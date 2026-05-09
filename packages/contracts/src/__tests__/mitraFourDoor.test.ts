@@ -128,6 +128,10 @@ const VALID_FULL_RESPONSE: TellMitraV3Response = {
   immediate_support_requested: false,
   predictive_eligible: false,
   pattern_key: null,
+  specific_contexts: [],
+  primary_specific_context: null,
+  support_need: "understand_context_first",
+  secondary_room_id: null,
 };
 
 describe('normalizeTellMitraResult', () => {
@@ -425,5 +429,48 @@ describe('S17-D1 normalizeTellMitraResult — listening mode fields', () => {
   it('T5: unknown suggested_action still coerces to "none" (existing guard preserved)', () => {
     const result = normalizeTellMitraResult({ suggested_action: "unknown_value" });
     expect(result.suggested_action).toBe("none");
+  });
+});
+
+// ── S17-D1X-A: multi-signal intelligence fields ───────────────────────────────
+
+describe('S17-D1X-A normalizeTellMitraResult — multi-signal fields', () => {
+  it('T1: specific_contexts passes through and filters non-string values', () => {
+    const result = normalizeTellMitraResult({
+      specific_contexts: ["workload", "deadlines", 42, null, "manager_pressure"],
+    });
+    expect(result.specific_contexts).toEqual(["workload", "deadlines", "manager_pressure"]);
+  });
+
+  it('T2: specific_contexts defaults to [] when absent', () => {
+    const result = normalizeTellMitraResult({});
+    expect(result.specific_contexts).toEqual([]);
+  });
+
+  it('T3: support_need passes through string; defaults to "understand_context_first" when absent', () => {
+    const present = normalizeTellMitraResult({ support_need: "stabilize_then_clarify" });
+    expect(present.support_need).toBe("stabilize_then_clarify");
+
+    const absent = normalizeTellMitraResult({});
+    expect(absent.support_need).toBe("understand_context_first");
+  });
+
+  it('T4: secondary_room_id passes through string; null when absent or non-string', () => {
+    const present = normalizeTellMitraResult({ secondary_room_id: "room_clarity" });
+    expect(present.secondary_room_id).toBe("room_clarity");
+
+    const absent = normalizeTellMitraResult({});
+    expect(absent.secondary_room_id).toBeNull();
+
+    const nonString = normalizeTellMitraResult({ secondary_room_id: 42 });
+    expect(nonString.secondary_room_id).toBeNull();
+  });
+
+  it('T5: primary_specific_context passes through string; null when absent', () => {
+    const present = normalizeTellMitraResult({ primary_specific_context: "workload" });
+    expect(present.primary_specific_context).toBe("workload");
+
+    const absent = normalizeTellMitraResult({});
+    expect(absent.primary_specific_context).toBeNull();
   });
 });

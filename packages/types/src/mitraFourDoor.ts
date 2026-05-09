@@ -330,4 +330,9 @@ export interface TellMitraV3Response {
   immediate_support_requested: boolean;
   predictive_eligible: boolean;
   pattern_key: string | null;
+  // S17-D1X-A: multi-signal intelligence fields
+  specific_contexts: string[];
+  primary_specific_context: string | null;
+  support_need: string;
+  secondary_room_id: string | null;
 }

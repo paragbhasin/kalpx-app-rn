@@ -286,6 +286,14 @@ export function normalizeTellMitraResult(raw: unknown): TellMitraV3Response {
     immediate_support_requested: typeof r["immediate_support_requested"] === "boolean" ? r["immediate_support_requested"] : false,
     predictive_eligible: typeof r["predictive_eligible"] === "boolean" ? r["predictive_eligible"] : false,
     pattern_key: typeof r["pattern_key"] === "string" ? r["pattern_key"] : null,
+    // S17-D1X-A: multi-signal intelligence fields
+    specific_contexts: Array.isArray(r["specific_contexts"])
+      ? (r["specific_contexts"] as unknown[]).filter((v): v is string => typeof v === "string")
+      : [],
+    primary_specific_context: typeof r["primary_specific_context"] === "string"
+      ? r["primary_specific_context"] : null,
+    support_need: typeof r["support_need"] === "string" ? r["support_need"] : "understand_context_first",
+    secondary_room_id: typeof r["secondary_room_id"] === "string" ? r["secondary_room_id"] : null,
   };
 }
 
@@ -310,6 +318,10 @@ function _safeTellMitraResponse(): TellMitraV3Response {
     immediate_support_requested: false,
     predictive_eligible: false,
     pattern_key: null,
+    specific_contexts: [],
+    primary_specific_context: null,
+    support_need: "understand_context_first",
+    secondary_room_id: null,
   };
 }
 

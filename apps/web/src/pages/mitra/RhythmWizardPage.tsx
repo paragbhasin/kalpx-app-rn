@@ -1,58 +1,147 @@
-import type { RhythmTimeBand, RhythmWizardLocalItem } from "@kalpx/types";
 import {
+  getMissingSuggestionSlots,
   RHYTHM_SUGGEST_COPY,
   rhythmSuggestItemToLocalItem,
   toRhythmSetupPayloadItems,
-  getMissingSuggestionSlots,
 } from "@kalpx/contracts";
+import type { RhythmTimeBand, RhythmWizardLocalItem } from "@kalpx/types";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
 import { RhythmLibraryPickerModal } from "../../components/mitra/RhythmLibraryPickerModal";
 import { executeAction } from "../../engine/actionExecutor";
-import { getMitraHomeV3, postRhythmSetup, postRhythmSuggest } from "../../engine/mitraApi";
+import {
+  getMitraHomeV3,
+  postRhythmSetup,
+  postRhythmSuggest,
+} from "../../engine/mitraApi";
 import type { AppDispatch, RootState } from "../../store";
 import { clearDoorState, setHomeData } from "../../store/doorSlice";
 import { useScreenState } from "../../store/screenSlice";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type WizardStep = "moments" | "purpose" | "suggestion" | "reminders" | "confirmation";
+type WizardStep =
+  | "moments"
+  | "purpose"
+  | "suggestion"
+  | "reminders"
+  | "confirmation";
 
 // ─── Content maps ─────────────────────────────────────────────────────────────
 
 const BANDS: RhythmTimeBand[] = ["morning", "afternoon", "night"];
 
 const MOMENT_COPY: Record<RhythmTimeBand, { label: string; desc: string }> = {
-  morning:   { label: "Morning",   desc: "Begin the day with steadiness and intention." },
-  afternoon: { label: "Afternoon", desc: "Pause, reset, and return to yourself." },
-  night:     { label: "Night",     desc: "Reflect, release, and close gently." },
+  morning: {
+    label: "Morning",
+    desc: "Begin the day with steadiness and intention.",
+  },
+  afternoon: {
+    label: "Afternoon",
+    desc: "Pause, reset, and return to yourself.",
+  },
+  night: { label: "Night", desc: "Reflect, release, and close gently." },
 };
 
-const PURPOSE_OPTIONS: Record<RhythmTimeBand, { value: string; label: string; desc: string }[]> = {
+const MOMENT_ART: Record<RhythmTimeBand, string> = {
+  morning: "/morning.svg",
+  afternoon: "/aft.svg",
+  night: "/night1.svg",
+};
+
+const PURPOSE_OPTIONS: Record<
+  RhythmTimeBand,
+  { value: string; label: string; desc: string }[]
+> = {
   morning: [
-    { value: "calm_start", label: "Calm Start",  desc: "Begin without rushing inside." },
-    { value: "focus",      label: "Focus",        desc: "Gather the mind before action." },
-    { value: "devotion",   label: "Devotion",     desc: "Begin the day with reverence." },
-    { value: "discipline", label: "Discipline",   desc: "Start with one sincere commitment." },
-    { value: "gratitude",  label: "Gratitude",    desc: "Remember what supports you." },
-    { value: "clarity",    label: "Clarity",      desc: "See the day with steadiness." },
+    {
+      value: "calm_start",
+      label: "Calm Start",
+      desc: "Begin without rushing inside.",
+    },
+    { value: "focus", label: "Focus", desc: "Gather the mind before action." },
+    {
+      value: "devotion",
+      label: "Devotion",
+      desc: "Begin the day with reverence.",
+    },
+    {
+      value: "discipline",
+      label: "Discipline",
+      desc: "Start with one sincere commitment.",
+    },
+    {
+      value: "gratitude",
+      label: "Gratitude",
+      desc: "Remember what supports you.",
+    },
+    {
+      value: "clarity",
+      label: "Clarity",
+      desc: "See the day with steadiness.",
+    },
   ],
   afternoon: [
-    { value: "reset",             label: "Reset",             desc: "Clear the midday weight." },
-    { value: "patience",          label: "Patience",          desc: "Steady the response to friction." },
-    { value: "sankalp_reminder",  label: "Sankalp Reminder",  desc: "Return to the quality you are practicing." },
-    { value: "energy_check",      label: "Energy Check",      desc: "Restore prana for the second half." },
-    { value: "mindful_action",    label: "Mindful Action",    desc: "Act from intention, not reaction." },
-    { value: "emotional_balance", label: "Emotional Balance", desc: "Settle what is stirred." },
+    { value: "reset", label: "Reset", desc: "Clear the midday weight." },
+    {
+      value: "patience",
+      label: "Patience",
+      desc: "Steady the response to friction.",
+    },
+    {
+      value: "sankalp_reminder",
+      label: "Sankalp Reminder",
+      desc: "Return to the quality you are practicing.",
+    },
+    {
+      value: "energy_check",
+      label: "Energy Check",
+      desc: "Restore prana for the second half.",
+    },
+    {
+      value: "mindful_action",
+      label: "Mindful Action",
+      desc: "Act from intention, not reaction.",
+    },
+    {
+      value: "emotional_balance",
+      label: "Emotional Balance",
+      desc: "Settle what is stirred.",
+    },
   ],
   night: [
-    { value: "release",     label: "Release",     desc: "Let go of what the day placed on you." },
-    { value: "gratitude",   label: "Gratitude",   desc: "Close with what was given." },
-    { value: "reflection",  label: "Reflection",  desc: "See the day clearly before rest." },
-    { value: "forgiveness", label: "Forgiveness", desc: "Dissolve what you are still carrying." },
-    { value: "sleep_calm",  label: "Sleep Calm",  desc: "Steady the mind for deep rest." },
-    { value: "self_review", label: "Self-Review", desc: "Study what the day is teaching." },
+    {
+      value: "release",
+      label: "Release",
+      desc: "Let go of what the day placed on you.",
+    },
+    {
+      value: "gratitude",
+      label: "Gratitude",
+      desc: "Close with what was given.",
+    },
+    {
+      value: "reflection",
+      label: "Reflection",
+      desc: "See the day clearly before rest.",
+    },
+    {
+      value: "forgiveness",
+      label: "Forgiveness",
+      desc: "Dissolve what you are still carrying.",
+    },
+    {
+      value: "sleep_calm",
+      label: "Sleep Calm",
+      desc: "Steady the mind for deep rest.",
+    },
+    {
+      value: "self_review",
+      label: "Self-Review",
+      desc: "Study what the day is teaching.",
+    },
   ],
 };
 
@@ -78,23 +167,36 @@ function itemTypeLabel(t: string): string {
 const SERIF = "var(--kalpx-font-serif)";
 const GOLD = "#C99317";
 const DARK = "#432104";
-const MID = "#7B6550";
+const MID = "#7B6545";
 const LIGHT = "#A08060";
-const BG = "#FFF8EF";
-const CARD_BG = "rgba(250,245,240,0.92)";
+const CARD_BG = "rgba(245,245,240,0.45)";
 const BORDER = "rgba(201,168,76,0.22)";
 const BORDER_ACTIVE = "#C99317";
 const SELECTED_BG = "rgba(201,147,23,0.08)";
-const GOLD_BTN = "linear-gradient(90deg, #C99317 0%, #E0AE21 50%, #C99317 100%)";
+const GOLD_BTN =
+  "linear-gradient(90deg, #C99317 0%, #E0AE21 45%, #C99317 100%)";
 
 // ─── Step indicators ──────────────────────────────────────────────────────────
 
-const STEP_ORDER: WizardStep[] = ["moments", "purpose", "suggestion", "reminders", "confirmation"];
+const STEP_ORDER: WizardStep[] = [
+  "moments",
+  "purpose",
+  "suggestion",
+  "reminders",
+  "confirmation",
+];
 
 function StepDots({ step }: { step: WizardStep }) {
   const idx = STEP_ORDER.indexOf(step);
   return (
-    <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 28 }}>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        gap: 6,
+        marginBottom: 28,
+      }}
+    >
       {STEP_ORDER.slice(0, 4).map((s, i) => (
         <div
           key={s}
@@ -122,12 +224,22 @@ export function RhythmWizardPage() {
   const homeData = useSelector((s: RootState) => s.door.homeData);
   const screenState = useScreenState();
 
-  const [step, setStep] = useState<WizardStep>(isEditMode ? "suggestion" : "moments");
+  const [step, setStep] = useState<WizardStep>(
+    isEditMode ? "suggestion" : "moments",
+  );
   const [selectedMoments, setSelectedMoments] = useState<RhythmTimeBand[]>([]);
-  const [purposes, setPurposes] = useState<Partial<Record<RhythmTimeBand, string>>>({});
-  const [items, setItems] = useState<Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>>>({});
-  const [reminderPref, setReminderPref] = useState<"yes" | "no" | "later">("later");
-  const [bandTimes, setBandTimes] = useState<Partial<Record<RhythmTimeBand, string>>>({});
+  const [purposes, setPurposes] = useState<
+    Partial<Record<RhythmTimeBand, string>>
+  >({});
+  const [items, setItems] = useState<
+    Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>>
+  >({});
+  const [reminderPref, setReminderPref] = useState<"yes" | "no" | "later">(
+    "later",
+  );
+  const [bandTimes, setBandTimes] = useState<
+    Partial<Record<RhythmTimeBand, string>>
+  >({});
   const [pickerBand, setPickerBand] = useState<RhythmTimeBand | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -141,7 +253,8 @@ export function RhythmWizardPage() {
     const cr = homeData?.companion_rhythm;
     if (!cr?.has_rhythm) return;
     const moments: RhythmTimeBand[] = [];
-    const seedItems: Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>> = {};
+    const seedItems: Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>> =
+      {};
     BANDS.forEach((band, idx) => {
       const slot = cr[band];
       if (slot?.items?.length) {
@@ -153,7 +266,8 @@ export function RhythmWizardPage() {
           item_id: itm.item_id,
           title_snapshot: itm.title_snapshot,
           description_snapshot: itm.description_snapshot ?? null,
-          source: (itm.source as RhythmWizardLocalItem["source"]) ?? "user_chosen",
+          source:
+            (itm.source as RhythmWizardLocalItem["source"]) ?? "user_chosen",
           sort_order: itm.sort_order ?? idx,
           reminder_enabled: itm.reminder_enabled ?? false,
           reminder_time: itm.reminder_time ?? null,
@@ -182,13 +296,13 @@ export function RhythmWizardPage() {
   // ── Navigation helpers ───────────────────────────────────────────────────────
 
   function toggleMoment(band: RhythmTimeBand) {
-    setSelectedMoments(prev =>
-      prev.includes(band) ? prev.filter(b => b !== band) : [...prev, band],
+    setSelectedMoments((prev) =>
+      prev.includes(band) ? prev.filter((b) => b !== band) : [...prev, band],
     );
   }
 
   function setPurpose(band: RhythmTimeBand, value: string) {
-    setPurposes(prev => ({ ...prev, [band]: value }));
+    setPurposes((prev) => ({ ...prev, [band]: value }));
   }
 
   function advanceMomentsToPurpose() {
@@ -206,14 +320,20 @@ export function RhythmWizardPage() {
         locale: "en",
         source_surface: "rhythm_wizard",
       });
-      const newItems: Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>> = {};
+      const newItems: Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>> =
+        {};
       resp.items.forEach((it, idx) => {
-        newItems[it.slot] = { ...rhythmSuggestItemToLocalItem(it), sort_order: idx };
+        newItems[it.slot] = {
+          ...rhythmSuggestItemToLocalItem(it),
+          sort_order: idx,
+        };
       });
       setItems(newItems);
       setSuggestionsLoaded(true);
       if (resp.status === "partial" && resp.missing_slots?.length) {
-        setSuggestError(`Mitra could not suggest a practice for: ${resp.missing_slots.join(", ")}.`);
+        setSuggestError(
+          `Mitra could not suggest a practice for: ${resp.missing_slots.join(", ")}.`,
+        );
       }
     } catch {
       setSuggestError(RHYTHM_SUGGEST_COPY.error);
@@ -227,21 +347,24 @@ export function RhythmWizardPage() {
   }
 
   function replaceItem(band: RhythmTimeBand, picked: RhythmWizardLocalItem) {
-    setItems(prev => ({ ...prev, [band]: { ...picked, slot: band } }));
+    setItems((prev) => ({ ...prev, [band]: { ...picked, slot: band } }));
   }
 
   async function saveAndConfirm() {
     setSaving(true);
     setError(null);
     try {
-      const localItems = BANDS.filter(b => items[b]).map((b, idx) => ({
+      const localItems = BANDS.filter((b) => items[b]).map((b, idx) => ({
         ...items[b]!,
         sort_order: idx,
         reminder_enabled: reminderPref === "yes" && !!bandTimes[b],
         reminder_time: reminderPref === "yes" ? (bandTimes[b] ?? null) : null,
       }));
       const itemsArr = toRhythmSetupPayloadItems(localItems);
-      await postRhythmSetup({ items: itemsArr as any[], reminder_preference: reminderPref });
+      await postRhythmSetup({
+        items: itemsArr as any[],
+        reminder_preference: reminderPref,
+      });
       const newHome = await getMitraHomeV3();
       dispatch(setHomeData(newHome));
       dispatch(clearDoorState());
@@ -256,10 +379,13 @@ export function RhythmWizardPage() {
   function beginTodaysPractice() {
     const band = getRhythmTimeBand();
     const cr = homeData?.companion_rhythm;
-    const slotItem = cr?.[band]?.items?.[0]
-      ?? cr?.[selectedMoments[0]]?.items?.[0];
+    const slotItem =
+      cr?.[band]?.items?.[0] ?? cr?.[selectedMoments[0]]?.items?.[0];
     const runItem = slotItem ?? items[band] ?? items[selectedMoments[0]];
-    if (!runItem) { navigate("/en/mitra/rhythm"); return; }
+    if (!runItem) {
+      navigate("/en/mitra/rhythm");
+      return;
+    }
     void executeAction(
       {
         type: "start_runner",
@@ -274,7 +400,11 @@ export function RhythmWizardPage() {
           },
         },
       },
-      { dispatch, screenData: screenState.screenData, currentStateId: "rhythm_wizard" },
+      {
+        dispatch,
+        screenData: screenState.screenData,
+        currentStateId: "rhythm_wizard",
+      },
     );
   }
 
@@ -291,82 +421,217 @@ export function RhythmWizardPage() {
 
   // ── Render ───────────────────────────────────────────────────────────────────
 
-  const shell: React.CSSProperties = {
-    minHeight: "100dvh",
-    background: BG,
-    display: "flex",
-    flexDirection: "column",
-  };
   const main: React.CSSProperties = {
-    flex: 1,
+    minHeight: "100%",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    padding: "24px 16px calc(92px + env(safe-area-inset-bottom))",
+    padding: "24px 16px calc(45px + env(safe-area-inset-bottom))",
   };
-  const container: React.CSSProperties = { width: "100%", maxWidth: 420 };
+  const container: React.CSSProperties = {
+    width: "100%",
+    maxWidth: 420,
+    position: "relative",
+  };
   const backBtn: React.CSSProperties = {
-    background: "none", border: "none", color: GOLD, fontSize: 14,
-    cursor: "pointer", marginBottom: 20, padding: 0,
+    background: "none",
+    border: "none",
+    color: GOLD,
+    fontSize: 14,
+    cursor: "pointer",
+    marginBottom: 20,
+    padding: 0,
   };
   const goldBtn: React.CSSProperties = {
-    width: "100%", padding: "14px 0", borderRadius: 14, border: "none",
-    background: GOLD_BTN, color: "#fff", fontFamily: SERIF,
-    fontSize: 16, fontWeight: 700, cursor: "pointer",
+    width: "100%",
+    padding: "14px 0",
+    borderRadius: 14,
+    border: "none",
+    background: GOLD_BTN,
+    color: "#fff",
+    fontFamily: SERIF,
+    fontSize: 16,
+    fontWeight: 700,
+    cursor: "pointer",
   };
   const ghostBtn: React.CSSProperties = {
-    width: "100%", padding: "12px 0", marginTop: 10, borderRadius: 12,
-    border: `1px solid rgba(201,168,76,0.35)`, background: "transparent",
-    color: MID, fontSize: 14, cursor: "pointer",
+    width: "100%",
+    padding: "12px 0",
+    marginTop: 10,
+    borderRadius: 12,
+    border: `1px solid rgba(201,168,76,0.35)`,
+    background: "transparent",
+    color: MID,
+    fontSize: 14,
+    cursor: "pointer",
   };
 
   return (
-    <div style={shell}>
+    <MitraMobileShell backgroundImage="/beige_bg.png">
       <main style={main}>
         <div style={container}>
-          <button onClick={handleBack} style={backBtn}>← Back</button>
+          <button onClick={handleBack} style={backBtn}>
+            ← Back
+          </button>
 
           {step !== "confirmation" && <StepDots step={step} />}
 
           {/* ── Step 1: Choose Moments ─────────────────────────────────── */}
           {step === "moments" && (
             <>
-              <h2 style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 26, color: DARK, margin: "0 0 8px" }}>
+              <img
+                src="/leaves-bird.png"
+                alt=""
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  top: -180,
+                  right: -22,
+                  width: 245,
+                  pointerEvents: "none",
+                  userSelect: "none",
+                  opacity: 0.5,
+                }}
+              />
+              <h2
+                style={{
+                  fontFamily: SERIF,
+                  fontWeight: 700,
+                  fontSize: 26,
+                  color: DARK,
+                  margin: "0 0 8px",
+                }}
+              >
                 Build Your Daily Rhythm
               </h2>
-              <p style={{ color: MID, fontSize: 15, marginBottom: 28, lineHeight: 1.6 }}>
+              <p
+                style={{
+                  color: MID,
+                  fontSize: 15,
+                  marginBottom: 34,
+                  lineHeight: 1.6,
+                }}
+              >
                 When would you like Mitra to support you?
               </p>
 
-              {BANDS.map(band => {
+              {BANDS.map((band) => {
                 const selected = selectedMoments.includes(band);
                 return (
                   <button
                     key={band}
                     onClick={() => toggleMoment(band)}
                     style={{
-                      width: "100%", display: "flex", alignItems: "center", gap: 16,
-                      padding: "18px 20px", borderRadius: 16, marginBottom: 12,
-                      border: `2px solid ${selected ? BORDER_ACTIVE : "rgba(201,168,76,0.3)"}`,
-                      background: selected ? SELECTED_BG : CARD_BG,
-                      cursor: "pointer", textAlign: "left",
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 18,
+                      padding: "10px",
+                      borderRadius: 28,
+                      marginBottom: 16,
+                      border: `1.5px solid ${selected ? BORDER_ACTIVE : "rgba(201,168,76,0.26)"}`,
+                      background: selected ? "rgba(255,251,244,0.98)" : CARD_BG,
+                      boxShadow: selected
+                        ? "0 18px 36px rgba(222,184,97,0.16)"
+                        : "0 10px 26px rgba(67,33,4,0.08)",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      position: "relative",
+                      overflow: "hidden",
                     }}
                   >
+                    <div
+                      style={{
+                        width: 45,
+                        height: 45,
+                        borderRadius: "45%",
+                        background:
+                          "radial-gradient(circle at 30% 30%, rgba(255,251,243,0.98), rgba(245,232,202,0.8))",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                        boxShadow: "inset 0 0 18px rgba(231,206,149,0.18)",
+                      }}
+                    >
+                      <img
+                        src={MOMENT_ART[band]}
+                        alt=""
+                        aria-hidden="true"
+                        style={{ width: 66, height: 66, objectFit: "contain" }}
+                      />
+                    </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 17, color: DARK, marginBottom: 3 }}>
+                      <div
+                        style={{
+                          fontFamily: SERIF,
+                          fontWeight: 700,
+                          fontSize: 19,
+                          color: DARK,
+                          marginBottom: 8,
+                        }}
+                      >
                         {MOMENT_COPY[band].label}
                       </div>
-                      <div style={{ fontSize: 14, color: MID, lineHeight: 1.5 }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          marginBottom: 12,
+                          color: "#E4B44F",
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: 56,
+                            height: 1,
+                            background: "rgba(228,180,79,0.4)",
+                          }}
+                        />
+                        <span style={{ fontSize: 13, lineHeight: 1 }}>✦</span>
+                        <div
+                          style={{
+                            width: 56,
+                            height: 1,
+                            background: "rgba(228,180,79,0.4)",
+                          }}
+                        />
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 15,
+                          color: MID,
+                          lineHeight: 1.45,
+                          maxWidth: 220,
+                        }}
+                      >
                         {MOMENT_COPY[band].desc}
                       </div>
                     </div>
-                    <div style={{
-                      width: 22, height: 22, borderRadius: 11, flexShrink: 0,
-                      border: `2px solid ${selected ? GOLD : "rgba(201,168,76,0.4)"}`,
-                      background: selected ? GOLD : "transparent",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                    }}>
-                      {selected && <span style={{ color: "#fff", fontSize: 13, lineHeight: 1 }}>✓</span>}
+                    <div
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: 19,
+                        flexShrink: 0,
+                        border: `2px solid ${selected ? GOLD : "rgba(201,168,76,0.4)"}`,
+                        background: "transparent",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {selected && (
+                        <div
+                          style={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: 5,
+                            background: GOLD,
+                          }}
+                        />
+                      )}
                     </div>
                   </button>
                 );
@@ -377,9 +642,13 @@ export function RhythmWizardPage() {
                 disabled={selectedMoments.length === 0}
                 style={{
                   ...goldBtn,
-                  marginTop: 8,
+                  marginTop: 20,
                   opacity: selectedMoments.length === 0 ? 0.45 : 1,
-                  cursor: selectedMoments.length === 0 ? "not-allowed" : "pointer",
+                  cursor:
+                    selectedMoments.length === 0 ? "not-allowed" : "pointer",
+                  borderRadius: 12,
+
+                  boxShadow: "0 16px 34px rgba(222,184,97,0.22)",
                 }}
               >
                 Continue →
@@ -390,36 +659,83 @@ export function RhythmWizardPage() {
           {/* ── Step 2: Choose Purpose ─────────────────────────────────── */}
           {step === "purpose" && (
             <>
-              <h2 style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 26, color: DARK, margin: "0 0 8px" }}>
+              <h2
+                style={{
+                  fontFamily: SERIF,
+                  fontWeight: 700,
+                  fontSize: 26,
+                  color: DARK,
+                  margin: "0 0 8px",
+                }}
+              >
                 What should each moment give you?
               </h2>
-              <p style={{ color: MID, fontSize: 15, marginBottom: 28, lineHeight: 1.6 }}>
+              <p
+                style={{
+                  color: MID,
+                  fontSize: 15,
+                  marginBottom: 28,
+                  lineHeight: 1.6,
+                }}
+              >
                 Mitra will choose a practice that fits.
               </p>
 
-              {selectedMoments.map(band => (
+              {selectedMoments.map((band) => (
                 <div key={band} style={{ marginBottom: 28 }}>
-                  <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 16, color: DARK, marginBottom: 12 }}>
+                  <div
+                    style={{
+                      fontFamily: SERIF,
+                      fontWeight: 700,
+                      fontSize: 16,
+                      color: DARK,
+                      marginBottom: 12,
+                    }}
+                  >
                     {MOMENT_COPY[band].label}
                   </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                    {PURPOSE_OPTIONS[band].map(opt => {
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: 8,
+                    }}
+                  >
+                    {PURPOSE_OPTIONS[band].map((opt) => {
                       const sel = purposes[band] === opt.value;
                       return (
                         <button
                           key={opt.value}
                           onClick={() => setPurpose(band, opt.value)}
                           style={{
-                            padding: "12px 10px", borderRadius: 12, textAlign: "left",
+                            padding: "12px 10px",
+                            borderRadius: 12,
+                            textAlign: "left",
                             border: `2px solid ${sel ? BORDER_ACTIVE : "rgba(201,168,76,0.25)"}`,
                             background: sel ? SELECTED_BG : CARD_BG,
                             cursor: "pointer",
                           }}
                         >
-                          <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 14, color: DARK, marginBottom: 2 }}>
+                          <div
+                            style={{
+                              fontFamily: SERIF,
+                              fontWeight: 600,
+                              fontSize: 14,
+                              color: DARK,
+                              marginBottom: 2,
+                            }}
+                          >
                             {opt.label}
                           </div>
-                          <div style={{ fontSize: 12, color: LIGHT, lineHeight: 1.4 }}>{opt.desc}</div>
+                          <div
+                            style={{
+                              fontSize: 12,
+                              color: LIGHT,
+                              lineHeight: 1.4,
+                            }}
+                          >
+                            {opt.desc}
+                          </div>
                         </button>
                       );
                     })}
@@ -428,7 +744,7 @@ export function RhythmWizardPage() {
               ))}
 
               {(() => {
-                const allSelected = selectedMoments.every(b => purposes[b]);
+                const allSelected = selectedMoments.every((b) => purposes[b]);
                 return (
                   <button
                     onClick={advancePurposeToSuggestion}
@@ -447,129 +763,316 @@ export function RhythmWizardPage() {
           )}
 
           {/* ── Step 3: Mitra Suggests ─────────────────────────────────── */}
-          {step === "suggestion" && (() => {
-            const missingSlots = getMissingSuggestionSlots(selectedMoments, items);
-            const acceptDisabled = suggestLoading || saving || missingSlots.length > 0;
-            return (
-              <>
-                <h2 style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 26, color: DARK, margin: "0 0 8px" }}>
-                  {isEditMode ? "Your Rhythm" : "Mitra suggests this for you."}
-                </h2>
-                <p style={{ color: MID, fontSize: 15, marginBottom: 28, lineHeight: 1.6 }}>
-                  {isEditMode
-                    ? "Change any item or keep it as it is."
-                    : "Each practice fits the purpose you chose. You can change any of them."}
-                </p>
+          {step === "suggestion" &&
+            (() => {
+              const missingSlots = getMissingSuggestionSlots(
+                selectedMoments,
+                items,
+              );
+              const acceptDisabled =
+                suggestLoading || saving || missingSlots.length > 0;
+              return (
+                <>
+                  <h2
+                    style={{
+                      fontFamily: SERIF,
+                      fontWeight: 700,
+                      fontSize: 26,
+                      color: DARK,
+                      margin: "0 0 8px",
+                    }}
+                  >
+                    {isEditMode
+                      ? "Your Rhythm"
+                      : "Mitra suggests this for you."}
+                  </h2>
+                  <p
+                    style={{
+                      color: MID,
+                      fontSize: 15,
+                      marginBottom: 28,
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    {isEditMode
+                      ? "Change any item or keep it as it is."
+                      : "Each practice fits the purpose you chose. You can change any of them."}
+                  </p>
 
-                {suggestLoading && (
-                  <div style={{ textAlign: "center", padding: "32px 0", color: MID, fontSize: 15 }}>
-                    {RHYTHM_SUGGEST_COPY.loading}
-                  </div>
-                )}
-
-                {!suggestLoading && suggestError && (
-                  <div style={{ textAlign: "center", padding: "16px 0" }}>
-                    <p style={{ color: "#c0392b", fontSize: 14, marginBottom: 12 }}>{suggestError}</p>
-                    <button
-                      onClick={() => { setSuggestionsLoaded(false); setItems({}); }}
-                      style={{ ...goldBtn, display: "inline-block", width: "auto", padding: "8px 20px", marginBottom: 8 }}
+                  {suggestLoading && (
+                    <div
+                      style={{
+                        textAlign: "center",
+                        padding: "32px 0",
+                        color: MID,
+                        fontSize: 15,
+                      }}
                     >
-                      {RHYTHM_SUGGEST_COPY.tryAgain}
-                    </button>
-                    <button onClick={() => navigate("/en/mitra/rhythm/edit")} style={ghostBtn}>
-                      {RHYTHM_SUGGEST_COPY.chooseFromLibrary}
-                    </button>
-                  </div>
-                )}
-
-                {!suggestLoading && selectedMoments.map(band => {
-                  const item = items[band];
-                  if (!item) {
-                    return (
-                      <div key={band} style={{ border: "1px solid rgba(201,100,76,0.3)", borderRadius: 12, background: "rgba(255,245,245,0.9)", padding: "14px 18px", marginBottom: 14 }}>
-                        <p style={{ color: "#9b4e4e", fontSize: 14, margin: "0 0 10px" }}>
-                          Mitra could not suggest a {MOMENT_COPY[band].label.toLowerCase()} practice.
-                        </p>
-                        <button onClick={() => setPickerBand(band)} style={{ background: "none", border: `1px solid rgba(201,168,76,0.4)`, color: GOLD, borderRadius: 8, padding: "5px 10px", fontSize: 13, cursor: "pointer" }}>
-                          {RHYTHM_SUGGEST_COPY.chooseFromLibrary}
-                        </button>
-                      </div>
-                    );
-                  }
-                  return (
-                    <div key={band} style={{ border: `1px solid ${BORDER}`, borderRadius: 16, background: CARD_BG, padding: "16px 18px", marginBottom: 14 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                        <div style={{ flex: 1, marginRight: 10 }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.4, color: "#8B6914", textTransform: "uppercase", background: "#F5F0E0", borderRadius: 6, padding: "2px 8px" }}>
-                              {itemTypeLabel(item.item_type)}
-                            </span>
-                            <span style={{ fontSize: 12, color: LIGHT }}>{MOMENT_COPY[band].label}</span>
-                          </div>
-                          <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 16, color: DARK, marginBottom: 4 }}>
-                            {item.title_snapshot}
-                          </div>
-                          {item.why_this && (
-                            <div style={{ fontSize: 13, color: "#8B6914", lineHeight: 1.5, fontStyle: "italic", marginBottom: 4 }}>
-                              {item.why_this}
-                            </div>
-                          )}
-                          {!item.why_this && item.description_snapshot && (
-                            <div style={{ fontSize: 13, color: MID, lineHeight: 1.5 }}>
-                              {item.description_snapshot}
-                            </div>
-                          )}
-                        </div>
-                        <button onClick={() => setPickerBand(band)} style={{ background: "none", border: `1px solid rgba(201,168,76,0.4)`, color: GOLD, borderRadius: 8, padding: "5px 10px", fontSize: 13, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}>
-                          Change
-                        </button>
-                      </div>
+                      {RHYTHM_SUGGEST_COPY.loading}
                     </div>
-                  );
-                })}
+                  )}
 
-                {error && <p style={{ color: "#e06060", fontSize: 14, textAlign: "center" }}>{error}</p>}
+                  {!suggestLoading && suggestError && (
+                    <div style={{ textAlign: "center", padding: "16px 0" }}>
+                      <p
+                        style={{
+                          color: "#c0345b",
+                          fontSize: 14,
+                          marginBottom: 12,
+                        }}
+                      >
+                        {suggestError}
+                      </p>
+                      <button
+                        onClick={() => {
+                          setSuggestionsLoaded(false);
+                          setItems({});
+                        }}
+                        style={{
+                          ...goldBtn,
+                          display: "inline-block",
+                          width: "auto",
+                          padding: "8px 20px",
+                          marginBottom: 8,
+                        }}
+                      >
+                        {RHYTHM_SUGGEST_COPY.tryAgain}
+                      </button>
+                      <button
+                        onClick={() => navigate("/en/mitra/rhythm/edit")}
+                        style={ghostBtn}
+                      >
+                        {RHYTHM_SUGGEST_COPY.chooseFromLibrary}
+                      </button>
+                    </div>
+                  )}
 
-                <button
-                  onClick={() => setStep("reminders")}
-                  style={{ ...goldBtn, marginTop: 8, opacity: acceptDisabled ? 0.45 : 1, cursor: acceptDisabled ? "not-allowed" : "pointer" }}
-                  disabled={acceptDisabled}
-                >
-                  Accept Rhythm →
-                </button>
-                {!isEditMode && (
-                  <button onClick={() => navigate("/en/mitra/rhythm/edit")} style={ghostBtn}>
-                    Choose My Own
+                  {!suggestLoading &&
+                    selectedMoments.map((band) => {
+                      const item = items[band];
+                      if (!item) {
+                        return (
+                          <div
+                            key={band}
+                            style={{
+                              border: "1px solid rgba(201,100,76,0.3)",
+                              borderRadius: 12,
+                              background: "rgba(255,245,245,0.9)",
+                              padding: "14px 18px",
+                              marginBottom: 14,
+                            }}
+                          >
+                            <p
+                              style={{
+                                color: "#9b4e4e",
+                                fontSize: 14,
+                                margin: "0 0 10px",
+                              }}
+                            >
+                              Mitra could not suggest a{" "}
+                              {MOMENT_COPY[band].label.toLowerCase()} practice.
+                            </p>
+                            <button
+                              onClick={() => setPickerBand(band)}
+                              style={{
+                                background: "none",
+                                border: `1px solid rgba(201,168,76,0.4)`,
+                                color: GOLD,
+                                borderRadius: 8,
+                                padding: "5px 10px",
+                                fontSize: 13,
+                                cursor: "pointer",
+                              }}
+                            >
+                              {RHYTHM_SUGGEST_COPY.chooseFromLibrary}
+                            </button>
+                          </div>
+                        );
+                      }
+                      return (
+                        <div
+                          key={band}
+                          style={{
+                            border: `1px solid ${BORDER}`,
+                            borderRadius: 16,
+                            background: CARD_BG,
+                            padding: "16px 18px",
+                            marginBottom: 14,
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "flex-start",
+                            }}
+                          >
+                            <div style={{ flex: 1, marginRight: 10 }}>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 8,
+                                  marginBottom: 6,
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    fontSize: 10,
+                                    fontWeight: 700,
+                                    letterSpacing: 1.4,
+                                    color: "#8B6914",
+                                    textTransform: "uppercase",
+                                    background: "#F5F0E0",
+                                    borderRadius: 6,
+                                    padding: "2px 8px",
+                                  }}
+                                >
+                                  {itemTypeLabel(item.item_type)}
+                                </span>
+                                <span style={{ fontSize: 12, color: LIGHT }}>
+                                  {MOMENT_COPY[band].label}
+                                </span>
+                              </div>
+                              <div
+                                style={{
+                                  fontFamily: SERIF,
+                                  fontWeight: 700,
+                                  fontSize: 16,
+                                  color: DARK,
+                                  marginBottom: 4,
+                                }}
+                              >
+                                {item.title_snapshot}
+                              </div>
+                              {item.why_this && (
+                                <div
+                                  style={{
+                                    fontSize: 13,
+                                    color: "#8B6914",
+                                    lineHeight: 1.5,
+                                    fontStyle: "italic",
+                                    marginBottom: 4,
+                                  }}
+                                >
+                                  {item.why_this}
+                                </div>
+                              )}
+                              {!item.why_this && item.description_snapshot && (
+                                <div
+                                  style={{
+                                    fontSize: 13,
+                                    color: MID,
+                                    lineHeight: 1.5,
+                                  }}
+                                >
+                                  {item.description_snapshot}
+                                </div>
+                              )}
+                            </div>
+                            <button
+                              onClick={() => setPickerBand(band)}
+                              style={{
+                                background: "none",
+                                border: `1px solid rgba(201,168,76,0.4)`,
+                                color: GOLD,
+                                borderRadius: 8,
+                                padding: "5px 10px",
+                                fontSize: 13,
+                                cursor: "pointer",
+                                whiteSpace: "nowrap",
+                                flexShrink: 0,
+                              }}
+                            >
+                              Change
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                  {error && (
+                    <p
+                      style={{
+                        color: "#e06060",
+                        fontSize: 14,
+                        textAlign: "center",
+                      }}
+                    >
+                      {error}
+                    </p>
+                  )}
+
+                  <button
+                    onClick={() => setStep("reminders")}
+                    style={{
+                      ...goldBtn,
+                      marginTop: 8,
+                      opacity: acceptDisabled ? 0.45 : 1,
+                      cursor: acceptDisabled ? "not-allowed" : "pointer",
+                    }}
+                    disabled={acceptDisabled}
+                  >
+                    Accept Rhythm →
                   </button>
-                )}
-              </>
-            );
-          })()}
+                  {!isEditMode && (
+                    <button
+                      onClick={() => navigate("/en/mitra/rhythm/edit")}
+                      style={ghostBtn}
+                    >
+                      Choose My Own
+                    </button>
+                  )}
+                </>
+              );
+            })()}
 
           {/* ── Step 4: Reminders ──────────────────────────────────────── */}
           {step === "reminders" && (
             <>
-              <h2 style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 26, color: DARK, margin: "0 0 8px" }}>
+              <h2
+                style={{
+                  fontFamily: SERIF,
+                  fontWeight: 700,
+                  fontSize: 26,
+                  color: DARK,
+                  margin: "0 0 8px",
+                }}
+              >
                 Would you like a gentle reminder?
               </h2>
-              <p style={{ color: MID, fontSize: 15, marginBottom: 28, lineHeight: 1.6 }}>
+              <p
+                style={{
+                  color: MID,
+                  fontSize: 15,
+                  marginBottom: 28,
+                  lineHeight: 1.6,
+                }}
+              >
                 Mitra can remind you when each moment arrives.
               </p>
 
               <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
-                {([
-                  { label: "Yes, gently remind me", value: "yes" as const },
-                  { label: "No, I will come myself",  value: "no" as const },
-                  { label: "Ask me later",             value: "later" as const },
-                ] satisfies { label: string; value: "yes" | "no" | "later" }[]).map(opt => (
+                {(
+                  [
+                    { label: "Yes, gently remind me", value: "yes" as const },
+                    { label: "No, I will come myself", value: "no" as const },
+                    { label: "Ask me later", value: "later" as const },
+                  ] satisfies { label: string; value: "yes" | "no" | "later" }[]
+                ).map((opt) => (
                   <button
                     key={opt.value}
                     onClick={() => setReminderPref(opt.value)}
                     style={{
-                      flex: 1, padding: "10px 4px", borderRadius: 20, fontSize: 13,
-                      fontFamily: SERIF, cursor: "pointer",
+                      flex: 1,
+                      padding: "10px 4px",
+                      borderRadius: 20,
+                      fontSize: 13,
+                      fontFamily: SERIF,
+                      cursor: "pointer",
                       border: `1px solid ${reminderPref === opt.value ? GOLD : "rgba(201,168,76,0.4)"}`,
-                      background: reminderPref === opt.value ? GOLD : "transparent",
+                      background:
+                        reminderPref === opt.value ? GOLD : "transparent",
                       color: reminderPref === opt.value ? "#fff" : MID,
                     }}
                   >
@@ -578,32 +1081,64 @@ export function RhythmWizardPage() {
                 ))}
               </div>
 
-              {reminderPref === "yes" && BANDS.filter(b => items[b]).map(band => (
-                <div
-                  key={band}
+              {reminderPref === "yes" &&
+                BANDS.filter((b) => items[b]).map((band) => (
+                  <div
+                    key={band}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 12,
+                      marginBottom: 12,
+                      padding: "12px 16px",
+                      background: "rgba(201,168,76,0.06)",
+                      borderRadius: 12,
+                      border: `1px solid rgba(201,168,76,0.2)`,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: SERIF,
+                        fontSize: 14,
+                        color: DARK,
+                        flex: 1,
+                      }}
+                    >
+                      {MOMENT_COPY[band].label}
+                    </span>
+                    <input
+                      type="time"
+                      value={bandTimes[band] ?? ""}
+                      onChange={(e) =>
+                        setBandTimes((prev) => ({
+                          ...prev,
+                          [band]: e.target.value || undefined,
+                        }))
+                      }
+                      style={{
+                        border: `1px solid rgba(201,168,76,0.3)`,
+                        borderRadius: 8,
+                        padding: "4px 8px",
+                        fontSize: 13,
+                        color: DARK,
+                        background: "#fff",
+                        outline: "none",
+                      }}
+                    />
+                  </div>
+                ))}
+
+              {error && (
+                <p
                   style={{
-                    display: "flex", alignItems: "center", gap: 12, marginBottom: 12,
-                    padding: "12px 16px", background: "rgba(201,168,76,0.06)",
-                    borderRadius: 12, border: `1px solid rgba(201,168,76,0.2)`,
+                    color: "#e06060",
+                    fontSize: 14,
+                    textAlign: "center",
                   }}
                 >
-                  <span style={{ fontFamily: SERIF, fontSize: 14, color: DARK, flex: 1 }}>
-                    {MOMENT_COPY[band].label}
-                  </span>
-                  <input
-                    type="time"
-                    value={bandTimes[band] ?? ""}
-                    onChange={e => setBandTimes(prev => ({ ...prev, [band]: e.target.value || undefined }))}
-                    style={{
-                      border: `1px solid rgba(201,168,76,0.3)`, borderRadius: 8,
-                      padding: "4px 8px", fontSize: 13, color: DARK,
-                      background: "#fff", outline: "none",
-                    }}
-                  />
-                </div>
-              ))}
-
-              {error && <p style={{ color: "#e06060", fontSize: 14, textAlign: "center" }}>{error}</p>}
+                  {error}
+                </p>
+              )}
 
               <button
                 onClick={() => void saveAndConfirm()}
@@ -626,7 +1161,15 @@ export function RhythmWizardPage() {
             <>
               <div style={{ textAlign: "center", marginBottom: 32 }}>
                 <div style={{ fontSize: 36, marginBottom: 12 }}>✦</div>
-                <h2 style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 26, color: DARK, margin: "0 0 8px" }}>
+                <h2
+                  style={{
+                    fontFamily: SERIF,
+                    fontWeight: 700,
+                    fontSize: 26,
+                    color: DARK,
+                    margin: "0 0 8px",
+                  }}
+                >
                   Your Daily Companion is ready.
                 </h2>
                 <p style={{ color: MID, fontSize: 15, lineHeight: 1.6 }}>
@@ -634,35 +1177,61 @@ export function RhythmWizardPage() {
                 </p>
               </div>
 
-              {BANDS.filter(b => items[b]).map(band => {
+              {BANDS.filter((b) => items[b]).map((band) => {
                 const item = items[band]!;
                 return (
                   <div
                     key={band}
                     style={{
-                      display: "flex", alignItems: "center", gap: 14,
-                      padding: "14px 18px", borderRadius: 14, marginBottom: 10,
-                      border: `1px solid ${BORDER}`, background: CARD_BG,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 14,
+                      padding: "14px 18px",
+                      borderRadius: 14,
+                      marginBottom: 10,
+                      border: `1px solid ${BORDER}`,
+                      background: CARD_BG,
                     }}
                   >
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 12, color: LIGHT, marginBottom: 2 }}>{MOMENT_COPY[band].label}</div>
-                      <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 15, color: DARK }}>
+                      <div
+                        style={{ fontSize: 12, color: LIGHT, marginBottom: 2 }}
+                      >
+                        {MOMENT_COPY[band].label}
+                      </div>
+                      <div
+                        style={{
+                          fontFamily: SERIF,
+                          fontWeight: 700,
+                          fontSize: 15,
+                          color: DARK,
+                        }}
+                      >
                         {item.title_snapshot}
                       </div>
                     </div>
-                    <span style={{
-                      fontSize: 10, fontWeight: 700, letterSpacing: 1.2,
-                      color: "#8B6914", textTransform: "uppercase",
-                      background: "#F5F0E0", borderRadius: 6, padding: "2px 8px",
-                    }}>
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        letterSpacing: 1.2,
+                        color: "#8B6914",
+                        textTransform: "uppercase",
+                        background: "#F5F0E0",
+                        borderRadius: 6,
+                        padding: "2px 8px",
+                      }}
+                    >
                       {itemTypeLabel(item.item_type)}
                     </span>
                   </div>
                 );
               })}
 
-              <button onClick={beginTodaysPractice} style={{ ...goldBtn, marginTop: 20 }}>
+              <button
+                onClick={beginTodaysPractice}
+                style={{ ...goldBtn, marginTop: 20 }}
+              >
                 Begin today's practice
               </button>
               <button onClick={() => navigate("/en/mitra")} style={ghostBtn}>
@@ -671,7 +1240,13 @@ export function RhythmWizardPage() {
               <div style={{ textAlign: "center", marginTop: 16 }}>
                 <button
                   onClick={() => navigate("/en/mitra/inner-path")}
-                  style={{ background: "none", border: "none", color: LIGHT, fontSize: 13, cursor: "pointer" }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: LIGHT,
+                    fontSize: 13,
+                    cursor: "pointer",
+                  }}
                 >
                   Add Inner Path →
                 </button>
@@ -685,11 +1260,14 @@ export function RhythmWizardPage() {
       {pickerBand && (
         <RhythmLibraryPickerModal
           band={pickerBand}
-          onPick={picked => { replaceItem(pickerBand, { ...picked, reminder_time: null }); setPickerBand(null); }}
+          onPick={(picked) => {
+            replaceItem(pickerBand, { ...picked, reminder_time: null });
+            setPickerBand(null);
+          }}
           onClose={() => setPickerBand(null)}
           nextSortOrder={0}
         />
       )}
-    </div>
+    </MitraMobileShell>
   );
 }

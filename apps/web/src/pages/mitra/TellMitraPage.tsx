@@ -1,4 +1,4 @@
-import { getDoorLabel, isValidRoomId } from "@kalpx/contracts";
+import { getDoorLabel, getRoomLabel, isValidRoomId } from "@kalpx/contracts";
 import type { TellMitraFollowupMeta, TellMitraFollowupOption, TellMitraNextOption, TellMitraV3Response } from "@kalpx/types";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -380,6 +380,17 @@ export function TellMitraPage() {
               >
                 {submitting ? "Sending…" : `Go to ${result.suggested_room_label || "Room"}`}
               </button>
+              {result.secondary_room_id && result.secondary_room_id !== result.suggested_room_id && (
+                <button
+                  onClick={() => void executeAction(
+                    { type: 'enter_room', payload: { room_id: result.secondary_room_id!, source: 'tell_mitra_secondary' } },
+                    { dispatch, screenData: screenState.screenData, currentStateId: 'tell_mitra' }
+                  )}
+                  style={{ ...GHOST_BTN, marginTop: 6 }}
+                >
+                  Or try {getRoomLabel(result.secondary_room_id as any)} →
+                </button>
+              )}
               <button onClick={() => { setScreen("none"); setText(""); }} style={{ ...GHOST_BTN, marginTop: 10 }}>
                 Tell Mitra more
               </button>

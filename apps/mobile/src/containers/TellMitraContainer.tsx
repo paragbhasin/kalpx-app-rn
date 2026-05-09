@@ -23,7 +23,7 @@ import {
 import { Fonts } from '../theme/fonts';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
-import { isValidRoomId } from '@kalpx/contracts';
+import { getRoomLabel, isValidRoomId } from '@kalpx/contracts';
 import type {
   TellMitraFollowupMeta,
   TellMitraFollowupOption,
@@ -107,6 +107,7 @@ export default function TellMitraContainer() {
   const [supportDepth, setSupportDepth] = useState<TellMitraSupportDepth>("direct_room");
   const [parentEventId, setParentEventId] = useState<string | number | null>(null);
   const [parentIntentType, setParentIntentType] = useState<string | null>(null);
+  const [secondaryRoomId, setSecondaryRoomId] = useState<string | null>(null);
 
   // Mirror the buildActionContext pattern from ContinueJourney.tsx so
   // enter_room can resolve screenState, setScreenValue, loadScreen, goBack.
@@ -185,6 +186,7 @@ export default function TellMitraContainer() {
       setSupportDepth(result.support_depth ?? "direct_room");
       setParentEventId(result.tell_mitra_event_id ?? null);
       setParentIntentType(result.intent_type ?? null);
+      setSecondaryRoomId(result.secondary_room_id ?? null);
 
       if (
         result.suggested_action === 'navigate_to_room' &&
@@ -291,6 +293,22 @@ export default function TellMitraContainer() {
             ))}
           </View>
         </View>
+      )}
+      {!!secondaryRoomId && !!suggestedRoomId && secondaryRoomId !== suggestedRoomId && (
+        <TouchableOpacity
+          onPress={() => void executeAction(
+            {
+              type: 'enter_room',
+              payload: { room_id: secondaryRoomId, source: 'tell_mitra_secondary' },
+            } as any,
+            buildActionContext() as any,
+          )}
+          activeOpacity={0.7}
+          style={styles.ghostLink}
+          disabled={isSubmitting}
+        >
+          <Text style={styles.ghostLinkText}>Or try {getRoomLabel(secondaryRoomId as any)} →</Text>
+        </TouchableOpacity>
       )}
       {!!resultCopy && (
         <TouchableOpacity

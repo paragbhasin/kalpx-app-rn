@@ -6,6 +6,10 @@ import type {
   TellMitraV3Response,
   TellMitraNextOption,
   TellMitraRoomEntryContext,
+  TellMitraConversationContext,
+  TellMitraFollowupOption,
+  TellMitraFollowupQuestion,
+  TellMitraSupportDepth,
   RhythmTimeBand,
   RhythmItemType,
   RhythmItemSource,
@@ -274,6 +278,9 @@ export function normalizeTellMitraResult(raw: unknown): TellMitraV3Response {
     tell_mitra_event_id: (typeof r["tell_mitra_event_id"] === "string" || typeof r["tell_mitra_event_id"] === "number")
       ? r["tell_mitra_event_id"] as string | number : null,
     room_entry_context: _normalizeRoomEntryContext(r["room_entry_context"]),
+    conversation_context: _normalizeConversationContext(r["conversation_context"]),
+    support_depth: _coerceSupportDepth(r["support_depth"]),
+    followup_question: _normalizeFollowupQuestion(r["followup_question"]),
   };
 }
 
@@ -290,6 +297,9 @@ function _safeTellMitraResponse(): TellMitraV3Response {
     next_options: [],
     tell_mitra_event_id: null,
     room_entry_context: null,
+    conversation_context: null,
+    support_depth: "direct_room" as TellMitraSupportDepth,
+    followup_question: null,
   };
 }
 
@@ -301,6 +311,44 @@ function _coerceRoutingType(v: unknown): TellMitraV3Response["suggested_action"]
   return typeof v === "string" && _VALID_ROUTING_TYPES.has(v)
     ? (v as TellMitraV3Response["suggested_action"])
     : "none";
+}
+
+const _VALID_SUPPORT_DEPTHS = new Set(["direct_room", "ask_followup", "room_with_followup"]);
+
+function _coerceSupportDepth(v: unknown): TellMitraSupportDepth {
+  return typeof v === "string" && _VALID_SUPPORT_DEPTHS.has(v)
+    ? (v as TellMitraSupportDepth) : "direct_room";
+}
+
+function _normalizeConversationContext(raw: unknown): TellMitraConversationContext | null {
+  if (raw === null || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  return {
+    turn_count: typeof r["turn_count"] === "number" ? r["turn_count"] : 1,
+    prior_context_used: typeof r["prior_context_used"] === "boolean" ? r["prior_context_used"] : false,
+    prior_intent_type: typeof r["prior_intent_type"] === "string" ? r["prior_intent_type"] : null,
+    prior_state_tags: Array.isArray(r["prior_state_tags"])
+      ? r["prior_state_tags"].filter((t): t is string => typeof t === "string") : [],
+    prior_life_context: typeof r["prior_life_context"] === "string" ? r["prior_life_context"] : null,
+    current_input_added_context: typeof r["current_input_added_context"] === "boolean"
+      ? r["current_input_added_context"] : false,
+    current_life_context: typeof r["current_life_context"] === "string" ? r["current_life_context"] : null,
+    summary: typeof r["summary"] === "string" ? r["summary"] : null,
+  };
+}
+
+function _normalizeFollowupQuestion(raw: unknown): TellMitraFollowupQuestion | null {
+  if (raw === null || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  const prompt = typeof r["prompt"] === "string" ? r["prompt"] : "";
+  if (!prompt) return null;
+  const options = Array.isArray(r["options"])
+    ? r["options"].filter((o): o is TellMitraFollowupOption =>
+        typeof o === "object" && o !== null &&
+        typeof (o as Record<string, unknown>)["label"] === "string" &&
+        typeof (o as Record<string, unknown>)["value"] === "string")
+    : [];
+  return { prompt, options };
 }
 
 function _normalizeRoomEntryContext(raw: unknown): TellMitraRoomEntryContext | null {
@@ -337,5 +385,6 @@ function _normalizeRoomEntryContext(raw: unknown): TellMitraRoomEntryContext | n
       eligible_for_learning: typeof lrn["eligible_for_learning"] === "boolean" ? lrn["eligible_for_learning"] : false,
       feedback_pending:      typeof lrn["feedback_pending"] === "boolean"      ? lrn["feedback_pending"] : false,
     },
+    conversation_context: _normalizeConversationContext(r["conversation_context"]) ?? undefined,
   };
 }

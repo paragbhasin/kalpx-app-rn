@@ -120,6 +120,9 @@ const VALID_FULL_RESPONSE: TellMitraV3Response = {
   next_options: [],
   tell_mitra_event_id: null,
   room_entry_context: null,
+  conversation_context: null,
+  support_depth: "direct_room",
+  followup_question: null,
 };
 
 describe('normalizeTellMitraResult', () => {
@@ -278,5 +281,104 @@ describe('S17-C getRoomRenderParamsFromEntryContext', () => {
     };
     const result = getRoomRenderParamsFromEntryContext(ctxNullId, "room_stillness");
     expect('tell_mitra_event_id' in result).toBe(false);
+  });
+});
+
+// ── S17-D0: conversation_context, support_depth, followup_question ────────────
+
+describe('S17-D0 normalizeTellMitraResult — conversation context + followup', () => {
+  it('T1: parses full conversation_context — all 8 fields correct', () => {
+    const raw = {
+      ...VALID_FULL_RESPONSE,
+      conversation_context: {
+        turn_count: 2,
+        prior_context_used: true,
+        prior_intent_type: "distress_acute",
+        prior_state_tags: ["overwhelmed"],
+        prior_life_context: "",
+        current_input_added_context: true,
+        current_life_context: "work_career",
+        summary: "You shared distress earlier, then told Mitra it connects to your work situation.",
+      },
+    };
+    const result = normalizeTellMitraResult(raw);
+    expect(result.conversation_context?.turn_count).toBe(2);
+    expect(result.conversation_context?.prior_context_used).toBe(true);
+    expect(result.conversation_context?.prior_intent_type).toBe("distress_acute");
+    expect(result.conversation_context?.prior_state_tags).toEqual(["overwhelmed"]);
+    expect(result.conversation_context?.prior_life_context).toBe("");
+    expect(result.conversation_context?.current_input_added_context).toBe(true);
+    expect(result.conversation_context?.current_life_context).toBe("work_career");
+    expect(result.conversation_context?.summary).toBe(
+      "You shared distress earlier, then told Mitra it connects to your work situation.",
+    );
+  });
+
+  it('T2: parses support_depth="room_with_followup"', () => {
+    const result = normalizeTellMitraResult({ ...VALID_FULL_RESPONSE, support_depth: "room_with_followup" });
+    expect(result.support_depth).toBe("room_with_followup");
+  });
+
+  it('T3: invalid support_depth ("banana") defaults to "direct_room"', () => {
+    const result = normalizeTellMitraResult({ ...VALID_FULL_RESPONSE, support_depth: "banana" });
+    expect(result.support_depth).toBe("direct_room");
+  });
+
+  it('T4: parses followup_question, filters malformed options', () => {
+    const raw = {
+      ...VALID_FULL_RESPONSE,
+      followup_question: {
+        prompt: "What part of work feels heaviest?",
+        options: [
+          { label: "Workload", value: "workload" },
+          { label: 123, value: "bad" },        // malformed label — filtered
+          { label: "Pressure", value: "pressure" },
+          "not_an_object",                      // malformed — filtered
+        ],
+      },
+    };
+    const result = normalizeTellMitraResult(raw);
+    expect(result.followup_question?.prompt).toBe("What part of work feels heaviest?");
+    expect(result.followup_question?.options).toHaveLength(2);
+    expect(result.followup_question?.options[0].value).toBe("workload");
+    expect(result.followup_question?.options[1].value).toBe("pressure");
+  });
+
+  it('T5: null input → conversation_context=null, support_depth="direct_room", followup_question=null', () => {
+    const result = normalizeTellMitraResult(null);
+    expect(result.conversation_context).toBeNull();
+    expect(result.support_depth).toBe("direct_room");
+    expect(result.followup_question).toBeNull();
+  });
+
+  it('T6: room_entry_context preserves nested conversation_context when present', () => {
+    const ctxWithConversation: TellMitraRoomEntryContext = {
+      ...VALID_ROOM_ENTRY_CONTEXT,
+      conversation_context: {
+        turn_count: 2,
+        prior_context_used: true,
+        prior_intent_type: "distress_acute",
+        prior_state_tags: ["overwhelmed"],
+        prior_life_context: "",
+        current_input_added_context: true,
+        current_life_context: "work_career",
+        summary: "You shared distress earlier.",
+      },
+    };
+    const result = normalizeTellMitraResult({ ...VALID_FULL_RESPONSE, room_entry_context: ctxWithConversation });
+    expect(result.room_entry_context?.conversation_context?.turn_count).toBe(2);
+    expect(result.room_entry_context?.conversation_context?.current_life_context).toBe("work_career");
+  });
+
+  it('T7: S17-C backward-compat — room_entry_context without conversation_context normalizes cleanly', () => {
+    const result = normalizeTellMitraResult({
+      ...VALID_FULL_RESPONSE,
+      room_entry_context: VALID_ROOM_ENTRY_CONTEXT,
+    });
+    expect(result.room_entry_context).not.toBeNull();
+    expect(result.room_entry_context?.situation.intent_type).toBe("distress_acute");
+    // conversation_context absent in old response → undefined or null, no crash
+    const cc = result.room_entry_context?.conversation_context;
+    expect(cc === undefined || cc === null).toBe(true);
   });
 });

@@ -253,12 +253,44 @@ export interface TellMitraRoomEntryLearning {
   feedback_pending: boolean;
 }
 
+export interface TellMitraConversationContext {
+  turn_count: number;
+  prior_context_used: boolean;
+  prior_intent_type: string | null;
+  prior_state_tags: string[];
+  prior_life_context: string | null;
+  current_input_added_context: boolean;
+  current_life_context: string | null;
+  summary: string | null;
+}
+
+export interface TellMitraFollowupOption {
+  label: string;
+  value: string;
+}
+
+export interface TellMitraFollowupQuestion {
+  prompt: string;
+  options: TellMitraFollowupOption[];
+}
+
+export type TellMitraSupportDepth = "direct_room" | "ask_followup" | "room_with_followup";
+
+export interface TellMitraFollowupMeta {
+  prompt_id: string | null;
+  selected_value: string;
+  selected_label: string;
+  parent_tell_mitra_event_id: string | number | null;
+  parent_intent_type: string | null;
+}
+
 export interface TellMitraRoomEntryContext {
   source_surface: string;
   tell_mitra_event_id: string | number | null;
   situation: TellMitraRoomEntrySituation;
   decision: TellMitraRoomEntryDecision;
   learning: TellMitraRoomEntryLearning;
+  conversation_context?: TellMitraConversationContext | null;
 }
 
 export interface TellMitraV3Response {
@@ -283,4 +315,7 @@ export interface TellMitraV3Response {
   next_options: TellMitraNextOption[];
   tell_mitra_event_id: string | number | null;
   room_entry_context: TellMitraRoomEntryContext | null;
+  conversation_context: TellMitraConversationContext | null;
+  support_depth: TellMitraSupportDepth;
+  followup_question: TellMitraFollowupQuestion | null;
 }

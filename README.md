@@ -35,6 +35,10 @@ npm run reset-project
 
 This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
+## Developer references
+
+- Feature flags and environment variables: see [docs/feature-flags-and-env.md](docs/feature-flags-and-env.md).
+
 ## Learn more
 
 To learn more about developing your project with Expo, look at the following resources:

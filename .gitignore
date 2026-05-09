@@ -52,6 +52,7 @@ docs/
 !docs/
 !docs/feature-flags-and-env.md
 !docs/mitra-experience-handoff.md
+!docs/mitra-experience-handoff-mini.md
 .maestro/
 tests/
 

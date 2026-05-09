@@ -179,6 +179,7 @@ export function TellMitraThreadView({
 
     // ── followup_chips ───────────────────────────────────────────────────────
     if (item.type === "followup_chips") {
+      if (item.disabled) return null;
       return (
         <div key={item.id} style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 13, color: "#7B6550", marginBottom: 10 }}>{item.prompt}</div>
@@ -360,7 +361,7 @@ export function TellMitraThreadView({
             onClick={onStartFresh}
             style={{ background: "none", border: "none", color: "#A08060", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}
           >
-            Start fresh ×
+            Start fresh
           </button>
         </div>
       )}

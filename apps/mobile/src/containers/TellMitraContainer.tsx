@@ -74,7 +74,22 @@ export default function TellMitraContainer() {
   const [composerPlaceholder, setComposerPlaceholder] = useState("What's on your mind?");
   const scrollViewRef = useRef<any>(null);
   const composerInputRef = useRef<TextInput>(null);
-  const pendingTellMitraReturnRef = useRef<{ room_id: string; room_label: string } | null>(null);
+  const pendingTellMitraReturnRef = useRef<{
+    room_id: string; room_label: string;
+    return_key: string;
+    tell_mitra_event_id?: string | number | null;
+    room_entry_context?: TellMitraRoomEntryContext | null;
+  } | null>(null);
+  const lastReturnCardKeyRef = useRef<string | null>(null);
+  const freshResetPendingRef = useRef(false);
+  const activeContextRef = useRef<{
+    parentEventId: string | number | null;
+    parentIntentType: string | null;
+    lifeContext: string | null;
+    supportNeed: string | null;
+    patternKey: string | null;
+    roomEntryContext: TellMitraRoomEntryContext | null;
+  }>({ parentEventId: null, parentIntentType: null, lifeContext: null, supportNeed: null, patternKey: null, roomEntryContext: null });
 
   const screenBridge = useScreenStore();
   const screenBridgeRef = React.useRef(screenBridge);
@@ -112,16 +127,25 @@ export default function TellMitraContainer() {
     React.useCallback(() => {
       if (!THREAD_UI_ENABLED) return;
       const pending = pendingTellMitraReturnRef.current;
-      if (pending) {
-        pendingTellMitraReturnRef.current = null;
-        setConversation(prev => {
-          const alreadyHasReturn = prev.some(
-            item => item.type === 'return_card' && item.room_id === pending.room_id
-          );
-          if (alreadyHasReturn) return prev;
-          return [...prev, { id: genId(), type: 'return_card', room_id: pending.room_id, room_label: pending.room_label }];
-        });
-      }
+      if (!pending) return;
+      pendingTellMitraReturnRef.current = null;
+      if (lastReturnCardKeyRef.current === pending.return_key) return;
+      lastReturnCardKeyRef.current = pending.return_key;
+      setConversation(prev => {
+        const alreadyHasReturn = prev.some(
+          item => item.type === 'return_card' &&
+            (item.return_key ? item.return_key === pending.return_key : item.room_id === pending.room_id)
+        );
+        if (alreadyHasReturn) return prev;
+        return [...prev, {
+          id: genId(), type: 'return_card',
+          room_id: pending.room_id, room_label: pending.room_label,
+          return_key: pending.return_key,
+          tell_mitra_event_id: pending.tell_mitra_event_id,
+          room_entry_context: pending.room_entry_context,
+        }];
+      });
+      setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 150);
     }, [])
   );
 
@@ -241,6 +265,9 @@ export default function TellMitraContainer() {
     sourceSurface: string,
     followupMeta?: TellMitraFollowupMeta,
   ) => {
+    const effectiveSource = freshResetPendingRef.current ? 'tell_mitra_start_fresh' : sourceSurface;
+    const isReset = freshResetPendingRef.current;
+    freshResetPendingRef.current = false;
     const loadingId = genId();
     const now = new Date().toISOString();
     setConversation(prev => [...prev, { id: loadingId, type: 'loading' }]);
@@ -249,9 +276,22 @@ export default function TellMitraContainer() {
       const result = await postTellMitraV3({
         text: inputText.trim(),
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        source_surface: sourceSurface,
+        source_surface: effectiveSource,
         ...(followupMeta ? { followup: followupMeta } : {}),
+        ...(isReset ? { reset_context: true } : {}),
       });
+      // Update active context from response
+      activeContextRef.current = {
+        parentEventId: result.tell_mitra_event_id ?? activeContextRef.current.parentEventId,
+        parentIntentType: result.intent_type ?? activeContextRef.current.parentIntentType,
+        lifeContext:
+          result.room_entry_context?.situation?.life_context ??
+          result.conversation_context?.current_life_context ??
+          activeContextRef.current.lifeContext,
+        supportNeed: result.support_need || activeContextRef.current.supportNeed,
+        patternKey: result.pattern_key ?? activeContextRef.current.patternKey,
+        roomEntryContext: result.room_entry_context ?? activeContextRef.current.roomEntryContext,
+      };
       dispatch(
         setTellMitraResult({
           suggested_room_id: result.suggested_room_id,
@@ -313,10 +353,19 @@ export default function TellMitraContainer() {
 
   // ── Flag-on: chip click ───────────────────────────────────────────────────
   const handleChipClickThread = (opt: TellMitraFollowupOption, chipGroupId: string) => {
+    const isReturnCard = chipGroupId.startsWith('return_card_');
     const chipGroup = conversation.find(
       (item): item is Extract<TellMitraConversationItem, { type: 'followup_chips' }> =>
         item.id === chipGroupId && item.type === 'followup_chips'
     );
+    let returnCardItem: Extract<TellMitraConversationItem, { type: 'return_card' }> | undefined;
+    if (isReturnCard) {
+      const rcId = chipGroupId.replace('return_card_', '');
+      returnCardItem = conversation.find(
+        (i): i is Extract<TellMitraConversationItem, { type: 'return_card' }> =>
+          i.id === rcId && i.type === 'return_card'
+      );
+    }
     if (opt.value === 'let_me_tell') {
       setConversation(prev =>
         prev.map(item => item.id === chipGroupId ? { ...item, disabled: true } as TellMitraConversationItem : item)
@@ -325,28 +374,48 @@ export default function TellMitraContainer() {
       composerInputRef.current?.focus();
       return;
     }
+    if (opt.value === 'tell_mitra_more') {
+      handleTellMitraMoreThread();
+      return;
+    }
+    // Disable chip group or return card
+    if (isReturnCard) {
+      const rcId = chipGroupId.replace('return_card_', '');
+      setConversation(prev =>
+        prev.map(item => item.id === rcId ? { ...item, disabled: true } as TellMitraConversationItem : item)
+      );
+    } else {
+      setConversation(prev =>
+        prev.map(item => item.id === chipGroupId ? { ...item, disabled: true } as TellMitraConversationItem : item)
+      );
+    }
     const userChip: TellMitraConversationItem = {
       id: genId(), type: 'user_chip',
       label: opt.label, value: opt.value,
       created_at: new Date().toISOString(),
     };
-    setConversation(prev => [
-      ...prev.map(item => item.id === chipGroupId ? { ...item, disabled: true } as TellMitraConversationItem : item),
-      userChip,
-    ]);
+    setConversation(prev => [...prev, userChip]);
     const mappedText = CHIP_SUBMIT_TEXT[opt.value];
-    if (!mappedText) console.warn('[TellMitra] Missing CHIP_SUBMIT_TEXT mapping', opt.value);
+    const sourceSurface = isReturnCard ? 'room_return_chip' : 'tell_mitra_followup_chip';
     const followupMeta: TellMitraFollowupMeta = {
       prompt_id: null,
       selected_value: opt.value,
       selected_label: opt.label,
-      parent_tell_mitra_event_id: chipGroup?.parent_tell_mitra_event_id ?? null,
-      parent_intent_type: chipGroup?.parent_intent_type ?? null,
+      parent_tell_mitra_event_id:
+        returnCardItem?.tell_mitra_event_id ??
+        chipGroup?.parent_tell_mitra_event_id ??
+        activeContextRef.current.parentEventId ?? null,
+      parent_intent_type:
+        chipGroup?.parent_intent_type ??
+        activeContextRef.current.parentIntentType ?? null,
+      life_context:
+        returnCardItem?.room_entry_context?.situation?.life_context ??
+        activeContextRef.current.lifeContext ?? null,
     };
     if (opt.value === 'calm_now') {
       void submitThread('Just help me calm down', 'tell_mitra_followup_calm_now', followupMeta);
     } else {
-      void submitThread(mappedText ?? opt.label, 'tell_mitra_followup_chip', followupMeta);
+      void submitThread(mappedText ?? opt.label, sourceSurface, followupMeta);
     }
   };
 
@@ -364,7 +433,13 @@ export default function TellMitraContainer() {
   };
 
   const handleEnterRoomThread = (item: Extract<TellMitraConversationItem, { type: 'room_recommendation' }>) => {
-    pendingTellMitraReturnRef.current = { room_id: item.room_id, room_label: item.room_label };
+    const returnKey = `return_card:${item.room_id}:${item.tell_mitra_event_id ?? Math.floor(Date.now() / 60000)}`;
+    pendingTellMitraReturnRef.current = {
+      room_id: item.room_id, room_label: item.room_label,
+      return_key: returnKey,
+      tell_mitra_event_id: item.tell_mitra_event_id,
+      room_entry_context: item.room_entry_context,
+    };
     void executeAction(
       {
         type: 'enter_room',
@@ -398,7 +473,15 @@ export default function TellMitraContainer() {
         onChipClick={handleChipClickThread}
         onEnterRoom={handleEnterRoomThread}
         onTellMitraMore={handleTellMitraMoreThread}
-        onStartFresh={() => { setConversation([]); setThreadDraft(''); setComposerPlaceholder("What's on your mind?"); }}
+        onStartFresh={() => {
+          setConversation([]);
+          setThreadDraft('');
+          setComposerPlaceholder("What's on your mind?");
+          freshResetPendingRef.current = true;
+          lastReturnCardKeyRef.current = null;
+          pendingTellMitraReturnRef.current = null;
+          activeContextRef.current = { parentEventId: null, parentIntentType: null, lifeContext: null, supportNeed: null, patternKey: null, roomEntryContext: null };
+        }}
         onQuickStartChip={handleQuickStartChipThread}
         onWisdomOptionPress={opt => {
           if (opt.action_type === 'navigate_to_room' && opt.room_id) {

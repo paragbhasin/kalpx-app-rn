@@ -127,6 +127,7 @@ export default function TellMitraThreadView({
 
     // ── followup_chips ───────────────────────────────────────────────────────
     if (item.type === 'followup_chips') {
+      if (item.disabled) return null;
       return (
         <View key={item.id} style={s.chipsBlock}>
           <Text style={s.chipsPrompt}>{item.prompt}</Text>
@@ -269,7 +270,7 @@ export default function TellMitraThreadView({
       {conversation.length > 0 && (
         <View style={s.startFreshRow}>
           <TouchableOpacity onPress={onStartFresh} activeOpacity={0.7}>
-            <Text style={s.startFreshText}>Start fresh ×</Text>
+            <Text style={s.startFreshText}>Start fresh</Text>
           </TouchableOpacity>
         </View>
       )}

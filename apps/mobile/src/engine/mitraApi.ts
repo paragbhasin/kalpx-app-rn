@@ -2071,6 +2071,7 @@ export interface TellMitraV3Payload {
   tz?: string;
   source_surface?: string;
   followup?: TellMitraFollowupMeta;
+  reset_context?: boolean;
 }
 
 export async function postTellMitraV3(payload: TellMitraV3Payload): Promise<TellMitraV3Response> {

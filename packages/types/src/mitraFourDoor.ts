@@ -289,6 +289,7 @@ export interface TellMitraFollowupMeta {
   selected_label: string;
   parent_tell_mitra_event_id: string | number | null;
   parent_intent_type: string | null;
+  life_context?: string | null;
 }
 
 export interface TellMitraRoomEntryContext {
@@ -370,7 +371,13 @@ export type TellMitraConversationItem =
       response_copy?: string | null;
     }
   | { id: string; type: "wisdom_options"; next_options: TellMitraNextOption[] }
-  | { id: string; type: "return_card"; room_id: string; room_label: string }
+  | {
+      id: string; type: "return_card";
+      room_id: string; room_label: string;
+      return_key?: string;
+      tell_mitra_event_id?: string | number | null;
+      room_entry_context?: TellMitraRoomEntryContext | null;
+    }
   | { id: string; type: "safety"; response_copy: string }
   | { id: string; type: "loading" }
   | { id: string; type: "error"; message: string };

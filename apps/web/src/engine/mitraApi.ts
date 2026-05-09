@@ -768,6 +768,7 @@ export interface TellMitraV3Payload {
   tz?: string;
   source_surface?: string;
   followup?: TellMitraFollowupMeta;
+  reset_context?: boolean;
 }
 
 /**

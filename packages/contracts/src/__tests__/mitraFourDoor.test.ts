@@ -123,6 +123,11 @@ const VALID_FULL_RESPONSE: TellMitraV3Response = {
   conversation_context: null,
   support_depth: "direct_room",
   followup_question: null,
+  conversation_stage: "ready_for_room",
+  specific_context: null,
+  immediate_support_requested: false,
+  predictive_eligible: false,
+  pattern_key: null,
 };
 
 describe('normalizeTellMitraResult', () => {
@@ -380,5 +385,45 @@ describe('S17-D0 normalizeTellMitraResult — conversation context + followup', 
     // conversation_context absent in old response → undefined or null, no crash
     const cc = result.room_entry_context?.conversation_context;
     expect(cc === undefined || cc === null).toBe(true);
+  });
+});
+
+// ── S17-D1: ask_followup routing + conversation_stage + specific_context ─────
+
+describe('S17-D1 normalizeTellMitraResult — listening mode fields', () => {
+  it('T1: suggested_action="ask_followup" passes through', () => {
+    const result = normalizeTellMitraResult({ ...VALID_FULL_RESPONSE, suggested_action: "ask_followup" });
+    expect(result.suggested_action).toBe("ask_followup");
+  });
+
+  it('T2: conversation_stage="context_clarification" parsed correctly', () => {
+    const result = normalizeTellMitraResult({ ...VALID_FULL_RESPONSE, conversation_stage: "context_clarification" });
+    expect(result.conversation_stage).toBe("context_clarification");
+  });
+
+  it('T3: specific_context, predictive_eligible, immediate_support_requested all parse correctly', () => {
+    const result = normalizeTellMitraResult({
+      ...VALID_FULL_RESPONSE,
+      specific_context: "pressure",
+      predictive_eligible: true,
+      immediate_support_requested: false,
+    });
+    expect(result.specific_context).toBe("pressure");
+    expect(result.predictive_eligible).toBe(true);
+    expect(result.immediate_support_requested).toBe(false);
+  });
+
+  it('T4: null input → conversation_stage="none", specific_context=null, predictive_eligible=false, immediate_support_requested=false, pattern_key=null', () => {
+    const result = normalizeTellMitraResult(null);
+    expect(result.conversation_stage).toBe("none");
+    expect(result.specific_context).toBeNull();
+    expect(result.predictive_eligible).toBe(false);
+    expect(result.immediate_support_requested).toBe(false);
+    expect(result.pattern_key).toBeNull();
+  });
+
+  it('T5: unknown suggested_action still coerces to "none" (existing guard preserved)', () => {
+    const result = normalizeTellMitraResult({ suggested_action: "unknown_value" });
+    expect(result.suggested_action).toBe("none");
   });
 });

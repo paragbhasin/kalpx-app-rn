@@ -281,6 +281,11 @@ export function normalizeTellMitraResult(raw: unknown): TellMitraV3Response {
     conversation_context: _normalizeConversationContext(r["conversation_context"]),
     support_depth: _coerceSupportDepth(r["support_depth"]),
     followup_question: _normalizeFollowupQuestion(r["followup_question"]),
+    conversation_stage: typeof r["conversation_stage"] === "string" ? r["conversation_stage"] : "none",
+    specific_context: typeof r["specific_context"] === "string" ? r["specific_context"] : null,
+    immediate_support_requested: typeof r["immediate_support_requested"] === "boolean" ? r["immediate_support_requested"] : false,
+    predictive_eligible: typeof r["predictive_eligible"] === "boolean" ? r["predictive_eligible"] : false,
+    pattern_key: typeof r["pattern_key"] === "string" ? r["pattern_key"] : null,
   };
 }
 
@@ -300,11 +305,16 @@ function _safeTellMitraResponse(): TellMitraV3Response {
     conversation_context: null,
     support_depth: "direct_room" as TellMitraSupportDepth,
     followup_question: null,
+    conversation_stage: "none",
+    specific_context: null,
+    immediate_support_requested: false,
+    predictive_eligible: false,
+    pattern_key: null,
   };
 }
 
 const _VALID_ROUTING_TYPES = new Set([
-  "navigate_to_room", "navigate_to_door", "provide_wisdom_inline", "none",
+  "navigate_to_room", "navigate_to_door", "provide_wisdom_inline", "ask_followup", "none",
 ]);
 
 function _coerceRoutingType(v: unknown): TellMitraV3Response["suggested_action"] {
@@ -313,7 +323,9 @@ function _coerceRoutingType(v: unknown): TellMitraV3Response["suggested_action"]
     : "none";
 }
 
-const _VALID_SUPPORT_DEPTHS = new Set(["direct_room", "ask_followup", "room_with_followup"]);
+const _VALID_SUPPORT_DEPTHS = new Set([
+  "direct_room", "ask_followup", "context_followup", "room_with_followup", "wisdom_inline", "door_navigation",
+]);
 
 function _coerceSupportDepth(v: unknown): TellMitraSupportDepth {
   return typeof v === "string" && _VALID_SUPPORT_DEPTHS.has(v)

@@ -223,7 +223,8 @@ export interface RhythmWizardLocalItem {
 export type TellMitraRoutingType =
   | "navigate_to_room"
   | "navigate_to_door"
-  | "provide_wisdom_inline";
+  | "provide_wisdom_inline"
+  | "ask_followup";
 
 export interface TellMitraNextOption {
   label: string;
@@ -274,7 +275,13 @@ export interface TellMitraFollowupQuestion {
   options: TellMitraFollowupOption[];
 }
 
-export type TellMitraSupportDepth = "direct_room" | "ask_followup" | "room_with_followup";
+export type TellMitraSupportDepth =
+  | "direct_room"
+  | "ask_followup"
+  | "context_followup"
+  | "room_with_followup"
+  | "wisdom_inline"
+  | "door_navigation";
 
 export interface TellMitraFollowupMeta {
   prompt_id: string | null;
@@ -318,4 +325,9 @@ export interface TellMitraV3Response {
   conversation_context: TellMitraConversationContext | null;
   support_depth: TellMitraSupportDepth;
   followup_question: TellMitraFollowupQuestion | null;
+  conversation_stage: string;
+  specific_context: string | null;
+  immediate_support_requested: boolean;
+  predictive_eligible: boolean;
+  pattern_key: string | null;
 }

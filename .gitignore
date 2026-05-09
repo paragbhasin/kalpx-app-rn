@@ -51,6 +51,7 @@ screenshots/
 docs/
 !docs/
 !docs/feature-flags-and-env.md
+!docs/mitra-experience-handoff.md
 .maestro/
 tests/
 

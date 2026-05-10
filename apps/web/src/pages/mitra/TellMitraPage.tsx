@@ -262,7 +262,7 @@ export function TellMitraPage() {
             room_entry_context: resp.room_entry_context,
             response_copy: resp.response_copy,
           });
-        } else if (resp.next_options.length > 0) {
+        } else if (resp.next_options.length > 0 && resp.response_copy) {
           newItems.push({ id: _id(), type: "wisdom_options", next_options: resp.next_options });
         }
       }

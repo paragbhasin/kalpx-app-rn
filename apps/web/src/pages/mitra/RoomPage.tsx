@@ -12,7 +12,7 @@ import { RoomReflectionSheet } from "../../components/blocks/room/RoomReflection
 import { ROOM_DISPLAY_NAMES } from "../../components/blocks/room/roomConstants";
 import { executeAction } from "../../engine/actionExecutor";
 import { getRoomRender, trackEvent, trackRoomTelemetry } from "../../engine/mitraApi";
-import { normalizeRoomWhyThisState, getRoomRenderParamsFromEntryContext } from "@kalpx/contracts";
+import { normalizeRoomWhyThisState, getRoomRenderParamsFromEntryContext, hasTellMitraRoomEntryContext } from "@kalpx/contracts";
 import type { TellMitraRoomEntryContext } from "@kalpx/types";
 import {
   ensureRoomAmbientPlaying,
@@ -69,10 +69,7 @@ export function RoomPage() {
       : null;
 
   const roomEntryContext = (sd?.room_entry_context as TellMitraRoomEntryContext | null) ?? null;
-  // Guard: bypass picker only when this is a real Tell Mitra intent entry
-  const hasTellMitraRoomContext =
-    roomEntryContext?.source_surface === "tell_mitra" &&
-    !!roomEntryContext?.situation?.intent_type;
+  const hasTellMitraRoomContext = hasTellMitraRoomEntryContext(roomEntryContext);
 
   const [phase, setPhase] = useState<"picker" | "loading" | "render" | "error">(
     storedEnvelope

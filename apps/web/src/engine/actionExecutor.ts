@@ -4,6 +4,7 @@
  * Full 103-case RN parity is Phase 7.
  */
 
+import { hasTellMitraRoomEntryContext } from '@kalpx/contracts';
 import type { AppDispatch } from '../store';
 import { loadScreen, setScreenValue, updateScreenData, setSubmitting, goBack } from '../store/screenSlice';
 import {
@@ -967,9 +968,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
         break;
       }
       // Guard: bypass picker only when this is a real Tell Mitra intent entry
-      const hasTellMitraRoomContext =
-        roomEntryContext?.source_surface === "tell_mitra" &&
-        !!roomEntryContext?.situation?.intent_type;
+      const hasTellMitraRoomContext = hasTellMitraRoomEntryContext(roomEntryContext);
       ensureRoomAmbientPlaying();
       // Clear stale room state before entering; always write room_entry_context
       // (null for normal entries explicitly clears any stale Tell Mitra context)

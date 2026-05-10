@@ -7,6 +7,7 @@ import {
   getDoorLabel,
   normalizeTellMitraResult,
   getRoomRenderParamsFromEntryContext,
+  hasTellMitraRoomEntryContext,
   ROOM_LABELS,
   DOOR_LABELS,
   VALID_ROOM_IDS,
@@ -472,5 +473,65 @@ describe('S17-D1X-A normalizeTellMitraResult — multi-signal fields', () => {
 
     const absent = normalizeTellMitraResult({});
     expect(absent.primary_specific_context).toBeNull();
+  });
+});
+
+// ── S17-D4C: hasTellMitraRoomEntryContext ─────────────────────────────────────
+
+const _BASE_CTX: TellMitraRoomEntryContext = {
+  source_surface: "tell_mitra_door",
+  tell_mitra_event_id: "db08ca38-0000-0000-0000-000000000002",
+  situation: {
+    intent_type: "distress_acute",
+    state_tags: [],
+    energy_state: "",
+    life_context: "relationships",
+    prior_context_used: false,
+  },
+  decision: {
+    routing_type: "navigate_to_room",
+    suggested_room_id: "room_release",
+    confidence: 0.9,
+    source: "internal_rule",
+  },
+  learning: { eligible_for_learning: true, feedback_pending: true },
+};
+
+describe('S17-D4C hasTellMitraRoomEntryContext', () => {
+  it('tell_mitra_door + intent_type → true (primary production case)', () => {
+    expect(hasTellMitraRoomEntryContext(_BASE_CTX)).toBe(true);
+  });
+
+  it('tell_mitra_followup_chip + intent_type → true', () => {
+    expect(hasTellMitraRoomEntryContext({ ..._BASE_CTX, source_surface: "tell_mitra_followup_chip" })).toBe(true);
+  });
+
+  it('tell_mitra_start_fresh + intent_type → true', () => {
+    expect(hasTellMitraRoomEntryContext({ ..._BASE_CTX, source_surface: "tell_mitra_start_fresh" })).toBe(true);
+  });
+
+  it('tell_mitra_room_return + intent_type → true (future surface)', () => {
+    expect(hasTellMitraRoomEntryContext({ ..._BASE_CTX, source_surface: "tell_mitra_room_return" })).toBe(true);
+  });
+
+  it('quick_support_block + intent_type → false (non-Tell Mitra source)', () => {
+    expect(hasTellMitraRoomEntryContext({ ..._BASE_CTX, source_surface: "quick_support_block" })).toBe(false);
+  });
+
+  it('dashboard + intent_type → false', () => {
+    expect(hasTellMitraRoomEntryContext({ ..._BASE_CTX, source_surface: "dashboard" })).toBe(false);
+  });
+
+  it('tell_mitra_door without situation.intent_type → false', () => {
+    const noIntent = { ..._BASE_CTX, situation: { ..._BASE_CTX.situation, intent_type: "" } };
+    expect(hasTellMitraRoomEntryContext(noIntent)).toBe(false);
+  });
+
+  it('null input → false', () => {
+    expect(hasTellMitraRoomEntryContext(null)).toBe(false);
+  });
+
+  it('undefined input → false', () => {
+    expect(hasTellMitraRoomEntryContext(undefined)).toBe(false);
   });
 });

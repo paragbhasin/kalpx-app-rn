@@ -413,7 +413,7 @@ describe('support_exit', () => {
 // ── S17-C: enter_room — room_entry_context threading ─────────────────────────
 
 const VALID_ROOM_ENTRY_CTX = {
-  source_surface: "tell_mitra",
+  source_surface: "tell_mitra_door",
   tell_mitra_event_id: "db08ca38-0000-0000-0000-000000000001",
   situation: { intent_type: "distress_acute", state_tags: [], energy_state: "", life_context: "", prior_context_used: false },
   decision: { routing_type: "navigate_to_room", suggested_room_id: "room_stillness", confidence: 0.95, source: "internal_rule" },
@@ -463,5 +463,41 @@ describe('enter_room — S17-C room_entry_context', () => {
     const update2 = calls2.find((a: any) => a?.payload?.room_id === 'room_stillness');
     expect(update2?.payload?.room_entry_context).toBeNull();
     expect(Array.isArray(update2?.payload?.life_context_allowed)).toBe(true);
+  });
+
+  it('suppresses picker for tell_mitra_followup_chip source', async () => {
+    const ctx = makeContext({});
+    const chipCtx = { ...VALID_ROOM_ENTRY_CTX, source_surface: "tell_mitra_followup_chip" };
+    await executeAction(
+      { type: 'enter_room', payload: { room_id: 'room_release', source: 'tell_mitra', room_entry_context: chipCtx } },
+      ctx,
+    );
+    const calls = (ctx.dispatch as any).mock.calls.map((c: any[]) => c[0]);
+    const update = calls.find((a: any) => a?.payload?.room_id === 'room_release');
+    expect(update?.payload?.life_context_allowed).toBeNull();
+  });
+
+  it('does NOT suppress picker when situation.intent_type is missing', async () => {
+    const ctx = makeContext({});
+    const noIntentCtx = { ...VALID_ROOM_ENTRY_CTX, situation: { ...VALID_ROOM_ENTRY_CTX.situation, intent_type: "" } };
+    await executeAction(
+      { type: 'enter_room', payload: { room_id: 'room_release', source: 'tell_mitra', room_entry_context: noIntentCtx } },
+      ctx,
+    );
+    const calls = (ctx.dispatch as any).mock.calls.map((c: any[]) => c[0]);
+    const update = calls.find((a: any) => a?.payload?.room_id === 'room_release');
+    expect(Array.isArray(update?.payload?.life_context_allowed)).toBe(true);
+  });
+
+  it('does NOT suppress picker for non-tell_mitra source', async () => {
+    const ctx = makeContext({});
+    const foreignCtx = { ...VALID_ROOM_ENTRY_CTX, source_surface: "quick_support_block" };
+    await executeAction(
+      { type: 'enter_room', payload: { room_id: 'room_release', source: 'dashboard', room_entry_context: foreignCtx } },
+      ctx,
+    );
+    const calls = (ctx.dispatch as any).mock.calls.map((c: any[]) => c[0]);
+    const update = calls.find((a: any) => a?.payload?.room_id === 'room_release');
+    expect(Array.isArray(update?.payload?.life_context_allowed)).toBe(true);
   });
 });

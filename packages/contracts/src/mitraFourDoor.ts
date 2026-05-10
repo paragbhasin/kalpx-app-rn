@@ -146,6 +146,25 @@ export function getDoorLabel(doorId: DoorId): string {
   return DOOR_LABELS[doorId] ?? doorId;
 }
 
+/**
+ * Returns true when roomEntryContext came from any Tell Mitra surface
+ * (tell_mitra_door, tell_mitra_followup_chip, tell_mitra_start_fresh, etc.)
+ * and carries a resolved intent_type.
+ *
+ * Use this everywhere instead of inline source_surface === "tell_mitra" checks.
+ * The backend sends the specific sub-surface ("tell_mitra_door", not "tell_mitra"),
+ * so an exact-equality check silently fails for every real Tell Mitra entry.
+ */
+export function hasTellMitraRoomEntryContext(
+  roomEntryContext?: TellMitraRoomEntryContext | null,
+): boolean {
+  return (
+    typeof roomEntryContext?.source_surface === "string" &&
+    roomEntryContext.source_surface.startsWith("tell_mitra") &&
+    !!roomEntryContext?.situation?.intent_type
+  );
+}
+
 // ── Rhythm suggest helpers ───────────────────────────────────────────────────
 
 export const RHYTHM_SUGGEST_COPY = {

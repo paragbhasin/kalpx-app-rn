@@ -232,14 +232,16 @@ export function TellMitraPage() {
           response_copy: resp.response_copy || "You are not alone. Please speak to someone you trust right now.",
         });
       } else {
-        newItems.push({
-          id: _id(), type: "mitra_response",
-          response_copy: resp.response_copy,
-          prior_context_summary: resp.prior_context_summary,
-          conversation_stage: resp.conversation_stage,
-          support_depth: resp.support_depth,
-          created_at: now,
-        });
+        if (resp.response_copy) {
+          newItems.push({
+            id: _id(), type: "mitra_response",
+            response_copy: resp.response_copy,
+            prior_context_summary: resp.prior_context_summary,
+            conversation_stage: resp.conversation_stage,
+            support_depth: resp.support_depth,
+            created_at: now,
+          });
+        }
         if (resp.followup_question) {
           newItems.push({
             id: _id(), type: "followup_chips",

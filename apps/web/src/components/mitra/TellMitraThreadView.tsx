@@ -155,6 +155,7 @@ export function TellMitraThreadView({
 
     // ── mitra_response ───────────────────────────────────────────────────────
     if (item.type === "mitra_response") {
+      if (!item.response_copy) return null;
       return (
         <div key={item.id} style={{ marginBottom: 20, maxWidth: "85%" }}>
           <div style={{ fontSize: 11, color: "#B8963E", marginBottom: 8, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" as const }}>

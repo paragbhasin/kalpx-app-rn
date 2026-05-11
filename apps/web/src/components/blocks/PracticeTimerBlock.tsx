@@ -138,13 +138,20 @@ export function PracticeTimerBlock({
   const activeItem: any = screenData["runner_active_item"] || {};
   const info: any = activeItem;
 
-  const title: string = info.title || screenData["practice_title"] || "";
+  const title: string =
+    info.title || info.title_snapshot || screenData["practice_title"] || "";
   const summary: string =
-    info.summary || info.subtitle_or_line || info.subtitle || info.line || "";
+    info.summary ||
+    info.subtitle_or_line ||
+    info.subtitle ||
+    info.description_snapshot ||
+    info.line ||
+    "";
   const duration: string = info.duration || "";
   const steps: string[] = Array.isArray(info.steps) ? info.steps : [];
   const benefits: any = info.benefits || null;
-  const insight: string = info.essence || info.insight || "";
+  const insight: string =
+    info.essence || info.insight || info.description_snapshot || "";
 
   // Duration seeded from backend (practice_duration_seconds) or derived from item
   const rawDurationSec: number =

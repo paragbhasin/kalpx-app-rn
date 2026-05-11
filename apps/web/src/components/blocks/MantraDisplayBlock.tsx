@@ -17,7 +17,11 @@ export function MantraDisplayBlock({ block, screenData = {} }: Props) {
   const devKey = block.devanagari_key || 'mantra_devanagari';
   const translitKey = block.transliteration_key || 'mantra_transliteration';
 
-  const text = sd[textKey] || sd['runner_active_item']?.title || '';
+  const text =
+    sd[textKey] ||
+    sd['runner_active_item']?.title ||
+    sd['runner_active_item']?.title_snapshot ||
+    '';
   const devanagari = sd[devKey] || sd['runner_active_item']?.devanagari || '';
   const translit = sd[translitKey] || sd['runner_active_item']?.transliteration || '';
 

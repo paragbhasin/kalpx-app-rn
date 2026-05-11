@@ -84,10 +84,12 @@ export function TriggerPracticeRunnerBlock({
   const activeItem: any = screenData.runner_active_item || {};
   const title =
     activeItem.title ||
+    activeItem.title_snapshot ||
     screenData.runner_headline ||
     "Take one steadying action.";
   const subtitle =
     activeItem.summary ||
+    activeItem.description_snapshot ||
     activeItem.subtitle ||
     screenData.runner_subtext ||
     "Move through the steps gently. You do not need to force a shift.";

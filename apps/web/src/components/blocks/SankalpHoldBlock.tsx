@@ -110,16 +110,22 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
   const activeItem: any = screenData["runner_active_item"] || {};
   const info: any = activeItem;
 
-  const title: string = info.title || screenData["sankalp_text"] || "Intention";
+  const title: string =
+    info.title ||
+    info.title_snapshot ||
+    screenData["sankalp_text"] ||
+    "Intention";
   const bodyText: string =
     info.subtitle_or_line ||
     info.subtitle ||
+    info.description_snapshot ||
     info.body ||
     info.line ||
     screenData["sankalp_prefix"] ||
     "";
   const howToLive: any = info.how_to_live || null;
-  const insight: string = info.insight || info.essence || "";
+  const insight: string =
+    info.insight || info.essence || info.description_snapshot || "";
   const benefits: any = info.benefits || null;
   const audioUrl: string =
     info.audio_url || screenData["sankalp_audio_url"] || "";

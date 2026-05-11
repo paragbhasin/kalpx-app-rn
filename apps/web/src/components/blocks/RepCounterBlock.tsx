@@ -412,7 +412,11 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
   const completingRef = useRef(false);
 
   const activeItem: any = screenData["runner_active_item"] || {};
-  const title: string = activeItem.title || screenData["mantra_text"] || "";
+  const title: string =
+    activeItem.title ||
+    activeItem.title_snapshot ||
+    screenData["mantra_text"] ||
+    "";
   const deity: string = activeItem.deity || activeItem.source_deity || "";
   const source: string = activeItem.source || activeItem.tradition || "";
   const traditionLine =
@@ -420,7 +424,11 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
   const iast: string = activeItem.iast || activeItem.transliteration || "";
   const devanagari: string =
     activeItem.devanagari || screenData["mantra_devanagari"] || "";
-  const meaning: string = activeItem.meaning || activeItem.summary || "";
+  const meaning: string =
+    activeItem.meaning ||
+    activeItem.summary ||
+    activeItem.description_snapshot ||
+    "";
   const essence: string = activeItem.essence || activeItem.insight || "";
   const audioUrl: string =
     activeItem.audio_url || screenData["mantra_audio_url"] || "";

@@ -457,7 +457,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
           runner_duration_actual_sec: 0,
           runner_tz: tz,
           // Populate runner-specific display keys
-          mantra_text: variant === 'mantra' ? (item.title || '') : screenData.mantra_text,
+          mantra_text: variant === 'mantra' ? (item.title || item.title_snapshot || '') : screenData.mantra_text,
           mantra_devanagari: variant === 'mantra' ? (item.devanagari || '') : screenData.mantra_devanagari,
           mantra_audio_url: variant === 'mantra' ? (item.audio_url || '') : screenData.mantra_audio_url,
           // G13: seed sankalp audio for SankalpHoldBlock — silent without this

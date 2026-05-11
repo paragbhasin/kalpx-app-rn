@@ -1,5 +1,6 @@
 import { RHYTHM_BAND_LABELS } from "@kalpx/contracts";
 import type { RhythmItem, RhythmSlot, RhythmTimeBand } from "@kalpx/types";
+import { Clock3, Pencil, Sparkles } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -15,33 +16,84 @@ function actionLabel(itemType: string): string {
   return "Practice";
 }
 
-function RhythmItemCard({ item, onAction }: { item: RhythmItem; onAction: () => void }) {
+function beginLabel(itemType: string): string {
+  if (itemType === "mantra") return "Begin Chanting";
+  if (itemType === "sankalp") return "Begin Embodying";
+  return "Begin Practice";
+}
+
+function cardLabel(itemType: string): string {
+  if (itemType === "mantra") return "MANTRA";
+  if (itemType === "sankalp") return "SANKALP";
+  if (itemType === "reflection") return "REFLECTION";
+  return "PRACTICE";
+}
+
+function itemDuration(item: RhythmItem): string | null {
+  const rawDuration = (item as any).duration_minutes;
+  if (typeof rawDuration === "number" && Number.isFinite(rawDuration)) {
+    return `${rawDuration} min`;
+  }
+  return null;
+}
+
+function RhythmItemCard({
+  item,
+  onAction,
+}: {
+  item: RhythmItem;
+  onAction: () => void;
+}) {
   return (
     <div
       style={{
-        border: "1px solid rgba(228,197,145,0.8)",
-        borderRadius: 20,
-        background: "#ffffff",
-        padding: 16,
-        marginBottom: 12,
+        border: "1px solid rgba(201,168,76,0.35)",
+        borderRadius: 28,
+        background: "rgba(255,252,247,0.9)",
+        padding: "15px",
+        marginBottom: 18,
+        boxShadow: "0 18px 48px rgba(201,168,76,0.08)",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6, flexWrap: "wrap" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          marginBottom: 22,
+        }}
+      >
         <span
           style={{
-            fontSize: 10,
-            fontWeight: "700",
-            letterSpacing: 1.5,
-            color: "#8B6914",
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: 1.4,
+            color: "#A97C14",
             textTransform: "uppercase",
-            background: "#F5F0E0",
-            borderRadius: 6,
-            padding: "2px 8px",
+            background: "#F6EED8",
+            borderRadius: 5,
+            padding: "5px",
             display: "inline-block",
           }}
         >
-          {item.item_type}
+          {cardLabel(item.item_type)}
         </span>
+        {itemDuration(item) && (
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              color: "#8B6A43",
+              fontSize: 15,
+              flexShrink: 0,
+            }}
+          >
+            <Clock3 size={20} strokeWidth={1.8} />
+            {itemDuration(item)}
+          </span>
+        )}
       </div>
       <p
         style={{
@@ -49,40 +101,80 @@ function RhythmItemCard({ item, onAction }: { item: RhythmItem; onAction: () => 
           fontSize: 18,
           fontWeight: "700",
           color: "#432104",
-          margin: "0 0 4px",
-          lineHeight: 1.3,
+          margin: "0 0 24px",
+          textAlign: "center",
         }}
       >
         {item.title_snapshot}
       </p>
-      {item.description_snapshot && (
-        <p
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 14,
+          marginBottom: 22,
+          color: "#D2A63D",
+        }}
+      >
+        <div
           style={{
-            fontFamily: "var(--kalpx-font-sans, Inter, sans-serif)",
-            fontSize: 13,
-            color: "#7B6550",
-            margin: "0 0 12px",
-            lineHeight: 1.5,
+            width: 86,
+            height: 1,
+            background: "rgba(210,166,61,0.45)",
           }}
-        >
-          {item.description_snapshot}
-        </p>
+        />
+        <span style={{ fontSize: 28, lineHeight: 1 }}>
+          <img src="/lotus_icon.png" alt="" height={20} width={20} />
+        </span>
+        <div
+          style={{
+            width: 86,
+            height: 1,
+            background: "rgba(210,166,61,0.45)",
+          }}
+        />
+      </div>
+      {item.description_snapshot && (
+        <div style={{ marginBottom: 28 }}>
+          <p
+            style={{
+              fontFamily: "var(--kalpx-font-serif)",
+              fontSize: 16,
+              textAlign: "center",
+              color: "#7A6040",
+              margin: 0,
+              lineHeight: 1.6,
+            }}
+          >
+            {item.description_snapshot}
+          </p>
+        </div>
       )}
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+      <div style={{ display: "flex", justifyContent: "center" }}>
         <button
           onClick={onAction}
           style={{
-            padding: "7px 16px",
-            borderRadius: 20,
+            width: "100%",
+            padding: "10px",
+            borderRadius: 11,
             border: "none",
-            background: "linear-gradient(135deg, #c9a84c, #a8873a)",
+            background:
+              "linear-gradient(90deg, #C99317 0%, #E0AE21 45%, #C99317 100%)",
             color: "#fff",
-            fontSize: 14,
-            fontWeight: "600",
+            fontSize: 18,
+            fontWeight: "700",
+            fontFamily: "var(--kalpx-font-serif)",
             cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 14,
+            boxShadow: "0 18px 40px rgba(201,147,23,0.24)",
           }}
         >
-          {actionLabel(item.item_type)}
+          <Sparkles size={22} strokeWidth={1.8} />
+          {beginLabel(item.item_type)}
         </button>
       </div>
     </div>
@@ -99,22 +191,50 @@ function BandSection({
   onItemAction: (item: RhythmItem) => void;
 }) {
   if (!slot || slot.items.length === 0) return null;
+  const featuredItem = slot.items[0];
   return (
-    <div style={{ marginBottom: 24 }}>
+    <div style={{ marginBottom: 28 }}>
       <div
         style={{
           fontFamily: "var(--kalpx-font-serif)",
           fontWeight: 700,
-          fontSize: 17,
+          fontSize: 16,
           color: "#432104",
-          marginBottom: 10,
+          marginBottom: 8,
         }}
       >
-        {RHYTHM_BAND_LABELS[band]}
+        {RHYTHM_BAND_LABELS[band]} Practice
       </div>
-      {slot.items.map((item) => (
-        <RhythmItemCard key={item.id} item={item} onAction={() => onItemAction(item)} />
-      ))}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          marginBottom: 28,
+          color: "#D2A63D",
+        }}
+      >
+        <div
+          style={{
+            width: 35,
+            height: 1,
+            background: "rgba(210,166,61,0.45)",
+          }}
+        />
+        <span style={{ fontSize: 14, lineHeight: 1 }}>◇</span>
+        <div
+          style={{
+            width: 35,
+            height: 1,
+            background: "rgba(210,166,61,0.45)",
+          }}
+        />
+      </div>
+      <RhythmItemCard
+        key={featuredItem.id}
+        item={featuredItem}
+        onAction={() => onItemAction(featuredItem)}
+      />
     </div>
   );
 }
@@ -132,7 +252,7 @@ const SHELL_STYLE: React.CSSProperties = {
 const CARD_STYLE: React.CSSProperties = {
   background: "rgba(250,245,240,0.95)",
   border: "1px solid rgba(201,168,76,0.25)",
-  borderRadius: 18,
+  borderRadius: 24,
   padding: "32px 20px",
   textAlign: "center",
 };
@@ -200,7 +320,7 @@ export function RhythmHomePage() {
             aria-hidden="true"
             style={{
               position: "absolute",
-              top: -180,
+              top: -135,
               right: -22,
               width: 245,
               pointerEvents: "none",
@@ -226,16 +346,20 @@ export function RhythmHomePage() {
             style={{
               fontFamily: "var(--kalpx-font-serif)",
               fontWeight: 700,
-              fontSize: 24,
+              fontSize: 34,
               color: "#432104",
-              margin: "0 0 20px",
+              // margin: "0 0 24px",
             }}
           >
             My Rhythm
           </h2>
 
-          {loading && <p style={{ color: "#A08060", textAlign: "center" }}>Loading…</p>}
-          {error && <p style={{ color: "#e06060", textAlign: "center" }}>{error}</p>}
+          {loading && (
+            <p style={{ color: "#A08060", textAlign: "center" }}>Loading…</p>
+          )}
+          {error && (
+            <p style={{ color: "#e06060", textAlign: "center" }}>{error}</p>
+          )}
 
           {!loading && rhythm && !rhythm.has_rhythm && (
             <div style={CARD_STYLE}>
@@ -255,7 +379,8 @@ export function RhythmHomePage() {
                   padding: "14px 28px",
                   borderRadius: 14,
                   border: "none",
-                  background: "linear-gradient(90deg, #C99317 0%, #E0AE21 50%, #C99317 100%)",
+                  background:
+                    "linear-gradient(90deg, #C99317 0%, #E0AE21 50%, #C99317 100%)",
                   color: "#fff",
                   fontFamily: "var(--kalpx-font-serif)",
                   fontSize: 16,
@@ -289,16 +414,22 @@ export function RhythmHomePage() {
                 onClick={() => navigate("/en/mitra/rhythm/edit")}
                 style={{
                   width: "100%",
-                  padding: "12px 0",
-                  borderRadius: 12,
-                  border: "1px solid rgba(201,168,76,0.35)",
-                  background: "transparent",
+                  padding: "10px",
+                  borderRadius: 11,
+                  border: "1px solid rgba(201,168,76,0.55)",
+                  background: "rgba(255,252,247,0.6)",
                   color: "#7B6550",
-                  fontSize: 14,
+                  fontSize: 17,
+                  fontFamily: "var(--kalpx-font-sans, Inter, sans-serif)",
                   cursor: "pointer",
-                  marginTop: 4,
+                  marginTop: 8,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 14,
                 }}
               >
+                <Pencil size={24} strokeWidth={1.8} color="#C99317" />
                 Edit My Rhythm
               </button>
             </>

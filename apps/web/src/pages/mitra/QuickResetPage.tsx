@@ -17,6 +17,7 @@ import {
   MantraTextCard,
 } from "../../components/blocks/RepCounterBlock";
 import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
+import { HighlightedToast } from "../../components/ui/HighlightedToast";
 import {
   getQuickResetOpening,
   postBrowseMantras,
@@ -314,6 +315,8 @@ export function QuickResetPage() {
   const [pickerMantras, setPickerMantras] = useState<QuickResetMantra[]>([]);
   const [pickerLoading, setPickerLoading] = useState(false);
   const [defaultSetConfirmed, setDefaultSetConfirmed] = useState(false);
+  const [mantraUpdatedToastVisible, setMantraUpdatedToastVisible] =
+    useState(false);
 
   const runnerStartedAt = useRef<number>(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -330,6 +333,14 @@ export function QuickResetPage() {
       audioRef.current.pause();
     }
   }, [phase, audioUrl]);
+
+  useEffect(() => {
+    if (!mantraUpdatedToastVisible) return;
+    const timeout = window.setTimeout(() => {
+      setMantraUpdatedToastVisible(false);
+    }, 2600);
+    return () => window.clearTimeout(timeout);
+  }, [mantraUpdatedToastVisible]);
 
   // ── Initial load ───────────────────────────────────────────────────────────
   const loadOpening = useCallback(async () => {
@@ -382,6 +393,7 @@ export function QuickResetPage() {
     setSelectedMantra(mantra);
     setPickerOpen(false);
     setPhase("preview");
+    setMantraUpdatedToastVisible(true);
   }, []);
 
   // ── Runner start ───────────────────────────────────────────────────────────
@@ -684,6 +696,12 @@ export function QuickResetPage() {
       <div style={S.page}>
         <style>{QUICK_RESET_RING_CSS}</style>
         {content}
+        <HighlightedToast
+          visible={mantraUpdatedToastVisible}
+          title="Mantra Updated ✦"
+          message="Your rhythm has been gently realigned."
+          onClose={() => setMantraUpdatedToastVisible(false)}
+        />
       </div>
     </MitraMobileShell>
   );

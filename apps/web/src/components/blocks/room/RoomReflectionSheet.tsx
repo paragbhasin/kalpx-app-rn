@@ -4,7 +4,7 @@
  * Triggered by RoomPage when show_room_reflection=true in screenData.
  */
 import React, { useState } from 'react';
-import { ROOM_REFLECTION_OPTIONS, ROOM_GUIDED_COPY } from '@kalpx/contracts';
+import { ROOM_REFLECTION_OPTIONS, ROOM_GUIDED_COPY, ROOM_COMPLETION_HEADER, ROOM_NEXT_STEP_LINE } from '@kalpx/contracts';
 import type { VerifiedRoomId } from '@kalpx/types';
 import { postRoomReflection, postRoomTelemetry } from '../../../engine/mitraApi';
 
@@ -83,6 +83,20 @@ export function RoomReflectionSheet({
       >
         {phase === 'reflection' ? (
           <>
+            {ROOM_COMPLETION_HEADER[roomId as VerifiedRoomId] && (
+              <p
+                style={{
+                  fontSize: 14,
+                  color: '#8A7968',
+                  textAlign: 'center',
+                  lineHeight: 1.5,
+                  margin: '0 0 10px',
+                  fontStyle: 'italic',
+                }}
+              >
+                {ROOM_COMPLETION_HEADER[roomId as VerifiedRoomId]}
+              </p>
+            )}
             <p
               style={{
                 fontSize: 16,
@@ -130,6 +144,20 @@ export function RoomReflectionSheet({
             >
               You can stay, continue, or come back when you're ready.
             </p>
+            {ROOM_NEXT_STEP_LINE[roomId as VerifiedRoomId] && (
+              <p
+                style={{
+                  fontSize: 14,
+                  color: '#432104',
+                  textAlign: 'center',
+                  fontStyle: 'italic',
+                  margin: '0 0 16px',
+                  lineHeight: 1.5,
+                }}
+              >
+                {ROOM_NEXT_STEP_LINE[roomId as VerifiedRoomId]}
+              </p>
+            )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[
                 { key: 'finish_here',  label: ROOM_GUIDED_COPY.nextStep.finishHere },

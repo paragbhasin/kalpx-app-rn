@@ -8,6 +8,7 @@ import type {
   QuickResetMantra,
   QuickResetOpeningState,
 } from "@kalpx/types";
+import { ArrowLeft, RotateCw, SlidersHorizontal } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AudioPlayerBlock } from "../../components/blocks/AudioPlayerBlock";
@@ -16,6 +17,7 @@ import {
   MantraTextCard,
 } from "../../components/blocks/RepCounterBlock";
 import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
+import { HighlightedToast } from "../../components/ui/HighlightedToast";
 import {
   getQuickResetOpening,
   postBrowseMantras,
@@ -115,11 +117,10 @@ const S = {
   secondaryBtn: {
     background: "none",
     border: "none",
-    color: "#C99317",
+    color: "#432104",
     fontSize: 15,
     cursor: "pointer",
-    textDecoration: "underline",
-    padding: "8px 0",
+    padding: 0,
   } as const,
   subtleText: {
     fontSize: 14,
@@ -186,22 +187,30 @@ const S = {
   } as const,
   pickerList: { flex: 1, overflowY: "auto", padding: "0 16px" } as const,
   pickerItem: {
-    padding: "16px 0",
-    borderBottom: "0.5px solid #DAC28E",
+    padding: "15px",
+    borderRadius: 22,
+    border: "1px solid rgba(218,194,142,0.55)",
+    background: "rgba(255,255,255,0.72)",
+    boxShadow: "0 14px 34px rgba(201,168,76,0.08)",
     cursor: "pointer",
+    marginBottom: 14,
   } as const,
   pickerItemTitle: {
     fontFamily: "var(--kalpx-font-serif)",
     fontWeight: 700,
-    fontSize: 17,
+    fontSize: 16,
     color: "#432104",
     margin: 0,
+    lineHeight: 1.55,
+    textAlign: "center",
   } as const,
   pickerItemDevanagari: {
     fontSize: 15,
     color: "#8B6914",
     margin: 0,
-    marginTop: 2,
+    marginTop: 12,
+    lineHeight: 1.55,
+    textAlign: "center",
   } as const,
   openingShell: {
     width: "100%",
@@ -300,10 +309,19 @@ export function QuickResetPage() {
   const [iastExpanded, setIastExpanded] = useState(false);
   const [devExpanded, setDevExpanded] = useState(false);
   const [meaningExpanded, setMeaningExpanded] = useState(false);
+  const [essenceExpanded, setEssenceExpanded] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerMantras, setPickerMantras] = useState<QuickResetMantra[]>([]);
   const [pickerLoading, setPickerLoading] = useState(false);
   const [defaultSetConfirmed, setDefaultSetConfirmed] = useState(false);
+  const [highlightedToastTitle, setHighlightedToastTitle] = useState(
+    "Mantra Updated ✦",
+  );
+  const [highlightedToastMessage, setHighlightedToastMessage] = useState(
+    "Your rhythm has been gently realigned.",
+  );
+  const [mantraUpdatedToastVisible, setMantraUpdatedToastVisible] =
+    useState(false);
 
   const runnerStartedAt = useRef<number>(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -320,6 +338,14 @@ export function QuickResetPage() {
       audioRef.current.pause();
     }
   }, [phase, audioUrl]);
+
+  useEffect(() => {
+    if (!mantraUpdatedToastVisible) return;
+    const timeout = window.setTimeout(() => {
+      setMantraUpdatedToastVisible(false);
+    }, 2600);
+    return () => window.clearTimeout(timeout);
+  }, [mantraUpdatedToastVisible]);
 
   // ── Initial load ───────────────────────────────────────────────────────────
   const loadOpening = useCallback(async () => {
@@ -354,6 +380,11 @@ export function QuickResetPage() {
     async (mantra: QuickResetMantra) => {
       await postQuickResetSetDefault(mantra.item_id);
       setDefaultSetConfirmed(true);
+      setHighlightedToastTitle("Quick Reset Mantra Set ✦");
+      setHighlightedToastMessage(
+        "Your mantra has been set for future Quick Reset moments.",
+      );
+      setMantraUpdatedToastVisible(true);
       await loadOpening();
     },
     [loadOpening],
@@ -372,6 +403,9 @@ export function QuickResetPage() {
     setSelectedMantra(mantra);
     setPickerOpen(false);
     setPhase("preview");
+    setHighlightedToastTitle("Mantra Updated ✦");
+    setHighlightedToastMessage("Your rhythm has been gently realigned.");
+    setMantraUpdatedToastVisible(true);
   }, []);
 
   // ── Runner start ───────────────────────────────────────────────────────────
@@ -623,6 +657,18 @@ export function QuickResetPage() {
           </div>
         )}
 
+        {mantra.essence && (
+          <div style={{ width: "100%", marginBottom: 20 }}>
+            <CollapsibleCard
+              label="Essence"
+              expanded={essenceExpanded}
+              onToggle={() => setEssenceExpanded((v) => !v)}
+            >
+              {mantra.essence}
+            </CollapsibleCard>
+          </div>
+        )}
+
         <div style={S.openingActions}>
           <button style={S.primaryBtn} onClick={handleBeginChanting}>
             {primaryLabel}
@@ -630,15 +676,70 @@ export function QuickResetPage() {
           {secondaryActions.map((action) => (
             <button
               key={action}
-              style={S.secondaryBtn}
+              style={{
+                ...S.secondaryBtn,
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-start",
+                gap: 18,
+                maxWidth: 360,
+              }}
               onClick={() => handleSecondaryAction(action)}
             >
-              {getQuickResetActionLabel(action)}
+              <span
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: "50%",
+                  border: "1px dashed rgba(212,160,23,0.38)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#C99317",
+                  background: "rgba(255,255,255,0.42)",
+                  flexShrink: 0,
+                }}
+              >
+                {action === "change_mantra" ? (
+                  <RotateCw size={20} strokeWidth={1.8} />
+                ) : (
+                  <SlidersHorizontal size={20} strokeWidth={1.8} />
+                )}
+              </span>
+              <span
+                style={{
+                  display: "inline-flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  minWidth: 0,
+                  flex: 1,
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: "var(--kalpx-font-serif)",
+                    fontSize: 16,
+                    color: "#432104",
+                    lineHeight: 1.2,
+                    textAlign: "left",
+                  }}
+                >
+                  {getQuickResetActionLabel(action)}
+                </span>
+                <span
+                  style={{
+                    width: "100%",
+                    marginTop: 6,
+                    borderBottom: "2px dotted rgba(232,197,135,0.95)",
+                  }}
+                />
+              </span>
             </button>
           ))}
-          {defaultSetConfirmed && (
+          {/* {defaultSetConfirmed && (
             <p style={S.subtleText}>Set as your Quick Reset mantra.</p>
-          )}
+          )} */}
         </div>
       </div>
     );
@@ -662,6 +763,12 @@ export function QuickResetPage() {
       <div style={S.page}>
         <style>{QUICK_RESET_RING_CSS}</style>
         {content}
+        <HighlightedToast
+          visible={mantraUpdatedToastVisible}
+          title={highlightedToastTitle}
+          message={highlightedToastMessage}
+          onClose={() => setMantraUpdatedToastVisible(false)}
+        />
       </div>
     </MitraMobileShell>
   );
@@ -878,22 +985,81 @@ export function QuickResetPage() {
       <div style={S.overlay as React.CSSProperties}>
         <div
           style={{
-            padding: "16px 16px 0",
-            display: "flex",
-            alignItems: "center",
-            borderBottom: "0.5px solid #DAC28E",
-            paddingBottom: 12,
+            width: "100%",
+            maxWidth: 420,
+            margin: "0 auto",
+            padding: "18px 16px 0",
+            position: "relative",
           }}
         >
-          <button style={S.backBtn} onClick={() => setPickerOpen(false)}>
-            ← Back
+          <img
+            src="/leaves-bird.png"
+            alt=""
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              top: "-57px",
+              right: "9px",
+              width: "165px",
+
+              pointerEvents: "none",
+              userSelect: "none",
+            }}
+          />
+          <button
+            style={{
+              ...S.backBtn,
+              marginBottom: 24,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+            onClick={() => setPickerOpen(false)}
+          >
+            <ArrowLeft size={22} strokeWidth={2} />
+            Back
           </button>
-          <p style={{ ...S.pageTitle, margin: "0 auto", fontSize: 20 }}>
-            Choose a Mantra
-          </p>
-          <div style={{ width: 56 }} />
+          <div style={{ textAlign: "center" }}>
+            <p style={{ ...S.pageTitle, margin: "0 0 12px", fontSize: 22 }}>
+              Choose a Mantra
+            </p>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 12,
+                color: "#C7A048",
+              }}
+            >
+              <div
+                style={{
+                  width: 78,
+                  height: 1,
+                  background: "rgba(199,160,72,0.45)",
+                }}
+              />
+              <span style={{ fontSize: 18, lineHeight: 1 }}>✦</span>
+              <div
+                style={{
+                  width: 78,
+                  height: 1,
+                  background: "rgba(199,160,72,0.45)",
+                }}
+              />
+            </div>
+          </div>
         </div>
-        <div style={S.pickerList as React.CSSProperties}>
+        <div
+          style={{
+            ...(S.pickerList as React.CSSProperties),
+            width: "100%",
+            maxWidth: 420,
+            margin: "0 auto",
+            padding: "0 16px 24px",
+            boxSizing: "border-box",
+          }}
+        >
           {pickerLoading ? (
             <p
               style={{
@@ -909,7 +1075,12 @@ export function QuickResetPage() {
             pickerMantras.map((mantra) => (
               <div
                 key={mantra.item_id}
-                style={S.pickerItem}
+                style={{
+                  ...S.pickerItem,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 18,
+                }}
                 onClick={() => handlePickerSelect(mantra)}
                 role="button"
                 tabIndex={0}
@@ -917,10 +1088,12 @@ export function QuickResetPage() {
                   e.key === "Enter" && handlePickerSelect(mantra)
                 }
               >
-                <p style={S.pickerItemTitle}>{mantra.title}</p>
-                {mantra.devanagari && (
-                  <p style={S.pickerItemDevanagari}>{mantra.devanagari}</p>
-                )}
+                <div style={{ flex: 1 }}>
+                  <p style={S.pickerItemTitle}>{mantra.title}</p>
+                  {mantra.devanagari && (
+                    <p style={S.pickerItemDevanagari}>{mantra.devanagari}</p>
+                  )}
+                </div>
               </div>
             ))
           )}

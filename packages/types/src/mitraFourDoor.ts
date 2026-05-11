@@ -205,6 +205,7 @@ export interface QuickResetMantra {
   devanagari: string;
   iast: string;
   meaning: string;
+  essence?: string;
   audio_url: string | null;
 }
 

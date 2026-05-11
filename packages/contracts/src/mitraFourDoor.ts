@@ -654,6 +654,7 @@ export function normalizeMantraFromBrowse(
         : typeof raw["essence"] === "string"
           ? raw["essence"]
           : "",
+    essence: typeof raw["essence"] === "string" ? raw["essence"] : undefined,
     audio_url:
       typeof raw["audio_url"] === "string" && raw["audio_url"]
         ? raw["audio_url"]

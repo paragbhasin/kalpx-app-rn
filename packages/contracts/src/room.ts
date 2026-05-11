@@ -42,6 +42,18 @@ export const ROOM_REFLECTION_OPTIONS: Record<VerifiedRoomId, RoomReflectionOptio
   ],
 };
 
+// D-C Surface A: per-room completion acknowledgement header shown in RoomReflectionSheet.
+// COPY STATUS: DRAFT — requires copy freeze before production release.
+// These lines acknowledge the completion without implying therapy or guaranteed outcomes.
+export const ROOM_COMPLETION_HEADER: Partial<Record<VerifiedRoomId, string>> = {
+  room_stillness:  "You gave yourself a moment to return.",
+  room_connection: "You stayed with what needed tenderness.",
+  room_release:    "You made space to set something down.",
+  room_clarity:    "You paused long enough for one thing to become clearer.",
+  room_growth:     "You met the next step with sincerity.",
+  room_joy:        "You noticed what was already light.",
+};
+
 export const ROOM_GUIDED_COPY = {
   begin:            "Begin",
   whyThisLabel:     "Why this was chosen",

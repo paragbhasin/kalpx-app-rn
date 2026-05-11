@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { ROOM_REFLECTION_OPTIONS, ROOM_GUIDED_COPY } from "@kalpx/contracts";
+import { ROOM_REFLECTION_OPTIONS, ROOM_GUIDED_COPY, ROOM_COMPLETION_HEADER } from "@kalpx/contracts";
 import type { VerifiedRoomId } from "@kalpx/types";
 import { postRoomReflection, trackRoomTelemetry } from "../../engine/mitraApi";
 
@@ -68,6 +68,11 @@ const RoomReflectionSheet: React.FC<Props> = ({
         <View style={styles.sheet} onStartShouldSetResponder={() => true}>
           {phase === "reflection" ? (
             <>
+              {ROOM_COMPLETION_HEADER[roomId as VerifiedRoomId] ? (
+                <Text style={styles.completionHeader}>
+                  {ROOM_COMPLETION_HEADER[roomId as VerifiedRoomId]}
+                </Text>
+              ) : null}
               <Text style={styles.prompt}>{ROOM_GUIDED_COPY.reflectionPrompt}</Text>
               {options.map((opt) => (
                 <TouchableOpacity
@@ -124,6 +129,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 24,
     paddingBottom: 48,
+  },
+  completionHeader: {
+    fontSize: 14,
+    color: "#8A7968",
+    textAlign: "center",
+    lineHeight: 20,
+    marginBottom: 10,
+    fontStyle: "italic",
   },
   prompt: {
     fontSize: 16,

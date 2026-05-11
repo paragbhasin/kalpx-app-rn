@@ -79,7 +79,7 @@ export const VALID_DOOR_IDS: readonly DoorId[] = [
 export const DOOR_LABELS: Record<DoorId, string> = {
   my_rhythm: "My Rhythm",
   inner_path: "Inner Path",
-  quick_reset: "Quick Reset",
+  quick_reset: "Quick Chant",
   tell_mitra: "Tell Mitra",
 };
 

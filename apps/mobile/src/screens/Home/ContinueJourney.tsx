@@ -3,11 +3,8 @@
  *
  * Two modes selected by `hasActiveJourney` prop:
  *
- *   hasActiveJourney = true  → GET /api/mitra/journey/home/
- *     Dispatches on response_type per JOURNEY_HOME_CONTRACT_V1:
- *       render_home      → momentum / choice / minimal_care layouts
- *       route_to_moment  → executeAction immediately
- *       fallback         → minimal 2-chip shell
+ *   hasActiveJourney = true  → renders the Four Door home surface
+ *     backed by GET /api/mitra/v3/journey/home/
  *
  *   hasActiveJourney = false → GET /api/mitra/v3/journey/entry-view/
  *     target.view_key === "welcome_back_surface" → reentry chip home
@@ -19,13 +16,11 @@
  */
 
 import { Ionicons } from "@expo/vector-icons";
-import type { RoomId } from "@kalpx/types";
 import { useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
-  Image,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -35,70 +30,18 @@ import {
 } from "react-native";
 import uuidv4 from "react-native-uuid";
 import { useDispatch } from "react-redux";
-import RoomEntrySheet from "../../blocks/room/RoomEntrySheet";
 import { useToast } from "../../context/ToastContext";
-import { executeAction } from "../../engine/actionExecutor";
 import {
   mitraJourneyEntryView,
-  mitraJourneyHome,
   mitraJourneyReentryDecision,
   V3EntryViewEnvelope,
 } from "../../engine/mitraApi";
-import { useScreenStore } from "../../engine/useScreenBridge";
 import { ingestDailyView } from "../../engine/v3Ingest";
-import {
-  goBackWithData,
-  loadScreenWithData,
-  screenActions,
-} from "../../store/screenSlice";
+import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
+import FourDoorHomeContainer from "../../containers/FourDoorHomeContainer";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-
-// ── Types: journey/home/ response ────────────────────────────────────
-interface ActionSpec {
-  type:
-    | "navigate"
-    | "load_screen"
-    | "open_mitra_chat"
-    | "open_support_path"
-    | "start_checkin"
-    | "start_support"
-    | "continue_practice"
-    | "view_last_path"
-    | "noop";
-  target?: { container_id?: string; state_id?: string } | string;
-}
-
-interface ChipSpec {
-  id: string;
-  label: string;
-  icon: string | null;
-  action: ActionSpec;
-}
-
-interface FooterLink {
-  label: string;
-  action: ActionSpec;
-}
-
-interface HomeResponse {
-  response_type: "render_home" | "route_to_moment" | "fallback";
-  moment_id?: string | null;
-  layout?: "momentum" | "choice" | "minimal_care";
-  headline?: string;
-  body_lines?: string[];
-  h2_prompt?: string | null;
-  primary_cta?: ChipSpec | null;
-  chips?: ChipSpec[];
-  footer_link?: FooterLink | null;
-  action?: ActionSpec;
-  target?: { container_id: string; state_id: string };
-  meta: {
-    fallback_used?: boolean;
-    cache_ttl_sec?: number;
-  };
-}
 
 // ── Types: entry-view / welcome_back_surface ─────────────────────────
 type ChipKey = "reentry_continue" | "reentry_fresh";
@@ -129,31 +72,10 @@ interface ContinueJourneyProps {
   hasActiveJourney?: boolean;
 }
 
-// Icon-name → Ionicon glyph.
-function ioniconFor(name: string | null | undefined): React.ReactNode {
-  if (!name) {
-    return <View style={styles.iconPlaceholder} />;
-  }
-  const glyphMap: Record<string, any> = {
-    chat: "chatbubble-outline",
-    heart: "heart-outline",
-    hands_heart: "heart-outline",
-    diamond: "diamond-outline",
-  };
-  const glyph = glyphMap[name] || "ellipse-outline";
-  return (
-    <Ionicons name={glyph} size={24} color="#432104" style={styles.btnIcon} />
-  );
-}
-
-// Lightweight in-module TTL cache for active-user journey/home/.
-let _homeCache: { response: HomeResponse; ts: number } | null = null;
-
 // Module-level ETag for entry-view (returning-user path).
 let _entryViewEtag: string | null = null;
 
 export function clearContinueJourneyHomeCache() {
-  _homeCache = null;
   _entryViewEtag = null;
 }
 
@@ -161,86 +83,16 @@ export default function ContinueJourney({
   userName = "friend",
   hasActiveJourney = false,
 }: ContinueJourneyProps) {
-  const screenBridge = useScreenStore();
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
   const { showToast } = useToast();
 
-  // Active-user path state.
-  const [home, setHome] = useState<HomeResponse | null>(null);
   // Returning-user path state.
   const [reentry, setReentry] = useState<ReentryHome | null>(null);
   // Shared.
   const [loading, setLoading] = useState(true);
   const [submittingReentry, setSubmittingReentry] = useState(false);
-  const [roomSheetVisible, setRoomSheetVisible] = useState(false);
   const routedRef = useRef(false);
-
-  // ── Active-user path: buildActionContext ─────────────────────────
-  // Use a ref so buildActionContext reads the latest screenBridge values at
-  // call time without including them in useCallback deps. If screenData or
-  // currentScreen were in the deps, buildActionContext would change on every
-  // dispatch, making the mount effect re-run after every API response → loop.
-  const screenBridgeRef = useRef(screenBridge);
-  useEffect(() => {
-    screenBridgeRef.current = screenBridge;
-  });
-
-  const buildActionContext = useCallback(() => {
-    return {
-      screenState: screenBridgeRef.current.screenData || {},
-      setScreenValue: (value: any, key: string) => {
-        dispatch(screenActions.setScreenValue({ key, value }));
-      },
-      loadScreen: (target: any) => {
-        const containerId =
-          typeof target === "string"
-            ? "generic"
-            : target?.container_id || target?.containerId || "generic";
-        const stateId =
-          typeof target === "string"
-            ? target
-            : target?.state_id || target?.stateId || "";
-        dispatch(loadScreenWithData({ containerId, stateId }) as any);
-        navigation.navigate("DynamicEngine");
-      },
-      goBack: () => {
-        dispatch(goBackWithData() as any);
-      },
-      currentScreen: screenBridgeRef.current.currentScreen,
-    };
-  }, [dispatch, navigation]);
-
-  // ── Active-user path: fetchHome ──────────────────────────────────
-  const fetchHome = useCallback(async (forceRefresh = false) => {
-    const ttlMs = (_homeCache?.response?.meta?.cache_ttl_sec || 0) * 1000;
-    if (
-      !forceRefresh &&
-      _homeCache &&
-      ttlMs > 0 &&
-      Date.now() - _homeCache.ts < ttlMs
-    ) {
-      setHome(_homeCache.response);
-      setLoading(false);
-      return _homeCache.response;
-    }
-    setLoading(true);
-    let deviceTz: string | undefined;
-    try {
-      deviceTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    } catch {
-      deviceTz = undefined;
-    }
-    const res = (await mitraJourneyHome({
-      tz: deviceTz,
-    })) as HomeResponse | null;
-    if (res) {
-      _homeCache = { response: res, ts: Date.now() };
-      setHome(res);
-    }
-    setLoading(false);
-    return res;
-  }, []);
 
   // ── Returning-user path: routeToView ─────────────────────────────
   const routeToView = useCallback(
@@ -411,29 +263,7 @@ export default function ContinueJourney({
     if (routedRef.current) return;
 
     if (hasActiveJourney) {
-      // Active-user path: journey/home/ dispatches on response_type.
-      // generate_companion prehydrate removed: the action handler was
-      // retired in v3 (no-op). Active users are fully handled by
-      // route_to_moment (milestone/care-room) or render_home (ground state).
-      // Fallback: if journey/home does not produce a route (null, 429, or
-      // non-route_to_moment), call entry-view which handles Day 7/14
-      // checkpoint detection for active journeys (routing safety fallback —
-      // not final routing architecture, pending journey/home audit).
-      (async () => {
-        const res = await fetchHome();
-        if (cancelled || routedRef.current) return;
-
-        if (res?.response_type === "route_to_moment" && res.action) {
-          routedRef.current = true;
-          await executeAction(res.action as any, buildActionContext() as any);
-          return;
-        }
-
-        if (cancelled || routedRef.current) return;
-        if (!res || res.response_type !== "render_home") {
-          await fetchEntryView();
-        }
-      })();
+      setLoading(false);
     } else {
       // Returning-user path: entry-view.
       (async () => {
@@ -445,7 +275,7 @@ export default function ContinueJourney({
     return () => {
       cancelled = true;
     };
-  }, [hasActiveJourney, fetchHome, fetchEntryView, buildActionContext]);
+  }, [hasActiveJourney, fetchEntryView]);
 
   // ── Reentry chip submit (returning-user path only) ───────────────
   const handleReentryChip = useCallback(
@@ -531,7 +361,7 @@ export default function ContinueJourney({
   );
 
   // ── Loading state ────────────────────────────────────────────────
-  if (loading || (hasActiveJourney ? !home : !reentry)) {
+  if (!hasActiveJourney && (loading || !reentry)) {
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.loadingWrap}>
@@ -541,160 +371,8 @@ export default function ContinueJourney({
     );
   }
 
-  // ── Active-user render (journey/home/) ───────────────────────────
-  if (hasActiveJourney && home) {
-    if (home.response_type === "route_to_moment") {
-      return null;
-    }
-
-    const headline = (home.headline || "").replace(
-      "{userName}",
-      userName || "friend",
-    );
-    const bodyLines = home.body_lines || [];
-    const layout = home.layout || "minimal_care";
-    const chips = home.chips || [];
-    const primaryCta = home.primary_cta || null;
-    const h2 = home.h2_prompt || null;
-    const footer = home.footer_link || null;
-
-    const handleAction = async (action: ActionSpec | undefined) => {
-      if (!action) return;
-      if ((action as any).type === "open_support_path") {
-        setRoomSheetVisible(true);
-        return;
-      }
-      try {
-        await executeAction(action as any, buildActionContext() as any);
-      } catch (err: any) {
-        console.warn("[ContinueJourney] executeAction threw:", err?.message);
-      }
-    };
-
-    const handleRoomEntry = async (room_id: RoomId) => {
-      setRoomSheetVisible(false);
-      try {
-        await executeAction(
-          {
-            type: "enter_room",
-            payload: { room_id, source: "home_support_path" },
-          } as any,
-          buildActionContext() as any,
-        );
-      } catch (err: any) {
-        console.warn("[ContinueJourney] room entry failed:", err?.message);
-      }
-    };
-
-    return (
-      <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.header}>
-            {!!headline && <Text style={styles.welcomeText}>{headline}</Text>}
-            {bodyLines.map((line, i) => (
-              <Text key={i} style={styles.subtext}>
-                {line}
-              </Text>
-            ))}
-          </View>
-
-          <View style={styles.dividerContainer}>
-            <View style={styles.dividerLine} />
-            <Ionicons name="diamond-outline" size={10} color="#DAC28E" />
-            <View style={styles.dividerLine} />
-          </View>
-
-          {!!h2 && <Text style={styles.promptText}>{h2}</Text>}
-
-          {primaryCta && (
-            <TouchableOpacity
-              testID="home_continue_cta"
-              style={styles.primaryCtaWrap}
-              activeOpacity={0.85}
-              onPress={() => handleAction(primaryCta.action)}
-            >
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Text style={styles.primaryCtaLabel}>{primaryCta.label}</Text>
-
-                <Ionicons
-                  name="arrow-forward"
-                  size={22}
-                  color="#ffffff"
-                  style={{ marginLeft: 8 }}
-                />
-              </View>
-            </TouchableOpacity>
-          )}
-          <View style={styles.actionGroup}>
-            {chips.map((chip, idx) => {
-              const isLastWithArrow =
-                chip.action?.type === "continue_practice" && !primaryCta;
-              return (
-                <TouchableOpacity
-                  key={chip.id || `chip_${idx}`}
-                  testID={chip.id || undefined}
-                  style={styles.actionButton}
-                  activeOpacity={0.7}
-                  onPress={() => handleAction(chip.action)}
-                >
-                  <View
-                    style={[
-                      styles.btnContent,
-                      isLastWithArrow && { justifyContent: "space-between" },
-                    ]}
-                  >
-                    <View style={styles.btnContentInner}>
-                      {ioniconFor(chip.icon)}
-                      <Text style={styles.btnText}>{chip.label}</Text>
-                    </View>
-                    {isLastWithArrow && (
-                      <Ionicons
-                        name="arrow-forward"
-                        size={22}
-                        color="#432104"
-                      />
-                    )}
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-
-          {footer && layout === "momentum" && (
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => handleAction(footer.action)}
-              style={styles.footerLinkWrap}
-            >
-              <Text style={styles.footerLinkText}>{footer.label} →</Text>
-            </TouchableOpacity>
-          )}
-        </ScrollView>
-
-        {/* <View style={styles.lotusContainer} pointerEvents="none">
-          <Image
-            source={require("../../../assets/new_home_lotus.png")}
-            style={styles.lotusImage}
-            resizeMode="contain"
-          />
-        </View> */}
-
-        <RoomEntrySheet
-          visible={roomSheetVisible}
-          onDismiss={() => setRoomSheetVisible(false)}
-          onRoomEntry={handleRoomEntry}
-        />
-      </SafeAreaView>
-    );
+  if (hasActiveJourney) {
+    return <FourDoorHomeContainer userName={userName} />;
   }
 
   // ── Returning-user render (entry-view welcome_back_surface) ──────

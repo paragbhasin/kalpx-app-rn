@@ -108,7 +108,7 @@ export default function Home() {
   useFocusEffect(
     React.useCallback(() => {
       updateBackground(mitraJourneyId ? CONTINUE_BG : HOME_BACKGROUND);
-      updateHeaderHidden(false);
+      updateHeaderHidden(!!mitraJourneyId);
       return () => {
         updateBackground(null);
         updateHeaderHidden(false);

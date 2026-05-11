@@ -1,58 +1,210 @@
-/**
- * FourDoorHomeContainer — S04 Phase 2 FourDoor home surface.
- *
- * Registered in ScreenRenderer as container_type "four_door_home".
- *
- * Fetches GET /api/mitra/v3/journey/home/ on first mount (skips if already
- * hydrated in store). Renders four door panels using DOOR_LABELS from
- * @kalpx/contracts. my_rhythm→RhythmHome, inner_path→InnerPath,
- * quick_reset→QuickReset screen, tell_mitra inline.
- */
-
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Image,
+  ImageBackground,
+  Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigation } from '@react-navigation/native';
-import { DOOR_LABELS } from '@kalpx/contracts';
-import { mitraJourneyHomeV3 } from '../engine/mitraApi';
-import { setHomeData } from '../store/doorSlice';
-import TellMitraContainer from './TellMitraContainer';
+} from "react-native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { DOOR_LABELS } from "@kalpx/contracts";
+import type { QuickCheckinPranaLabel } from "@kalpx/types";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  mitraJourneyHomeV3,
+  mitraPranaAcknowledge,
+  postPranaAcknowledgeDismiss,
+} from "../engine/mitraApi";
+import { useScreenStore } from "../engine/useScreenBridge";
+import { setHomeData } from "../store/doorSlice";
+import { Fonts } from "../theme/fonts";
 
-function getRhythmTimeBand(): 'morning' | 'afternoon' | 'night' {
+type FeelingOption = "Agitated" | "Drained" | "Steady" | "Open";
+
+const FEELING_OPTIONS: FeelingOption[] = [
+  "Agitated",
+  "Drained",
+  "Steady",
+  "Open",
+];
+
+const HERO_DAY = require("../../assets/imgsun.png");
+const HERO_NIGHT = require("../../assets/night-home.png");
+const LOGO = require("../../assets/KalpXlogo.png");
+const DOOR_ICON_RHYTHM = require("../../assets/mitra1.png");
+const DOOR_ICON_PATH = require("../../assets/mitra3.png");
+const DOOR_ICON_RESET = require("../../assets/mitra2.png");
+const DOOR_ICON_TELL = require("../../assets/mitra4.png");
+
+function getRhythmTimeBand(): "morning" | "afternoon" | "night" {
   const hour = new Date().getHours();
-  if (hour < 12) return 'morning';
-  if (hour < 18) return 'afternoon';
-  return 'night';
+  if (hour < 12) return "morning";
+  if (hour < 20) return "afternoon";
+  return "night";
 }
 
-export default function FourDoorHomeContainer() {
+function getGreetingVisualState(headline?: string | null) {
+  const greetingHeadline = headline || "";
+  const isNightGreeting = /good\s*night|night/i.test(greetingHeadline);
+  return {
+    isNightGreeting,
+    image: isNightGreeting ? HERO_NIGHT : HERO_DAY,
+    textColor: isNightGreeting ? "#FFFFFF" : "#432104",
+  };
+}
+
+function mapFeelingToPranaType(feeling: FeelingOption) {
+  if (feeling === "Open") return "energized";
+  if (feeling === "Steady") return "balanced";
+  return feeling.toLowerCase();
+}
+
+function DoorCard({
+  icon,
+  label,
+  subtitle,
+  onPress,
+}: {
+  icon: any;
+  label: string;
+  subtitle?: string | null;
+  onPress: () => void;
+}) {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.86}
+      onPress={onPress}
+      style={styles.doorCard}
+    >
+      <Image source={icon} style={styles.doorIcon} resizeMode="contain" />
+      <View style={styles.doorBody}>
+        <Text style={styles.doorLabel}>{label}</Text>
+        {!!subtitle && <Text style={styles.doorSubtitle}>{subtitle}</Text>}
+      </View>
+      <Text style={styles.doorArrow}>→</Text>
+    </TouchableOpacity>
+  );
+}
+
+export default function FourDoorHomeContainer({
+  userName = "friend",
+}: {
+  userName?: string;
+}) {
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
+  const screenData = useScreenStore((state) => state.screenData);
   const homeData = useSelector((state: any) => state.door?.homeData);
+
   const [loading, setLoading] = useState(!homeData);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedFeeling, setSelectedFeeling] = useState<FeelingOption | null>(
+    null,
+  );
+  const [feelingLoading, setFeelingLoading] = useState(false);
+  const doorStates = (homeData?.door_states ?? {}) as Record<string, any>;
+
+  const loadHome = useCallback(
+    async (silent = false) => {
+      if (!silent) setLoading(true);
+      setError(null);
+      try {
+        const data = await mitraJourneyHomeV3();
+        dispatch(setHomeData(data));
+      } catch {
+        setError("Unable to load. Please try again.");
+      } finally {
+        if (!silent) setLoading(false);
+      }
+    },
+    [dispatch],
+  );
 
   useEffect(() => {
-    if (homeData) return; // already hydrated
     setLoading(true);
-    mitraJourneyHomeV3()
-      .then((data) => {
-        dispatch(setHomeData(data));
-        setLoading(false);
-      })
-      .catch(() => {
-        setError(true);
-        setLoading(false);
-      });
-  }, []);
+    void loadHome();
+  }, [homeData, loadHome]);
 
-  if (loading) {
+  useFocusEffect(
+    useCallback(() => {
+      if (homeData) {
+        void loadHome(true);
+      }
+    }, [homeData, loadHome]),
+  );
+
+  const handleFeelingSelect = useCallback(
+    async (feeling: FeelingOption) => {
+      const pranaType = mapFeelingToPranaType(feeling);
+      setSelectedFeeling(feeling);
+      setFeelingLoading(true);
+      try {
+        await mitraPranaAcknowledge({
+          pranaType,
+          focus:
+            (screenData?.scan_focus as string) ||
+            (screenData?.active_focus as string) ||
+            "peacecalm",
+          subFocus:
+            (screenData?.prana_baseline_selection as string) || "",
+          depth:
+            (screenData?.routine_depth as string) ||
+            (screenData?.routine_setup as string) ||
+            "standard",
+          dayNumber: screenData?.day_number || 1,
+          journeyId: screenData?.journey_id || null,
+          round: 2,
+          locale: (screenData?.locale as string) || "en",
+          tz:
+            Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
+        });
+        await loadHome(true);
+      } finally {
+        setFeelingLoading(false);
+      }
+    },
+    [loadHome, screenData],
+  );
+
+  const handleDismissCheckin = useCallback(async () => {
+    await postPranaAcknowledgeDismiss();
+    await loadHome(true);
+  }, [loadHome]);
+
+  const rhythmBand = getRhythmTimeBand();
+  const greetingHeadline = homeData?.greeting?.headline?.trim() || "";
+  const greetingSubtext = homeData?.greeting?.subtext || "";
+  const greetingVisual = getGreetingVisualState(homeData?.greeting?.headline);
+
+  const rhythmSubtitle = useMemo(() => {
+    const rhythmSlot = homeData?.companion_rhythm?.[rhythmBand];
+    return (
+      homeData?.my_rhythm_summary?.next_practice_label ??
+      rhythmSlot?.items?.[0]?.title_snapshot ??
+      doorStates?.my_rhythm?.subtitle ??
+      doorStates?.my_rhythm?.cta ??
+      ""
+    );
+  }, [doorStates, homeData, rhythmBand]);
+
+  const innerPathSubtitle = useMemo(() => {
+    const ips = homeData?.inner_path_summary;
+    return ips?.has_active_path
+      ? `Day ${ips.day_number} of ${ips.total_days}`
+      : (ips?.path_title ?? doorStates?.inner_path?.subtitle ?? "");
+  }, [doorStates, homeData]);
+  const quickResetSubtitle =
+    doorStates?.quick_reset?.subtitle ??
+    homeData?.quick_reset_summary?.subtitle ??
+    "Return to your sound.";
+  const tellMitraSubtitle =
+    doorStates?.tell_mitra?.subtitle ?? "What is on your mind right now?";
+
+  if (loading && !homeData) {
     return (
       <View style={styles.centeredWrap}>
         <ActivityIndicator size="small" color="#b8922a" />
@@ -60,153 +212,452 @@ export default function FourDoorHomeContainer() {
     );
   }
 
-  if (error || !homeData) {
+  if (!homeData) {
     return (
       <View style={styles.centeredWrap}>
-        <Text style={styles.errorText}>Unable to load. Please try again.</Text>
+        <Text style={styles.errorText}>{error || "Unable to load."}</Text>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => void loadHome()}
+          style={styles.retryButton}
+        >
+          <Text style={styles.retryButtonText}>Try again</Text>
+        </TouchableOpacity>
       </View>
     );
   }
 
-  const ds = homeData.door_states;
-  const ips = homeData.inner_path_summary;
-  const greeting = homeData.greeting;
-
-  // My Rhythm: prefer backend summary label, then first item in current time-band slot, then door state
-  const rhythmBand = getRhythmTimeBand();
-  const rhythmSlot = homeData.companion_rhythm?.[rhythmBand];
-  const rhythmSubtitle =
-    homeData.my_rhythm_summary?.next_practice_label ??
-    rhythmSlot?.items?.[0]?.title_snapshot ??
-    ds.my_rhythm?.subtitle ??
-    ds.my_rhythm?.cta ??
-    '';
-
-  // Inner Path: prefer Day X of Y when path is active, fallback to path_title or door subtitle
-  const innerPathSubtitle = ips?.has_active_path
-    ? `Day ${ips.day_number} of ${ips.total_days}`
-    : (ips?.path_title ?? ds.inner_path?.subtitle ?? '');
+  const acw = homeData.active_checkin_window;
+  const windowActive = acw?.active === true;
+  const hasRhythm = homeData?.companion_rhythm?.has_rhythm === true;
+  const myRhythmTarget = hasRhythm ? "RhythmHome" : "RhythmSetup";
 
   return (
-    <View style={styles.root}>
-      {/* Greeting */}
-      {(greeting?.headline || greeting?.subtext) && (
-        <View style={styles.greetingBlock}>
-          {!!greeting.headline && (
-            <Text style={styles.greetingHeadline}>{greeting.headline}</Text>
-          )}
-          {!!greeting.subtext && (
-            <Text style={styles.greetingSubtext}>{greeting.subtext}</Text>
+    <ScrollView
+      style={styles.root}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.heroWrap}>
+        <ImageBackground
+          source={greetingVisual.image}
+          resizeMode="cover"
+          style={styles.heroImage}
+        >
+          <View style={styles.heroInner}>
+            <Image source={LOGO} style={styles.logo} resizeMode="contain" />
+            <View style={styles.heroCopy}>
+              <Text
+                style={[styles.heroHeadline, { color: greetingVisual.textColor }]}
+                numberOfLines={2}
+              >
+                {greetingHeadline}
+              </Text>
+              {!!greetingSubtext && (
+                <Text
+                  style={[styles.heroSubtext, { color: greetingVisual.textColor }]}
+                >
+                  {greetingSubtext}
+                </Text>
+              )}
+              <View style={styles.heroDivider}>
+                <View style={styles.heroDividerLine} />
+                <Text style={styles.heroDividerIcon}>◈</Text>
+                <View style={styles.heroDividerLine} />
+              </View>
+            </View>
+          </View>
+        </ImageBackground>
+      </View>
+
+      <View style={styles.content}>
+        {!!error && <Text style={styles.inlineError}>{error}</Text>}
+
+        <DoorCard
+          icon={DOOR_ICON_RHYTHM}
+          label={DOOR_LABELS.my_rhythm}
+          subtitle={rhythmSubtitle}
+          onPress={() => navigation.navigate(myRhythmTarget as any)}
+        />
+        <DoorCard
+          icon={DOOR_ICON_PATH}
+          label={DOOR_LABELS.inner_path}
+          subtitle={innerPathSubtitle}
+          onPress={() => navigation.navigate("InnerPath" as any)}
+        />
+        <DoorCard
+          icon={DOOR_ICON_RESET}
+          label={DOOR_LABELS.quick_reset}
+          subtitle={quickResetSubtitle}
+          onPress={() => navigation.navigate("QuickReset" as any)}
+        />
+        <DoorCard
+          icon={DOOR_ICON_TELL}
+          label={DOOR_LABELS.tell_mitra}
+          subtitle={tellMitraSubtitle}
+          onPress={() => navigation.navigate("TellMitra" as any)}
+        />
+
+        <View style={styles.checkinCard}>
+          {windowActive ? (
+            <>
+              <View style={styles.checkinHeaderRow}>
+                <Text style={styles.checkinTitle}>
+                  {(acw?.prana_label as QuickCheckinPranaLabel) || "How are you landing?"}
+                </Text>
+                {acw?.dismissible && (
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() => void handleDismissCheckin()}
+                    style={styles.dismissButton}
+                  >
+                    <Text style={styles.dismissButtonText}>×</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {!!acw?.acknowledgment && (
+                <Text style={styles.checkinAcknowledgment}>
+                  {acw.acknowledgment}
+                </Text>
+              )}
+
+              {!!acw?.suggestion && (
+                <>
+                  {!!acw.suggestion.card_header && (
+                    <Text style={styles.suggestionHeader}>
+                      {acw.suggestion.card_header}
+                    </Text>
+                  )}
+                  <TouchableOpacity
+                    activeOpacity={0.82}
+                    onPress={() => navigation.navigate("QuickReset" as any)}
+                    style={styles.suggestionButton}
+                  >
+                    <Text style={styles.suggestionButtonText}>
+                      {acw.suggestion.label} →
+                    </Text>
+                  </TouchableOpacity>
+                </>
+              )}
+
+              {acw?.companion_boundary && (
+                <Text style={styles.boundaryText}>
+                  If this feels heavy to carry,{" "}
+                  <Text
+                    style={styles.boundaryLink}
+                    onPress={() => navigation.navigate("TellMitra" as any)}
+                  >
+                    Tell Mitra
+                  </Text>{" "}
+                  is here.
+                </Text>
+              )}
+            </>
+          ) : (
+            <>
+              <Text style={styles.checkinTitle}>How are you landing?</Text>
+              <Text style={styles.checkinSubtitle}>
+                One tap. Mitra meets you where you are.
+              </Text>
+              <View style={styles.feelingGrid}>
+                {FEELING_OPTIONS.map((feeling) => {
+                  const isSelected = selectedFeeling === feeling;
+                  return (
+                    <TouchableOpacity
+                      key={feeling}
+                      activeOpacity={0.82}
+                      disabled={feelingLoading}
+                      onPress={() => void handleFeelingSelect(feeling)}
+                      style={[
+                        styles.feelingChip,
+                        isSelected && styles.feelingChipSelected,
+                        feelingLoading && styles.feelingChipDisabled,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.feelingChipText,
+                          isSelected && styles.feelingChipTextSelected,
+                        ]}
+                      >
+                        {feeling}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </>
           )}
         </View>
-      )}
-
-      {/* my_rhythm door */}
-      <TouchableOpacity
-        style={styles.doorCard}
-        activeOpacity={0.8}
-        onPress={() => navigation.navigate("RhythmHome" as any)}
-      >
-        <Text style={styles.doorLabel}>{DOOR_LABELS.my_rhythm}</Text>
-        <Text style={styles.doorSubtitle}>{rhythmSubtitle}</Text>
-      </TouchableOpacity>
-
-      {/* inner_path door */}
-      <TouchableOpacity
-        style={styles.doorCard}
-        activeOpacity={0.8}
-        onPress={() => navigation.navigate("InnerPath" as any)}
-      >
-        <Text style={styles.doorLabel}>{DOOR_LABELS.inner_path}</Text>
-        <Text style={styles.doorSubtitle}>
-          {innerPathSubtitle}
-        </Text>
-      </TouchableOpacity>
-
-      {/* quick_reset door */}
-      <TouchableOpacity
-        style={styles.doorCard}
-        activeOpacity={0.8}
-        onPress={() => navigation.navigate("QuickReset" as any)}
-      >
-        <Text style={styles.doorLabel}>{DOOR_LABELS.quick_reset}</Text>
-        <Text style={styles.doorSubtitle}>{ds.quick_reset?.subtitle ?? ''}</Text>
-      </TouchableOpacity>
-
-      {/* tell_mitra door — inline TellMitraContainer */}
-      <View style={styles.tellMitraWrap}>
-        <Text style={styles.doorLabel}>{DOOR_LABELS.tell_mitra}</Text>
-        <TellMitraContainer />
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    padding: 16,
-    gap: 12,
+  },
+  scrollContent: {
+    paddingBottom: 120,
   },
   centeredWrap: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
   },
   errorText: {
     fontSize: 16,
-    color: '#6b5a45',
-    textAlign: 'center',
+    color: "#6b5a45",
+    textAlign: "center",
+    marginBottom: 16,
+    fontFamily: Fonts.sans.regular,
+  },
+  retryButton: {
+    backgroundColor: "#C99317",
+    borderRadius: 999,
+    paddingHorizontal: 22,
+    paddingVertical: 12,
+  },
+  retryButtonText: {
+    color: "#fff",
+    fontSize: 15,
+    fontFamily: Fonts.sans.semiBold,
+  },
+  heroWrap: {
+    width: "100%",
+    marginBottom: 22,
+  },
+  heroImage: {
+    minHeight: 316,
+    justifyContent: "space-between",
+  },
+  heroInner: {
+    flex: 1,
+    paddingHorizontal: 18,
+    paddingTop: Platform.OS === "ios" ? 18 : 22,
+    paddingBottom: 12,
+    justifyContent: "space-between",
+  },
+  logo: {
+    width: 108,
+    height: 42,
+  },
+  heroCopy: {
+    gap: 6,
+    paddingBottom: 10,
+  },
+  heroHeadline: {
+    fontSize: 28,
+    lineHeight: 34,
+    fontFamily: Fonts.serif.bold,
+  },
+  heroSubtext: {
+    fontSize: 17,
+    lineHeight: 25,
+    fontFamily: Fonts.serif.regular,
+    maxWidth: "92%",
+  },
+  heroDivider: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: 170,
+    marginTop: 6,
+  },
+  heroDividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "rgba(201,168,76,0.45)",
+  },
+  heroDividerIcon: {
+    color: "#C9A84C",
+    fontSize: 14,
+    marginHorizontal: 10,
+  },
+  content: {
+    paddingHorizontal: 16,
+    gap: 14,
+  },
+  inlineError: {
+    color: "#c0392b",
+    textAlign: "center",
+    fontSize: 13,
+    fontFamily: Fonts.sans.regular,
+    marginBottom: 4,
   },
   doorCard: {
-    backgroundColor: '#FBF5F5',
-    borderColor: '#9f9f9f',
-    borderWidth: 0.3,
-    borderRadius: 15,
-    padding: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: "rgba(201,168,76,0.28)",
+    backgroundColor: "rgba(255,255,255,0.72)",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    minHeight: 108,
+    shadowColor: "#432104",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
     elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
+  },
+  doorIcon: {
+    width: 48,
+    height: 48,
+  },
+  doorBody: {
+    flex: 1,
+    justifyContent: "center",
   },
   doorLabel: {
+    color: "#432104",
     fontSize: 18,
-    fontWeight: '600',
-    color: '#432104',
+    lineHeight: 22,
+    fontFamily: Fonts.serif.bold,
     marginBottom: 4,
   },
   doorSubtitle: {
+    color: "rgba(67,33,4,0.62)",
     fontSize: 14,
-    color: '#6b5a45',
+    lineHeight: 20,
+    fontFamily: Fonts.sans.regular,
   },
-  greetingBlock: {
-    paddingHorizontal: 4,
-    paddingBottom: 8,
+  doorArrow: {
+    color: "#C9A84C",
+    fontSize: 24,
+    lineHeight: 24,
+    opacity: 0.7,
+    marginLeft: 8,
   },
-  greetingHeadline: {
-    fontFamily: 'serif',
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#432104',
-    marginBottom: 4,
-  },
-  greetingSubtext: {
-    fontFamily: 'serif',
-    fontSize: 15,
-    color: '#7B6550',
-    lineHeight: 22,
-  },
-  tellMitraWrap: {
-    backgroundColor: '#FBF5F5',
-    borderColor: '#9f9f9f',
-    borderWidth: 0.3,
-    borderRadius: 15,
-    padding: 15,
+  checkinCard: {
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: "rgba(201,168,76,0.28)",
+    backgroundColor: "rgba(255,251,245,0.9)",
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+    shadowColor: "#432104",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
     elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
+    marginTop: 4,
+  },
+  checkinHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 6,
+  },
+  checkinTitle: {
+    color: "#432104",
+    fontSize: 18,
+    lineHeight: 24,
+    fontFamily: Fonts.serif.bold,
+    flex: 1,
+  },
+  dismissButton: {
+    width: 28,
+    alignItems: "center",
+  },
+  dismissButtonText: {
+    color: "rgba(67,33,4,0.45)",
+    fontSize: 24,
+    lineHeight: 24,
+    fontFamily: Fonts.sans.regular,
+  },
+  checkinAcknowledgment: {
+    color: "rgba(67,33,4,0.8)",
+    fontSize: 15,
+    lineHeight: 24,
+    fontFamily: Fonts.serif.regular,
+    fontStyle: "italic",
+    marginBottom: 12,
+  },
+  suggestionHeader: {
+    color: "rgba(67,33,4,0.5)",
+    fontSize: 13,
+    lineHeight: 18,
+    fontFamily: Fonts.sans.regular,
+    marginBottom: 8,
+  },
+  suggestionButton: {
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "rgba(201,168,76,0.38)",
+    backgroundColor: "rgba(255,255,255,0.82)",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    shadowColor: "#C9A84C",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 14,
+    elevation: 2,
+  },
+  suggestionButtonText: {
+    color: "#432104",
+    fontSize: 15,
+    lineHeight: 20,
+    fontFamily: Fonts.serif.bold,
+  },
+  boundaryText: {
+    color: "rgba(67,33,4,0.5)",
+    fontSize: 13,
+    lineHeight: 18,
+    fontFamily: Fonts.sans.regular,
+    textAlign: "center",
+    marginTop: 10,
+  },
+  boundaryLink: {
+    color: "#C99317",
+    textDecorationLine: "underline",
+  },
+  checkinSubtitle: {
+    color: "rgba(67,33,4,0.62)",
+    fontSize: 14,
+    lineHeight: 21,
+    fontFamily: Fonts.sans.regular,
+    marginTop: 4,
+    marginBottom: 14,
+  },
+  feelingGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  feelingChip: {
+    width: "48.5%",
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(201,168,76,0.38)",
+    backgroundColor: "rgba(255,255,255,0.78)",
+    paddingVertical: 13,
+    paddingHorizontal: 12,
+    alignItems: "center",
+  },
+  feelingChipSelected: {
+    borderColor: "rgba(201,168,76,0.85)",
+    backgroundColor: "rgba(243,220,168,0.95)",
+    shadowColor: "#C9A84C",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.16,
+    shadowRadius: 12,
+    elevation: 2,
+  },
+  feelingChipDisabled: {
+    opacity: 0.7,
+  },
+  feelingChipText: {
+    color: "#432104",
+    fontSize: 14,
+    lineHeight: 18,
+    fontFamily: Fonts.sans.medium,
+  },
+  feelingChipTextSelected: {
+    fontFamily: Fonts.sans.bold,
   },
 });

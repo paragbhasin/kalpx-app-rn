@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { executeAction } from "../../engine/actionExecutor";
-import { getMitraHomeV3 } from "../../engine/mitraApi";
+import { getMitraHomeV3, postRhythmResolveItem } from "../../engine/mitraApi";
 import type { AppDispatch, RootState } from "../../store";
 import { setHomeData } from "../../store/doorSlice";
 import { useScreenState } from "../../store/screenSlice";
@@ -40,9 +40,11 @@ function itemDuration(item: RhythmItem): string | null {
 function RhythmItemCard({
   item,
   onAction,
+  resolving,
 }: {
   item: RhythmItem;
   onAction: () => void;
+  resolving?: boolean;
 }) {
   return (
     <div
@@ -154,27 +156,30 @@ function RhythmItemCard({
       <div style={{ display: "flex", justifyContent: "center" }}>
         <button
           onClick={onAction}
+          disabled={resolving}
           style={{
             width: "100%",
             padding: "10px",
             borderRadius: 11,
             border: "none",
-            background:
-              "linear-gradient(90deg, #C99317 0%, #E0AE21 45%, #C99317 100%)",
+            background: resolving
+              ? "rgba(201,147,23,0.45)"
+              : "linear-gradient(90deg, #C99317 0%, #E0AE21 45%, #C99317 100%)",
             color: "#fff",
             fontSize: 18,
             fontWeight: "700",
             fontFamily: "var(--kalpx-font-serif)",
-            cursor: "pointer",
+            cursor: resolving ? "default" : "pointer",
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
             gap: 14,
             boxShadow: "0 18px 40px rgba(201,147,23,0.24)",
+            opacity: resolving ? 0.7 : 1,
           }}
         >
           <Sparkles size={22} strokeWidth={1.8} />
-          {beginLabel(item.item_type)}
+          {resolving ? "Opening…" : beginLabel(item.item_type)}
         </button>
       </div>
     </div>
@@ -185,10 +190,12 @@ function BandSection({
   band,
   slot,
   onItemAction,
+  resolvingItemId,
 }: {
   band: RhythmTimeBand;
   slot: RhythmSlot | null;
   onItemAction: (item: RhythmItem) => void;
+  resolvingItemId?: string | null;
 }) {
   if (!slot || slot.items.length === 0) return null;
   const featuredItem = slot.items[0];
@@ -234,6 +241,7 @@ function BandSection({
         key={featuredItem.id}
         item={featuredItem}
         onAction={() => onItemAction(featuredItem)}
+        resolving={resolvingItemId === featuredItem.item_id}
       />
     </div>
   );
@@ -264,6 +272,7 @@ export function RhythmHomePage() {
   const screenState = useScreenState();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resolvingItemId, setResolvingItemId] = useState<string | null>(null);
 
   useEffect(() => {
     if (homeData) return;
@@ -282,7 +291,31 @@ export function RhythmHomePage() {
     currentStateId: "rhythm_daily",
   };
 
-  function handleItemAction(item: RhythmItem, band: RhythmTimeBand) {
+  async function handleItemAction(item: RhythmItem, band: RhythmTimeBand) {
+    if (resolvingItemId) return;
+    setResolvingItemId(item.item_id);
+    let enrichedItem: Record<string, unknown> = {
+      item_id: item.item_id,
+      title_snapshot: item.title_snapshot,
+      description_snapshot: item.description_snapshot ?? "",
+      item_type: item.item_type,
+    };
+    try {
+      const resolved = await postRhythmResolveItem(band, item.item_id, item.item_type);
+      if (resolved?.resolved) {
+        enrichedItem = {
+          ...enrichedItem,
+          ...resolved,
+          title_snapshot: item.title_snapshot || resolved.title || resolved.title_snapshot || "",
+          description_snapshot:
+            item.description_snapshot || resolved.description_snapshot || resolved.subtitle || "",
+        };
+      }
+    } catch (_) {
+      // fall through with snapshot item
+    } finally {
+      setResolvingItemId(null);
+    }
     void executeAction(
       {
         type: "start_runner",
@@ -290,12 +323,7 @@ export function RhythmHomePage() {
           source: "rhythm_daily",
           variant: item.item_type,
           rhythm_slot: band,
-          item: {
-            item_id: item.item_id,
-            title_snapshot: item.title_snapshot,
-            description_snapshot: item.description_snapshot ?? "",
-            item_type: item.item_type,
-          },
+          item: enrichedItem,
         },
       },
       actionContext,
@@ -398,17 +426,20 @@ export function RhythmHomePage() {
               <BandSection
                 band="morning"
                 slot={rhythm.morning}
-                onItemAction={(item) => handleItemAction(item, "morning")}
+                onItemAction={(item) => void handleItemAction(item, "morning")}
+                resolvingItemId={resolvingItemId}
               />
               <BandSection
                 band="afternoon"
                 slot={rhythm.afternoon}
-                onItemAction={(item) => handleItemAction(item, "afternoon")}
+                onItemAction={(item) => void handleItemAction(item, "afternoon")}
+                resolvingItemId={resolvingItemId}
               />
               <BandSection
                 band="night"
                 slot={rhythm.night}
-                onItemAction={(item) => handleItemAction(item, "night")}
+                onItemAction={(item) => void handleItemAction(item, "night")}
+                resolvingItemId={resolvingItemId}
               />
               <button
                 onClick={() => navigate("/en/mitra/rhythm/edit")}

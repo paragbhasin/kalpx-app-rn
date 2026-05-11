@@ -8,7 +8,7 @@
  */
 
 import api from "../Networks/axios";
-import type { MitraHomeV3Response, TellMitraV3Response, MitraHomeV3CompanionRhythm, QuickCheckinEnergyState, QuickCheckinResponse, RhythmSuggestRequest, RhythmSuggestResponse, TellMitraFollowupMeta, QuickResetOpeningState, QuickChantCompleteRequest, QuickChantCompleteResponse, QuickResetSetDefaultResponse, RhythmCompleteResponse } from '@kalpx/types';
+import type { MitraHomeV3Response, TellMitraV3Response, MitraHomeV3CompanionRhythm, QuickCheckinEnergyState, QuickCheckinResponse, RhythmSuggestRequest, RhythmSuggestResponse, TellMitraFollowupMeta, QuickResetOpeningState, QuickChantCompleteRequest, QuickChantCompleteResponse, QuickResetSetDefaultResponse, RhythmCompleteResponse, RhythmResolvedItem } from '@kalpx/types';
 import type { RhythmSetupPayload } from '@kalpx/contracts';
 import { normalizeTellMitraResult, normalizeRhythmSuggestResponse } from '@kalpx/contracts';
 
@@ -188,12 +188,34 @@ export async function mitraTrackCompletion(inputData: any): Promise<any> {
 }
 
 /** POST mitra/v3/rhythm/complete/ — log slot completion + get frozen copy (F-B-2). null on error. */
-export async function mitraRhythmComplete(slot: string): Promise<RhythmCompleteResponse | null> {
+export async function mitraRhythmComplete(slot: string, itemId?: string): Promise<RhythmCompleteResponse | null> {
   try {
-    const res = await api.post<RhythmCompleteResponse>('mitra/v3/rhythm/complete/', { slot });
+    const res = await api.post<RhythmCompleteResponse>('mitra/v3/rhythm/complete/', {
+      slot,
+      ...(itemId ? { item_id: itemId } : {}),
+    });
     return res.data;
   } catch (err: any) {
     console.warn('[MITRA] rhythm-complete failed:', err.message);
+    return null;
+  }
+}
+
+/** POST /api/mitra/v3/rhythm/resolve-item/ — fetch full master content before launching a rhythm runner. null on error or flag off. */
+export async function mitraRhythmResolveItem(
+  slot: string,
+  itemId: string,
+  itemType: string,
+): Promise<RhythmResolvedItem | null> {
+  try {
+    const res = await api.post<RhythmResolvedItem>('/api/mitra/v3/rhythm/resolve-item/', {
+      slot,
+      item_id: itemId,
+      item_type: itemType,
+    });
+    return res.data;
+  } catch (err: any) {
+    console.warn('[MITRA] resolve-item failed:', err.message);
     return null;
   }
 }

@@ -523,7 +523,9 @@ export async function executeAction(action: any, context: ActionContext): Promis
           const rhythmSlot = (screenData.runner_rhythm_slot as string) || '';
           if (rhythmSlot) {
             try {
-              const rhythmResult = await postRhythmComplete(rhythmSlot);
+              const activeItem = screenData.runner_active_item as { item_id?: string } | null;
+              const itemId = typeof activeItem?.item_id === 'string' ? activeItem.item_id : '';
+              const rhythmResult = await postRhythmComplete(rhythmSlot, itemId);
               if (rhythmResult) {
                 dispatch(updateScreenData({ rhythm_complete_result: rhythmResult }));
               }

@@ -6,7 +6,7 @@
  * If has_rhythm === true: morning/afternoon/night band cards.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -21,6 +21,7 @@ import { RHYTHM_BAND_LABELS, RHYTHM_BAND_SUBTITLES } from '@kalpx/contracts';
 import type { RhythmTimeBand, RhythmItem } from '@kalpx/types';
 import { Fonts } from '../../theme/fonts';
 import { executeAction } from '../../engine/actionExecutor';
+import { mitraRhythmResolveItem } from '../../engine/mitraApi';
 import { useScreenStore } from '../../engine/useScreenBridge';
 import { screenActions, loadScreenWithData, goBackWithData } from '../../store/screenSlice';
 
@@ -30,7 +31,15 @@ function actionLabel(itemType: string): string {
   return 'Practice';
 }
 
-function RhythmItemCard({ item, onAction }: { item: RhythmItem; onAction: () => void }) {
+function RhythmItemCard({
+  item,
+  onAction,
+  resolving,
+}: {
+  item: RhythmItem;
+  onAction: () => void;
+  resolving?: boolean;
+}) {
   return (
     <View style={styles.itemCard}>
       <View style={styles.badgeRow}>
@@ -41,8 +50,14 @@ function RhythmItemCard({ item, onAction }: { item: RhythmItem; onAction: () => 
         <Text style={styles.itemDescription}>{item.description_snapshot}</Text>
       ) : null}
       <View style={styles.actionRow}>
-        <TouchableOpacity style={styles.actionBtn} onPress={onAction} activeOpacity={0.8}>
-          <Text style={styles.actionBtnText}>{actionLabel(item.item_type)}</Text>
+        <TouchableOpacity
+          style={[styles.actionBtn, resolving && styles.actionBtnResolving]}
+          onPress={resolving ? undefined : onAction}
+          activeOpacity={resolving ? 1 : 0.8}
+        >
+          <Text style={styles.actionBtnText}>
+            {resolving ? 'Opening…' : actionLabel(item.item_type)}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -53,17 +68,24 @@ function RhythmBand({
   band,
   items,
   onItemAction,
+  resolvingItemId,
 }: {
   band: RhythmTimeBand;
   items: RhythmItem[];
   onItemAction: (item: RhythmItem) => void;
+  resolvingItemId?: string | null;
 }) {
   return (
     <View style={styles.band}>
       <Text style={styles.bandLabel}>{RHYTHM_BAND_LABELS[band]}</Text>
       <Text style={styles.bandSubtitle}>{RHYTHM_BAND_SUBTITLES[band]}</Text>
       {items.map((item) => (
-        <RhythmItemCard key={item.id} item={item} onAction={() => onItemAction(item)} />
+        <RhythmItemCard
+          key={item.id}
+          item={item}
+          onAction={() => onItemAction(item)}
+          resolving={resolvingItemId === item.item_id}
+        />
       ))}
       {items.length === 0 && (
         <Text style={styles.emptyBand}>No items in this band yet.</Text>
@@ -79,6 +101,8 @@ export default function RhythmHomeScreen() {
   const rhythm = homeData?.companion_rhythm;
 
   const hasRhythm = rhythm?.has_rhythm === true;
+
+  const [resolvingItemId, setResolvingItemId] = useState<string | null>(null);
 
   const screenBridge = useScreenStore();
   const screenBridgeRef = useRef(screenBridge);
@@ -111,7 +135,31 @@ export default function RhythmHomeScreen() {
     };
   }, [dispatch, navigation]);
 
-  function handleItemAction(item: RhythmItem, band: RhythmTimeBand) {
+  async function handleItemAction(item: RhythmItem, band: RhythmTimeBand) {
+    if (resolvingItemId) return;
+    setResolvingItemId(item.item_id);
+    let enrichedItem: Record<string, unknown> = {
+      item_id: item.item_id,
+      title_snapshot: item.title_snapshot,
+      description_snapshot: item.description_snapshot ?? '',
+      item_type: item.item_type,
+    };
+    try {
+      const resolved = await mitraRhythmResolveItem(band, item.item_id, item.item_type);
+      if (resolved?.resolved) {
+        enrichedItem = {
+          ...enrichedItem,
+          ...resolved,
+          title_snapshot: item.title_snapshot || resolved.title || resolved.title_snapshot || '',
+          description_snapshot:
+            item.description_snapshot || resolved.description_snapshot || resolved.subtitle || '',
+        };
+      }
+    } catch (_) {
+      // fall through with snapshot item
+    } finally {
+      setResolvingItemId(null);
+    }
     void executeAction(
       {
         type: 'start_runner',
@@ -119,12 +167,7 @@ export default function RhythmHomeScreen() {
           source: 'rhythm_daily',
           variant: item.item_type,
           rhythm_slot: band,
-          item: {
-            item_id: item.item_id,
-            title_snapshot: item.title_snapshot,
-            description_snapshot: item.description_snapshot ?? '',
-            item_type: item.item_type,
-          },
+          item: enrichedItem,
         },
       } as any,
       buildActionContext() as any,
@@ -171,7 +214,8 @@ export default function RhythmHomeScreen() {
               key={band}
               band={band}
               items={rhythm?.[band]?.items ?? []}
-              onItemAction={(item) => handleItemAction(item, band)}
+              onItemAction={(item) => void handleItemAction(item, band)}
+              resolvingItemId={resolvingItemId}
             />
           ))}
         </ScrollView>
@@ -325,6 +369,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
+  },
+  actionBtnResolving: {
+    opacity: 0.55,
   },
   actionBtnText: {
     fontSize: 14,

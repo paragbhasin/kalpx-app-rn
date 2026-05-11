@@ -3037,7 +3037,9 @@ export async function executeAction(
             const rhythmSlot = (screenState.runner_rhythm_slot as string) || "";
             if (rhythmSlot) {
               try {
-                const rhythmResult = await mitraRhythmComplete(rhythmSlot);
+                const activeItem = screenState.runner_active_item as { item_id?: string } | null;
+                const itemId = typeof activeItem?.item_id === "string" ? activeItem.item_id : "";
+                const rhythmResult = await mitraRhythmComplete(rhythmSlot, itemId);
                 if (rhythmResult) {
                   setScreenValue(rhythmResult, "rhythm_complete_result");
                 }

@@ -60,6 +60,39 @@ export interface RhythmCompleteResponse {
   rhythm_state: RhythmCompleteRhythmState;
 }
 
+export interface RhythmResolvedItem {
+  resolved: boolean;
+  slot?: RhythmTimeBand;
+  item_type: RhythmItemType;
+  type?: RhythmItemType;
+  item_id: string;
+  title?: string;
+  subtitle?: string | null;
+  title_snapshot: string;
+  description_snapshot: string | null;
+  // mantra
+  audio_url?: string | null;
+  devanagari?: string | null;
+  iast?: string | null;
+  meaning?: string | null;
+  essence?: string | null;
+  source?: string | null;
+  deity?: string | null;
+  tradition?: string[] | string | null;
+  level_normalized?: string | null;
+  // sankalp
+  line?: string | null;
+  insight?: string | null;
+  // practice
+  summary?: string | null;
+  duration?: string | null;
+  steps?: string[];
+  // shared
+  benefits?: string[];
+  how_to_live?: string[];
+  context: Record<string, unknown>;
+}
+
 // ── Quick Check-in ───────────────────────────────────────────────────────────
 
 export type QuickCheckinEnergyState =

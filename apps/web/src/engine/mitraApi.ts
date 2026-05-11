@@ -1,5 +1,5 @@
 import { api } from '../lib/api';
-import type { MitraHomeV3Response, TellMitraV3Response, QuickCheckinEnergyState, QuickCheckinResponse, RhythmSuggestRequest, RhythmSuggestResponse, TellMitraFollowupMeta, QuickResetOpeningState, QuickChantCompleteRequest, QuickChantCompleteResponse, QuickResetSetDefaultResponse, RhythmCompleteResponse } from '@kalpx/types';
+import type { MitraHomeV3Response, TellMitraV3Response, QuickCheckinEnergyState, QuickCheckinResponse, RhythmSuggestRequest, RhythmSuggestResponse, TellMitraFollowupMeta, QuickResetOpeningState, QuickChantCompleteRequest, QuickChantCompleteResponse, QuickResetSetDefaultResponse, RhythmCompleteResponse, RhythmResolvedItem } from '@kalpx/types';
 import { normalizeTellMitraResult, normalizeRhythmSuggestResponse } from '@kalpx/contracts';
 import type { RhythmSetupPayload } from '@kalpx/contracts';
 
@@ -795,12 +795,34 @@ export async function postRhythmSetup(payload: RhythmSetupPayload): Promise<{ st
 }
 
 /** POST mitra/v3/rhythm/complete/ — log slot completion + get frozen copy (F-B-2). null on error. */
-export async function postRhythmComplete(slot: string): Promise<RhythmCompleteResponse | null> {
+export async function postRhythmComplete(slot: string, itemId?: string): Promise<RhythmCompleteResponse | null> {
   try {
-    const resp = await api.post<RhythmCompleteResponse>('mitra/v3/rhythm/complete/', { slot });
+    const resp = await api.post<RhythmCompleteResponse>('mitra/v3/rhythm/complete/', {
+      slot,
+      ...(itemId ? { item_id: itemId } : {}),
+    });
     return resp.data;
   } catch (err: any) {
     console.warn('[Rhythm] postRhythmComplete failed:', err?.message);
+    return null;
+  }
+}
+
+/** POST mitra/v3/rhythm/resolve-item/ — fetch full master content before launching a rhythm runner. null on error or flag off. */
+export async function postRhythmResolveItem(
+  slot: string,
+  itemId: string,
+  itemType: string,
+): Promise<RhythmResolvedItem | null> {
+  try {
+    const resp = await api.post<RhythmResolvedItem>('mitra/v3/rhythm/resolve-item/', {
+      slot,
+      item_id: itemId,
+      item_type: itemType,
+    });
+    return resp.data;
+  } catch (err: any) {
+    console.warn('[Rhythm] resolve-item failed:', err?.message);
     return null;
   }
 }

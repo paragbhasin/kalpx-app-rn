@@ -111,13 +111,14 @@ export default function RhythmHomeScreen() {
     };
   }, [dispatch, navigation]);
 
-  function handleItemAction(item: RhythmItem) {
+  function handleItemAction(item: RhythmItem, band: RhythmTimeBand) {
     void executeAction(
       {
         type: 'start_runner',
         payload: {
           source: 'rhythm_daily',
           variant: item.item_type,
+          rhythm_slot: band,
           item: {
             item_id: item.item_id,
             title_snapshot: item.title_snapshot,
@@ -170,7 +171,7 @@ export default function RhythmHomeScreen() {
               key={band}
               band={band}
               items={rhythm?.[band]?.items ?? []}
-              onItemAction={handleItemAction}
+              onItemAction={(item) => handleItemAction(item, band)}
             />
           ))}
         </ScrollView>

@@ -38,6 +38,28 @@ export interface RhythmSlot {
   items: RhythmItem[];
 }
 
+export interface RhythmCompleteCopy {
+  headline: string;
+  subtext: string | null;
+}
+
+export interface RhythmCompleteRhythmState {
+  morning_completed: boolean;
+  afternoon_completed: boolean;
+  night_completed: boolean;
+  all_complete_today: boolean;
+  streak_current: number;
+  streak_milestone: number | null;
+}
+
+export interface RhythmCompleteResponse {
+  slot: RhythmTimeBand;
+  completed: boolean;
+  already_completed: boolean;
+  copy: RhythmCompleteCopy;
+  rhythm_state: RhythmCompleteRhythmState;
+}
+
 // ── Quick Check-in ───────────────────────────────────────────────────────────
 
 export type QuickCheckinEnergyState =

@@ -49,9 +49,9 @@ export const RHYTHM_BAND_LABELS: Record<RhythmTimeBand, string> = {
 };
 
 export const RHYTHM_BAND_SUBTITLES: Record<RhythmTimeBand, string> = {
-  morning:   "Start with intention",
-  afternoon: "Steady the middle",
-  night:     "Close with care",
+  morning:   "Smriti — remembering before the day begins",
+  afternoon: "Karma Yoga — a small return in the middle of everything",
+  night:     "Sharanagati — offering what the day held",
 };
 
 export const RHYTHM_ITEM_TYPE_LABELS: Record<RhythmItemType, string> = {

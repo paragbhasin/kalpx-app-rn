@@ -158,13 +158,14 @@ export function RhythmHomePage() {
     currentStateId: "rhythm_daily",
   };
 
-  function handleItemAction(item: RhythmItem) {
+  function handleItemAction(item: RhythmItem, band: RhythmTimeBand) {
     void executeAction(
       {
         type: "start_runner",
         payload: {
           source: "rhythm_daily",
           variant: item.item_type,
+          rhythm_slot: band,
           item: {
             item_id: item.item_id,
             title_snapshot: item.title_snapshot,
@@ -254,17 +255,17 @@ export function RhythmHomePage() {
               <BandSection
                 band="morning"
                 slot={rhythm.morning}
-                onItemAction={handleItemAction}
+                onItemAction={(item) => handleItemAction(item, "morning")}
               />
               <BandSection
                 band="afternoon"
                 slot={rhythm.afternoon}
-                onItemAction={handleItemAction}
+                onItemAction={(item) => handleItemAction(item, "afternoon")}
               />
               <BandSection
                 band="night"
                 slot={rhythm.night}
-                onItemAction={handleItemAction}
+                onItemAction={(item) => handleItemAction(item, "night")}
               />
               <button
                 onClick={() => navigate("/en/mitra/rhythm/edit")}

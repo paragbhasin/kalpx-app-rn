@@ -78,26 +78,34 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
   /* ── Content slots (mirrors mobile readMomentSlot) ── */
   const slots: any = (screenData["completion_return"] as any) || {};
 
-  // "message" slot — primary API-driven message
-  const message: string =
-    slots.message ||
-    FALLBACKS[variant]?.headline ||
-    FALLBACKS.mantra.headline;
+  const returnSource: string = (screenData["runner_source"] as string) || "core";
+  const _rhythmResult = screenData["rhythm_complete_result"] as import('@kalpx/types').RhythmCompleteResponse | null | undefined;
+  const _isRhythmCompletion = returnSource === "rhythm_daily"
+    && typeof _rhythmResult?.copy?.headline === "string"
+    && _rhythmResult.copy.headline.trim().length > 0;
 
-  // wisdom anchor line — optional third beat
-  const wisdomAnchorLine: string = slots.wisdom_anchor_line || "";
+  // For rhythm_daily completions, use frozen F-C copy from backend instead of registry.
+  const message: string = _isRhythmCompletion
+    ? _rhythmResult!.copy.headline
+    : (slots.message || FALLBACKS[variant]?.headline || FALLBACKS.mantra.headline);
+
+  // wisdom anchor line — optional third beat; for rhythm this is copy.subtext
+  const wisdomAnchorLine: string = _isRhythmCompletion
+    ? (_rhythmResult!.copy.subtext ?? "")
+    : (slots.wisdom_anchor_line || "");
 
   // CTA labels — API-driven; fall back to static English
-  const returnHomeLabel: string  = slots.return_home_cta   || "Return to Mitra Home";
+  const returnHomeLabel: string  = _isRhythmCompletion ? "Return to My Rhythm" : (slots.return_home_cta || "Return to Mitra Home");
   const repeatLabel: string      = slots.repeat_cta        || "Repeat";
   const reflectionPrompt: string = slots.reflection_prompt || "Anything to carry from this?";
 
   /* ── Return action (G17 / G27 parity) ── */
-  const returnSource: string = (screenData["runner_source"] as string) || "core";
   const SUPPORT_SOURCES = new Set(["support_room", "support_trigger"]);
-  const returnAction = SUPPORT_SOURCES.has(returnSource)
-    ? "return_to_source"
-    : "return_to_dashboard";
+  const returnAction = _isRhythmCompletion
+    ? "return_to_rhythm_home"
+    : SUPPORT_SOURCES.has(returnSource)
+      ? "return_to_source"
+      : "return_to_dashboard";
 
   /* ── Reflection submit ── */
   function handleSubmitReflection(text: string, responseType: "text" | "voice") {

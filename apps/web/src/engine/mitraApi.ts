@@ -1,5 +1,5 @@
 import { api } from '../lib/api';
-import type { MitraHomeV3Response, TellMitraV3Response, QuickCheckinEnergyState, QuickCheckinResponse, RhythmSuggestRequest, RhythmSuggestResponse, TellMitraFollowupMeta, QuickResetOpeningState, QuickChantCompleteRequest, QuickChantCompleteResponse, QuickResetSetDefaultResponse } from '@kalpx/types';
+import type { MitraHomeV3Response, TellMitraV3Response, QuickCheckinEnergyState, QuickCheckinResponse, RhythmSuggestRequest, RhythmSuggestResponse, TellMitraFollowupMeta, QuickResetOpeningState, QuickChantCompleteRequest, QuickChantCompleteResponse, QuickResetSetDefaultResponse, RhythmCompleteResponse } from '@kalpx/types';
 import { normalizeTellMitraResult, normalizeRhythmSuggestResponse } from '@kalpx/contracts';
 import type { RhythmSetupPayload } from '@kalpx/contracts';
 
@@ -764,10 +764,10 @@ export async function acceptPredictiveAlert(id: string | number): Promise<any> {
  * GET /api/mitra/v3/journey/home/ — Four-Door home envelope (S03).
  * Returns MitraHomeV3Response with door_states, inner_path_summary, etc.
  */
-export async function getMitraHomeV3(): Promise<MitraHomeV3Response> {
-  const resp = await api.get<MitraHomeV3Response>('mitra/v3/journey/home/', {
-    params: { tz: getTz() },
-  });
+export async function getMitraHomeV3(opts?: { forceFresh?: boolean }): Promise<MitraHomeV3Response> {
+  const params: Record<string, string | number> = { tz: getTz() };
+  if (opts?.forceFresh) params['_t'] = Date.now();
+  const resp = await api.get<MitraHomeV3Response>('mitra/v3/journey/home/', { params });
   return resp.data;
 }
 
@@ -792,6 +792,17 @@ export async function postTellMitraV3(payload: TellMitraV3Payload): Promise<Tell
 export async function postRhythmSetup(payload: RhythmSetupPayload): Promise<{ status: string; reminder_preference: string; slots_set: string[]; item_count: number }> {
   const resp = await api.post<{ status: string; reminder_preference: string; slots_set: string[]; item_count: number }>('mitra/v3/rhythm/setup/', payload);
   return resp.data;
+}
+
+/** POST mitra/v3/rhythm/complete/ — log slot completion + get frozen copy (F-B-2). null on error. */
+export async function postRhythmComplete(slot: string): Promise<RhythmCompleteResponse | null> {
+  try {
+    const resp = await api.post<RhythmCompleteResponse>('mitra/v3/rhythm/complete/', { slot });
+    return resp.data;
+  } catch (err: any) {
+    console.warn('[Rhythm] postRhythmComplete failed:', err?.message);
+    return null;
+  }
 }
 
 export async function postRhythmSuggest(payload: RhythmSuggestRequest): Promise<RhythmSuggestResponse> {

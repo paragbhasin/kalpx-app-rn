@@ -99,14 +99,17 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
   });
   const slot = (name: string) => readMomentSlot(ss, "completion_return", name);
 
-  // Message comes from the registry's runner_variant-keyed slot.
-  const message = slot("message");
-  // Track 1 — optional wisdom anchor line (third beat). Authored in the
-  // M_completion_return ContentPack on source-aware variants. Empty when
-  // the resolved variant doesn't include it; in that case the third beat
-  // is not rendered and the completion shows the existing 2-beat shape.
-  const wisdomAnchorLine = slot("wisdom_anchor_line");
-  const wisdomAnchorPrincipleId = slot("wisdom_anchor_principle_id");
+  const _rhythmResult = ss.rhythm_complete_result as import('@kalpx/types').RhythmCompleteResponse | null | undefined;
+  const _isRhythmCompletion = String(ss.runner_source || '') === 'rhythm_daily' && !!_rhythmResult;
+
+  // For rhythm_daily completions, use frozen F-C copy from backend instead of registry.
+  const message = _isRhythmCompletion
+    ? (_rhythmResult!.copy.headline ?? slot("message"))
+    : slot("message");
+  const wisdomAnchorLine = _isRhythmCompletion
+    ? (_rhythmResult!.copy.subtext ?? "")
+    : slot("wisdom_anchor_line");
+  const wisdomAnchorPrincipleId = _isRhythmCompletion ? null : slot("wisdom_anchor_principle_id");
 
   const contentFade = useRef(new Animated.Value(0)).current;
   const checkProgress = useRef(new Animated.Value(0)).current;
@@ -452,7 +455,9 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
               onPress={() => handleReturnHome(true)}
               activeOpacity={0.8}
             >
-              <Text style={styles.primaryCtaText}>{slot("return_home_cta")}</Text>
+              <Text style={styles.primaryCtaText}>
+                {_isRhythmCompletion ? "Return to My Rhythm" : slot("return_home_cta")}
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity

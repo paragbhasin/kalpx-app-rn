@@ -8,7 +8,7 @@
  */
 
 import api from "../Networks/axios";
-import type { MitraHomeV3Response, TellMitraV3Response, MitraHomeV3CompanionRhythm, QuickCheckinEnergyState, QuickCheckinResponse, RhythmSuggestRequest, RhythmSuggestResponse, TellMitraFollowupMeta, QuickResetOpeningState, QuickChantCompleteRequest, QuickChantCompleteResponse, QuickResetSetDefaultResponse } from '@kalpx/types';
+import type { MitraHomeV3Response, TellMitraV3Response, MitraHomeV3CompanionRhythm, QuickCheckinEnergyState, QuickCheckinResponse, RhythmSuggestRequest, RhythmSuggestResponse, TellMitraFollowupMeta, QuickResetOpeningState, QuickChantCompleteRequest, QuickChantCompleteResponse, QuickResetSetDefaultResponse, RhythmCompleteResponse } from '@kalpx/types';
 import type { RhythmSetupPayload } from '@kalpx/contracts';
 import { normalizeTellMitraResult, normalizeRhythmSuggestResponse } from '@kalpx/contracts';
 
@@ -183,6 +183,17 @@ export async function mitraTrackCompletion(inputData: any): Promise<any> {
     return res.data;
   } catch (err: any) {
     console.warn("[MITRA] track-completion API failed:", err.message);
+    return null;
+  }
+}
+
+/** POST mitra/v3/rhythm/complete/ — log slot completion + get frozen copy (F-B-2). null on error. */
+export async function mitraRhythmComplete(slot: string): Promise<RhythmCompleteResponse | null> {
+  try {
+    const res = await api.post<RhythmCompleteResponse>('mitra/v3/rhythm/complete/', { slot });
+    return res.data;
+  } catch (err: any) {
+    console.warn('[MITRA] rhythm-complete failed:', err.message);
     return null;
   }
 }

@@ -26,6 +26,7 @@ import {
   mitraJourneyDay14View,
   mitraJourneyDay7Decision,
   mitraJourneyDay14Decision,
+  postRhythmComplete,
 } from './mitraApi';
 import { ingestDailyView, ingestDay7View, ingestDay14View } from './v3Ingest';
 import { ensureRoomAmbientPlaying } from '../lib/audio/calmMusic';
@@ -449,6 +450,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
           runner_variant: variant,
           runner_source: source,
           runner_action_id: (p.action_id as string | null) ?? null,  // S17-D4A: track which room action started this
+          runner_rhythm_slot: (p.rhythm_slot as string | null) ?? null,
           runner_step_index: 0,
           runner_reps_completed: 0,
           runner_start_time: Date.now(),
@@ -515,6 +517,18 @@ export async function executeAction(action: any, context: ActionContext): Promis
             tz,
             meta,
           });
+        }
+
+        if (source === 'rhythm_daily') {
+          const rhythmSlot = (screenData.runner_rhythm_slot as string) || '';
+          if (rhythmSlot) {
+            try {
+              const rhythmResult = await postRhythmComplete(rhythmSlot);
+              if (rhythmResult) {
+                dispatch(updateScreenData({ rhythm_complete_result: rhythmResult }));
+              }
+            } catch (_) {}
+          }
         }
 
         // S17-D4A: if this was the recommended room action, skip completion_return
@@ -604,6 +618,13 @@ export async function executeAction(action: any, context: ActionContext): Promis
     // ----------------------------------------------------------------
     // RETURN_TO_DASHBOARD — clear runner state, reload dashboard.
     // ----------------------------------------------------------------
+    case 'return_to_rhythm_home': {
+      const runnerClearKeysRhythm = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz', 'runner_rhythm_slot', 'rhythm_complete_result'];
+      runnerClearKeysRhythm.forEach(k => dispatch(setScreenValue({ key: k, value: null })));
+      webNavigate('/en/mitra/rhythm');
+      break;
+    }
+
     case 'return_to_dashboard': {
       const returnPath: string = (screenData.completion_return_path as string) || '/en/mitra/dashboard';
       // Navigate first so support/mantra screens do not briefly re-render with

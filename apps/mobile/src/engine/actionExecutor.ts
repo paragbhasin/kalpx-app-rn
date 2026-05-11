@@ -48,6 +48,7 @@ import {
   mitraPathEvolution,
   mitraPranaAcknowledge,
   mitraStartJourney,
+  mitraRhythmComplete,
   mitraTrackCompletion,
   mitraTrackEvent,
   mitraTriggerMantras,
@@ -2938,6 +2939,7 @@ export async function executeAction(
         setScreenValue(sp.variant, "runner_variant");
         setScreenValue(sp.source, "runner_source");
         setScreenValue((sp.action_id as string | null) ?? null, "runner_action_id");  // S17-D4A
+        setScreenValue((sp.rhythm_slot as string | null) ?? null, "runner_rhythm_slot");
         setScreenValue(normalizedItem, "runner_active_item");
         setScreenValue(Date.now(), "runner_start_time");
         setScreenValue(0, "runner_reps_completed");
@@ -3030,6 +3032,19 @@ export async function executeAction(
                 : {}),
             },
           });
+
+          if (source === "rhythm_daily") {
+            const rhythmSlot = (screenState.runner_rhythm_slot as string) || "";
+            if (rhythmSlot) {
+              try {
+                const rhythmResult = await mitraRhythmComplete(rhythmSlot);
+                if (rhythmResult) {
+                  setScreenValue(rhythmResult, "rhythm_complete_result");
+                }
+              } catch (_) {}
+            }
+          }
+
           if (source === "core") dispatchCoreCompletion();
 
           // Local engagement flag — always flip regardless of item_id so the
@@ -5268,7 +5283,7 @@ export async function executeAction(
       }
 
       case "return_to_rhythm_home": {
-        const runnerClearKeysRhythm = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz', 'completion_return_screen'];
+        const runnerClearKeysRhythm = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz', 'completion_return_screen', 'runner_rhythm_slot', 'rhythm_complete_result'];
         runnerClearKeysRhythm.forEach(k => setScreenValue(null, k));
         rootNavigate('RhythmHome');
         break;

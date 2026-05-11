@@ -20,9 +20,7 @@ import { useJourneyStatus } from "../../hooks/useJourneyStatus";
 import { WEB_ENV } from "../../lib/env";
 import type { AppDispatch, RootState } from "../../store";
 import { setHomeData } from "../../store/doorSlice";
-import {
-  useScreenState,
-} from "../../store/screenSlice";
+import { useScreenState } from "../../store/screenSlice";
 
 function getRhythmTimeBand(): "morning" | "afternoon" | "night" {
   const hour = new Date().getHours();
@@ -31,12 +29,7 @@ function getRhythmTimeBand(): "morning" | "afternoon" | "night" {
   return "night";
 }
 
-const FEELING_OPTIONS = [
-  "Agitated",
-  "Drained",
-  "Steady",
-  "Open",
-] as const;
+const FEELING_OPTIONS = ["Agitated", "Drained", "Steady", "Open"] as const;
 
 type FeelingOption = (typeof FEELING_OPTIONS)[number];
 
@@ -45,7 +38,6 @@ function mapFeelingToPranaType(feeling: FeelingOption): string {
   if (feeling === "Steady") return "balanced";
   return feeling.toLowerCase();
 }
-
 
 function LoadingScreen() {
   return (
@@ -189,8 +181,8 @@ export function MitraHomePage() {
 
     // My Rhythm: prefer backend summary label, then first item in current time-band slot, then door state
     const rhythmBand = getRhythmTimeBand();
-    const isNightGreeting =
-      /night/i.test(greeting?.headline || "") || rhythmBand === "night";
+    const greetingHeadline = greeting?.headline || "";
+    const isNightGreeting = /good\s*night|night/i.test(greetingHeadline);
     const greetingImageSrc = isNightGreeting
       ? "/night-home.png"
       : "/imgsun.png";
@@ -260,7 +252,7 @@ export function MitraHomePage() {
                   position: "relative",
                   width: "100%",
                   height: "100%",
-                  minHeight: isNightGreeting ? 230 : 190,
+                  minHeight: isNightGreeting ? 230 : 230,
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "flex-end",
@@ -620,7 +612,14 @@ export function MitraHomePage() {
                     >
                       {windowActive ? (
                         <>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              marginBottom: 6,
+                            }}
+                          >
                             <div
                               style={{
                                 fontFamily: "var(--kalpx-font-serif)",
@@ -677,7 +676,9 @@ export function MitraHomePage() {
                               </div>
                               <button
                                 type="button"
-                                onClick={() => navigate("/en/mitra/quick-reset")}
+                                onClick={() =>
+                                  navigate("/en/mitra/quick-reset")
+                                }
                                 style={{
                                   width: "100%",
                                   border: "1px solid rgba(201,168,76,0.38)",
@@ -709,7 +710,9 @@ export function MitraHomePage() {
                                   If this feels heavy to carry,{" "}
                                   <button
                                     type="button"
-                                    onClick={() => navigate("/en/mitra/tell-mitra")}
+                                    onClick={() =>
+                                      navigate("/en/mitra/tell-mitra")
+                                    }
                                     style={{
                                       background: "none",
                                       border: "none",
@@ -764,7 +767,9 @@ export function MitraHomePage() {
                                 <button
                                   key={feeling}
                                   type="button"
-                                  onClick={() => void handleFeelingSelect(feeling)}
+                                  onClick={() =>
+                                    void handleFeelingSelect(feeling)
+                                  }
                                   aria-pressed={isSelected}
                                   disabled={feelingLoading}
                                   style={{
@@ -780,7 +785,9 @@ export function MitraHomePage() {
                                     padding: "10px 14px",
                                     fontSize: 14,
                                     fontWeight: isSelected ? 700 : 500,
-                                    cursor: feelingLoading ? "not-allowed" : "pointer",
+                                    cursor: feelingLoading
+                                      ? "not-allowed"
+                                      : "pointer",
                                     boxShadow: isSelected
                                       ? "0 6px 14px rgba(201,168,76,0.18)"
                                       : "none",

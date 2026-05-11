@@ -123,7 +123,7 @@ export function MitraHomePage() {
 
   async function refetchHome() {
     try {
-      const data = await getMitraHomeV3();
+      const data = await getMitraHomeV3({ forceFresh: true });
       dispatch(setHomeData(data));
     } catch {}
   }

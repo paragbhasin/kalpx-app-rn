@@ -18,7 +18,9 @@ import { executeAction } from "../../engine/actionExecutor";
 import { trackRoomTelemetry } from "../../engine/mitraApi";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import { buildActionCtx } from "./actions/actionContextHelper";
-import type { RoomRenderV1 } from "./types";
+import InquiryModal from "./actions/InquiryModal";
+import StepModal, { type StepModalResult } from "./actions/StepModal";
+import type { InquiryCategory, RoomRenderV1, StepPayload } from "./types";
 
 interface Props {
   envelope: RoomRenderV1;
@@ -39,8 +41,21 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
 
   const [whyExpanded, setWhyExpanded] = useState(false);
   const [stepsOpen, setStepsOpen] = useState(false);
+  const [inquiryAction, setInquiryAction] = useState<any | null>(null);
+  const [stepAction, setStepAction] = useState<any | null>(null);
+  const [stepPayload, setStepPayload] = useState<StepPayload | null>(null);
+  const [stepLabel, setStepLabel] = useState("");
+  const [pendingCategory, setPendingCategory] = useState<InquiryCategory | null>(
+    null,
+  );
 
   const { loadScreen, goBack } = useScreenStore();
+  const actionCtx = buildActionCtx({ loadScreen, goBack });
+
+  function triggerRoomReflection() {
+    actionCtx.setScreenValue(true, "show_room_reflection");
+    loadScreen({ container_id: "room", state_id: "render" } as any);
+  }
 
   function handleBegin() {
     if (__DEV__) console.log('[S17-D4B] handleBegin', {
@@ -54,7 +69,6 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
       render_id: renderId,
     });
     if (!recAction) return;
-    const actionCtx = buildActionCtx({ loadScreen, goBack });
     if (envelope.room_id) {
       actionCtx.setScreenValue(envelope.room_id, "room_id");
     }
@@ -68,21 +82,96 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
       action_id: actionId,
       surface: "room",
     });
-    if (actionType === "inquiry") {
-      const ip = (recAction as any).inquiry_payload;
-      if (!ip) return;
-      void executeAction(
-        {
-          type: "room_inquiry_opened",
-          payload: { inquiry_payload: ip, action_id: actionId, room_id: roomId, render_id: renderId },
-        } as any,
-        actionCtx,
-      );
-    } else {
-      const rp = (recAction as any).runner_payload;
-      if (!rp) {
-        if (__DEV__) console.warn("[S17-D4B] handleBegin: runner_payload missing for", actionType);
-        return;
+    if (
+      actionType === "inquiry" ||
+      actionType === "in_room_step" ||
+      actionType.startsWith("runner_")
+    ) {
+      launchAction(recAction);
+      return;
+    }
+    if (__DEV__) {
+      console.warn("[S17-D4B] handleBegin: unsupported action type", actionType);
+    }
+  }
+
+  function handleExit() {
+    void trackRoomTelemetry({ event_type: 'room_exited' as any, room_id: roomId, surface: 'room' });
+    void executeAction({ type: "exit_tapped", payload: { room_id: roomId } } as any, actionCtx);
+  }
+
+  function dispatchInquiryOpened(action: any) {
+    void executeAction(
+      {
+        type: "room_inquiry_opened",
+        payload: {
+          room_id: envelope?.room_id ?? null,
+          action_id: action.action_id,
+          analytics_key: action.analytics_key,
+          category_count: action.inquiry_payload?.categories?.length ?? 0,
+        },
+      } as any,
+      actionCtx,
+    );
+  }
+
+  function dispatchInquiryCategorySelected(action: any, category: InquiryCategory) {
+    void executeAction(
+      {
+        type: "room_inquiry_category_selected",
+        payload: {
+          room_id: envelope?.room_id ?? null,
+          category_id: category.id,
+          action_id: action.action_id,
+          analytics_key: action.analytics_key,
+        },
+      } as any,
+      actionCtx,
+    );
+  }
+
+  function dispatchStepCompleted(
+    action: any,
+    templateId: string,
+    extra: Record<string, unknown> = {},
+  ) {
+    void executeAction(
+      {
+        type: "room_step_completed",
+        payload: {
+          room_id: envelope?.room_id ?? null,
+          template_id: templateId,
+          action_id: action.action_id,
+          analytics_key: action.analytics_key,
+          writes_event: action.persistence?.writes_event ?? null,
+          ...extra,
+        },
+      } as any,
+      actionCtx,
+    );
+  }
+
+  function launchAction(action: any) {
+    const actionType: string = action?.action_type ?? "";
+    setStepsOpen(false);
+
+    if (actionType === "inquiry" && action?.inquiry_payload?.categories?.length) {
+      setInquiryAction(action);
+      return;
+    }
+
+    if (actionType === "in_room_step" && action?.step_payload) {
+      setStepAction(action);
+      setStepPayload(action.step_payload);
+      setStepLabel(action.label || "Step");
+      return;
+    }
+
+    if (actionType.startsWith("runner_")) {
+      const rp = action?.runner_payload;
+      if (!rp) return;
+      if (envelope.room_id) {
+        actionCtx.setScreenValue(envelope.room_id, "room_id");
       }
       void executeAction(
         {
@@ -91,7 +180,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
             source: rp.runner_source ?? "support_room",
             variant: (rp.runner_kind ?? actionType.replace("runner_", "")) || "mantra",
             item: rp,
-            action_id: actionId,
+            action_id: action.action_id,
           },
         } as any,
         actionCtx,
@@ -99,10 +188,71 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     }
   }
 
-  function handleExit() {
-    void trackRoomTelemetry({ event_type: 'room_exited' as any, room_id: roomId, surface: 'room' });
-    const actionCtx = buildActionCtx({ loadScreen, goBack });
-    void executeAction({ type: "exit_tapped", payload: { room_id: roomId } } as any, actionCtx);
+  function handleLaunchPractice(category: InquiryCategory, templateId: string) {
+    if (!inquiryAction) return;
+    setInquiryAction(null);
+    setPendingCategory(category);
+    const durationMatch = templateId.match(/_(\d+)min$/);
+    const durationSec = durationMatch ? parseInt(durationMatch[1], 10) * 60 : null;
+    const practicePrompt = category.reflective_prompt || category.prompt || null;
+    setStepAction(inquiryAction);
+    setStepPayload({
+      template_id: templateId,
+      step_config: {},
+      input_slots: [],
+      duration_sec: durationSec,
+      memory_modal: practicePrompt
+        ? {
+            title:
+              category.suggested_practice_label ||
+              category.practice_label ||
+              undefined,
+            prompt: practicePrompt,
+            placeholder: "Write what comes...",
+            primary_label: "Done",
+          }
+        : null,
+    });
+    setStepLabel(
+      category.suggested_practice_label ||
+        category.practice_label ||
+        category.label ||
+        templateId,
+    );
+  }
+
+  function handleSubmitJournal(category: InquiryCategory, text: string) {
+    if (!inquiryAction) return;
+    const action = inquiryAction;
+    setInquiryAction(null);
+    dispatchStepCompleted(action, "step_journal_inquiry", {
+      text,
+      category_id: category.id,
+      source: "inquiry",
+    });
+    triggerRoomReflection();
+  }
+
+  function handleStepDone(extra: StepModalResult) {
+    if (!stepAction || !stepPayload?.template_id) {
+      setStepAction(null);
+      setStepPayload(null);
+      setPendingCategory(null);
+      return;
+    }
+
+    const extraPayload: Record<string, unknown> = {
+      ...(extra.text ? { text: extra.text } : {}),
+      ...(extra.grounding ? { grounding: extra.grounding } : {}),
+      ...(pendingCategory ? { category_id: pendingCategory.id, source: "inquiry" } : {}),
+    };
+
+    dispatchStepCompleted(stepAction, String(stepPayload.template_id), extraPayload);
+    if (pendingCategory) triggerRoomReflection();
+    setStepAction(null);
+    setStepPayload(null);
+    setStepLabel("");
+    setPendingCategory(null);
   }
 
   return (
@@ -163,13 +313,19 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
         animationType="slide"
         onRequestClose={() => setStepsOpen(false)}
       >
-        <Pressable style={styles.modalOverlay} onPress={() => setStepsOpen(false)}>
+        <View style={styles.modalOverlay}>
+          <Pressable
+            style={StyleSheet.absoluteFill}
+            onPress={() => setStepsOpen(false)}
+          />
           <View style={styles.stepsSheet}>
             <Text style={styles.stepsTitle}>Steps in this space</Text>
             <ScrollView>
               {nonExitActions.map((a: any, i: number) => (
-                <View
+                <TouchableOpacity
                   key={a.action_id}
+                  activeOpacity={0.82}
+                  onPress={() => launchAction(a)}
                   style={[
                     styles.stepRow,
                     a.action_id === recId && styles.stepRowHighlight,
@@ -181,12 +337,36 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
                   {a.action_id === recId && (
                     <Text style={styles.stepSuggested}>suggested</Text>
                   )}
-                </View>
+                </TouchableOpacity>
               ))}
             </ScrollView>
           </View>
-        </Pressable>
+        </View>
       </Modal>
+      <InquiryModal
+        visible={!!inquiryAction}
+        label={inquiryAction?.label || "Inquiry"}
+        inquiryPayload={inquiryAction?.inquiry_payload}
+        onCancel={() => setInquiryAction(null)}
+        onOpened={() => inquiryAction && dispatchInquiryOpened(inquiryAction)}
+        onCategorySelected={(category) =>
+          inquiryAction && dispatchInquiryCategorySelected(inquiryAction, category)
+        }
+        onLaunchPractice={handleLaunchPractice}
+        onSubmitJournal={handleSubmitJournal}
+      />
+      <StepModal
+        visible={!!stepAction}
+        stepPayload={stepPayload}
+        label={stepLabel}
+        onCancel={() => {
+          setStepAction(null);
+          setStepPayload(null);
+          setStepLabel("");
+          setPendingCategory(null);
+        }}
+        onDone={handleStepDone}
+      />
     </View>
   );
 };

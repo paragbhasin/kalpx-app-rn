@@ -5,8 +5,12 @@
  */
 import React, { useState } from 'react';
 import { ROOM_GUIDED_COPY } from '@kalpx/contracts';
-import { postRoomTelemetry } from '../../../engine/mitraApi';
+import { postRoomSacred, postRoomTelemetry } from '../../../engine/mitraApi';
 import { WEB_ENV } from '../../../lib/env';
+import { CarryCaptureModal } from './CarryCaptureModal';
+import { InquiryModal } from './InquiryModal';
+import type { StepModalResult } from './StepModal';
+import { StepModal, classifyStep } from './StepModal';
 
 interface Props {
   envelope: any;
@@ -32,6 +36,126 @@ export function RoomGuidedSection({ envelope, screenData, onAction }: Props) {
 
   const [whyExpanded, setWhyExpanded] = useState(false);
   const [stepsOpen, setStepsOpen] = useState(false);
+  const [stepModalVisible, setStepModalVisible] = useState(false);
+  const [inquiryModalVisible, setInquiryModalVisible] = useState(false);
+  const [carryModalVisible, setCarryModalVisible] = useState(false);
+  const [activeAction, setActiveAction] = useState<any | null>(null);
+  const [activeStepPayload, setActiveStepPayload] = useState<any>(null);
+
+  function openAction(action: any) {
+    if (!action) return;
+    setStepsOpen(false);
+    setActiveAction(action);
+
+    if (action.action_type === 'in_room_step') {
+      const kind = classifyStep(action.step_payload?.template_id);
+      if (kind !== 'unknown') {
+        setActiveStepPayload(action.step_payload);
+        setStepModalVisible(true);
+      } else {
+        onAction?.({
+          type: 'room_step_completed',
+          payload: {
+            room_id: roomId,
+            action_id: action.action_id,
+            analytics_key: action.analytics_key,
+            template_id: action.step_payload?.template_id,
+            writes_event:
+              action.step_payload?.persistence?.writes_event ??
+              action.persistence?.writes_event,
+          },
+        });
+      }
+      return;
+    }
+
+    if (action.action_type === 'inquiry') {
+      setInquiryModalVisible(true);
+      return;
+    }
+
+    if (action.action_type === 'in_room_carry') {
+      setCarryModalVisible(true);
+      return;
+    }
+
+    if (action.action_type.startsWith('runner_')) {
+      const rp = action.runner_payload;
+      if (!rp) {
+        if (WEB_ENV.isDev) console.warn('[RoomGuidedSection] missing runner_payload for', action.action_type);
+        return;
+      }
+      const variant: string =
+        rp.runner_kind ||
+        (action.action_type.startsWith('runner_')
+          ? action.action_type.replace('runner_', '')
+          : action.action_type) ||
+        'mantra';
+      onAction?.({
+        type: 'start_runner',
+        payload: {
+          source: rp.runner_source ?? 'support_room',
+          variant,
+          item: {
+            ...(rp.item || rp.offering || rp),
+            item_id: rp.item_id || rp.item?.item_id || rp.offering?.item_id,
+            id:
+              rp.item_id ||
+              rp.item?.id ||
+              rp.offering?.id ||
+              rp.item?.item_id ||
+              rp.offering?.item_id,
+            item_type:
+              rp.item_type ||
+              rp.item?.item_type ||
+              rp.offering?.item_type ||
+              variant,
+            title: rp.title || rp.item?.title || rp.offering?.title || '',
+            subtitle:
+              rp.subtitle ||
+              rp.subtitle_or_line ||
+              rp.item?.subtitle ||
+              rp.offering?.subtitle ||
+              '',
+            subtitle_or_line:
+              rp.subtitle_or_line ||
+              rp.subtitle ||
+              rp.item?.subtitle_or_line ||
+              rp.offering?.subtitle_or_line ||
+              '',
+            line:
+              rp.line ||
+              rp.subtitle_or_line ||
+              rp.item?.line ||
+              rp.offering?.line ||
+              '',
+            devanagari:
+              rp.devanagari ||
+              rp.item?.devanagari ||
+              rp.offering?.devanagari ||
+              '',
+            audio_url:
+              rp.audio_url ||
+              rp.item?.audio_url ||
+              rp.offering?.audio_url ||
+              '',
+            reps_total:
+              rp.reps_default_selection ||
+              rp.reps_target ||
+              rp.item?.reps_total ||
+              rp.offering?.reps_total ||
+              null,
+            duration_seconds:
+              rp.duration_min != null
+                ? Math.round(rp.duration_min * 60)
+                : rp.item?.duration_seconds || rp.offering?.duration_seconds || null,
+            steps: rp.steps || rp.item?.steps || rp.offering?.steps || [],
+          },
+          action_id: action.action_id,
+        },
+      });
+    }
+  }
 
   function handleBegin() {
     if (WEB_ENV.isDev) console.log('[S17-D4B] handleBegin', {
@@ -51,42 +175,13 @@ export function RoomGuidedSection({ envelope, screenData, onAction }: Props) {
       render_id: renderId,
       action_id: recAction.action_id,
     } as any);
-    if (!onAction) return;
-    const actionId: string = recAction.action_id;
-    const actionType: string = recAction.action_type ?? '';
-    if (actionType === 'inquiry') {
-      const ip = (recAction as any).inquiry_payload;
-      if (!ip) return;
-      onAction({
-        type: 'room_inquiry_opened',
-        payload: { inquiry_payload: ip, action_id: actionId, room_id: roomId, render_id: renderId },
-      });
-    } else {
-      const rp = recAction.runner_payload;
-      if (!rp) {
-        if (WEB_ENV.isDev) console.warn('[S17-D4B] handleBegin: runner_payload missing for', actionType);
-        return;
-      }
-      const variant: string =
-        rp.runner_kind ||
-        (actionType.startsWith('runner_') ? actionType.replace('runner_', '') : actionType) ||
-        'mantra';
-      onAction({
-        type: 'start_runner',
-        payload: {
-          source: rp.runner_source ?? 'support_room',
-          variant,
-          item: rp,
-          action_id: actionId,
-        },
-      });
-    }
+    openAction(recAction);
   }
 
   function handleExit() {
     void postRoomTelemetry({ room_id: roomId, event_type: 'room_exited', phase: 'welcome', render_id: renderId } as any);
     if (onAction) {
-      onAction({ type: 'exit_tapped', payload: { room_id: roomId } });
+      onAction({ type: 'room_exit', payload: { room_id: roomId } });
     }
   }
 
@@ -230,16 +325,23 @@ export function RoomGuidedSection({ envelope, screenData, onAction }: Props) {
               Steps in this space
             </p>
             {nonExitActions.map((a: any, i: number) => (
-              <div
+              <button
                 key={a.action_id}
                 data-testid={`room-step-${a.action_id}`}
+                onClick={() => openAction(a)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: 12,
+                  width: '100%',
                   padding: '12px 20px',
                   borderBottom: '1px solid rgba(200,180,154,0.2)',
                   background: a.action_id === recId ? 'rgba(201,168,76,0.08)' : 'transparent',
+                  borderLeft: 'none',
+                  borderRight: 'none',
+                  borderTop: 'none',
+                  cursor: 'pointer',
+                  textAlign: 'left',
                 }}
               >
                 <span style={{ fontSize: 13, color: '#9f9f9f', minWidth: 20, textAlign: 'right' }}>{i + 1}</span>
@@ -247,11 +349,167 @@ export function RoomGuidedSection({ envelope, screenData, onAction }: Props) {
                 {a.action_id === recId && (
                   <span style={{ fontSize: 11, color: '#8B6914', fontStyle: 'italic' }}>suggested</span>
                 )}
-              </div>
+              </button>
             ))}
           </div>
         </div>
       )}
+      <StepModal
+        visible={stepModalVisible}
+        stepPayload={activeStepPayload}
+        label={activeAction?.label || 'Step'}
+        onCancel={() => {
+          setStepModalVisible(false);
+          setActiveStepPayload(null);
+          setActiveAction(null);
+        }}
+        onDone={(extra: StepModalResult) => {
+          const stepPl = activeStepPayload;
+          const action = activeAction;
+          setStepModalVisible(false);
+          setActiveStepPayload(null);
+          setActiveAction(null);
+          if (!action) return;
+          if (extra.text || extra.grounding) {
+            postRoomSacred(roomId, {
+              writes_event:
+                stepPl?.persistence?.writes_event ??
+                action.persistence?.writes_event ??
+                null,
+              label: action.label,
+              action_id: action.action_id,
+              analytics_key: action.analytics_key ?? null,
+              captured_at: Date.now(),
+              text: extra.text ?? null,
+              life_context: screenData?.room_life_context ?? null,
+              journey_id: screenData?.journey_id ?? null,
+              day_number: screenData?.day_number ?? null,
+              source_surface: 'step_pill',
+            });
+          }
+          onAction?.({
+            type: 'room_step_completed',
+            payload: {
+              room_id: roomId,
+              action_id: action.action_id,
+              analytics_key: action.analytics_key,
+              template_id: stepPl?.template_id,
+              writes_event:
+                stepPl?.persistence?.writes_event ??
+                action.persistence?.writes_event,
+              ...(extra.text ? { text: extra.text } : {}),
+              ...(extra.grounding ? { grounding: extra.grounding } : {}),
+            },
+          });
+        }}
+      />
+      <InquiryModal
+        visible={inquiryModalVisible}
+        label={activeAction?.label || 'Inquiry'}
+        inquiryPayload={activeAction?.inquiry_payload}
+        onCancel={() => {
+          setInquiryModalVisible(false);
+          setActiveAction(null);
+        }}
+        onOpened={() =>
+          activeAction &&
+          onAction?.({
+            type: 'room_inquiry_opened',
+            payload: {
+              room_id: roomId,
+              action_id: activeAction.action_id,
+              analytics_key: activeAction.analytics_key,
+            },
+          })
+        }
+        onCategorySelected={(cat) =>
+          activeAction &&
+          onAction?.({
+            type: 'room_inquiry_category_selected',
+            payload: {
+              room_id: roomId,
+              action_id: activeAction.action_id,
+              category_id: cat.id,
+            },
+          })
+        }
+        onLaunchPractice={(_cat, templateId) => {
+          setInquiryModalVisible(false);
+          setActiveStepPayload({ template_id: templateId });
+          setStepModalVisible(true);
+        }}
+        onSubmitJournal={(cat, text) => {
+          const action = activeAction;
+          setInquiryModalVisible(false);
+          setActiveAction(null);
+          if (!action) return;
+          postRoomSacred(roomId, {
+            writes_event: 'inquiry_journal',
+            label: action.label,
+            action_id: action.action_id,
+            analytics_key: action.analytics_key ?? null,
+            captured_at: Date.now(),
+            text,
+            life_context: screenData?.room_life_context ?? null,
+            journey_id: screenData?.journey_id ?? null,
+            day_number: screenData?.day_number ?? null,
+            source_surface: 'inquiry_pill',
+          });
+          onAction?.({
+            type: 'room_step_completed',
+            payload: {
+              room_id: roomId,
+              action_id: action.action_id,
+              analytics_key: action.analytics_key,
+              template_id: 'step_journal_inquiry',
+              text,
+              category_id: cat.id,
+              source: 'inquiry',
+            },
+          });
+        }}
+      />
+      <CarryCaptureModal
+        visible={carryModalVisible}
+        label={activeAction?.label || 'Carry'}
+        roomId={roomId}
+        actionId={activeAction?.action_id || ''}
+        analyticsKey={activeAction?.analytics_key ?? null}
+        writesEvent={
+          activeAction?.carry_payload?.writes_event ??
+          activeAction?.carry_payload?.persistence?.writes_event ??
+          activeAction?.persistence?.writes_event ??
+          null
+        }
+        carryPayload={activeAction?.carry_payload}
+        lifeContext={screenData?.room_life_context ?? null}
+        journeyId={screenData?.journey_id ?? null}
+        dayNumber={screenData?.day_number ?? null}
+        onCancel={() => {
+          setCarryModalVisible(false);
+          setActiveAction(null);
+        }}
+        onSave={(_text, _sacredWriteOk) => {
+          const action = activeAction;
+          setCarryModalVisible(false);
+          setActiveAction(null);
+          if (!action) return;
+          onAction?.({
+            type: 'room_carry_captured',
+            payload: {
+              room_id: roomId,
+              action_id: action.action_id,
+              analytics_key: action.analytics_key,
+              label: action.label,
+              writes_event:
+                action.carry_payload?.writes_event ??
+                action.carry_payload?.persistence?.writes_event ??
+                action.persistence?.writes_event ??
+                null,
+            },
+          });
+        }}
+      />
     </div>
   );
 }

@@ -12,10 +12,12 @@ import type {
   TellMitraRoomEntryContext,
   TellMitraV3Response,
 } from "@kalpx/types";
+import { ArrowLeft, LockKeyhole, Sparkles } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { TellMitraThreadView } from "../../components/mitra/TellMitraThreadView";
+import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
 import { executeAction } from "../../engine/actionExecutor";
 import { postTellMitraV3 } from "../../engine/mitraApi";
 import { WEB_ENV } from "../../lib/env";
@@ -582,6 +584,70 @@ export function TellMitraPage() {
     cursor: "pointer",
   };
 
+  const PAGE_SHELL: React.CSSProperties = {
+    minHeight: "100%",
+    display: "flex",
+    flexDirection: "column",
+  };
+
+  const PAGE_INNER: React.CSSProperties = {
+    width: "100%",
+    maxWidth: 420,
+    position: "relative",
+  };
+
+  const BACK_BTN: React.CSSProperties = {
+    background: "none",
+    border: "none",
+    color: "#C99317",
+    fontSize: 15,
+    cursor: "pointer",
+    marginBottom: 22,
+    padding: 0,
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 8,
+  };
+
+  const TELL_MITRA_FORM_CARD: React.CSSProperties = {
+    position: "relative",
+    overflow: "hidden",
+    border: "1px solid rgba(225, 197, 136, 0.45)",
+    borderRadius: 28,
+    background: "rgba(255, 252, 247, 0.88)",
+    padding: "26px 16px 18px",
+    boxShadow: "0 18px 48px rgba(201,168,76,0.12)",
+    backdropFilter: "blur(2px)",
+    marginBottom: 26,
+  };
+
+  const TELL_MITRA_TEXTAREA: React.CSSProperties = {
+    width: "100%",
+    minHeight: 250,
+    boxSizing: "border-box",
+    border: "1px solid rgba(225, 197, 136, 0.85)",
+    borderRadius: 18,
+    padding: "18px 16px",
+    fontSize: 15,
+    lineHeight: 1.6,
+    fontFamily: "var(--kalpx-font-serif)",
+    color: "#8B6A43",
+    background: "rgba(255,255,255,0.66)",
+    resize: "vertical",
+    outline: "none",
+  };
+
+  const PRIVACY_NOTE: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+    color: "#8B6A43",
+    fontSize: 13,
+    textAlign: "center",
+    margin: "0 10px",
+  };
+
   const PRIOR_CONTEXT_CARD: React.CSSProperties = {
     background: "rgba(201,168,76,0.06)",
     border: "1px solid rgba(201,168,76,0.18)",
@@ -726,162 +792,212 @@ export function TellMitraPage() {
   // ── Flag-on: thread UI ────────────────────────────────────────────────────
   if (THREAD_UI_ENABLED) {
     return (
-      <div
-        style={{
-          minHeight: "100dvh",
-          background: "#FFF8EF",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
+      <MitraMobileShell backgroundImage="/beige_bg.png">
+        <div style={PAGE_SHELL}>
+          <main
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              padding: "24px 16px 0",
+            }}
+          >
+            <div style={{ width: "100%", maxWidth: 740, position: "relative" }}>
+              <button
+                onClick={() => navigate("/en/mitra")}
+                style={BACK_BTN}
+              >
+                <ArrowLeft size={22} strokeWidth={2} />
+                Back
+              </button>
+            </div>
+            <div
+              style={{
+                width: "100%",
+                maxWidth: 740,
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                background: "#FAF7F2",
+                borderRadius: "20px 20px 0 0",
+                border: "1px solid rgba(201,168,76,0.15)",
+                borderBottom: "none",
+                boxShadow: "0 -4px 24px rgba(67,33,4,0.06)",
+                overflow: "hidden",
+                minHeight: "calc(100dvh - 100px)",
+              }}
+            >
+              <TellMitraThreadView
+                conversation={conversation}
+                submitting={submitting}
+                composerValue={text}
+                composerPlaceholder={composerPlaceholder}
+                composerRef={composerRef}
+                threadBottomRef={threadBottomRef}
+                onComposerChange={(val) => {
+                  setText(val);
+                  if (error) setError(null);
+                }}
+                onSubmit={(input) => {
+                  setText("");
+                  setConversation((prev) => [
+                    ...prev,
+                    {
+                      id: _id(),
+                      type: "user_message",
+                      text: input,
+                      created_at: new Date().toISOString(),
+                    },
+                  ]);
+                  void submitThread(input, "tell_mitra_page_web");
+                }}
+                onChipClick={handleChipClickThread}
+                onEnterRoom={handleEnterRoom}
+                onTellMitraMore={handleTellMitraMoreThread}
+                onStartFresh={handleStartFresh}
+                onQuickStartChip={handleQuickStartChip}
+                onWisdomOptionPress={(opt) => {
+                  if (opt.action_type === "navigate_to_room" && opt.room_id) {
+                    void executeAction(
+                      {
+                        type: "enter_room",
+                        payload: {
+                          room_id: opt.room_id,
+                          source: "tell_mitra_next_option",
+                        },
+                      },
+                      {
+                        dispatch,
+                        screenData: screenState.screenData,
+                        currentStateId: "tell_mitra",
+                      },
+                    );
+                  } else if (opt.action_type === "navigate_to_door" && opt.door) {
+                    navigate(DOOR_ROUTES[opt.door] ?? "/en/mitra");
+                  }
+                }}
+                error={error}
+              />
+            </div>
+          </main>
+        </div>
+      </MitraMobileShell>
+    );
+  }
+
+  // ── Flag-off: original UI (completely unchanged) ──────────────────────────
+  return (
+    <MitraMobileShell backgroundImage="/beige_bg.png">
+      <div style={PAGE_SHELL}>
         <main
           style={{
             flex: 1,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            padding: "24px 16px 0",
+            padding: "24px 16px calc(92px + env(safe-area-inset-bottom))",
           }}
         >
-          <div style={{ width: "100%", maxWidth: 740 }}>
+          <div style={PAGE_INNER}>
             <button
               onClick={() => navigate("/en/mitra")}
-              style={{
-                background: "none",
-                border: "none",
-                color: "#C99317",
-                fontSize: 14,
-                cursor: "pointer",
-                marginBottom: 16,
-                padding: 0,
-              }}
+              style={BACK_BTN}
             >
-              ← Back
+              <ArrowLeft size={22} strokeWidth={2} />
+              Back
             </button>
-          </div>
-          <div
-            style={{
-              width: "100%",
-              maxWidth: 740,
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              background: "#FAF7F2",
-              borderRadius: "20px 20px 0 0",
-              border: "1px solid rgba(201,168,76,0.15)",
-              borderBottom: "none",
-              boxShadow: "0 -4px 24px rgba(67,33,4,0.06)",
-              overflow: "hidden",
-              minHeight: "calc(100dvh - 100px)",
-            }}
-          >
-            <TellMitraThreadView
-              conversation={conversation}
-              submitting={submitting}
-              composerValue={text}
-              composerPlaceholder={composerPlaceholder}
-              composerRef={composerRef}
-              threadBottomRef={threadBottomRef}
-              onComposerChange={(val) => {
-                setText(val);
-                if (error) setError(null);
-              }}
-              onSubmit={(input) => {
-                setText("");
-                setConversation((prev) => [
-                  ...prev,
-                  {
-                    id: _id(),
-                    type: "user_message",
-                    text: input,
-                    created_at: new Date().toISOString(),
-                  },
-                ]);
-                void submitThread(input, "tell_mitra_page_web");
-              }}
-              onChipClick={handleChipClickThread}
-              onEnterRoom={handleEnterRoom}
-              onTellMitraMore={handleTellMitraMoreThread}
-              onStartFresh={handleStartFresh}
-              onQuickStartChip={handleQuickStartChip}
-              onWisdomOptionPress={(opt) => {
-                if (opt.action_type === "navigate_to_room" && opt.room_id) {
-                  void executeAction(
-                    {
-                      type: "enter_room",
-                      payload: {
-                        room_id: opt.room_id,
-                        source: "tell_mitra_next_option",
-                      },
-                    },
-                    {
-                      dispatch,
-                      screenData: screenState.screenData,
-                      currentStateId: "tell_mitra",
-                    },
-                  );
-                } else if (opt.action_type === "navigate_to_door" && opt.door) {
-                  navigate(DOOR_ROUTES[opt.door] ?? "/en/mitra");
-                }
-              }}
-              error={error}
-            />
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  // ── Flag-off: original UI (completely unchanged) ──────────────────────────
-  return (
-    <div
-      style={{
-        minHeight: "100dvh",
-        background: "#FFF8EF",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <main
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          padding: "24px 16px calc(92px + env(safe-area-inset-bottom))",
-        }}
-      >
-        <div style={{ width: "100%", maxWidth: 420 }}>
-          <button
-            onClick={() => navigate("/en/mitra")}
-            style={{
-              background: "none",
-              border: "none",
-              color: "#C99317",
-              fontSize: 14,
-              cursor: "pointer",
-              marginBottom: 16,
-              padding: 0,
-            }}
-          >
-            ← Back
-          </button>
 
           {/* Input section — always visible unless a result screen is shown */}
           {screen === "none" && (
-            <div style={CARD}>
+            <>
+            <div style={TELL_MITRA_FORM_CARD}>
+              <img
+                src="/leaves-bird.png"
+                alt=""
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  top: -86,
+                  right: -8,
+                  width: 180,
+                  pointerEvents: "none",
+                  userSelect: "none",
+                  opacity: 0.42,
+                }}
+              />
               <div
                 style={{
-                  fontFamily: "var(--kalpx-font-serif)",
-                  fontWeight: 700,
-                  fontSize: 20,
-                  color: "#432104",
-                  marginBottom: 4,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 14,
+                  marginBottom: 16,
                 }}
               >
-                Tell Mitra
+                <div
+                  style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: "50%",
+                    border: "1px solid rgba(225, 197, 136, 0.5)",
+                    background: "rgba(255, 249, 239, 0.9)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: "0 8px 22px rgba(201,168,76,0.08)",
+                    flexShrink: 0,
+                  }}
+                >
+                  <Sparkles size={28} strokeWidth={1.8} color="#D5A028" />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div
+                    style={{
+                      fontFamily: "var(--kalpx-font-serif)",
+                      fontWeight: 700,
+                      fontSize: 20,
+                      color: "#432104",
+                      marginBottom: 6,
+                    }}
+                  >
+                    Tell Mitra
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      color: "#D9A83A",
+                    }}
+                  >
+                    <div
+                      style={{
+                        flex: 1,
+                        maxWidth: 52,
+                        height: 1,
+                        background: "rgba(217,168,58,0.45)",
+                      }}
+                    />
+                    <span style={{ fontSize: 18, lineHeight: 1 }}>◇</span>
+                    <div
+                      style={{
+                        flex: 1,
+                        maxWidth: 52,
+                        height: 1,
+                        background: "rgba(217,168,58,0.45)",
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
-              <div style={{ fontSize: 14, color: "#7B6550", marginBottom: 14 }}>
+              <div
+                style={{
+                  fontSize: 16,
+                  color: "#7B6550",
+                  lineHeight: 1.55,
+                  marginBottom: 18,
+                }}
+              >
                 Share what you're carrying right now.
               </div>
               <textarea
@@ -893,18 +1009,20 @@ export function TellMitraPage() {
                 maxLength={1000}
                 rows={5}
                 placeholder="What's on your mind…"
+                style={TELL_MITRA_TEXTAREA}
+              />
+              <img
+                src="/leaves-bird.png"
+                alt=""
+                aria-hidden="true"
                 style={{
-                  width: "100%",
-                  boxSizing: "border-box",
-                  border: "1px solid rgba(201,168,76,0.3)",
-                  borderRadius: 10,
-                  padding: "12px 14px",
-                  fontSize: 15,
-                  fontFamily: "var(--kalpx-font-serif)",
-                  color: "#432104",
-                  background: "rgba(255,252,248,0.9)",
-                  resize: "vertical",
-                  outline: "none",
+                  position: "absolute",
+                  right: 28,
+                  bottom: 168,
+                  width: 94,
+                  opacity: 0.14,
+                  pointerEvents: "none",
+                  userSelect: "none",
                 }}
               />
               <div
@@ -912,10 +1030,10 @@ export function TellMitraPage() {
                   display: "flex",
                   justifyContent: "space-between",
                   marginTop: 6,
-                  marginBottom: 12,
+                  marginBottom: 18,
                 }}
               >
-                <span style={{ fontSize: 12, color: "#A08060" }}>
+                <span style={{ fontSize: 12, color: "#8B6A43" }}>
                   {text.length} / 1000
                 </span>
                 {error && (
@@ -929,12 +1047,25 @@ export function TellMitraPage() {
                 disabled={submitting || !text.trim()}
                 style={{
                   ...GOLD_BTN,
+                  padding: "16px 0",
+                  borderRadius: 20,
+                  fontSize: 18,
                   opacity: submitting || !text.trim() ? 0.5 : 1,
                   cursor:
                     submitting || !text.trim() ? "not-allowed" : "pointer",
                 }}
               >
-                {submitting ? "Sending…" : "Tell Mitra"}
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 10,
+                  }}
+                >
+                  {submitting ? "Sending…" : "Tell Mitra"}
+                  {!submitting && <Sparkles size={18} strokeWidth={2} />}
+                </span>
               </button>
               {/* <button
                 onClick={() => navigate("/en/mitra/checkin-quick")}
@@ -943,6 +1074,34 @@ export function TellMitraPage() {
                 Quick Check-in instead
               </button> */}
             </div>
+            <div
+              style={{
+                position: "relative",
+                padding: "8px 0 0",
+              }}
+            >
+              <div style={PRIVACY_NOTE}>
+                <div
+                  style={{
+                    width: 52,
+                    height: 1,
+                    background: "rgba(217,168,58,0.45)",
+                    flexShrink: 0,
+                  }}
+                />
+                <LockKeyhole size={16} strokeWidth={2} color="#C99317" />
+                <span>Your thoughts are private and safe with us.</span>
+                <div
+                  style={{
+                    width: 52,
+                    height: 1,
+                    background: "rgba(217,168,58,0.45)",
+                    flexShrink: 0,
+                  }}
+                />
+              </div>
+            </div>
+            </>
           )}
 
           {/* navigate_to_room */}
@@ -1387,8 +1546,9 @@ export function TellMitraPage() {
               </button>
             </div>
           )}
-        </div>
-      </main>
-    </div>
+          </div>
+        </main>
+      </div>
+    </MitraMobileShell>
   );
 }

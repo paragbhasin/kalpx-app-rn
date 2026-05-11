@@ -167,7 +167,7 @@ export function InnerPathPage() {
   }
 
   return (
-    <MitraMobileShell hideTopBar>
+    <MitraMobileShell>
       <div style={{ maxWidth: 480, margin: "0 auto", padding: "0 20px 120px" }}>
 
         <button

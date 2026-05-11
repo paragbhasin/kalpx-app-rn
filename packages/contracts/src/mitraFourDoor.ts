@@ -17,6 +17,7 @@ import type {
   RhythmSuggestItem,
   RhythmSuggestResponse,
   RhythmWizardLocalItem,
+  QuickResetMantra,
 } from '@kalpx/types';
 
 // ── Rhythm setup contracts ───────────────────────────────────────────────────
@@ -453,6 +454,62 @@ export const CHIP_SUBMIT_TEXT: Readonly<Record<string, string>> = {
   more_steady:          "I am feeling more steady now",
   still_heavy:          "I still feel heavy and weighed down",
 };
+
+// ── Quick Reset shared product logic (Stream E, Gate E-1 approved 2026-05-10) ──
+
+// Backend action identifiers → frontend display labels (LOCKED 2026-05-10)
+export const QUICK_RESET_ACTION_LABELS: Record<string, string> = {
+  mitra_suggest_for_this_moment: "Show another calming mantra",
+  set_as_default:                "Set as my Quick Reset mantra",
+  change_mantra:                 "Change mantra",
+  choose_from_library:           "Choose from library",
+};
+
+export function getQuickResetActionLabel(action: string): string {
+  return QUICK_RESET_ACTION_LABELS[action] ?? action;
+}
+
+// Normalises a browse-mantras API result item into QuickResetMantra shape.
+// browse API returns `id` (not item_id); curated rows have id="curated:{n}" — excluded.
+// No audio_url in browse response; normalised to null.
+export function normalizeMantraFromBrowse(
+  raw: Record<string, unknown>,
+): QuickResetMantra | null {
+  const id = typeof raw['id'] === 'string' ? raw['id'] : null;
+  if (!id || id.startsWith('curated:')) return null;
+  return {
+    item_id:    id,
+    title:      typeof raw['title'] === 'string'      ? raw['title']      : '',
+    devanagari: typeof raw['devanagari'] === 'string'  ? raw['devanagari'] : '',
+    iast:       typeof raw['iast'] === 'string'        ? raw['iast']       : '',
+    meaning:    typeof raw['meaning'] === 'string'
+      ? raw['meaning']
+      : (typeof raw['essence'] === 'string' ? raw['essence'] : ''),
+    audio_url:  typeof raw['audio_url'] === 'string' && raw['audio_url'] ? raw['audio_url'] : null,
+  };
+}
+
+// Returns a mantra from `candidates` whose item_id differs from `currentItemId`.
+// Falls back to null if no different mantra is available.
+export function pickDifferentMantra(
+  candidates: QuickResetMantra[],
+  currentItemId: string,
+): QuickResetMantra | null {
+  const different = candidates.filter((m) => m.item_id !== currentItemId);
+  if (different.length === 0) return null;
+  return different[0];
+}
+
+// Normalises browse-mantras raw array → QuickResetMantra[].
+export function normalizeBrowseMantras(raw: unknown[]): QuickResetMantra[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((item) => normalizeMantraFromBrowse(item as Record<string, unknown>))
+    .filter((m): m is QuickResetMantra => m !== null);
+}
+
+// Re-export for convenience
+export type { QuickResetMantra };
 
 function _normalizeRoomEntryContext(raw: unknown): TellMitraRoomEntryContext | null {
   if (raw === null || typeof raw !== "object") return null;

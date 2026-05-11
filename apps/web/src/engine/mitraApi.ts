@@ -1,5 +1,5 @@
 import { api } from '../lib/api';
-import type { MitraHomeV3Response, TellMitraV3Response, QuickCheckinEnergyState, QuickCheckinResponse, RhythmSuggestRequest, RhythmSuggestResponse, TellMitraFollowupMeta } from '@kalpx/types';
+import type { MitraHomeV3Response, TellMitraV3Response, QuickCheckinEnergyState, QuickCheckinResponse, RhythmSuggestRequest, RhythmSuggestResponse, TellMitraFollowupMeta, QuickResetOpeningState, QuickChantCompleteRequest, QuickChantCompleteResponse, QuickResetSetDefaultResponse } from '@kalpx/types';
 import { normalizeTellMitraResult, normalizeRhythmSuggestResponse } from '@kalpx/contracts';
 import type { RhythmSetupPayload } from '@kalpx/contracts';
 
@@ -797,4 +797,63 @@ export async function postQuickCheckin(energy_state: QuickCheckinEnergyState): P
     source_surface: 'quick_checkin_page_web',
   });
   return resp.data;
+}
+
+/** GET mitra/v3/quick_reset/ — 3-state opening (E-D-10). null = flag off or error. */
+export async function getQuickResetOpening(): Promise<QuickResetOpeningState | null> {
+  try {
+    const resp = await api.get<QuickResetOpeningState>('mitra/v3/quick_reset/');
+    return resp.data;
+  } catch (err: any) {
+    if (err?.response?.status === 404) return null;
+    console.warn('[QuickReset] getQuickResetOpening failed:', err?.message);
+    return null;
+  }
+}
+
+/** POST mitra/v3/quick_chant/complete/ — log session + get copy (E-B-5). null on error. */
+export async function postQuickChantComplete(
+  payload: QuickChantCompleteRequest,
+): Promise<QuickChantCompleteResponse | null> {
+  try {
+    const resp = await api.post<QuickChantCompleteResponse>(
+      'mitra/v3/quick_chant/complete/', payload,
+    );
+    return resp.data;
+  } catch (err: any) {
+    console.warn('[QuickReset] postQuickChantComplete failed:', err?.message);
+    return null;
+  }
+}
+
+/** POST mitra/v3/quick_reset/set-default/ — set/clear explicit mantra (E-D-11). */
+export async function postQuickResetSetDefault(
+  mantra_ref: string | null,
+): Promise<QuickResetSetDefaultResponse | null> {
+  try {
+    const resp = await api.post<QuickResetSetDefaultResponse>(
+      'mitra/v3/quick_reset/set-default/', { mantra_ref },
+    );
+    return resp.data;
+  } catch (err: any) {
+    console.warn('[QuickReset] postQuickResetSetDefault failed:', err?.message);
+    return null;
+  }
+}
+
+/** POST mitra/browse-mantras/ — browse mantra library (change/choose flow).
+ *  focus defaults to peacecalm (locked). Returns raw array; caller normalises via
+ *  normalizeBrowseMantras() from @kalpx/contracts. */
+export async function postBrowseMantras(
+  focus: string = 'peacecalm',
+): Promise<unknown[]> {
+  try {
+    const resp = await api.post<{ mantras: unknown[]; count: number }>(
+      'mitra/browse-mantras/', { focus },
+    );
+    return Array.isArray(resp.data?.mantras) ? resp.data.mantras : [];
+  } catch (err: any) {
+    console.warn('[QuickReset] postBrowseMantras failed:', err?.message);
+    return [];
+  }
 }

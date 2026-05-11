@@ -115,6 +115,7 @@ export interface MitraHomeV3QuickResetSummary {
   source_item_type: string | null;
   source_item_id: string | null;
   label: string;
+  subtitle?: string | null;
 }
 
 export interface MitraHomeV3TellMitraSummary {
@@ -147,6 +148,58 @@ export interface MitraHomeV3Response {
   greeting?: MitraHomeV3Greeting;
   my_rhythm_summary?: MitraHomeV3MyRhythmSummary;
   [key: string]: unknown;
+}
+
+// ── Quick Reset / Quick Chant (Stream E, Gate E-1 approved 2026-05-10) ────────
+
+export interface QuickResetMantra {
+  item_id: string;
+  title: string;
+  devanagari: string;
+  iast: string;
+  meaning: string;
+  audio_url: string | null;
+}
+
+export type QuickResetScreenState = "explicit" | "last_used" | "no_history";
+export type QuickResetSource = "user_selected" | "last_used" | "mitra_suggested";
+
+export interface QuickResetOpeningState {
+  screen_state: QuickResetScreenState;
+  source: QuickResetSource;
+  mantra: QuickResetMantra;
+  primary_cta: string;
+  secondary_actions: string[];
+  can_set_default: boolean;
+  suggestion_reason: null;
+}
+
+export interface QuickChantCompleteRequest {
+  mantra_ref: string;
+  duration_ms?: number;
+  completed: boolean;
+}
+
+export interface QuickChantCopy {
+  headline: string;
+  subtext: string | null;
+}
+
+export interface QuickChantSummary {
+  last_mantra_ref: string | null;
+  last_chant_at: string | null;
+}
+
+export interface QuickChantCompleteResponse {
+  completed: boolean;
+  mantra_ref: string;
+  copy: QuickChantCopy | null;
+  chant_summary?: QuickChantSummary;
+}
+
+export interface QuickResetSetDefaultResponse {
+  set: boolean;
+  mantra_ref: string | null;
 }
 
 // ── Rhythm Suggest (wizard Step 3) ──────────────────────────────────────────

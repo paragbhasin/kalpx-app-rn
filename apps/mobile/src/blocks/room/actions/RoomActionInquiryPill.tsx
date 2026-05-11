@@ -24,6 +24,8 @@ import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import api from "../../../Networks/axios";
 import { executeAction } from "../../../engine/actionExecutor";
 import { useScreenStore } from "../../../engine/useScreenBridge";
+import store from "../../../store";
+import { screenActions } from "../../../store/screenSlice";
 import type { ActionEnvelope, InquiryCategory, RoomRenderV1, StepPayload } from "../types";
 import { buildActionCtx } from "./actionContextHelper";
 import InquiryModal from "./InquiryModal";
@@ -50,6 +52,12 @@ const RoomActionInquiryPill: React.FC<Props> = ({
   const [stepModalLabel, setStepModalLabel] = useState<string>("");
   const [pendingCategory, setPendingCategory] = useState<InquiryCategory | null>(null);
   const [confirmed, setConfirmed] = useState(false);
+
+  // D-D-1 Option B: after inquiry/journal completion, open RoomReflectionSheet.
+  const triggerRoomReflection = () => {
+    store.dispatch(screenActions.setScreenValue({ key: "show_room_reflection", value: true }));
+    loadScreen({ container_id: "room", state_id: "render" } as any);
+  };
 
   const fireSacredPost = (writesEvent: string, text: string) => {
     const roomId = envelope?.room_id ?? null;
@@ -222,6 +230,7 @@ const RoomActionInquiryPill: React.FC<Props> = ({
     if (text.trim().length > 0 && writesEvent) {
       fireSacredPost(writesEvent, text.trim());
     }
+    triggerRoomReflection();
     setConfirmed(true);
   };
 
@@ -235,6 +244,7 @@ const RoomActionInquiryPill: React.FC<Props> = ({
     );
     setStepModalPayload(null);
     setPendingCategory(null);
+    triggerRoomReflection();
     setConfirmed(true);
   };
 

@@ -33,6 +33,16 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
   const p = sd.why_this_principle;
   const isRoomCtx = isRoomWhyThisContext(sd);
 
+  // D-D-1 Option B: in room context, "Got it" opens RoomReflectionSheet instead of dismissing.
+  const handleGotIt = () => {
+    if (isRoomCtx) {
+      store.dispatch(screenActions.setScreenValue({ key: "show_room_reflection", value: true }));
+      loadScreen({ container_id: "room", state_id: "render" } as any);
+    } else {
+      goBack();
+    }
+  };
+
   // Flag-off / 404 tolerance — render a minimal placeholder and a Got it exit.
   if (!p) {
     return (
@@ -42,7 +52,7 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
         </Text>
         <TouchableOpacity
           style={styles.dismissPill}
-          onPress={() => goBack()}
+          onPress={handleGotIt}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Text style={styles.dismissText}>Got it</Text>
@@ -112,7 +122,7 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
 
       <TouchableOpacity
         style={styles.dismissPill}
-        onPress={() => goBack()}
+        onPress={handleGotIt}
         accessibilityLabel="Dismiss"
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >

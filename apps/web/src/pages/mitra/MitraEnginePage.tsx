@@ -29,6 +29,7 @@ import {
   useScreenState,
 } from "../../store/screenSlice";
 import { showSnackBar } from "../../store/snackBarSlice";
+import { QuickResetPage } from "./QuickResetPage";
 
 function CommunityRunnerActionBar({
   addLoading,
@@ -853,6 +854,7 @@ export function MitraEnginePage() {
   const dispatch = useDispatch<AppDispatch>();
   const [searchParams] = useSearchParams();
   const location = useLocation();
+  const isQuickResetRoute = location.pathname === "/en/mitra/quick-reset";
   const screenState = useScreenState();
   const [resolving, setResolving] = useState(false);
   const [communityAddLoading, setCommunityAddLoading] = useState(false);
@@ -992,6 +994,10 @@ export function MitraEnginePage() {
       setCommunityAddLoading(false);
     }
   };
+
+  if (isQuickResetRoute) {
+    return <QuickResetPage />;
+  }
 
   if (!containerId || !stateId) {
     return (

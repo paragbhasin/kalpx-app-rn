@@ -40,7 +40,6 @@ import { MitraHomePage } from "./pages/mitra/MitraHomePage";
 import { MitraStartPage } from "./pages/mitra/MitraStartPage";
 import { OnboardingPage } from "./pages/mitra/OnboardingPage";
 import { QuickCheckinPage } from "./pages/mitra/QuickCheckinPage";
-import { QuickResetPage } from "./pages/mitra/QuickResetPage";
 import { RhythmHomePage } from "./pages/mitra/RhythmHomePage";
 import { RhythmSetupPage } from "./pages/mitra/RhythmSetupPage";
 import { RhythmWizardPage } from "./pages/mitra/RhythmWizardPage";
@@ -101,7 +100,14 @@ export function AppRoutes() {
       <Route path="/en/mitra/rhythm" element={<RhythmHomePage />} />
       <Route path="/en/mitra/rhythm/setup" element={<RhythmWizardPage />} />
       <Route path="/en/mitra/rhythm/edit" element={<RhythmSetupPage />} />
-      <Route path="/en/mitra/quick-reset" element={<QuickResetPage />} />
+      <Route
+        path="/en/mitra/quick-reset"
+        element={
+          <RequiresJourney>
+            <MitraEnginePage />
+          </RequiresJourney>
+        }
+      />
       <Route path="/en/mitra/tell-mitra" element={<TellMitraPage />} />
       <Route path="/en/mitra/checkin-quick" element={<QuickCheckinPage />} />
       <Route path="/en/mitra/rooms" element={<BrowseRoomsPage />} />

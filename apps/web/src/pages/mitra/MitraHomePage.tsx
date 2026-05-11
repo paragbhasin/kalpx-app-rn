@@ -9,7 +9,7 @@ import { MobileBottomNav } from "../../components/layout/MobileBottomNav";
 import {
   getMitraHomeV3,
   postPranaAcknowledge,
-  postTriggerMantras,
+  postPranaAcknowledgeDismiss,
 } from "../../engine/mitraApi";
 import { useGuestIdentity } from "../../hooks/useGuestIdentity";
 import {
@@ -18,12 +18,9 @@ import {
 } from "../../hooks/useJourneyEntryView";
 import { useJourneyStatus } from "../../hooks/useJourneyStatus";
 import { WEB_ENV } from "../../lib/env";
-import { webNavigate } from "../../lib/webRouter";
 import type { AppDispatch, RootState } from "../../store";
 import { setHomeData } from "../../store/doorSlice";
 import {
-  loadScreen,
-  updateScreenData,
   useScreenState,
 } from "../../store/screenSlice";
 
@@ -37,79 +34,18 @@ function getRhythmTimeBand(): "morning" | "afternoon" | "night" {
 const FEELING_OPTIONS = [
   "Agitated",
   "Drained",
-  "Energised",
-  "Balanced",
+  "Steady",
+  "Open",
 ] as const;
-
-const HOME_FEELING_CACHE_KEY = "kalpx_home_feeling_support_v1";
-const HOME_FEELING_CACHE_MS = 60 * 60 * 1000;
 
 type FeelingOption = (typeof FEELING_OPTIONS)[number];
 
-type HomeFeelingSupportCache = {
-  feeling: FeelingOption;
-  expiresAt: number;
-  stateId: "trigger_practice_runner" | "post_trigger_mantra";
-  title: string;
-  description: string;
-  screenDataPatch: Record<string, any>;
-};
-
 function mapFeelingToPranaType(feeling: FeelingOption): string {
-  if (feeling === "Energised") return "energized";
+  if (feeling === "Open") return "energized";
+  if (feeling === "Steady") return "balanced";
   return feeling.toLowerCase();
 }
 
-function readHomeFeelingCache(): HomeFeelingSupportCache | null {
-  try {
-    const raw = localStorage.getItem(HOME_FEELING_CACHE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as HomeFeelingSupportCache;
-    if (!parsed?.expiresAt || parsed.expiresAt <= Date.now()) {
-      localStorage.removeItem(HOME_FEELING_CACHE_KEY);
-      return null;
-    }
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-function writeHomeFeelingCache(cache: HomeFeelingSupportCache) {
-  try {
-    localStorage.setItem(HOME_FEELING_CACHE_KEY, JSON.stringify(cache));
-  } catch {}
-}
-
-function normalizeTriggerPractice(suggestion: any) {
-  const core = suggestion?.core || {};
-  return {
-    ...core,
-    wisdom: suggestion?.context,
-    source: "support",
-    is_trigger: true,
-    item_id: suggestion?.item_id || core.item_id || suggestion?.id || core.id,
-    item_type: "practice",
-    steps_text: Array.isArray(core.steps)
-      ? core.steps.map((s: string, i: number) => `${i + 1}. ${s}`).join("\n")
-      : core.steps_text,
-    benefits_text: Array.isArray(core.benefits)
-      ? core.benefits.map((b: string) => `• ${b}`).join("\n")
-      : core.benefits_text,
-  };
-}
-
-function normalizeTriggerMantra(suggestion: any) {
-  const core = suggestion?.core || {};
-  return {
-    ...core,
-    wisdom: suggestion?.context,
-    source: "support",
-    is_trigger: true,
-    item_id: suggestion?.item_id || core.item_id || suggestion?.id || core.id,
-    item_type: "mantra",
-  };
-}
 
 function LoadingScreen() {
   return (
@@ -145,8 +81,6 @@ export function MitraHomePage() {
   const [selectedFeeling, setSelectedFeeling] = useState<
     (typeof FEELING_OPTIONS)[number] | null
   >(null);
-  const [feelingSupport, setFeelingSupport] =
-    useState<HomeFeelingSupportCache | null>(() => readHomeFeelingCache());
   const [feelingLoading, setFeelingLoading] = useState(false);
   const { loading, error, hasActiveJourney, rawStatus, refetch } =
     useJourneyStatus();
@@ -187,6 +121,13 @@ export function MitraHomePage() {
     };
   }, [hasActiveJourney, homeData, dispatch]);
 
+  async function refetchHome() {
+    try {
+      const data = await getMitraHomeV3();
+      dispatch(setHomeData(data));
+    } catch {}
+  }
+
   async function handleFeelingSelect(feeling: FeelingOption) {
     const pranaType = mapFeelingToPranaType(feeling);
     setSelectedFeeling(feeling);
@@ -210,123 +151,7 @@ export function MitraHomePage() {
         locale: (screenState.screenData.locale as string) || "en",
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
       });
-
-      const triggerRes = await postTriggerMantras({
-        feeling: pranaType,
-        focus:
-          (screenState.screenData.scan_focus as string) ||
-          (screenState.screenData.active_focus as string) ||
-          "peacecalm",
-        subFocus:
-          (screenState.screenData.prana_baseline_selection as string) || "",
-        depth:
-          (screenState.screenData.routine_depth as string) ||
-          (screenState.screenData.routine_setup as string) ||
-          "standard",
-        round: 1,
-        locale: (screenState.screenData.locale as string) || "en",
-        tz: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
-      });
-
-      const suggestions = triggerRes?.suggestions || [];
-      const practiceSuggestion = suggestions.find(
-        (s: any) => s?.type === "practice",
-      );
-      const mantraSuggestion = suggestions.find(
-        (s: any) => s?.type === "mantra",
-      );
-
-      const nextCache: HomeFeelingSupportCache | null = practiceSuggestion
-        ? {
-            feeling,
-            expiresAt: Date.now() + HOME_FEELING_CACHE_MS,
-            stateId: "trigger_practice_runner",
-            title:
-              practiceSuggestion?.ui?.card_title ||
-              practiceSuggestion?.core?.title ||
-              "Suggested practice",
-            description:
-              practiceSuggestion?.ui?.card_subtitle ||
-              practiceSuggestion?.core?.summary ||
-              practiceSuggestion?.core?.meaning ||
-              "A steadying practice is ready for you.",
-            screenDataPatch: {
-              current_prana: pranaType,
-              current_prana_type: pranaType,
-              trigger_feeling: pranaType,
-              trigger_step: 2,
-              trigger_cycle_count: 1,
-              _trigger_negative_label: "Try another way",
-              _trigger_practice_data: {
-                ...(practiceSuggestion.core || {}),
-                wisdom: practiceSuggestion.context,
-                item_id: practiceSuggestion.item_id || practiceSuggestion.id,
-              },
-              ...(mantraSuggestion
-                ? {
-                    _trigger_mantra_data: {
-                      ...(mantraSuggestion.core || {}),
-                      wisdom: mantraSuggestion.context,
-                      item_id: mantraSuggestion.item_id || mantraSuggestion.id,
-                    },
-                  }
-                : {}),
-              runner_active_item: normalizeTriggerPractice(practiceSuggestion),
-              runner_variant: "practice",
-              runner_source: "support_trigger",
-            },
-          }
-        : mantraSuggestion
-          ? {
-              feeling,
-              expiresAt: Date.now() + HOME_FEELING_CACHE_MS,
-              stateId: "post_trigger_mantra",
-              title:
-                mantraSuggestion?.ui?.card_title ||
-                mantraSuggestion?.core?.title ||
-                "Suggested mantra",
-              description:
-                mantraSuggestion?.ui?.card_subtitle ||
-                mantraSuggestion?.core?.meaning ||
-                "A supportive mantra is ready for you.",
-              screenDataPatch: {
-                current_prana: pranaType,
-                current_prana_type: pranaType,
-                trigger_feeling: pranaType,
-                trigger_step: 3,
-                trigger_cycle_count: 1,
-                _trigger_negative_label: "Try another way",
-                _trigger_mantra_data: {
-                  ...(mantraSuggestion.core || {}),
-                  wisdom: mantraSuggestion.context,
-                  item_id: mantraSuggestion.item_id || mantraSuggestion.id,
-                },
-                runner_active_item: normalizeTriggerMantra(mantraSuggestion),
-                runner_variant: "mantra",
-                runner_source: "support_trigger",
-                runner_reps_completed: 0,
-                runner_start_time: Date.now(),
-                runner_duration_actual_sec: 0,
-                mantra_text:
-                  mantraSuggestion?.core?.iast ||
-                  mantraSuggestion?.core?.title ||
-                  "OM",
-                mantra_devanagari: mantraSuggestion?.core?.devanagari || "ॐ",
-                mantra_audio_url: mantraSuggestion?.core?.audio_url || "",
-                trigger_mantra_text:
-                  mantraSuggestion?.core?.iast ||
-                  mantraSuggestion?.core?.title ||
-                  "OM",
-                trigger_mantra_devanagari:
-                  mantraSuggestion?.core?.devanagari || "ॐ",
-              },
-            }
-          : null;
-
-      if (nextCache) {
-        setFeelingSupport(nextCache);
-        writeHomeFeelingCache(nextCache);
-      }
+      await refetchHome();
     } catch {
       if (WEB_ENV.isDev) {
         console.warn("[MitraHomePage] feeling support fetch failed");
@@ -336,18 +161,11 @@ export function MitraHomePage() {
     }
   }
 
-  function startFeelingSupportPractice() {
-    if (!feelingSupport) return;
-    dispatch(updateScreenData(feelingSupport.screenDataPatch));
-    dispatch(
-      loadScreen({
-        containerId: "practice_runner",
-        stateId: feelingSupport.stateId,
-      }),
-    );
-    webNavigate(
-      `/en/mitra/engine?containerId=practice_runner&stateId=${feelingSupport.stateId}`,
-    );
+  async function handleCheckinDismiss() {
+    try {
+      await postPranaAcknowledgeDismiss();
+      await refetchHome();
+    } catch {}
   }
 
   if (
@@ -785,122 +603,201 @@ export function MitraHomePage() {
                   </div>
                 </button>
 
-                <div
-                  style={{
-                    width: "100%",
-                    border: "1px solid rgba(201,168,76,0.28)",
-                    borderRadius: 20,
-                    padding: "16px 18px 18px",
-                    boxShadow: "0 10px 25px rgba(67,33,4,0.08)",
-                    background:
-                      "linear-gradient(180deg, rgba(255,255,255,0.78) 0%, rgba(255,250,243,0.9) 100%)",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: "var(--kalpx-font-serif)",
-                      fontWeight: 700,
-                      fontSize: 18,
-                      color: "#432104",
-                      marginBottom: 6,
-                    }}
-                  >
-                    {feelingSupport
-                      ? "Your support practice is ready."
-                      : "How are you feeling today?"}
-                  </div>
-                  <div
-                    style={{
-                      color: "rgba(67, 33, 4, 0.62)",
-                      fontSize: 14,
-                      lineHeight: 1.5,
-                      marginBottom: 14,
-                    }}
-                  >
-                    {feelingSupport
-                      ? feelingSupport.description
-                      : "Choose what best matches your energy right now."}
-                  </div>
-                  {feelingSupport ? (
-                    <button
-                      type="button"
-                      onClick={startFeelingSupportPractice}
-                      style={{
-                        width: "100%",
-                        border: "1px solid rgba(201,168,76,0.38)",
-                        background:
-                          "linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,250,243,0.96))",
-                        color: "#432104",
-                        borderRadius: 18,
-                        padding: "16px 18px",
-                        textAlign: "left",
-                        cursor: "pointer",
-                        boxShadow: "0 8px 18px rgba(201,168,76,0.12)",
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontFamily: "var(--kalpx-font-serif)",
-                          fontWeight: 700,
-                          fontSize: 18,
-                          marginBottom: 4,
-                        }}
-                      >
-                        {feelingSupport.title}
-                      </div>
-                      <div
-                        style={{ fontSize: 13, color: "rgba(67,33,4,0.62)" }}
-                      >
-                        Start now
-                      </div>
-                    </button>
-                  ) : (
+                {(() => {
+                  const acw = homeData?.active_checkin_window;
+                  const windowActive = acw?.active === true;
+                  return (
                     <div
                       style={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                        gap: 10,
+                        width: "100%",
+                        border: "1px solid rgba(201,168,76,0.28)",
+                        borderRadius: 20,
+                        padding: "16px 18px 18px",
+                        boxShadow: "0 10px 25px rgba(67,33,4,0.08)",
+                        background:
+                          "linear-gradient(180deg, rgba(255,255,255,0.78) 0%, rgba(255,250,243,0.9) 100%)",
                       }}
                     >
-                      {FEELING_OPTIONS.map((feeling) => {
-                        const isSelected = selectedFeeling === feeling;
-                        return (
-                          <button
-                            key={feeling}
-                            type="button"
-                            onClick={() => void handleFeelingSelect(feeling)}
-                            aria-pressed={isSelected}
-                            disabled={feelingLoading}
+                      {windowActive ? (
+                        <>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                            <div
+                              style={{
+                                fontFamily: "var(--kalpx-font-serif)",
+                                fontWeight: 700,
+                                fontSize: 18,
+                                color: "#432104",
+                              }}
+                            >
+                              {acw!.prana_label}
+                            </div>
+                            {acw!.dismissible && (
+                              <button
+                                type="button"
+                                data-testid="dismiss-checkin"
+                                onClick={() => void handleCheckinDismiss()}
+                                style={{
+                                  background: "none",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  color: "rgba(67,33,4,0.4)",
+                                  fontSize: 18,
+                                  lineHeight: 1,
+                                  padding: "0 2px",
+                                }}
+                                aria-label="Dismiss"
+                              >
+                                ×
+                              </button>
+                            )}
+                          </div>
+                          <div
                             style={{
-                              width: "100%",
-                              border: isSelected
-                                ? "1px solid rgba(201,168,76,0.85)"
-                                : "1px solid rgba(201,168,76,0.38)",
-                              background: isSelected
-                                ? "linear-gradient(135deg, rgba(243,220,168,0.95), rgba(255,247,230,0.98))"
-                                : "rgba(255,255,255,0.78)",
-                              color: "#432104",
-                              borderRadius: 999,
-                              padding: "10px 14px",
-                              fontSize: 14,
-                              fontWeight: isSelected ? 700 : 500,
-                              cursor: feelingLoading
-                                ? "not-allowed"
-                                : "pointer",
-                              boxShadow: isSelected
-                                ? "0 6px 14px rgba(201,168,76,0.18)"
-                                : "none",
-                              transition: "all 160ms ease",
-                              opacity: feelingLoading ? 0.7 : 1,
+                              color: "rgba(67,33,4,0.78)",
+                              fontSize: 15,
+                              lineHeight: 1.55,
+                              fontFamily: "var(--kalpx-font-serif)",
+                              fontStyle: "italic",
+                              marginBottom: acw!.suggestion ? 14 : 0,
                             }}
                           >
-                            {feeling}
-                          </button>
-                        );
-                      })}
+                            {acw!.acknowledgment}
+                          </div>
+                          {acw!.suggestion && (
+                            <>
+                              <div
+                                style={{
+                                  fontSize: 13,
+                                  color: "rgba(67,33,4,0.5)",
+                                  marginBottom: 8,
+                                  fontFamily: "var(--kalpx-font-sans)",
+                                }}
+                              >
+                                {acw!.suggestion.card_header}
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => navigate("/en/mitra/quick-reset")}
+                                style={{
+                                  width: "100%",
+                                  border: "1px solid rgba(201,168,76,0.38)",
+                                  background:
+                                    "linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,250,243,0.96))",
+                                  color: "#432104",
+                                  borderRadius: 18,
+                                  padding: "14px 18px",
+                                  textAlign: "left",
+                                  cursor: "pointer",
+                                  boxShadow: "0 8px 18px rgba(201,168,76,0.12)",
+                                  fontSize: 15,
+                                  fontFamily: "var(--kalpx-font-serif)",
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {acw!.suggestion.label} →
+                              </button>
+                              {acw!.companion_boundary && (
+                                <div
+                                  style={{
+                                    fontSize: 13,
+                                    color: "rgba(67,33,4,0.45)",
+                                    marginTop: 10,
+                                    textAlign: "center",
+                                    fontFamily: "var(--kalpx-font-sans)",
+                                  }}
+                                >
+                                  If this feels heavy to carry,{" "}
+                                  <button
+                                    type="button"
+                                    onClick={() => navigate("/en/mitra/tell-mitra")}
+                                    style={{
+                                      background: "none",
+                                      border: "none",
+                                      cursor: "pointer",
+                                      color: "#C99317",
+                                      fontSize: 13,
+                                      padding: 0,
+                                      textDecoration: "underline",
+                                    }}
+                                  >
+                                    Tell Mitra
+                                  </button>{" "}
+                                  is here.
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <div
+                            style={{
+                              fontFamily: "var(--kalpx-font-serif)",
+                              fontWeight: 700,
+                              fontSize: 18,
+                              color: "#432104",
+                              marginBottom: 6,
+                            }}
+                          >
+                            How are you landing?
+                          </div>
+                          <div
+                            style={{
+                              color: "rgba(67, 33, 4, 0.62)",
+                              fontSize: 14,
+                              lineHeight: 1.5,
+                              marginBottom: 14,
+                            }}
+                          >
+                            One tap. Mitra meets you where you are.
+                          </div>
+                          <div
+                            style={{
+                              display: "grid",
+                              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                              gap: 10,
+                            }}
+                          >
+                            {FEELING_OPTIONS.map((feeling) => {
+                              const isSelected = selectedFeeling === feeling;
+                              return (
+                                <button
+                                  key={feeling}
+                                  type="button"
+                                  onClick={() => void handleFeelingSelect(feeling)}
+                                  aria-pressed={isSelected}
+                                  disabled={feelingLoading}
+                                  style={{
+                                    width: "100%",
+                                    border: isSelected
+                                      ? "1px solid rgba(201,168,76,0.85)"
+                                      : "1px solid rgba(201,168,76,0.38)",
+                                    background: isSelected
+                                      ? "linear-gradient(135deg, rgba(243,220,168,0.95), rgba(255,247,230,0.98))"
+                                      : "rgba(255,255,255,0.78)",
+                                    color: "#432104",
+                                    borderRadius: 999,
+                                    padding: "10px 14px",
+                                    fontSize: 14,
+                                    fontWeight: isSelected ? 700 : 500,
+                                    cursor: feelingLoading ? "not-allowed" : "pointer",
+                                    boxShadow: isSelected
+                                      ? "0 6px 14px rgba(201,168,76,0.18)"
+                                      : "none",
+                                    transition: "all 160ms ease",
+                                    opacity: feelingLoading ? 0.7 : 1,
+                                  }}
+                                >
+                                  {feeling}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </>
+                      )}
                     </div>
-                  )}
-                </div>
+                  );
+                })()}
               </div>
             )}
           </div>

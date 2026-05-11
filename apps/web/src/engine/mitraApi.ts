@@ -447,6 +447,15 @@ export async function postPranaAcknowledge(payload: {
   }
 }
 
+export async function postPranaAcknowledgeDismiss(): Promise<{ dismissed: boolean }> {
+  try {
+    const res = await api.post('mitra/prana-acknowledge/dismiss/');
+    return res.data;
+  } catch {
+    return { dismissed: false };
+  }
+}
+
 // ─── WhyThis Principles ───────────────────────────────────────────────────────
 
 /**

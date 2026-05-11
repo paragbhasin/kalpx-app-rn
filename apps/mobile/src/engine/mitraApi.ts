@@ -423,6 +423,16 @@ export async function mitraPranaAcknowledge(inputData: any): Promise<any> {
   }
 }
 
+/** POST mitra/prana-acknowledge/dismiss/ — Dismiss active check-in window. */
+export async function postPranaAcknowledgeDismiss(): Promise<{ dismissed: boolean }> {
+  try {
+    const resp = await api.post<{ dismissed: boolean }>("/api/mitra/prana-acknowledge/dismiss/");
+    return resp.data;
+  } catch {
+    return { dismissed: false };
+  }
+}
+
 /** POST mitra/trigger-mantras/ — Trigger mantra suggestions. */
 export async function mitraTriggerMantras(inputData: any): Promise<any> {
   try {

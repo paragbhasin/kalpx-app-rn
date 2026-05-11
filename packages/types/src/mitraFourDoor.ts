@@ -59,6 +59,30 @@ export interface QuickCheckinResponse {
   copy: string;
 }
 
+// ── Active Check-in Window (Wave QC-B) ───────────────────────────────────────
+
+export type QuickCheckinPranaType = "agitated" | "drained" | "balanced" | "energized";
+export type QuickCheckinPranaLabel = "Agitated" | "Drained" | "Steady" | "Open";
+
+export interface ActiveCheckinWindowSuggestion {
+  item_id: string;
+  item_type: "quick_reset" | "mantra" | "practice" | "room";
+  label: string;
+  card_header?: string | null;
+}
+
+export interface ActiveCheckinWindow {
+  active: boolean;
+  prana_type?: QuickCheckinPranaType;
+  prana_label?: QuickCheckinPranaLabel;
+  acknowledgment?: string;
+  step?: "step1" | "step2" | "closure" | null;
+  suggestion?: ActiveCheckinWindowSuggestion | null;
+  companion_boundary?: boolean;
+  dismissible?: boolean;
+  closure_copy?: string | null;
+}
+
 // ── Home Response Additions ──────────────────────────────────────────────────
 
 export interface MitraHomeV3Greeting {
@@ -142,6 +166,7 @@ export interface MitraHomeV3Response {
   inner_path_summary: MitraHomeV3InnerPathSummary;
   companion_rhythm: MitraHomeV3CompanionRhythm;
   quick_reset_summary: MitraHomeV3QuickResetSummary;
+  active_checkin_window?: ActiveCheckinWindow;
   tell_mitra_summary: MitraHomeV3TellMitraSummary;
   additional_items_placement: MitraHomeV3AdditionalItemsPlacement;
   reminder_summary: MitraHomeV3ReminderSummary;

@@ -8,7 +8,7 @@ import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
 import { RhythmLibraryPickerModal } from "../../components/mitra/RhythmLibraryPickerModal";
 import { getMitraHomeV3, postRhythmSetup } from "../../engine/mitraApi";
 import type { AppDispatch, RootState } from "../../store";
-import { clearDoorState, setHomeData } from "../../store/doorSlice";
+import { setHomeData } from "../../store/doorSlice";
 
 type LocalItem = {
   slot: RhythmTimeBand;
@@ -99,7 +99,6 @@ export function RhythmSetupPage() {
       });
       const homeData = await getMitraHomeV3();
       dispatch(setHomeData(homeData));
-      dispatch(clearDoorState());
       navigate("/en/mitra/rhythm");
     } catch {
       setError("Could not save. Please try again.");

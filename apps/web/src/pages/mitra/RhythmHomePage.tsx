@@ -121,7 +121,11 @@ function BandSection({
 
 const SHELL_STYLE: React.CSSProperties = {
   minHeight: "100dvh",
-  background: "#FFF8EF",
+  backgroundColor: "#FFF8EF",
+  backgroundImage: 'url("/beige_bg.png")',
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  backgroundRepeat: "no-repeat",
   display: "flex",
   flexDirection: "column",
 };
@@ -189,7 +193,21 @@ export function RhythmHomePage() {
           padding: "24px 16px calc(92px + env(safe-area-inset-bottom))",
         }}
       >
-        <div style={{ width: "100%", maxWidth: 420 }}>
+        <div style={{ width: "100%", maxWidth: 420, position: "relative" }}>
+          <img
+            src="/leaves-bird.png"
+            alt=""
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              top: -180,
+              right: -22,
+              width: 245,
+              pointerEvents: "none",
+              userSelect: "none",
+              opacity: 0.5,
+            }}
+          />
           <button
             onClick={() => navigate("/en/mitra")}
             style={{

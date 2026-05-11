@@ -31,7 +31,7 @@ import LibrarySearchModal, { LibrarySearchItem } from '../../components/LibraryS
 import { executeAction } from '../../engine/actionExecutor';
 import { useScreenStore } from '../../engine/useScreenBridge';
 import { mitraJourneyHomeV3, postRhythmSetup, postRhythmSuggest } from '../../engine/mitraApi';
-import { clearDoorState, setHomeData } from '../../store/doorSlice';
+import { setHomeData } from '../../store/doorSlice';
 import { screenActions, loadScreenWithData, goBackWithData } from '../../store/screenSlice';
 import { Fonts } from '../../theme/fonts';
 
@@ -235,7 +235,6 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
       await postRhythmSetup({ items, reminder_preference: wizardReminderPref });
       const newHomeData = await mitraJourneyHomeV3();
       dispatch(setHomeData(newHomeData));
-      dispatch(clearDoorState());
       setWizardStep('confirmation');
     } catch {
       setWizardError('Could not save. Please try again.');
@@ -313,7 +312,6 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
       await postRhythmSetup({ items: allItems, reminder_preference: reminderPref });
       const newHomeData = await mitraJourneyHomeV3();
       dispatch(setHomeData(newHomeData));
-      dispatch(clearDoorState());
       navigation.navigate('RhythmHome' as any);
     } catch {
       setErrorMsg('Could not save. Please try again.');

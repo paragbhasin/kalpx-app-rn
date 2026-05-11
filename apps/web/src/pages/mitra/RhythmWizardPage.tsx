@@ -18,7 +18,7 @@ import {
   postRhythmSuggest,
 } from "../../engine/mitraApi";
 import type { AppDispatch, RootState } from "../../store";
-import { clearDoorState, setHomeData } from "../../store/doorSlice";
+import { setHomeData } from "../../store/doorSlice";
 import { useScreenState } from "../../store/screenSlice";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -230,6 +230,9 @@ export function RhythmWizardPage() {
 
   const homeData = useSelector((s: RootState) => s.door.homeData);
   const screenState = useScreenState();
+  const hasExistingRhythm = homeData?.companion_rhythm?.has_rhythm === true;
+  const wizardBackTarget =
+    isEditMode || hasExistingRhythm ? "/en/mitra/rhythm" : "/en/mitra";
 
   const [step, setStep] = useState<WizardStep>(
     isEditMode ? "suggestion" : "moments",
@@ -374,7 +377,6 @@ export function RhythmWizardPage() {
       });
       const newHome = await getMitraHomeV3();
       dispatch(setHomeData(newHome));
-      dispatch(clearDoorState());
       setStep("confirmation");
     } catch {
       setError("Could not save. Please try again.");
@@ -419,11 +421,11 @@ export function RhythmWizardPage() {
 
   function handleBack() {
     if (step === "moments" || (isEditMode && step === "suggestion")) {
-      navigate("/en/mitra/rhythm");
+      navigate(wizardBackTarget);
     } else if (step === "purpose") setStep("moments");
     else if (step === "suggestion") setStep(isEditMode ? "moments" : "purpose");
     else if (step === "reminders") setStep("suggestion");
-    else if (step === "confirmation") navigate("/en/mitra/rhythm");
+    else if (step === "confirmation") navigate("/en/mitra");
   }
 
   // ── Render ───────────────────────────────────────────────────────────────────
@@ -477,9 +479,11 @@ export function RhythmWizardPage() {
     <MitraMobileShell backgroundImage="/beige_bg.png">
       <main style={main}>
         <div style={container}>
-          <button onClick={handleBack} style={backBtn}>
-            ← Back
-          </button>
+          {step !== "confirmation" && (
+            <button onClick={handleBack} style={backBtn}>
+              ← Back
+            </button>
+          )}
 
           {step !== "confirmation" && <StepDots step={step} />}
 
@@ -1207,6 +1211,7 @@ export function RhythmWizardPage() {
                       padding: "10px 4px",
                       borderRadius: 20,
                       fontSize: 13,
+                      fontWeight: 900,
                       fontFamily: SERIF,
                       cursor: "pointer",
                       border: `1px solid ${reminderPref === opt.value ? GOLD : "rgba(201,168,76,0.4)"}`,
@@ -1298,8 +1303,26 @@ export function RhythmWizardPage() {
           {/* ── Step 5: Confirmation ───────────────────────────────────── */}
           {step === "confirmation" && (
             <>
+              <img
+                src="/leaves-bird.png"
+                alt=""
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  top: -180,
+                  right: -22,
+                  width: 245,
+                  pointerEvents: "none",
+                  userSelect: "none",
+                  opacity: 0.5,
+                }}
+              />
               <div style={{ textAlign: "center", marginBottom: 32 }}>
-                <div style={{ fontSize: 36, marginBottom: 12 }}>✦</div>
+                <div
+                  style={{ fontSize: 36, marginBottom: 12, color: "#D4A017" }}
+                >
+                  ✦
+                </div>
                 <h2
                   style={{
                     fontFamily: SERIF,
@@ -1334,7 +1357,13 @@ export function RhythmWizardPage() {
                   >
                     <div style={{ flex: 1 }}>
                       <div
-                        style={{ fontSize: 12, color: LIGHT, marginBottom: 2 }}
+                        style={{
+                          fontSize: 12,
+                          color: "#D4A017",
+                          marginBottom: 2,
+                          textTransform: "uppercase",
+                          fontWeight: 700,
+                        }}
                       >
                         {MOMENT_COPY[band].label}
                       </div>
@@ -1358,7 +1387,7 @@ export function RhythmWizardPage() {
                         textTransform: "uppercase",
                         background: "#F5F0E0",
                         borderRadius: 6,
-                        padding: "2px 8px",
+                        padding: "8px 8px",
                       }}
                     >
                       {itemTypeLabel(item.item_type)}

@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { ROOM_REFLECTION_OPTIONS, ROOM_GUIDED_COPY, ROOM_COMPLETION_HEADER } from "@kalpx/contracts";
+import { ROOM_REFLECTION_OPTIONS, ROOM_GUIDED_COPY, ROOM_COMPLETION_HEADER, ROOM_NEXT_STEP_LINE } from "@kalpx/contracts";
 import type { VerifiedRoomId } from "@kalpx/types";
 import { postRoomReflection, trackRoomTelemetry } from "../../engine/mitraApi";
 
@@ -93,6 +93,11 @@ const RoomReflectionSheet: React.FC<Props> = ({
               <Text style={styles.nextStepIntro}>
                 You can stay, continue, or come back when you're ready.
               </Text>
+              {ROOM_NEXT_STEP_LINE[roomId as VerifiedRoomId] ? (
+                <Text style={styles.nextStepLine}>
+                  {ROOM_NEXT_STEP_LINE[roomId as VerifiedRoomId]}
+                </Text>
+              ) : null}
               {[
                 { key: "finish_here",  label: ROOM_GUIDED_COPY.nextStep.finishHere },
                 { key: "tell_mitra",   label: ROOM_GUIDED_COPY.nextStep.tellMitraMore },
@@ -151,6 +156,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 20,
     marginBottom: 20,
+  },
+  nextStepLine: {
+    fontSize: 14,
+    color: "#432104",
+    textAlign: "center",
+    fontStyle: "italic",
+    marginBottom: 16,
+    lineHeight: 20,
   },
   option: {
     paddingVertical: 13,

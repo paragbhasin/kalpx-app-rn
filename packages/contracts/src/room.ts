@@ -43,15 +43,25 @@ export const ROOM_REFLECTION_OPTIONS: Record<VerifiedRoomId, RoomReflectionOptio
 };
 
 // D-C Surface A: per-room completion acknowledgement header shown in RoomReflectionSheet.
-// COPY STATUS: DRAFT — requires copy freeze before production release.
-// These lines acknowledge the completion without implying therapy or guaranteed outcomes.
+// COPY STATUS: FROZEN — approved by founder 2026-05-11.
 export const ROOM_COMPLETION_HEADER: Partial<Record<VerifiedRoomId, string>> = {
-  room_stillness:  "You gave yourself a moment to return.",
-  room_connection: "You stayed with what needed tenderness.",
-  room_release:    "You made space to set something down.",
-  room_clarity:    "You paused long enough for one thing to become clearer.",
-  room_growth:     "You met the next step with sincerity.",
-  room_joy:        "You noticed what was already light.",
+  room_stillness:  "Pratyahara. The turning inward was the practice.",
+  room_connection: "Bhakti. The heart turned.",
+  room_release:    "Sharanagati. One offering, however small.",
+  room_clarity:    "Viveka — the space was given.",
+  room_growth:     "Tapasya. You stayed.",
+  room_joy:        "Ananda. You noticed.",
+};
+
+// §5.2 post-completion next-step suggestion shown in RoomReflectionSheet next_step phase.
+// COPY STATUS: FROZEN — approved by founder 2026-05-11.
+export const ROOM_NEXT_STEP_LINE: Partial<Record<VerifiedRoomId, string>> = {
+  room_stillness:  "When the noise returns, this room is here.",
+  room_connection: "Carry one softened feeling with you.",
+  room_release:    "Leave what you can leave. Return gently.",
+  room_clarity:    "One clear thing is enough for now.",
+  room_growth:     "One small step is enough to begin.",
+  room_joy:        "Let the lightness stay simple.",
 };
 
 export const ROOM_GUIDED_COPY = {

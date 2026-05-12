@@ -11,7 +11,18 @@ import {
   View,
 } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import { DOOR_LABELS } from "@kalpx/contracts";
+import {
+  DOOR_LABELS,
+  QUICK_CHANT_HAS_MANTRA_SUBTITLE,
+  QUICK_CHANT_HISTORY_ONLY_SUBTITLE,
+  QUICK_CHANT_NO_STATE_SUBTITLE,
+  TELL_MITRA_HAS_HISTORY_SUBTITLE,
+  TELL_MITRA_ACTIVE_PATH_SUBTITLE,
+  TELL_MITRA_DEFAULT_SUBTITLE,
+  SEGMENT_RHYTHM_NO_STATE_SUBTITLE,
+  SEGMENT_INNER_PATH_NO_STATE_SUBTITLE,
+  type MitraHomeSegment,
+} from "@kalpx/contracts";
 import type { QuickCheckinPranaLabel } from "@kalpx/types";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -182,6 +193,11 @@ export default function FourDoorHomeContainer({
 
   const rhythmSubtitle = useMemo(() => {
     const rhythmSlot = homeData?.companion_rhythm?.[rhythmBand];
+    const hasRhythmState = homeData?.companion_rhythm?.has_rhythm === true;
+    const segVal = (homeData?.user_surface_state?.segment ?? "new") as MitraHomeSegment;
+    if (!hasRhythmState) {
+      return SEGMENT_RHYTHM_NO_STATE_SUBTITLE[segVal] || "Build a gentle daily rhythm.";
+    }
     return (
       homeData?.my_rhythm_summary?.next_practice_label ??
       rhythmSlot?.items?.[0]?.title_snapshot ??
@@ -193,16 +209,30 @@ export default function FourDoorHomeContainer({
 
   const innerPathSubtitle = useMemo(() => {
     const ips = homeData?.inner_path_summary;
+    const segVal = (homeData?.user_surface_state?.segment ?? "new") as MitraHomeSegment;
     return ips?.has_active_path
       ? `Day ${ips.day_number} of ${ips.total_days}`
-      : (ips?.path_title ?? doorStates?.inner_path?.subtitle ?? "");
+      : (ips?.path_title ?? doorStates?.inner_path?.subtitle ?? SEGMENT_INNER_PATH_NO_STATE_SUBTITLE[segVal]);
   }, [doorStates, homeData]);
-  const quickResetSubtitle =
-    doorStates?.quick_reset?.subtitle ??
-    homeData?.quick_reset_summary?.subtitle ??
-    "Return to your sound.";
-  const tellMitraSubtitle =
-    doorStates?.tell_mitra?.subtitle ?? "What is on your mind right now?";
+  const seg = (homeData?.user_surface_state?.segment ?? "new") as MitraHomeSegment;
+  const hasMantra = homeData?.user_surface_state?.has_quick_chant_mantra === true;
+  const hasQuickChantHistory = homeData?.user_surface_state?.has_quick_chant_history === true;
+  const hasTMHistory = homeData?.user_surface_state?.has_tell_mitra_history === true;
+  const hasIP = homeData?.user_surface_state?.has_inner_path === true;
+
+  // Quick Chant subtitle — 3-way conditional (CRITICAL: only show "chosen mantra" if has_quick_chant_mantra)
+  const quickResetSubtitle = hasMantra
+    ? QUICK_CHANT_HAS_MANTRA_SUBTITLE
+    : hasQuickChantHistory
+      ? QUICK_CHANT_HISTORY_ONLY_SUBTITLE
+      : QUICK_CHANT_NO_STATE_SUBTITLE;
+
+  // Tell Mitra subtitle — conditional on state
+  const tellMitraSubtitle = hasTMHistory
+    ? TELL_MITRA_HAS_HISTORY_SUBTITLE
+    : (hasIP || seg === "rhythm_and_path")
+      ? TELL_MITRA_ACTIVE_PATH_SUBTITLE
+      : TELL_MITRA_DEFAULT_SUBTITLE;
 
   if (loading && !homeData) {
     return (

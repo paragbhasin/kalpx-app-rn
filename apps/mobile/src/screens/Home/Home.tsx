@@ -36,6 +36,7 @@ import store, { AppDispatch, RootState } from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
 import ContinueJourney from "./ContinueJourney";
+import FourDoorHomeContainer from "../../containers/FourDoorHomeContainer";
 // Legacy WelcomeBack screen removed 2026-04-18 — all returning users
 // (3d+, including 30+d) now flow through ContinueJourney →
 // GET /api/mitra/journey/home/ which resolves to M12 (short-gap or
@@ -86,6 +87,7 @@ export default function Home() {
 
   const [mitraJourneyId, setMitraJourneyId] = useState<string | null>(null);
   const [hasActiveJourney, setHasActiveJourney] = useState(false);
+  const [hasPartialState, setHasPartialState] = useState(false);
   const [journeyDay, setJourneyDay] = useState<number>(1);
   const [checkingJourney, setCheckingJourney] = useState(false);
   // Mitra v3 — guard auto-route so we don't re-navigate on every Home focus.
@@ -189,10 +191,24 @@ export default function Home() {
           } else {
             setMitraJourneyId(null);
             setHasActiveJourney(false);
-            // Authed user with no journey → welcome_onboarding turn_1.
+            // Authed user with no journey — check for partial companion state (Stream O).
             if (!v3AutoRoutedRef.current) {
               v3AutoRoutedRef.current = true;
-              navigateToMitra(false);
+              try {
+                const { mitraJourneyHomeV3 } = require("../../engine/mitraApi");
+                const homeResp = await mitraJourneyHomeV3();
+                const segment = homeResp?.user_surface_state?.segment;
+                if (segment && segment !== "new") {
+                  // Has companion state (rhythm/chant/TM/checkin) → FourDoor home
+                  setHasPartialState(true);
+                } else {
+                  // True zero state → entry intention screen
+                  navigation.navigate("MitraIntention" as any);
+                }
+              } catch {
+                // Fallback to intention screen on API error
+                navigation.navigate("MitraIntention" as any);
+              }
             }
           }
         } catch (err) {
@@ -787,7 +803,19 @@ export default function Home() {
       />
       */}
 
-      {mitraJourneyId ? (
+      {hasPartialState ? (
+        // Stream O: partial-state user (has companion data but no active journey) → FourDoor home
+        <FourDoorHomeContainer
+          userName={
+            profileNameFromRedux ||
+            profileNameFromStorage ||
+            user?.name ||
+            user?.firstName ||
+            user?.email?.split("@")[0] ||
+            "friend"
+          }
+        />
+      ) : mitraJourneyId ? (
         // ContinueJourney v2 — backend-driven via GET /journey/home/.
         // All chip copy + navigation (including 30+d welcome-back)
         // comes from the backend response; the parent only provides
@@ -815,7 +843,7 @@ export default function Home() {
             <Text style={styles.heroQuote}>
               "In this path, no effort is ever lost."
             </Text>
-            <Text style={styles.heroSource}>— Bhagavad Gita 6.5</Text>
+            <Text style={styles.heroSource}>— Bhagavad Gita 2.40</Text>
             <View style={styles.turnOneHeadlineDivider}>
               <View style={styles.turnOneDividerLine} />
               <Ionicons name="diamond" size={10} color="#c7a258" />
@@ -853,7 +881,7 @@ export default function Home() {
           <Image source={require("../../../assets/new_home_lotus.png")} />
           {/* <View style={{ height: 220 }} /> */}
           <TouchableOpacity
-            onPress={() => navigateToMitra(false)}
+            onPress={() => navigation.navigate("MitraIntention" as any)}
             activeOpacity={0.85}
             style={{ borderRadius: 28 }}
             testID="onboarding_begin_journey_cta"
@@ -865,7 +893,7 @@ export default function Home() {
               end={{ x: 1, y: 0 }}
               style={styles.ctaButton}
             >
-              <Text style={styles.ctaText}>Begin your journey →</Text>
+              <Text style={styles.ctaText}>Begin with Mitra →</Text>
             </LinearGradient>
           </TouchableOpacity>
         </ScrollView>

@@ -169,6 +169,10 @@ function itemTypeLabel(t: string): string {
   return "Library";
 }
 
+function sortBands(bands: RhythmTimeBand[]): RhythmTimeBand[] {
+  return BANDS.filter((band) => bands.includes(band));
+}
+
 // ─── Shared style tokens ──────────────────────────────────────────────────────
 
 const SERIF = "var(--kalpx-font-serif)";
@@ -307,7 +311,9 @@ export function RhythmWizardPage() {
 
   function toggleMoment(band: RhythmTimeBand) {
     setSelectedMoments((prev) =>
-      prev.includes(band) ? prev.filter((b) => b !== band) : [...prev, band],
+      prev.includes(band)
+        ? sortBands(prev.filter((b) => b !== band))
+        : sortBands([...prev, band]),
     );
   }
 
@@ -519,12 +525,44 @@ export function RhythmWizardPage() {
                 style={{
                   color: MID,
                   fontSize: 15,
-                  marginBottom: 34,
+                  marginBottom: 18,
                   lineHeight: 1.6,
                 }}
               >
                 When would you like Mitra to support you?
               </p>
+
+              <div
+                style={{
+                  marginBottom: 24,
+                  padding: "14px 16px",
+                  borderRadius: 16,
+                  border: "1px solid rgba(228, 205, 166, 0.55)",
+                  background:
+                    "linear-gradient(180deg, rgba(255,250,246,0.92) 0%, rgba(252,244,237,0.88) 100%)",
+                  boxShadow: "0 10px 24px rgba(201,168,76,0.08)",
+                }}
+              >
+                <div
+                  style={{
+                    color: "#8E5D99",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    marginBottom: 4,
+                  }}
+                >
+                  You can select more than one
+                </div>
+                <div
+                  style={{
+                    color: MID,
+                    fontSize: 13,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  Choose all moments when you&apos;d like Mitra to walk with you.
+                </div>
+              </div>
 
               {BANDS.map((band) => {
                 const selected = selectedMoments.includes(band);

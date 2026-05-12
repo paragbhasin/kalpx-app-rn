@@ -18,6 +18,7 @@ const IMMERSIVE_PREFIXES = [
   '/en/mitra/trigger',
   '/en/mitra/checkin',
   '/en/mitra/start',
+  '/en/mitra/intention',
   '/en/mitra/onboarding',
   '/en/mitra/welcome-back',
 ];

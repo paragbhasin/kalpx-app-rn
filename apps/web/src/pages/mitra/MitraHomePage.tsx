@@ -1063,7 +1063,7 @@ export function MitraHomePage() {
               }}
             />
             <Link
-              to="/en/mitra/intention"
+              to="/en/mitra/start"
               style={{
                 display: "block",
                 padding: "10px",

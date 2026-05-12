@@ -63,7 +63,7 @@ export function MitraIntentionPage() {
       case "inner_path":
         localStorage.setItem("mitra_entry_intention", "inner_path");
         navigate(
-          "/en/mitra/onboarding?containerId=welcome_onboarding&stateId=turn_1",
+          "/en/mitra/onboarding?containerId=welcome_onboarding&stateId=turn_2",
         );
         break;
       case "quick_chant":
@@ -88,7 +88,7 @@ export function MitraIntentionPage() {
       case "inner_path":
         localStorage.setItem("mitra_entry_intention", "inner_path");
         navigate(
-          "/en/mitra/onboarding?containerId=welcome_onboarding&stateId=turn_1",
+          "/en/mitra/onboarding?containerId=welcome_onboarding&stateId=turn_2",
         );
         break;
       case "quick_chant":

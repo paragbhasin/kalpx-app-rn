@@ -203,11 +203,11 @@ export default function Home() {
                   setHasPartialState(true);
                 } else {
                   // True zero state → entry intention screen
-                  navigation.navigate("MitraIntention" as any);
+                  navigation.navigate("MitraStart" as any);
                 }
               } catch {
                 // Fallback to intention screen on API error
-                navigation.navigate("MitraIntention" as any);
+                navigation.navigate("MitraStart" as any);
               }
             }
           }
@@ -885,7 +885,7 @@ export default function Home() {
           <Image source={require("../../../assets/new_home_lotus.png")} />
           {/* <View style={{ height: 220 }} /> */}
           <TouchableOpacity
-            onPress={() => navigation.navigate("MitraIntention" as any)}
+            onPress={() => navigation.navigate("MitraStart" as any)}
             activeOpacity={0.85}
             style={{ borderRadius: 28 }}
             testID="onboarding_begin_journey_cta"

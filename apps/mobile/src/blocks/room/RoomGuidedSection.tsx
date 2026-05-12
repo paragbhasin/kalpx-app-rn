@@ -3,6 +3,7 @@
  * Recommended action card + secondary links + exit.
  * Replaces RoomActionList when entry_context.recommended_first_action_id is set.
  */
+import { ROOM_GUIDED_COPY } from "@kalpx/contracts";
 import React, { useState } from "react";
 import {
   Modal,
@@ -13,7 +14,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { ROOM_GUIDED_COPY } from "@kalpx/contracts";
 import { executeAction } from "../../engine/actionExecutor";
 import { trackRoomTelemetry } from "../../engine/mitraApi";
 import { useScreenStore } from "../../engine/useScreenBridge";
@@ -35,9 +35,11 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   const renderId: string = (envelope as any).provenance?.render_id ?? "";
 
   const recAction = recId
-    ? envelope.actions.find((a: any) => a.action_id === recId) ?? null
+    ? (envelope.actions.find((a: any) => a.action_id === recId) ?? null)
     : null;
-  const nonExitActions = envelope.actions.filter((a: any) => a.action_type !== "exit");
+  const nonExitActions = envelope.actions.filter(
+    (a: any) => a.action_type !== "exit",
+  );
 
   const [whyExpanded, setWhyExpanded] = useState(false);
   const [stepsOpen, setStepsOpen] = useState(false);
@@ -45,9 +47,8 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   const [stepAction, setStepAction] = useState<any | null>(null);
   const [stepPayload, setStepPayload] = useState<StepPayload | null>(null);
   const [stepLabel, setStepLabel] = useState("");
-  const [pendingCategory, setPendingCategory] = useState<InquiryCategory | null>(
-    null,
-  );
+  const [pendingCategory, setPendingCategory] =
+    useState<InquiryCategory | null>(null);
 
   const { loadScreen, goBack } = useScreenStore();
   const actionCtx = buildActionCtx({ loadScreen, goBack });
@@ -58,16 +59,17 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   }
 
   function handleBegin() {
-    if (__DEV__) console.log('[S17-D4B] handleBegin', {
-      recId,
-      recAction_found: !!recAction,
-      recAction_type: (recAction as any)?.action_type,
-      runner_payload_present: !!(recAction as any)?.runner_payload,
-      inquiry_payload_present: !!(recAction as any)?.inquiry_payload,
-      actions_count: envelope.actions.length,
-      action_ids: envelope.actions.map((a: any) => a.action_id),
-      render_id: renderId,
-    });
+    if (__DEV__)
+      console.log("[S17-D4B] handleBegin", {
+        recId,
+        recAction_found: !!recAction,
+        recAction_type: (recAction as any)?.action_type,
+        runner_payload_present: !!(recAction as any)?.runner_payload,
+        inquiry_payload_present: !!(recAction as any)?.inquiry_payload,
+        actions_count: envelope.actions.length,
+        action_ids: envelope.actions.map((a: any) => a.action_id),
+        render_id: renderId,
+      });
     if (!recAction) return;
     if (envelope.room_id) {
       actionCtx.setScreenValue(envelope.room_id, "room_id");
@@ -91,13 +93,23 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
       return;
     }
     if (__DEV__) {
-      console.warn("[S17-D4B] handleBegin: unsupported action type", actionType);
+      console.warn(
+        "[S17-D4B] handleBegin: unsupported action type",
+        actionType,
+      );
     }
   }
 
   function handleExit() {
-    void trackRoomTelemetry({ event_type: 'room_exited' as any, room_id: roomId, surface: 'room' });
-    void executeAction({ type: "exit_tapped", payload: { room_id: roomId } } as any, actionCtx);
+    void trackRoomTelemetry({
+      event_type: "room_exited" as any,
+      room_id: roomId,
+      surface: "room",
+    });
+    void executeAction(
+      { type: "exit_tapped", payload: { room_id: roomId } } as any,
+      actionCtx,
+    );
   }
 
   function dispatchInquiryOpened(action: any) {
@@ -115,7 +127,10 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     );
   }
 
-  function dispatchInquiryCategorySelected(action: any, category: InquiryCategory) {
+  function dispatchInquiryCategorySelected(
+    action: any,
+    category: InquiryCategory,
+  ) {
     void executeAction(
       {
         type: "room_inquiry_category_selected",
@@ -155,7 +170,10 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     const actionType: string = action?.action_type ?? "";
     setStepsOpen(false);
 
-    if (actionType === "inquiry" && action?.inquiry_payload?.categories?.length) {
+    if (
+      actionType === "inquiry" &&
+      action?.inquiry_payload?.categories?.length
+    ) {
       setInquiryAction(action);
       return;
     }
@@ -178,7 +196,8 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
           type: "start_runner",
           payload: {
             source: rp.runner_source ?? "support_room",
-            variant: (rp.runner_kind ?? actionType.replace("runner_", "")) || "mantra",
+            variant:
+              (rp.runner_kind ?? actionType.replace("runner_", "")) || "mantra",
             item: rp,
             action_id: action.action_id,
           },
@@ -193,8 +212,11 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     setInquiryAction(null);
     setPendingCategory(category);
     const durationMatch = templateId.match(/_(\d+)min$/);
-    const durationSec = durationMatch ? parseInt(durationMatch[1], 10) * 60 : null;
-    const practicePrompt = category.reflective_prompt || category.prompt || null;
+    const durationSec = durationMatch
+      ? parseInt(durationMatch[1], 10) * 60
+      : null;
+    const practicePrompt =
+      category.reflective_prompt || category.prompt || null;
     setStepAction(inquiryAction);
     setStepPayload({
       template_id: templateId,
@@ -244,10 +266,16 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     const extraPayload: Record<string, unknown> = {
       ...(extra.text ? { text: extra.text } : {}),
       ...(extra.grounding ? { grounding: extra.grounding } : {}),
-      ...(pendingCategory ? { category_id: pendingCategory.id, source: "inquiry" } : {}),
+      ...(pendingCategory
+        ? { category_id: pendingCategory.id, source: "inquiry" }
+        : {}),
     };
 
-    dispatchStepCompleted(stepAction, String(stepPayload.template_id), extraPayload);
+    dispatchStepCompleted(
+      stepAction,
+      String(stepPayload.template_id),
+      extraPayload,
+    );
     if (pendingCategory) triggerRoomReflection();
     setStepAction(null);
     setStepPayload(null);
@@ -259,7 +287,9 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     <View style={styles.root} testID="room_guided_section">
       {/* Recommended action card */}
       <View style={styles.card} testID="room_recommended_card">
-        <Text style={styles.cardTitle}>{recTitle || (recAction as any)?.label || ""}</Text>
+        <Text style={styles.cardTitle}>
+          {recTitle || (recAction as any)?.label || ""}
+        </Text>
         {!!recDesc && <Text style={styles.cardDesc}>{recDesc}</Text>}
         <TouchableOpacity
           style={styles.beginBtn}
@@ -276,7 +306,11 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
         {!!ctx.why_this_room_line && (
           <TouchableOpacity
             onPress={() => {
-              void trackRoomTelemetry({ event_type: 'why_this_viewed' as any, room_id: roomId, surface: 'room' });
+              void trackRoomTelemetry({
+                event_type: "why_this_viewed" as any,
+                room_id: roomId,
+                surface: "room",
+              });
               setWhyExpanded((v) => !v);
             }}
             testID="room_guided_why_this"
@@ -350,7 +384,8 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
         onCancel={() => setInquiryAction(null)}
         onOpened={() => inquiryAction && dispatchInquiryOpened(inquiryAction)}
         onCategorySelected={(category) =>
-          inquiryAction && dispatchInquiryCategorySelected(inquiryAction, category)
+          inquiryAction &&
+          dispatchInquiryCategorySelected(inquiryAction, category)
         }
         onLaunchPractice={handleLaunchPractice}
         onSubmitJournal={handleSubmitJournal}
@@ -419,7 +454,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   linkGold: { fontSize: 13, color: "#8B6914", textDecorationLine: "underline" },
-  linkMuted: { fontSize: 13, color: "#8A7968", textDecorationLine: "underline" },
+  linkMuted: {
+    fontSize: 13,
+    color: "#8A7968",
+    textDecorationLine: "underline",
+  },
   whyBox: {
     backgroundColor: "rgba(248,242,232,0.8)",
     borderRadius: 10,

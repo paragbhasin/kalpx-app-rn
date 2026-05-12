@@ -187,9 +187,9 @@ const CARRY_MODAL_BY_CONTEXT: Record<string, Record<string, CarryModalCopy>> = {
     relationships: {
       title: "Name what you are releasing in this relationship",
       sanatan_context:
-        "Letting go of what we expect from others is itself a form of love.",
+        "Sambandha reminds us that even one true bond can hold us.",
       why_we_ask:
-        "In a relationship, naming what you are releasing helps you separate from what you cannot control.",
+        "Naming someone helps you return from feeling alone to one thread of care.",
       prompt: "What are you ready to release in this relationship for now?",
       placeholder: "Write one word or a few lines…",
       primary_label: "Save this release",
@@ -634,7 +634,7 @@ export function CarryCaptureModal({
               </div>
             </div>
 
-            {copy.sanatan_context && (
+            {copy.why_we_ask && (
               <p
                 style={{
                   fontSize: 14,
@@ -646,10 +646,10 @@ export function CarryCaptureModal({
                   maxWidth: 560,
                 }}
               >
-                {copy.sanatan_context}
+                {copy.why_we_ask}
               </p>
             )}
-            {copy.why_we_ask && (
+            {copy.sanatan_context && (
               <p
                 style={{
                   fontSize: 14,
@@ -660,7 +660,7 @@ export function CarryCaptureModal({
                   maxWidth: 640,
                 }}
               >
-                {copy.why_we_ask}
+                {copy.sanatan_context}
               </p>
             )}
             <p

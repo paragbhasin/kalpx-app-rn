@@ -7,6 +7,8 @@ import {
 } from "@kalpx/contracts";
 import React, { useCallback } from "react";
 import {
+  Image,
+  ImageBackground,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -17,8 +19,36 @@ import {
 import { useSelector } from "react-redux";
 import store from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
+import { Fonts } from "../../theme/fonts";
 
 const PENDING_KEY = "mitra_intention_pending";
+
+const OPTION_ACCENTS = {
+  daily_rhythm: {
+    icon: require("../../../assets/mitra3.png"),
+    iconBg: "rgba(248, 238, 209, 0.72)",
+    chipBg: "rgba(245, 222, 166, 0.34)",
+    chipColor: "#C18B12",
+  },
+  inner_path: {
+    icon: require("../../../assets/mitra1.png"), // Using best available
+    iconBg: "rgba(248, 238, 209, 0.72)",
+    chipBg: "rgba(222, 200, 232, 0.48)",
+    chipColor: "#8E5D99",
+  },
+  quick_chant: {
+    icon: require("../../../assets/mitra2.png"),
+    iconBg: "rgba(248, 238, 209, 0.72)",
+    chipBg: "rgba(225, 228, 190, 0.5)",
+    chipColor: "#8E9440",
+  },
+  tell_mitra: {
+    icon: require("../../../assets/mitra4.png"),
+    iconBg: "rgba(248, 238, 209, 0.72)",
+    chipBg: "rgba(247, 213, 179, 0.48)",
+    chipColor: "#D27A27",
+  },
+} as const;
 
 export default function MitraIntentionScreen() {
   const navigation = useNavigation<any>();
@@ -26,7 +56,6 @@ export default function MitraIntentionScreen() {
     (state: any) => !!(state.login?.user || state.socialLoginReducer?.user),
   );
 
-  // After returning from Login, pick up the door the guest originally selected.
   useFocusEffect(
     useCallback(() => {
       if (!isLoggedIn) return;
@@ -36,7 +65,7 @@ export default function MitraIntentionScreen() {
         await AsyncStorage.removeItem(PENDING_KEY);
         await executeDoor(pending);
       })();
-    }, [isLoggedIn]), // eslint-disable-line react-hooks/exhaustive-deps
+    }, [isLoggedIn]),
   );
 
   async function executeDoor(optionId: string) {
@@ -82,95 +111,171 @@ export default function MitraIntentionScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        showsVerticalScrollIndicator={false}
-      >
-        <Text style={styles.heading}>{ENTRY_INTENTION_HEADING}</Text>
-        {ENTRY_INTENTION_SUBTEXT.split("\n\n").map((para, i) => (
-          <Text key={i} style={[styles.subtext, i > 0 && styles.subtextSpacing]}>
-            {para}
-          </Text>
-        ))}
+    <ImageBackground
+      source={require("../../../assets/beige_bg.png")}
+      style={styles.container}
+    >
+      <SafeAreaView style={styles.safe}>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.header}>
+            <Text style={styles.heading}>{ENTRY_INTENTION_HEADING}</Text>
+            
+            <View style={styles.divider}>
+              <View style={styles.line} />
+              <Image 
+                source={require("../../../assets/lotus_icon.png")} 
+                style={styles.lotusIcon}
+              />
+              <View style={styles.line} />
+            </View>
 
-        <View style={styles.options}>
-          {ENTRY_INTENTION_OPTIONS.map((opt) => (
-            <TouchableOpacity
-              key={opt.id}
-              activeOpacity={0.85}
-              onPress={() => void handleSelect(opt.id)}
-              style={styles.card}
-            >
-              <Text style={styles.cardTitle}>{opt.title}</Text>
-              <Text style={styles.cardBody}>{opt.body}</Text>
-              <Text style={styles.cardCta}>{opt.cta} →</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+            {ENTRY_INTENTION_SUBTEXT.split("\n\n").map((para, i) => (
+              <Text key={i} style={styles.subtext}>
+                {para}
+              </Text>
+            ))}
+          </View>
+
+          <View style={styles.options}>
+            {ENTRY_INTENTION_OPTIONS.map((opt) => {
+              const accent = (OPTION_ACCENTS as any)[opt.id] || OPTION_ACCENTS.daily_rhythm;
+              return (
+                <TouchableOpacity
+                  key={opt.id}
+                  activeOpacity={0.85}
+                  onPress={() => void handleSelect(opt.id)}
+                  style={styles.card}
+                >
+                  <View style={[styles.iconContainer, { backgroundColor: accent.iconBg }]}>
+                    <Image source={accent.icon} style={styles.optionIcon} />
+                  </View>
+                  <View style={styles.cardContent}>
+                    <Text style={styles.cardTitle}>{opt.title}</Text>
+                    <Text style={styles.cardBody}>{opt.body}</Text>
+                    <View style={[styles.chip, { backgroundColor: accent.chipBg }]}>
+                      <Text style={[styles.chipText, { color: accent.chipColor }]}>
+                        {opt.cta} →
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   safe: {
     flex: 1,
-    backgroundColor: "#FFF8EF",
   },
   scroll: {
     paddingHorizontal: 20,
     paddingTop: 32,
     paddingBottom: 48,
   },
+  header: {
+    alignItems: "center",
+    marginBottom: 32,
+  },
   heading: {
-    fontFamily: "Cormorant-Bold",
-    fontSize: 26,
+    fontFamily: Fonts.serif.bold,
+    fontSize: 32,
     color: "#432104",
-    marginBottom: 10,
+    textAlign: "center",
+    lineHeight: 40,
+    marginBottom: 16,
+  },
+  divider: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+    marginBottom: 20,
+  },
+  line: {
+    width: 100,
+    height: 1,
+    backgroundColor: "rgba(214, 166, 58, 0.42)",
+  },
+  lotusIcon: {
+    width: 22,
+    height: 22,
+    tintColor: "#D6A63A",
   },
   subtext: {
-    fontFamily: "Cormorant-Regular",
+    fontFamily: Fonts.serif.regular,
     fontSize: 16,
-    color: "rgba(67, 33, 4, 0.72)",
+    color: "rgba(67, 33, 4, 0.78)",
     lineHeight: 24,
-    marginBottom: 10,
-  },
-  subtextSpacing: {
-    marginTop: 0,
-    marginBottom: 28,
+    textAlign: "center",
+    marginBottom: 12,
   },
   options: {
-    gap: 14,
+    gap: 20,
   },
   card: {
-    backgroundColor: "#F5EDEA",
-    borderRadius: 20,
-    padding: 18,
+    backgroundColor: "rgba(255, 252, 247, 0.92)",
+    borderRadius: 16,
+    padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(199,162,88,0.3)",
-    shadowColor: "#432104",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.08,
-    shadowRadius: 14,
-    elevation: 3,
+    borderColor: "rgba(226, 199, 144, 0.48)",
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 16,
+    shadowColor: "#C9A84C",
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.1,
+    shadowRadius: 40,
+    elevation: 4,
+  },
+  iconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  optionIcon: {
+    width: 40,
+    height: 40,
+    resizeMode: "contain",
+  },
+  cardContent: {
+    flex: 1,
   },
   cardTitle: {
-    fontFamily: "Cormorant-Bold",
-    fontSize: 17,
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
     color: "#432104",
+    lineHeight: 24,
     marginBottom: 6,
   },
   cardBody: {
-    fontFamily: "Cormorant-Regular",
+    fontFamily: Fonts.sans.regular,
     fontSize: 14,
-    color: "rgba(67, 33, 4, 0.65)",
+    color: "rgba(67, 33, 4, 0.76)",
     lineHeight: 20,
     marginBottom: 12,
   },
-  cardCta: {
-    fontFamily: "Cormorant-SemiBold",
-    fontSize: 14,
-    color: "#C9A84C",
+  chip: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  chipText: {
+    fontSize: 12,
+    fontWeight: "700",
   },
 });

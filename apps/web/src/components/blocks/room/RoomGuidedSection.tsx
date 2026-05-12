@@ -20,18 +20,45 @@ interface Props {
   onAction?: (action: any) => void;
 }
 
-function normalizeWhyThisRoomLine(value: string | null | undefined): string | null {
+function normalizeWhyThisRoomLine(
+  value: string | null | undefined,
+): string | null {
   if (!value) return null;
   const compact = value.replace(/\n+/g, " ").replace(/\s+/g, " ").trim();
   if (/^because you shared\s*:/i.test(compact)) return null;
   return value;
 }
 
-function extractBecauseYouSharedLabel(value: string | null | undefined): string | null {
+function extractBecauseYouSharedLabel(
+  value: string | null | undefined,
+): string | null {
   if (!value) return null;
-  const compact = value.replace(/\n+/g, " ").replace(/\s+/g, " ").trim();
-  const match = compact.match(/^because you shared\s*:\s*[·•-]?\s*(.+)$/i);
-  return match?.[1]?.trim() || null;
+  const lines = value
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (lines.length === 0) return null;
+
+  const firstLine = lines[0] ?? "";
+  if (!/^because you shared\s*:/i.test(firstLine)) {
+    const compact = value.replace(/\n+/g, " ").replace(/\s+/g, " ").trim();
+    const match = compact.match(/^because you shared\s*:\s*[·•-]?\s*(.+)$/i);
+    return match?.[1]?.trim() || null;
+  }
+
+  const inlineRemainder = firstLine
+    .replace(/^because you shared\s*:/i, "")
+    .trim()
+    .replace(/^[·•-]\s*/, "");
+
+  const bulletLines = lines
+    .slice(1)
+    .map((line) => line.replace(/^[·•-]\s*/, "").trim())
+    .filter(Boolean);
+
+  const parts = [inlineRemainder, ...bulletLines].filter(Boolean);
+  return parts.length ? parts.join(" · ") : null;
 }
 
 export function RoomGuidedSection({
@@ -66,9 +93,7 @@ export function RoomGuidedSection({
     roomCtx.room_purpose_line ?? ctx.room_purpose_line ?? null;
   const rawWhyThisRoomLine =
     roomCtx.why_this_room_line ?? ctx.why_this_room_line ?? null;
-  const whyThisRoomLine = normalizeWhyThisRoomLine(
-    rawWhyThisRoomLine,
-  );
+  const whyThisRoomLine = normalizeWhyThisRoomLine(rawWhyThisRoomLine);
   const derivedLifeContextLabel =
     lifeContextLabel || extractBecauseYouSharedLabel(rawWhyThisRoomLine);
   const sanatanInsightLine =
@@ -79,6 +104,7 @@ export function RoomGuidedSection({
   const memoryEchoLine = envelope.memory_echo_line ?? null;
 
   const [whyExpanded, setWhyExpanded] = useState(false);
+  const [recommendedExpanded, setRecommendedExpanded] = useState(false);
   const [stepsOpen, setStepsOpen] = useState(false);
   const [stepModalVisible, setStepModalVisible] = useState(false);
   const [inquiryModalVisible, setInquiryModalVisible] = useState(false);
@@ -242,7 +268,15 @@ export function RoomGuidedSection({
   }
 
   return (
-    <div style={{ padding: "8px 20px 80px" }} data-testid="room-guided-section">
+    <div
+      style={{
+        padding: "8px 20px 80px",
+        minHeight: "calc(100dvh - 90px)",
+        display: "flex",
+        flexDirection: "column",
+      }}
+      data-testid="room-guided-section"
+    >
       <div style={{ textAlign: "center", marginBottom: 28 }}>
         <img
           src="/lotus_icon.png"
@@ -309,7 +343,7 @@ export function RoomGuidedSection({
             {situationAck}
           </p>
         )}
-        {roomPurposeLine && (
+        {/* {roomPurposeLine && (
           <p
             style={{
               fontSize: 15,
@@ -321,8 +355,8 @@ export function RoomGuidedSection({
           >
             {roomPurposeLine}
           </p>
-        )}
-        {openingLine && (
+        )} */}
+        {/* {openingLine && (
           <p
             style={{
               fontSize: 16,
@@ -334,8 +368,8 @@ export function RoomGuidedSection({
           >
             {openingLine}
           </p>
-        )}
-        {secondBeatLine && (
+        )} */}
+        {/* {secondBeatLine && (
           <p
             style={{
               fontSize: 16,
@@ -347,7 +381,7 @@ export function RoomGuidedSection({
           >
             {secondBeatLine}
           </p>
-        )}
+        )} */}
       </div>
 
       <button
@@ -376,6 +410,57 @@ export function RoomGuidedSection({
         <span>{ROOM_GUIDED_COPY.begin}</span>
         <span style={{ fontSize: 24, lineHeight: 1, marginTop: -2 }}>→</span>
       </button>
+
+      {recDesc && (
+        <div style={{ textAlign: "center", marginBottom: 18 }}>
+          <img
+            src="/lotus_icon.png"
+            alt=""
+            aria-hidden="true"
+            style={{
+              width: 26,
+              height: 20,
+              opacity: 0.72,
+              margin: "0 auto 8px",
+              display: "block",
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => setRecommendedExpanded((v) => !v)}
+            data-testid="room-guided-recommended-description"
+            style={{
+              background: "none",
+              border: "none",
+              padding: 0,
+              margin: 0,
+              cursor: "pointer",
+              color: "#6E6357",
+              fontSize: 14,
+              fontStyle: "italic",
+              lineHeight: 1.6,
+              textAlign: "center",
+              maxWidth: 320,
+            }}
+          >
+            <span
+              style={
+                recommendedExpanded
+                  ? undefined
+                  : {
+                      display: "-webkit-box",
+                      WebkitLineClamp: 1,
+                      WebkitBoxOrient: "vertical" as const,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }
+              }
+            >
+              {recDesc}
+            </span>
+          </button>
+        </div>
+      )}
 
       {memoryEchoLine && (
         <div style={{ textAlign: "center", marginBottom: 22 }}>
@@ -406,7 +491,7 @@ export function RoomGuidedSection({
         </div>
       )}
 
-      {(principleBanner || sanatanInsightLine || whyThisRoomLine) && (
+      {(principleBanner || sanatanInsightLine || roomPurposeLine) && (
         <div
           style={{
             background: "rgba(255, 251, 244, 0.9)",
@@ -463,16 +548,35 @@ export function RoomGuidedSection({
               />
             </div>
             <div style={{ flex: 1 }}>
-              <div
-                style={{
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: "#432104",
-                  lineHeight: 1.3,
-                }}
-              >
-                {principleBanner?.source_line || "Sanatan wisdom says"}
-              </div>
+              {whyExpanded && (
+                <div
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: "#432104",
+                    lineHeight: 1.3,
+                    marginBottom: 12,
+                  }}
+                >
+                  {principleBanner?.source_line || "Sanatan wisdom says"}
+                </div>
+              )}
+              {!whyExpanded && sanatanInsightLine && (
+                <div
+                  style={{
+                    fontSize: 15,
+                    color: "#3F352B",
+                    lineHeight: 1.55,
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical" as const,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {sanatanInsightLine}
+                </div>
+              )}
             </div>
             <span style={{ fontSize: 15, lineHeight: 1, color: "#C89B39" }}>
               {whyExpanded ? (
@@ -494,95 +598,76 @@ export function RoomGuidedSection({
                 lineHeight: 1.8,
               }}
             >
-              {principleBanner?.principle_text && (
-                <p style={{ margin: "0 0 18px" }}>
-                  {principleBanner.principle_text}
-                </p>
-              )}
-              {principleBanner?.helper_line && (
-                <p style={{ margin: "0 0 18px" }}>
-                  {principleBanner.helper_line}
-                </p>
-              )}
-              {!principleBanner?.helper_line && sanatanInsightLine && (
+              {sanatanInsightLine && (
                 <p style={{ margin: "0 0 18px" }}>{sanatanInsightLine}</p>
               )}
-              {whyThisRoomLine && (
-                <p style={{ margin: 0 }}>{whyThisRoomLine}</p>
+              {roomPurposeLine && (
+                <p style={{ margin: 0 }}>{roomPurposeLine}</p>
               )}
             </div>
           )}
         </div>
       )}
 
-      {derivedLifeContextLabel && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginBottom: 14,
-          }}
-        >
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "12px 18px",
-              borderRadius: 999,
-              background: "rgba(255,250,245,0.88)",
-              border: "1px solid rgba(214,183,130,0.22)",
-              color: "#5E5449",
-              boxShadow: "0 10px 24px rgba(67,33,4,0.06)",
-              fontSize: 14,
-            }}
-          >
-            <span>
-              Because you shared ·{" "}
-              <strong style={{ color: "#3E2A15" }}>{derivedLifeContextLabel}</strong>
-            </span>
-          </div>
-        </div>
-      )}
-
       <div
         style={{
+          marginTop: "auto",
+          paddingTop: 28,
           display: "flex",
-          gap: 20,
-          justifyContent: "center",
-          marginBottom: 8,
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 14,
         }}
       >
-        <button
-          onClick={() => setStepsOpen(true)}
-          data-testid="room-guided-view-all-steps"
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            fontSize: 13,
-            color: "#8A7968",
-            textDecoration: "underline",
-          }}
-        >
-          {ROOM_GUIDED_COPY.viewAllSteps}
-        </button>
-      </div>
+        {derivedLifeContextLabel && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexWrap: "wrap",
+                gap: 6,
+                padding: "12px 18px",
+                borderRadius: 999,
+                background: "rgba(255,250,245,0.88)",
+                border: "1px solid rgba(214,183,130,0.22)",
+                color: "#5E5449",
+                boxShadow: "0 10px 24px rgba(67,33,4,0.06)",
+                fontSize: 14,
+                lineHeight: 1.45,
+                textAlign: "center",
+                maxWidth: "100%",
+              }}
+            >
+              <span style={{ whiteSpace: "nowrap" }}>Because you shared ·</span>
+              <strong style={{ color: "#3E2A15", fontWeight: 600 }}>
+                {derivedLifeContextLabel}
+              </strong>
+            </div>
+          </div>
+        )}
 
-      <div style={{ textAlign: "center", marginTop: 4 }}>
-        <button
-          onClick={handleExit}
-          data-testid="room-guided-exit"
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            fontSize: 13,
-            color: "#b0a090",
-          }}
-        >
-          {ROOM_GUIDED_COPY.exitLabel}
-        </button>
+        <div style={{ textAlign: "center" }}>
+          <button
+            onClick={handleExit}
+            data-testid="room-guided-exit"
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: 13,
+              color: "#b0a090",
+            }}
+          >
+            {ROOM_GUIDED_COPY.exitLabel}
+          </button>
+        </div>
       </div>
 
       {stepsOpen && (

@@ -6,7 +6,7 @@ import {
 } from "@react-navigation/native";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Platform, TouchableOpacity } from "react-native";
+import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 
 import FontSize from "../../components/FontSize";
@@ -30,7 +30,9 @@ function isMitraRouteName(routeName) {
     routeName === "DynamicEngine" ||
     routeName === "MitraEngine" ||
     routeName === "GuidedGrowth" ||
-    routeName === "MitraPhilosophy"
+    routeName === "MitraPhilosophy" ||
+    routeName === "MitraStart" ||
+    routeName === "MitraIntention"
   );
 }
 
@@ -58,12 +60,18 @@ const BottomMenuContent = () => {
               display: isVisible ? "flex" : "none",
               backgroundColor: shouldUseTransparentTabBar ? "transparent" : "#FFF",
               borderTopWidth: shouldUseTransparentTabBar ? 0 : 0.5,
-              borderTopColor: "#d1d1d1",
+              borderTopColor: shouldUseTransparentTabBar ? "transparent" : "#d1d1d1",
               elevation: 0,
               shadowOpacity: 0,
+              shadowColor: "transparent",
               height: FontSize.CONSTS.DEVICE_HEIGHT * 0.07,
               paddingBottom: Platform.OS === "ios" ? 10 : 6,
+              position: shouldUseTransparentTabBar ? "absolute" : "relative",
             },
+            tabBarBackground: () =>
+              shouldUseTransparentTabBar ? (
+                <View style={styles.transparentTabBarBackground} />
+              ) : null,
             tabBarActiveTintColor: "#8d5524",
             tabBarInactiveTintColor: "#000",
             tabBarAllowFontScaling: false,
@@ -150,6 +158,13 @@ const BottomMenuContent = () => {
     </GlobalScrollLayout>
   );
 };
+
+const styles = StyleSheet.create({
+  transparentTabBarBackground: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
+});
 
 const BottomMenu = () => {
   return (

@@ -10,6 +10,9 @@ interface DayDot {
 
 interface Props {
   sd: Record<string, any>;
+  expanded?: boolean;
+  onToggle?: () => void;
+  hideHeader?: boolean;
 }
 
 function Metric({ value, label }: { value: number; label: string }) {
@@ -68,8 +71,10 @@ function dotStyles(state?: string) {
   };
 }
 
-export function CycleProgressBlock({ sd }: Props) {
-  const [expanded, setExpanded] = useState(false);
+export function CycleProgressBlock({ sd, expanded: expandedProp, onToggle, hideHeader = false }: Props) {
+  const [uncontrolledExpanded, setUncontrolledExpanded] = useState(false);
+  const expanded = expandedProp ?? uncontrolledExpanded;
+  const toggleExpanded = onToggle ?? (() => setUncontrolledExpanded((value) => !value));
 
   const metrics = sd.today?.cycle_metrics || sd.cycle_metrics || {};
   const dayNumber: number = sd.identity?.day_number ?? sd.day_number ?? 1;
@@ -116,55 +121,57 @@ export function CycleProgressBlock({ sd }: Props) {
         padding: "10px",
       }}
     >
-      <button
-        onClick={() => setExpanded((value) => !value)}
-        aria-expanded={expanded}
-        data-testid="cycle-progress-header"
-        style={{
-          width: "100%",
-          background: "none",
-          border: "none",
-          padding: 0,
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          textAlign: "left",
-        }}
-      >
-        <span
+      {!hideHeader && (
+        <button
+          onClick={toggleExpanded}
+          aria-expanded={expanded}
+          data-testid="cycle-progress-header"
           style={{
-            fontSize: 15,
-            fontWeight: 700,
-            color: "#432104",
+            width: "100%",
+            background: "none",
+            border: "none",
+            padding: 0,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            textAlign: "left",
           }}
         >
-          {summaryLine}
-        </span>
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 18 18"
-          fill="none"
-          aria-hidden="true"
-          style={{
-            transform: expanded ? "rotate(180deg)" : "none",
-            transition: "transform 180ms ease",
-            flexShrink: 0,
-          }}
-        >
-          <path
-            d="M4.5 7l4.5 4.5L13.5 7"
-            stroke="#8B7864"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
+          <span
+            style={{
+              fontSize: 15,
+              fontWeight: 700,
+              color: "#432104",
+            }}
+          >
+            {summaryLine}
+          </span>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 18 18"
+            fill="none"
+            aria-hidden="true"
+            style={{
+              transform: expanded ? "rotate(180deg)" : "none",
+              transition: "transform 180ms ease",
+              flexShrink: 0,
+            }}
+          >
+            <path
+              d="M4.5 7l4.5 4.5L13.5 7"
+              stroke="#8B7864"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      )}
 
       {expanded && (
-        <div style={{ marginTop: 22 }}>
+        <div style={{ marginTop: hideHeader ? 0 : 22 }}>
           <div
             style={{
               display: "flex",

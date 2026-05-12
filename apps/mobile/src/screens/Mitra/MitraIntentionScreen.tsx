@@ -1,11 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import {
   ENTRY_INTENTION_HEADING,
   ENTRY_INTENTION_OPTIONS,
   ENTRY_INTENTION_SUBTEXT,
 } from "@kalpx/contracts";
-import React from "react";
+import React, { useCallback } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -14,13 +14,32 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSelector } from "react-redux";
 import store from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 
+const PENDING_KEY = "mitra_intention_pending";
+
 export default function MitraIntentionScreen() {
   const navigation = useNavigation<any>();
+  const isLoggedIn = useSelector(
+    (state: any) => !!(state.login?.user || state.socialLoginReducer?.user),
+  );
 
-  async function handleSelect(optionId: string) {
+  // After returning from Login, pick up the door the guest originally selected.
+  useFocusEffect(
+    useCallback(() => {
+      if (!isLoggedIn) return;
+      (async () => {
+        const pending = await AsyncStorage.getItem(PENDING_KEY);
+        if (!pending) return;
+        await AsyncStorage.removeItem(PENDING_KEY);
+        await executeDoor(pending);
+      })();
+    }, [isLoggedIn]), // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  async function executeDoor(optionId: string) {
     switch (optionId) {
       case "daily_rhythm":
         navigation.navigate("RhythmSetup");
@@ -53,6 +72,15 @@ export default function MitraIntentionScreen() {
     }
   }
 
+  async function handleSelect(optionId: string) {
+    if (!isLoggedIn) {
+      await AsyncStorage.setItem(PENDING_KEY, optionId);
+      navigation.navigate("Login" as any);
+      return;
+    }
+    await executeDoor(optionId);
+  }
+
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView
@@ -60,7 +88,11 @@ export default function MitraIntentionScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.heading}>{ENTRY_INTENTION_HEADING}</Text>
-        <Text style={styles.subtext}>{ENTRY_INTENTION_SUBTEXT}</Text>
+        {ENTRY_INTENTION_SUBTEXT.split("\n\n").map((para, i) => (
+          <Text key={i} style={[styles.subtext, i > 0 && styles.subtextSpacing]}>
+            {para}
+          </Text>
+        ))}
 
         <View style={styles.options}>
           {ENTRY_INTENTION_OPTIONS.map((opt) => (
@@ -102,6 +134,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "rgba(67, 33, 4, 0.72)",
     lineHeight: 24,
+    marginBottom: 10,
+  },
+  subtextSpacing: {
+    marginTop: 0,
     marginBottom: 28,
   },
   options: {

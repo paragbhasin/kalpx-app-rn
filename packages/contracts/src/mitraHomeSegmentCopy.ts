@@ -92,31 +92,31 @@ export const TELL_MITRA_DEFAULT_SUBTITLE = "Share what is moving today.";
  */
 export const ENTRY_INTENTION_HEADING = "Where should Mitra meet you today?";
 export const ENTRY_INTENTION_SUBTEXT =
-  "You don't need to know the full path yet. Choose what feels closest right now.";
+  "Begin with a gentle daily rhythm, walk an Inner Path toward deeper alignment, share what is moving within you, or return through mantra when you need steadiness.\n\nChoose what feels closest right now.";
 
 export const ENTRY_INTENTION_OPTIONS = [
   {
     id: "daily_rhythm",
-    title: "Help me build a gentle daily rhythm",
-    body:  "For morning clarity, afternoon steadiness, and night release.",
+    title: "Build my Daily Rhythm",
+    body:  "Begin with remembrance, return during the day, and release what you cannot carry at night.",
     cta:   "Set my rhythm",
   },
   {
     id: "inner_path",
-    title: "Help me work through something more deeply",
-    body:  "A 14-day path for a pattern, question, or inner struggle that keeps returning.",
+    title: "Begin an Inner Path",
+    body:  "A 14-day journey to understand what is moving within you and align your life with clarity, practice, and Sanatan wisdom.",
     cta:   "Begin my path",
   },
   {
     id: "quick_chant",
-    title: "Help me return to myself right now",
-    body:  "One short mantra when the mind feels scattered, heavy, or restless.",
-    cta:   "Start a quick reset",
+    title: "Start a Quick Chant",
+    body:  "A short mantra practice to gather the mind, return to steadiness, and reconnect with what is sacred within.",
+    cta:   "Start chanting",
   },
   {
     id: "tell_mitra",
-    title: "I want to tell Mitra something",
-    body:  "Speak or write what is on your mind, and Mitra will meet you there.",
+    title: "Tell Mitra what's on my mind",
+    body:  "Share what is moving in your life. Mitra will help you pause, see clearly, and choose the next right step.",
     cta:   "Tell Mitra",
   },
 ] as const;

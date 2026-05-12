@@ -6,24 +6,50 @@ import {
 } from "@kalpx/contracts";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Header } from "../../components/layout/Header";
-import { MobileBottomNav } from "../../components/layout/MobileBottomNav";
+
+const PENDING_KEY = "mitra_intention_pending";
+
+function isAuthed(): boolean {
+  return !!(
+    localStorage.getItem(AUTH_KEYS.accessToken) ||
+    localStorage.getItem("access_token")
+  );
+}
 
 export function MitraIntentionPage() {
   const navigate = useNavigate();
 
-  // Redirect unauthenticated users to login before they can make a selection
+  // After login redirects back here, pick up the door the guest originally selected.
   useEffect(() => {
-    const isAuthed = !!(
-      localStorage.getItem(AUTH_KEYS.accessToken) ||
-      localStorage.getItem("access_token")
-    );
-    if (!isAuthed) {
-      navigate("/login", { replace: true });
+    if (!isAuthed()) return;
+    const pending = sessionStorage.getItem(PENDING_KEY);
+    if (!pending) return;
+    sessionStorage.removeItem(PENDING_KEY);
+    switch (pending) {
+      case "daily_rhythm":
+        navigate("/en/mitra/rhythm/setup");
+        break;
+      case "inner_path":
+        localStorage.setItem("mitra_entry_intention", "inner_path");
+        navigate(
+          "/en/mitra/onboarding?containerId=welcome_onboarding&stateId=turn_1"
+        );
+        break;
+      case "quick_chant":
+        navigate("/en/mitra/quick-reset");
+        break;
+      case "tell_mitra":
+        navigate("/en/mitra/tell-mitra");
+        break;
     }
   }, [navigate]);
 
   function handleSelect(optionId: string) {
+    if (!isAuthed()) {
+      sessionStorage.setItem(PENDING_KEY, optionId);
+      navigate("/login?returnTo=" + encodeURIComponent("/en/mitra/intention"));
+      return;
+    }
     switch (optionId) {
       case "daily_rhythm":
         navigate("/en/mitra/rhythm/setup");
@@ -55,7 +81,6 @@ export function MitraIntentionPage() {
         flexDirection: "column",
       }}
     >
-      <Header transparent />
       <main
         style={{
           flex: 1,
@@ -85,18 +110,21 @@ export function MitraIntentionPage() {
           >
             {ENTRY_INTENTION_HEADING}
           </h1>
-          <p
-            style={{
-              fontFamily: "var(--kalpx-font-serif)",
-              color: "rgba(67, 33, 4, 0.72)",
-              fontSize: 16,
-              lineHeight: 1.55,
-              marginBottom: 28,
-              marginTop: 0,
-            }}
-          >
-            {ENTRY_INTENTION_SUBTEXT}
-          </p>
+          {ENTRY_INTENTION_SUBTEXT.split("\n\n").map((para, i, arr) => (
+            <p
+              key={i}
+              style={{
+                fontFamily: "var(--kalpx-font-serif)",
+                color: "rgba(67, 33, 4, 0.72)",
+                fontSize: 16,
+                lineHeight: 1.55,
+                marginBottom: i === arr.length - 1 ? 28 : 10,
+                marginTop: 0,
+              }}
+            >
+              {para}
+            </p>
+          ))}
 
           <div
             style={{
@@ -156,7 +184,6 @@ export function MitraIntentionPage() {
           </div>
         </div>
       </main>
-      <MobileBottomNav transparent />
     </div>
   );
 }

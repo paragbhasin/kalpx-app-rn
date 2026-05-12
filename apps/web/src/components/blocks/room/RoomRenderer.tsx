@@ -26,26 +26,30 @@ export function RoomRenderer({ envelope, screenData, onAction }: Props) {
 
   return (
     <div style={{ paddingBottom: 40 }} data-testid={`room-renderer-${envelope.room_id}`}>
-      <RoomOpeningExperience
-        envelope={envelope}
-        roomName={roomName}
-        lifeContextLabel={lifeContextLabel}
-      />
-      {envelope.principle_banner && (
-        <RoomPrincipleBanner banner={envelope.principle_banner} screenData={screenData} onAction={onAction} />
-      )}
       {isGuided ? (
         <RoomGuidedSection
           envelope={envelope}
+          roomName={roomName}
+          lifeContextLabel={lifeContextLabel}
           screenData={screenData}
           onAction={onAction}
         />
       ) : (
-        <RoomActionList
-          envelope={envelope}
-          screenData={screenData}
-          onAction={onAction}
-        />
+        <>
+          <RoomOpeningExperience
+            envelope={envelope}
+            roomName={roomName}
+            lifeContextLabel={lifeContextLabel}
+          />
+          {envelope.principle_banner && (
+            <RoomPrincipleBanner banner={envelope.principle_banner} screenData={screenData} onAction={onAction} />
+          )}
+          <RoomActionList
+            envelope={envelope}
+            screenData={screenData}
+            onAction={onAction}
+          />
+        </>
       )}
     </div>
   );

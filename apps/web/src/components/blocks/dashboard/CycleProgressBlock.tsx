@@ -69,7 +69,7 @@ function dotStyles(state?: string) {
 }
 
 export function CycleProgressBlock({ sd }: Props) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
 
   const metrics = sd.today?.cycle_metrics || sd.cycle_metrics || {};
   const dayNumber: number = sd.identity?.day_number ?? sd.day_number ?? 1;
@@ -93,10 +93,13 @@ export function CycleProgressBlock({ sd }: Props) {
 
   const visibleRhythm = useMemo(() => {
     if (rhythm.length > 0) return rhythm;
-    return Array.from({ length: totalDays }, (_, index): DayDot => ({
-      day_number: index + 1,
-      state: index + 1 < dayNumber ? "missed" : "pending",
-    }));
+    return Array.from(
+      { length: totalDays },
+      (_, index): DayDot => ({
+        day_number: index + 1,
+        state: index + 1 < dayNumber ? "missed" : "pending",
+      }),
+    );
   }, [rhythm, totalDays, dayNumber]);
 
   if (!summaryLine && visibleRhythm.length === 0) return null;

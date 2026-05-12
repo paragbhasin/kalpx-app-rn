@@ -8,4 +8,5 @@ export * from './data/mantras';
 export * from './data/Practice';
 export * from './curatedWhyThis';
 export * from './mitraFourDoor';
+export * from './mitraHomeSegmentCopy';
 export * from './room';

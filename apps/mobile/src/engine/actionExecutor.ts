@@ -3244,22 +3244,20 @@ export async function executeAction(
             const path = p.chip_id === "growth" ? "growth" : "support";
             draft.path = path;
             draft.stage0_choice = path;
-            nextStateId =
-              path === "growth" ? "turn_3_growth" : "turn_3_support";
+            nextStateId = "turn_3_life_context";
 
-            // Fetch Stage 1 chips
-            const stage1 = await mitraFetchOnboardingChips({
-              stage: 1,
-              lane: path,
-              guidance_mode: "hybrid",
-            });
-            if (stage1) setScreenValue(stage1, "stage1_data");
+          } else if (currentStateId === "turn_3_life_context") {
+            // Life context pick (stage1 — comes before kosha/vritti)
+            draft.stage1_choice = p.chip_id || "self";
+            draft.life_context = p.chip_id || null;
+            nextStateId =
+              draft.path === "growth" ? "turn_3_growth" : "turn_3_support";
+
           } else if (
             currentStateId === "turn_3_support" ||
             currentStateId === "turn_3_growth"
           ) {
-            // Stage 1 chip pick
-            draft.stage1_choice = p.chip_id || "selected_via_text";
+            // Kosha pick — not staged (backend derives kosha from vritti/stage2)
             nextStateId =
               draft.path === "growth" ? "turn_4_growth" : "turn_4_support";
             if (p.freeform_text) {
@@ -3269,7 +3267,7 @@ export async function executeAction(
               };
             }
 
-            // Fetch Stage 2 chips
+            // Fetch Stage 2 chips using life_context as stage1_choice
             const stage2 = await mitraFetchOnboardingChips({
               stage: 2,
               lane: draft.path,
@@ -3313,9 +3311,6 @@ export async function executeAction(
                 stage3: p.freeform_text,
               };
             }
-            nextStateId = "turn_5_life_context";
-          } else if (currentStateId === "turn_5_life_context") {
-            draft.life_context = p.chip_id || null;
             nextStateId = "turn_6";
           } else if (currentStateId === "turn_6") {
             // Mode picker

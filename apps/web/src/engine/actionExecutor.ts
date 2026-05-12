@@ -1096,10 +1096,14 @@ export async function executeAction(action: any, context: ActionContext): Promis
           const path = p.chip_id === 'growth' ? 'growth' : 'support';
           draft.path = path;
           draft.stage0_choice = path;
-          nextStateId = path === 'growth' ? 'turn_3_growth' : 'turn_3_support';
+          nextStateId = 'turn_3_life_context';
+
+        } else if (stateId === 'turn_3_life_context') {
+          draft.stage1_choice = p.chip_id || 'self';
+          draft.life_context = p.chip_id || null;
+          nextStateId = draft.path === 'growth' ? 'turn_3_growth' : 'turn_3_support';
 
         } else if (stateId === 'turn_3_support' || stateId === 'turn_3_growth') {
-          draft.stage1_choice = p.chip_id || 'selected_via_text';
           if (p.freeform_text) draft.freeforms = { ...(draft.freeforms || {}), stage1: p.freeform_text };
           nextStateId = draft.path === 'growth' ? 'turn_4_growth' : 'turn_4_support';
 
@@ -1111,10 +1115,6 @@ export async function executeAction(action: any, context: ActionContext): Promis
         } else if (stateId === 'turn_5_support' || stateId === 'turn_5_growth') {
           draft.stage3_choice = p.chip_id || 'selected_via_text';
           if (p.freeform_text) draft.freeforms = { ...(draft.freeforms || {}), stage3: p.freeform_text };
-          nextStateId = 'turn_5_life_context';
-
-        } else if (stateId === 'turn_5_life_context') {
-          draft.life_context = p.chip_id || null;
           nextStateId = 'turn_6';
 
         } else if (stateId === 'turn_6') {

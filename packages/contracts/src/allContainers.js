@@ -6728,15 +6728,15 @@ const _onResp = { type: "onboarding_turn_response" };
 
 // Sadhana Yatra 4-stage schema (2026-04-14). Path-aware branching map:
 //   turn_1            → turn_2
-//   turn_2 (path)     → turn_3_support     if path: "support"
-//   turn_2 (path)     → turn_3_growth      if path: "growth"
-//   turn_3_support    → turn_4_support     (stashes primary_kosha)
-//   turn_3_growth     → turn_4_growth      (stashes aliveness_state)
+//   turn_2 (path)     → turn_3_life_context (always)
+//   turn_3_life_context → turn_3_support   if path: "support"  (stashes stage1_choice = life_context chip)
+//   turn_3_life_context → turn_3_growth    if path: "growth"   (stashes stage1_choice = life_context chip)
+//   turn_3_support    → turn_4_support     (kosha — not staged; backend derives kosha from vritti/stage2)
+//   turn_3_growth     → turn_4_growth      (aliveness_state)
 //   turn_4_support    → turn_5_support     (stashes primary_vritti)
 //   turn_4_growth     → turn_5_growth      (stashes aspiration)
-//   turn_5_support    → turn_5_life_context (stashes primary_klesha)
-//   turn_5_growth     → turn_5_life_context (stashes preferred_modality)
-//   turn_5_life_context → turn_6           (stashes life_context)
+//   turn_5_support    → turn_6             (stashes primary_klesha; life_context already in stage1)
+//   turn_5_growth     → turn_6             (stashes preferred_modality; life_context already in stage1)
 //   turn_6 (mode)     → turn_7             (calls /onboarding/recognition/)
 //   turn_7            → turn_8             (triad reveal)
 //   turn_8            → companion_dashboard/day_active
@@ -6799,6 +6799,39 @@ export const WelcomeOnboardingContainer = {
               style: "secondary",
             },
           ],
+          on_response: _onResp,
+        },
+      ],
+    },
+
+    // Stage 0.5 — life context picker (always after path selection, before kosha)
+    turn_3_life_context: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "headline",
+          content: "What part of life is this touching?",
+          style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
+        },
+        {
+          type: "subtext",
+          content: "Pick one that feels most alive right now.",
+          variant: "multi_line",
+        },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn3_life_context",
+          mitra_message: "",
+          reply_chips: [
+            { id: "work_career",       label: "Work & Career",       style: "secondary" },
+            { id: "relationships",     label: "Relationships",       style: "secondary" },
+            { id: "self",              label: "Myself",              style: "secondary" },
+            { id: "health_energy",     label: "Health & Energy",     style: "secondary" },
+            { id: "money_security",    label: "Money & Security",    style: "secondary" },
+            { id: "purpose_direction", label: "Purpose & Direction", style: "secondary" },
+            { id: "daily_life",        label: "Daily Life",          style: "secondary" },
+          ],
+          open_input: { enabled: false },
           on_response: _onResp,
         },
       ],

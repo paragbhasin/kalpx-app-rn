@@ -86,11 +86,15 @@ export function RoomGuidedSection({
   );
   const orderedActions = useMemo(() => {
     const actionMap = new Map(
-      (envelope.actions as any[]).map((action: any) => [action.action_id, action]),
+      (envelope.actions as any[]).map((action: any) => [
+        action.action_id,
+        action,
+      ]),
     );
     const steps = Array.isArray(envelope.room_steps)
-      ? [...envelope.room_steps]
-          .sort((a: any, b: any) => (a?.step_number ?? 0) - (b?.step_number ?? 0))
+      ? [...envelope.room_steps].sort(
+          (a: any, b: any) => (a?.step_number ?? 0) - (b?.step_number ?? 0),
+        )
       : [];
 
     const orderedIds: string[] = [];
@@ -172,7 +176,10 @@ export function RoomGuidedSection({
     setTimeout(() => openAction(nextAction), 120);
   }
 
-  function openAction(action: any, options?: { forceSequenceActive?: boolean }) {
+  function openAction(
+    action: any,
+    options?: { forceSequenceActive?: boolean },
+  ) {
     if (!action) return;
     setStepsOpen(false);
     setActiveAction(action);
@@ -475,7 +482,7 @@ export function RoomGuidedSection({
         data-testid="room-guided-begin"
         style={{
           width: "100%",
-          maxWidth: 376,
+          maxWidth: 220,
           margin: "0 auto 18px",
           display: "flex",
           alignItems: "center",

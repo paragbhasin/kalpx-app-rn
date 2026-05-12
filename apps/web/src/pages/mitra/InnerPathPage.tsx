@@ -126,7 +126,10 @@ export function InnerPathPage() {
   const triadArr: any[] = Array.isArray(sd.today?.triad) ? sd.today.triad : [];
   const getShift = (context: any): string =>
     context?.target_shift || context?.mitra_shift || "";
-  const sentence = (value: string | null | undefined, fallback = ""): string => {
+  const sentence = (
+    value: string | null | undefined,
+    fallback = "",
+  ): string => {
     const text = String(value || fallback).trim();
     if (!text) return "";
     return /[.!?]$/.test(text) ? text : `${text}.`;
@@ -139,10 +142,8 @@ export function InnerPathPage() {
         triadArr.find((t: any) => t?.slot === "mantra")?.title ||
         sd.card_mantra_title ||
         "",
-      subtitle:
-        triadArr.find((t: any) => t?.slot === "mantra")?.subtitle ||
-        sd.card_mantra_description ||
-        "",
+      subtitle: "Return through sound",
+
       master:
         sd.master_mantra ||
         triadArr.find((t: any) => t?.slot === "mantra") ||
@@ -158,10 +159,8 @@ export function InnerPathPage() {
         triadArr.find((t: any) => t?.slot === "sankalp")?.title ||
         sd.card_sankalpa_title ||
         "",
-      subtitle:
-        triadArr.find((t: any) => t?.slot === "sankalp")?.subtitle ||
-        sd.card_sankalpa_description ||
-        "",
+      subtitle: "Hold today's intention",
+
       master:
         sd.master_sankalp ||
         triadArr.find((t: any) => t?.slot === "sankalp") ||
@@ -177,10 +176,8 @@ export function InnerPathPage() {
         triadArr.find((t: any) => t?.slot === "practice")?.title ||
         sd.card_ritual_title ||
         "",
-      subtitle:
-        triadArr.find((t: any) => t?.slot === "practice")?.subtitle ||
-        sd.card_ritual_description ||
-        "",
+      subtitle: "Move through the body",
+
       master:
         sd.master_practice ||
         triadArr.find((t: any) => t?.slot === "practice") ||
@@ -191,7 +188,9 @@ export function InnerPathPage() {
     },
   ].filter((item) => item.title);
   const whyTabs = (
-    ["mantra", "sankalp", "practice"] as Array<"mantra" | "sankalp" | "practice">
+    ["mantra", "sankalp", "practice"] as Array<
+      "mantra" | "sankalp" | "practice"
+    >
   )
     .map((slot) => {
       const item = triadArr.find((t: any) => t?.slot === slot) || {};
@@ -257,7 +256,6 @@ export function InnerPathPage() {
             width: 34,
             height: 34,
             borderRadius: "50%",
-
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -450,6 +448,7 @@ export function InnerPathPage() {
                 maxWidth: 420,
                 textWrap: "balance",
                 marginInline: "auto",
+                fontWeight: 700,
               }}
             >
               {sd.greeting_context}
@@ -605,6 +604,7 @@ export function InnerPathPage() {
                         fontStyle: "italic",
                         color: "#A57A2B",
                         lineHeight: 1.45,
+                        fontWeight: 700,
                       }}
                     >
                       {item.subtitle}
@@ -731,7 +731,7 @@ export function InnerPathPage() {
                         >
                           {activeWhyItem.label}
                         </p>
-                        <p
+                        {/* <p
                           style={{
                             margin: "0 0 14px",
                             fontFamily: "var(--kalpx-font-serif)",
@@ -742,39 +742,37 @@ export function InnerPathPage() {
                           }}
                         >
                           {activeWhyItem.title}
-                        </p>
+                        </p> */}
 
-                        {activeWhyItem.slot === "sankalp" ? (
-                          !!activeWhyItem.context?.mitra_frame_through && (
-                            <p
-                              style={{
-                                margin: "0 0 14px",
-                                fontSize: 15,
-                                lineHeight: 1.75,
-                                color: "#5D5348",
-                              }}
-                            >
-                              {sentence(
-                                `This is ${activeWhyItem.context.mitra_frame_through}`,
-                              )}
-                            </p>
-                          )
-                        ) : (
-                          !!activeWhyItem.context?.mitra_frame_through && (
-                            <p
-                              style={{
-                                margin: "0 0 14px",
-                                fontSize: 15,
-                                lineHeight: 1.75,
-                                color: "#5D5348",
-                              }}
-                            >
-                              {sentence(
-                                `${activeWhyItem.title || "This"} is ${activeWhyItem.context.mitra_frame_through}`,
-                              )}
-                            </p>
-                          )
-                        )}
+                        {activeWhyItem.slot === "sankalp"
+                          ? !!activeWhyItem.context?.mitra_frame_through && (
+                              <p
+                                style={{
+                                  margin: "0 0 14px",
+                                  fontSize: 15,
+                                  lineHeight: 1.75,
+                                  color: "#5D5348",
+                                }}
+                              >
+                                {sentence(
+                                  `This is ${activeWhyItem.context.mitra_frame_through}`,
+                                )}
+                              </p>
+                            )
+                          : !!activeWhyItem.context?.mitra_frame_through && (
+                              <p
+                                style={{
+                                  margin: "0 0 14px",
+                                  fontSize: 15,
+                                  lineHeight: 1.75,
+                                  color: "#5D5348",
+                                }}
+                              >
+                                {sentence(
+                                  `${activeWhyItem.title || "This"} is ${activeWhyItem.context.mitra_frame_through}`,
+                                )}
+                              </p>
+                            )}
 
                         {!!activeWhyItem.shift && (
                           <p
@@ -855,7 +853,11 @@ export function InnerPathPage() {
 
                     {l1Items.length > 0 && (
                       <div
-                        style={{ display: "flex", flexDirection: "column", gap: 8 }}
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 8,
+                        }}
                       >
                         {l1Items.map((it) => (
                           <div

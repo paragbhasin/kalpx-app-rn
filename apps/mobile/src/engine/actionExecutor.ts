@@ -3544,10 +3544,7 @@ export async function executeAction(
             if (entryIntention === "inner_path") {
               rootNavigate("InnerPath");
             } else {
-              loadScreen({
-                container_id: "companion_dashboard",
-                state_id: "day_active",
-              });
+              rootNavigate("Home");
             }
             break;
           }

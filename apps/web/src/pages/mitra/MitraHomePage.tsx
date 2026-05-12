@@ -104,11 +104,13 @@ export function MitraHomePage() {
     localStorage.getItem("access_token")
   );
 
-  // Four-Door V3 fetch — all authenticated users (partial-state or active journey)
+  // Four-Door V3 fetch — runs once on mount for all authenticated users.
+  // homeData excluded from deps intentionally: re-fetches only if user_surface_state
+  // is absent (stale Redux cache). Explicit refreshes go through refetchHome().
   useEffect(() => {
     let cancelled = false;
     if (!isAuthed) return;
-    if (homeData) return; // already hydrated
+    if (homeData?.user_surface_state) return; // already hydrated with stream-o data
 
     setFourDoorLoading(true);
     setFourDoorError(null);
@@ -122,13 +124,14 @@ export function MitraHomePage() {
           setFourDoorError("Could not load your home. Please try again.");
       })
       .finally(() => {
-        setFourDoorLoading(false);
+        if (!cancelled) setFourDoorLoading(false);
       });
 
     return () => {
       cancelled = true;
     };
-  }, [homeData, dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthed, dispatch]);
 
   async function refetchHome() {
     try {
@@ -179,23 +182,23 @@ export function MitraHomePage() {
 
   // Derive segment from loaded home data (Stream O)
   const segment = (homeData?.user_surface_state?.segment ?? null) as MitraHomeSegment | null;
-  const hasAnyState = !!segment && segment !== "new";
+  const hasAnyState = (!!segment && segment !== "new") || hasActiveJourney === true;
 
-  // Authenticated users must never see the welcome page during loading.
-  // isAuthed && !homeData && !fourDoorError covers the 1-frame gap before
-  // the useEffect fires and sets fourDoorLoading=true.
+  // Block on LoadingScreen only while we lack enough data to make a render decision.
+  // Never block on entry-view/ — the redirect check below uses `viewKey &&` so it
+  // is safe when viewKey is still null, and it handles checkpoints when they arrive.
+  const homeReady = !!(homeData?.user_surface_state);
   if (
-    loading ||
     fourDoorLoading ||
     (isAuthed && !homeData && !fourDoorError) ||
-    (hasActiveJourney === true &&
-      (entryLoading || (viewKey === null && !entryError)))
+    (!homeReady && loading)
   ) {
     return <LoadingScreen />;
   }
 
-  // Entry-view redirects for active-journey users (checkpoint / welcome-back)
-  if (hasActiveJourney === true && viewKey) {
+  // Entry-view redirects for active-journey users (checkpoint / welcome-back / onboarding)
+  // daily_view falls through to the four-door companion home (Stream O)
+  if (hasActiveJourney === true && viewKey && viewKey !== 'daily_view') {
     const redirectPath = mapJourneyEntryViewPath(viewKey);
     if (redirectPath) return <Navigate to={redirectPath} replace />;
   }
@@ -862,12 +865,6 @@ export function MitraHomePage() {
         <Footer transparent />
         <MobileBottomNav transparent />
       </div>
-    );
-  }
-
-  if (hasActiveJourney === true) {
-    return (
-      <Navigate to={mapJourneyEntryViewPath(viewKey || "daily_view")} replace />
     );
   }
 

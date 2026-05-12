@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { Home, Bell, User, Menu } from 'lucide-react';
 
 const LINK_TABS = [
-  { label: 'Home',          Icon: Home, to: '/en/mitra/dashboard', end: true },
+  { label: 'Home',          Icon: Home, to: '/en/mitra', end: true },
   { label: 'Notifications', Icon: Bell, to: '/en/notifications',   end: false },
   { label: 'Profile',       Icon: User, to: '/en/profile',         end: false },
 ] as const;

@@ -25,7 +25,7 @@ export function MitraTopBar({ transparent = false }: Props) {
       }}
     >
       <Link
-        to="/en/mitra/dashboard"
+        to="/en/mitra"
         style={{ display: "flex", alignItems: "center" }}
       >
         <img src="/kalpx-logo.png" alt="KalpX" style={{ height: 28 }} />

@@ -1237,7 +1237,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
           // Route to Inner Path if the user entered via the inner_path intention (Stream O)
           const entryIntention = localStorage.getItem('mitra_entry_intention');
           localStorage.removeItem('mitra_entry_intention');
-          webNavigate(entryIntention === 'inner_path' ? '/en/mitra/inner-path' : '/en/mitra/dashboard');
+          webNavigate(entryIntention === 'inner_path' ? '/en/mitra/inner-path' : '/en/mitra');
           return;
         } else {
           if (WEB_ENV.isDev) console.warn('[actionExecutor] onboarding_turn_response: unknown state', stateId);

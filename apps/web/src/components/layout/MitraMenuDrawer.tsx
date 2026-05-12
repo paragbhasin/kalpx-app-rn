@@ -18,7 +18,7 @@ interface Props {
 }
 
 const NAV_ITEMS = [
-  { label: "Mitra", Icon: LayoutDashboard, to: "/en/mitra/dashboard" },
+  { label: "Mitra", Icon: LayoutDashboard, to: "/en/mitra" },
   { label: "Kalpx Haat", Icon: ShoppingBag, to: "/en/haat" },
   { label: "Retreats", Icon: Mountain, to: "/en/retreats" },
   { label: "Community", Icon: Users, to: "/en/community" },

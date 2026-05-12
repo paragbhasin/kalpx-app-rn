@@ -1,5 +1,16 @@
 import { AUTH_KEYS } from "@kalpx/api-client";
-import { DOOR_LABELS } from "@kalpx/contracts";
+import {
+  DOOR_LABELS,
+  type MitraHomeSegment,
+  SEGMENT_RHYTHM_NO_STATE_SUBTITLE,
+  SEGMENT_INNER_PATH_NO_STATE_SUBTITLE,
+  QUICK_CHANT_HAS_MANTRA_SUBTITLE,
+  QUICK_CHANT_HISTORY_ONLY_SUBTITLE,
+  QUICK_CHANT_NO_STATE_SUBTITLE,
+  TELL_MITRA_HAS_HISTORY_SUBTITLE,
+  TELL_MITRA_ACTIVE_PATH_SUBTITLE,
+  TELL_MITRA_DEFAULT_SUBTITLE,
+} from "@kalpx/contracts";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, Navigate, useNavigate } from "react-router-dom";
@@ -87,10 +98,14 @@ export function MitraHomePage() {
   const [fourDoorLoading, setFourDoorLoading] = useState(false);
   const [fourDoorError, setFourDoorError] = useState<string | null>(null);
 
-  // Four-Door V3 fetch
+  // Four-Door V3 fetch — all authenticated users (partial-state or active journey)
   useEffect(() => {
     let cancelled = false;
-    if (hasActiveJourney !== true) return;
+    const isAuthed = !!(
+      localStorage.getItem(AUTH_KEYS.accessToken) ||
+      localStorage.getItem("access_token")
+    );
+    if (!isAuthed) return;
     if (homeData) return; // already hydrated
 
     setFourDoorLoading(true);
@@ -111,7 +126,7 @@ export function MitraHomePage() {
     return () => {
       cancelled = true;
     };
-  }, [hasActiveJourney, homeData, dispatch]);
+  }, [homeData, dispatch]);
 
   async function refetchHome() {
     try {
@@ -160,21 +175,35 @@ export function MitraHomePage() {
     } catch {}
   }
 
+  // Derive segment from loaded home data (Stream O)
+  const segment = (homeData?.user_surface_state?.segment ?? null) as MitraHomeSegment | null;
+  const hasAnyState = !!segment && segment !== "new";
+
   if (
     loading ||
-    (hasActiveJourney === true && fourDoorLoading) ||
+    fourDoorLoading ||
     (hasActiveJourney === true &&
       (entryLoading || (viewKey === null && !entryError)))
   ) {
     return <LoadingScreen />;
   }
 
-  // ── Four-Door Home (S03) ─────────────────────────────────────────────────
-  if (hasActiveJourney === true && (homeData || fourDoorError !== null)) {
+  // Entry-view redirects for active-journey users (checkpoint / welcome-back)
+  if (hasActiveJourney === true && viewKey) {
+    const redirectPath = mapJourneyEntryViewPath(viewKey);
+    if (redirectPath) return <Navigate to={redirectPath} replace />;
+  }
+
+  // ── Four-Door Home — active journey or partial state (Stream O) ──────────
+  if (hasAnyState && (homeData || fourDoorError !== null)) {
     const doorStates = homeData?.door_states;
     const innerPathSummary = homeData?.inner_path_summary;
     const greeting = homeData?.greeting;
     const hasRhythm = homeData?.companion_rhythm?.has_rhythm === true;
+    const hasMantra = homeData?.user_surface_state?.has_quick_chant_mantra === true;
+    const hasQuickChantHistory = homeData?.user_surface_state?.has_quick_chant_history === true;
+    const hasTMHistory = homeData?.user_surface_state?.has_tell_mitra_history === true;
+    const hasIP = homeData?.user_surface_state?.has_inner_path === true;
     const myRhythmTarget = hasRhythm
       ? "/en/mitra/rhythm"
       : "/en/mitra/rhythm/setup";
@@ -188,19 +217,34 @@ export function MitraHomePage() {
       : "/imgsun.png";
     const greetingTextColor = isNightGreeting ? "#FFFFFF" : "#432104";
     const rhythmSlot = homeData?.companion_rhythm?.[rhythmBand];
-    const rhythmSubtitle =
-      homeData?.my_rhythm_summary?.next_practice_label ??
-      rhythmSlot?.items?.[0]?.title_snapshot ??
-      doorStates?.my_rhythm?.subtitle ??
-      doorStates?.my_rhythm?.cta ??
-      "";
 
-    // Inner Path: prefer Day X of Y when path is active, fallback to path_title or door subtitle
+    // State-aware My Rhythm subtitle
+    const rhythmSubtitle = hasRhythm
+      ? (homeData?.my_rhythm_summary?.next_practice_label ??
+        rhythmSlot?.items?.[0]?.title_snapshot ??
+        doorStates?.my_rhythm?.subtitle ??
+        doorStates?.my_rhythm?.cta ??
+        "")
+      : (segment ? SEGMENT_RHYTHM_NO_STATE_SUBTITLE[segment] : "Build a gentle daily rhythm.");
+
+    // Inner Path: prefer Day X of Y when path is active, fallback to segment-aware no-path copy
     const innerPathSubtitle = innerPathSummary?.has_active_path
       ? `Day ${innerPathSummary.day_number} of ${innerPathSummary.total_days}`
-      : (innerPathSummary?.path_title ??
-        doorStates?.inner_path?.subtitle ??
-        "");
+      : (segment ? SEGMENT_INNER_PATH_NO_STATE_SUBTITLE[segment] : "Begin a 14-day path for what you are moving through.");
+
+    // Quick Chant subtitle — 3-way conditional (CRITICAL: only show "chosen mantra" if has_quick_chant_mantra)
+    const quickChantSubtitle = hasMantra
+      ? QUICK_CHANT_HAS_MANTRA_SUBTITLE
+      : hasQuickChantHistory
+        ? QUICK_CHANT_HISTORY_ONLY_SUBTITLE
+        : QUICK_CHANT_NO_STATE_SUBTITLE;
+
+    // Tell Mitra subtitle — conditional on state
+    const tellMitraSubtitle = hasTMHistory
+      ? TELL_MITRA_HAS_HISTORY_SUBTITLE
+      : (hasIP || segment === "rhythm_and_path")
+        ? TELL_MITRA_ACTIVE_PATH_SUBTITLE
+        : TELL_MITRA_DEFAULT_SUBTITLE;
 
     return (
       <div
@@ -530,7 +574,7 @@ export function MitraHomePage() {
                     <div
                       style={{ color: "rgba(67, 33, 4, 0.6)", fontSize: 14 }}
                     >
-                      {doorStates.quick_reset?.subtitle}
+                      {quickChantSubtitle}
                     </div>
                   </div>
                   <div style={{ color: "#C9A84C", opacity: 0.5, fontSize: 18 }}>
@@ -587,7 +631,7 @@ export function MitraHomePage() {
                     <div
                       style={{ color: "rgba(67, 33, 4, 0.6)", fontSize: 14 }}
                     >
-                      {doorStates.tell_mitra?.subtitle}
+                      {tellMitraSubtitle}
                     </div>
                   </div>
                   <div style={{ color: "#C9A84C", opacity: 0.5, fontSize: 18 }}>
@@ -895,7 +939,7 @@ export function MitraHomePage() {
                 fontFamily: "var(--kalpx-font-serif)",
               }}
             >
-              — Bhagavad Gita 6.5
+              — Bhagavad Gita 2.40
             </div>
             <div
               style={{
@@ -1016,7 +1060,7 @@ export function MitraHomePage() {
               }}
             />
             <Link
-              to="/en/mitra/start"
+              to="/en/mitra/intention"
               style={{
                 display: "block",
                 padding: "10px",
@@ -1032,7 +1076,7 @@ export function MitraHomePage() {
               }}
               className="shadow-2xl flex justify-center align"
             >
-              Begin your journey →
+              Begin with Mitra →
             </Link>
           </div>
         </div>

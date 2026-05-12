@@ -57,7 +57,7 @@ function parseReentryData(envelope: any, fallbackName?: string): ReentryData {
   const decisionLabels: Record<string, string> = payload.decision_labels ?? {};
   const chips: ReentryData["chips"] = decisions.map((d: string) => ({
     id: (d === "fresh" ? "reentry_fresh" : "reentry_continue") as ChipKey,
-    label: decisionLabels[d] ?? (d === "fresh" ? "Begin fresh" : "Continue"),
+    label: decisionLabels[d] ?? (d === "fresh" ? "Begin a new path" : "Continue"),
   }));
   return {
     headline: cont.headline || "Welcome back.",

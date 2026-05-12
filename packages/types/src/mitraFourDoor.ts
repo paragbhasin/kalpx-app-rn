@@ -216,6 +216,25 @@ export interface MitraHomeV3ReminderSummary {
   ask_later: boolean;
 }
 
+export type MitraHomeSegment =
+  | "new"
+  | "rhythm_only"
+  | "quick_chant_only"
+  | "tell_mitra_only"
+  | "inner_path_only"
+  | "rhythm_and_path"
+  | "mixed_partial";
+
+export interface MitraHomeV3UserSurfaceState {
+  has_rhythm: boolean;
+  has_inner_path: boolean;
+  has_quick_chant_mantra: boolean;
+  has_quick_chant_history: boolean;
+  has_tell_mitra_history: boolean;
+  has_quick_checkin_history: boolean;
+  segment: MitraHomeSegment;
+}
+
 export interface MitraHomeV3Response {
   door_states: Record<DoorId, MitraHomeV3DoorState>;
   inner_path_summary: MitraHomeV3InnerPathSummary;
@@ -227,6 +246,7 @@ export interface MitraHomeV3Response {
   reminder_summary: MitraHomeV3ReminderSummary;
   greeting?: MitraHomeV3Greeting;
   my_rhythm_summary?: MitraHomeV3MyRhythmSummary;
+  user_surface_state?: MitraHomeV3UserSurfaceState;
   [key: string]: unknown;
 }
 

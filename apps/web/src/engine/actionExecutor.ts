@@ -1234,7 +1234,10 @@ export async function executeAction(action: any, context: ActionContext): Promis
           // Journey was created at turn_7 but the 60s cache still has hasActiveJourney=false
           // from the start of onboarding. RequiresJourney must re-fetch to get the real value.
           invalidateJourneyStatusCache();
-          webNavigate('/en/mitra/dashboard');
+          // Route to Inner Path if the user entered via the inner_path intention (Stream O)
+          const entryIntention = localStorage.getItem('mitra_entry_intention');
+          localStorage.removeItem('mitra_entry_intention');
+          webNavigate(entryIntention === 'inner_path' ? '/en/mitra/inner-path' : '/en/mitra/dashboard');
           return;
         } else {
           if (WEB_ENV.isDev) console.warn('[actionExecutor] onboarding_turn_response: unknown state', stateId);

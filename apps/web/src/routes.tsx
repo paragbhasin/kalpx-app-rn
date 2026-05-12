@@ -37,6 +37,7 @@ import { DashboardPage } from "./pages/mitra/DashboardPage";
 import { InnerPathPage } from "./pages/mitra/InnerPathPage";
 import { MitraEnginePage } from "./pages/mitra/MitraEnginePage";
 import { MitraHomePage } from "./pages/mitra/MitraHomePage";
+import { MitraIntentionPage } from "./pages/mitra/MitraIntentionPage";
 import { MitraStartPage } from "./pages/mitra/MitraStartPage";
 import { OnboardingPage } from "./pages/mitra/OnboardingPage";
 import { QuickCheckinPage } from "./pages/mitra/QuickCheckinPage";
@@ -88,6 +89,7 @@ export function AppRoutes() {
       {/* Mitra — home is an open routing hub */}
       <Route path="/en/mitra" element={<MitraHomePage />} />
       <Route path="/en/mitra/start" element={<MitraStartPage />} />
+      <Route path="/en/mitra/intention" element={<MitraIntentionPage />} />
       <Route path="/en/mitra/onboarding" element={<OnboardingPage />} />
       <Route
         path="/en/mitra/inner-path"
@@ -100,14 +102,7 @@ export function AppRoutes() {
       <Route path="/en/mitra/rhythm" element={<RhythmHomePage />} />
       <Route path="/en/mitra/rhythm/setup" element={<RhythmWizardPage />} />
       <Route path="/en/mitra/rhythm/edit" element={<RhythmSetupPage />} />
-      <Route
-        path="/en/mitra/quick-reset"
-        element={
-          <RequiresJourney>
-            <MitraEnginePage />
-          </RequiresJourney>
-        }
-      />
+      <Route path="/en/mitra/quick-reset" element={<MitraEnginePage />} />
       <Route path="/en/mitra/tell-mitra" element={<TellMitraPage />} />
       <Route path="/en/mitra/checkin-quick" element={<QuickCheckinPage />} />
       <Route path="/en/mitra/rooms" element={<BrowseRoomsPage />} />

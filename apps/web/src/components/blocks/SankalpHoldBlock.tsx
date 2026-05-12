@@ -105,6 +105,7 @@ interface Props {
 /* ── Main component ───────────────────────────────────────────────── */
 export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
   ensureCSS();
+  const infoViewOnly = screenData["info_view_only"] === true;
 
   /* ── Data resolution (matches mobile `info` object) ── */
   const activeItem: any = screenData["runner_active_item"] || {};
@@ -331,64 +332,62 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
         </div>
       )}
 
-      {/* ── 3. Embody section: instruction + NamasteIcon TAP target ── */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 20,
-          marginBottom: 32,
-          width: "100%",
-        }}
-      >
-        {/* Instruction text */}
-        <p
+      {!infoViewOnly && (
+        <div
           style={{
-            fontSize: 15,
-            color: MUTED,
-            textAlign: "center",
-            fontFamily: "var(--kalpx-font-serif)",
-            margin: 0,
-            transition: "opacity 0.4s",
-            opacity: activating ? 0.5 : 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 20,
+            marginBottom: 32,
+            width: "100%",
           }}
         >
-          {activating
-            ? "Let the vibration settle within..."
-            : "Tap to embody your intention"}
-        </p>
-
-        {/* Hold tap target — NamasteIcon with 3D flip animation on tap */}
-        <button
-          onClick={handleTap}
-          disabled={activating || done}
-          data-testid="sankalp-hold-circle"
-          aria-label="Tap to embody sankalp"
-        >
-          <img
-            src="/namaste.png"
-            alt="Namaste"
-            width={300}
-            height={300}
-            draggable={false}
+          <p
             style={{
-              // Coin-flip: slow continuous rotateY while activating
-              animation: activating
-                ? "kalpx-coin-spin 4s linear infinite"
-                : "none",
-              opacity: done ? 0.3 : 1,
+              fontSize: 15,
+              color: MUTED,
+              textAlign: "center",
+              fontFamily: "var(--kalpx-font-serif)",
+              margin: 0,
               transition: "opacity 0.4s",
-              objectFit: "contain",
-              marginTop: -40,
+              opacity: activating ? 0.5 : 1,
             }}
-          />
-        </button>
-      </div>
+          >
+            {activating
+              ? "Let the vibration settle within..."
+              : "Tap to embody your intention"}
+          </p>
+
+          <button
+            onClick={handleTap}
+            disabled={activating || done}
+            data-testid="sankalp-hold-circle"
+            aria-label="Tap to embody sankalp"
+          >
+            <img
+              src="/namaste.png"
+              alt="Namaste"
+              width={300}
+              height={300}
+              draggable={false}
+              style={{
+                animation: activating
+                  ? "kalpx-coin-spin 4s linear infinite"
+                  : "none",
+                opacity: done ? 0.3 : 1,
+                transition: "opacity 0.4s",
+                objectFit: "contain",
+                marginTop: -40,
+              }}
+            />
+          </button>
+        </div>
+      )}
 
       {/* ── 4. Essence collapsible (info.insight) ── */}
       {hasContent(insight) && (
-        <div style={{ width: "100%", marginBottom: 12, marginTop: -80 }}>
+        <div style={{ width: "100%", marginBottom: 12, marginTop: infoViewOnly ? 0 : -80 }}>
           <CollapsibleCard
             label="Essence"
             expanded={essenceExpanded}

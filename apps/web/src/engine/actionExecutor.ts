@@ -604,8 +604,18 @@ export async function executeAction(action: any, context: ActionContext): Promis
     case 'runner_back': {
       const exitSource = screenData.runner_source as string | null;
       const exitRoomId = screenData.room_id as string | null;
-      const runnerKeys = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz'];
+      const infoViewOnly = screenData.info_view_only === true;
+      const backTarget = screenData.info_back_target;
+      const runnerKeys = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz', 'info_view_only', 'info_back_target'];
       runnerKeys.forEach(k => dispatch(setScreenValue({ key: k, value: null })));
+      if (infoViewOnly && backTarget) {
+        const dest = _resolveTarget(backTarget);
+        if (dest) {
+          dispatch(loadScreen({ containerId: dest.containerId, stateId: dest.stateId }));
+          webNavigate(_containerToPath(dest.containerId, dest.stateId));
+          break;
+        }
+      }
       if (exitSource === 'support_room' && exitRoomId) {
         ensureRoomAmbientPlaying();
         webNavigate(`/en/mitra/room/${exitRoomId.replace(/^room_/, '')}`);
@@ -674,9 +684,52 @@ export async function executeAction(action: any, context: ActionContext): Promis
       const item = p.manualData || {};
       const itemType: string = p.type || p.item_type || 'mantra';
       const itemSource: string = item.source || (screenData.runner_source as string) || 'core';
+      const readOnly = p.readOnly === true || p.read_only === true;
+      const variant: 'mantra' | 'sankalp' | 'practice' =
+        itemType === 'sankalp' ? 'sankalp'
+        : itemType === 'practice' ? 'practice'
+        : 'mantra';
 
       dispatch(setSubmitting(true));
       try {
+        if (readOnly) {
+          const stateId =
+            variant === 'sankalp' ? 'sankalp_embody'
+            : variant === 'practice' ? 'practice_step_runner'
+            : 'free_mantra_chanting';
+          dispatch(updateScreenData({
+            runner_source: itemSource,
+            runner_variant: variant,
+            runner_active_item: {
+              ...item,
+              item_id: item.item_id || item.itemId || item.id || '',
+              item_type: variant,
+              title: item.title || item.name || '',
+            },
+            mantra_text: variant === 'mantra' ? (item.title || item.name || '') : screenData.mantra_text,
+            mantra_devanagari: variant === 'mantra' ? (item.devanagari || '') : screenData.mantra_devanagari,
+            mantra_audio_url: variant === 'mantra' ? (item.audio_url || '') : screenData.mantra_audio_url,
+            sankalp_text: variant === 'sankalp' ? (item.title || item.name || '') : screenData.sankalp_text,
+            sankalp_audio_url: variant === 'sankalp' ? (item.audio_url || '') : (screenData.sankalp_audio_url ?? ''),
+            practice_title: variant === 'practice' ? (item.title || item.name || '') : screenData.practice_title,
+            practice_duration_seconds: variant === 'practice'
+              ? ((typeof item.duration_seconds === 'number' && item.duration_seconds > 0)
+                  ? item.duration_seconds
+                  : ((typeof item.duration_min === 'number' && item.duration_min > 0) ? item.duration_min * 60 : screenData.practice_duration_seconds))
+              : screenData.practice_duration_seconds,
+            practice_steps: variant === 'practice' ? (item.steps || screenData.practice_steps || []) : screenData.practice_steps,
+            info_view_only: true,
+            info_back_target: p.backTarget || null,
+            info: null,
+            _info_manual_data: null,
+            info_start_action: null,
+            info_start_label: null,
+          }));
+          dispatch(loadScreen({ containerId: 'practice_runner', stateId }));
+          webNavigate(_containerToPath('practice_runner', stateId));
+          break;
+        }
+
         dispatch(updateScreenData({
           runner_source: itemSource,
           _info_manual_data: item,
@@ -689,6 +742,8 @@ export async function executeAction(action: any, context: ActionContext): Promis
           },
           info_start_label: 'Begin',
           info_start_action: { type: 'info_start_click' },
+          info_view_only: false,
+          info_back_target: p.backTarget || null,
         }));
         dispatch(loadScreen({ containerId: 'cycle_transitions', stateId: 'offering_reveal' }));
         webNavigate(_containerToPath('cycle_transitions', 'offering_reveal'));

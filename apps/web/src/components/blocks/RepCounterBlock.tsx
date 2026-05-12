@@ -400,6 +400,7 @@ function MalaBeadRing({
 /* ── Main export ──────────────────────────────────────────────────── */
 export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
   ensureCSS();
+  const infoViewOnly = screenData["info_view_only"] === true;
 
   /* ── Data resolution ── */
   const initialTotal: number =
@@ -527,48 +528,52 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
         </p>
       )}
 
-      {/* 3 ── Progress counter */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "baseline",
-          gap: 4,
-          margin: "-6px 0 8px",
-        }}
-      >
-        <span
-          style={{
-            fontSize: 64,
-            fontFamily: "var(--kalpx-font-serif)",
-            fontWeight: 300,
-            color: GOLD,
-            lineHeight: 1,
-          }}
-        >
-          {reps}
-        </span>
-        {!unlimited && (
-          <span
+      {!infoViewOnly && (
+        <>
+          {/* 3 ── Progress counter */}
+          <div
             style={{
-              fontSize: 32,
-              fontFamily: "var(--kalpx-font-serif)",
-              color: "#d1c1a1",
-              lineHeight: 1,
+              display: "flex",
+              alignItems: "baseline",
+              gap: 4,
+              margin: "-6px 0 8px",
             }}
           >
-            / {repsTotal}
-          </span>
-        )}
-      </div>
+            <span
+              style={{
+                fontSize: 64,
+                fontFamily: "var(--kalpx-font-serif)",
+                fontWeight: 300,
+                color: GOLD,
+                lineHeight: 1,
+              }}
+            >
+              {reps}
+            </span>
+            {!unlimited && (
+              <span
+                style={{
+                  fontSize: 32,
+                  fontFamily: "var(--kalpx-font-serif)",
+                  color: "#d1c1a1",
+                  lineHeight: 1,
+                }}
+              >
+                / {repsTotal}
+              </span>
+            )}
+          </div>
 
-      {/* 4 ── Mala bead ring */}
-      <MalaBeadRing
-        count={beadCount}
-        reps={reps}
-        repsTotal={repsTotal}
-        unlimited={unlimited}
-        onTap={increment}
-      />
+          {/* 4 ── Mala bead ring */}
+          <MalaBeadRing
+            count={beadCount}
+            reps={reps}
+            repsTotal={repsTotal}
+            unlimited={unlimited}
+            onTap={increment}
+          />
+        </>
+      )}
 
       {/* 5 ── IAST / Devanagari text cards */}
       {(iast || devanagari) && (
@@ -600,43 +605,44 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
         </div>
       )}
 
-      {/* 6 ── Rep preset pills */}
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "center",
-          gap: 10,
-          marginTop: 22,
-          marginBottom: 26,
-        }}
-      >
-        {REP_PRESETS.map((n) => {
-          const sel = repsTotal === n && !unlimited;
-          return (
-            <button
-              key={n}
-              onClick={() => setPreset(n)}
-              data-testid={`rep-chip-${n}`}
-              style={{
-                paddingInline: 18,
-                paddingBlock: 8,
-                borderRadius: 20,
-                border: `1px solid ${sel ? GOLD : "#e8c587"}`,
-                background: sel ? GOLD : "transparent",
-                color: sel ? "#fff" : MUTED,
-                fontSize: 15,
-                fontWeight: 600,
-                cursor: "pointer",
-                transition: "all 0.15s ease",
-              }}
-            >
-              {n}
-              {sel ? " ✓" : ""}
-            </button>
-          );
-        })}
-      </div>
+      {!infoViewOnly && (
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: 10,
+            marginTop: 22,
+            marginBottom: 26,
+          }}
+        >
+          {REP_PRESETS.map((n) => {
+            const sel = repsTotal === n && !unlimited;
+            return (
+              <button
+                key={n}
+                onClick={() => setPreset(n)}
+                data-testid={`rep-chip-${n}`}
+                style={{
+                  paddingInline: 18,
+                  paddingBlock: 8,
+                  borderRadius: 20,
+                  border: `1px solid ${sel ? GOLD : "#e8c587"}`,
+                  background: sel ? GOLD : "transparent",
+                  color: sel ? "#fff" : MUTED,
+                  fontSize: 15,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                {n}
+                {sel ? " ✓" : ""}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* 7 ── Audio player */}
       {audioUrl && (

@@ -75,7 +75,7 @@ export function BlockRenderer({ block, screenData, onAction }: BlockRendererProp
     case 'first_recognition':
       return <FirstRecognitionBlock block={block} screenData={screenData} />;
     case 'path_emerges':
-      return <PathEmergesBlock block={block} screenData={screenData} />;
+      return <PathEmergesBlock block={block} screenData={screenData} onAction={onAction} />;
     case 'new_dashboard_body':
       return <NewDashboardBodyBlock block={block} screenData={screenData} onAction={onAction} />;
 

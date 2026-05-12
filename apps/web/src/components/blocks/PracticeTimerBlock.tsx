@@ -133,6 +133,7 @@ export function PracticeTimerBlock({
   onAction,
 }: Props) {
   ensureCSS();
+  const infoViewOnly = screenData["info_view_only"] === true;
 
   /* ── Data resolution ── */
   const activeItem: any = screenData["runner_active_item"] || {};
@@ -434,20 +435,20 @@ export function PracticeTimerBlock({
         </div>
       )}
 
-      {/* ── 3. Timer card ── */}
-      <div
-        style={{
-          width: "100%",
-          borderRadius: 14,
-          border: `1px solid ${CARD_BORDER}`,
-          background: CARD_BG,
-          padding: "20px 20px 24px",
-          marginBottom: 16,
-          boxSizing: "border-box",
-          textAlign: "center",
-        }}
-      >
-        {!running && !done ? (
+      {!infoViewOnly && (
+        <div
+          style={{
+            width: "100%",
+            borderRadius: 14,
+            border: `1px solid ${CARD_BORDER}`,
+            background: CARD_BG,
+            padding: "20px 20px 24px",
+            marginBottom: 16,
+            boxSizing: "border-box",
+            textAlign: "center",
+          }}
+        >
+          {!running && !done ? (
           /* PRE-START */
           <>
             <p
@@ -710,7 +711,8 @@ export function PracticeTimerBlock({
             </button>
           </>
         )}
-      </div>
+        </div>
+      )}
 
       {/* ── 4. Benefits collapsible ── */}
       {hasContent(benefits) && (

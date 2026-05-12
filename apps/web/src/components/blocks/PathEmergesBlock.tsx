@@ -1,6 +1,7 @@
 interface Props {
   block?: Record<string, any>;
   screenData?: Record<string, any>;
+  onAction?: (action: any) => void;
 }
 
 type Kind = "mantra" | "sankalp" | "practice";
@@ -79,8 +80,9 @@ function ChevronIcon({ color }: { color: string }) {
   );
 }
 
-export function PathEmergesBlock({ screenData }: Props) {
+export function PathEmergesBlock({ screenData, onAction }: Props) {
   const sd = screenData || {};
+  const triad = sd.onboarding_triad_data?.triad || {};
 
   const hasData = CARDS.some((c) => !!sd[c.titleKey]);
 
@@ -138,17 +140,38 @@ export function PathEmergesBlock({ screenData }: Props) {
 
       {CARDS.map((card) => {
         const theme = THEME[card.kind];
-        const rawTitle = sd[card.titleKey] || "";
+        const triadItem = triad[card.kind] || {};
+        const rawTitle = triadItem.title || sd[card.titleKey] || "";
         if (!rawTitle) return null;
         const title =
           card.kind === "sankalp" ? `'${rawTitle.trim()}'` : rawTitle;
-        const why: string = sd[card.whyKey] || "";
+        const why: string =
+          triadItem.body ||
+          triadItem.description ||
+          triadItem.subtitle ||
+          sd[card.whyKey] ||
+          "";
 
         return (
-          <div
+          <button
             key={card.kind}
             data-testid={`triad-${card.kind}`}
+            onClick={() =>
+              onAction?.({
+                type: "view_info",
+                payload: {
+                  type: card.kind,
+                  manualData: triadItem,
+                  readOnly: true,
+                  backTarget: {
+                    container_id: "welcome_onboarding",
+                    state_id: "turn_8",
+                  },
+                },
+              })
+            }
             style={{
+              width: "100%",
               borderRadius: 28,
               border: `1px solid ${theme.border}`,
               background: theme.bg,
@@ -158,6 +181,8 @@ export function PathEmergesBlock({ screenData }: Props) {
               alignItems: "center",
               gap: 0,
               boxShadow: "0 8px 18px rgba(179, 140, 54, 0.05)",
+              cursor: "pointer",
+              textAlign: "left",
             }}
           >
             {/* Icon circle */}
@@ -228,7 +253,7 @@ export function PathEmergesBlock({ screenData }: Props) {
             <div style={{ marginLeft: 6 }}>
               <ChevronIcon color={theme.accent} />
             </div>
-          </div>
+          </button>
         );
       })}
 

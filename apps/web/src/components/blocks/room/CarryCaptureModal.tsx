@@ -123,9 +123,10 @@ const CARRY_MEMORY_MODAL: Record<string, CarryModalCopy> = {
   release_named: {
     title: "Name what you’re setting down",
     sanatan_context:
-      "Letting go is not giving up. It is loosening the grip so life can move again.",
-    why_we_ask:
       "Naming the weight helps you separate yourself from what you are carrying.",
+    why_we_ask:
+      "Letting go is not giving up. It is loosening the grip so life can move again.",
+
     prompt: "What is ready to be set down for now?",
     placeholder: "Write one word or a few lines…",
     primary_label: "Save this release",
@@ -415,7 +416,7 @@ export function CarryCaptureModal({
         background: "rgba(0,0,0,0.35)",
         zIndex: 300,
         display: "flex",
-        alignItems: "flex-end",
+        alignItems: "center",
         justifyContent: "center",
       }}
       onClick={(e) =>
@@ -427,15 +428,16 @@ export function CarryCaptureModal({
         data-testid="carry-capture-modal"
         style={{
           width: "100%",
-          maxWidth: 480,
+          maxWidth: 780,
           background: "#fdf8ef",
           backgroundImage: "url(/beige_bg.png)",
           backgroundSize: "cover",
           backgroundPosition: "center",
-          borderRadius: "24px 24px 0 0",
+
           padding: "0 0 32px",
-          maxHeight: "90dvh",
+          maxHeight: "calc(100dvh - 40px)",
           overflowY: "auto",
+          boxShadow: "0 18px 50px rgba(48, 28, 6, 0.16)",
         }}
       >
         {/* Handle */}
@@ -459,7 +461,7 @@ export function CarryCaptureModal({
         {confirmation.visible ? (
           /* Confirmation state */
           <div
-            style={{ padding: "20px 24px", textAlign: "center" }}
+            style={{ padding: "36px 34px 20px", textAlign: "center" }}
             data-testid="carry-capture-confirmation"
           >
             <p style={{ fontSize: 12, color: "#D4A017", margin: "0 0 4px" }}>
@@ -530,50 +532,119 @@ export function CarryCaptureModal({
           </div>
         ) : (
           /* Input state */
-          <div style={{ padding: "0 24px 0" }}>
+          <div style={{ padding: "0 18px 0" }}>
             {/* Header */}
-            <div style={{ position: "relative", padding: "14px 0 4px" }}>
-              <button
-                data-testid="carry-capture-cancel"
-                onClick={onCancel}
+            <div style={{ padding: "5px" }}>
+              <div
                 style={{
-                  position: "absolute",
-                  top: 14,
-                  right: 0,
-                  background: "none",
-                  border: "none",
-                  fontSize: 15,
-                  color: "#6E6E73",
-                  cursor: "pointer",
-                  padding: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
                 }}
               >
-                Cancel
-              </button>
-              <p
+                <button
+                  onClick={onCancel}
+                  aria-label="Back"
+                  style={{
+                    width: 30,
+                    height: 30,
+                    borderRadius: 999,
+                    border: "1.2px solid rgba(191, 151, 84, 0.75)",
+                    background: "rgba(255,255,255,0.52)",
+                    color: "#A7792E",
+                    fontSize: 28,
+                    lineHeight: 1,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 0,
+                  }}
+                >
+                  ‹
+                </button>
+                <button
+                  data-testid="carry-capture-cancel"
+                  onClick={onCancel}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    fontSize: 16,
+                    color: "#45403A",
+                    cursor: "pointer",
+                    padding: 0,
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+
+              <div
                 style={{
-                  fontSize: 15,
-                  fontWeight: 600,
-                  color: "#1C1C1E",
-                  margin: 0,
                   textAlign: "center",
-                  paddingRight: 56,
+                  maxWidth: 620,
+                  margin: "0 auto",
                 }}
               >
-                {copy.title || label}
-              </p>
+                <img
+                  src="/lotus_icon.png"
+                  alt=""
+                  width={34}
+                  height={26}
+                  style={{ display: "block", margin: "0 auto 18px" }}
+                />
+                <h2
+                  style={{
+                    margin: 0,
+                    color: "#2C1C11",
+                    fontFamily: "var(--kalpx-font-serif)",
+                    fontSize: "clamp(30px, 4.8vw, 68px)",
+                    lineHeight: 1.02,
+                    fontWeight: 700,
+                    letterSpacing: "-0.04em",
+                  }}
+                >
+                  {copy.title || label}
+                </h2>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 14,
+                    margin: "18px 0 0",
+                    color: "#B88632",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 48,
+                      height: 1,
+                      background: "rgba(184, 134, 50, 0.42)",
+                    }}
+                  />
+                  <span style={{ fontSize: 16, lineHeight: 1 }}>◆</span>
+                  <span
+                    style={{
+                      width: 48,
+                      height: 1,
+                      background: "rgba(184, 134, 50, 0.42)",
+                    }}
+                  />
+                </div>
+              </div>
             </div>
 
             {copy.sanatan_context && (
               <p
                 style={{
-                  fontSize: 13,
-                  color: "#8B6914",
+                  fontSize: 14,
+                  color: "#A97817",
                   fontStyle: "italic",
                   textAlign: "center",
-                  margin: "8px auto 10px",
-                  lineHeight: 1.5,
-                  maxWidth: 520,
+                  margin: "0 auto 18px",
+                  lineHeight: 1.45,
+                  maxWidth: 560,
                 }}
               >
                 {copy.sanatan_context}
@@ -582,12 +653,12 @@ export function CarryCaptureModal({
             {copy.why_we_ask && (
               <p
                 style={{
-                  fontSize: 16,
-                  color: "#5C5C5C",
+                  fontSize: 14,
+                  color: "#35302B",
                   textAlign: "center",
-                  margin: "0 auto 22px",
-                  lineHeight: 1.5,
-                  maxWidth: 560,
+                  margin: "0 auto 30px",
+                  lineHeight: 1.55,
+                  maxWidth: 640,
                 }}
               >
                 {copy.why_we_ask}
@@ -595,47 +666,56 @@ export function CarryCaptureModal({
             )}
             <p
               style={{
-                fontSize: 17,
-                color: "#3C3C43",
-                marginBottom: 16,
-                lineHeight: 1.4,
+                fontSize: 16,
+                color: "#2E241B",
+                margin: "0 auto 18px",
+                lineHeight: 1.3,
                 textAlign: "center",
+                fontFamily: "var(--kalpx-font-serif)",
+                maxWidth: 560,
+                fontWeight: 700,
               }}
             >
               {copy.prompt}
             </p>
 
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value.slice(0, MAX_TEXT))}
-              placeholder={copy.placeholder}
-              data-testid="carry-capture-input"
-              maxLength={MAX_TEXT}
-              style={{
-                width: "100%",
-                minHeight: 230,
-                border: "1px solid #D8D8D8",
-                borderRadius: 20,
-                padding: 22,
-                fontSize: 15,
-                color: "#1C1C1E",
-                background: "rgba(255,255,255,0.38)",
-                resize: "none",
-                boxSizing: "border-box",
-                outline: "none",
-                lineHeight: 1.5,
-              }}
-            />
-            <p
-              style={{
-                fontSize: 12,
-                color: "#8E8E93",
-                textAlign: "right",
-                margin: "6px 0 16px",
-              }}
-            >
-              {text.length} / {MAX_TEXT}
-            </p>
+            <div style={{ position: "relative", marginBottom: 24 }}>
+              <textarea
+                value={text}
+                onChange={(e) => setText(e.target.value.slice(0, MAX_TEXT))}
+                placeholder={copy.placeholder}
+                data-testid="carry-capture-input"
+                maxLength={MAX_TEXT}
+                style={{
+                  width: "100%",
+                  minHeight: 320,
+                  border: "1px solid rgba(196, 181, 161, 0.92)",
+                  borderRadius: 28,
+                  padding: "28px 28px 54px",
+                  fontSize: 18,
+                  color: "#1C1C1E",
+                  background: "rgba(255,255,255,0.72)",
+                  resize: "none",
+                  boxSizing: "border-box",
+                  outline: "none",
+                  lineHeight: 1.5,
+                  boxShadow: "0 6px 16px rgba(72, 46, 13, 0.12)",
+                }}
+              />
+              <p
+                style={{
+                  position: "absolute",
+                  right: 22,
+                  bottom: 18,
+                  margin: 0,
+                  fontSize: 13,
+                  color: "#75706A",
+                  pointerEvents: "none",
+                }}
+              >
+                {text.length} / {MAX_TEXT}
+              </p>
+            </div>
 
             {error && (
               <p
@@ -657,18 +737,50 @@ export function CarryCaptureModal({
               onClick={handleSave}
               style={{
                 width: "100%",
-                height: 46,
+                maxWidth: 560,
+                display: "block",
+                margin: "0 auto",
+                padding: "10px",
+                // height: 64,
                 borderRadius: 999,
-                border: "1px solid rgba(212, 183, 132, 0.3)",
-                background: "rgba(251,245,245,0.55)",
-                fontSize: 17,
+                border: "1px solid rgba(85, 42, 11, 0.22)",
+                background: "linear-gradient(180deg, #6D3A10 0%, #4D2408 100%)",
+                boxShadow: "0 10px 22px rgba(94, 51, 15, 0.2)",
+                fontSize: 18,
                 fontWeight: 600,
-                color: "#432104",
+                color: "#FFF7EF",
                 cursor: enabled ? "pointer" : "default",
                 opacity: enabled ? 1 : 0.45,
               }}
             >
-              {isSubmitting ? "Saving…" : copy.primary_label}
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 12,
+                }}
+              >
+                <img src="/lotus_icon.png" alt="" width={22} height={18} />
+                {isSubmitting ? "Saving…" : copy.primary_label}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={onCancel}
+              style={{
+                display: "block",
+                margin: "18px auto 0",
+                background: "none",
+                border: "none",
+                borderBottom: "1px solid rgba(72, 57, 41, 0.45)",
+                padding: "0 0 3px",
+                fontSize: 14,
+                color: "#4A433C",
+                cursor: "pointer",
+              }}
+            >
+              I&apos;ll go now
             </button>
           </div>
         )}

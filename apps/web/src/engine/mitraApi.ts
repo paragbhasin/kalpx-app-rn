@@ -33,6 +33,9 @@ let _entryViewInflight: Promise<{
 
 let _journeyHomeCache: { data: any; ts: number } | null = null;
 let _journeyHomeInflight: Promise<any | null> | null = null;
+const MITRA_HOME_TTL_MS = 30_000;
+let _mitraHomeCache: { data: MitraHomeV3Response; ts: number } | null = null;
+let _mitraHomeInflight: Promise<MitraHomeV3Response> | null = null;
 
 export function invalidateDashboardViewCache(): void {
   _dashboardViewCache = null;
@@ -57,6 +60,11 @@ export function invalidateEntryViewApiCache(): void {
 export function invalidateJourneyHomeCache(): void {
   _journeyHomeCache = null;
   _journeyHomeInflight = null;
+}
+
+export function invalidateMitraHomeV3Cache(): void {
+  _mitraHomeCache = null;
+  _mitraHomeInflight = null;
 }
 
 export async function getUserPreferences(): Promise<any> {
@@ -765,10 +773,32 @@ export async function acceptPredictiveAlert(id: string | number): Promise<any> {
  * Returns MitraHomeV3Response with door_states, inner_path_summary, etc.
  */
 export async function getMitraHomeV3(opts?: { forceFresh?: boolean }): Promise<MitraHomeV3Response> {
+  if (!opts?.forceFresh) {
+    if (_mitraHomeCache && Date.now() - _mitraHomeCache.ts < MITRA_HOME_TTL_MS) {
+      return _mitraHomeCache.data;
+    }
+    if (_mitraHomeInflight) {
+      return _mitraHomeInflight;
+    }
+  }
+
   const params: Record<string, string | number> = { tz: getTz() };
   if (opts?.forceFresh) params['_t'] = Date.now();
-  const resp = await api.get<MitraHomeV3Response>('mitra/v3/journey/home/', { params });
-  return resp.data;
+  const request = (async () => {
+    try {
+      const resp = await api.get<MitraHomeV3Response>('mitra/v3/journey/home/', { params });
+      _mitraHomeCache = { data: resp.data, ts: Date.now() };
+      return resp.data;
+    } finally {
+      _mitraHomeInflight = null;
+    }
+  })();
+
+  if (!opts?.forceFresh) {
+    _mitraHomeInflight = request;
+  }
+
+  return request;
 }
 
 export interface TellMitraV3Payload {

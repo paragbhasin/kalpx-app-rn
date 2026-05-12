@@ -815,6 +815,10 @@ export default function Home() {
             "friend"
           }
         />
+      ) : isLoggedIn && checkingJourney ? (
+        // Authenticated user while segment check is in progress — show nothing so the
+        // welcome page never flashes for users Mitra already knows.
+        null
       ) : mitraJourneyId ? (
         // ContinueJourney v2 — backend-driven via GET /journey/home/.
         // All chip copy + navigation (including 30+d welcome-back)

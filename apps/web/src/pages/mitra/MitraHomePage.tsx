@@ -98,13 +98,15 @@ export function MitraHomePage() {
   const [fourDoorLoading, setFourDoorLoading] = useState(false);
   const [fourDoorError, setFourDoorError] = useState<string | null>(null);
 
+  // Computed once per render — guards both the fetch and the loading check below.
+  const isAuthed = !!(
+    localStorage.getItem(AUTH_KEYS.accessToken) ||
+    localStorage.getItem("access_token")
+  );
+
   // Four-Door V3 fetch — all authenticated users (partial-state or active journey)
   useEffect(() => {
     let cancelled = false;
-    const isAuthed = !!(
-      localStorage.getItem(AUTH_KEYS.accessToken) ||
-      localStorage.getItem("access_token")
-    );
     if (!isAuthed) return;
     if (homeData) return; // already hydrated
 
@@ -179,9 +181,13 @@ export function MitraHomePage() {
   const segment = (homeData?.user_surface_state?.segment ?? null) as MitraHomeSegment | null;
   const hasAnyState = !!segment && segment !== "new";
 
+  // Authenticated users must never see the welcome page during loading.
+  // isAuthed && !homeData && !fourDoorError covers the 1-frame gap before
+  // the useEffect fires and sets fourDoorLoading=true.
   if (
     loading ||
     fourDoorLoading ||
+    (isAuthed && !homeData && !fourDoorError) ||
     (hasActiveJourney === true &&
       (entryLoading || (viewKey === null && !entryError)))
   ) {

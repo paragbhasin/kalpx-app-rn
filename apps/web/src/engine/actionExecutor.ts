@@ -450,6 +450,10 @@ export async function executeAction(action: any, context: ActionContext): Promis
           runner_variant: variant,
           runner_source: source,
           runner_action_id: (p.action_id as string | null) ?? null,  // S17-D4A: track which room action started this
+          room_sequence_active: p.room_sequence_active === true,
+          room_sequence_action_ids: Array.isArray(p.room_sequence_action_ids) ? p.room_sequence_action_ids : null,
+          room_sequence_index: typeof p.room_sequence_index === 'number' ? p.room_sequence_index : null,
+          room_sequence_resume_action_id: null,
           runner_rhythm_slot: (p.rhythm_slot as string | null) ?? null,
           runner_step_index: 0,
           runner_reps_completed: 0,
@@ -496,6 +500,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
       try {
         const item = (screenData.runner_active_item || {}) as Record<string, any>;
         const variant: string = (screenData.runner_variant as string) || 'mantra';
+        const rawRunnerSource: string = (screenData.runner_source as string) || 'core';
         const source: string =
           _normalizeCompletionSource(screenData.runner_source as string | null | undefined) || 'core';
         const itemId: string = item.item_id || item.id || '';
@@ -533,27 +538,63 @@ export async function executeAction(action: any, context: ActionContext): Promis
           }
         }
 
-        // S17-D4A: if this was the recommended room action, skip completion_return
-        // and navigate back to the room with show_room_reflection=true.
-        const runnerActionId = (screenData.runner_action_id as string | null) ?? null;
-        const recId = (screenData.room_render_payload as any)?.room_context?.entry_context?.recommended_first_action_id ?? null;
-        const isRecommendedRoomAction = !!(runnerActionId && recId && runnerActionId === recId && source === 'support_room');
         const roomId = (screenData.room_id as string | null) ?? null;
+        const roomSequenceActive =
+          screenData.room_sequence_active === true &&
+          rawRunnerSource === 'support_room';
+        const roomSequenceActionIds = Array.isArray(screenData.room_sequence_action_ids)
+          ? screenData.room_sequence_action_ids.filter((id: any) => typeof id === 'string' && id.length > 0)
+          : [];
+        const roomSequenceIndex = typeof screenData.room_sequence_index === 'number'
+          ? screenData.room_sequence_index
+          : roomSequenceActionIds.findIndex((id: string) => id === (screenData.runner_action_id as string | null));
+        const nextRoomSequenceActionId =
+          roomSequenceActive && roomSequenceIndex >= 0
+            ? roomSequenceActionIds[roomSequenceIndex + 1] || null
+            : null;
 
-        if (isRecommendedRoomAction && roomId) {
-          void postRoomTelemetry({ room_id: roomId, event_type: 'recommended_action_completed', render_id: (screenData.room_render_payload as any)?.provenance?.render_id ?? null } as any);
+        if (roomSequenceActive && roomId && nextRoomSequenceActionId) {
           dispatch(updateScreenData({
             runner_duration_actual_sec: actualSeconds,
-            show_room_reflection: true,
             runner_action_id: null,
+            room_sequence_resume_action_id: nextRoomSequenceActionId,
           }));
+          ensureRoomAmbientPlaying();
           webNavigate(`/en/mitra/room/${roomId.replace(/^room_/, '')}`);
         } else {
-          const rawSource: string = (screenData.runner_source as string) || '';
-          const completionReturnPath = rawSource === 'rhythm_daily' ? '/en/mitra/rhythm' : '/en/mitra/dashboard';
-          dispatch(updateScreenData({ runner_duration_actual_sec: actualSeconds, completion_return_path: completionReturnPath }));
-          dispatch(loadScreen({ containerId: 'practice_runner', stateId: 'completion_return' }));
-          webNavigate(_containerToPath('practice_runner', 'completion_return'));
+          // S17-D4A: if this was the recommended room action, skip completion_return
+          // and navigate back to the room with show_room_reflection=true.
+          const runnerActionId = (screenData.runner_action_id as string | null) ?? null;
+          const recId = (screenData.room_render_payload as any)?.room_context?.entry_context?.recommended_first_action_id ?? null;
+          const isRecommendedRoomAction = !!(
+            runnerActionId &&
+            recId &&
+            runnerActionId === recId &&
+            rawRunnerSource === 'support_room'
+          );
+
+          if (!roomSequenceActive && isRecommendedRoomAction && roomId) {
+            void postRoomTelemetry({ room_id: roomId, event_type: 'recommended_action_completed', render_id: (screenData.room_render_payload as any)?.provenance?.render_id ?? null } as any);
+            dispatch(updateScreenData({
+              runner_duration_actual_sec: actualSeconds,
+              show_room_reflection: true,
+              runner_action_id: null,
+            }));
+            webNavigate(`/en/mitra/room/${roomId.replace(/^room_/, '')}`);
+          } else {
+            const completionReturnPath =
+              rawRunnerSource === 'rhythm_daily' ? '/en/mitra/rhythm' : '/en/mitra/dashboard';
+            dispatch(updateScreenData({
+              runner_duration_actual_sec: actualSeconds,
+              completion_return_path: completionReturnPath,
+              room_sequence_active: false,
+              room_sequence_action_ids: null,
+              room_sequence_index: null,
+              room_sequence_resume_action_id: null,
+            }));
+            dispatch(loadScreen({ containerId: 'practice_runner', stateId: 'completion_return' }));
+            webNavigate(_containerToPath('practice_runner', 'completion_return'));
+          }
         }
       } finally {
         dispatch(setSubmitting(false));
@@ -1757,6 +1798,31 @@ export async function executeAction(action: any, context: ActionContext): Promis
           analytics_key: action.payload?.analytics_key,
         });
       }
+      break;
+    }
+
+    case 'room_sequence_completed': {
+      const roomId = action.payload?.room_id || screenData.room_id || null;
+      dispatch(updateScreenData({
+        runner_source: 'support_room',
+        runner_variant: 'practice',
+        runner_action_id: null,
+        room_sequence_active: false,
+        room_sequence_action_ids: null,
+        room_sequence_index: null,
+        room_sequence_resume_action_id: null,
+        completion_return_path: '/en/mitra/dashboard',
+        completion_return: action.payload?.completion_return || null,
+        show_room_reflection: false,
+        ...(roomId ? { room_id: roomId } : {}),
+      }));
+      dispatch(loadScreen({ containerId: 'practice_runner', stateId: 'completion_return' }));
+      webNavigate(_containerToPath('practice_runner', 'completion_return'));
+      break;
+    }
+
+    case 'room_sequence_resume_consumed': {
+      dispatch(updateScreenData({ room_sequence_resume_action_id: null }));
       break;
     }
 

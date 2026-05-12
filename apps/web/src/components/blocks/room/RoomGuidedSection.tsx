@@ -4,7 +4,7 @@
  */
 import { ROOM_GUIDED_COPY } from "@kalpx/contracts";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { postRoomSacred, postRoomTelemetry } from "../../../engine/mitraApi";
 import { WEB_ENV } from "../../../lib/env";
 import { CarryCaptureModal } from "./CarryCaptureModal";
@@ -84,6 +84,30 @@ export function RoomGuidedSection({
   const nonExitActions: any[] = (envelope.actions as any[]).filter(
     (a: any) => a.action_type !== "exit",
   );
+  const orderedActions = useMemo(() => {
+    const actionMap = new Map(
+      (envelope.actions as any[]).map((action: any) => [action.action_id, action]),
+    );
+    const steps = Array.isArray(envelope.room_steps)
+      ? [...envelope.room_steps]
+          .sort((a: any, b: any) => (a?.step_number ?? 0) - (b?.step_number ?? 0))
+      : [];
+
+    const orderedIds: string[] = [];
+    if (recId) orderedIds.push(recId);
+
+    for (const step of steps) {
+      const actionId = step?.action_id;
+      if (!actionId || orderedIds.includes(actionId)) continue;
+      orderedIds.push(actionId);
+    }
+
+    const fromSteps = orderedIds
+      .map((actionId) => actionMap.get(actionId))
+      .filter(Boolean);
+
+    return fromSteps.length > 0 ? fromSteps : nonExitActions;
+  }, [envelope.actions, envelope.room_steps, nonExitActions, recId]);
 
   const situationAck =
     roomCtx.situation_acknowledgement_line ??
@@ -102,9 +126,18 @@ export function RoomGuidedSection({
   const openingLine = envelope.opening_line ?? "";
   const secondBeatLine = envelope.second_beat_line ?? "";
   const memoryEchoLine = envelope.memory_echo_line ?? null;
+  const completionMessage =
+    envelope.opening_line || "Complete. You stayed with the practice.";
+  const completionWisdom =
+    roomCtx.bridge_line ||
+    roomCtx.sanatan_insight_line ||
+    "Let what became clear stay with you.";
 
   const [whyExpanded, setWhyExpanded] = useState(false);
   const [recommendedExpanded, setRecommendedExpanded] = useState(false);
+  const [sequenceActive, setSequenceActive] = useState(
+    !!screenData?.room_sequence_active,
+  );
   const [stepsOpen, setStepsOpen] = useState(false);
   const [stepModalVisible, setStepModalVisible] = useState(false);
   const [inquiryModalVisible, setInquiryModalVisible] = useState(false);
@@ -112,10 +145,38 @@ export function RoomGuidedSection({
   const [activeAction, setActiveAction] = useState<any | null>(null);
   const [activeStepPayload, setActiveStepPayload] = useState<any>(null);
 
-  function openAction(action: any) {
+  function maybeAdvanceToNextAction(completedActionId?: string | null) {
+    if (!sequenceActive || !completedActionId) return;
+    const currentIndex = orderedActions.findIndex(
+      (action: any) => action?.action_id === completedActionId,
+    );
+    if (currentIndex < 0) return;
+    const nextAction = orderedActions[currentIndex + 1];
+    if (!nextAction) {
+      setSequenceActive(false);
+      onAction?.({
+        type: "room_sequence_completed",
+        payload: {
+          room_id: roomId,
+          completion_return: {
+            message: completionMessage,
+            wisdom_anchor_line: completionWisdom,
+            return_home_cta: "Return to Mitra Home",
+            repeat_cta: "Repeat",
+            reflection_prompt: "Anything to carry from this?",
+          },
+        },
+      });
+      return;
+    }
+    setTimeout(() => openAction(nextAction), 120);
+  }
+
+  function openAction(action: any, options?: { forceSequenceActive?: boolean }) {
     if (!action) return;
     setStepsOpen(false);
     setActiveAction(action);
+    const isSequenceActive = options?.forceSequenceActive ?? sequenceActive;
 
     if (action.action_type === "in_room_step") {
       const kind = classifyStep(action.step_payload?.template_id);
@@ -165,6 +226,9 @@ export function RoomGuidedSection({
           ? action.action_type.replace("runner_", "")
           : action.action_type) ||
         "mantra";
+      const currentIndex = orderedActions.findIndex(
+        (candidate: any) => candidate?.action_id === action.action_id,
+      );
       onAction?.({
         type: "start_runner",
         payload: {
@@ -228,10 +292,31 @@ export function RoomGuidedSection({
             steps: rp.steps || rp.item?.steps || rp.offering?.steps || [],
           },
           action_id: action.action_id,
+          room_sequence_active: isSequenceActive,
+          room_sequence_action_ids: orderedActions.map(
+            (candidate: any) => candidate.action_id,
+          ),
+          room_sequence_index: currentIndex,
         },
       });
     }
   }
+
+  useEffect(() => {
+    if (!screenData?.room_sequence_active) return;
+    setSequenceActive(true);
+  }, [screenData?.room_sequence_active]);
+
+  useEffect(() => {
+    const resumeActionId = screenData?.room_sequence_resume_action_id;
+    if (!resumeActionId) return;
+    const action = orderedActions.find(
+      (candidate: any) => candidate?.action_id === resumeActionId,
+    );
+    if (!action) return;
+    onAction?.({ type: "room_sequence_resume_consumed" });
+    openAction(action);
+  }, [onAction, orderedActions, screenData?.room_sequence_resume_action_id]);
 
   function handleBegin() {
     if (WEB_ENV.isDev)
@@ -246,13 +331,14 @@ export function RoomGuidedSection({
         render_id: renderId,
       });
     if (!recAction) return;
+    setSequenceActive(true);
     void postRoomTelemetry({
       room_id: roomId,
       event_type: "recommended_action_started",
       render_id: renderId,
       action_id: recAction.action_id,
     } as any);
-    openAction(recAction);
+    openAction(recAction, { forceSequenceActive: true });
   }
 
   function handleExit() {
@@ -806,6 +892,7 @@ export function RoomGuidedSection({
               ...(extra.grounding ? { grounding: extra.grounding } : {}),
             },
           });
+          maybeAdvanceToNextAction(action.action_id);
         }}
       />
       <InquiryModal
@@ -872,6 +959,7 @@ export function RoomGuidedSection({
               source: "inquiry",
             },
           });
+          maybeAdvanceToNextAction(action.action_id);
         }}
       />
       <CarryCaptureModal
@@ -913,6 +1001,7 @@ export function RoomGuidedSection({
                 null,
             },
           });
+          maybeAdvanceToNextAction(action.action_id);
         }}
       />
     </div>

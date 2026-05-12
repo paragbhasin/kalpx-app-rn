@@ -77,9 +77,8 @@ const CARRY_MEMORY_MODAL: Record<string, CarryModalCopy> = {
   connection_named: {
     title: "Name someone who matters",
     sanatan_context:
-      "Sambandha reminds us that even one true bond can hold us.",
-    why_we_ask:
       "Naming someone helps you return from feeling alone to one thread of care.",
+    why_we_ask: "Sambandha reminds us that even one true bond can hold us.",
     prompt: "Who is close to your heart right now?",
     placeholder: "Write a name, relationship, or a few words…",
     primary_label: "Save this connection",
@@ -599,7 +598,7 @@ export function CarryCaptureModal({
                     color: "#2C1C11",
                     fontFamily: "var(--kalpx-font-serif)",
                     fontSize: "clamp(30px, 4.8vw, 68px)",
-                    lineHeight: 1.02,
+
                     fontWeight: 700,
                     letterSpacing: "-0.04em",
                   }}

@@ -171,6 +171,38 @@ export default function RhythmHomeScreen({
     };
   }, [dispatch, navigation]);
 
+  const openRhythmSetup = useCallback(() => {
+    dispatch(
+      screenActions.setScreenValue({
+        key: "dashboard_entry_surface",
+        value: "my_rhythm_setup",
+      }),
+    );
+    dispatch(
+      loadScreenWithData({
+        containerId: "companion_dashboard",
+        stateId: "day_active",
+      }) as any,
+    );
+    navigation.navigate("DynamicEngine");
+  }, [dispatch, navigation]);
+
+  const openRhythmEdit = useCallback(() => {
+    dispatch(
+      screenActions.setScreenValue({
+        key: "dashboard_entry_surface",
+        value: "my_rhythm_edit",
+      }),
+    );
+    dispatch(
+      loadScreenWithData({
+        containerId: "companion_dashboard",
+        stateId: "day_active",
+      }) as any,
+    );
+    navigation.navigate("DynamicEngine");
+  }, [dispatch, navigation]);
+
   const handleBack = useCallback(() => {
     if (embedded) {
       dispatch(
@@ -262,7 +294,7 @@ export default function RhythmHomeScreen({
               </Text>
               <TouchableOpacity
                 style={styles.setupBtn}
-                onPress={() => navigation.navigate("RhythmSetup" as any)}
+                onPress={openRhythmSetup}
                 activeOpacity={0.8}
               >
                 <Text style={styles.setupBtnText}>Set up My Rhythm</Text>
@@ -283,7 +315,7 @@ export default function RhythmHomeScreen({
               )}
 
               <TouchableOpacity
-                onPress={() => navigation.navigate("RhythmEdit" as any)}
+                onPress={openRhythmEdit}
                 activeOpacity={0.8}
                 style={styles.editRhythmBtn}
               >

@@ -405,7 +405,14 @@ export default function FourDoorHomeContainer({
             subtitle={rhythmSubtitle}
             onPress={() => {
               if (!hasRhythm) {
-                navigation.navigate("RhythmSetup" as any);
+                updateScreenData("dashboard_entry_surface", "my_rhythm_setup");
+                loadScreen({
+                  container_id: "companion_dashboard",
+                  state_id: "day_active",
+                });
+                if (currentRouteName !== "DynamicEngine") {
+                  navigation.navigate("DynamicEngine" as any);
+                }
                 return;
               }
               updateScreenData("dashboard_entry_surface", "my_rhythm");

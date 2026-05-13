@@ -6,38 +6,58 @@
  * accordion editor directly (used by RhythmEditScreen wrapper).
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  getMissingSuggestionSlots,
+  RHYTHM_BAND_LABELS,
+  RHYTHM_BAND_SUBTITLES,
+  RHYTHM_SUGGEST_COPY,
+  rhythmSuggestItemToLocalItem,
+  toRhythmSetupPayloadItems,
+} from "@kalpx/contracts";
+import type { RhythmTimeBand, RhythmWizardLocalItem } from "@kalpx/types";
+import { useNavigation } from "@react-navigation/native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Image,
+  ImageBackground,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigation } from '@react-navigation/native';
+} from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import AfternoonIcon from "../../../assets/aft.svg";
+import MorningIcon from "../../../assets/morning.svg";
+import NightIcon from "../../../assets/night1.svg";
+import LibrarySearchModal, {
+  LibrarySearchItem,
+} from "../../components/LibrarySearchModal";
+import { executeAction } from "../../engine/actionExecutor";
 import {
-  RHYTHM_BAND_LABELS,
-  RHYTHM_BAND_SUBTITLES,
-  RHYTHM_SUGGEST_COPY,
-  rhythmSuggestItemToLocalItem,
-  toRhythmSetupPayloadItems,
-  getMissingSuggestionSlots,
-} from '@kalpx/contracts';
-import type { RhythmTimeBand, RhythmWizardLocalItem } from '@kalpx/types';
-import LibrarySearchModal, { LibrarySearchItem } from '../../components/LibrarySearchModal';
-import { executeAction } from '../../engine/actionExecutor';
-import { useScreenStore } from '../../engine/useScreenBridge';
-import { mitraJourneyHomeV3, postRhythmSetup, postRhythmSuggest } from '../../engine/mitraApi';
-import { setHomeData } from '../../store/doorSlice';
-import { screenActions, loadScreenWithData, goBackWithData } from '../../store/screenSlice';
-import { Fonts } from '../../theme/fonts';
+  mitraJourneyHomeV3,
+  postRhythmSetup,
+  postRhythmSuggest,
+} from "../../engine/mitraApi";
+import { useScreenStore } from "../../engine/useScreenBridge";
+import { setHomeData } from "../../store/doorSlice";
+import {
+  goBackWithData,
+  loadScreenWithData,
+  screenActions,
+} from "../../store/screenSlice";
+import { Fonts } from "../../theme/fonts";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type WizardStep = 'moments' | 'purpose' | 'suggestion' | 'reminders' | 'confirmation';
+type WizardStep =
+  | "moments"
+  | "purpose"
+  | "suggestion"
+  | "reminders"
+  | "confirmation";
 
 interface BandItem {
   item_id: string;
@@ -50,45 +70,130 @@ type BandItems = Record<RhythmTimeBand, BandItem[]>;
 
 // ─── Content maps ──────────────────────────────────────────────────────────────
 
-const BANDS: RhythmTimeBand[] = ['morning', 'afternoon', 'night'];
+const BANDS: RhythmTimeBand[] = ["morning", "afternoon", "night"];
+const BAND_ART: Record<RhythmTimeBand, React.ComponentType<any>> = {
+  morning: MorningIcon,
+  afternoon: AfternoonIcon,
+  night: NightIcon,
+};
+const RHYTHM_BG = require("../../../assets/beige_bg.png");
+const RHYTHM_LEAF_ART = require("../../../assets/leaves-bird.png");
 
 const MOMENT_COPY: Record<RhythmTimeBand, { label: string; desc: string }> = {
-  morning:   { label: 'Morning',   desc: 'Begin the day with steadiness and intention.' },
-  afternoon: { label: 'Afternoon', desc: 'Pause, reset, and return to yourself.' },
-  night:     { label: 'Night',     desc: 'Reflect, release, and close gently.' },
+  morning: {
+    label: "Morning",
+    desc: "Begin the day with steadiness and intention.",
+  },
+  afternoon: {
+    label: "Afternoon",
+    desc: "Pause, reset, and return to yourself.",
+  },
+  night: { label: "Night", desc: "Reflect, release, and close gently." },
 };
 
-const PURPOSE_OPTIONS: Record<RhythmTimeBand, { value: string; label: string; desc: string }[]> = {
+const PURPOSE_OPTIONS: Record<
+  RhythmTimeBand,
+  { value: string; label: string; desc: string }[]
+> = {
   morning: [
-    { value: 'calm_start', label: 'Calm Start',  desc: 'Begin without rushing inside.' },
-    { value: 'focus',      label: 'Focus',        desc: 'Gather the mind before action.' },
-    { value: 'devotion',   label: 'Devotion',     desc: 'Begin the day with reverence.' },
-    { value: 'discipline', label: 'Discipline',   desc: 'Start with one sincere commitment.' },
-    { value: 'gratitude',  label: 'Gratitude',    desc: 'Remember what supports you.' },
-    { value: 'clarity',    label: 'Clarity',      desc: 'See the day with steadiness.' },
+    {
+      value: "calm_start",
+      label: "Calm Start",
+      desc: "Begin without rushing inside.",
+    },
+    { value: "focus", label: "Focus", desc: "Gather the mind before action." },
+    {
+      value: "devotion",
+      label: "Devotion",
+      desc: "Begin the day with reverence.",
+    },
+    {
+      value: "discipline",
+      label: "Discipline",
+      desc: "Start with one sincere commitment.",
+    },
+    {
+      value: "gratitude",
+      label: "Gratitude",
+      desc: "Remember what supports you.",
+    },
+    {
+      value: "clarity",
+      label: "Clarity",
+      desc: "See the day with steadiness.",
+    },
   ],
   afternoon: [
-    { value: 'reset',             label: 'Reset',             desc: 'Clear the midday weight.' },
-    { value: 'patience',          label: 'Patience',          desc: 'Steady the response to friction.' },
-    { value: 'sankalp_reminder',  label: 'Sankalp Reminder',  desc: 'Return to the quality you are practicing.' },
-    { value: 'energy_check',      label: 'Energy Check',      desc: 'Restore prana for the second half.' },
-    { value: 'mindful_action',    label: 'Mindful Action',    desc: 'Act from intention, not reaction.' },
-    { value: 'emotional_balance', label: 'Emotional Balance', desc: 'Settle what is stirred.' },
+    { value: "reset", label: "Reset", desc: "Clear the midday weight." },
+    {
+      value: "patience",
+      label: "Patience",
+      desc: "Steady the response to friction.",
+    },
+    {
+      value: "sankalp_reminder",
+      label: "Sankalp Reminder",
+      desc: "Return to the quality you are practicing.",
+    },
+    {
+      value: "energy_check",
+      label: "Energy Check",
+      desc: "Restore prana for the second half.",
+    },
+    {
+      value: "mindful_action",
+      label: "Mindful Action",
+      desc: "Act from intention, not reaction.",
+    },
+    {
+      value: "emotional_balance",
+      label: "Emotional Balance",
+      desc: "Settle what is stirred.",
+    },
   ],
   night: [
-    { value: 'release',     label: 'Release',     desc: 'Let go of what the day placed on you.' },
-    { value: 'gratitude',   label: 'Gratitude',   desc: 'Close with what was given.' },
-    { value: 'reflection',  label: 'Reflection',  desc: 'See the day clearly before rest.' },
-    { value: 'forgiveness', label: 'Forgiveness', desc: 'Dissolve what you are still carrying.' },
-    { value: 'sleep_calm',  label: 'Sleep Calm',  desc: 'Steady the mind for deep rest.' },
-    { value: 'self_review', label: 'Self-Review', desc: 'Study what the day is teaching.' },
+    {
+      value: "release",
+      label: "Release",
+      desc: "Let go of what the day placed on you.",
+    },
+    {
+      value: "gratitude",
+      label: "Gratitude",
+      desc: "Close with what was given.",
+    },
+    {
+      value: "reflection",
+      label: "Reflection",
+      desc: "See the day clearly before rest.",
+    },
+    {
+      value: "forgiveness",
+      label: "Forgiveness",
+      desc: "Dissolve what you are still carrying.",
+    },
+    {
+      value: "sleep_calm",
+      label: "Sleep Calm",
+      desc: "Steady the mind for deep rest.",
+    },
+    {
+      value: "self_review",
+      label: "Self-Review",
+      desc: "Study what the day is teaching.",
+    },
   ],
 };
-
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function RhythmSetupScreen({ editMode = false }: { editMode?: boolean }) {
+export default function RhythmSetupScreen({
+  editMode = false,
+  embedded = false,
+}: {
+  editMode?: boolean;
+  embedded?: boolean;
+}) {
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
   const homeData = useSelector((state: any) => state.door?.homeData);
@@ -97,34 +202,90 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
   // ── Screen bridge (needed for executeAction in wizard confirmation) ──────────
   const screenBridge = useScreenStore();
   const screenBridgeRef = useRef(screenBridge);
-  useEffect(() => { screenBridgeRef.current = screenBridge; });
+  useEffect(() => {
+    screenBridgeRef.current = screenBridge;
+  });
 
-  const buildActionContext = useCallback(() => ({
-    screenState: screenBridgeRef.current.screenData || {},
-    setScreenValue: (value: any, key: string) => {
-      dispatch(screenActions.setScreenValue({ key, value }));
-    },
-    loadScreen: (target: any) => {
-      const containerId =
-        typeof target === 'string' ? 'generic' : target?.container_id || target?.containerId || 'generic';
-      const stateId =
-        typeof target === 'string' ? target : target?.state_id || target?.stateId || '';
-      dispatch(loadScreenWithData({ containerId, stateId }) as any);
-      navigation.navigate('DynamicEngine');
-    },
-    goBack: () => { dispatch(goBackWithData() as any); },
-    currentScreen: screenBridgeRef.current.currentScreen,
-  }), [dispatch, navigation]);
+  const buildActionContext = useCallback(
+    () => ({
+      screenState: screenBridgeRef.current.screenData || {},
+      setScreenValue: (value: any, key: string) => {
+        dispatch(screenActions.setScreenValue({ key, value }));
+      },
+      loadScreen: (target: any) => {
+        const containerId =
+          typeof target === "string"
+            ? "generic"
+            : target?.container_id || target?.containerId || "generic";
+        const stateId =
+          typeof target === "string"
+            ? target
+            : target?.state_id || target?.stateId || "";
+        dispatch(loadScreenWithData({ containerId, stateId }) as any);
+        navigation.navigate("DynamicEngine");
+      },
+      goBack: () => {
+        dispatch(goBackWithData() as any);
+      },
+      currentScreen: screenBridgeRef.current.currentScreen,
+    }),
+    [dispatch, navigation],
+  );
+
+  const openRhythmHome = useCallback(() => {
+    dispatch(
+      screenActions.setScreenValue({
+        key: "dashboard_entry_surface",
+        value: "my_rhythm",
+      }),
+    );
+    dispatch(
+      loadScreenWithData({
+        containerId: "companion_dashboard",
+        stateId: "day_active",
+      }) as any,
+    );
+    navigation.navigate("DynamicEngine");
+  }, [dispatch, navigation]);
+
+  const leaveEmbeddedFlow = useCallback(() => {
+    if (embedded) {
+      dispatch(
+        screenActions.setScreenValue({
+          key: "dashboard_entry_surface",
+          value: null,
+        }),
+      );
+    }
+    navigation.goBack();
+  }, [dispatch, embedded, navigation]);
+
+  const handleEditBack = useCallback(() => {
+    if (embedded) {
+      openRhythmHome();
+      return;
+    }
+    navigation.goBack();
+  }, [embedded, navigation, openRhythmHome]);
 
   // ── Wizard state ─────────────────────────────────────────────────────────────
-  const [wizardStep, setWizardStep] = useState<WizardStep | null>(editMode ? null : 'moments');
+  const [wizardStep, setWizardStep] = useState<WizardStep | null>(
+    editMode ? null : "moments",
+  );
   const [selectedMoments, setSelectedMoments] = useState<RhythmTimeBand[]>([]);
-  const [purposes, setPurposes] = useState<Partial<Record<RhythmTimeBand, string>>>({});
-  const [wizardItems, setWizardItems] = useState<Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>>>({});
-  const [wizardReminderPref, setWizardReminderPref] = useState<'yes' | 'no' | 'later'>('later');
-  const [wizardPickerBand, setWizardPickerBand] = useState<RhythmTimeBand | null>(null);
+  const [purposes, setPurposes] = useState<
+    Partial<Record<RhythmTimeBand, string>>
+  >({});
+  const [wizardItems, setWizardItems] = useState<
+    Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>>
+  >({});
+  const [wizardReminderPref, setWizardReminderPref] = useState<
+    "yes" | "no" | "later"
+  >("later");
+  const [wizardPickerBand, setWizardPickerBand] =
+    useState<RhythmTimeBand | null>(null);
   const [wizardSaving, setWizardSaving] = useState(false);
-  const [wizardError, setWizardError] = useState('');
+  const [wizardError, setWizardError] = useState("");
   const [suggestLoading, setSuggestLoading] = useState(false);
   const [suggestError, setSuggestError] = useState<string | null>(null);
   const [suggestionsLoaded, setSuggestionsLoaded] = useState(false);
@@ -142,15 +303,19 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
   };
 
   const [bandItems, setBandItems] = useState<BandItems>({
-    morning: seedBand('morning'),
-    afternoon: seedBand('afternoon'),
-    night: seedBand('night'),
+    morning: seedBand("morning"),
+    afternoon: seedBand("afternoon"),
+    night: seedBand("night"),
   });
-  const [expandedBand, setExpandedBand] = useState<RhythmTimeBand | null>('morning');
+  const [expandedBand, setExpandedBand] = useState<RhythmTimeBand | null>(
+    "morning",
+  );
   const [libraryBand, setLibraryBand] = useState<RhythmTimeBand | null>(null);
   const [saving, setSaving] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [reminderPref, setReminderPref] = useState<'yes' | 'no' | 'later'>('later');
+  const [errorMsg, setErrorMsg] = useState("");
+  const [reminderPref, setReminderPref] = useState<"yes" | "no" | "later">(
+    "later",
+  );
 
   // ── Wizard methods ────────────────────────────────────────────────────────────
 
@@ -169,7 +334,7 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
 
   // Load suggestions once when entering suggestion step
   useEffect(() => {
-    if (wizardStep === 'suggestion' && !editMode && !suggestionsLoaded) {
+    if (wizardStep === "suggestion" && !editMode && !suggestionsLoaded) {
       void loadSuggestions();
     }
   }, [wizardStep, suggestionsLoaded]);
@@ -182,17 +347,23 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
         selected_moments: selectedMoments,
         purposes,
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        locale: 'en',
-        source_surface: 'rhythm_wizard',
+        locale: "en",
+        source_surface: "rhythm_wizard",
       });
-      const newItems: Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>> = {};
+      const newItems: Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>> =
+        {};
       resp.items.forEach((it, idx) => {
-        newItems[it.slot] = { ...rhythmSuggestItemToLocalItem(it), sort_order: idx };
+        newItems[it.slot] = {
+          ...rhythmSuggestItemToLocalItem(it),
+          sort_order: idx,
+        };
       });
       setWizardItems(newItems);
       setSuggestionsLoaded(true);
-      if (resp.status === 'partial' && resp.missing_slots?.length) {
-        setSuggestError(`Mitra could not suggest a practice for: ${resp.missing_slots.join(', ')}.`);
+      if (resp.status === "partial" && resp.missing_slots?.length) {
+        setSuggestError(
+          `Mitra could not suggest a practice for: ${resp.missing_slots.join(", ")}.`,
+        );
       }
     } catch {
       setSuggestError(RHYTHM_SUGGEST_COPY.error);
@@ -202,13 +373,17 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
   };
 
   const advanceToSuggestion = () => {
-    setWizardStep('suggestion');
+    setWizardStep("suggestion");
   };
 
   const handleWizardPickerSelect = (item: LibrarySearchItem) => {
     if (!wizardPickerBand) return;
-    const itemId = item.itemId || (item as any).item_id || '';
-    const itemType = (item as any)._type || item.itemType || (item as any).item_type || 'practice';
+    const itemId = item.itemId || (item as any).item_id || "";
+    const itemType =
+      (item as any)._type ||
+      item.itemType ||
+      (item as any).item_type ||
+      "practice";
     setWizardItems((prev) => ({
       ...prev,
       [wizardPickerBand]: {
@@ -217,7 +392,7 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
         item_type: itemType,
         title_snapshot: item.title,
         description_snapshot: item.description ?? null,
-        source: 'user_chosen' as const,
+        source: "user_chosen" as const,
         sort_order: selectedMoments.indexOf(wizardPickerBand),
         reminder_enabled: false,
         reminder_time: null,
@@ -228,16 +403,18 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
 
   const saveWizard = async () => {
     setWizardSaving(true);
-    setWizardError('');
+    setWizardError("");
     try {
-      const localItems = BANDS.filter((b) => wizardItems[b]).map((b) => wizardItems[b]!);
+      const localItems = BANDS.filter((b) => wizardItems[b]).map(
+        (b) => wizardItems[b]!,
+      );
       const items = toRhythmSetupPayloadItems(localItems) as any[];
       await postRhythmSetup({ items, reminder_preference: wizardReminderPref });
       const newHomeData = await mitraJourneyHomeV3();
       dispatch(setHomeData(newHomeData));
-      setWizardStep('confirmation');
+      setWizardStep("confirmation");
     } catch {
-      setWizardError('Could not save. Please try again.');
+      setWizardError("Could not save. Please try again.");
     } finally {
       setWizardSaving(false);
     }
@@ -245,23 +422,24 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
 
   const beginTodaysPractice = () => {
     const hour = new Date().getHours();
-    const band: RhythmTimeBand = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'night';
+    const band: RhythmTimeBand =
+      hour < 12 ? "morning" : hour < 17 ? "afternoon" : "night";
     const rhythm = homeData?.companion_rhythm;
     const practiceItem = rhythm?.[band]?.items?.[0];
     if (!practiceItem) {
-      navigation.navigate('RhythmHome' as any);
+      openRhythmHome();
       return;
     }
     void executeAction(
       {
-        type: 'start_runner',
+        type: "start_runner",
         payload: {
-          source: 'rhythm_daily',
+          source: "rhythm_daily",
           variant: practiceItem.item_type,
           item: {
             item_id: practiceItem.item_id,
             title_snapshot: practiceItem.title_snapshot,
-            description_snapshot: practiceItem.description_snapshot ?? '',
+            description_snapshot: practiceItem.description_snapshot ?? "",
             item_type: practiceItem.item_type,
           },
         },
@@ -274,15 +452,24 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
 
   const handleItemSelected = (item: LibrarySearchItem) => {
     if (!libraryBand) return;
-    const itemId = item.itemId || (item as any).item_id || '';
-    const itemType = (item as any)._type || item.itemType || (item as any).item_type || 'practice';
+    const itemId = item.itemId || (item as any).item_id || "";
+    const itemType =
+      (item as any)._type ||
+      item.itemType ||
+      (item as any).item_type ||
+      "practice";
     setBandItems((prev) => {
       if (prev[libraryBand].some((i) => i.item_id === itemId)) return prev;
       return {
         ...prev,
         [libraryBand]: [
           ...prev[libraryBand],
-          { item_id: itemId, item_type: itemType, title: item.title, description: item.description ?? null },
+          {
+            item_id: itemId,
+            item_type: itemType,
+            title: item.title,
+            description: item.description ?? null,
+          },
         ],
       };
     });
@@ -290,7 +477,10 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
   };
 
   const removeItem = (band: RhythmTimeBand, itemId: string) => {
-    setBandItems((prev) => ({ ...prev, [band]: prev[band].filter((i) => i.item_id !== itemId) }));
+    setBandItems((prev) => ({
+      ...prev,
+      [band]: prev[band].filter((i) => i.item_id !== itemId),
+    }));
   };
 
   const handleSave = async () => {
@@ -301,20 +491,23 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
         item_id: item.item_id,
         title_snapshot: item.title,
         description_snapshot: item.description ?? null,
-        source: 'user_chosen' as const,
+        source: "user_chosen" as const,
         sort_order: idx,
         reminder_enabled: false,
       })),
     );
     setSaving(true);
-    setErrorMsg('');
+    setErrorMsg("");
     try {
-      await postRhythmSetup({ items: allItems, reminder_preference: reminderPref });
+      await postRhythmSetup({
+        items: allItems,
+        reminder_preference: reminderPref,
+      });
       const newHomeData = await mitraJourneyHomeV3();
       dispatch(setHomeData(newHomeData));
-      navigation.navigate('RhythmHome' as any);
+      openRhythmHome();
     } catch {
-      setErrorMsg('Could not save. Please try again.');
+      setErrorMsg("Could not save. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -322,7 +515,12 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
 
   // ── Wizard step renderers ──────────────────────────────────────────────────────
 
-  const STEP_LABELS: WizardStep[] = ['moments', 'purpose', 'suggestion', 'reminders'];
+  const STEP_LABELS: WizardStep[] = [
+    "moments",
+    "purpose",
+    "suggestion",
+    "reminders",
+  ];
 
   const renderStepDots = (current: WizardStep) => {
     const idx = STEP_LABELS.indexOf(current);
@@ -336,25 +534,37 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
   };
 
   const renderMomentsStep = () => (
-    <SafeAreaView style={wStyles.safe}>
-      <ScrollView contentContainerStyle={wStyles.scroll} showsVerticalScrollIndicator={false}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={wStyles.backRow}>
-          <Text style={wStyles.backText}>{'< Back'}</Text>
+    <SafeAreaView
+      style={[wStyles.safe, embedded && styles.embeddedTransparent]}
+    >
+      <ScrollView
+        contentContainerStyle={wStyles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        <TouchableOpacity onPress={leaveEmbeddedFlow} style={wStyles.backRow}>
+          <Text style={wStyles.backText}>{"< Back"}</Text>
         </TouchableOpacity>
-        {renderStepDots('moments')}
+        {renderStepDots("moments")}
         <Text style={wStyles.heading}>Build Your Daily Rhythm</Text>
-        <Text style={wStyles.subheading}>When would you like Mitra to support you?</Text>
+        <Text style={wStyles.subheading}>
+          When would you like Mitra to support you?
+        </Text>
         {BANDS.map((band) => {
           const selected = selectedMoments.includes(band);
           return (
             <TouchableOpacity
               key={band}
-              style={[wStyles.momentCard, selected && wStyles.momentCardSelected]}
+              style={[
+                wStyles.momentCard,
+                selected && wStyles.momentCardSelected,
+              ]}
               onPress={() => toggleMoment(band)}
               activeOpacity={0.7}
             >
               <View style={wStyles.momentCardInner}>
-                <Text style={wStyles.momentLabel}>{MOMENT_COPY[band].label}</Text>
+                <Text style={wStyles.momentLabel}>
+                  {MOMENT_COPY[band].label}
+                </Text>
                 <Text style={wStyles.momentDesc}>{MOMENT_COPY[band].desc}</Text>
               </View>
               <View style={[wStyles.check, selected && wStyles.checkSelected]}>
@@ -364,8 +574,11 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
           );
         })}
         <TouchableOpacity
-          style={[wStyles.primaryBtn, selectedMoments.length === 0 && wStyles.primaryBtnDisabled]}
-          onPress={() => setWizardStep('purpose')}
+          style={[
+            wStyles.primaryBtn,
+            selectedMoments.length === 0 && wStyles.primaryBtnDisabled,
+          ]}
+          onPress={() => setWizardStep("purpose")}
           disabled={selectedMoments.length === 0}
           activeOpacity={0.8}
         >
@@ -376,32 +589,59 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
   );
 
   const renderPurposeStep = () => (
-    <SafeAreaView style={wStyles.safe}>
-      <ScrollView contentContainerStyle={wStyles.scroll} showsVerticalScrollIndicator={false}>
-        <TouchableOpacity onPress={() => setWizardStep('moments')} style={wStyles.backRow}>
-          <Text style={wStyles.backText}>{'< Back'}</Text>
+    <SafeAreaView
+      style={[wStyles.safe, embedded && styles.embeddedTransparent]}
+    >
+      <ScrollView
+        contentContainerStyle={wStyles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        <TouchableOpacity
+          onPress={() => setWizardStep("moments")}
+          style={wStyles.backRow}
+        >
+          <Text style={wStyles.backText}>{"< Back"}</Text>
         </TouchableOpacity>
-        {renderStepDots('purpose')}
+        {renderStepDots("purpose")}
         <Text style={wStyles.heading}>Choose Your Purpose</Text>
-        <Text style={wStyles.subheading}>What do you need from each moment?</Text>
+        <Text style={wStyles.subheading}>
+          What do you need from each moment?
+        </Text>
 
         {selectedMoments.map((band) => (
           <View key={band} style={wStyles.purposeSection}>
-            <Text style={wStyles.purposeBandLabel}>{MOMENT_COPY[band].label}</Text>
+            <Text style={wStyles.purposeBandLabel}>
+              {MOMENT_COPY[band].label}
+            </Text>
             <View style={wStyles.purposeGrid}>
               {PURPOSE_OPTIONS[band].map((opt) => {
                 const active = purposes[band] === opt.value;
                 return (
                   <TouchableOpacity
                     key={opt.value}
-                    style={[wStyles.purposeChip, active && wStyles.purposeChipActive]}
-                    onPress={() => setPurposes((prev) => ({ ...prev, [band]: opt.value }))}
+                    style={[
+                      wStyles.purposeChip,
+                      active && wStyles.purposeChipActive,
+                    ]}
+                    onPress={() =>
+                      setPurposes((prev) => ({ ...prev, [band]: opt.value }))
+                    }
                     activeOpacity={0.7}
                   >
-                    <Text style={[wStyles.purposeChipLabel, active && wStyles.purposeChipLabelActive]}>
+                    <Text
+                      style={[
+                        wStyles.purposeChipLabel,
+                        active && wStyles.purposeChipLabelActive,
+                      ]}
+                    >
                       {opt.label}
                     </Text>
-                    <Text style={[wStyles.purposeChipDesc, active && wStyles.purposeChipDescActive]}>
+                    <Text
+                      style={[
+                        wStyles.purposeChipDesc,
+                        active && wStyles.purposeChipDescActive,
+                      ]}
+                    >
                       {opt.desc}
                     </Text>
                   </TouchableOpacity>
@@ -414,7 +654,8 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
         <TouchableOpacity
           style={[
             wStyles.primaryBtn,
-            selectedMoments.some((b) => !purposes[b]) && wStyles.primaryBtnDisabled,
+            selectedMoments.some((b) => !purposes[b]) &&
+              wStyles.primaryBtnDisabled,
           ]}
           onPress={advanceToSuggestion}
           disabled={selectedMoments.some((b) => !purposes[b])}
@@ -427,22 +668,37 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
   );
 
   const renderSuggestionStep = () => {
-    const missingSlots = getMissingSuggestionSlots(selectedMoments, wizardItems);
+    const missingSlots = getMissingSuggestionSlots(
+      selectedMoments,
+      wizardItems,
+    );
     const acceptDisabled = suggestLoading || missingSlots.length > 0;
     return (
-      <SafeAreaView style={wStyles.safe}>
-        <ScrollView contentContainerStyle={wStyles.scroll} showsVerticalScrollIndicator={false}>
-          <TouchableOpacity onPress={() => setWizardStep('purpose')} style={wStyles.backRow}>
-            <Text style={wStyles.backText}>{'< Back'}</Text>
+      <SafeAreaView
+        style={[wStyles.safe, embedded && styles.embeddedTransparent]}
+      >
+        <ScrollView
+          contentContainerStyle={wStyles.scroll}
+          showsVerticalScrollIndicator={false}
+        >
+          <TouchableOpacity
+            onPress={() => setWizardStep("purpose")}
+            style={wStyles.backRow}
+          >
+            <Text style={wStyles.backText}>{"< Back"}</Text>
           </TouchableOpacity>
-          {renderStepDots('suggestion')}
+          {renderStepDots("suggestion")}
           <Text style={wStyles.heading}>Mitra Suggests</Text>
-          <Text style={wStyles.subheading}>These practices match your intentions.</Text>
+          <Text style={wStyles.subheading}>
+            These practices match your intentions.
+          </Text>
 
           {suggestLoading && (
             <View style={wStyles.loadingRow}>
               <ActivityIndicator color="#C99317" />
-              <Text style={wStyles.loadingText}>{RHYTHM_SUGGEST_COPY.loading}</Text>
+              <Text style={wStyles.loadingText}>
+                {RHYTHM_SUGGEST_COPY.loading}
+              </Text>
             </View>
           )}
 
@@ -457,63 +713,84 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
                 }}
                 activeOpacity={0.8}
               >
-                <Text style={wStyles.retryBtnText}>{RHYTHM_SUGGEST_COPY.tryAgain}</Text>
+                <Text style={wStyles.retryBtnText}>
+                  {RHYTHM_SUGGEST_COPY.tryAgain}
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setWizardStep(null)}
                 activeOpacity={0.7}
                 style={wStyles.secondaryLinkRow}
               >
-                <Text style={wStyles.secondaryLink}>{RHYTHM_SUGGEST_COPY.chooseFromLibrary}</Text>
+                <Text style={wStyles.secondaryLink}>
+                  {RHYTHM_SUGGEST_COPY.chooseFromLibrary}
+                </Text>
               </TouchableOpacity>
             </View>
           )}
 
-          {!suggestLoading && selectedMoments.map((band) => {
-            const item = wizardItems[band];
-            if (!item) {
+          {!suggestLoading &&
+            selectedMoments.map((band) => {
+              const item = wizardItems[band];
+              if (!item) {
+                return (
+                  <View key={band} style={wStyles.missingSlotBox}>
+                    <Text style={wStyles.missingSlotText}>
+                      Mitra could not suggest a{" "}
+                      {MOMENT_COPY[band].label.toLowerCase()} practice.
+                    </Text>
+                    <TouchableOpacity
+                      style={wStyles.changeBtn}
+                      onPress={() => setWizardPickerBand(band)}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={wStyles.changeBtnText}>
+                        {RHYTHM_SUGGEST_COPY.chooseFromLibrary}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                );
+              }
               return (
-                <View key={band} style={wStyles.missingSlotBox}>
-                  <Text style={wStyles.missingSlotText}>
-                    Mitra could not suggest a {MOMENT_COPY[band].label.toLowerCase()} practice.
+                <View key={band} style={wStyles.suggestionCard}>
+                  <View style={wStyles.suggestionCardHeader}>
+                    <Text style={wStyles.suggestionBandLabel}>
+                      {MOMENT_COPY[band].label}
+                    </Text>
+                    <Text style={wStyles.suggestionTypeBadge}>
+                      {item.item_type}
+                    </Text>
+                  </View>
+                  <Text style={wStyles.suggestionTitle}>
+                    {item.title_snapshot}
                   </Text>
+                  {!!item.why_this && (
+                    <Text style={wStyles.suggestionWhyThis}>
+                      {item.why_this}
+                    </Text>
+                  )}
+                  {!!item.description_snapshot && !item.why_this && (
+                    <Text style={wStyles.suggestionDesc}>
+                      {item.description_snapshot}
+                    </Text>
+                  )}
                   <TouchableOpacity
                     style={wStyles.changeBtn}
                     onPress={() => setWizardPickerBand(band)}
                     activeOpacity={0.7}
                   >
-                    <Text style={wStyles.changeBtnText}>{RHYTHM_SUGGEST_COPY.chooseFromLibrary}</Text>
+                    <Text style={wStyles.changeBtnText}>Change</Text>
                   </TouchableOpacity>
                 </View>
               );
-            }
-            return (
-              <View key={band} style={wStyles.suggestionCard}>
-                <View style={wStyles.suggestionCardHeader}>
-                  <Text style={wStyles.suggestionBandLabel}>{MOMENT_COPY[band].label}</Text>
-                  <Text style={wStyles.suggestionTypeBadge}>{item.item_type}</Text>
-                </View>
-                <Text style={wStyles.suggestionTitle}>{item.title_snapshot}</Text>
-                {!!item.why_this && (
-                  <Text style={wStyles.suggestionWhyThis}>{item.why_this}</Text>
-                )}
-                {!!item.description_snapshot && !item.why_this && (
-                  <Text style={wStyles.suggestionDesc}>{item.description_snapshot}</Text>
-                )}
-                <TouchableOpacity
-                  style={wStyles.changeBtn}
-                  onPress={() => setWizardPickerBand(band)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={wStyles.changeBtnText}>Change</Text>
-                </TouchableOpacity>
-              </View>
-            );
-          })}
+            })}
 
           <TouchableOpacity
-            style={[wStyles.primaryBtn, acceptDisabled && wStyles.primaryBtnDisabled]}
-            onPress={() => setWizardStep('reminders')}
+            style={[
+              wStyles.primaryBtn,
+              acceptDisabled && wStyles.primaryBtnDisabled,
+            ]}
+            onPress={() => setWizardStep("reminders")}
             activeOpacity={0.8}
             disabled={acceptDisabled}
           >
@@ -521,7 +798,9 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() => { setWizardStep(null); }}
+            onPress={() => {
+              setWizardStep(null);
+            }}
             activeOpacity={0.7}
             style={wStyles.secondaryLinkRow}
           >
@@ -541,30 +820,48 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
   };
 
   const renderRemindersStep = () => (
-    <SafeAreaView style={wStyles.safe}>
-      <ScrollView contentContainerStyle={wStyles.scroll} showsVerticalScrollIndicator={false}>
-        <TouchableOpacity onPress={() => setWizardStep('suggestion')} style={wStyles.backRow}>
-          <Text style={wStyles.backText}>{'< Back'}</Text>
+    <SafeAreaView
+      style={[wStyles.safe, embedded && styles.embeddedTransparent]}
+    >
+      <ScrollView
+        contentContainerStyle={wStyles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        <TouchableOpacity
+          onPress={() => setWizardStep("suggestion")}
+          style={wStyles.backRow}
+        >
+          <Text style={wStyles.backText}>{"< Back"}</Text>
         </TouchableOpacity>
-        {renderStepDots('reminders')}
+        {renderStepDots("reminders")}
         <Text style={wStyles.heading}>Gentle Reminders</Text>
-        <Text style={wStyles.subheading}>Would you like Mitra to remind you?</Text>
+        <Text style={wStyles.subheading}>
+          Would you like Mitra to remind you?
+        </Text>
 
         <View style={wStyles.pillRow}>
           {(
             [
-              { label: 'Yes, gently', value: 'yes' },
-              { label: 'I will come', value: 'no' },
-              { label: 'Ask me later', value: 'later' },
-            ] as { label: string; value: 'yes' | 'no' | 'later' }[]
+              { label: "Yes, gently", value: "yes" },
+              { label: "I will come", value: "no" },
+              { label: "Ask me later", value: "later" },
+            ] as { label: string; value: "yes" | "no" | "later" }[]
           ).map((opt) => (
             <TouchableOpacity
               key={opt.value}
-              style={[wStyles.pill, wizardReminderPref === opt.value && wStyles.pillActive]}
+              style={[
+                wStyles.pill,
+                wizardReminderPref === opt.value && wStyles.pillActive,
+              ]}
               onPress={() => setWizardReminderPref(opt.value)}
               activeOpacity={0.7}
             >
-              <Text style={[wStyles.pillText, wizardReminderPref === opt.value && wStyles.pillTextActive]}>
+              <Text
+                style={[
+                  wStyles.pillText,
+                  wizardReminderPref === opt.value && wStyles.pillTextActive,
+                ]}
+              >
                 {opt.label}
               </Text>
             </TouchableOpacity>
@@ -574,7 +871,10 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
         {!!wizardError && <Text style={wStyles.errorText}>{wizardError}</Text>}
 
         <TouchableOpacity
-          style={[wStyles.primaryBtn, wizardSaving && wStyles.primaryBtnDisabled]}
+          style={[
+            wStyles.primaryBtn,
+            wizardSaving && wStyles.primaryBtnDisabled,
+          ]}
           onPress={() => void saveWizard()}
           disabled={wizardSaving}
           activeOpacity={0.8}
@@ -590,10 +890,19 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
   );
 
   const renderConfirmationStep = () => (
-    <SafeAreaView style={wStyles.safe}>
-      <ScrollView contentContainerStyle={wStyles.scroll} showsVerticalScrollIndicator={false}>
-        <Text style={[wStyles.heading, { marginTop: 48 }]}>Your Daily Companion{'\n'}is ready.</Text>
-        <Text style={wStyles.subheading}>A practice waits for you each day.</Text>
+    <SafeAreaView
+      style={[wStyles.safe, embedded && styles.embeddedTransparent]}
+    >
+      <ScrollView
+        contentContainerStyle={wStyles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={[wStyles.heading, { marginTop: 48 }]}>
+          Your Daily Companion{"\n"}is ready.
+        </Text>
+        <Text style={wStyles.subheading}>
+          A practice waits for you each day.
+        </Text>
 
         <View style={wStyles.confirmList}>
           {selectedMoments.map((band) => {
@@ -601,7 +910,9 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
             if (!item) return null;
             return (
               <View key={band} style={wStyles.confirmRow}>
-                <Text style={wStyles.confirmBand}>{MOMENT_COPY[band].label}</Text>
+                <Text style={wStyles.confirmBand}>
+                  {MOMENT_COPY[band].label}
+                </Text>
                 <Text style={wStyles.confirmTitle}>{item.title_snapshot}</Text>
               </View>
             );
@@ -618,10 +929,12 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
 
         <TouchableOpacity
           style={[wStyles.primaryBtn, wStyles.secondaryBtn]}
-          onPress={() => navigation.navigate('RhythmHome' as any)}
+          onPress={openRhythmHome}
           activeOpacity={0.8}
         >
-          <Text style={[wStyles.primaryBtnText, { color: '#7B6550' }]}>Return Home</Text>
+          <Text style={[wStyles.primaryBtnText, { color: "#7B6550" }]}>
+            Return Home
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -645,119 +958,174 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
 
   // ── Render ────────────────────────────────────────────────────────────────────
 
-  if (wizardStep === 'moments') return renderMomentsStep();
-  if (wizardStep === 'purpose') return renderPurposeStep();
-  if (wizardStep === 'suggestion') return renderSuggestionStep();
-  if (wizardStep === 'reminders') return renderRemindersStep();
-  if (wizardStep === 'confirmation') return renderConfirmationStep();
+  if (wizardStep === "moments") return renderMomentsStep();
+  if (wizardStep === "purpose") return renderPurposeStep();
+  if (wizardStep === "suggestion") return renderSuggestionStep();
+  if (wizardStep === "reminders") return renderRemindersStep();
+  if (wizardStep === "confirmation") return renderConfirmationStep();
 
   // ── Edit mode: accordion ──────────────────────────────────────────────────────
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7}>
-          <Text style={styles.backBtnText}>{'< Back'}</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Edit My Rhythm</Text>
-        <View style={{ width: 50 }} />
-      </View>
+    <SafeAreaView
+      style={[styles.safeArea, embedded && styles.embeddedTransparent]}
+    >
+      <ImageBackground
+        source={RHYTHM_BG}
+        style={styles.background}
+        imageStyle={styles.backgroundImage}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.hero}>
+            <Image
+              source={RHYTHM_LEAF_ART}
+              style={styles.leafArt}
+              resizeMode="contain"
+            />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {BANDS.map((band) => {
-          const isExpanded = expandedBand === band;
-          return (
-            <View key={band} style={styles.bandSection}>
-              <TouchableOpacity
-                style={styles.bandHeader}
-                onPress={() => setExpandedBand(isExpanded ? null : band)}
-                activeOpacity={0.7}
-              >
-                <View>
-                  <Text style={styles.bandLabel}>{RHYTHM_BAND_LABELS[band]}</Text>
-                  <Text style={styles.bandSubtitle}>{RHYTHM_BAND_SUBTITLES[band]}</Text>
-                </View>
-                <Text style={styles.chevron}>{isExpanded ? '▲' : '▼'}</Text>
-              </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleEditBack}
+              activeOpacity={0.7}
+              style={styles.backBtn}
+            >
+              <Text style={styles.backBtnText}>{"< Back"}</Text>
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>
+              {editMode ? "Edit My Rhythm" : "Set Up My Rhythm"}
+            </Text>
+          </View>
 
-              {isExpanded && (
-                <View style={styles.bandBody}>
-                  {bandItems[band].map((item) => (
-                    <View key={item.item_id} style={styles.addedItem}>
-                      <View style={styles.addedItemInfo}>
-                        <Text style={styles.addedItemType}>{item.item_type}</Text>
-                        <Text style={styles.addedItemTitle}>{item.title}</Text>
-                      </View>
-                      <TouchableOpacity
-                        onPress={() => removeItem(band, item.item_id)}
-                        activeOpacity={0.7}
-                        style={styles.removeBtn}
-                      >
-                        <Text style={styles.removeBtnText}>Remove</Text>
-                      </TouchableOpacity>
-                    </View>
-                  ))}
-
-                  <TouchableOpacity
-                    style={styles.addFromLibraryBtn}
-                    onPress={() => setLibraryBand(band)}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={styles.addFromLibraryText}>+ Add from library</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-          );
-        })}
-
-        <View style={styles.reminderSection}>
-          <Text style={styles.reminderLabel}>Reminder preference</Text>
-          <View style={styles.reminderPills}>
-            {(
-              [
-                { label: 'Yes please', value: 'yes' },
-                { label: 'No thanks', value: 'no' },
-                { label: 'Remind me later', value: 'later' },
-              ] as { label: string; value: 'yes' | 'no' | 'later' }[]
-            ).map((opt) => (
-              <TouchableOpacity
-                key={opt.value}
-                onPress={() => setReminderPref(opt.value)}
-                activeOpacity={0.7}
-                style={[styles.reminderPill, reminderPref === opt.value && styles.reminderPillSelected]}
-              >
-                <Text
+          {BANDS.map((band) => {
+            const isExpanded = expandedBand === band;
+            const Icon = BAND_ART[band];
+            return (
+              <View key={band} style={styles.bandBlock}>
+                <TouchableOpacity
                   style={[
-                    styles.reminderPillText,
-                    reminderPref === opt.value && styles.reminderPillTextSelected,
+                    styles.bandHeaderCard,
+                    isExpanded && styles.bandHeaderCardExpanded,
+                  ]}
+                  onPress={() => setExpandedBand(isExpanded ? null : band)}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.bandIconWrap}>
+                    <Icon width={38} height={38} />
+                  </View>
+                  <View style={styles.bandCopy}>
+                    <Text style={styles.bandLabel}>
+                      {RHYTHM_BAND_LABELS[band]}
+                    </Text>
+                    <Text style={styles.bandSubtitle}>
+                      {RHYTHM_BAND_SUBTITLES[band]}
+                    </Text>
+                  </View>
+                  <Text style={styles.chevron}>{isExpanded ? "⌃" : "⌄"}</Text>
+                </TouchableOpacity>
+
+                {isExpanded && (
+                  <View style={styles.bandBody}>
+                    {bandItems[band].map((item) => (
+                      <View key={item.item_id} style={styles.addedItem}>
+                        <View style={styles.addedItemInfo}>
+                          <Text style={styles.addedItemType}>
+                            {item.item_type}
+                          </Text>
+                          <Text style={styles.addedItemTitle}>
+                            {item.title}
+                          </Text>
+                        </View>
+                        <TouchableOpacity
+                          onPress={() => removeItem(band, item.item_id)}
+                          activeOpacity={0.7}
+                          style={styles.removeBtn}
+                        >
+                          <Text style={styles.removeBtnText}>Remove</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+
+                    <TouchableOpacity
+                      style={styles.addFromLibraryBtn}
+                      onPress={() => setLibraryBand(band)}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.addFromLibraryPlus}>＋</Text>
+                      <Text style={styles.addFromLibraryText}>
+                        Add from library
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            );
+          })}
+
+          <View style={styles.reminderSection}>
+            <Text style={styles.reminderLabel}>Reminder preference</Text>
+            <View style={styles.reminderPills}>
+              {(
+                [
+                  { label: "Yes please", value: "yes" },
+                  { label: "No thanks", value: "no" },
+                  { label: "Remind me later", value: "later" },
+                ] as { label: string; value: "yes" | "no" | "later" }[]
+              ).map((opt) => (
+                <TouchableOpacity
+                  key={opt.value}
+                  onPress={() => setReminderPref(opt.value)}
+                  activeOpacity={0.7}
+                  style={[
+                    styles.reminderPill,
+                    reminderPref === opt.value && styles.reminderPillSelected,
                   ]}
                 >
-                  {opt.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text
+                    style={[
+                      styles.reminderPillText,
+                      reminderPref === opt.value &&
+                        styles.reminderPillTextSelected,
+                    ]}
+                  >
+                    {reminderPref === opt.value && opt.value === "later"
+                      ? "✓  "
+                      : ""}
+                    {opt.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
-        </View>
 
-        {!!errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
+          {!!errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
 
-        <TouchableOpacity
-          style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
-          onPress={handleSave}
-          disabled={saving}
-          activeOpacity={0.8}
-        >
-          {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Save My Rhythm</Text>}
-        </TouchableOpacity>
-      </ScrollView>
+          <TouchableOpacity
+            style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
+            onPress={handleSave}
+            disabled={saving}
+            activeOpacity={0.85}
+          >
+            {saving ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <>
+                <Text style={styles.saveBtnIcon}>✦</Text>
+                <Text style={styles.saveBtnText}>Save My Rhythm</Text>
+                <Text style={styles.saveBtnArrow}>→</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        </ScrollView>
 
-      <LibrarySearchModal
-        isVisible={libraryBand !== null}
-        onClose={() => setLibraryBand(null)}
-        onItemAdded={() => {}}
-        mode="select_for_rhythm"
-        onItemSelected={handleItemSelected}
-      />
+        <LibrarySearchModal
+          isVisible={libraryBand !== null}
+          onClose={() => setLibraryBand(null)}
+          onItemAdded={() => {}}
+          mode="select_for_rhythm"
+          onItemSelected={handleItemSelected}
+        />
+      </ImageBackground>
     </SafeAreaView>
   );
 }
@@ -765,111 +1133,455 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
 // ─── Wizard styles ─────────────────────────────────────────────────────────────
 
 const wStyles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#FFF8EF' },
+  safe: { flex: 1, backgroundColor: "#FFF8EF" },
   scroll: { padding: 20, paddingBottom: 48 },
   backRow: { marginBottom: 16 },
-  backText: { fontSize: 15, color: '#C99317', fontFamily: Fonts.sans.medium },
-  dots: { flexDirection: 'row', gap: 6, marginBottom: 20 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: 'rgba(201,147,23,0.25)' },
-  dotActive: { backgroundColor: '#C99317' },
-  heading: { fontFamily: Fonts.serif.bold, fontSize: 26, color: '#432104', fontWeight: '700', marginBottom: 8 },
-  subheading: { fontSize: 15, color: '#7B6550', fontFamily: Fonts.sans.regular, marginBottom: 24, lineHeight: 22 },
+  backText: { fontSize: 15, color: "#C99317", fontFamily: Fonts.sans.medium },
+  dots: { flexDirection: "row", gap: 6, marginBottom: 20 },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "rgba(201,147,23,0.25)",
+  },
+  dotActive: { backgroundColor: "#C99317" },
+  heading: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 26,
+    color: "#432104",
+    fontWeight: "700",
+    marginBottom: 8,
+  },
+  subheading: {
+    fontSize: 15,
+    color: "#7B6550",
+    fontFamily: Fonts.sans.regular,
+    marginBottom: 24,
+    lineHeight: 22,
+  },
   momentCard: {
-    flexDirection: 'row', alignItems: 'center',
-    padding: 18, borderRadius: 14, borderWidth: 1, borderColor: 'rgba(201,168,76,0.25)',
-    backgroundColor: 'rgba(250,245,240,0.92)', marginBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 18,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "rgba(201,168,76,0.25)",
+    backgroundColor: "rgba(250,245,240,0.92)",
+    marginBottom: 12,
   },
-  momentCardSelected: { borderColor: '#C99317', backgroundColor: 'rgba(201,147,23,0.08)' },
+  momentCardSelected: {
+    borderColor: "#C99317",
+    backgroundColor: "rgba(201,147,23,0.08)",
+  },
   momentCardInner: { flex: 1, marginRight: 12 },
-  momentLabel: { fontFamily: Fonts.serif.bold, fontSize: 17, color: '#432104', fontWeight: '700', marginBottom: 4 },
-  momentDesc: { fontSize: 13, color: '#7B6550', fontFamily: Fonts.sans.regular },
-  check: { width: 24, height: 24, borderRadius: 12, borderWidth: 1.5, borderColor: 'rgba(201,168,76,0.4)', alignItems: 'center', justifyContent: 'center' },
-  checkSelected: { backgroundColor: '#C99317', borderColor: '#C99317' },
-  checkMark: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  momentLabel: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 17,
+    color: "#432104",
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  momentDesc: {
+    fontSize: 13,
+    color: "#7B6550",
+    fontFamily: Fonts.sans.regular,
+  },
+  check: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: "rgba(201,168,76,0.4)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkSelected: { backgroundColor: "#C99317", borderColor: "#C99317" },
+  checkMark: { color: "#fff", fontSize: 13, fontWeight: "700" },
   purposeSection: { marginBottom: 20 },
-  purposeBandLabel: { fontFamily: Fonts.serif.bold, fontSize: 16, color: '#432104', fontWeight: '700', marginBottom: 10 },
-  purposeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  purposeBandLabel: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 16,
+    color: "#432104",
+    fontWeight: "700",
+    marginBottom: 10,
+  },
+  purposeGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   purposeChip: {
-    width: '47%', padding: 12, borderRadius: 12, borderWidth: 1,
-    borderColor: 'rgba(201,168,76,0.3)', backgroundColor: 'rgba(250,245,240,0.92)',
+    width: "47%",
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(201,168,76,0.3)",
+    backgroundColor: "rgba(250,245,240,0.92)",
   },
-  purposeChipActive: { borderColor: '#C99317', backgroundColor: 'rgba(201,147,23,0.1)' },
-  purposeChipLabel: { fontFamily: Fonts.serif.bold, fontSize: 14, color: '#432104', fontWeight: '600', marginBottom: 2 },
-  purposeChipLabelActive: { color: '#8B5E00' },
-  purposeChipDesc: { fontSize: 11, color: '#A08060', fontFamily: Fonts.sans.regular },
-  purposeChipDescActive: { color: '#7B5500' },
+  purposeChipActive: {
+    borderColor: "#C99317",
+    backgroundColor: "rgba(201,147,23,0.1)",
+  },
+  purposeChipLabel: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 14,
+    color: "#432104",
+    fontWeight: "600",
+    marginBottom: 2,
+  },
+  purposeChipLabelActive: { color: "#8B5E00" },
+  purposeChipDesc: {
+    fontSize: 11,
+    color: "#A08060",
+    fontFamily: Fonts.sans.regular,
+  },
+  purposeChipDescActive: { color: "#7B5500" },
   suggestionCard: {
-    padding: 16, borderRadius: 14, borderWidth: 1, borderColor: 'rgba(201,168,76,0.25)',
-    backgroundColor: 'rgba(255,252,248,0.95)', marginBottom: 14,
+    padding: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "rgba(201,168,76,0.25)",
+    backgroundColor: "rgba(255,252,248,0.95)",
+    marginBottom: 14,
   },
-  suggestionCardHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
-  suggestionBandLabel: { fontFamily: Fonts.serif.bold, fontSize: 13, color: '#7B6550', fontWeight: '700' },
-  suggestionTypeBadge: { fontSize: 11, color: '#8b6838', fontFamily: Fonts.sans.semiBold, textTransform: 'uppercase' },
-  suggestionTitle: { fontFamily: Fonts.serif.bold, fontSize: 17, color: '#432104', fontWeight: '600', marginBottom: 4 },
-  suggestionDesc: { fontSize: 13, color: '#7B6550', fontFamily: Fonts.sans.regular, marginBottom: 10 },
-  suggestionWhyThis: { fontSize: 13, color: '#8B6914', fontFamily: Fonts.sans.regular, fontStyle: 'italic', marginBottom: 10 },
-  loadingRow: { alignItems: 'center', paddingVertical: 24, gap: 12 },
-  loadingText: { fontSize: 14, color: '#7B6550', fontFamily: Fonts.sans.regular, textAlign: 'center' },
-  errorBox: { alignItems: 'center', paddingVertical: 16, gap: 10 },
-  retryBtn: { backgroundColor: '#C99317', borderRadius: 10, paddingHorizontal: 20, paddingVertical: 10 },
-  retryBtnText: { fontSize: 14, color: '#fff', fontFamily: Fonts.sans.semiBold },
-  missingSlotBox: { padding: 16, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(201,100,76,0.3)', backgroundColor: 'rgba(255,245,245,0.9)', marginBottom: 12, gap: 10 },
-  missingSlotText: { fontSize: 14, color: '#9B4E4E', fontFamily: Fonts.sans.regular },
-  changeBtn: { alignSelf: 'flex-start', paddingVertical: 4, paddingHorizontal: 10, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(201,168,76,0.4)' },
-  changeBtnText: { fontSize: 13, color: '#C99317', fontFamily: Fonts.sans.medium },
-  pillRow: { flexDirection: 'row', gap: 8, marginBottom: 24 },
-  pill: { flex: 1, paddingVertical: 12, borderRadius: 20, borderWidth: 1.5, borderColor: '#DAC28E', alignItems: 'center', backgroundColor: '#FBF5F5' },
-  pillActive: { backgroundColor: '#C99317', borderColor: '#C99317' },
-  pillText: { fontSize: 13, color: '#7B6550', fontFamily: Fonts.sans.medium, textAlign: 'center' },
-  pillTextActive: { color: '#fff' },
+  suggestionCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  suggestionBandLabel: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 13,
+    color: "#7B6550",
+    fontWeight: "700",
+  },
+  suggestionTypeBadge: {
+    fontSize: 11,
+    color: "#8b6838",
+    fontFamily: Fonts.sans.semiBold,
+    textTransform: "uppercase",
+  },
+  suggestionTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 17,
+    color: "#432104",
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  suggestionDesc: {
+    fontSize: 13,
+    color: "#7B6550",
+    fontFamily: Fonts.sans.regular,
+    marginBottom: 10,
+  },
+  suggestionWhyThis: {
+    fontSize: 13,
+    color: "#8B6914",
+    fontFamily: Fonts.sans.regular,
+    fontStyle: "italic",
+    marginBottom: 10,
+  },
+  loadingRow: { alignItems: "center", paddingVertical: 24, gap: 12 },
+  loadingText: {
+    fontSize: 14,
+    color: "#7B6550",
+    fontFamily: Fonts.sans.regular,
+    textAlign: "center",
+  },
+  errorBox: { alignItems: "center", paddingVertical: 16, gap: 10 },
+  retryBtn: {
+    backgroundColor: "#C99317",
+    borderRadius: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  retryBtnText: {
+    fontSize: 14,
+    color: "#fff",
+    fontFamily: Fonts.sans.semiBold,
+  },
+  missingSlotBox: {
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(201,100,76,0.3)",
+    backgroundColor: "rgba(255,245,245,0.9)",
+    marginBottom: 12,
+    gap: 10,
+  },
+  missingSlotText: {
+    fontSize: 14,
+    color: "#9B4E4E",
+    fontFamily: Fonts.sans.regular,
+  },
+  changeBtn: {
+    alignSelf: "flex-start",
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(201,168,76,0.4)",
+  },
+  changeBtnText: {
+    fontSize: 13,
+    color: "#C99317",
+    fontFamily: Fonts.sans.medium,
+  },
+  pillRow: { flexDirection: "row", gap: 8, marginBottom: 24 },
+  pill: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: "#DAC28E",
+    alignItems: "center",
+    backgroundColor: "#FBF5F5",
+  },
+  pillActive: { backgroundColor: "#C99317", borderColor: "#C99317" },
+  pillText: {
+    fontSize: 13,
+    color: "#7B6550",
+    fontFamily: Fonts.sans.medium,
+    textAlign: "center",
+  },
+  pillTextActive: { color: "#fff" },
   confirmList: { marginVertical: 24 },
-  confirmRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 0.5, borderBottomColor: 'rgba(201,168,76,0.25)' },
-  confirmBand: { fontFamily: Fonts.serif.bold, fontSize: 15, color: '#7B6550', fontWeight: '600' },
-  confirmTitle: { fontFamily: Fonts.serif.regular, fontSize: 15, color: '#432104', flex: 1, textAlign: 'right' },
-  primaryBtn: { backgroundColor: '#C99317', borderRadius: 14, paddingVertical: 14, alignItems: 'center', marginBottom: 10 },
+  confirmRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 12,
+    borderBottomWidth: 0.5,
+    borderBottomColor: "rgba(201,168,76,0.25)",
+  },
+  confirmBand: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 15,
+    color: "#7B6550",
+    fontWeight: "600",
+  },
+  confirmTitle: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 15,
+    color: "#432104",
+    flex: 1,
+    textAlign: "right",
+  },
+  primaryBtn: {
+    backgroundColor: "#C99317",
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: "center",
+    marginBottom: 10,
+  },
   primaryBtnDisabled: { opacity: 0.45 },
-  primaryBtnText: { fontSize: 16, fontFamily: Fonts.sans.semiBold, color: '#fff' },
-  secondaryBtn: { backgroundColor: 'transparent', borderWidth: 1, borderColor: 'rgba(201,168,76,0.4)' },
-  secondaryLinkRow: { alignItems: 'center', paddingTop: 12 },
-  secondaryLink: { fontSize: 13, color: '#C99317', fontFamily: Fonts.sans.medium },
-  errorText: { fontSize: 13, color: '#c0392b', textAlign: 'center', marginBottom: 10 },
+  primaryBtnText: {
+    fontSize: 16,
+    fontFamily: Fonts.sans.semiBold,
+    color: "#fff",
+  },
+  secondaryBtn: {
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "rgba(201,168,76,0.4)",
+  },
+  secondaryLinkRow: { alignItems: "center", paddingTop: 12 },
+  secondaryLink: {
+    fontSize: 13,
+    color: "#C99317",
+    fontFamily: Fonts.sans.medium,
+  },
+  errorText: {
+    fontSize: 13,
+    color: "#c0392b",
+    textAlign: "center",
+    marginBottom: 10,
+  },
 });
 
 // ─── Accordion styles ──────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#FFF8EF' },
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12,
-    borderBottomWidth: 0.5, borderBottomColor: '#DAC28E',
+  safeArea: { flex: 1, backgroundColor: "#FFF8EF" },
+  embeddedTransparent: { backgroundColor: "transparent" },
+  background: { flex: 1 },
+  backgroundImage: { opacity: 0.98 },
+  scrollContent: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40 },
+  hero: { position: "relative", paddingTop: 6, marginBottom: 18 },
+  leafArt: {
+    position: "absolute",
+    right: -70,
+    top: -110,
+    width: 300,
+    height: 300,
+    opacity: 0.78,
   },
-  backBtnText: { fontSize: 16, color: '#C99317', fontFamily: Fonts.sans.medium },
-  headerTitle: { fontSize: 20, fontFamily: Fonts.serif.bold, color: '#432104', fontWeight: '700' },
-  scrollContent: { padding: 16, gap: 12, paddingBottom: 40 },
-  bandSection: { backgroundColor: '#FBF5F5', borderRadius: 15, borderWidth: 0.5, borderColor: '#DAC28E', overflow: 'hidden' },
-  bandHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16 },
-  bandLabel: { fontSize: 18, fontFamily: Fonts.serif.bold, color: '#432104', fontWeight: '700' },
-  bandSubtitle: { fontSize: 13, fontFamily: Fonts.serif.regular, color: '#7B6550', marginTop: 2 },
-  chevron: { fontSize: 14, color: '#7B6550' },
-  bandBody: { padding: 16, paddingTop: 0, gap: 10 },
-  addedItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF8EF', borderRadius: 10, padding: 12, borderWidth: 0.5, borderColor: '#DAC28E' },
-  addedItemInfo: { flex: 1, gap: 2 },
-  addedItemType: { fontSize: 11, fontFamily: Fonts.sans.semiBold, color: '#8b6838', textTransform: 'uppercase' },
-  addedItemTitle: { fontSize: 15, fontFamily: Fonts.serif.regular, color: '#432104' },
-  removeBtn: { padding: 4 },
-  removeBtnText: { fontSize: 13, color: '#c0392b', fontFamily: Fonts.sans.medium },
-  addFromLibraryBtn: { borderWidth: 1, borderColor: '#C99317', borderRadius: 10, paddingVertical: 10, alignItems: 'center', backgroundColor: 'rgba(201, 147, 23, 0.05)' },
-  addFromLibraryText: { fontSize: 15, color: '#C99317', fontFamily: Fonts.sans.semiBold },
-  errorText: { fontSize: 14, color: '#c0392b', textAlign: 'center' },
-  saveBtn: { backgroundColor: '#C99317', borderRadius: 15, paddingVertical: 14, alignItems: 'center', marginTop: 8 },
+  brandBlock: { marginLeft: 4, marginBottom: 26 },
+  brandTitle: {
+    fontSize: 36,
+    color: "#D19A18",
+    fontFamily: Fonts.serif.regular,
+    lineHeight: 38,
+  },
+  brandSubtitle: {
+    fontSize: 11,
+    color: "#9B7340",
+    fontFamily: Fonts.sans.regular,
+    marginTop: 2,
+    marginLeft: 2,
+  },
+  backBtn: {
+    alignSelf: "flex-start",
+    paddingVertical: 4,
+    paddingHorizontal: 2,
+    marginBottom: 22,
+  },
+  backBtnText: {
+    fontSize: 16,
+    color: "#D19A18",
+    fontFamily: Fonts.sans.medium,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontFamily: Fonts.serif.bold,
+    color: "#432104",
+    fontWeight: "700",
+    marginBottom: 8,
+  },
+  bandBlock: { marginBottom: 20 },
+  bandHeaderCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: "rgba(226, 201, 151, 0.72)",
+    borderRadius: 15,
+    backgroundColor: "rgba(255, 250, 242, 0.96",
+    shadowColor: "#8A6837",
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 1,
+  },
+  bandHeaderCardExpanded: {
+    backgroundColor: "rgba(248, 242, 230, 0.96)",
+  },
+  bandIconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "rgba(248, 236, 210, 0.68)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  bandCopy: { flex: 1, paddingRight: 10 },
+  bandLabel: {
+    fontSize: 16,
+    fontFamily: Fonts.serif.bold,
+    color: "#432104",
+    fontWeight: "700",
+    marginBottom: 2,
+  },
+  bandSubtitle: {
+    fontSize: 13,
+    fontFamily: Fonts.sans.regular,
+    color: "#7B6550",
+    lineHeight: 19,
+  },
+  chevron: { fontSize: 26, color: "#C99317", marginTop: -4 },
+  bandBody: { paddingTop: 16, gap: 12 },
+  addedItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "rgba(226, 201, 151, 0.9)",
+    backgroundColor: "rgba(255, 251, 244, 0.95)",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  addedItemInfo: { flex: 1, paddingRight: 12 },
+  addedItemType: {
+    fontSize: 12,
+    fontFamily: Fonts.sans.bold,
+    color: "#9A7436",
+    textTransform: "uppercase",
+    marginBottom: 4,
+  },
+  addedItemTitle: {
+    fontSize: 14,
+    fontFamily: Fonts.serif.regular,
+    color: "#6A4523",
+    lineHeight: 24,
+  },
+  removeBtn: { paddingVertical: 6, paddingLeft: 8 },
+  removeBtnText: {
+    fontSize: 14,
+    color: "#DF4D35",
+    fontFamily: Fonts.sans.semiBold,
+  },
+  addFromLibraryBtn: {
+    // minHeight: 68,
+    borderWidth: 1,
+    borderStyle: "dashed",
+    borderColor: "rgba(226, 201, 151, 0.95)",
+    borderRadius: 34,
+    padding: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    backgroundColor: "rgba(255, 252, 248, 0.44)",
+  },
+  addFromLibraryPlus: {
+    fontSize: 26,
+    color: "#D39A14",
+    marginRight: 10,
+    lineHeight: 28,
+  },
+  addFromLibraryText: {
+    fontSize: 17,
+    color: "#D39A14",
+    fontFamily: Fonts.serif.regular,
+  },
+  errorText: { fontSize: 14, color: "#c0392b", textAlign: "center" },
+  saveBtn: {
+    backgroundColor: "#D8A00E",
+    borderRadius: 11,
+    padding: 10,
+    marginTop: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   saveBtnDisabled: { opacity: 0.6 },
-  saveBtnText: { fontSize: 17, fontFamily: Fonts.sans.semiBold, color: '#fff' },
-  reminderSection: { marginTop: 8 },
-  reminderLabel: { fontSize: 13, color: '#7B6550', fontFamily: Fonts.sans.medium, marginBottom: 8 },
-  reminderPills: { flexDirection: 'row', gap: 8 },
-  reminderPill: { flex: 1, borderWidth: 1.5, borderColor: '#DAC28E', borderRadius: 15, paddingHorizontal: 16, paddingVertical: 10, alignItems: 'center', backgroundColor: '#FBF5F5' },
-  reminderPillSelected: { backgroundColor: '#C99317', borderColor: '#C99317' },
-  reminderPillText: { fontSize: 13, color: '#7B6550', fontFamily: Fonts.sans.medium, textAlign: 'center' },
-  reminderPillTextSelected: { color: '#fff' },
+  saveBtnIcon: { color: "#fff", fontSize: 24, marginRight: 12 },
+  saveBtnText: { fontSize: 18, fontFamily: Fonts.sans.semiBold, color: "#fff" },
+  saveBtnArrow: { color: "#fff", fontSize: 28, marginLeft: 12, lineHeight: 28 },
+  reminderSection: { marginTop: 16, marginBottom: 6 },
+  reminderLabel: {
+    fontSize: 18,
+    color: "#432104",
+    fontFamily: Fonts.serif.regular,
+    marginBottom: 16,
+  },
+  reminderPills: { flexDirection: "row", gap: 10 },
+  reminderPill: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: "#D8BC77",
+    borderRadius: 22,
+
+    paddingVertical: 6,
+    alignItems: "center",
+    justifyContent: "center",
+
+    backgroundColor: "rgba(255, 250, 244, 0.85)",
+  },
+  reminderPillSelected: { backgroundColor: "#C99317", borderColor: "#C99317" },
+  reminderPillText: {
+    fontSize: 11,
+    color: "#7B6550",
+    fontFamily: Fonts.sans.medium,
+    textAlign: "center",
+    lineHeight: 18,
+  },
+  reminderPillTextSelected: { color: "#fff" },
 });

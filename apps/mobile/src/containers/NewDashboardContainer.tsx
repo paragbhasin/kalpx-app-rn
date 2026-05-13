@@ -79,6 +79,7 @@ import ContinuityMirrorCard from "../extensions/moments/continuity_mirror_card";
 import PathMilestoneBanner from "../extensions/moments/path_milestone_banner";
 import InnerPathScreen from "../screens/Mitra/InnerPathScreen";
 import RhythmHomeScreen from "../screens/Mitra/RhythmHomeScreen";
+import RhythmSetupScreen from "../screens/Mitra/RhythmSetupScreen";
 
 
 type Schema = {
@@ -114,6 +115,8 @@ const NewDashboardContainer: React.FC<Props> = () => {
   const returnModal = sd.dashboard_return_modal;
   const isInnerPathEntry = sd.dashboard_entry_surface === "inner_path";
   const isRhythmHomeEntry = sd.dashboard_entry_surface === "my_rhythm";
+  const isRhythmSetupEntry = sd.dashboard_entry_surface === "my_rhythm_setup";
+  const isRhythmEditEntry = sd.dashboard_entry_surface === "my_rhythm_edit";
 
   useEffect(() => {
     let active = true;
@@ -217,6 +220,14 @@ const NewDashboardContainer: React.FC<Props> = () => {
 
   if (isRhythmHomeEntry) {
     return <RhythmHomeScreen embedded />;
+  }
+
+  if (isRhythmSetupEntry) {
+    return <RhythmSetupScreen embedded />;
+  }
+
+  if (isRhythmEditEntry) {
+    return <RhythmSetupScreen editMode embedded />;
   }
 
   return (

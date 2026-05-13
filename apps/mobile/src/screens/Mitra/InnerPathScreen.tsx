@@ -351,6 +351,17 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
       },
     ).catch(() => {});
   };
+  const handleBack = () => {
+    if (embedded) {
+      store.dispatch(
+        screenActions.setScreenValue({
+          key: "dashboard_entry_surface",
+          value: null,
+        }),
+      );
+    }
+    navigation.goBack();
+  };
   const toggleProgress = () => {
     LayoutAnimation.configureNext(
       LayoutAnimation.create(220, "easeInEaseOut", "opacity"),
@@ -385,10 +396,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
       <SafeAreaView style={styles.safe}>
         <View style={styles.centered}>
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.retryBtn}
-          >
+          <TouchableOpacity onPress={handleBack} style={styles.retryBtn}>
             <Text style={styles.retryBtnText}>Go back</Text>
           </TouchableOpacity>
         </View>
@@ -404,7 +412,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
         showsVerticalScrollIndicator={false}
       >
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={handleBack}
           hitSlop={12}
           style={styles.backButton}
         >

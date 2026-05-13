@@ -110,24 +110,8 @@ const NewDashboardContainer: React.FC<Props> = () => {
   const [whyOpen, setWhyOpen] = useState(false);
   const [isHydrating, setIsHydrating] = useState(false);
   const [predictiveAlerts, setPredictiveAlerts] = useState<any[]>([]);
-  const [entrySurface, setEntrySurface] = useState<string | null>(
-    typeof sd.dashboard_entry_surface === "string"
-      ? sd.dashboard_entry_surface
-      : null,
-  );
   const returnModal = sd.dashboard_return_modal;
-  const isInnerPathEntry = entrySurface === "inner_path";
-
-  useEffect(() => {
-    if (typeof sd.dashboard_entry_surface !== "string") return;
-    setEntrySurface(sd.dashboard_entry_surface);
-    store.dispatch(
-      screenActions.setScreenValue({
-        key: "dashboard_entry_surface",
-        value: null,
-      }),
-    );
-  }, [sd.dashboard_entry_surface]);
+  const isInnerPathEntry = sd.dashboard_entry_surface === "inner_path";
 
   useEffect(() => {
     let active = true;

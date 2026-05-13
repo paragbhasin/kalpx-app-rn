@@ -313,7 +313,6 @@ export default function FourDoorHomeContainer({
   const acw = homeData.active_checkin_window;
   const windowActive = acw?.active === true;
   const hasRhythm = homeData?.companion_rhythm?.has_rhythm === true;
-  const myRhythmTarget = hasRhythm ? "RhythmHome" : "RhythmSetup";
   const currentRouteName = navigation.getState?.()?.routes?.slice(-1)?.[0]?.name;
 
   return (
@@ -404,7 +403,20 @@ export default function FourDoorHomeContainer({
             Icon={M3Icon}
             label={DOOR_LABELS.my_rhythm}
             subtitle={rhythmSubtitle}
-            onPress={() => navigation.navigate(myRhythmTarget as any)}
+            onPress={() => {
+              if (!hasRhythm) {
+                navigation.navigate("RhythmSetup" as any);
+                return;
+              }
+              updateScreenData("dashboard_entry_surface", "my_rhythm");
+              loadScreen({
+                container_id: "companion_dashboard",
+                state_id: "day_active",
+              });
+              if (currentRouteName !== "DynamicEngine") {
+                navigation.navigate("DynamicEngine" as any);
+              }
+            }}
           />
           <DoorCard
             Icon={Mp3Icon}

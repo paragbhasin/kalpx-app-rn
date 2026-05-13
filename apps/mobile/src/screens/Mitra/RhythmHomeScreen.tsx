@@ -6,29 +6,49 @@
  * If has_rhythm === true: morning/afternoon/night band cards.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { RHYTHM_BAND_LABELS } from "@kalpx/contracts";
+import type { RhythmItem, RhythmTimeBand } from "@kalpx/types";
+import { useNavigation } from "@react-navigation/native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Image,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigation } from '@react-navigation/native';
-import { RHYTHM_BAND_LABELS, RHYTHM_BAND_SUBTITLES } from '@kalpx/contracts';
-import type { RhythmTimeBand, RhythmItem } from '@kalpx/types';
-import { Fonts } from '../../theme/fonts';
-import { executeAction } from '../../engine/actionExecutor';
-import { mitraRhythmResolveItem } from '../../engine/mitraApi';
-import { useScreenStore } from '../../engine/useScreenBridge';
-import { screenActions, loadScreenWithData, goBackWithData } from '../../store/screenSlice';
+} from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { executeAction } from "../../engine/actionExecutor";
+import { mitraRhythmResolveItem } from "../../engine/mitraApi";
+import { useScreenStore } from "../../engine/useScreenBridge";
+import {
+  goBackWithData,
+  loadScreenWithData,
+  screenActions,
+} from "../../store/screenSlice";
+import { Fonts } from "../../theme/fonts";
 
-function actionLabel(itemType: string): string {
-  if (itemType === 'mantra') return 'Chant';
-  if (itemType === 'sankalp') return 'Embody';
-  return 'Practice';
+function beginLabel(itemType: string): string {
+  if (itemType === "mantra") return "Begin Chanting";
+  if (itemType === "sankalp") return "Begin Embodying";
+  return "Begin Practice";
+}
+
+function cardLabel(itemType: string): string {
+  if (itemType === "mantra") return "MANTRA";
+  if (itemType === "sankalp") return "SANKALP";
+  if (itemType === "reflection") return "REFLECTION";
+  return "PRACTICE";
+}
+
+function itemDuration(item: RhythmItem): string | null {
+  const rawDuration = (item as any).duration_minutes;
+  if (typeof rawDuration === "number" && Number.isFinite(rawDuration)) {
+    return `${rawDuration} min`;
+  }
+  return null;
 }
 
 function RhythmItemCard({
@@ -42,24 +62,35 @@ function RhythmItemCard({
 }) {
   return (
     <View style={styles.itemCard}>
-      <View style={styles.badgeRow}>
-        <Text style={styles.itemTypeBadge}>{item.item_type.toUpperCase()}</Text>
+      <View style={styles.cardTopRow}>
+        <Text style={styles.itemTypeBadge}>{cardLabel(item.item_type)}</Text>
+        {!!itemDuration(item) && (
+          <Text style={styles.durationText}>{itemDuration(item)}</Text>
+        )}
       </View>
       <Text style={styles.itemTitle}>{item.title_snapshot}</Text>
+      <View style={styles.cardDivider}>
+        <View style={styles.cardDividerLine} />
+        <Image
+          source={require("../../../assets/lotus_icon.png")}
+          style={styles.cardDividerLotus}
+          resizeMode="contain"
+        />
+        <View style={styles.cardDividerLine} />
+      </View>
       {item.description_snapshot ? (
         <Text style={styles.itemDescription}>{item.description_snapshot}</Text>
       ) : null}
-      <View style={styles.actionRow}>
-        <TouchableOpacity
-          style={[styles.actionBtn, resolving && styles.actionBtnResolving]}
-          onPress={resolving ? undefined : onAction}
-          activeOpacity={resolving ? 1 : 0.8}
-        >
-          <Text style={styles.actionBtnText}>
-            {resolving ? 'Opening…' : actionLabel(item.item_type)}
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity
+        style={[styles.actionBtn, resolving && styles.actionBtnResolving]}
+        onPress={resolving ? undefined : onAction}
+        activeOpacity={resolving ? 1 : 0.8}
+      >
+        <Text style={styles.actionBtnSparkle}>✦</Text>
+        <Text style={styles.actionBtnText}>
+          {resolving ? "Opening…" : beginLabel(item.item_type)}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -75,26 +106,31 @@ function RhythmBand({
   onItemAction: (item: RhythmItem) => void;
   resolvingItemId?: string | null;
 }) {
+  if (items.length === 0) return null;
+  const featuredItem = items[0];
   return (
     <View style={styles.band}>
-      <Text style={styles.bandLabel}>{RHYTHM_BAND_LABELS[band]}</Text>
-      <Text style={styles.bandSubtitle}>{RHYTHM_BAND_SUBTITLES[band]}</Text>
-      {items.map((item) => (
-        <RhythmItemCard
-          key={item.id}
-          item={item}
-          onAction={() => onItemAction(item)}
-          resolving={resolvingItemId === item.item_id}
-        />
-      ))}
-      {items.length === 0 && (
-        <Text style={styles.emptyBand}>No items in this band yet.</Text>
-      )}
+      <Text style={styles.bandLabel}>{RHYTHM_BAND_LABELS[band]} Practice</Text>
+      <View style={styles.bandDivider}>
+        <View style={styles.bandDividerLine} />
+        <Text style={styles.bandDividerDiamond}>◇</Text>
+        <View style={styles.bandDividerLine} />
+      </View>
+      <RhythmItemCard
+        key={featuredItem.id}
+        item={featuredItem}
+        onAction={() => onItemAction(featuredItem)}
+        resolving={resolvingItemId === featuredItem.item_id}
+      />
     </View>
   );
 }
 
-export default function RhythmHomeScreen() {
+export default function RhythmHomeScreen({
+  embedded = false,
+}: {
+  embedded?: boolean;
+}) {
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
   const homeData = useSelector((state: any) => state.door?.homeData);
@@ -118,15 +154,15 @@ export default function RhythmHomeScreen() {
       },
       loadScreen: (target: any) => {
         const containerId =
-          typeof target === 'string'
-            ? 'generic'
-            : target?.container_id || target?.containerId || 'generic';
+          typeof target === "string"
+            ? "generic"
+            : target?.container_id || target?.containerId || "generic";
         const stateId =
-          typeof target === 'string'
+          typeof target === "string"
             ? target
-            : target?.state_id || target?.stateId || '';
+            : target?.state_id || target?.stateId || "";
         dispatch(loadScreenWithData({ containerId, stateId }) as any);
-        navigation.navigate('DynamicEngine');
+        navigation.navigate("DynamicEngine");
       },
       goBack: () => {
         dispatch(goBackWithData() as any);
@@ -135,24 +171,47 @@ export default function RhythmHomeScreen() {
     };
   }, [dispatch, navigation]);
 
+  const handleBack = useCallback(() => {
+    if (embedded) {
+      dispatch(
+        screenActions.setScreenValue({
+          key: "dashboard_entry_surface",
+          value: null,
+        }),
+      );
+    }
+    navigation.goBack();
+  }, [dispatch, embedded, navigation]);
+
   async function handleItemAction(item: RhythmItem, band: RhythmTimeBand) {
     if (resolvingItemId) return;
     setResolvingItemId(item.item_id);
     let enrichedItem: Record<string, unknown> = {
       item_id: item.item_id,
       title_snapshot: item.title_snapshot,
-      description_snapshot: item.description_snapshot ?? '',
+      description_snapshot: item.description_snapshot ?? "",
       item_type: item.item_type,
     };
     try {
-      const resolved = await mitraRhythmResolveItem(band, item.item_id, item.item_type);
+      const resolved = await mitraRhythmResolveItem(
+        band,
+        item.item_id,
+        item.item_type,
+      );
       if (resolved?.resolved) {
         enrichedItem = {
           ...enrichedItem,
           ...resolved,
-          title_snapshot: item.title_snapshot || resolved.title || resolved.title_snapshot || '',
+          title_snapshot:
+            item.title_snapshot ||
+            resolved.title ||
+            resolved.title_snapshot ||
+            "",
           description_snapshot:
-            item.description_snapshot || resolved.description_snapshot || resolved.subtitle || '',
+            item.description_snapshot ||
+            resolved.description_snapshot ||
+            resolved.subtitle ||
+            "",
         };
       }
     } catch (_) {
@@ -162,9 +221,9 @@ export default function RhythmHomeScreen() {
     }
     void executeAction(
       {
-        type: 'start_runner',
+        type: "start_runner",
         payload: {
-          source: 'rhythm_daily',
+          source: "rhythm_daily",
           variant: item.item_type,
           rhythm_slot: band,
           item: enrichedItem,
@@ -176,50 +235,64 @@ export default function RhythmHomeScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7} style={styles.backBtn}>
-          <Text style={styles.backBtnText}>{'< Back'}</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>My Rhythm</Text>
-        {hasRhythm && (
-          <TouchableOpacity
-            onPress={() => navigation.navigate('RhythmEdit' as any)}
-            activeOpacity={0.7}
-            style={styles.editBtn}
-          >
-            <Text style={styles.editBtnText}>Edit</Text>
-          </TouchableOpacity>
-        )}
-        {!hasRhythm && <View style={styles.editBtn} />}
-      </View>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.shell}>
+          <Image
+            source={require("../../../../web/public/leaves-bird.png")}
+            style={styles.heroLeaves}
+          />
 
-      {!hasRhythm ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyTitle}>Your rhythm begins here.</Text>
-          <Text style={styles.emptyBody}>
-            A daily rhythm gives your practice a shape — morning intention, afternoon steadiness, night closure.
-          </Text>
           <TouchableOpacity
-            style={styles.setupBtn}
-            onPress={() => navigation.navigate('RhythmSetup' as any)}
-            activeOpacity={0.8}
+            onPress={handleBack}
+            activeOpacity={0.7}
+            style={styles.backBtn}
           >
-            <Text style={styles.setupBtnText}>Set up My Rhythm</Text>
+            <Text style={styles.backBtnText}>← Back</Text>
           </TouchableOpacity>
+
+          <Text style={styles.headerTitle}>My Rhythm</Text>
+
+          {!hasRhythm ? (
+            <View style={styles.emptyStateCard}>
+              <Text style={styles.emptyTitle}>
+                You haven't set up your rhythm yet.
+              </Text>
+              <TouchableOpacity
+                style={styles.setupBtn}
+                onPress={() => navigation.navigate("RhythmSetup" as any)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.setupBtnText}>Set up My Rhythm</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <>
+              {(["morning", "afternoon", "night"] as RhythmTimeBand[]).map(
+                (band) => (
+                  <RhythmBand
+                    key={band}
+                    band={band}
+                    items={rhythm?.[band]?.items ?? []}
+                    onItemAction={(item) => void handleItemAction(item, band)}
+                    resolvingItemId={resolvingItemId}
+                  />
+                ),
+              )}
+
+              <TouchableOpacity
+                onPress={() => navigation.navigate("RhythmEdit" as any)}
+                activeOpacity={0.8}
+                style={styles.editRhythmBtn}
+              >
+                <Text style={styles.editRhythmBtnText}>Edit My Rhythm</Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
-      ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          {(['morning', 'afternoon', 'night'] as RhythmTimeBand[]).map((band) => (
-            <RhythmBand
-              key={band}
-              band={band}
-              items={rhythm?.[band]?.items ?? []}
-              onItemAction={(item) => void handleItemAction(item, band)}
-              resolvingItemId={resolvingItemId}
-            />
-          ))}
-        </ScrollView>
-      )}
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -227,156 +300,206 @@ export default function RhythmHomeScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFF8EF',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 12,
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#DAC28E',
   },
   backBtn: {
-    minWidth: 60,
+    alignSelf: "flex-start",
+    marginBottom: 16,
   },
   backBtnText: {
-    fontSize: 16,
-    color: '#C99317',
-    fontFamily: Fonts.sans.medium,
+    fontSize: 14,
+    color: "#C99317",
+    fontFamily: Fonts.sans.regular,
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: 28,
     fontFamily: Fonts.serif.bold,
-    color: '#432104',
-    fontWeight: '700',
-  },
-  editBtn: {
-    minWidth: 40,
-    alignItems: 'flex-end',
-  },
-  editBtnText: {
-    fontSize: 15,
-    color: '#C99317',
-    fontFamily: Fonts.sans.medium,
-  },
-  emptyState: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 32,
-  },
-  emptyTitle: {
-    fontSize: 24,
-    fontFamily: Fonts.serif.bold,
-    color: '#432104',
-    textAlign: 'center',
-    marginBottom: 12,
-    fontWeight: '700',
-  },
-  emptyBody: {
-    fontSize: 16,
-    fontFamily: Fonts.serif.regular,
-    color: '#7B6550',
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 32,
-  },
-  setupBtn: {
-    backgroundColor: '#C99317',
-    borderRadius: 15,
-    paddingHorizontal: 28,
-    paddingVertical: 14,
-  },
-  setupBtnText: {
-    fontSize: 17,
-    fontFamily: Fonts.sans.semiBold,
-    color: '#fff',
+    color: "#432104",
+    marginBottom: 8,
   },
   scrollContent: {
-    padding: 16,
-    gap: 20,
+    paddingHorizontal: 16,
+    paddingTop: 24,
     paddingBottom: 40,
   },
+  shell: {
+    width: "100%",
+    maxWidth: 420,
+    alignSelf: "center",
+    position: "relative",
+  },
+  heroLeaves: {
+    position: "absolute",
+    top: -140,
+    right: -60,
+    width: 300,
+    height: 300,
+
+    resizeMode: "contain",
+  },
+  emptyStateCard: {
+    backgroundColor: "rgba(250,245,240,0.95)",
+    borderWidth: 1,
+    borderColor: "rgba(201,168,76,0.25)",
+    borderRadius: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 32,
+    alignItems: "center",
+  },
+  emptyTitle: {
+    fontSize: 17,
+    fontFamily: Fonts.serif.regular,
+    color: "#432104",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  setupBtn: {
+    paddingHorizontal: 28,
+    paddingVertical: 14,
+    borderRadius: 14,
+    backgroundColor: "#C99317",
+  },
+  setupBtnText: {
+    fontSize: 16,
+    fontFamily: Fonts.serif.bold,
+    color: "#fff",
+  },
   band: {
-    gap: 10,
     marginBottom: 8,
   },
   bandLabel: {
-    fontSize: 20,
-    fontFamily: Fonts.serif.bold,
-    color: '#432104',
-    fontWeight: '700',
-    marginBottom: 2,
-  },
-  bandSubtitle: {
     fontSize: 14,
     fontFamily: Fonts.serif.regular,
-    color: '#7B6550',
-    marginBottom: 6,
+    color: "#432104",
+    marginBottom: 8,
   },
-  emptyBand: {
+  bandDivider: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 28,
+  },
+  bandDividerLine: {
+    width: 35,
+    height: 1,
+    backgroundColor: "rgba(210,166,61,0.45)",
+  },
+  bandDividerDiamond: {
     fontSize: 14,
-    color: '#9b8b77',
-    fontFamily: Fonts.sans.regular,
-    fontStyle: 'italic',
+    color: "#D2A63D",
   },
   itemCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 20,
-    padding: 16,
     borderWidth: 1,
-    borderColor: 'rgba(228,197,145,0.8)',
-    marginBottom: 12,
+    borderColor: "rgba(201,168,76,0.35)",
+    borderRadius: 28,
+    backgroundColor: "rgba(255,252,247,0.9)",
+    padding: 15,
+    // marginBottom: 18,
+    shadowColor: "#C9A84C",
+    shadowOpacity: 0.08,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 18 },
+    elevation: 4,
   },
-  badgeRow: {
-    flexDirection: 'row',
-    marginBottom: 6,
+  cardTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    marginBottom: 22,
   },
   itemTypeBadge: {
-    fontSize: 10,
-    fontFamily: Fonts.sans.semiBold,
-    color: '#8B6914',
-    backgroundColor: '#F5F0E0',
-    alignSelf: 'flex-start',
+    fontSize: 12,
+    fontFamily: Fonts.sans.bold,
+    letterSpacing: 1.4,
+    color: "#A97C14",
+    textTransform: "uppercase",
+    backgroundColor: "#F6EED8",
+    borderRadius: 5,
     paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-    overflow: 'hidden',
-    letterSpacing: 1.5,
+    paddingVertical: 5,
+    overflow: "hidden",
+  },
+  durationText: {
+    fontSize: 15,
+    color: "#8B6A43",
+    fontFamily: Fonts.sans.regular,
   },
   itemTitle: {
     fontSize: 18,
     fontFamily: Fonts.serif.bold,
-    color: '#432104',
-    fontWeight: '700',
-    marginBottom: 4,
+    color: "#432104",
+    textAlign: "center",
+    marginBottom: 24,
   },
-  itemDescription: {
-    fontSize: 13,
-    fontFamily: Fonts.sans.regular,
-    color: '#7B6550',
-    lineHeight: 19,
+  cardDivider: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 14,
     marginBottom: 8,
   },
-  actionRow: {
-    alignItems: 'flex-end',
+  cardDividerLine: {
+    width: 86,
+    height: 1,
+    backgroundColor: "rgba(210,166,61,0.45)",
+  },
+  cardDividerLotus: {
+    width: 22,
+    height: 18,
+    tintColor: "#D2A63D",
+  },
+  itemDescription: {
+    fontSize: 16,
+    fontFamily: Fonts.serif.regular,
+    textAlign: "center",
+    color: "#7A6040",
+    lineHeight: 30,
+    marginBottom: 28,
   },
   actionBtn: {
-    backgroundColor: '#C99317',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    width: "100%",
+    paddingVertical: 10,
+    borderRadius: 11,
+    borderWidth: 0,
+    backgroundColor: "#C99317",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 14,
+    shadowColor: "#C99317",
+    shadowOpacity: 0.24,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 18 },
+    elevation: 4,
+  },
+  actionBtnSparkle: {
+    fontSize: 20,
+    lineHeight: 20,
+    color: "#fff",
   },
   actionBtnResolving: {
-    opacity: 0.55,
+    opacity: 0.7,
   },
   actionBtnText: {
-    fontSize: 14,
-    fontFamily: Fonts.sans.semiBold,
-    color: '#fff',
-    fontWeight: '600',
+    fontSize: 18,
+    fontFamily: Fonts.serif.bold,
+    color: "#fff",
+  },
+  editRhythmBtn: {
+    width: "100%",
+    paddingVertical: 10,
+    borderRadius: 11,
+    borderWidth: 1,
+    borderColor: "rgba(201,168,76,0.55)",
+    backgroundColor: "rgba(255,252,247,0.6)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 8,
+    marginBottom: 40,
+  },
+  editRhythmBtnText: {
+    fontSize: 17,
+    fontFamily: Fonts.sans.regular,
+    color: "#7B6550",
   },
 });

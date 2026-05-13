@@ -78,6 +78,7 @@ import ResilienceNarrativeCard from "../blocks/dashboard/insights/ResilienceNarr
 import ContinuityMirrorCard from "../extensions/moments/continuity_mirror_card";
 import PathMilestoneBanner from "../extensions/moments/path_milestone_banner";
 import InnerPathScreen from "../screens/Mitra/InnerPathScreen";
+import RhythmHomeScreen from "../screens/Mitra/RhythmHomeScreen";
 
 
 type Schema = {
@@ -112,6 +113,7 @@ const NewDashboardContainer: React.FC<Props> = () => {
   const [predictiveAlerts, setPredictiveAlerts] = useState<any[]>([]);
   const returnModal = sd.dashboard_return_modal;
   const isInnerPathEntry = sd.dashboard_entry_surface === "inner_path";
+  const isRhythmHomeEntry = sd.dashboard_entry_surface === "my_rhythm";
 
   useEffect(() => {
     let active = true;
@@ -211,6 +213,10 @@ const NewDashboardContainer: React.FC<Props> = () => {
 
   if (isInnerPathEntry) {
     return <InnerPathScreen embedded />;
+  }
+
+  if (isRhythmHomeEntry) {
+    return <RhythmHomeScreen embedded />;
   }
 
   return (

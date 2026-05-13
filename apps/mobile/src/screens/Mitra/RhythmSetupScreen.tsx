@@ -6,6 +6,7 @@
  * accordion editor directly (used by RhythmEditScreen wrapper).
  */
 
+import { Ionicons } from "@expo/vector-icons";
 import {
   getMissingSuggestionSlots,
   RHYTHM_BAND_LABELS,
@@ -16,6 +17,7 @@ import {
 } from "@kalpx/contracts";
 import type { RhythmTimeBand, RhythmWizardLocalItem } from "@kalpx/types";
 import { useNavigation } from "@react-navigation/native";
+
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -207,6 +209,14 @@ const PURPOSE_OPTIONS: Record<
     },
   ],
 };
+
+function itemTypeLabel(itemType: string): string {
+  if (itemType === "mantra") return "Mantra";
+  if (itemType === "sankalp") return "Sankalp";
+  if (itemType === "practice") return "Practice";
+  if (itemType === "reflection") return "Reflection";
+  return "Library";
+}
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -781,144 +791,172 @@ export default function RhythmSetupScreen({
       <SafeAreaView
         style={[wStyles.safe, embedded && styles.embeddedTransparent]}
       >
-        <ScrollView
-          contentContainerStyle={wStyles.scroll}
-          showsVerticalScrollIndicator={false}
+        <ImageBackground
+          source={RHYTHM_BG}
+          style={wStyles.background}
+          imageStyle={wStyles.backgroundImage}
         >
-          <TouchableOpacity
-            onPress={() => setWizardStep("purpose")}
-            style={wStyles.backRow}
+          <ScrollView
+            contentContainerStyle={wStyles.scroll}
+            showsVerticalScrollIndicator={false}
           >
-            <Text style={wStyles.backText}>{"< Back"}</Text>
-          </TouchableOpacity>
-          {renderStepDots("suggestion")}
-          <Text style={wStyles.heading}>Mitra Suggests</Text>
-          <Text style={wStyles.subheading}>
-            These practices match your intentions.
-          </Text>
+            <View style={wStyles.hero}>
+              <Image
+                source={RHYTHM_LEAF_ART}
+                style={wStyles.leafArt}
+                resizeMode="contain"
+              />
+              <TouchableOpacity
+                onPress={() => setWizardStep("purpose")}
+                style={wStyles.backRow}
+              >
+                <Text style={wStyles.backText}>{"< Back"}</Text>
+              </TouchableOpacity>
 
-          {suggestLoading && (
-            <View style={wStyles.loadingRow}>
-              <ActivityIndicator color="#C99317" />
-              <Text style={wStyles.loadingText}>
-                {RHYTHM_SUGGEST_COPY.loading}
+              <Text style={[wStyles.heading, wStyles.suggestionHeading]}>
+                Mitra suggests this for you.
+              </Text>
+              <Text style={[wStyles.subheading, wStyles.suggestionSubheading]}>
+                Each practice fits the purpose you chose. You can change any of
+                them.
               </Text>
             </View>
-          )}
 
-          {!suggestLoading && suggestError && (
-            <View style={wStyles.errorBox}>
-              <Text style={wStyles.errorText}>{suggestError}</Text>
-              <TouchableOpacity
-                style={wStyles.retryBtn}
-                onPress={() => {
-                  setSuggestionsLoaded(false);
-                  setWizardItems({});
-                }}
-                activeOpacity={0.8}
-              >
-                <Text style={wStyles.retryBtnText}>
-                  {RHYTHM_SUGGEST_COPY.tryAgain}
+            {suggestLoading && (
+              <View style={wStyles.loadingRow}>
+                <ActivityIndicator color="#C99317" />
+                <Text style={wStyles.loadingText}>
+                  {RHYTHM_SUGGEST_COPY.loading}
                 </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setWizardStep(null)}
-                activeOpacity={0.7}
-                style={wStyles.secondaryLinkRow}
-              >
-                <Text style={wStyles.secondaryLink}>
-                  {RHYTHM_SUGGEST_COPY.chooseFromLibrary}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
+              </View>
+            )}
 
-          {!suggestLoading &&
-            selectedMoments.map((band) => {
-              const item = wizardItems[band];
-              if (!item) {
-                return (
-                  <View key={band} style={wStyles.missingSlotBox}>
-                    <Text style={wStyles.missingSlotText}>
-                      Mitra could not suggest a{" "}
-                      {MOMENT_COPY[band].label.toLowerCase()} practice.
-                    </Text>
-                    <TouchableOpacity
-                      style={wStyles.changeBtn}
-                      onPress={() => setWizardPickerBand(band)}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={wStyles.changeBtnText}>
-                        {RHYTHM_SUGGEST_COPY.chooseFromLibrary}
+            {!suggestLoading && suggestError && (
+              <View style={wStyles.errorBox}>
+                <Text style={wStyles.errorText}>{suggestError}</Text>
+                <TouchableOpacity
+                  style={wStyles.retryBtn}
+                  onPress={() => {
+                    setSuggestionsLoaded(false);
+                    setWizardItems({});
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text style={wStyles.retryBtnText}>
+                    {RHYTHM_SUGGEST_COPY.tryAgain}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setWizardStep(null)}
+                  activeOpacity={0.7}
+                  style={wStyles.secondaryLinkRow}
+                >
+                  <Text style={wStyles.secondaryLink}>
+                    {RHYTHM_SUGGEST_COPY.chooseFromLibrary}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {!suggestLoading &&
+              selectedMoments.map((band) => {
+                const item = wizardItems[band];
+                if (!item) {
+                  return (
+                    <View key={band} style={wStyles.missingSlotBox}>
+                      <Text style={wStyles.missingSlotText}>
+                        Mitra could not suggest a{" "}
+                        {MOMENT_COPY[band].label.toLowerCase()} practice.
                       </Text>
-                    </TouchableOpacity>
+                      <TouchableOpacity
+                        style={wStyles.changeBtn}
+                        onPress={() => setWizardPickerBand(band)}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={wStyles.changeBtnText}>
+                          {RHYTHM_SUGGEST_COPY.chooseFromLibrary}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  );
+                }
+                return (
+                  <View key={band} style={wStyles.suggestionCard}>
+                    <View style={wStyles.suggestionMetaRow}>
+                      <View style={wStyles.suggestionTypePill}>
+                        <Text style={wStyles.suggestionTypePillText}>
+                          {itemTypeLabel(item.item_type)}
+                        </Text>
+                      </View>
+                      <Text style={wStyles.suggestionBandMeta}>
+                        {MOMENT_COPY[band].label}
+                      </Text>
+                      <TouchableOpacity
+                        style={wStyles.suggestionChangeBtn}
+                        onPress={() => setWizardPickerBand(band)}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons
+                          name="pencil-outline"
+                          size={15}
+                          color="#C89211"
+                        />
+                        <Text style={wStyles.suggestionChangeText}>Change</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={wStyles.suggestionTitle}>
+                      {item.title_snapshot}
+                    </Text>
+                    <View style={wStyles.suggestionDividerRow}>
+                      <View style={wStyles.suggestionDividerShort} />
+                      <Text style={wStyles.suggestionDividerStar}>✦</Text>
+                      <View style={wStyles.suggestionDividerLong} />
+                    </View>
+                    {!!item.why_this && (
+                      <Text style={wStyles.suggestionWhyThis}>
+                        {item.why_this}
+                      </Text>
+                    )}
+                    {!!item.description_snapshot && !item.why_this && (
+                      <Text style={wStyles.suggestionWhyThis}>
+                        {item.description_snapshot}
+                      </Text>
+                    )}
                   </View>
                 );
-              }
-              return (
-                <View key={band} style={wStyles.suggestionCard}>
-                  <View style={wStyles.suggestionCardHeader}>
-                    <Text style={wStyles.suggestionBandLabel}>
-                      {MOMENT_COPY[band].label}
-                    </Text>
-                    <Text style={wStyles.suggestionTypeBadge}>
-                      {item.item_type}
-                    </Text>
-                  </View>
-                  <Text style={wStyles.suggestionTitle}>
-                    {item.title_snapshot}
-                  </Text>
-                  {!!item.why_this && (
-                    <Text style={wStyles.suggestionWhyThis}>
-                      {item.why_this}
-                    </Text>
-                  )}
-                  {!!item.description_snapshot && !item.why_this && (
-                    <Text style={wStyles.suggestionDesc}>
-                      {item.description_snapshot}
-                    </Text>
-                  )}
-                  <TouchableOpacity
-                    style={wStyles.changeBtn}
-                    onPress={() => setWizardPickerBand(band)}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={wStyles.changeBtnText}>Change</Text>
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
+              })}
 
-          <TouchableOpacity
-            style={[
-              wStyles.primaryBtn,
-              acceptDisabled && wStyles.primaryBtnDisabled,
-            ]}
-            onPress={() => setWizardStep("reminders")}
-            activeOpacity={0.8}
-            disabled={acceptDisabled}
-          >
-            <Text style={wStyles.primaryBtnText}>Accept Rhythm →</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                wStyles.primaryBtn,
+                acceptDisabled && wStyles.primaryBtnDisabled,
+              ]}
+              onPress={() => setWizardStep("reminders")}
+              activeOpacity={0.85}
+              disabled={acceptDisabled}
+            >
+              <Text style={wStyles.primaryBtnText}>Accept Rhythm →</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => {
-              setWizardStep(null);
-            }}
-            activeOpacity={0.7}
-            style={wStyles.secondaryLinkRow}
-          >
-            <Text style={wStyles.secondaryLink}>Choose My Own</Text>
-          </TouchableOpacity>
-        </ScrollView>
+            <TouchableOpacity
+              onPress={() => {
+                setWizardStep(null);
+              }}
+              activeOpacity={0.7}
+              style={[wStyles.secondaryLinkRow, { marginBottom: 48 }]}
+            >
+              <Text style={wStyles.secondaryLink}>Choose My Own</Text>
+            </TouchableOpacity>
+          </ScrollView>
 
-        <LibrarySearchModal
-          isVisible={wizardPickerBand !== null}
-          onClose={() => setWizardPickerBand(null)}
-          onItemAdded={() => {}}
-          mode="select_for_rhythm"
-          onItemSelected={handleWizardPickerSelect}
-        />
+          <LibrarySearchModal
+            isVisible={wizardPickerBand !== null}
+            onClose={() => setWizardPickerBand(null)}
+            onItemAdded={() => {}}
+            mode="select_for_rhythm"
+            onItemSelected={handleWizardPickerSelect}
+          />
+        </ImageBackground>
       </SafeAreaView>
     );
   };
@@ -938,16 +976,18 @@ export default function RhythmSetupScreen({
           <Text style={wStyles.backText}>{"< Back"}</Text>
         </TouchableOpacity>
         {renderStepDots("reminders")}
-        <Text style={wStyles.heading}>Gentle Reminders</Text>
+        <Text style={wStyles.buildheading}>
+          Would you like gentle reminder?
+        </Text>
         <Text style={wStyles.subheading}>
-          Would you like Mitra to remind you?
+          Mitra can remind you when each moment arrives.
         </Text>
 
         <View style={wStyles.pillRow}>
           {(
             [
-              { label: "Yes, gently", value: "yes" },
-              { label: "I will come", value: "no" },
+              { label: "Yes, gently remind me", value: "yes" },
+              { label: "No,I will come myself", value: "no" },
               { label: "Ask me later", value: "later" },
             ] as { label: string; value: "yes" | "no" | "later" }[]
           ).map((opt) => (
@@ -986,7 +1026,7 @@ export default function RhythmSetupScreen({
           {wizardSaving ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={wStyles.primaryBtnText}>Continue →</Text>
+            <Text style={wStyles.primaryBtnText}>Save My Rhythm →</Text>
           )}
         </TouchableOpacity>
       </ScrollView>
@@ -1472,51 +1512,111 @@ const wStyles = StyleSheet.create({
     lineHeight: 18,
   },
   purposeChipDescActive: { color: "#7B5500" },
-  suggestionCard: {
-    padding: 16,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "rgba(201,168,76,0.25)",
-    backgroundColor: "rgba(255,252,248,0.95)",
-    marginBottom: 14,
+  suggestionHeading: {
+    textAlign: "left",
+    marginBottom: 12,
   },
-  suggestionCardHeader: {
+  suggestionSubheading: {
+    textAlign: "left",
+    marginBottom: 28,
+  },
+  suggestionCard: {
+    borderWidth: 1.5,
+    borderColor: "rgba(201,168,76,0.22)",
+    borderRadius: 26,
+    backgroundColor: "rgba(255,251,244,0.95)",
+    padding: 15,
+    marginBottom: 18,
+    shadowColor: "#432104",
+    shadowOpacity: 0.06,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 1,
+  },
+  suggestionMetaRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 8,
+    gap: 10,
+    marginBottom: 18,
   },
-  suggestionBandLabel: {
-    fontFamily: Fonts.serif.bold,
-    fontSize: 13,
-    color: "#7B6550",
-    fontWeight: "700",
+  suggestionTypePill: {
+    backgroundColor: "#FCF8EC",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
   },
-  suggestionTypeBadge: {
+  suggestionTypePillText: {
     fontSize: 11,
-    color: "#8b6838",
-    fontFamily: Fonts.sans.semiBold,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: "#8B6914",
     textTransform: "uppercase",
+    fontFamily: Fonts.sans.bold,
+  },
+  suggestionBandMeta: {
+    fontSize: 13,
+    color: "#A08060",
+    fontFamily: Fonts.sans.regular,
+    flexShrink: 1,
+  },
+  suggestionChangeBtn: {
+    marginLeft: "auto",
+    minWidth: 106,
+    borderWidth: 1,
+    borderColor: "rgba(201,168,76,0.4)",
+    borderRadius: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "transparent",
+  },
+  suggestionChangeIcon: {
+    fontSize: 14,
+    color: "#C99317",
+  },
+  suggestionChangeText: {
+    fontSize: 13,
+    color: "#C99317",
+    fontFamily: Fonts.sans.medium,
   },
   suggestionTitle: {
     fontFamily: Fonts.serif.bold,
-    fontSize: 17,
+    fontSize: 18,
     color: "#432104",
-    fontWeight: "600",
-    marginBottom: 4,
+    fontWeight: "700",
+    marginBottom: 14,
+    lineHeight: 26,
   },
-  suggestionDesc: {
+  suggestionDividerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 14,
+  },
+  suggestionDividerShort: {
+    width: 86,
+    height: 1,
+    backgroundColor: "rgba(228,180,79,0.4)",
+  },
+  suggestionDividerLong: {
+    width: 118,
+    height: 1,
+    backgroundColor: "rgba(228,180,79,0.4)",
+  },
+  suggestionDividerStar: {
     fontSize: 13,
-    color: "#7B6550",
-    fontFamily: Fonts.sans.regular,
-    marginBottom: 10,
+    lineHeight: 13,
+    color: "#E4B44F",
   },
   suggestionWhyThis: {
-    fontSize: 13,
+    fontSize: 14,
     color: "#8B6914",
     fontFamily: Fonts.sans.regular,
     fontStyle: "italic",
-    marginBottom: 10,
+    lineHeight: 22,
   },
   loadingRow: { alignItems: "center", paddingVertical: 24, gap: 12 },
   loadingText: {
@@ -1576,10 +1676,11 @@ const wStyles = StyleSheet.create({
   },
   pillActive: { backgroundColor: "#C99317", borderColor: "#C99317" },
   pillText: {
-    fontSize: 13,
+    fontSize: 11,
     color: "#7B6550",
     fontFamily: Fonts.sans.medium,
     textAlign: "center",
+    alignSelf: "center",
   },
   pillTextActive: { color: "#fff" },
   confirmList: { marginVertical: 24 },

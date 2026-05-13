@@ -537,54 +537,101 @@ export default function RhythmSetupScreen({
     <SafeAreaView
       style={[wStyles.safe, embedded && styles.embeddedTransparent]}
     >
-      <ScrollView
-        contentContainerStyle={wStyles.scroll}
-        showsVerticalScrollIndicator={false}
+      <ImageBackground
+        source={RHYTHM_BG}
+        style={wStyles.background}
+        imageStyle={wStyles.backgroundImage}
       >
-        <TouchableOpacity onPress={leaveEmbeddedFlow} style={wStyles.backRow}>
-          <Text style={wStyles.backText}>{"< Back"}</Text>
-        </TouchableOpacity>
-        {renderStepDots("moments")}
-        <Text style={wStyles.heading}>Build Your Daily Rhythm</Text>
-        <Text style={wStyles.subheading}>
-          When would you like Mitra to support you?
-        </Text>
-        {BANDS.map((band) => {
-          const selected = selectedMoments.includes(band);
-          return (
-            <TouchableOpacity
-              key={band}
-              style={[
-                wStyles.momentCard,
-                selected && wStyles.momentCardSelected,
-              ]}
-              onPress={() => toggleMoment(band)}
-              activeOpacity={0.7}
-            >
-              <View style={wStyles.momentCardInner}>
-                <Text style={wStyles.momentLabel}>
-                  {MOMENT_COPY[band].label}
-                </Text>
-                <Text style={wStyles.momentDesc}>{MOMENT_COPY[band].desc}</Text>
-              </View>
-              <View style={[wStyles.check, selected && wStyles.checkSelected]}>
-                {selected && <Text style={wStyles.checkMark}>✓</Text>}
-              </View>
-            </TouchableOpacity>
-          );
-        })}
-        <TouchableOpacity
-          style={[
-            wStyles.primaryBtn,
-            selectedMoments.length === 0 && wStyles.primaryBtnDisabled,
-          ]}
-          onPress={() => setWizardStep("purpose")}
-          disabled={selectedMoments.length === 0}
-          activeOpacity={0.8}
+        <ScrollView
+          contentContainerStyle={wStyles.scroll}
+          showsVerticalScrollIndicator={false}
         >
-          <Text style={wStyles.primaryBtnText}>Continue →</Text>
-        </TouchableOpacity>
-      </ScrollView>
+          <View style={wStyles.hero}>
+            <Image
+              source={RHYTHM_LEAF_ART}
+              style={wStyles.leafArt}
+              resizeMode="contain"
+            />
+
+            <TouchableOpacity
+              onPress={leaveEmbeddedFlow}
+              style={wStyles.backRow}
+            >
+              <Text style={wStyles.backText}>{"< Back"}</Text>
+            </TouchableOpacity>
+            {/* {renderStepDots("moments")} */}
+            <Text style={wStyles.heading}>Build Your Daily Rhythm</Text>
+            <Text style={wStyles.subheading}>
+              When would you like Mitra to support you?
+            </Text>
+            <View style={{ alignSelf: "center" }}>
+              <View style={wStyles.momentDividerRow}>
+                <View style={wStyles.momentDividerLine} />
+                <Text style={wStyles.momentDividerStar}>✦</Text>
+                <View style={wStyles.momentDividerLine} />
+              </View>
+            </View>
+            <View style={wStyles.helperCopyWrap}>
+              <Text style={wStyles.helperTitle}>
+                You can select more than one
+              </Text>
+              <Text style={wStyles.helperBody}>
+                Choose all moments when you'd like Mitra to walk with you.
+              </Text>
+            </View>
+          </View>
+
+          {BANDS.map((band) => {
+            const selected = selectedMoments.includes(band);
+            const Icon = BAND_ART[band];
+            return (
+              <TouchableOpacity
+                key={band}
+                style={[
+                  wStyles.momentCard,
+                  selected && wStyles.momentCardSelected,
+                ]}
+                onPress={() => toggleMoment(band)}
+                activeOpacity={0.82}
+              >
+                <View style={wStyles.momentArtWrap}>
+                  <Icon width={40} height={40} />
+                </View>
+                <View style={wStyles.momentCardInner}>
+                  <Text style={wStyles.momentLabel}>
+                    {MOMENT_COPY[band].label}
+                  </Text>
+                  <View style={wStyles.momentDividerRow}>
+                    <View style={wStyles.momentDividerLine} />
+                    <Text style={wStyles.momentDividerStar}>✦</Text>
+                    <View style={wStyles.momentDividerLine} />
+                  </View>
+                  <Text style={wStyles.momentDesc}>
+                    {MOMENT_COPY[band].desc}
+                  </Text>
+                </View>
+                <View
+                  style={[wStyles.check, selected && wStyles.checkSelected]}
+                >
+                  {selected && <View style={wStyles.checkInner} />}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+
+          <TouchableOpacity
+            style={[
+              wStyles.primaryBtn,
+              selectedMoments.length === 0 && wStyles.primaryBtnDisabled,
+            ]}
+            onPress={() => setWizardStep("purpose")}
+            disabled={selectedMoments.length === 0}
+            activeOpacity={0.85}
+          >
+            <Text style={wStyles.primaryBtnText}>Continue →</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </ImageBackground>
     </SafeAreaView>
   );
 
@@ -1134,69 +1181,154 @@ export default function RhythmSetupScreen({
 
 const wStyles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: "#FFF8EF" },
-  scroll: { padding: 20, paddingBottom: 48 },
-  backRow: { marginBottom: 16 },
-  backText: { fontSize: 15, color: "#C99317", fontFamily: Fonts.sans.medium },
-  dots: { flexDirection: "row", gap: 6, marginBottom: 20 },
+  background: { flex: 1 },
+  backgroundImage: { opacity: 0.98 },
+  scroll: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 48 },
+  hero: { position: "relative", paddingTop: 6 },
+  leafArt: {
+    position: "absolute",
+    right: -70,
+    top: -110,
+    width: 300,
+    height: 300,
+    opacity: 0.78,
+  },
+  brandBlock: { marginLeft: 2, marginBottom: 26 },
+  brandTitle: {
+    fontSize: 34,
+    lineHeight: 36,
+    color: "#D19A18",
+    fontFamily: Fonts.serif.regular,
+  },
+  brandSubtitle: {
+    fontSize: 11,
+    color: "#9B7340",
+    fontFamily: Fonts.sans.regular,
+    marginTop: 2,
+    marginLeft: 2,
+  },
+  backRow: { alignSelf: "flex-start", marginBottom: 18 },
+  backText: { fontSize: 16, color: "#C99317", fontFamily: Fonts.sans.medium },
+  dots: { flexDirection: "row", gap: 8, marginBottom: 24, alignSelf: "center" },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "rgba(201,147,23,0.25)",
+    backgroundColor: "rgba(201,168,76,0.25)",
   },
-  dotActive: { backgroundColor: "#C99317" },
+  dotActive: { width: 30, backgroundColor: "#C99317" },
   heading: {
     fontFamily: Fonts.serif.bold,
-    fontSize: 26,
+    fontSize: 28,
     color: "#432104",
     fontWeight: "700",
     marginBottom: 8,
+    textAlign: "center",
   },
   subheading: {
-    fontSize: 15,
+    fontSize: 16,
     color: "#7B6550",
     fontFamily: Fonts.sans.regular,
+    marginBottom: 18,
+    lineHeight: 24,
+    textAlign: "center",
+  },
+  helperCopyWrap: {
+    alignItems: "center",
     marginBottom: 24,
-    lineHeight: 22,
+    paddingHorizontal: 10,
+  },
+  helperTitle: {
+    fontSize: 13,
+    color: "#8E5D99",
+    fontFamily: Fonts.sans.bold,
+    marginBottom: 4,
+    textAlign: "center",
+  },
+  helperBody: {
+    fontSize: 13,
+    color: "#7B6550",
+    fontFamily: Fonts.sans.regular,
+    lineHeight: 20,
+    textAlign: "center",
   },
   momentCard: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 18,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "rgba(201,168,76,0.25)",
-    backgroundColor: "rgba(250,245,240,0.92)",
-    marginBottom: 12,
+    gap: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 28,
+    borderWidth: 1.5,
+    borderColor: "rgba(201,168,76,0.26)",
+    backgroundColor: "rgba(245,245,240,0.45)",
+    marginBottom: 16,
+    shadowColor: "#432104",
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 1,
   },
   momentCardSelected: {
     borderColor: "#C99317",
-    backgroundColor: "rgba(201,147,23,0.08)",
+    backgroundColor: "rgba(255,251,244,0.98)",
   },
-  momentCardInner: { flex: 1, marginRight: 12 },
+  momentArtWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 22,
+
+    backgroundColor: "#FCF8EC",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  momentCardInner: { flex: 1, marginRight: 4 },
   momentLabel: {
     fontFamily: Fonts.serif.bold,
-    fontSize: 17,
+    fontSize: 19,
     color: "#432104",
     fontWeight: "700",
-    marginBottom: 4,
+    marginBottom: 8,
+  },
+  momentDividerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 5,
+  },
+  momentDividerLine: {
+    width: 56,
+    height: 1,
+    backgroundColor: "rgba(228,180,79,0.4)",
+  },
+  momentDividerStar: {
+    fontSize: 13,
+    lineHeight: 13,
+    color: "#E4B44F",
   },
   momentDesc: {
     fontSize: 13,
     color: "#7B6550",
     fontFamily: Fonts.sans.regular,
+    lineHeight: 22,
+    maxWidth: 220,
   },
   check: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 1.5,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
     borderColor: "rgba(201,168,76,0.4)",
     alignItems: "center",
     justifyContent: "center",
   },
-  checkSelected: { backgroundColor: "#C99317", borderColor: "#C99317" },
-  checkMark: { color: "#fff", fontSize: 13, fontWeight: "700" },
+  checkSelected: { borderColor: "#C99317" },
+  checkInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#C99317",
+  },
   purposeSection: { marginBottom: 20 },
   purposeBandLabel: {
     fontFamily: Fonts.serif.bold,

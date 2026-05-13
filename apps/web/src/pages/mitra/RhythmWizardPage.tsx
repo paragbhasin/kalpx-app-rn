@@ -532,17 +532,7 @@ export function RhythmWizardPage() {
                 When would you like Mitra to support you?
               </p>
 
-              <div
-                style={{
-                  marginBottom: 24,
-                  padding: "14px 16px",
-                  borderRadius: 16,
-                  border: "1px solid rgba(228, 205, 166, 0.55)",
-                  background:
-                    "linear-gradient(180deg, rgba(255,250,246,0.92) 0%, rgba(252,244,237,0.88) 100%)",
-                  boxShadow: "0 10px 24px rgba(201,168,76,0.08)",
-                }}
-              >
+              <div style={{ marginBottom: 24, textAlign: "center" }}>
                 <div
                   style={{
                     color: "#8E5D99",
@@ -560,7 +550,8 @@ export function RhythmWizardPage() {
                     lineHeight: 1.5,
                   }}
                 >
-                  Choose all moments when you&apos;d like Mitra to walk with you.
+                  Choose all moments when you&apos;d like Mitra to walk with
+                  you.
                 </div>
               </div>
 

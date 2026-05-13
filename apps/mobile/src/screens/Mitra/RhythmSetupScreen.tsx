@@ -218,6 +218,42 @@ function itemTypeLabel(itemType: string): string {
   return "Library";
 }
 
+function getConfirmationItems(
+  bands: RhythmTimeBand[],
+  wizardItems: Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>>,
+  rhythm: any,
+) {
+  const fromWizard = bands
+    .map((band) => ({ band, item: wizardItems[band] }))
+    .filter((entry) => !!entry.item) as {
+    band: RhythmTimeBand;
+    item: RhythmWizardLocalItem;
+  }[];
+
+  if (fromWizard.length > 0) {
+    return fromWizard;
+  }
+
+  return BANDS.map((band) => {
+    const item = rhythm?.[band]?.items?.[0];
+    if (!item) return null;
+    return {
+      band,
+      item: {
+        slot: band,
+        item_id: item.item_id,
+        item_type: item.item_type,
+        title_snapshot: item.title_snapshot,
+        description_snapshot: item.description_snapshot ?? null,
+        source: item.source ?? "user_chosen",
+        sort_order: item.sort_order ?? 0,
+        reminder_enabled: item.reminder_enabled ?? false,
+        reminder_time: item.reminder_time ?? null,
+      } satisfies RhythmWizardLocalItem,
+    };
+  }).filter(Boolean) as { band: RhythmTimeBand; item: RhythmWizardLocalItem }[];
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function RhythmSetupScreen({
@@ -1037,66 +1073,95 @@ export default function RhythmSetupScreen({
     <SafeAreaView
       style={[wStyles.safe, embedded && styles.embeddedTransparent]}
     >
-      <ScrollView
-        contentContainerStyle={wStyles.scroll}
-        showsVerticalScrollIndicator={false}
+      <ImageBackground
+        source={RHYTHM_BG}
+        style={wStyles.background}
+        imageStyle={wStyles.backgroundImage}
       >
-        <Text style={[wStyles.heading, { marginTop: 48 }]}>
-          Your Daily Companion{"\n"}is ready.
-        </Text>
-        <Text style={wStyles.subheading}>
-          A practice waits for you each day.
-        </Text>
-
-        <View style={wStyles.confirmList}>
-          {selectedMoments.map((band) => {
-            const item = wizardItems[band];
-            if (!item) return null;
-            return (
-              <View key={band} style={wStyles.confirmRow}>
-                <Text style={wStyles.confirmBand}>
-                  {MOMENT_COPY[band].label}
-                </Text>
-                <Text style={wStyles.confirmTitle}>{item.title_snapshot}</Text>
-              </View>
-            );
-          })}
-        </View>
-
-        <TouchableOpacity
-          style={wStyles.primaryBtn}
-          onPress={beginTodaysPractice}
-          activeOpacity={0.8}
+        <ScrollView
+          contentContainerStyle={wStyles.scroll}
+          showsVerticalScrollIndicator={false}
         >
-          <Text style={wStyles.primaryBtnText}>Begin today's practice</Text>
-        </TouchableOpacity>
+          <View style={wStyles.hero}>
+            <Image
+              source={RHYTHM_LEAF_ART}
+              style={wStyles.leafArt}
+              resizeMode="contain"
+            />
+            <View style={wStyles.confirmSparkleWrap}>
+              <Text style={wStyles.confirmSparkle}>✦</Text>
+            </View>
+            <Text style={[wStyles.heading, wStyles.confirmHeading]}>
+              Your Daily Companion is ready.
+            </Text>
+            <Text style={[wStyles.subheading, wStyles.confirmSubheading]}>
+              Each moment has its practice. Return to it whenever you need.
+            </Text>
+          </View>
 
-        <TouchableOpacity
-          style={[wStyles.primaryBtn, wStyles.secondaryBtn]}
-          onPress={openRhythmHome}
-          activeOpacity={0.8}
-        >
-          <Text style={[wStyles.primaryBtnText, { color: "#7B6550" }]}>
-            Return Home
-          </Text>
-        </TouchableOpacity>
+          <View style={wStyles.confirmList}>
+            {getConfirmationItems(
+              selectedMoments,
+              wizardItems,
+              homeData?.companion_rhythm,
+            ).map(({ band, item }) => {
+              return (
+                <View key={band} style={wStyles.confirmCard}>
+                  <View style={wStyles.confirmCardRow}>
+                    <View style={wStyles.confirmCardBody}>
+                      <Text style={wStyles.confirmBand}>
+                        {MOMENT_COPY[band].label.toUpperCase()}
+                      </Text>
+                      <Text style={wStyles.confirmTitle}>
+                        {item.title_snapshot}
+                      </Text>
+                    </View>
+                    <View style={wStyles.confirmTypePill}>
+                      <Text style={wStyles.confirmTypePillText}>
+                        {itemTypeLabel(item.item_type).toUpperCase()}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
 
-        <TouchableOpacity
-          onPress={() => {
-            dispatch(
-              loadScreenWithData({
-                containerId: "companion_dashboard",
-                stateId: "day_active",
-              }) as any,
-            );
-            navigation.navigate("DynamicEngine" as any);
-          }}
-          activeOpacity={0.7}
-          style={wStyles.secondaryLinkRow}
-        >
-          <Text style={wStyles.secondaryLink}>Add Inner Path</Text>
-        </TouchableOpacity>
-      </ScrollView>
+          <TouchableOpacity
+            style={wStyles.primaryBtn}
+            onPress={beginTodaysPractice}
+            activeOpacity={0.85}
+          >
+            <Text style={wStyles.primaryBtnText}>Begin today&apos;s practice</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[wStyles.primaryBtn, wStyles.secondaryBtn]}
+            onPress={openRhythmHome}
+            activeOpacity={0.85}
+          >
+            <Text style={[wStyles.primaryBtnText, { color: "#7B6550" }]}>
+              Return Home
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              dispatch(
+                loadScreenWithData({
+                  containerId: "companion_dashboard",
+                  stateId: "day_active",
+                }) as any,
+              );
+              navigation.navigate("DynamicEngine" as any);
+            }}
+            activeOpacity={0.7}
+            style={wStyles.secondaryLinkRow}
+          >
+            <Text style={wStyles.secondaryLink}>Add Inner Path →</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </ImageBackground>
     </SafeAreaView>
   );
 
@@ -1683,26 +1748,74 @@ const wStyles = StyleSheet.create({
     alignSelf: "center",
   },
   pillTextActive: { color: "#fff" },
-  confirmList: { marginVertical: 24 },
-  confirmRow: {
+  confirmSparkleWrap: {
+    alignItems: "center",
+    marginTop: 28,
+    marginBottom: 22,
+  },
+  confirmSparkle: {
+    fontSize: 44,
+    lineHeight: 44,
+    color: "#D8A00E",
+  },
+  confirmHeading: {
+    textAlign: "center",
+    marginBottom: 12,
+  },
+  confirmSubheading: {
+    textAlign: "center",
+    marginBottom: 30,
+    paddingHorizontal: 24,
+  },
+  confirmList: { marginBottom: 26, gap: 14 },
+  confirmCard: {
+    borderWidth: 1.5,
+    borderColor: "rgba(201,168,76,0.22)",
+    borderRadius: 24,
+    backgroundColor: "rgba(255,251,244,0.95)",
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+    shadowColor: "#432104",
+    shadowOpacity: 0.05,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 1,
+  },
+  confirmCardRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 12,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "rgba(201,168,76,0.25)",
+    alignItems: "center",
+    gap: 12,
+  },
+  confirmCardBody: {
+    flex: 1,
   },
   confirmBand: {
-    fontFamily: Fonts.serif.bold,
-    fontSize: 15,
-    color: "#7B6550",
-    fontWeight: "600",
+    fontFamily: Fonts.sans.bold,
+    fontSize: 12,
+    color: "#D8A00E",
+    letterSpacing: 0.4,
+    marginBottom: 8,
   },
   confirmTitle: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 15,
+    fontSize: 18,
     color: "#432104",
-    flex: 1,
-    textAlign: "right",
+    lineHeight: 28,
+  },
+  confirmTypePill: {
+    backgroundColor: "#F5EFD8",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    minWidth: 104,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  confirmTypePillText: {
+    fontSize: 11,
+    color: "#8B6914",
+    letterSpacing: 2,
+    fontFamily: Fonts.sans.bold,
   },
   primaryBtn: {
     backgroundColor: "#C99317",

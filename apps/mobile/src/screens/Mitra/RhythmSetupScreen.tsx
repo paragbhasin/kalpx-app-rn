@@ -583,7 +583,7 @@ export default function RhythmSetupScreen({
               <Text style={wStyles.backText}>{"< Back"}</Text>
             </TouchableOpacity>
             {/* {renderStepDots("moments")} */}
-            <Text style={wStyles.heading}>Build Your Daily Rhythm</Text>
+            <Text style={wStyles.buildheading}>Build Your Daily Rhythm</Text>
             <Text style={wStyles.subheading}>
               When would you like Mitra to support you?
             </Text>
@@ -1281,6 +1281,14 @@ const wStyles = StyleSheet.create({
     fontWeight: "700",
     marginBottom: 8,
     textAlign: "left",
+  },
+  buildheading: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 22,
+    color: "#432104",
+    fontWeight: "700",
+    marginBottom: 8,
+    textAlign: "center",
   },
   subheading: {
     fontSize: 14,

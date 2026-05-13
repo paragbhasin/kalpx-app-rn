@@ -204,7 +204,9 @@ export function StepModal({
           {kind === "text_input" && (
             <TextInputBody stepPayload={stepPayload} onDone={onDone} />
           )}
-          {kind === "grounding" && <GroundingBody onDone={onDone} />}
+          {kind === "grounding" && (
+            <GroundingBody onDone={onDone} isScreen={isScreen} />
+          )}
           {kind === "voice_note" && <VoiceNoteBody onDone={onDone} />}
           {kind === "reach_out" && <ReachOutBody onDone={onDone} />}
           {kind === "unknown" && <UnknownBody onDone={onDone} />}
@@ -762,8 +764,10 @@ function TextInputBody({ stepPayload, onDone }: TextInputBodyProps) {
 
 function GroundingBody({
   onDone,
+  isScreen = false,
 }: {
   onDone: (extra: StepModalResult) => void;
+  isScreen?: boolean;
 }) {
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<string[]>(["", "", "", "", ""]);
@@ -791,47 +795,74 @@ function GroundingBody({
   };
 
   return (
-    <div style={{ paddingTop: 8 }}>
+    <div style={{ paddingTop: isScreen ? 8 : 8 }}>
       <p
         data-testid="step-modal-grounding-progress"
         style={{
-          fontSize: 12,
+          fontSize: isScreen ? 14 : 12,
           color: "#8E8E93",
           textAlign: "center",
-          marginBottom: 8,
+          marginBottom: isScreen ? 18 : 8,
         }}
       >
         {index + 1} of {GROUNDING_PROMPTS.length}
       </p>
       <p
         style={{
-          fontSize: 16,
-          color: "#3C3C43",
-          marginBottom: 16,
-          lineHeight: 1.4,
+          fontSize: isScreen ? 18 : 16,
+          color: "#432104",
+          marginBottom: isScreen ? 24 : 16,
+          lineHeight: isScreen ? 1.6 : 1.4,
+          textAlign: isScreen ? "center" : "left",
+          maxWidth: isScreen ? 560 : undefined,
+          marginInline: isScreen ? "auto" : undefined,
+          textWrap: isScreen ? "balance" : undefined,
         }}
       >
         {prompt}
       </p>
-      <textarea
-        value={current}
-        onChange={(e) => setCurrent(e.target.value)}
-        placeholder="Type what you feel.."
-        data-testid="step-modal-grounding-input"
-        maxLength={MAX_TEXT}
-        style={{
-          width: "100%",
-          minHeight: 120,
-          border: "1px solid #D8D8D8",
-          borderRadius: 12,
-          padding: 12,
-          fontSize: 15,
-          color: "#1C1C1E",
-          background: "rgba(255,255,255,0.5)",
-          resize: "vertical",
-          boxSizing: "border-box",
-        }}
-      />
+      <div style={{ position: "relative", marginBottom: isScreen ? 18 : 0 }}>
+        <textarea
+          value={current}
+          onChange={(e) => setCurrent(e.target.value)}
+          placeholder="Type what you feel.."
+          data-testid="step-modal-grounding-input"
+          maxLength={MAX_TEXT}
+          style={{
+            width: "100%",
+            minHeight: isScreen ? 210 : 120,
+            border: isScreen
+              ? "1px solid rgba(214, 183, 130, 0.7)"
+              : "1px solid #D8D8D8",
+            borderRadius: isScreen ? 28 : 12,
+            padding: isScreen ? "24px 24px 42px" : 12,
+            fontSize: isScreen ? 16 : 15,
+            color: "#1C1C1E",
+            background: isScreen
+              ? "rgba(255,255,255,0.56)"
+              : "rgba(255,255,255,0.5)",
+            resize: isScreen ? "none" : "vertical",
+            boxSizing: "border-box",
+            lineHeight: 1.6,
+            outline: "none",
+          }}
+        />
+        {isScreen && (
+          <p
+            style={{
+              position: "absolute",
+              right: 18,
+              bottom: 14,
+              fontSize: 12,
+              color: "#8E8E93",
+              margin: 0,
+              pointerEvents: "none",
+            }}
+          >
+            {current.length} / {MAX_TEXT}
+          </p>
+        )}
+      </div>
       <button
         data-testid={
           isLast ? "step-modal-grounding-done" : "step-modal-grounding-next"
@@ -840,16 +871,21 @@ function GroundingBody({
         onClick={handleNext}
         style={{
           width: "100%",
-          height: 40,
+          padding: "10px",
           marginTop: 16,
-          borderRadius: 28,
-          border: "0.3px solid #9f9f9f",
-          background: "#FBF5F5",
-          fontSize: 17,
+          borderRadius: 999,
+          border: isScreen
+            ? "1px solid rgba(212, 183, 132, 0.28)"
+            : "0.3px solid #9f9f9f",
+          background: "linear-gradient(180deg, #6D3A10 0%, #4D2408 100%)",
+          fontSize: isScreen ? 18 : 17,
           fontWeight: 600,
-          color: "#432104",
+          color: isScreen ? "#FFF8EF" : "#432104",
           cursor: enabled ? "pointer" : "default",
-          opacity: enabled ? 1 : 0.35,
+          opacity: enabled ? 1 : 0.45,
+          boxShadow: isScreen
+            ? "0 14px 30px rgba(140, 103, 63, 0.16)"
+            : undefined,
         }}
       >
         {isLast ? "Done" : "Next"}

@@ -6778,6 +6778,15 @@ export const WelcomeOnboardingContainer = {
         },
       ],
     },
+    entry_intention: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "mitra_intention",
+          id: "entry_intention",
+        },
+      ],
+    },
 
     // Stage 0 — path selection (support vs growth)
     turn_2: {

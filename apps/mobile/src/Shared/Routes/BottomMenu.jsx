@@ -1,4 +1,5 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { LinearGradient } from "expo-linear-gradient";
 import {
   DrawerActions,
   getFocusedRouteNameFromRoute,
@@ -70,7 +71,12 @@ const BottomMenuContent = () => {
             },
             tabBarBackground: () =>
               shouldUseTransparentTabBar ? (
-                <View style={styles.transparentTabBarBackground} />
+                <View style={styles.transparentTabBarBackground}>
+                  <LinearGradient
+                    colors={["rgba(249, 242, 231, 0)", "rgba(249, 242, 231, 0.92)"]}
+                    style={styles.transparentTabBarFade}
+                  />
+                </View>
               ) : null,
             tabBarActiveTintColor: "#8d5524",
             tabBarInactiveTintColor: "#000",
@@ -163,6 +169,13 @@ const styles = StyleSheet.create({
   transparentTabBarBackground: {
     flex: 1,
     backgroundColor: "transparent",
+  },
+  transparentTabBarFade: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: -56,
+    bottom: 0,
   },
 });
 

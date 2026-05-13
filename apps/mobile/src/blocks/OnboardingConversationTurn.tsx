@@ -595,9 +595,24 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
               <TouchableOpacity
                 key={chip.id}
                 activeOpacity={0.75}
-                onPress={() =>
-                  fire({ chip_id: chip.id, response_type: "chip" })
-                }
+                onPress={() => {
+                  if (isYesLetsBegin) {
+                    const { screenActions } = require("../store/screenSlice");
+                    const { store } = require("../store");
+                    store.dispatch(
+                      screenActions.setScreenValue({
+                        key: "onboarding_turn",
+                        value: "entry_intention",
+                      }),
+                    );
+                    loadScreen({
+                      container_id: "welcome_onboarding",
+                      state_id: "entry_intention",
+                    });
+                    return;
+                  }
+                  fire({ chip_id: chip.id, response_type: "chip" });
+                }}
                 testID={stableTestID || chipTestID}
                 accessibilityLabel={stableTestID || chipTestID}
               >

@@ -82,6 +82,7 @@ import GuidanceModePicker from '../blocks/GuidanceModePicker';
 import FirstRecognitionBlock from '../blocks/FirstRecognitionBlock';
 import PathEmergesBlock from '../blocks/PathEmergesBlock';
 import OnboardingIntroHero from '../blocks/OnboardingIntroHero';
+import MitraIntentionBlock from '../blocks/MitraIntentionBlock';
 
 // Week 2 — Day Active Dashboard (Mitra v3 Moments 8-15, 40, 41, 43)
 import MorningBriefingBlock from '../blocks/MorningBriefingBlock';
@@ -209,6 +210,7 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   activity_stats: ActivityStatsBlock,
   // Week 1 — Welcome Onboarding
   onboarding_conversation_turn: OnboardingConversationTurn,
+  mitra_intention: MitraIntentionBlock,
   voice_text_fork: VoiceTextForkBlock,
   guidance_mode_picker: GuidanceModePicker,
   first_recognition: FirstRecognitionBlock,

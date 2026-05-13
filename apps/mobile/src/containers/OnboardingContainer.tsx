@@ -26,6 +26,7 @@ import React, { useEffect } from "react";
 import {
   BackHandler,
   InteractionManager,
+  View,
   ScrollView,
   StyleSheet,
 } from "react-native";
@@ -53,11 +54,13 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
         ? Number((_rawTurn.match(/\d+/) || ["1"])[0])
         : 1;
   const activeStateId = schema?.state_id || currentStateId || "";
+  const isEntryIntentionState = activeStateId === "entry_intention";
   const isIntroState =
-    activeStateId === "turn_1" ||
+    !isEntryIntentionState &&
+    (activeStateId === "turn_1" ||
     activeStateId === "turn_2" ||
     turn === 1 ||
-    turn === 2;
+    turn === 2);
   const backgroundSource = isIntroState
     ? require("../../assets/new_home.png")
     : require("../../assets/beige_bg.png");
@@ -136,6 +139,16 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
     // Remove standalone headline/subtext/recognition — they're now owned by the turn card.
     .filter((b: any) => b.type !== "headline" && b.type !== "subtext" && b.type !== "first_recognition");
 
+  if (isEntryIntentionState) {
+    return (
+      <View style={styles.fullScreen}>
+        {enrichedBlocks.map((b: any, i: number) => (
+          <BlockRenderer key={b.id || `entry-${i}`} block={b} />
+        ))}
+      </View>
+    );
+  }
+
   return (
     <ScrollView
       style={styles.scroll}
@@ -155,6 +168,7 @@ const styles = StyleSheet.create({
   // Cream background, not dark immersive — onboarding is welcoming, not practice-mode.
   scroll: { flex: 1 },
   content: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 32 },
+  fullScreen: { flex: 1 },
 });
 
 export default OnboardingContainer;

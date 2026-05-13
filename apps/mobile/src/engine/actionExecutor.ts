@@ -3238,6 +3238,8 @@ export async function executeAction(
               return; // Do not proceed to turn_2
             }
             if (p.freeform_text) draft.intro_freeform = p.freeform_text;
+            nextStateId = "entry_intention";
+          } else if (currentStateId === "entry_intention") {
             nextStateId = "turn_2";
           } else if (currentStateId === "turn_2") {
             // Stage 0 — path pick

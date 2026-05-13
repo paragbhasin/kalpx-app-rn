@@ -222,13 +222,14 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
               width: "100%",
               borderRadius: 28,
               border: `1px solid ${theme.border}`,
-              background: theme.bg,
-              padding: "22px 18px",
+
+              padding: "15px",
               marginBottom: 16,
               display: "flex",
               alignItems: "center",
               gap: 0,
-              boxShadow: "0 8px 18px rgba(179, 140, 54, 0.05)",
+              boxShadow:
+                "0 16px 30px rgba(166,125,54,0.08), inset 0 0 0 1px rgba(255,255,255,0.32)",
               cursor: "pointer",
               textAlign: "left",
             }}
@@ -240,7 +241,7 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
                 height: 42,
                 borderRadius: "50%",
                 border: `1px solid ${theme.accent}30`,
-                background: "rgba(255,255,255,0.58)",
+                background: "rgba(255,255,255,0.78)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -248,6 +249,8 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
                 color: theme.accent,
                 flexShrink: 0,
                 marginRight: 16,
+                boxShadow:
+                  "0 12px 28px rgba(176,139,70,0.14), inset 0 -8px 18px rgba(246,236,217,0.7)",
               }}
             >
               {ICONS[card.kind]}
@@ -272,11 +275,11 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
                 style={{
                   fontFamily: "var(--kalpx-font-serif)",
                   fontWeight: 700,
-                  fontSize: "clamp(18px, 4.8vw, 20px)",
-                  lineHeight: 1.4,
+                  fontSize: "clamp(16px, 4.8vw, 26px)",
+                  lineHeight: 1.28,
                   color: "var(--kalpx-text)",
-                  marginBottom: 4,
-                  margin: "0 0 4px",
+                  marginBottom: 8,
+                  margin: "0 0 8px",
                   textWrap: "balance",
                 }}
               >
@@ -333,11 +336,24 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
             marginBottom: 18,
             borderRadius: 28,
             border: "1px solid rgba(226, 208, 174, 0.9)",
-            background: "rgba(255, 252, 246, 0.92)",
-            boxShadow: "0 8px 18px rgba(179, 140, 54, 0.05)",
+            background:
+              "linear-gradient(180deg, rgba(255,251,245,0.98) 0%, rgba(255,247,235,0.94) 48%, rgba(252,242,226,0.96) 100%)",
+            boxShadow:
+              "0 18px 40px rgba(139, 106, 42, 0.08), inset 0 1px 0 rgba(255,255,255,0.85)",
             overflow: "hidden",
+            position: "relative",
           }}
         >
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              inset: 0,
+              background:
+                "radial-gradient(circle at top right, rgba(243,224,188,0.45), transparent 30%), radial-gradient(circle at bottom left, rgba(214,188,134,0.22), transparent 32%)",
+              pointerEvents: "none",
+            }}
+          />
           <button
             type="button"
             onClick={() => {
@@ -353,12 +369,14 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
               width: "100%",
               background: "none",
               border: "none",
-              padding: "18px 20px",
+              padding: "13px",
               display: "flex",
               alignItems: "center",
               gap: 14,
               cursor: "pointer",
               textAlign: "left",
+              position: "relative",
+              zIndex: 1,
             }}
           >
             <div
@@ -411,7 +429,68 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
           </button>
 
           {whyOpen && (
-            <div style={{ padding: "0 20px 22px" }}>
+            <div
+              style={{
+                padding: "0 20px 22px",
+                position: "relative",
+                zIndex: 1,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  marginBottom: 18,
+                }}
+              >
+                {/* <div
+                  style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: "50%",
+                    background:
+                      "linear-gradient(180deg, rgba(255,247,228,0.95), rgba(247,231,194,0.95))",
+                    border: "1px solid rgba(214,183,130,0.55)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow:
+                      "0 8px 22px rgba(179,135,34,0.12), inset 0 1px 0 rgba(255,255,255,0.8)",
+                  }}
+                >
+                  <img
+                    src="/lotus_icon.png"
+                    alt=""
+                    style={{ width: 18, height: 14, opacity: 0.82 }}
+                  />
+                </div> */}
+                <div>
+                  <p
+                    style={{
+                      margin: "0 0 3px",
+                      fontSize: 11,
+                      letterSpacing: 1.6,
+                      textTransform: "uppercase",
+                      color: "#B38722",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Chosen with care
+                  </p>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontFamily: "var(--kalpx-font-serif)",
+                      fontSize: 18,
+                      lineHeight: 1.2,
+                      color: "#432104",
+                    }}
+                  >
+                    Why this supports today
+                  </p>
+                </div>
+              </div>
               <div
                 style={{
                   display: "flex",
@@ -431,17 +510,24 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
                         borderRadius: 999,
                         border: selected
                           ? `1px solid ${THEME[tab.kind].accent}`
-                          : "1px solid rgba(214,183,130,0.4)",
+                          : "1px solid rgba(214,183,130,0.42)",
                         background: selected
-                          ? THEME[tab.kind].bg
+                          ? tab.kind === "mantra"
+                            ? "linear-gradient(180deg, rgba(246,251,243,1) 0%, rgba(239,247,236,0.98) 100%)"
+                            : tab.kind === "sankalp"
+                              ? "linear-gradient(180deg, rgba(250,247,255,1) 0%, rgba(245,240,253,0.98) 100%)"
+                              : "linear-gradient(180deg, rgba(255,252,246,1) 0%, rgba(255,247,235,0.98) 100%)"
                           : "rgba(255,255,255,0.7)",
                         color: selected ? THEME[tab.kind].accent : "#7A6A58",
-                        padding: "8px 14px",
-                        fontSize: 12,
+                        padding: "8px 15px",
+                        fontSize: 11,
                         fontWeight: 700,
-                        letterSpacing: 1,
+                        letterSpacing: 0.9,
                         textTransform: "uppercase",
                         cursor: "pointer",
+                        boxShadow: selected
+                          ? "0 10px 20px rgba(179,135,34,0.12)"
+                          : "none",
                       }}
                     >
                       {tab.kind === "sankalp"
@@ -457,17 +543,35 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
               <div
                 style={{
                   borderTop: "1px solid rgba(214,183,130,0.28)",
-                  paddingTop: 18,
+                  paddingTop: 20,
                   color: "var(--kalpx-text)",
                 }}
               >
                 <p
                   style={{
-                    fontFamily: "var(--kalpx-font-serif)",
-                    fontSize: 22,
+                    margin: "0 0 8px",
+                    fontFamily: "var(--kalpx-font-sans)",
+                    fontSize: 11,
                     fontWeight: 700,
-                    margin: "0 0 14px",
-                    lineHeight: 1.35,
+                    letterSpacing: 1,
+                    textTransform: "uppercase",
+                    color: THEME[activeWhyTab].accent,
+                  }}
+                >
+                  {activeWhyTab === "sankalp"
+                    ? "Sankalp"
+                    : activeWhyTab === "mantra"
+                      ? "Mantra"
+                      : "Practice"}
+                </p>
+                <p
+                  style={{
+                    fontFamily: "var(--kalpx-font-serif)",
+                    fontSize: 18,
+                    fontWeight: 700,
+                    margin: "0 0 18px",
+                    lineHeight: 1.18,
+                    color: "#432104",
                   }}
                 >
                   {activeWhyTab === "sankalp"
@@ -478,79 +582,196 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
                 {activeWhyTab === "sankalp" ? (
                   <>
                     {!!activeWhyContext.mitra_frame_through && (
-                      <p
+                      <div
                         style={{
                           margin: "0 0 14px",
-                          fontSize: 15,
+                          padding: "14px 16px",
+                          borderRadius: 18,
+                          background:
+                            "linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,248,237,0.88))",
+                          border: "1px solid rgba(230, 214, 186, 0.9)",
+                        }}
+                      >
+                        <p
+                          style={{
+                            margin: "0 0 6px",
+                            fontSize: 11,
+                            letterSpacing: 1.4,
+                            textTransform: "uppercase",
+                            color: "#A57A2B",
+                            fontWeight: 700,
+                          }}
+                        >
+                          Essence
+                        </p>
+                        <p
+                          style={{
+                            margin: 0,
+                            fontSize: 16,
+                            lineHeight: 1.75,
+                            color: "#5D5348",
+                          }}
+                        >
+                          {sentence(
+                            `This is ${activeWhyContext.mitra_frame_through}`,
+                          )}
+                        </p>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  !!activeWhyContext.mitra_frame_through && (
+                    <div
+                      style={{
+                        margin: "0 0 14px",
+                        padding: "14px 16px",
+                        borderRadius: 18,
+                        background:
+                          "linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,248,237,0.88))",
+                        border: "1px solid rgba(230, 214, 186, 0.9)",
+                      }}
+                    >
+                      <p
+                        style={{
+                          margin: "0 0 6px",
+                          fontSize: 11,
+                          letterSpacing: 1.4,
+                          textTransform: "uppercase",
+                          color: "#A57A2B",
+                          fontWeight: 700,
+                        }}
+                      >
+                        Essence
+                      </p>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: 16,
                           lineHeight: 1.75,
                           color: "#5D5348",
                         }}
                       >
                         {sentence(
-                          `This is ${activeWhyContext.mitra_frame_through}`,
+                          `${activeWhyItem.title || "This"} is ${activeWhyContext.mitra_frame_through}`,
                         )}
                       </p>
-                    )}
-                  </>
-                ) : (
-                  !!activeWhyContext.mitra_frame_through && (
+                    </div>
+                  )
+                )}
+
+                {!!activeShift && (
+                  <div
+                    style={{
+                      margin: "0 0 14px",
+                      padding: "14px 16px",
+                      borderRadius: 18,
+                      background:
+                        "linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,248,237,0.88))",
+                      border: "1px solid rgba(230, 214, 186, 0.9)",
+                    }}
+                  >
                     <p
                       style={{
-                        margin: "0 0 14px",
-                        fontSize: 15,
+                        margin: "0 0 6px",
+                        fontSize: 11,
+                        letterSpacing: 1.4,
+                        textTransform: "uppercase",
+                        color: "#A57A2B",
+                        fontWeight: 700,
+                      }}
+                    >
+                      Shift
+                    </p>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: 16,
                         lineHeight: 1.75,
                         color: "#5D5348",
                       }}
                     >
                       {sentence(
-                        `${activeWhyItem.title || "This"} is ${activeWhyContext.mitra_frame_through}`,
+                        `Mitra chose this to guide you from ${activeShift}`,
                       )}
                     </p>
-                  )
+                  </div>
                 )}
 
-                {!!activeShift && (
-                  <p
-                    style={{
-                      margin: "0 0 14px",
-                      fontSize: 15,
-                      lineHeight: 1.75,
-                      color: "#5D5348",
-                    }}
-                  >
-                    {sentence(
-                      `Mitra chose this to guide you from ${activeShift}`,
-                    )}
-                  </p>
-                )}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                    gap: 12,
+                  }}
+                >
+                  {!!activeWhyContext.mitra_use_for && (
+                    <div
+                      style={{
+                        padding: "14px 16px",
+                        borderRadius: 18,
+                        background: "rgba(255,255,255,0.64)",
+                        border: "1px solid rgba(230, 214, 186, 0.86)",
+                      }}
+                    >
+                      <p
+                        style={{
+                          margin: "0 0 8px",
+                          fontSize: 11,
+                          letterSpacing: 1.4,
+                          textTransform: "uppercase",
+                          color: "#A57A2B",
+                          fontWeight: 700,
+                        }}
+                      >
+                        Useful for
+                      </p>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: 15,
+                          lineHeight: 1.7,
+                          color: "#5D5348",
+                        }}
+                      >
+                        {sentence(activeWhyContext.mitra_use_for)}
+                      </p>
+                    </div>
+                  )}
 
-                {!!activeWhyContext.mitra_use_for && (
-                  <p
-                    style={{
-                      margin: "0 0 14px",
-                      fontSize: 15,
-                      lineHeight: 1.75,
-                      color: "#5D5348",
-                    }}
-                  >
-                    <strong>It is useful for:</strong>{" "}
-                    {sentence(activeWhyContext.mitra_use_for)}
-                  </p>
-                )}
-
-                {!!activeWhyContext.commentary_lineage && (
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: 15,
-                      lineHeight: 1.75,
-                      color: "#5D5348",
-                    }}
-                  >
-                    <strong>It is rooted in:</strong>{" "}
-                    {sentence(activeWhyContext.commentary_lineage)}
-                  </p>
-                )}
+                  {!!activeWhyContext.commentary_lineage && (
+                    <div
+                      style={{
+                        padding: "14px 16px",
+                        borderRadius: 18,
+                        background: "rgba(255,255,255,0.64)",
+                        border: "1px solid rgba(230, 214, 186, 0.86)",
+                      }}
+                    >
+                      <p
+                        style={{
+                          margin: "0 0 8px",
+                          fontSize: 11,
+                          letterSpacing: 1.4,
+                          textTransform: "uppercase",
+                          color: "#A57A2B",
+                          fontWeight: 700,
+                        }}
+                      >
+                        Rooted in
+                      </p>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: 15,
+                          lineHeight: 1.7,
+                          color: "#5D5348",
+                        }}
+                      >
+                        {sentence(activeWhyContext.commentary_lineage)}
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}

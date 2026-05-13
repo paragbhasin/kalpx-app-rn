@@ -464,6 +464,79 @@ export function RoomGuidedSection({
     );
   }
 
+  if (inquiryModalVisible) {
+    return (
+      <InquiryModal
+        visible={inquiryModalVisible}
+        presentation="screen"
+        label={activeAction?.label || "Inquiry"}
+        inquiryPayload={activeAction?.inquiry_payload}
+        onCancel={() => {
+          setInquiryModalVisible(false);
+          setActiveAction(null);
+        }}
+        onOpened={() =>
+          activeAction &&
+          onAction?.({
+            type: "room_inquiry_opened",
+            payload: {
+              room_id: roomId,
+              action_id: activeAction.action_id,
+              analytics_key: activeAction.analytics_key,
+            },
+          })
+        }
+        onCategorySelected={(cat) =>
+          activeAction &&
+          onAction?.({
+            type: "room_inquiry_category_selected",
+            payload: {
+              room_id: roomId,
+              action_id: activeAction.action_id,
+              category_id: cat.id,
+            },
+          })
+        }
+        onLaunchPractice={(_cat, templateId) => {
+          setInquiryModalVisible(false);
+          setActiveStepPayload({ template_id: templateId });
+          setStepModalVisible(true);
+        }}
+        onSubmitJournal={(cat, text) => {
+          const action = activeAction;
+          setInquiryModalVisible(false);
+          setActiveAction(null);
+          if (!action) return;
+          postRoomSacred(roomId, {
+            writes_event: "inquiry_journal",
+            label: action.label,
+            action_id: action.action_id,
+            analytics_key: action.analytics_key ?? null,
+            captured_at: Date.now(),
+            text,
+            life_context: screenData?.room_life_context ?? null,
+            journey_id: screenData?.journey_id ?? null,
+            day_number: screenData?.day_number ?? null,
+            source_surface: "inquiry_pill",
+          });
+          onAction?.({
+            type: "room_step_completed",
+            payload: {
+              room_id: roomId,
+              action_id: action.action_id,
+              analytics_key: action.analytics_key,
+              template_id: "step_journal_inquiry",
+              text,
+              category_id: cat.id,
+              source: "inquiry",
+            },
+          });
+          maybeAdvanceToNextAction(action.action_id);
+        }}
+      />
+    );
+  }
+
   return (
     <div
       style={{
@@ -956,73 +1029,6 @@ export function RoomGuidedSection({
         </div>
       )}
 
-      <InquiryModal
-        visible={inquiryModalVisible}
-        label={activeAction?.label || "Inquiry"}
-        inquiryPayload={activeAction?.inquiry_payload}
-        onCancel={() => {
-          setInquiryModalVisible(false);
-          setActiveAction(null);
-        }}
-        onOpened={() =>
-          activeAction &&
-          onAction?.({
-            type: "room_inquiry_opened",
-            payload: {
-              room_id: roomId,
-              action_id: activeAction.action_id,
-              analytics_key: activeAction.analytics_key,
-            },
-          })
-        }
-        onCategorySelected={(cat) =>
-          activeAction &&
-          onAction?.({
-            type: "room_inquiry_category_selected",
-            payload: {
-              room_id: roomId,
-              action_id: activeAction.action_id,
-              category_id: cat.id,
-            },
-          })
-        }
-        onLaunchPractice={(_cat, templateId) => {
-          setInquiryModalVisible(false);
-          setActiveStepPayload({ template_id: templateId });
-          setStepModalVisible(true);
-        }}
-        onSubmitJournal={(cat, text) => {
-          const action = activeAction;
-          setInquiryModalVisible(false);
-          setActiveAction(null);
-          if (!action) return;
-          postRoomSacred(roomId, {
-            writes_event: "inquiry_journal",
-            label: action.label,
-            action_id: action.action_id,
-            analytics_key: action.analytics_key ?? null,
-            captured_at: Date.now(),
-            text,
-            life_context: screenData?.room_life_context ?? null,
-            journey_id: screenData?.journey_id ?? null,
-            day_number: screenData?.day_number ?? null,
-            source_surface: "inquiry_pill",
-          });
-          onAction?.({
-            type: "room_step_completed",
-            payload: {
-              room_id: roomId,
-              action_id: action.action_id,
-              analytics_key: action.analytics_key,
-              template_id: "step_journal_inquiry",
-              text,
-              category_id: cat.id,
-              source: "inquiry",
-            },
-          });
-          maybeAdvanceToNextAction(action.action_id);
-        }}
-      />
     </div>
   );
 }

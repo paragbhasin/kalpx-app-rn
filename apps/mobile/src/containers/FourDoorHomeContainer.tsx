@@ -129,6 +129,7 @@ export default function FourDoorHomeContainer({
   const navigation = useNavigation<any>();
   const loadScreen = useScreenStore((state) => state.loadScreen);
   const updateScreenData = useScreenStore((state) => state.updateScreenData);
+  const setCurrentScreen = useScreenStore((state) => state.setCurrentScreen);
   const screenData = useScreenStore((state) => state.screenData);
   const homeData = useSelector((state: any) => state.door?.homeData);
   const hasSkippedInitialFocusRefresh = useRef(false);
@@ -223,6 +224,19 @@ export default function FourDoorHomeContainer({
     await postPranaAcknowledgeDismiss();
     await loadHome(true);
   }, [loadHome]);
+
+  const openQuickResetSurface = useCallback(async () => {
+    updateScreenData("dashboard_entry_surface", "quick_reset");
+    await loadScreen({
+      container_id: "quick_reset",
+      state_id: "opening",
+    });
+    setCurrentScreen({ blocks: [], overlay: false });
+    const routeName = navigation.getState?.()?.routes?.slice(-1)?.[0]?.name;
+    if (routeName !== "DynamicEngine") {
+      navigation.navigate("DynamicEngine" as any);
+    }
+  }, [loadScreen, navigation, setCurrentScreen, updateScreenData]);
 
   const rhythmBand = getRhythmTimeBand();
   const seg = (homeData?.user_surface_state?.segment ??
@@ -444,7 +458,7 @@ export default function FourDoorHomeContainer({
             Icon={Mp2Icon}
             label={DOOR_LABELS.quick_reset}
             subtitle={quickResetSubtitle}
-            onPress={() => navigation.navigate("QuickReset" as any)}
+            onPress={() => void openQuickResetSurface()}
           />
           <DoorCard
             Icon={Mp4Icon}
@@ -487,7 +501,7 @@ export default function FourDoorHomeContainer({
                     )}
                     <TouchableOpacity
                       activeOpacity={0.82}
-                      onPress={() => navigation.navigate("QuickReset" as any)}
+                      onPress={() => void openQuickResetSurface()}
                       style={styles.suggestionButton}
                     >
                       <Text style={styles.suggestionButtonText}>

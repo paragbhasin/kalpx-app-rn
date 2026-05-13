@@ -1,107 +1,348 @@
-/**
- * QuickCheckinScreen — One-tap Jagruti / Guna-awareness moment.
- *
- * Chips: Agitated / Drained / Steady / Open (locked QC-A labels).
- * Calls prana-acknowledge, then navigates home so active_checkin_window
- * in the home response shows the state-aware acknowledgment.
- */
-
-import React, { useState } from 'react';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { isValidRoomId } from '@kalpx/contracts';
+import type {
+  QuickCheckinEnergyState,
+  QuickCheckinResponse,
+} from '@kalpx/types';
+import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
+  ImageBackground,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import type { QuickCheckinEnergyState } from '@kalpx/types';
-import { mitraPranaAcknowledge } from '../../engine/mitraApi';
+import { useDispatch } from 'react-redux';
+import { executeAction } from '../../engine/actionExecutor';
+import { postQuickCheckin } from '../../engine/mitraApi';
+import { useScreenStore } from '../../engine/useScreenBridge';
 import { Fonts } from '../../theme/fonts';
 
-interface EnergyOption {
-  value: QuickCheckinEnergyState;
+const BEIGE_BG = require('../../../assets/beige_bg.png');
+const LEAF_ART = require('../../../assets/leaves-bird.png');
+
+const DOOR_ROUTES: Record<string, string> = {
+  my_rhythm: 'RhythmHome',
+  inner_path: 'InnerPath',
+  quick_reset: 'QuickReset',
+  tell_mitra: 'TellMitra',
+};
+
+const ROOM_CTA_LABELS: Record<string, string> = {
+  room_stillness: 'Go to Find Calm',
+  room_release: 'Set It Down',
+  room_joy: "Notice What's Good",
+  room_growth: 'Take the Next Step',
+  room_clarity: 'Go to Find Clarity',
+  room_connection: 'Open Connection',
+};
+
+const DOOR_CTA_LABELS: Record<string, string> = {
+  my_rhythm: 'Go to My Rhythm',
+  inner_path: 'Continue Your Path',
+  quick_reset: 'Quick Reset',
+  tell_mitra: 'Tell Mitra more',
+};
+
+const ENERGY_OPTIONS: {
   label: string;
+  value: QuickCheckinEnergyState;
+  desc: string;
+  icon: React.ReactNode;
+}[] = [
+  {
+    label: 'Energized',
+    value: 'energized',
+    desc: 'Ready and moving',
+    icon: <Ionicons name="sunny-outline" size={30} color="#D4A017" />,
+  },
+  {
+    label: 'Balanced',
+    value: 'balanced',
+    desc: 'Steady and clear',
+    icon: (
+      <MaterialCommunityIcons
+        name="flower-outline"
+        size={30}
+        color="#D4A017"
+      />
+    ),
+  },
+  {
+    label: 'Agitated',
+    value: 'agitated',
+    desc: 'Restless or tense',
+    icon: <Ionicons name="flash-outline" size={30} color="#D4A017" />,
+  },
+  {
+    label: 'Drained',
+    value: 'drained',
+    desc: 'Low or heavy',
+    icon: <Ionicons name="rainy-outline" size={30} color="#D4A017" />,
+  },
+];
+
+function getSuggestedRoomLabel(result: QuickCheckinResponse): string | null {
+  return (
+    (result as any).suggested_room_label ??
+    (result as any).room_label ??
+    null
+  );
 }
 
-const ENERGY_OPTIONS: EnergyOption[] = [
-  { value: 'agitated', label: 'Agitated' },
-  { value: 'drained',  label: 'Drained'  },
-  { value: 'balanced', label: 'Steady'   },
-  { value: 'energized',label: 'Open'     },
-];
+function getSuggestedRoomDescription(result: QuickCheckinResponse): string | null {
+  return (
+    (result as any).suggested_room_description ??
+    (result as any).room_description ??
+    null
+  );
+}
 
 export default function QuickCheckinScreen() {
   const navigation = useNavigation<any>();
-  const [submitting, setSubmitting] = useState(false);
-  const [selected, setSelected] = useState<QuickCheckinEnergyState | null>(null);
-  const [errorMsg, setErrorMsg] = useState('');
+  const dispatch = useDispatch();
+  const screenData = useScreenStore((state) => state.screenData);
 
-  const handleProceed = async () => {
-    if (!selected || submitting) return;
-    setSubmitting(true);
-    setErrorMsg('');
-    try {
-      await mitraPranaAcknowledge({ prana_type: selected });
-      navigation.navigate('MitraHome' as any);
-    } catch {
-      setErrorMsg('Something went wrong. Please try again.');
-      setSubmitting(false);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<QuickCheckinResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<QuickCheckinEnergyState | null>(
+    null,
+  );
+
+  const ctaLabel = useMemo(() => {
+    if (!result) return 'Continue';
+    if (
+      result.suggested_action === 'navigate_to_room' &&
+      result.suggested_room_id
+    ) {
+      return ROOM_CTA_LABELS[result.suggested_room_id] ?? 'Go to Practice';
     }
-  };
+    if (
+      result.suggested_action === 'navigate_to_door' &&
+      result.suggested_door
+    ) {
+      return DOOR_CTA_LABELS[result.suggested_door] ?? 'Continue';
+    }
+    return 'Return Home';
+  }, [result]);
+
+  const handleProceed = useCallback(async () => {
+    if (!selected) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await postQuickCheckin(selected);
+      setResult(res);
+    } catch {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [selected]);
+
+  const handleCTA = useCallback(() => {
+    if (!result) return;
+    if (
+      result.suggested_action === 'navigate_to_room' &&
+      isValidRoomId(result.suggested_room_id)
+    ) {
+      void executeAction(
+        {
+          type: 'enter_room',
+          payload: {
+            room_id: result.suggested_room_id,
+            source: 'quick_checkin',
+          },
+        } as any,
+        {
+          dispatch,
+          screenData,
+          currentStateId: 'quick_checkin',
+        } as any,
+      );
+      return;
+    }
+
+    if (
+      result.suggested_action === 'navigate_to_door' &&
+      result.suggested_door
+    ) {
+      navigation.navigate(DOOR_ROUTES[result.suggested_door] ?? 'Home');
+      return;
+    }
+
+    navigation.navigate('Home');
+  }, [dispatch, navigation, result, screenData]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7}>
-          <Text style={styles.backBtnText}>{'< Back'}</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Check In</Text>
-        <View style={{ width: 50 }} />
-      </View>
-
-      <View style={styles.content}>
-        <Text style={styles.prompt}>How are you landing?</Text>
-
-        {submitting ? (
-          <ActivityIndicator size="large" color="#C99317" style={{ marginTop: 40 }} />
-        ) : (
-          <>
-            <View style={styles.chipRow}>
-              {ENERGY_OPTIONS.map((opt) => (
-                <TouchableOpacity
-                  key={opt.value}
-                  style={[
-                    styles.chip,
-                    selected === opt.value ? styles.chipSelected : styles.chipUnselected,
-                  ]}
-                  onPress={() => setSelected(opt.value)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={[
-                    styles.chipLabel,
-                    selected === opt.value && styles.chipLabelSelected,
-                  ]}>
-                    {opt.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+      <ImageBackground
+        source={BEIGE_BG}
+        style={styles.background}
+        imageStyle={styles.backgroundImage}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.shell}>
+            <Image
+              source={LEAF_ART}
+              style={styles.leafArt}
+              resizeMode="contain"
+            />
 
             <TouchableOpacity
-              style={[styles.ctaBtn, selected === null && { opacity: 0.4 }]}
-              onPress={handleProceed}
-              disabled={selected === null}
-              activeOpacity={0.8}
+              onPress={() => navigation.goBack()}
+              activeOpacity={0.7}
+              style={styles.backBtn}
             >
-              <Text style={styles.ctaBtnText}>Proceed →</Text>
+              <Ionicons name="arrow-back" size={20} color="#C99317" />
+              <Text style={styles.backBtnText}>Back</Text>
             </TouchableOpacity>
-          </>
-        )}
 
-        {!!errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
-      </View>
+            {!result ? (
+              <>
+                <View style={styles.introBlock}>
+                  <View style={styles.sparkleRow}>
+                    <View style={styles.sparkleLine} />
+                    <Ionicons name="sparkles-outline" size={22} color="#D4A017" />
+                    <View style={styles.sparkleLine} />
+                  </View>
+
+                  <Text style={styles.heading}>Quick Check-in</Text>
+                  <Text style={styles.subheading}>
+                    Share how you&apos;re feeling.{'\n'}
+                    Mitra will find a practice that fits.
+                  </Text>
+                </View>
+
+                {loading ? (
+                  <Text style={styles.loadingText}>Checking in…</Text>
+                ) : (
+                  <>
+                    <View style={styles.optionGrid}>
+                      {ENERGY_OPTIONS.map((opt) => {
+                        const active = selected === opt.value;
+                        return (
+                          <TouchableOpacity
+                            key={opt.value}
+                            onPress={() => setSelected(opt.value)}
+                            activeOpacity={0.85}
+                            style={[
+                              styles.optionCard,
+                              active && styles.optionCardActive,
+                            ]}
+                          >
+                            <View style={styles.optionIconWrap}>{opt.icon}</View>
+                            <Text style={styles.optionLabel}>{opt.label}</Text>
+                            <Text style={styles.optionDesc}>{opt.desc}</Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+
+                    <View style={styles.helperRow}>
+                      <Text style={styles.helperFlower}>❦</Text>
+                      <Text style={styles.helperText}>
+                        Select your energy to continue.
+                      </Text>
+                      <Text style={styles.helperFlower}>❦</Text>
+                    </View>
+
+                    <TouchableOpacity
+                      onPress={() => void handleProceed()}
+                      disabled={selected === null}
+                      activeOpacity={0.85}
+                      style={[
+                        styles.goldBtn,
+                        selected === null && styles.goldBtnDisabled,
+                      ]}
+                    >
+                      <Text style={styles.goldBtnText}>Proceed →</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+
+                {error ? <Text style={styles.errorText}>{error}</Text> : null}
+              </>
+            ) : (
+              <View style={styles.resultCard}>
+                <Text style={styles.resultTitle}>Mitra heard you.</Text>
+
+                <View style={styles.copyCard}>
+                  <Text style={styles.copyText}>{result.copy}</Text>
+                </View>
+
+                {getSuggestedRoomLabel(result) ? (
+                  <View style={styles.suggestedCard}>
+                    <Text style={styles.suggestedTitle}>
+                      {getSuggestedRoomLabel(result)}
+                    </Text>
+                    {getSuggestedRoomDescription(result) ? (
+                      <Text style={styles.suggestedDesc}>
+                        {getSuggestedRoomDescription(result)}
+                      </Text>
+                    ) : null}
+                  </View>
+                ) : null}
+
+                <TouchableOpacity
+                  onPress={handleCTA}
+                  activeOpacity={0.85}
+                  style={[styles.goldBtn, styles.resultPrimaryBtn]}
+                >
+                  <Text style={styles.goldBtnText}>{ctaLabel}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('TellMitra')}
+                  activeOpacity={0.8}
+                  style={styles.secondaryFullBtn}
+                >
+                  <Text style={styles.secondaryFullBtnText}>Tell Mitra more</Text>
+                </TouchableOpacity>
+
+                <View style={styles.resultGrid}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setResult(null);
+                      setSelected(null);
+                      setError(null);
+                    }}
+                    activeOpacity={0.8}
+                    style={styles.resultSmallBtn}
+                  >
+                    <Text style={styles.resultSmallBtnText}>Quick Check-in</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('QuickReset')}
+                    activeOpacity={0.8}
+                    style={styles.resultSmallBtn}
+                  >
+                    <Text style={styles.resultSmallBtnText}>Quick Reset</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Home')}
+                  activeOpacity={0.7}
+                  style={styles.returnHomeBtn}
+                >
+                  <Text style={styles.returnHomeText}>Return Home</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </ScrollView>
+      </ImageBackground>
     </SafeAreaView>
   );
 }
@@ -111,88 +352,278 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFF8EF',
   },
-  header: {
+  background: {
+    flex: 1,
+  },
+  backgroundImage: {
+    resizeMode: 'cover',
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 18,
+    paddingBottom: 108,
+  },
+  shell: {
+    width: '100%',
+    maxWidth: 420,
+    alignSelf: 'center',
+    position: 'relative',
+  },
+  leafArt: {
+    position: 'absolute',
+    top: -118,
+    right: -30,
+    width: 245,
+    height: 245,
+    opacity: 0.36,
+  },
+  backBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 12,
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#DAC28E',
+    gap: 8,
+    alignSelf: 'flex-start',
+    marginBottom: 26,
   },
   backBtnText: {
-    fontSize: 16,
     color: '#C99317',
+    fontSize: 15,
     fontFamily: Fonts.sans.medium,
   },
-  headerTitle: {
-    fontSize: 22,
-    fontFamily: Fonts.serif.bold,
-    color: '#432104',
-    fontWeight: '700',
+  introBlock: {
+    alignItems: 'center',
+    marginBottom: 34,
   },
-  content: {
-    flex: 1,
-    padding: 24,
+  sparkleRow: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 24,
+    gap: 14,
+    marginBottom: 20,
   },
-  prompt: {
-    fontSize: 24,
+  sparkleLine: {
+    width: 68,
+    height: 1,
+    backgroundColor: 'rgba(212,160,23,0.45)',
+  },
+  heading: {
     fontFamily: Fonts.serif.bold,
+    fontSize: 34,
     color: '#432104',
-    fontWeight: '700',
-    textAlign: 'center',
+    marginBottom: 12,
   },
-  chipRow: {
+  subheading: {
+    color: '#7B6550',
+    fontSize: 17,
+    lineHeight: 24,
+    textAlign: 'center',
+    fontFamily: Fonts.sans.regular,
+  },
+  loadingText: {
+    color: '#A08060',
+    textAlign: 'center',
+    fontSize: 15,
+    fontFamily: Fonts.sans.regular,
+  },
+  optionGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
-    justifyContent: 'center',
-    width: '100%',
+    justifyContent: 'space-between',
+    rowGap: 16,
+    marginBottom: 22,
   },
-  chip: {
-    borderRadius: 40,
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    alignItems: 'center',
-    minWidth: '44%',
-  },
-  chipSelected: {
-    backgroundColor: '#C99317',
-    borderWidth: 0,
-  },
-  chipUnselected: {
+  optionCard: {
+    width: '48%',
+    padding: 18,
+    borderRadius: 28,
     borderWidth: 1,
-    borderColor: '#DAC28E',
-    backgroundColor: '#FBF5F5',
+    borderColor: 'rgba(212,160,23,0.35)',
+    backgroundColor: 'rgba(255,255,255,0.86)',
+    alignItems: 'center',
+    shadowColor: '#C9A84C',
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 2,
   },
-  chipLabel: {
-    fontSize: 17,
-    fontFamily: Fonts.sans.semiBold,
+  optionCardActive: {
+    borderWidth: 1.6,
+    borderColor: '#D4A017',
+    backgroundColor: 'rgba(255,250,241,0.96)',
+    shadowOpacity: 0.12,
+    shadowRadius: 22,
+    elevation: 3,
+  },
+  optionIconWrap: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginBottom: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(246,234,208,0.72)',
+  },
+  optionLabel: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
     color: '#432104',
-  },
-  chipLabelSelected: {
-    color: '#fff',
-  },
-  errorText: {
-    fontSize: 14,
-    color: '#c0392b',
+    marginBottom: 6,
     textAlign: 'center',
   },
-  ctaBtn: {
-    backgroundColor: '#C99317',
-    borderRadius: 15,
-    paddingHorizontal: 36,
-    paddingVertical: 14,
-    alignItems: 'center',
-    width: '100%',
+  optionDesc: {
+    fontSize: 14,
+    color: '#7B6550',
+    lineHeight: 19,
+    textAlign: 'center',
+    fontFamily: Fonts.sans.regular,
   },
-  ctaBtnText: {
-    fontSize: 17,
-    fontFamily: Fonts.sans.semiBold,
+  helperRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    marginBottom: 20,
+  },
+  helperFlower: {
+    color: '#E2C37F',
+    fontSize: 14,
+  },
+  helperText: {
+    color: '#8B6A43',
+    fontSize: 14,
+    textAlign: 'center',
+    fontFamily: Fonts.sans.regular,
+  },
+  goldBtn: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 11,
+    backgroundColor: '#C99317',
+    alignItems: 'center',
+    shadowColor: '#C99317',
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 3,
+  },
+  goldBtnDisabled: {
+    opacity: 0.45,
+  },
+  goldBtnText: {
     color: '#fff',
+    fontFamily: Fonts.serif.bold,
+    fontSize: 19,
+  },
+  errorText: {
+    color: '#e06060',
+    marginTop: 14,
+    fontSize: 14,
+    textAlign: 'center',
+    fontFamily: Fonts.sans.regular,
+  },
+  resultCard: {
+    borderWidth: 1,
+    borderColor: 'rgba(225,197,136,0.45)',
+    borderRadius: 28,
+    backgroundColor: 'rgba(255,252,247,0.88)',
+    paddingHorizontal: 16,
+    paddingTop: 26,
+    paddingBottom: 20,
+    shadowColor: '#C9A84C',
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 3,
+  },
+  resultTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
+    color: '#C99317',
+    marginBottom: 18,
+  },
+  copyCard: {
+    backgroundColor: 'rgba(255,255,255,0.72)',
+    borderLeftWidth: 4,
+    borderLeftColor: 'rgba(212,160,23,0.45)',
+    borderRadius: 18,
+    paddingHorizontal: 18,
+    paddingVertical: 22,
+    marginBottom: 22,
+  },
+  copyText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
+    color: '#432104',
+    lineHeight: 30,
+    fontStyle: 'italic',
+  },
+  suggestedCard: {
+    borderWidth: 1,
+    borderColor: 'rgba(225,197,136,0.6)',
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,251,244,0.78)',
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    marginBottom: 22,
+  },
+  suggestedTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 17,
+    color: '#432104',
+    marginBottom: 8,
+  },
+  suggestedDesc: {
+    fontSize: 15,
+    color: '#7B6550',
+    lineHeight: 22,
+    fontFamily: Fonts.sans.regular,
+  },
+  resultPrimaryBtn: {
+    marginBottom: 16,
+  },
+  secondaryFullBtn: {
+    width: '100%',
+    paddingVertical: 16,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(225,197,136,0.65)',
+    backgroundColor: 'rgba(255,255,255,0.6)',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  secondaryFullBtnText: {
+    color: '#7B6550',
+    fontSize: 17,
+    fontFamily: Fonts.sans.regular,
+  },
+  resultGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 18,
+  },
+  resultSmallBtn: {
+    flex: 1,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(225,197,136,0.65)',
+    backgroundColor: 'rgba(255,255,255,0.6)',
+    alignItems: 'center',
+  },
+  resultSmallBtnText: {
+    color: '#7B6550',
+    fontSize: 16,
+    fontFamily: Fonts.sans.regular,
+    textAlign: 'center',
+  },
+  returnHomeBtn: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  returnHomeText: {
+    color: '#8B6A43',
+    fontSize: 16,
+    fontFamily: Fonts.sans.regular,
   },
 });

@@ -58,6 +58,7 @@ import LibrarySearchModal, {
 import { executeAction } from "../../engine/actionExecutor";
 import {
   mitraJourneyHomeV3,
+  mitraRhythmResolveItem,
   postRhythmSetup,
   postRhythmSuggest,
 } from "../../engine/mitraApi";
@@ -216,6 +217,12 @@ function itemTypeLabel(itemType: string): string {
   if (itemType === "practice") return "Practice";
   if (itemType === "reflection") return "Reflection";
   return "Library";
+}
+
+function beginLabel(itemType: string): string {
+  if (itemType === "mantra") return "Begin Chanting";
+  if (itemType === "sankalp") return "Begin Embodying";
+  return "Begin Practice";
 }
 
 function getConfirmationItems(
@@ -489,32 +496,62 @@ export default function RhythmSetupScreen({
     }
   };
 
-  const beginTodaysPractice = () => {
-    const hour = new Date().getHours();
-    const band: RhythmTimeBand =
-      hour < 12 ? "morning" : hour < 17 ? "afternoon" : "night";
-    const rhythm = homeData?.companion_rhythm;
-    const practiceItem = rhythm?.[band]?.items?.[0];
-    if (!practiceItem) {
-      openRhythmHome();
-      return;
-    }
-    void executeAction(
-      {
-        type: "start_runner",
-        payload: {
-          source: "rhythm_daily",
-          variant: practiceItem.item_type,
-          item: {
-            item_id: practiceItem.item_id,
-            title_snapshot: practiceItem.title_snapshot,
-            description_snapshot: practiceItem.description_snapshot ?? "",
-            item_type: practiceItem.item_type,
+  const beginRhythmItem = (
+    band: RhythmTimeBand,
+    item: {
+      item_id: string;
+      item_type: string;
+      title_snapshot: string;
+      description_snapshot?: string | null;
+    },
+  ) => {
+    void (async () => {
+      let enrichedItem: Record<string, unknown> = {
+        item_id: item.item_id,
+        title_snapshot: item.title_snapshot,
+        description_snapshot: item.description_snapshot ?? "",
+        item_type: item.item_type,
+      };
+
+      try {
+        const resolved = await mitraRhythmResolveItem(
+          band,
+          item.item_id,
+          item.item_type,
+        );
+        if (resolved?.resolved) {
+          enrichedItem = {
+            ...enrichedItem,
+            ...resolved,
+            title_snapshot:
+              item.title_snapshot ||
+              resolved.title ||
+              resolved.title_snapshot ||
+              "",
+            description_snapshot:
+              item.description_snapshot ||
+              resolved.description_snapshot ||
+              resolved.subtitle ||
+              "",
+          };
+        }
+      } catch (_) {
+        // fall back to snapshot item
+      }
+
+      void executeAction(
+        {
+          type: "start_runner",
+          payload: {
+            source: "rhythm_daily",
+            variant: item.item_type,
+            item: enrichedItem,
+            rhythm_slot: band,
           },
-        },
-      } as any,
-      buildActionContext() as any,
-    );
+        } as any,
+        buildActionContext() as any,
+      );
+    })();
   };
 
   // ── Accordion methods ─────────────────────────────────────────────────────────
@@ -1107,33 +1144,37 @@ export default function RhythmSetupScreen({
             ).map(({ band, item }) => {
               return (
                 <View key={band} style={wStyles.confirmCard}>
-                  <View style={wStyles.confirmCardRow}>
-                    <View style={wStyles.confirmCardBody}>
-                      <Text style={wStyles.confirmBand}>
-                        {MOMENT_COPY[band].label.toUpperCase()}
-                      </Text>
-                      <Text style={wStyles.confirmTitle}>
-                        {item.title_snapshot}
-                      </Text>
-                    </View>
+                  <View style={wStyles.confirmCardHeader}>
+                    <Text style={wStyles.confirmBand}>
+                      {MOMENT_COPY[band].label.toUpperCase()}
+                    </Text>
                     <View style={wStyles.confirmTypePill}>
                       <Text style={wStyles.confirmTypePillText}>
                         {itemTypeLabel(item.item_type).toUpperCase()}
                       </Text>
                     </View>
                   </View>
+                  <Text style={wStyles.confirmTitle}>{item.title_snapshot}</Text>
+                  <TouchableOpacity
+                    style={wStyles.confirmActionBtn}
+                    onPress={() =>
+                      beginRhythmItem(band, {
+                        item_id: item.item_id,
+                        item_type: item.item_type,
+                        title_snapshot: item.title_snapshot,
+                        description_snapshot: item.description_snapshot,
+                      })
+                    }
+                    activeOpacity={0.85}
+                  >
+                    <Text style={wStyles.confirmActionBtnText}>
+                      {beginLabel(item.item_type)}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               );
             })}
           </View>
-
-          <TouchableOpacity
-            style={wStyles.primaryBtn}
-            onPress={beginTodaysPractice}
-            activeOpacity={0.85}
-          >
-            <Text style={wStyles.primaryBtnText}>Begin today&apos;s practice</Text>
-          </TouchableOpacity>
 
           <TouchableOpacity
             style={[wStyles.primaryBtn, wStyles.secondaryBtn]}
@@ -1781,26 +1822,25 @@ const wStyles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     elevation: 1,
   },
-  confirmCardRow: {
+  confirmCardHeader: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
     gap: 12,
-  },
-  confirmCardBody: {
-    flex: 1,
+    marginBottom: 12,
   },
   confirmBand: {
     fontFamily: Fonts.sans.bold,
     fontSize: 12,
     color: "#D8A00E",
     letterSpacing: 0.4,
-    marginBottom: 8,
   },
   confirmTitle: {
     fontFamily: Fonts.serif.regular,
     fontSize: 18,
     color: "#432104",
     lineHeight: 28,
+    marginBottom: 18,
   },
   confirmTypePill: {
     backgroundColor: "#F5EFD8",
@@ -1816,6 +1856,17 @@ const wStyles = StyleSheet.create({
     color: "#8B6914",
     letterSpacing: 2,
     fontFamily: Fonts.sans.bold,
+  },
+  confirmActionBtn: {
+    backgroundColor: "#C99317",
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  confirmActionBtnText: {
+    fontSize: 15,
+    fontFamily: Fonts.sans.semiBold,
+    color: "#fff",
   },
   primaryBtn: {
     backgroundColor: "#C99317",

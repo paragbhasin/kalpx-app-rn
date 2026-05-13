@@ -47,6 +47,7 @@ import RoomContainer from "../containers/RoomContainer";
 import { stopRoomAmbientAudio } from "../containers/RoomContainer";
 // S04 Phase 2 — FourDoor home surface.
 import FourDoorHomeContainer from "../containers/FourDoorHomeContainer";
+import QuickResetContainer from "../containers/QuickResetContainer";
 // Phase 3 — Mitra v3 new dashboard shell (11 required components).
 // Registered under `companion_dashboard_v3` so Home.tsx can route to it
 // when the flag flips. Gated behind EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD=1;
@@ -105,6 +106,7 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   // S04 Phase 2 — FourDoor home surface. Fetches v3/journey/home/ and
   // renders four door panels (My Rhythm, Inner Path, Quick Reset, Tell Mitra).
   four_door_home: FourDoorHomeContainer,
+  quick_reset: QuickResetContainer,
 };
 
 const ScreenRenderer: React.FC = () => {

@@ -198,7 +198,7 @@ const CollapsibleCard: React.FC<CollapsibleCardProps> = ({
 // Mantra Text Card sub-component
 // ---------------------------------------------------------------------------
 
-interface MantraTextCardProps {
+export interface MantraTextCardProps {
   text: string;
   isDevanagari?: boolean;
   expanded: boolean;

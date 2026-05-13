@@ -7142,7 +7142,7 @@ export const WelcomeOnboardingContainer = {
         {
           type: "headline",
           content: "How would you like this guidance to sound?",
-          style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
+          style: { fontSize: "28px", lineHeight: 36, marginTop: -10 },
         },
         {
           type: "subtext",

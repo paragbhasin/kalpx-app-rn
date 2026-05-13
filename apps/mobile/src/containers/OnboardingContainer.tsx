@@ -37,6 +37,30 @@ interface Props {
   schema: { blocks: any[]; tone?: any; state_id?: string };
 }
 
+function hasNonEmptyText(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function getUsableDynamicOnboardingData(data: any) {
+  if (!data || typeof data !== "object") return null;
+
+  const hasChips = Array.isArray(data.chips) && data.chips.length > 0;
+  const hasHeadline = hasNonEmptyText(data.mitra_message);
+  const hasSubPrompt = hasNonEmptyText(data.sub_prompt);
+  const hasOpenInput = !!data.open_input && typeof data.open_input === "object";
+
+  if (!hasChips && !hasHeadline && !hasSubPrompt && !hasOpenInput) {
+    return null;
+  }
+
+  return {
+    chips: hasChips ? data.chips : null,
+    mitra_message: hasHeadline ? data.mitra_message : null,
+    sub_prompt: hasSubPrompt ? data.sub_prompt : null,
+    open_input: hasOpenInput ? data.open_input : null,
+  };
+}
+
 const OnboardingContainer: React.FC<Props> = ({ schema }) => {
   const updateBackground = useScreenStore(
     (state: any) => state.updateBackground,
@@ -94,6 +118,13 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
   const hasGuidanceModePicker = blocks.some(
     (b: any) => b.type === "guidance_mode_picker",
   );
+  const isGuidanceModeState =
+    hasGuidanceModePicker &&
+    blocks.some(
+      (b: any) =>
+        b.type === "onboarding_conversation_turn" &&
+        /turn(5|6)/.test(String(b.id || "")),
+    );
   const hasPathEmerges = blocks.some((b: any) => b.type === "path_emerges");
 
   // Find headline/subtext/recognition to inject into conversation turn blocks for layout.
@@ -104,6 +135,9 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
   const enrichedBlocks = blocks
     // Inject headline/subtext into conversation turn blocks; pass all others through as-is.
     .map((b: any) => {
+      if (isGuidanceModeState && b.type === "onboarding_conversation_turn") {
+        return null;
+      }
       if (b.type === "onboarding_conversation_turn") {
         const turnId = b.id || "";
         // Support dynamic stage data injection from screenData
@@ -115,20 +149,27 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
         } else if (turnId === "turn5_support" || turnId === "turn5_growth") {
           dynamicData = screenData.stage3_data;
         }
+        const usableDynamicData = getUsableDynamicOnboardingData(dynamicData);
 
         return {
           ...b,
-          mitra_message: dynamicData ? null : b.mitra_message,
-          reply_chips: dynamicData?.chips || b.reply_chips,
-          subtext: dynamicData?.sub_prompt || subtextBlock?.content || b.subtext,
-          headline: dynamicData?.mitra_message || headlineBlock?.content || b.headline,
+          mitra_message: usableDynamicData?.mitra_message ? null : b.mitra_message,
+          reply_chips: usableDynamicData?.chips || b.reply_chips,
+          subtext:
+            usableDynamicData?.sub_prompt ||
+            subtextBlock?.content ||
+            b.subtext,
+          headline:
+            usableDynamicData?.mitra_message ||
+            headlineBlock?.content ||
+            b.headline,
           recognition: recognitionBlock,
           guidanceModeTurn: turn === 5 && hasGuidanceModePicker,
           // Do not hardcode turn index here; some flows still emit the
           // path-emerges screen as turn_7 while others use turn_8.
           pathEmergesTurn: hasPathEmerges,
-          open_input: dynamicData?.open_input 
-            ? { ...b.open_input, ...dynamicData.open_input, enabled: true } 
+          open_input: usableDynamicData?.open_input
+            ? { ...b.open_input, ...usableDynamicData.open_input, enabled: true }
             : b.open_input,
           turnOneHero: turn === 1,
           isTurn7: turn === 7 || turnId === "turn7",
@@ -137,7 +178,14 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
       return b;
     })
     // Remove standalone headline/subtext/recognition — they're now owned by the turn card.
-    .filter((b: any) => b.type !== "headline" && b.type !== "subtext" && b.type !== "first_recognition");
+    .filter(
+      (b: any) =>
+        !!b &&
+        (isGuidanceModeState ||
+          (b.type !== "headline" &&
+            b.type !== "subtext" &&
+            b.type !== "first_recognition")),
+    );
 
   if (isEntryIntentionState) {
     return (

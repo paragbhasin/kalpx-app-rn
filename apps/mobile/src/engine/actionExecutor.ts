@@ -3246,6 +3246,8 @@ export async function executeAction(
             const path = p.chip_id === "growth" ? "growth" : "support";
             draft.path = path;
             draft.stage0_choice = path;
+            setScreenValue(null, "stage2_data");
+            setScreenValue(null, "stage3_data");
             nextStateId = "turn_3_life_context";
 
           } else if (currentStateId === "turn_3_life_context") {
@@ -3276,7 +3278,7 @@ export async function executeAction(
               guidance_mode: "hybrid",
               stage1_choice: draft.stage1_choice,
             });
-            if (stage2) setScreenValue(stage2, "stage2_data");
+            setScreenValue(stage2 || null, "stage2_data");
           } else if (
             currentStateId === "turn_4_support" ||
             currentStateId === "turn_4_growth"
@@ -3300,7 +3302,7 @@ export async function executeAction(
               stage1_choice: draft.stage1_choice,
               stage2_choice: draft.stage2_choice,
             });
-            if (stage3) setScreenValue(stage3, "stage3_data");
+            setScreenValue(stage3 || null, "stage3_data");
           } else if (
             currentStateId === "turn_5_support" ||
             currentStateId === "turn_5_growth"

@@ -83,18 +83,21 @@ export default function MitraIntentionScreen() {
       case "inner_path":
         await AsyncStorage.setItem("mitra_entry_intention", "inner_path");
         store.dispatch(
-          screenActions.setScreenValue({ key: "onboarding_turn", value: 1 }),
+          screenActions.setScreenValue({
+            key: "onboarding_turn",
+            value: "turn_2",
+          }),
         );
         store.dispatch(
           screenActions.setScreenValue({
             key: "onboarding_draft_state",
-            value: { started_at: Date.now() },
+            value: { started_at: Date.now(), entry_intention: "inner_path" },
           }),
         );
         store.dispatch(
           loadScreenWithData({
             containerId: "welcome_onboarding",
-            stateId: "turn_1",
+            stateId: "turn_2",
           }),
         );
         navigation.navigate("DynamicEngine");

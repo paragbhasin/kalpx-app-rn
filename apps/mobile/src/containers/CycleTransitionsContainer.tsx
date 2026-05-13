@@ -842,6 +842,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
       currentType !== null,
     [stateId, currentType],
   );
+  const isViewOnlyInfo = isInfoScreen && !!screenData?.info_view_only;
 
   // Core mantra audio auto-play is handled by MantraRunnerDisplay's
   // embedded AudioPlayerBlock (unhidden 2026-04-18). The block provides
@@ -1036,94 +1037,95 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                 </Text>
               )}
 
-              {/* Progress Count */}
-              <View style={styles.progressCounter}>
-                <Text style={styles.currentCountText}>{chantCount}</Text>
-                <Text style={styles.totalCountText}> / {selectedTarget}</Text>
-              </View>
-
-              {/* Mala beads interaction area */}
-              <View style={styles.interactionArea}>
-                {/* Glow Background Layer */}
-                <View style={styles.glowOuter}>
-                  <View style={styles.glowMiddle}>
-                    <View style={styles.glowInner} />
+              {!isViewOnlyInfo && (
+                <>
+                  <View style={styles.progressCounter}>
+                    <Text style={styles.currentCountText}>{chantCount}</Text>
+                    <Text style={styles.totalCountText}> / {selectedTarget}</Text>
                   </View>
-                </View>
 
-                <Animated.View style={[styles.beadsRing, animatedRingStyle]}>
-                  <View style={styles.ringCircle} />
-
-                  {beads.map((bead) => {
-                    const tapped = isBeadTapped(bead.index);
-                    const active = isBeadActive(bead.index);
-                    return (
-                      <View
-                        key={bead.index}
-                        style={[
-                          styles.beadWrapper,
-                          {
-                            transform: [
-                              { translateX: bead.x },
-                              { translateY: bead.y },
-                              { scale: tapped ? 0.6 : 1 },
-                            ],
-                            opacity: tapped ? 0.2 : 1,
-                          },
-                        ]}
-                      >
-                        <TouchableOpacity
-                          onPress={handleIncrement}
-                          disabled={tapped}
-                          style={styles.beadInner}
-                          activeOpacity={1}
-                        >
-                          <RudrakshSvg width={30} height={30} />
-                          {active && <View style={styles.beadPointer} />}
-                        </TouchableOpacity>
-                      </View>
-                    );
-                  })}
-                </Animated.View>
-
-                <Animated.View
-                  style={[styles.centerTapTarget, animatedCenterStyle]}
-                >
-                  <TouchableOpacity
-                    style={styles.tapTouchable}
-                    onPress={handleIncrement}
-                    activeOpacity={0.8}
-                  >
-                    <View style={styles.tapContent}>
-                      <Text style={styles.tapText}>TAP</Text>
-                      <Text style={styles.subTap}>HERE</Text>
-                      <View style={styles.tapCheck}>
-                        <Svg
-                          width={24}
-                          height={24}
-                          viewBox="0 0 24 24"
-                          fill="none"
-                        >
-                          <Circle
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="#B89450"
-                            strokeWidth="1"
-                          />
-                          <Path
-                            d="M8 12L11 15L16 9"
-                            stroke="#B89450"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </Svg>
+                  <View style={styles.interactionArea}>
+                    <View style={styles.glowOuter}>
+                      <View style={styles.glowMiddle}>
+                        <View style={styles.glowInner} />
                       </View>
                     </View>
-                  </TouchableOpacity>
-                </Animated.View>
-              </View>
+
+                    <Animated.View style={[styles.beadsRing, animatedRingStyle]}>
+                      <View style={styles.ringCircle} />
+
+                      {beads.map((bead) => {
+                        const tapped = isBeadTapped(bead.index);
+                        const active = isBeadActive(bead.index);
+                        return (
+                          <View
+                            key={bead.index}
+                            style={[
+                              styles.beadWrapper,
+                              {
+                                transform: [
+                                  { translateX: bead.x },
+                                  { translateY: bead.y },
+                                  { scale: tapped ? 0.6 : 1 },
+                                ],
+                                opacity: tapped ? 0.2 : 1,
+                              },
+                            ]}
+                          >
+                            <TouchableOpacity
+                              onPress={handleIncrement}
+                              disabled={tapped}
+                              style={styles.beadInner}
+                              activeOpacity={1}
+                            >
+                              <RudrakshSvg width={30} height={30} />
+                              {active && <View style={styles.beadPointer} />}
+                            </TouchableOpacity>
+                          </View>
+                        );
+                      })}
+                    </Animated.View>
+
+                    <Animated.View
+                      style={[styles.centerTapTarget, animatedCenterStyle]}
+                    >
+                      <TouchableOpacity
+                        style={styles.tapTouchable}
+                        onPress={handleIncrement}
+                        activeOpacity={0.8}
+                      >
+                        <View style={styles.tapContent}>
+                          <Text style={styles.tapText}>TAP</Text>
+                          <Text style={styles.subTap}>HERE</Text>
+                          <View style={styles.tapCheck}>
+                            <Svg
+                              width={24}
+                              height={24}
+                              viewBox="0 0 24 24"
+                              fill="none"
+                            >
+                              <Circle
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="#B89450"
+                                strokeWidth="1"
+                              />
+                              <Path
+                                d="M8 12L11 15L16 9"
+                                stroke="#B89450"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </Svg>
+                          </View>
+                        </View>
+                      </TouchableOpacity>
+                    </Animated.View>
+                  </View>
+                </>
+              )}
               <View style={styles.topCardsRow}>
                 {info.iast && (
                   <MantraTextCard
@@ -1145,33 +1147,35 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                 Choose your chant count and tap the bead after each mantra.
               </Text> */}
               {/* Rep Selection Pills */}
-              <View style={styles.repPillsContainer}>
-                {[1, 9, 27, 54, 108].map((option) => {
-                  const isSelected = option === selectedTarget;
-                  return (
-                    <TouchableOpacity
-                      key={option}
-                      style={[
-                        styles.repPill,
-                        isSelected && styles.repPillSelected,
-                      ]}
-                      onPress={() => {
-                        setSelectedTarget(option);
-                        setChantCount(0); // Reset count when target changes
-                      }}
-                    >
-                      <Text
+              {!isViewOnlyInfo && (
+                <View style={styles.repPillsContainer}>
+                  {[1, 9, 27, 54, 108].map((option) => {
+                    const isSelected = option === selectedTarget;
+                    return (
+                      <TouchableOpacity
+                        key={option}
                         style={[
-                          styles.repPillText,
-                          isSelected && styles.repPillTextSelected,
+                          styles.repPill,
+                          isSelected && styles.repPillSelected,
                         ]}
+                        onPress={() => {
+                          setSelectedTarget(option);
+                          setChantCount(0);
+                        }}
                       >
-                        {option} {isSelected && " \u2713"}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
+                        <Text
+                          style={[
+                            styles.repPillText,
+                            isSelected && styles.repPillTextSelected,
+                          ]}
+                        >
+                          {option} {isSelected && " \u2713"}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              )}
 
               {/* Audio Player — source-independent, item-specific.
                   Derives URL from info.audio_url (set by view_info from
@@ -1293,50 +1297,44 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                 </View>
               )}
 
-              <View style={styles.embodySection}>
-                <Text style={styles.embodyInstr}>
-                  {isSankalpActivating
-                    ? "Let the vibration settle within..."
-                    : "Tap to embody your intention"}
-                </Text>
+              {!isViewOnlyInfo && (
+                <View style={styles.embodySection}>
+                  <Text style={styles.embodyInstr}>
+                    {isSankalpActivating
+                      ? "Let the vibration settle within..."
+                      : "Tap to embody your intention"}
+                  </Text>
 
-                <TouchableOpacity
-                  activeOpacity={0.9}
-                  onPress={runSankalpActivation}
-                  disabled={isSankalpActivating}
-                  style={styles.holdTarget}
-                >
-                  <RNAnimated.View
-                    style={{
-                      transform: [
-                        { perspective: 1000 },
-                        {
-                          rotateY: sankalpSpin.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: ["0deg", "360deg"],
-                          }),
-                        },
-                        {
-                          scaleX: sankalpSpin.interpolate({
-                            inputRange: [0, 0.25, 0.5, 0.75, 1],
-                            outputRange: [1, 0.18, 1, 0.18, 1],
-                          }),
-                        },
-                      ],
-                    }}
+                  <TouchableOpacity
+                    activeOpacity={0.9}
+                    onPress={runSankalpActivation}
+                    disabled={isSankalpActivating}
+                    style={styles.holdTarget}
                   >
-                    <Image source={NamasteIcon} style={styles.embodyImg} />
-                  </RNAnimated.View>
-                </TouchableOpacity>
-
-                {/* 
-                <TouchableOpacity
-                  onPress={handleBack}
-                  style={{ marginTop: 24 }}
-                >
-                  <Text style={styles.returnLink}>Return to Mitra Home</Text>
-                </TouchableOpacity> */}
-              </View>
+                    <RNAnimated.View
+                      style={{
+                        transform: [
+                          { perspective: 1000 },
+                          {
+                            rotateY: sankalpSpin.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: ["0deg", "360deg"],
+                            }),
+                          },
+                          {
+                            scaleX: sankalpSpin.interpolate({
+                              inputRange: [0, 0.25, 0.5, 0.75, 1],
+                              outputRange: [1, 0.18, 1, 0.18, 1],
+                            }),
+                          },
+                        ],
+                      }}
+                    >
+                      <Image source={NamasteIcon} style={styles.embodyImg} />
+                    </RNAnimated.View>
+                  </TouchableOpacity>
+                </View>
+              )}
 
               {/* Collapsible Sections for Sankalp.
                   - "Essence" (relabeled from "Meaning" per founder plan,
@@ -1347,7 +1345,10 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                     with empty benefits; those render nothing rather than
                     an empty collapsible. */}
               <View
-                style={[styles.collapsibleSectionsCombined, { marginTop: -70 }]}
+                style={[
+                  styles.collapsibleSectionsCombined,
+                  !isViewOnlyInfo && { marginTop: -70 },
+                ]}
               >
                 {hasContent(info.insight) && (
                   <CollapsibleCard
@@ -1452,12 +1453,13 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                   </>
                 )}
               </View>
-              <View
-                style={[
-                  styles.practiceTimerCard,
-                  info.steps && info.steps.length > 0 && { marginTop: 24 },
-                ]}
-              >
+              {!isViewOnlyInfo && (
+                <View
+                  style={[
+                    styles.practiceTimerCard,
+                    info.steps && info.steps.length > 0 && { marginTop: 24 },
+                  ]}
+                >
                 {!isPracticeTimerRunning ? (
                   <>
                     <Text style={styles.practiceTimerHeading}>
@@ -1608,7 +1610,8 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                     </TouchableOpacity>
                   </>
                 )}
-              </View>
+                </View>
+              )}
               {/* Benefits collapsible — gated on hasContent (48% of
                   practices populated). */}
               {hasContent(info.benefits) && (

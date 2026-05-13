@@ -1,58 +1,62 @@
 /**
- * PathEmergesBlock — Turn 7. Three cards: mantra / sankalp / practice.
+ * PathEmergesBlock — Turn 8 triad reveal.
  *
- * Web counterpart: kalpx-frontend/src/blocks/PracticeCardBlock.vue + MantraDisplay.vue (triad layout).
- * Spec: docs/specs/mitra-v3-experience/screens/route_welcome_onboarding.md §1 Turn 7, §2.
- * Regression cases: REG-015 (cards are display-only — no tap action; single "I'm ready" below).
- *
- * Each card shows title + 1-line "why this for you".
- * Data pulled from screenData (set by generate-companion response in Turn 5 handler).
+ * Mirrors the web PathEmergesBlock behavior:
+ *   - triad cards are tappable and open read-only info surfaces
+ *   - "Why these were chosen" is rendered as a separate expandable card
+ *   - per-card 1-line reasons are not shown inline on the triad cards
  */
 
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import React, { useState } from "react";
+import {
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
+import appStore from "../store";
+import { screenActions } from "../store/screenSlice";
 import { Fonts } from "../theme/fonts";
 
 const DEEP_BROWN = "#432104";
 
-interface Item {
-  kind: "mantra" | "sankalp" | "practice";
-  title_key: string;
-  why_key: string;
-  line_key?: string;
+type Kind = "mantra" | "sankalp" | "practice";
+
+interface CardDef {
+  kind: Kind;
+  titleKey: string;
+  whyKey: string;
 }
 
-const ITEMS: Item[] = [
+const CARDS: CardDef[] = [
   {
     kind: "mantra",
-    title_key: "companion_mantra_title",
-    why_key: "companion_mantra_one_line",
+    titleKey: "companion_mantra_title",
+    whyKey: "companion_mantra_one_line",
   },
   {
     kind: "sankalp",
-    title_key: "companion_sankalp_line",
-    line_key: "companion_sankalp_line",
-    why_key: "companion_sankalp_one_line",
+    titleKey: "companion_sankalp_line",
+    whyKey: "companion_sankalp_one_line",
   },
   {
     kind: "practice",
-    title_key: "companion_practice_title",
-    why_key: "companion_practice_one_line",
+    titleKey: "companion_practice_title",
+    whyKey: "companion_practice_one_line",
   },
 ];
 
-const LABELS: Record<string, string> = {
+const LABELS: Record<Kind, string> = {
   mantra: "Your mantra",
   sankalp: "Your intention",
   practice: "Your practice",
 };
 
-const CARD_THEME: Record<
-  Item["kind"],
-  { accent: string; bg: string; border: string }
-> = {
+const THEME: Record<Kind, { accent: string; bg: string; border: string }> = {
   mantra: {
     accent: "#5E8D55",
     bg: "rgba(244, 250, 241, 0.95)",
@@ -70,27 +74,83 @@ const CARD_THEME: Record<
   },
 };
 
-// ─── Theme Icon ───────────────────────────────────────────────────────────────
-
-const ThemeIcon: React.FC<{ kind: Item["kind"]; accent: string }> = ({
+const ThemeIcon: React.FC<{ kind: Kind; accent: string }> = ({
   kind,
   accent,
 }) => {
   const iconStyle = { fontSize: 18, color: accent, lineHeight: 22 };
   if (kind === "mantra") return <Text style={iconStyle}>ॐ</Text>;
   if (kind === "sankalp") return <Text style={iconStyle}>♡</Text>;
-  if (kind === "practice") return <Text style={iconStyle}>🧘</Text>;
-  return null;
+  return <Text style={iconStyle}>🧘</Text>;
 };
 
-// ─── Component ────────────────────────────────────────────────────────────────
+function getShift(context: any): string {
+  return context?.target_shift || context?.mitra_shift || "";
+}
+
+function sentence(value: string | null | undefined, fallback = ""): string {
+  const text = String(value || fallback).trim();
+  if (!text) return "";
+  return /[.!?]$/.test(text) ? text : `${text}.`;
+}
 
 interface Props {
   block: any;
 }
 
 const PathEmergesBlock: React.FC<Props> = () => {
-  const { screenData } = useScreenStore();
+  const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
+  const [whyOpen, setWhyOpen] = useState(false);
+  const triad = screenData.onboarding_triad_data?.triad || {};
+
+  const whyTabs = CARDS.filter((card) => {
+    const item = triad[card.kind] || {};
+    const context = item.context || {};
+    return !!(
+      item.title ||
+      context.mitra_frame_through ||
+      getShift(context) ||
+      context.mitra_use_for ||
+      context.commentary_lineage
+    );
+  });
+
+  const [activeWhyTab, setActiveWhyTab] = useState<Kind>(
+    whyTabs[0]?.kind || "mantra",
+  );
+
+  const activeWhyKind = whyTabs.some((tab) => tab.kind === activeWhyTab)
+    ? activeWhyTab
+    : (whyTabs[0]?.kind ?? "mantra");
+  const activeWhyItem = triad[activeWhyKind] || {};
+  const activeWhyContext = activeWhyItem.context || {};
+  const activeShift = getShift(activeWhyContext);
+
+  const handleViewInfo = (kind: Kind, manualData: any) => {
+    executeAction(
+      {
+        type: "view_info",
+        payload: {
+          type: kind,
+          manualData,
+          read_only: true,
+          back_label: "Back",
+          back_target: {
+            container_id: "welcome_onboarding",
+            state_id: "turn_8",
+          },
+        },
+        currentScreen,
+      },
+      {
+        loadScreen,
+        goBack,
+        setScreenValue: (value: any, key: string) =>
+          appStore.dispatch(screenActions.setScreenValue({ key, value })),
+        screenState: { ...screenData },
+      },
+    );
+  };
 
   return (
     <View style={styles.wrap}>
@@ -102,21 +162,25 @@ const PathEmergesBlock: React.FC<Props> = () => {
         </View>
       )}
 
-      {ITEMS.map((it) => {
-        const theme = CARD_THEME[it.kind];
+      {CARDS.map((card) => {
+        const theme = THEME[card.kind];
+        const triadItem = triad[card.kind] || {};
+        const rawTitle = triadItem.title || screenData[card.titleKey] || "";
+        if (!rawTitle) return null;
         const title =
-          it.kind === "sankalp"
-            ? `'${String(screenData[it.title_key] || "").trim()}'`
-            : String(screenData[it.title_key] || "—");
-        const why = String(screenData[it.why_key] || "");
+          card.kind === "sankalp" ? `'${String(rawTitle).trim()}'` : rawTitle;
 
         return (
-          <View
-            key={it.kind}
+          <TouchableOpacity
+            key={card.kind}
+            activeOpacity={0.84}
+            onPress={() => handleViewInfo(card.kind, triadItem)}
             style={[
               styles.card,
               { backgroundColor: theme.bg, borderColor: theme.border },
             ]}
+            testID={`triad-${card.kind}`}
+            accessibilityLabel={`triad-${card.kind}`}
           >
             <View style={styles.cardRow}>
               <View
@@ -125,52 +189,197 @@ const PathEmergesBlock: React.FC<Props> = () => {
                   { borderColor: `${theme.accent}33` },
                 ]}
               >
-                <ThemeIcon kind={it.kind} accent={theme.accent} />
+                <ThemeIcon kind={card.kind} accent={theme.accent} />
               </View>
 
               <View style={styles.textWrap}>
                 <Text style={[styles.label, { color: theme.accent }]}>
-                  {LABELS[it.kind].toUpperCase()}
+                  {LABELS[card.kind].toUpperCase()}
                 </Text>
                 <Text style={styles.title}>{title}</Text>
-                {!!why && (
-                  <Text
-                    style={[
-                      styles.why,
-                      it.kind === "sankalp" ? styles.whyPurple : null,
-                    ]}
-                  >
-                    {why}
-                  </Text>
-                )}
               </View>
 
-              <Ionicons name="chevron-forward" size={20} color={theme.accent} />
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={theme.accent}
+              />
             </View>
-          </View>
+          </TouchableOpacity>
         );
       })}
 
       <View style={styles.footerDivider}>
         <View style={styles.footerLine} />
-        <Text style={styles.footerLotus}>
-          <Image
-            source={require("../../assets/lotus_icon.png")}
-            style={styles.lotusIcon}
-          />
-        </Text>
+        <Image
+          source={require("../../assets/lotus_icon.png")}
+          style={styles.lotusIcon}
+        />
+        <View style={styles.footerLine} />
+      </View>
+
+      {whyTabs.length > 0 && (
+        <View style={styles.whyCard}>
+          <TouchableOpacity
+            activeOpacity={0.86}
+            onPress={() => {
+              if (!whyOpen && !whyTabs.some((tab) => tab.kind === activeWhyKind)) {
+                setActiveWhyTab(whyTabs[0].kind);
+              }
+              setWhyOpen((value) => !value);
+            }}
+            style={styles.whyHeader}
+          >
+            <View style={styles.whyLotusCircle}>
+              <Image
+                source={require("../../assets/lotus_icon.png")}
+                style={styles.whyLotusIcon}
+              />
+            </View>
+            <View style={styles.whyHeaderTextWrap}>
+              <Text style={styles.whyHeaderTitle}>Why these were chosen</Text>
+              {!whyOpen && (
+                <Text style={styles.whyHeaderSubtitle}>
+                  Understand why Mitra selected this mantra, sankalp, and
+                  practice.
+                </Text>
+              )}
+            </View>
+            <Ionicons
+              name={whyOpen ? "chevron-up" : "chevron-down"}
+              size={18}
+              color="#A89068"
+            />
+          </TouchableOpacity>
+
+          {whyOpen && (
+            <View style={styles.whyBody}>
+              <View style={styles.whyBodyHeader}>
+                <Text style={styles.whyEyebrow}>Chosen with care</Text>
+                <Text style={styles.whyBodyTitle}>Why this supports today</Text>
+              </View>
+
+              <View style={styles.tabRow}>
+                {whyTabs.map((tab) => {
+                  const selected = activeWhyKind === tab.kind;
+                  return (
+                    <TouchableOpacity
+                      key={tab.kind}
+                      activeOpacity={0.85}
+                      onPress={() => setActiveWhyTab(tab.kind)}
+                      style={[
+                        styles.tabChip,
+                        selected && {
+                          borderColor: THEME[tab.kind].accent,
+                          backgroundColor: THEME[tab.kind].bg,
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.tabChipText,
+                          {
+                            color: selected
+                              ? THEME[tab.kind].accent
+                              : "#7A6A58",
+                          },
+                        ]}
+                      >
+                        {tab.kind === "sankalp"
+                          ? "Sankalp"
+                          : tab.kind === "mantra"
+                            ? "Mantra"
+                            : "Practice"}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              <View style={styles.whyDetail}>
+                <Text
+                  style={[
+                    styles.whyDetailLabel,
+                    { color: THEME[activeWhyKind].accent },
+                  ]}
+                >
+                  {activeWhyKind === "sankalp"
+                    ? "Sankalp"
+                    : activeWhyKind === "mantra"
+                      ? "Mantra"
+                      : "Practice"}
+                </Text>
+                <Text style={styles.whyDetailTitle}>
+                  {activeWhyKind === "sankalp"
+                    ? activeWhyItem.title || ""
+                    : `${activeWhyItem.title || ""}`}
+                </Text>
+
+                {!!activeWhyContext.mitra_frame_through && (
+                  <View style={styles.primaryReasonCard}>
+                    <Text style={styles.reasonLabel}>Essence</Text>
+                    <Text style={styles.reasonBody}>
+                      {sentence(
+                        activeWhyKind === "sankalp"
+                          ? `This is ${activeWhyContext.mitra_frame_through}`
+                          : `${activeWhyItem.title || "This"} is ${activeWhyContext.mitra_frame_through}`,
+                      )}
+                    </Text>
+                  </View>
+                )}
+
+                {!!activeShift && (
+                  <View style={styles.primaryReasonCard}>
+                    <Text style={styles.reasonLabel}>Shift</Text>
+                    <Text style={styles.reasonBody}>
+                      {sentence(
+                        `Mitra chose this to guide you from ${activeShift}`,
+                      )}
+                    </Text>
+                  </View>
+                )}
+
+                <View style={styles.secondaryReasonGrid}>
+                  {!!activeWhyContext.mitra_use_for && (
+                    <View style={styles.secondaryReasonCard}>
+                      <Text style={styles.reasonLabel}>Useful for</Text>
+                      <Text style={styles.reasonBody}>
+                        {sentence(activeWhyContext.mitra_use_for)}
+                      </Text>
+                    </View>
+                  )}
+
+                  {!!activeWhyContext.commentary_lineage && (
+                    <View style={styles.secondaryReasonCard}>
+                      <Text style={styles.reasonLabel}>Rooted in</Text>
+                      <Text style={styles.reasonBody}>
+                        {sentence(activeWhyContext.commentary_lineage)}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+            </View>
+          )}
+        </View>
+      )}
+
+      <View style={styles.footerDividerBottom}>
+        <View style={styles.footerLine} />
+        <Image
+          source={require("../../assets/lotus_icon.png")}
+          style={styles.lotusIcon}
+        />
         <View style={styles.footerLine} />
       </View>
 
       <Text style={styles.footer}>
-        This isn't homework. It's sadhana — a daily practice that builds
-        something real over time.
+        This isn&apos;t homework. It&apos;s sadhana — a daily practice that
+        builds something real over time.
       </Text>
     </View>
   );
 };
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   wrap: { marginTop: 8, marginBottom: 12 },
@@ -180,7 +389,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 18,
     marginBottom: 14,
-    position: "relative",
     overflow: "hidden",
   },
   cardRow: {
@@ -197,13 +405,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.55)",
     marginRight: 16,
   },
-  lotusIcon: {
-    width: 20,
-    height: 16,
-    marginHorizontal: 12,
-
-    opacity: 0.6,
-  },
   textWrap: {
     flex: 1,
     paddingRight: 8,
@@ -219,37 +420,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     lineHeight: 25,
     color: DEEP_BROWN,
-    marginBottom: 4,
-  },
-  why: {
-    fontFamily: Fonts.sans.regular,
-    fontSize: 14,
-    lineHeight: 22,
-    color: "#5D5B58",
-    marginTop: 2,
-  },
-  whyPurple: {
-    color: "#6F6190",
-  },
-  mantraDivider: {
-    marginTop: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    width: 150,
-  },
-  mantraLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "rgba(199, 154, 43, 0.55)",
-    marginHorizontal: 6,
-  },
-  mantraDiamond: {
-    fontSize: 11,
-    color: "#C79A2B",
-    lineHeight: 14,
   },
   footerDivider: {
     marginTop: 4,
+    marginBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  footerDividerBottom: {
+    marginTop: 12,
     marginBottom: 10,
     flexDirection: "row",
     alignItems: "center",
@@ -261,8 +441,150 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(199, 154, 43, 0.55)",
     marginHorizontal: 10,
   },
-  footerLotus: {
-    fontSize: 10,
+  lotusIcon: {
+    width: 20,
+    height: 16,
+    opacity: 0.7,
+  },
+  whyCard: {
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: "rgba(226, 208, 174, 0.9)",
+    backgroundColor: "rgba(255, 249, 240, 0.97)",
+    overflow: "hidden",
+  },
+  whyHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  whyLotusCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "rgba(250, 244, 229, 0.95)",
+    borderWidth: 1,
+    borderColor: "rgba(226, 208, 174, 0.65)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+  },
+  whyLotusIcon: {
+    width: 20,
+    height: 16,
+    opacity: 0.8,
+  },
+  whyHeaderTextWrap: {
+    flex: 1,
+    paddingRight: 12,
+  },
+  whyHeaderTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
+    lineHeight: 24,
+    color: DEEP_BROWN,
+  },
+  whyHeaderSubtitle: {
+    marginTop: 6,
+    fontFamily: Fonts.sans.regular,
+    fontSize: 14,
+    lineHeight: 21,
+    color: "#6B6257",
+  },
+  whyBody: {
+    paddingHorizontal: 20,
+    paddingBottom: 22,
+  },
+  whyBodyHeader: {
+    marginBottom: 18,
+  },
+  whyEyebrow: {
+    marginBottom: 3,
+    fontFamily: Fonts.sans.bold,
+    fontSize: 11,
+    letterSpacing: 1.6,
+    textTransform: "uppercase",
+    color: "#B38722",
+  },
+  whyBodyTitle: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
+    lineHeight: 22,
+    color: DEEP_BROWN,
+  },
+  tabRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 18,
+  },
+  tabChip: {
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(214,183,130,0.42)",
+    backgroundColor: "rgba(255,255,255,0.7)",
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+  },
+  tabChipText: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 11,
+    letterSpacing: 0.9,
+    textTransform: "uppercase",
+  },
+  whyDetail: {
+    borderTopWidth: 1,
+    borderTopColor: "rgba(214,183,130,0.28)",
+    paddingTop: 20,
+  },
+  whyDetailLabel: {
+    marginBottom: 8,
+    fontFamily: Fonts.sans.bold,
+    fontSize: 11,
+    letterSpacing: 1,
+    textTransform: "uppercase",
+  },
+  whyDetailTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
+    lineHeight: 22,
+    color: DEEP_BROWN,
+    marginBottom: 18,
+  },
+  primaryReasonCard: {
+    marginBottom: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.78)",
+    borderWidth: 1,
+    borderColor: "rgba(230, 214, 186, 0.9)",
+  },
+  secondaryReasonGrid: {
+    gap: 12,
+  },
+  secondaryReasonCard: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.64)",
+    borderWidth: 1,
+    borderColor: "rgba(230, 214, 186, 0.86)",
+  },
+  reasonLabel: {
+    marginBottom: 8,
+    fontFamily: Fonts.sans.bold,
+    fontSize: 11,
+    letterSpacing: 1.4,
+    textTransform: "uppercase",
+    color: "#A57A2B",
+  },
+  reasonBody: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 15,
+    lineHeight: 25,
+    color: "#5D5348",
   },
   footer: {
     fontFamily: Fonts.serif.regular,

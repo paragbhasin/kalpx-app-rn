@@ -1316,7 +1316,9 @@ export async function executeAction(
         // Dynamic back target
         const currentStateId =
           action.currentScreen?.state_id || action.currentScreen?.id;
-        if (
+        if (payload.back_target?.container_id && payload.back_target?.state_id) {
+          setScreenValue(payload.back_target, "info_back_target");
+        } else if (
           currentContainerId === "companion_dashboard" ||
           currentStateId === "day_active"
         ) {
@@ -1341,6 +1343,7 @@ export async function executeAction(
         }
 
         setScreenValue(!!is_locked, "info_is_locked");
+        setScreenValue(!!payload.read_only, "info_view_only");
         setScreenValue(!(is_locked || payload.read_only), "show_info_start");
         setScreenValue(infoType === "mantra", "info_is_mantra");
         setScreenValue(
@@ -1491,7 +1494,11 @@ export async function executeAction(
         // Navigate to info reveal
         loadScreen({
           container_id: "cycle_transitions",
-          state_id: infoData.is_action ? "info_reveal" : "offering_reveal",
+          state_id: payload.read_only
+            ? "info_reveal"
+            : infoData.is_action
+              ? "info_reveal"
+              : "offering_reveal",
         });
         break;
       }

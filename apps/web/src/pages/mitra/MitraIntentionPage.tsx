@@ -30,20 +30,20 @@ const OPTION_ACCENTS = {
 
     iconBg: "rgba(248, 238, 209, 0.72)",
     chipBg: "rgba(222, 200, 232, 0.48)",
-    chipColor: "#8E5D99",
+    chipColor: "#C18B12",
   },
   quick_chant: {
     Icon: "/mp2.svg",
 
     iconBg: "rgba(248, 238, 209, 0.72)",
     chipBg: "rgba(225, 228, 190, 0.5)",
-    chipColor: "#8E9440",
+    chipColor: "#C18B12",
   },
   tell_mitra: {
     Icon: "/mp4.svg",
     iconBg: "rgba(248, 238, 209, 0.72)",
     chipBg: "rgba(247, 213, 179, 0.48)",
-    chipColor: "#D27A27",
+    chipColor: "#C18B12",
   },
 } as const;
 
@@ -108,7 +108,7 @@ export function MitraIntentionPage() {
           flexDirection: "column",
           alignItems: "center",
           width: "100%",
-          padding: "24px 16px 24px",
+          padding: "28px 16px 24px",
         }}
       >
         <div
@@ -139,7 +139,7 @@ export function MitraIntentionPage() {
               fontSize: 34,
               lineHeight: 1.28,
               color: "#432104",
-              marginBottom: 22,
+
               marginTop: 0,
               textAlign: "center",
             }}
@@ -148,33 +148,47 @@ export function MitraIntentionPage() {
           </h1>
           <div
             style={{
+              fontFamily: "var(--kalpx-font-ui, var(--kalpx-font-serif))",
+              fontSize: 18,
+              lineHeight: 1.45,
+              color: "rgba(67, 33, 4, 0.72)",
+              marginTop: 0,
+
+              textAlign: "center",
+            }}
+          >
+            {ENTRY_INTENTION_SUBTEXT}
+          </div>
+
+          <div
+            style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: 10,
+              gap: 14,
               color: "#D6A63A",
-              marginBottom: 20,
+              marginBottom: 24,
             }}
           >
             <div
               style={{
-                width: 140,
-                maxWidth: "34%",
+                width: 150,
+                maxWidth: "36%",
                 height: 1,
-                background: "rgba(214, 166, 58, 0.42)",
+                background: "rgba(214, 166, 58, 0.28)",
               }}
             />
             <img src="/lotus_icon.png" alt="" width={22} height={22} />
             <div
               style={{
-                width: 140,
-                maxWidth: "34%",
+                width: 150,
+                maxWidth: "36%",
                 height: 1,
-                background: "rgba(214, 166, 58, 0.42)",
+                background: "rgba(214, 166, 58, 0.28)",
               }}
             />
           </div>
-          {ENTRY_INTENTION_SUBTEXT.split("\n\n").map((para, i, arr) => (
+          {/* {ENTRY_INTENTION_SUBTEXT.split("\n\n").map((para, i, arr) => (
             <p
               key={i}
               style={{
@@ -189,7 +203,7 @@ export function MitraIntentionPage() {
             >
               {para}
             </p>
-          ))}
+          ))} */}
 
           <div
             style={{
@@ -235,12 +249,18 @@ export function MitraIntentionPage() {
                   >
                     <img src={accent.Icon} alt="" width={50} height={50} />
                   </div>
-                  <div style={{ flex: 1 }}>
+                  <div
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
                     <div
                       style={{
                         fontFamily: "var(--kalpx-font-serif)",
                         fontWeight: 700,
-                        fontSize: 18,
+                        fontSize: 20,
                         lineHeight: 1.35,
                         color: "#432104",
                         marginBottom: 8,
@@ -251,7 +271,7 @@ export function MitraIntentionPage() {
                     <div
                       style={{
                         color: "rgba(67, 33, 4, 0.76)",
-                        fontSize: 14,
+                        fontSize: 13,
                         lineHeight: 1.52,
                         marginBottom: 14,
                       }}
@@ -260,18 +280,24 @@ export function MitraIntentionPage() {
                     </div>
                     <div
                       style={{
-                        display: "inline-flex",
+                        display: "flex",
                         alignItems: "center",
+                        justifyContent: "flex-end",
                         gap: 12,
-                        borderRadius: 999,
-                        background: accent.chipBg,
-                        color: accent.chipColor,
-                        padding: "8px",
+                        width: "100%",
                         fontSize: 12,
                         fontWeight: 700,
+                        color: accent.chipColor,
                       }}
                     >
-                      <span>{opt.cta}</span>
+                      <span
+                        style={{
+                          textDecoration: " underline",
+                          textUnderlineOffset: "6px",
+                        }}
+                      >
+                        {opt.cta}
+                      </span>
                       <span style={{ fontSize: 18, lineHeight: 1 }}>→</span>
                     </div>
                   </div>

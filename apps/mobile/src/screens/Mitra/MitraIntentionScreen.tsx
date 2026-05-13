@@ -40,19 +40,18 @@ const OPTION_ACCENTS = {
     icon: Mp3Icon,
     iconBg: "rgba(248, 238, 209, 0.72)",
     chipBg: "rgba(222, 200, 232, 0.48)",
-    chipColor: "#8E5D99",
+    chipColor: "#C18B12",
   },
   quick_chant: {
     icon: Mp2Icon,
     iconBg: "rgba(248, 238, 209, 0.72)",
-    chipBg: "rgba(225, 228, 190, 0.5)",
-    chipColor: "#8E9440",
+    chipColor: "#C18B12",
   },
   tell_mitra: {
     icon: Mp4Icon,
     iconBg: "rgba(248, 238, 209, 0.72)",
     chipBg: "rgba(247, 213, 179, 0.48)",
-    chipColor: "#D27A27",
+    chipColor: "#C18B12",
   },
 } as const;
 
@@ -138,6 +137,7 @@ export default function MitraIntentionScreen() {
         >
           <View style={styles.header}>
             <Text style={styles.heading}>{ENTRY_INTENTION_HEADING}</Text>
+            <Text style={styles.subtext}>{ENTRY_INTENTION_SUBTEXT}</Text>
 
             <View style={styles.divider}>
               <View style={styles.line} />
@@ -148,12 +148,6 @@ export default function MitraIntentionScreen() {
               />
               <View style={styles.line} />
             </View>
-
-            {ENTRY_INTENTION_SUBTEXT.split("\n\n").map((para, i) => (
-              <Text key={i} style={styles.subtext}>
-                {para}
-              </Text>
-            ))}
           </View>
 
           <View style={styles.options}>
@@ -171,7 +165,7 @@ export default function MitraIntentionScreen() {
                   <View
                     style={[
                       styles.iconContainer,
-                      { backgroundColor: "#FCF8EC" },
+                      { backgroundColor: accent.iconBg },
                     ]}
                   >
                     <IconComponent width={45} height={45} />
@@ -179,13 +173,21 @@ export default function MitraIntentionScreen() {
                   <View style={styles.cardContent}>
                     <Text style={styles.cardTitle}>{opt.title}</Text>
                     <Text style={styles.cardBody}>{opt.body}</Text>
-                    <View
-                      style={[styles.chip, { backgroundColor: accent.chipBg }]}
-                    >
+                    <View style={styles.ctaRow}>
                       <Text
-                        style={[styles.chipText, { color: accent.chipColor }]}
+                        style={[
+                          styles.chipText,
+                          styles.ctaText,
+                          {
+                            color: accent.chipColor,
+                            borderBottomColor: accent.chipColor,
+                          },
+                        ]}
                       >
-                        {opt.cta} →
+                        {opt.cta}
+                      </Text>
+                      <Text style={[styles.arrow, { color: accent.chipColor }]}>
+                        →
                       </Text>
                     </View>
                   </View>
@@ -219,12 +221,12 @@ const styles = StyleSheet.create({
   },
   scroll: {
     paddingHorizontal: 20,
-    paddingTop: 32,
+    paddingTop: 36,
     paddingBottom: TAB_BAR_HEIGHT + 96,
   },
   header: {
-    alignItems: "center",
-    marginBottom: 18,
+    alignItems: "stretch",
+    marginBottom: 22,
   },
   heading: {
     fontFamily: Fonts.serif.bold,
@@ -232,30 +234,28 @@ const styles = StyleSheet.create({
     color: "#432104",
     textAlign: "center",
     lineHeight: 40,
-    marginBottom: 16,
   },
   divider: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 12,
-    marginBottom: 20,
   },
   line: {
-    width: 100,
+    width: 120,
     height: 1,
-    backgroundColor: "rgba(214, 166, 58, 0.42)",
+    backgroundColor: "rgba(214, 166, 58, 0.28)",
   },
   lotusIcon: {
-    width: 28,
-    height: 28,
+    width: 24,
+    height: 24,
     tintColor: "#D6A63A",
   },
   subtext: {
-    fontFamily: Fonts.serif.regular,
-    fontSize: 16,
-    color: "rgba(67, 33, 4, 0.78)",
-    lineHeight: 24,
+    fontFamily: Fonts.sans.regular,
+    fontSize: 14,
+    color: "rgba(67, 33, 4, 0.72)",
+    lineHeight: 26,
     textAlign: "center",
   },
   options: {
@@ -291,6 +291,7 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     flex: 1,
+    flexDirection: "column",
   },
   cardTitle: {
     fontFamily: Fonts.serif.bold,
@@ -306,14 +307,24 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: 12,
   },
-  chip: {
-    alignSelf: "flex-start",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
+  ctaRow: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: 12,
   },
   chipText: {
     fontSize: 12,
     fontWeight: "700",
+  },
+  ctaText: {
+    borderBottomWidth: 1,
+    paddingBottom: 2,
+  },
+  arrow: {
+    fontSize: 22,
+    lineHeight: 22,
+    fontWeight: "500",
   },
 });

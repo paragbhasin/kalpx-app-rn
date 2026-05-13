@@ -208,7 +208,7 @@ export async function mitraRhythmResolveItem(
   itemType: string,
 ): Promise<RhythmResolvedItem | null> {
   try {
-    const res = await api.post<RhythmResolvedItem>('/api/mitra/v3/rhythm/resolve-item/', {
+    const res = await api.post<RhythmResolvedItem>('mitra/v3/rhythm/resolve-item/', {
       slot,
       item_id: itemId,
       item_type: itemType,
@@ -459,7 +459,7 @@ export async function mitraPranaAcknowledge(inputData: any): Promise<any> {
 /** POST mitra/prana-acknowledge/dismiss/ — Dismiss active check-in window. */
 export async function postPranaAcknowledgeDismiss(): Promise<{ dismissed: boolean }> {
   try {
-    const resp = await api.post<{ dismissed: boolean }>("/api/mitra/prana-acknowledge/dismiss/");
+    const resp = await api.post<{ dismissed: boolean }>("mitra/prana-acknowledge/dismiss/");
     return resp.data;
   } catch {
     return { dismissed: false };
@@ -2099,10 +2099,32 @@ export async function postRoomReflection(
 // mitraJourneyHomeV3 — GET /api/mitra/v3/journey/home/ (S04 FourDoor surface)
 // ---------------------------------------------------------------------------
 export async function mitraJourneyHomeV3(): Promise<MitraHomeV3Response> {
-  const resp = await api.get<MitraHomeV3Response>('/api/mitra/v3/journey/home/', {
-    params: { tz: getTz() },
-  });
-  return resp.data;
+  try {
+    const resp = await api.get<MitraHomeV3Response>(
+      "mitra/v3/journey/home/",
+      {
+        params: { tz: getTz() },
+      },
+    );
+    console.log("[MITRA_HOME_API] full response object:", resp);
+    console.log("[MITRA_HOME_API] full response data:", resp.data);
+    console.log(
+      "[MITRA_HOME_API] full response data JSON:",
+      JSON.stringify(resp.data, null, 2),
+    );
+    return resp.data;
+  } catch (err: any) {
+    console.log("[MITRA_HOME_API] request failed:", err);
+    if (err?.response) {
+      console.log("[MITRA_HOME_API] error response object:", err.response);
+      console.log("[MITRA_HOME_API] error response data:", err.response.data);
+      console.log(
+        "[MITRA_HOME_API] error response data JSON:",
+        JSON.stringify(err.response.data, null, 2),
+      );
+    }
+    throw err;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -2118,22 +2140,22 @@ export interface TellMitraV3Payload {
 }
 
 export async function postTellMitraV3(payload: TellMitraV3Payload): Promise<TellMitraV3Response> {
-  const resp = await api.post<unknown>('/api/mitra/v3/tell-mitra/', payload);
+  const resp = await api.post<unknown>('mitra/v3/tell-mitra/', payload);
   return normalizeTellMitraResult(resp.data);
 }
 
 export async function postRhythmSetup(payload: RhythmSetupPayload): Promise<MitraHomeV3CompanionRhythm> {
-  const resp = await api.post<MitraHomeV3CompanionRhythm>('/api/mitra/v3/rhythm/setup/', payload);
+  const resp = await api.post<MitraHomeV3CompanionRhythm>('mitra/v3/rhythm/setup/', payload);
   return resp.data;
 }
 
 export async function postRhythmSuggest(payload: RhythmSuggestRequest): Promise<RhythmSuggestResponse> {
-  const resp = await api.post<unknown>('/api/mitra/v3/rhythm/suggest/', payload);
+  const resp = await api.post<unknown>('mitra/v3/rhythm/suggest/', payload);
   return normalizeRhythmSuggestResponse(resp.data);
 }
 
 export async function postQuickCheckin(energy_state: QuickCheckinEnergyState): Promise<QuickCheckinResponse> {
-  const resp = await api.post<QuickCheckinResponse>('/api/mitra/v3/checkin/', {
+  const resp = await api.post<QuickCheckinResponse>('mitra/v3/checkin/', {
     energy_state,
     tz: getTz(),
     source_surface: 'quick_checkin_screen_mobile',
@@ -2144,7 +2166,7 @@ export async function postQuickCheckin(energy_state: QuickCheckinEnergyState): P
 /** GET /api/mitra/v3/quick_reset/ — 3-state opening (E-D-10). null = flag off or error. */
 export async function getQuickResetOpening(): Promise<QuickResetOpeningState | null> {
   try {
-    const resp = await api.get<QuickResetOpeningState>('/api/mitra/v3/quick_reset/');
+    const resp = await api.get<QuickResetOpeningState>('mitra/v3/quick_reset/');
     return resp.data;
   } catch (err: any) {
     if (err?.response?.status === 404) return null;

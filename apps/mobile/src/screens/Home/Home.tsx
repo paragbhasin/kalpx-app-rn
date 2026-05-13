@@ -243,6 +243,25 @@ export default function Home() {
 
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const handleBeginJourney = React.useCallback(() => {
+    store.dispatch(
+      screenActions.setScreenValue({ key: "onboarding_turn", value: 1 }),
+    );
+    store.dispatch(
+      screenActions.setScreenValue({
+        key: "onboarding_draft_state",
+        value: { started_at: Date.now() },
+      }),
+    );
+    store.dispatch(
+      loadScreenWithData({
+        containerId: "welcome_onboarding",
+        stateId: "turn_1",
+      }),
+    );
+    navigation.navigate("DynamicEngine");
+  }, [navigation]);
+
   // Legacy handleWelcomeBackContinue + handleWelcomeBackFresh removed
   // 2026-04-18. Both decisions now flow through the two action handlers
   // in actionExecutor.ts (`welcome_back_continue` / `welcome_back_fresh`)
@@ -885,7 +904,7 @@ export default function Home() {
           <Image source={require("../../../assets/new_home_lotus.png")} />
           {/* <View style={{ height: 220 }} /> */}
           <TouchableOpacity
-            onPress={() => navigation.navigate("MitraStart" as any)}
+            onPress={handleBeginJourney}
             activeOpacity={0.85}
             style={{ borderRadius: 28 }}
             testID="onboarding_begin_journey_cta"

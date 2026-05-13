@@ -625,7 +625,15 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => navigation.navigate('InnerPath' as any)}
+          onPress={() => {
+            dispatch(
+              loadScreenWithData({
+                containerId: "companion_dashboard",
+                stateId: "day_active",
+              }) as any,
+            );
+            navigation.navigate("DynamicEngine" as any);
+          }}
           activeOpacity={0.7}
           style={wStyles.secondaryLinkRow}
         >

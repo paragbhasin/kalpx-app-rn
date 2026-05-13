@@ -21,38 +21,64 @@
  *   - QuickSupportBlock / AdditionalItems / Room menus
  */
 
+import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  LayoutAnimation,
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
+  UIManager,
   View,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
+import In1Icon from "../../../../web/public/in1.svg";
 import CycleProgressBlock from "../../blocks/dashboard/CycleProgressBlock";
-import PathChip from "../../blocks/dashboard/PathChip";
-import SankalpCarryBlock from "../../blocks/dashboard/SankalpCarryBlock";
-import TriadCardsRow from "../../blocks/dashboard/TriadCardsRow";
-import WhyThisL1Strip from "../../blocks/dashboard/WhyThisL1Strip";
-import { mitraJourneyDailyView, mitraJourneyEntryView } from "../../engine/mitraApi";
-import { ingestDay14View, ingestDay7View, ingestDailyView } from "../../engine/v3Ingest";
-import type { RootState } from "../../store";
+import { executeAction } from "../../engine/actionExecutor";
+import {
+  mitraJourneyDailyView,
+  mitraJourneyEntryView,
+} from "../../engine/mitraApi";
+import { useScreenStore } from "../../engine/useScreenBridge";
+import {
+  ingestDailyView,
+  ingestDay14View,
+  ingestDay7View,
+} from "../../engine/v3Ingest";
+import store, { type RootState } from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
+import { Colors } from "../../theme/colors";
+import { Fonts } from "../../theme/fonts";
 
 // Runner containers that require DynamicEngine to render.
 // When TriadCardsRow fires start_runner → loadScreen({ container_id: "cycle_transitions" }),
 // the selector below detects the change and navigates to DynamicEngine.
 const RUNNER_CONTAINERS = new Set(["cycle_transitions"]);
 
-export default function InnerPathScreen() {
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
   const navigation = useNavigation<any>();
   const dispatch = useDispatch<any>();
+  const { loadScreen, goBack } = useScreenStore();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [progressOpen, setProgressOpen] = useState(false);
+  const [guidanceOpen, setGuidanceOpen] = useState(true);
+  const [whyChosenOpen, setWhyChosenOpen] = useState(false);
+  const [activeWhyTab, setActiveWhyTab] = useState<
+    "mantra" | "sankalp" | "practice"
+  >("mantra");
 
   // After daily-view data is loaded, watch for runner container transitions.
   const watchRunnerRef = useRef(false);
@@ -62,10 +88,10 @@ export default function InnerPathScreen() {
 
   useEffect(() => {
     if (!watchRunnerRef.current) return;
-    if (RUNNER_CONTAINERS.has(currentContainerId)) {
+    if (!embedded && RUNNER_CONTAINERS.has(currentContainerId)) {
       navigation.navigate("DynamicEngine" as any);
     }
-  }, [currentContainerId, navigation]);
+  }, [currentContainerId, embedded, navigation]);
 
   // Common engine — same pipeline as web InnerPathPage.
   useEffect(() => {
@@ -90,27 +116,53 @@ export default function InnerPathScreen() {
 
         if (viewKey === "day_7_view") {
           writeAll(ingestDay7View(payload as any));
-          dispatch(screenActions.setScreenValue({ key: "checkpoint_day", value: 7 }));
-          dispatch(loadScreenWithData({ containerId: "checkpoint_reflection", stateId: "day_7" }) as any);
-          navigation.replace("DynamicEngine" as any);
+          dispatch(
+            screenActions.setScreenValue({ key: "checkpoint_day", value: 7 }),
+          );
+          dispatch(
+            loadScreenWithData({
+              containerId: "checkpoint_reflection",
+              stateId: "day_7",
+            }) as any,
+          );
+          if (!embedded) {
+            navigation.replace("DynamicEngine" as any);
+          }
           return;
         }
 
         if (viewKey === "day_14_view") {
           writeAll(ingestDay14View(payload as any));
-          dispatch(screenActions.setScreenValue({ key: "checkpoint_day", value: 14 }));
-          dispatch(loadScreenWithData({ containerId: "checkpoint_reflection", stateId: "day_14" }) as any);
-          navigation.replace("DynamicEngine" as any);
+          dispatch(
+            screenActions.setScreenValue({ key: "checkpoint_day", value: 14 }),
+          );
+          dispatch(
+            loadScreenWithData({
+              containerId: "checkpoint_reflection",
+              stateId: "day_14",
+            }) as any,
+          );
+          if (!embedded) {
+            navigation.replace("DynamicEngine" as any);
+          }
           return;
         }
 
-        if (!viewKey || viewKey === "onboarding_start" || viewKey === "welcome_back_surface") {
-          navigation.replace("DynamicEngine" as any);
+        if (
+          !viewKey ||
+          viewKey === "onboarding_start" ||
+          viewKey === "welcome_back_surface"
+        ) {
+          if (!embedded) {
+            navigation.replace("DynamicEngine" as any);
+          }
           return;
         }
 
         if (viewKey !== "daily_view") {
-          navigation.replace("DynamicEngine" as any);
+          if (!embedded) {
+            navigation.replace("DynamicEngine" as any);
+          }
           return;
         }
 
@@ -156,9 +208,167 @@ export default function InnerPathScreen() {
     return () => {
       cancelled = true;
     };
-  }, [dispatch, navigation]);
+  }, [dispatch, embedded, navigation]);
 
   const sd = useSelector((state: any) => state.screen?.screenData ?? {});
+  const triadArr = Array.isArray(sd.today?.triad) ? sd.today.triad : [];
+  const sankalpRow = triadArr.find((t: any) => t?.slot === "sankalp");
+  const guidanceItems = useMemo(() => {
+    if (sankalpRow?.how_to_live && typeof sankalpRow.how_to_live === "string") {
+      return [sankalpRow.how_to_live];
+    }
+    if (Array.isArray(sd.sankalp_how_to_live)) {
+      return sd.sankalp_how_to_live.filter(
+        (x: any) => typeof x === "string" && x.trim().length > 0,
+      );
+    }
+    if (
+      typeof sd.sankalp_how_to_live === "string" &&
+      sd.sankalp_how_to_live.trim().length > 0
+    ) {
+      return [sd.sankalp_how_to_live];
+    }
+    return [];
+  }, [sd.sankalp_how_to_live, sankalpRow]);
+  const hasGuidance = guidanceItems.length > 0;
+  const getShift = (context: any): string =>
+    context?.target_shift || context?.mitra_shift || "";
+  const sentence = (value: string | null | undefined): string => {
+    const text = String(value || "").trim();
+    if (!text) return "";
+    return /[.!?]$/.test(text) ? text : `${text}.`;
+  };
+  const whyTabs = useMemo(
+    () =>
+      (
+        ["mantra", "sankalp", "practice"] as (
+          | "mantra"
+          | "sankalp"
+          | "practice"
+        )[]
+      )
+        .map((slot) => {
+          const item = triadArr.find((t: any) => t?.slot === slot) || {};
+          const context = item.context || {};
+          return {
+            slot,
+            label: slot.toUpperCase(),
+            title: item.title || "",
+            context,
+            shift: getShift(context),
+          };
+        })
+        .filter(
+          (item) =>
+            !!(
+              item.title ||
+              item.context?.mitra_frame_through ||
+              item.shift ||
+              item.context?.mitra_use_for ||
+              item.context?.commentary_lineage
+            ),
+        ),
+    [triadArr],
+  );
+  const hasWhyChosen = whyTabs.length > 0;
+  const activeWhyItem =
+    whyTabs.find((item) => item.slot === activeWhyTab) || whyTabs[0] || null;
+  const triadItems = useMemo(
+    () =>
+      [
+        {
+          slot: "mantra",
+          label: "MANTRA",
+          title:
+            triadArr.find((t: any) => t?.slot === "mantra")?.title ||
+            sd.card_mantra_title ||
+            "",
+          subtitle:
+            triadArr.find((t: any) => t?.slot === "mantra")?.subtitle ||
+            "Return through sound",
+          iconName: "musical-notes-outline" as const,
+          master:
+            sd.master_mantra ||
+            triadArr.find((t: any) => t?.slot === "mantra") ||
+            null,
+        },
+        {
+          slot: "sankalp",
+          label: "SANKALP",
+          title:
+            triadArr.find((t: any) => t?.slot === "sankalp")?.title ||
+            sd.card_sankalpa_title ||
+            "",
+          subtitle:
+            triadArr.find((t: any) => t?.slot === "sankalp")?.subtitle ||
+            "Hold today's intention",
+          iconName: "leaf-outline" as const,
+          master:
+            sd.master_sankalp ||
+            triadArr.find((t: any) => t?.slot === "sankalp") ||
+            null,
+        },
+        {
+          slot: "practice",
+          label: "PRACTICE",
+          title:
+            triadArr.find((t: any) => t?.slot === "practice")?.title ||
+            sd.card_ritual_title ||
+            "",
+          subtitle:
+            triadArr.find((t: any) => t?.slot === "practice")?.subtitle ||
+            "Move through the body",
+          iconName: "flower-outline" as const,
+          IconComponent: In1Icon,
+          master:
+            sd.master_practice ||
+            triadArr.find((t: any) => t?.slot === "practice") ||
+            null,
+        },
+      ].filter((item) => item.title),
+    [sd, triadArr],
+  );
+
+  const handleTriadPress = (
+    slot: "mantra" | "sankalp" | "practice",
+    item: any,
+  ) => {
+    executeAction(
+      {
+        type: "start_runner",
+        payload: {
+          source: "core",
+          variant: slot,
+          item,
+        },
+      },
+      {
+        loadScreen,
+        goBack,
+        setScreenValue: (value: any, key: string) =>
+          store.dispatch(screenActions.setScreenValue({ key, value })),
+        screenState: store.getState().screen.screenData,
+      },
+    ).catch(() => {});
+  };
+  const toggleProgress = () => {
+    LayoutAnimation.configureNext(
+      LayoutAnimation.create(220, "easeInEaseOut", "opacity"),
+    );
+    setProgressOpen((value) => !value);
+  };
+  const toggleGuidance = () => {
+    LayoutAnimation.configureNext(
+      LayoutAnimation.create(220, "easeInEaseOut", "opacity"),
+    );
+    setGuidanceOpen((value) => !value);
+  };
+  const toggleWhyChosen = () => {
+    LayoutAnimation.configureNext(
+      LayoutAnimation.create(220, "easeInEaseOut", "opacity"),
+    );
+    setWhyChosenOpen((value) => !value);
+  };
 
   if (loading) {
     return (
@@ -188,96 +398,549 @@ export default function InnerPathScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={12}>
-          <Text style={styles.backText}>← Back</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Inner Path</Text>
-        <View style={{ width: 60 }} />
-      </View>
-
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Path identity — Day X of 14 · path label */}
-        <View style={styles.identityBlock}>
-          <Text style={styles.dayLabel}>
-            Day {sd.day_number} of {sd.total_days}
-            {sd.journey_path_label ? ` · ${sd.journey_path_label}` : ""}
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          hitSlop={12}
+          style={styles.backButton}
+        >
+          <Text style={styles.backText}>← Back</Text>
+        </TouchableOpacity>
+
+        <View style={styles.heroBlock}>
+          <Text style={styles.sparkle}>✧</Text>
+          <Text style={styles.heroTitle}>
+            {sd.headline_text ||
+              sd.greeting?.headline ||
+              sd.focus_phrase ||
+              "Still here. That is the practice."}
           </Text>
           {!!sd.greeting_context && (
             <Text style={styles.supportingLine}>{sd.greeting_context}</Text>
           )}
+
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={toggleProgress}
+            style={styles.dayPill}
+          >
+            <Text style={styles.dayPillText}>
+              Day {sd.day_number || 1} of {sd.total_days || 14}
+            </Text>
+            <Ionicons
+              name={progressOpen ? "chevron-up" : "chevron-down"}
+              size={18}
+              color={Colors.brownMuted}
+            />
+          </TouchableOpacity>
         </View>
 
-        {/* Triad — mantra / sankalp / practice */}
-        <TriadCardsRow />
+        {progressOpen && (
+          <View style={styles.progressWrap}>
+            <CycleProgressBlock
+              screenData={sd}
+              expanded={true}
+              hideHeader={true}
+            />
+          </View>
+        )}
 
-        {/* Path identity chip */}
-        <PathChip screenData={sd} />
+        <View style={styles.triadStack}>
+          {triadItems.map((item) => (
+            <TouchableOpacity
+              key={item.slot}
+              activeOpacity={0.9}
+              onPress={() => handleTriadPress(item.slot as any, item.master)}
+              style={styles.triadCard}
+            >
+              <View style={styles.triadIconWrap}>
+                {item.IconComponent ? (
+                  <item.IconComponent width={28} height={28} />
+                ) : (
+                  <Ionicons
+                    name={item.iconName}
+                    size={20}
+                    color={Colors.goldBright}
+                  />
+                )}
+              </View>
+              <View style={styles.triadCopy}>
+                <Text style={styles.triadLabel}>{item.label}</Text>
+                <Text style={styles.triadTitle}>{item.title}</Text>
+                {!!item.subtitle && (
+                  <Text style={styles.triadSubtitle}>{item.subtitle}</Text>
+                )}
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-        {/* Cycle / day progress */}
-        <CycleProgressBlock screenData={sd} />
+        <View style={styles.dividerWrap}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerLotus}>✿</Text>
+          <View style={styles.dividerLine} />
+        </View>
 
-        {/* Sankalp carry-over */}
-        <SankalpCarryBlock screenData={sd} />
+        {hasGuidance && (
+          <View style={styles.sectionBlock}>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={toggleGuidance}
+              style={styles.accordionRow}
+            >
+              <View style={styles.accordionLead}>
+                <Text style={styles.accordionIcon}>✦</Text>
+                <Text style={styles.accordionTitle}>Today's guidance</Text>
+              </View>
+              <Ionicons
+                name={guidanceOpen ? "chevron-up" : "chevron-down"}
+                size={18}
+                color={Colors.brownMuted}
+              />
+            </TouchableOpacity>
+            {guidanceOpen && (
+              <View style={styles.guidanceCard}>
+                <Text style={styles.guidanceHeader}>
+                  {sd.sankalp_how_to_live_label || "HOW TO LIVE THIS"}
+                </Text>
+                {guidanceItems.map((item: string, index: number) => (
+                  <View key={`guide-${index}`} style={styles.guidanceItemRow}>
+                    <View style={styles.guidanceItemBar} />
+                    <Text style={styles.guidanceItemText}>{item}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+        )}
 
-        {/* Why this triad was chosen */}
-        <WhyThisL1Strip screenData={sd} />
+        {hasWhyChosen && (
+          <View style={styles.sectionBlock}>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={toggleWhyChosen}
+              style={styles.accordionRow}
+            >
+              <View style={styles.accordionLead}>
+                <Text style={styles.accordionIcon}>✿</Text>
+                <View style={styles.whyHeaderCopy}>
+                  <Text style={styles.accordionTitle}>
+                    Why these were chosen
+                  </Text>
+                  {!whyChosenOpen && (
+                    <Text style={styles.accordionSubtitle}>
+                      Understand why Mitra selected this mantra, sankalp, and
+                      practice.
+                    </Text>
+                  )}
+                </View>
+              </View>
+              <Ionicons
+                name={whyChosenOpen ? "chevron-up" : "chevron-down"}
+                size={18}
+                color={Colors.brownMuted}
+              />
+            </TouchableOpacity>
+            {whyChosenOpen && (
+              <View style={styles.whyPanel}>
+                {activeWhyItem && (
+                  <View>
+                    <Text style={styles.whyEyebrow}>Chosen with care</Text>
+                    <Text style={styles.whyTitle}>Why this supports today</Text>
+
+                    <View style={styles.whyTabsRow}>
+                      {whyTabs.map((item) => {
+                        const isActive = activeWhyItem.slot === item.slot;
+                        return (
+                          <TouchableOpacity
+                            key={item.slot}
+                            activeOpacity={0.85}
+                            onPress={() => setActiveWhyTab(item.slot)}
+                            style={[
+                              styles.whyTabPill,
+                              isActive && styles.whyTabPillActive,
+                            ]}
+                          >
+                            <Text
+                              style={[
+                                styles.whyTabText,
+                                isActive && styles.whyTabTextActive,
+                              ]}
+                            >
+                              {item.label}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+
+                    <View style={styles.whyDivider} />
+
+                    <Text style={styles.whySectionLabel}>
+                      {activeWhyItem.label}
+                    </Text>
+                    <Text style={styles.whyItemTitle}>
+                      {activeWhyItem.title}
+                    </Text>
+
+                    {!!activeWhyItem.context?.mitra_frame_through && (
+                      <View style={styles.whyInfoCard}>
+                        <Text style={styles.whyInfoLabel}>Essence</Text>
+                        <Text style={styles.whyInfoText}>
+                          {sentence(
+                            activeWhyItem.slot === "sankalp"
+                              ? `This is ${activeWhyItem.context.mitra_frame_through}`
+                              : `${activeWhyItem.title || "This"} is ${activeWhyItem.context.mitra_frame_through}`,
+                          )}
+                        </Text>
+                      </View>
+                    )}
+
+                    {!!activeWhyItem.shift && (
+                      <View style={styles.whyInfoCard}>
+                        <Text style={styles.whyInfoLabel}>Shift</Text>
+                        <Text style={styles.whyInfoText}>
+                          {sentence(
+                            `Mitra chose this to guide you from ${activeWhyItem.shift}`,
+                          )}
+                        </Text>
+                      </View>
+                    )}
+
+                    {!!activeWhyItem.context?.mitra_use_for && (
+                      <View style={styles.whyInfoCard}>
+                        <Text style={styles.whyInfoLabel}>Useful for</Text>
+                        <Text style={styles.whyInfoText}>
+                          {sentence(activeWhyItem.context.mitra_use_for)}
+                        </Text>
+                      </View>
+                    )}
+
+                    {!!activeWhyItem.context?.commentary_lineage && (
+                      <View style={styles.whyInfoCard}>
+                        <Text style={styles.whyInfoLabel}>Rooted in</Text>
+                        <Text style={styles.whyInfoText}>
+                          {sentence(activeWhyItem.context.commentary_lineage)}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                )}
+              </View>
+            )}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
+export default InnerPathScreen;
+
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: "#FFF8EF",
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "rgba(201,168,76,0.2)",
+  backButton: {
+    alignSelf: "flex-start",
+    marginBottom: 22,
   },
   backText: {
-    fontSize: 15,
-    color: "#C99317",
-    fontWeight: "500",
-  },
-  headerTitle: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#432104",
-    letterSpacing: 0.3,
+    color: Colors.goldBright,
+    fontFamily: Fonts.serif.regular,
   },
   scroll: {
     flex: 1,
   },
   content: {
-    paddingHorizontal: 16,
-    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingTop: 18,
     paddingBottom: 80,
   },
-  identityBlock: {
-    marginBottom: 20,
+  heroBlock: {
+    alignItems: "center",
+    marginBottom: 26,
+    paddingHorizontal: 12,
   },
-  dayLabel: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#432104",
-    marginBottom: 6,
+  sparkle: {
+    fontSize: 28,
     lineHeight: 28,
+    color: Colors.goldBright,
+    marginBottom: 14,
+  },
+  heroTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 24,
+    lineHeight: 40,
+    color: Colors.brownDeep,
+    textAlign: "center",
   },
   supportingLine: {
-    fontSize: 15,
-    color: "#7B6550",
+    fontFamily: Fonts.sans.medium,
+    fontSize: 13,
+    color: Colors.textSoft,
+    lineHeight: 20,
+    textAlign: "center",
+    marginBottom: 22,
+  },
+  dayPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(223,205,181,0.95)",
+    backgroundColor: "rgba(255,252,246,0.92)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  dayPillText: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 13,
+    color: "#8B6A2A",
+  },
+  progressWrap: {
+    marginBottom: 20,
+  },
+  triadStack: {
+    gap: 16,
+    marginBottom: 28,
+  },
+  triadCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 18,
+    padding: 10,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: "rgba(242,223,182,0.95)",
+    backgroundColor: "rgba(255,253,247,0.74)",
+  },
+  triadIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: "rgba(235,221,194,0.95)",
+    backgroundColor: "rgba(255,250,244,0.92)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  triadCopy: {
+    flex: 1,
+  },
+  triadLabel: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 13,
+    letterSpacing: 4,
+    color: "rgb(179, 135, 34)",
+    marginBottom: 6,
+  },
+  triadTitle: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 16,
+    lineHeight: 30,
+    color: Colors.brownDeep,
+  },
+  triadSubtitle: {
+    fontSize: 13,
+    lineHeight: 24,
+    fontStyle: "italic",
+    color: "rgb(165, 122, 43)",
+  },
+  dividerWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 24,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "rgba(214,183,130,0.35)",
+  },
+  dividerLotus: {
+    fontSize: 22,
     lineHeight: 22,
+    color: Colors.goldBright,
+  },
+  sectionBlock: {
+    marginBottom: 18,
+  },
+  accordionRow: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+
+    borderBottomColor: "rgba(233,214,179,0.9)",
+    borderRadius: 18,
+    padding: 10,
+  },
+  accordionLead: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+    paddingRight: 12,
+  },
+  accordionIcon: {
+    fontSize: 22,
+    lineHeight: 22,
+    color: Colors.goldBright,
+    marginRight: 14,
+  },
+  accordionTitle: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
+    lineHeight: 26,
+    color: Colors.brownDeep,
+  },
+  accordionSubtitle: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 12,
+    lineHeight: 22,
+    color: Colors.textSoft,
+    marginTop: 4,
+  },
+  guidanceCard: {
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: "rgba(233,214,179,0.9)",
+    borderRadius: 22,
+    backgroundColor: "rgba(255,251,245,0.88)",
+    paddingHorizontal: 18,
+    paddingVertical: 18,
+  },
+  guidanceHeader: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 12,
+    letterSpacing: 3,
+    textTransform: "uppercase",
+    color: Colors.goldBright,
+    marginBottom: 14,
+  },
+  guidanceItemRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 12,
+  },
+  guidanceItemBar: {
+    width: 2,
+    height: 50,
+    borderRadius: 2,
+    backgroundColor: Colors.goldBright,
+    marginRight: 14,
+    opacity: 0.9,
+  },
+  guidanceItemText: {
+    flex: 1,
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    lineHeight: 22,
+    color: Colors.textSoft,
+  },
+  whyHeaderCopy: {
+    flex: 1,
+  },
+  whyPanel: {
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: "rgba(233,214,179,0.9)",
+    borderRadius: 22,
+    backgroundColor: "rgba(255,251,245,0.88)",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  whyEyebrow: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 12,
+    letterSpacing: 3,
+    textTransform: "uppercase",
+    color: "rgb(179, 135, 34)",
+  },
+  whyTitle: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 14,
+    lineHeight: 28,
+    color: Colors.brownDeep,
+    marginBottom: 18,
+  },
+  whyTabsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginBottom: 18,
+    justifyContent: "center",
+  },
+  whyTabPill: {
+    borderWidth: 1,
+    borderColor: "rgba(214,183,130,0.42)",
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    backgroundColor: "rgba(255,252,246,0.74)",
+  },
+  whyTabPillActive: {
+    borderColor: "rgba(179,135,34,0.68)",
+  },
+  whyTabText: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 10,
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
+    color: "#7F6A52",
+  },
+  whyTabTextActive: {
+    color: "#8B6A2A",
+  },
+  whyDivider: {
+    height: 1,
+    backgroundColor: "rgba(214,183,130,0.36)",
+    marginBottom: 18,
+  },
+  whySectionLabel: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 12,
+    letterSpacing: 2,
+    textTransform: "uppercase",
+    color: "rgb(179, 135, 34)",
+    marginBottom: 10,
+  },
+  whyItemTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
+    lineHeight: 26,
+    color: Colors.brownDeep,
+    marginBottom: 18,
+  },
+  whyInfoCard: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.72)",
+    borderWidth: 1,
+    borderColor: "rgba(230,214,186,0.9)",
+    marginBottom: 14,
+  },
+  whyInfoLabel: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 11,
+    letterSpacing: 1.4,
+    textTransform: "uppercase",
+    color: "#A57A2B",
+    marginBottom: 8,
+  },
+  whyInfoText: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 15,
+    lineHeight: 27,
+    color: "#5D5348",
   },
   centered: {
     flex: 1,
@@ -287,9 +950,10 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 14,
-    color: "#7B6550",
+    color: Colors.textSoft,
     textAlign: "center",
     marginBottom: 20,
+    fontFamily: Fonts.sans.regular,
   },
   retryBtn: {
     paddingVertical: 12,
@@ -300,6 +964,6 @@ const styles = StyleSheet.create({
   retryBtnText: {
     color: "#fff",
     fontSize: 14,
-    fontWeight: "600",
+    fontFamily: Fonts.sans.bold,
   },
 });

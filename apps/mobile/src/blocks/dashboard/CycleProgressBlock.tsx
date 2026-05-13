@@ -51,14 +51,23 @@ if (
 
 type Props = {
   screenData?: Record<string, any>;
+  expanded?: boolean;
+  onToggle?: () => void;
+  hideHeader?: boolean;
 };
 
-const CycleProgressBlock: React.FC<Props> = ({ screenData }) => {
+const CycleProgressBlock: React.FC<Props> = ({
+  screenData,
+  expanded: expandedProp,
+  onToggle,
+  hideHeader = false,
+}) => {
   const sd = screenData ?? {};
   const metrics = sd.today?.cycle_metrics ?? sd.cycle_metrics ?? {};
 
   // Hooks must be called unconditionally.
-  const [expanded, setExpanded] = useState(false);
+  const [uncontrolledExpanded, setUncontrolledExpanded] = useState(false);
+  const expanded = expandedProp ?? uncontrolledExpanded;
 
   // Always-visible block. Falls back to day_number / total_days when
   // cycle_metrics hasn't loaded yet; numeric metrics default to 0.
@@ -80,28 +89,34 @@ const CycleProgressBlock: React.FC<Props> = ({ screenData }) => {
     LayoutAnimation.configureNext(
       LayoutAnimation.create(220, "easeInEaseOut", "opacity"),
     );
-    setExpanded((v) => !v);
+    if (onToggle) {
+      onToggle();
+      return;
+    }
+    setUncontrolledExpanded((v) => !v);
   };
 
   return (
     <View style={styles.wrap} accessibilityLabel="cycle_progress_block">
-      <TouchableOpacity
-        activeOpacity={0.85}
-        onPress={toggle}
-        style={styles.header}
-      >
-        <View style={{ flex: 1 }}>
-          <Text style={styles.summary}>{summaryLabel}</Text>
-        </View>
-        <Ionicons
-          name={expanded ? "chevron-up" : "chevron-down"}
-          size={18}
-          color={Colors.brownMuted}
-        />
-      </TouchableOpacity>
+      {!hideHeader && (
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={toggle}
+          style={styles.header}
+        >
+          <View style={{ flex: 1 }}>
+            <Text style={styles.summary}>{summaryLabel}</Text>
+          </View>
+          <Ionicons
+            name={expanded ? "chevron-up" : "chevron-down"}
+            size={18}
+            color={Colors.brownMuted}
+          />
+        </TouchableOpacity>
+      )}
 
       {expanded && (
-        <View style={styles.body}>
+        <View style={[styles.body, hideHeader && styles.bodyNoHeader]}>
           {/* SOV-3 (2026-04-20): sovereignty-strict. Prior English fallbacks
               ("Days engaged" / "Fully completed" / "Trigger sessions" /
               "Daily rhythm") retired. Labels now read directly from
@@ -165,6 +180,9 @@ const styles = StyleSheet.create({
   },
   body: {
     marginTop: 12,
+  },
+  bodyNoHeader: {
+    marginTop: 0,
   },
   metricsRow: {
     flexDirection: "row",

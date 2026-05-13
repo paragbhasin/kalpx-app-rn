@@ -3553,7 +3553,10 @@ export async function executeAction(
             const entryIntention = await AsyncStorage.getItem("mitra_entry_intention").catch(() => null);
             await AsyncStorage.removeItem("mitra_entry_intention").catch(() => {});
             if (entryIntention === "inner_path") {
-              rootNavigate("InnerPath");
+              loadScreen({
+                container_id: "companion_dashboard",
+                state_id: "day_active",
+              });
             } else {
               rootNavigate("Home");
             }

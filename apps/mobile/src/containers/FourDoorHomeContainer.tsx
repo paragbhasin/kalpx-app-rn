@@ -127,6 +127,8 @@ export default function FourDoorHomeContainer({
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
+  const loadScreen = useScreenStore((state) => state.loadScreen);
+  const updateScreenData = useScreenStore((state) => state.updateScreenData);
   const screenData = useScreenStore((state) => state.screenData);
   const homeData = useSelector((state: any) => state.door?.homeData);
   const hasSkippedInitialFocusRefresh = useRef(false);
@@ -312,6 +314,7 @@ export default function FourDoorHomeContainer({
   const windowActive = acw?.active === true;
   const hasRhythm = homeData?.companion_rhythm?.has_rhythm === true;
   const myRhythmTarget = hasRhythm ? "RhythmHome" : "RhythmSetup";
+  const currentRouteName = navigation.getState?.()?.routes?.slice(-1)?.[0]?.name;
 
   return (
     <View style={styles.screen}>
@@ -407,7 +410,16 @@ export default function FourDoorHomeContainer({
             Icon={Mp3Icon}
             label={DOOR_LABELS.inner_path}
             subtitle={innerPathSubtitle}
-            onPress={() => navigation.navigate("InnerPath" as any)}
+            onPress={() => {
+              updateScreenData("dashboard_entry_surface", "inner_path");
+              loadScreen({
+                container_id: "companion_dashboard",
+                state_id: "day_active",
+              });
+              if (currentRouteName !== "DynamicEngine") {
+                navigation.navigate("DynamicEngine" as any);
+              }
+            }}
           />
           <DoorCard
             Icon={Mp2Icon}

@@ -29,8 +29,26 @@ import {
   View,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
+import A1Icon from "../../../assets/a1.svg";
+import A2Icon from "../../../assets/a2.svg";
+import A3Icon from "../../../assets/a3.svg";
+import A4Icon from "../../../assets/a4.svg";
+import A5Icon from "../../../assets/a5.svg";
+import A6Icon from "../../../assets/a6.svg";
 import AfternoonIcon from "../../../assets/aft.svg";
+import M1Icon from "../../../assets/m1.svg";
+import M2Icon from "../../../assets/m2.svg";
+import M3Icon from "../../../assets/m3.svg";
+import M4Icon from "../../../assets/m4.svg";
+import M5Icon from "../../../assets/m5.svg";
+import M6Icon from "../../../assets/m6.svg";
 import MorningIcon from "../../../assets/morning.svg";
+import N1Icon from "../../../assets/n1.svg";
+import N2Icon from "../../../assets/n2.svg";
+import N3Icon from "../../../assets/n3.svg";
+import N4Icon from "../../../assets/n4.svg";
+import N5Icon from "../../../assets/n5.svg";
+import N6Icon from "../../../assets/n6.svg";
 import NightIcon from "../../../assets/night1.svg";
 import LibrarySearchModal, {
   LibrarySearchItem,
@@ -89,6 +107,11 @@ const MOMENT_COPY: Record<RhythmTimeBand, { label: string; desc: string }> = {
     desc: "Pause, reset, and return to yourself.",
   },
   night: { label: "Night", desc: "Reflect, release, and close gently." },
+};
+const PURPOSE_ART: Record<RhythmTimeBand, React.ComponentType<any>[]> = {
+  morning: [M3Icon, M5Icon, M1Icon, M4Icon, M2Icon, M6Icon],
+  afternoon: [A5Icon, A1Icon, A4Icon, A2Icon, A6Icon, A3Icon],
+  night: [N4Icon, N2Icon, N5Icon, N1Icon, N6Icon, N3Icon],
 };
 
 const PURPOSE_OPTIONS: Record<
@@ -639,78 +662,112 @@ export default function RhythmSetupScreen({
     <SafeAreaView
       style={[wStyles.safe, embedded && styles.embeddedTransparent]}
     >
-      <ScrollView
-        contentContainerStyle={wStyles.scroll}
-        showsVerticalScrollIndicator={false}
+      <ImageBackground
+        source={RHYTHM_BG}
+        style={wStyles.background}
+        imageStyle={wStyles.backgroundImage}
       >
-        <TouchableOpacity
-          onPress={() => setWizardStep("moments")}
-          style={wStyles.backRow}
+        <ScrollView
+          contentContainerStyle={wStyles.scroll}
+          showsVerticalScrollIndicator={false}
         >
-          <Text style={wStyles.backText}>{"< Back"}</Text>
-        </TouchableOpacity>
-        {renderStepDots("purpose")}
-        <Text style={wStyles.heading}>Choose Your Purpose</Text>
-        <Text style={wStyles.subheading}>
-          What do you need from each moment?
-        </Text>
+          <View style={wStyles.hero}>
+            <Image
+              source={RHYTHM_LEAF_ART}
+              style={wStyles.leafArt}
+              resizeMode="contain"
+            />
 
-        {selectedMoments.map((band) => (
-          <View key={band} style={wStyles.purposeSection}>
-            <Text style={wStyles.purposeBandLabel}>
-              {MOMENT_COPY[band].label}
+            <TouchableOpacity
+              onPress={() => setWizardStep("moments")}
+              style={wStyles.backRow}
+            >
+              <Text style={wStyles.backText}>{"< Back"}</Text>
+            </TouchableOpacity>
+
+            <Text style={wStyles.heading}>
+              What should each{"\n"}moment give you?
             </Text>
-            <View style={wStyles.purposeGrid}>
-              {PURPOSE_OPTIONS[band].map((opt) => {
-                const active = purposes[band] === opt.value;
-                return (
-                  <TouchableOpacity
-                    key={opt.value}
-                    style={[
-                      wStyles.purposeChip,
-                      active && wStyles.purposeChipActive,
-                    ]}
-                    onPress={() =>
-                      setPurposes((prev) => ({ ...prev, [band]: opt.value }))
-                    }
-                    activeOpacity={0.7}
-                  >
-                    <Text
-                      style={[
-                        wStyles.purposeChipLabel,
-                        active && wStyles.purposeChipLabelActive,
-                      ]}
-                    >
-                      {opt.label}
-                    </Text>
-                    <Text
-                      style={[
-                        wStyles.purposeChipDesc,
-                        active && wStyles.purposeChipDescActive,
-                      ]}
-                    >
-                      {opt.desc}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
+            <Text style={[wStyles.subheading, wStyles.purposeIntro]}>
+              Mitra will choose a practice that fits.
+            </Text>
           </View>
-        ))}
 
-        <TouchableOpacity
-          style={[
-            wStyles.primaryBtn,
-            selectedMoments.some((b) => !purposes[b]) &&
-              wStyles.primaryBtnDisabled,
-          ]}
-          onPress={advanceToSuggestion}
-          disabled={selectedMoments.some((b) => !purposes[b])}
-          activeOpacity={0.8}
-        >
-          <Text style={wStyles.primaryBtnText}>Continue →</Text>
-        </TouchableOpacity>
-      </ScrollView>
+          {selectedMoments.map((band) => {
+            const BandIcon = BAND_ART[band];
+            return (
+              <View key={band} style={wStyles.purposeSection}>
+                <View style={wStyles.purposeSectionHeader}>
+                  <BandIcon width={58} height={58} />
+                  <Text style={wStyles.purposeBandLabel}>
+                    {MOMENT_COPY[band].label}
+                  </Text>
+                  <View style={wStyles.purposeHeaderLine} />
+                </View>
+                <View style={wStyles.purposeGrid}>
+                  {PURPOSE_OPTIONS[band].map((opt, idx) => {
+                    const active = purposes[band] === opt.value;
+                    const PurposeIcon = PURPOSE_ART[band][idx] ?? BandIcon;
+                    return (
+                      <TouchableOpacity
+                        key={opt.value}
+                        style={[
+                          wStyles.purposeChip,
+                          active && wStyles.purposeChipActive,
+                        ]}
+                        onPress={() =>
+                          setPurposes((prev) => ({
+                            ...prev,
+                            [band]: opt.value,
+                          }))
+                        }
+                        activeOpacity={0.82}
+                      >
+                        <View style={wStyles.purposeChipIconWrap}>
+                          <PurposeIcon width={40} height={40} />
+                        </View>
+                        <View style={wStyles.purposeChipBody}>
+                          <Text
+                            style={[
+                              wStyles.purposeChipLabel,
+                              active && wStyles.purposeChipLabelActive,
+                            ]}
+                          >
+                            {opt.label}
+                          </Text>
+                          <Text
+                            style={[
+                              wStyles.purposeChipDesc,
+                              active && wStyles.purposeChipDescActive,
+                            ]}
+                          >
+                            {opt.desc}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </View>
+            );
+          })}
+
+          <TouchableOpacity
+            style={[
+              wStyles.primaryBtn,
+              selectedMoments.some((b) => !purposes[b]) &&
+                wStyles.primaryBtnDisabled,
+            ]}
+            onPress={advanceToSuggestion}
+            disabled={selectedMoments.some((b) => !purposes[b])}
+            activeOpacity={0.85}
+          >
+            <Text style={wStyles.primaryBtnText}>
+              See Mitra&apos;s Suggestion →
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </ImageBackground>
     </SafeAreaView>
   );
 
@@ -1219,19 +1276,23 @@ const wStyles = StyleSheet.create({
   dotActive: { width: 30, backgroundColor: "#C99317" },
   heading: {
     fontFamily: Fonts.serif.bold,
-    fontSize: 28,
+    fontSize: 22,
     color: "#432104",
     fontWeight: "700",
     marginBottom: 8,
-    textAlign: "center",
+    textAlign: "left",
   },
   subheading: {
-    fontSize: 16,
+    fontSize: 14,
     color: "#7B6550",
     fontFamily: Fonts.sans.regular,
     marginBottom: 18,
     lineHeight: 24,
     textAlign: "center",
+  },
+  purposeIntro: {
+    textAlign: "left",
+    marginBottom: 28,
   },
   helperCopyWrap: {
     alignItems: "center",
@@ -1329,39 +1390,78 @@ const wStyles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: "#C99317",
   },
-  purposeSection: { marginBottom: 20 },
+  purposeSection: { marginBottom: 28 },
+  purposeSectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
   purposeBandLabel: {
     fontFamily: Fonts.serif.bold,
     fontSize: 16,
     color: "#432104",
     fontWeight: "700",
-    marginBottom: 10,
   },
-  purposeGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  purposeHeaderLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "rgba(201,168,76,0.22)",
+  },
+  purposeGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    justifyContent: "space-between",
+  },
   purposeChip: {
-    width: "47%",
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(201,168,76,0.3)",
-    backgroundColor: "rgba(250,245,240,0.92)",
+    width: "48.5%",
+
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: "rgba(201,168,76,0.22)",
+    backgroundColor: "rgba(245,245,240,0.45)",
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    shadowColor: "#432104",
+    shadowOpacity: 0.05,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 1,
   },
   purposeChipActive: {
     borderColor: "#C99317",
-    backgroundColor: "rgba(201,147,23,0.1)",
+    backgroundColor: "rgba(255,251,244,0.98)",
+    shadowColor: "#DEB861",
+    shadowOpacity: 0.14,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 12 },
+  },
+  purposeChipIconWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 2,
+  },
+  purposeChipBody: {
+    flex: 1,
   },
   purposeChipLabel: {
     fontFamily: Fonts.serif.bold,
-    fontSize: 14,
+    fontSize: 13,
     color: "#432104",
     fontWeight: "600",
-    marginBottom: 2,
+    marginBottom: 4,
+    lineHeight: 16,
   },
   purposeChipLabelActive: { color: "#8B5E00" },
   purposeChipDesc: {
-    fontSize: 11,
+    fontSize: 12,
     color: "#A08060",
-    fontFamily: Fonts.sans.regular,
+    fontFamily: Fonts.sans.semiBold,
+    lineHeight: 18,
   },
   purposeChipDescActive: { color: "#7B5500" },
   suggestionCard: {

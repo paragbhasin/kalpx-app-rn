@@ -360,6 +360,110 @@ export function RoomGuidedSection({
     }
   }
 
+  if (stepModalVisible) {
+    return (
+      <StepModal
+        visible={stepModalVisible}
+        presentation="screen"
+        stepPayload={activeStepPayload}
+        label={activeAction?.label || "Step"}
+        onCancel={() => {
+          setStepModalVisible(false);
+          setActiveStepPayload(null);
+          setActiveAction(null);
+        }}
+        onDone={(extra: StepModalResult) => {
+          const stepPl = activeStepPayload;
+          const action = activeAction;
+          setStepModalVisible(false);
+          setActiveStepPayload(null);
+          setActiveAction(null);
+          if (!action) return;
+          if (extra.text || extra.grounding) {
+            postRoomSacred(roomId, {
+              writes_event:
+                stepPl?.persistence?.writes_event ??
+                action.persistence?.writes_event ??
+                null,
+              label: action.label,
+              action_id: action.action_id,
+              analytics_key: action.analytics_key ?? null,
+              captured_at: Date.now(),
+              text: extra.text ?? null,
+              life_context: screenData?.room_life_context ?? null,
+              journey_id: screenData?.journey_id ?? null,
+              day_number: screenData?.day_number ?? null,
+              source_surface: "step_pill",
+            });
+          }
+          onAction?.({
+            type: "room_step_completed",
+            payload: {
+              room_id: roomId,
+              action_id: action.action_id,
+              analytics_key: action.analytics_key,
+              template_id: stepPl?.template_id,
+              writes_event:
+                stepPl?.persistence?.writes_event ??
+                action.persistence?.writes_event,
+              ...(extra.text ? { text: extra.text } : {}),
+              ...(extra.grounding ? { grounding: extra.grounding } : {}),
+            },
+          });
+          maybeAdvanceToNextAction(action.action_id);
+        }}
+      />
+    );
+  }
+
+  if (carryModalVisible) {
+    return (
+      <CarryCaptureModal
+        visible={carryModalVisible}
+        presentation="screen"
+        label={activeAction?.label || "Carry"}
+        roomId={roomId}
+        actionId={activeAction?.action_id || ""}
+        analyticsKey={activeAction?.analytics_key ?? null}
+        writesEvent={
+          activeAction?.carry_payload?.writes_event ??
+          activeAction?.carry_payload?.persistence?.writes_event ??
+          activeAction?.persistence?.writes_event ??
+          null
+        }
+        carryPayload={activeAction?.carry_payload}
+        lifeContext={screenData?.room_life_context ?? null}
+        journeyId={screenData?.journey_id ?? null}
+        dayNumber={screenData?.day_number ?? null}
+        onCancel={() => {
+          setCarryModalVisible(false);
+          setActiveAction(null);
+        }}
+        onSave={(_text, _sacredWriteOk) => {
+          const action = activeAction;
+          setCarryModalVisible(false);
+          setActiveAction(null);
+          if (!action) return;
+          onAction?.({
+            type: "room_carry_captured",
+            payload: {
+              room_id: roomId,
+              action_id: action.action_id,
+              analytics_key: action.analytics_key,
+              label: action.label,
+              writes_event:
+                action.carry_payload?.writes_event ??
+                action.carry_payload?.persistence?.writes_event ??
+                action.persistence?.writes_event ??
+                null,
+            },
+          });
+          maybeAdvanceToNextAction(action.action_id);
+        }}
+      />
+    );
+  }
+
   return (
     <div
       style={{
@@ -852,56 +956,6 @@ export function RoomGuidedSection({
         </div>
       )}
 
-      <StepModal
-        visible={stepModalVisible}
-        stepPayload={activeStepPayload}
-        label={activeAction?.label || "Step"}
-        onCancel={() => {
-          setStepModalVisible(false);
-          setActiveStepPayload(null);
-          setActiveAction(null);
-        }}
-        onDone={(extra: StepModalResult) => {
-          const stepPl = activeStepPayload;
-          const action = activeAction;
-          setStepModalVisible(false);
-          setActiveStepPayload(null);
-          setActiveAction(null);
-          if (!action) return;
-          if (extra.text || extra.grounding) {
-            postRoomSacred(roomId, {
-              writes_event:
-                stepPl?.persistence?.writes_event ??
-                action.persistence?.writes_event ??
-                null,
-              label: action.label,
-              action_id: action.action_id,
-              analytics_key: action.analytics_key ?? null,
-              captured_at: Date.now(),
-              text: extra.text ?? null,
-              life_context: screenData?.room_life_context ?? null,
-              journey_id: screenData?.journey_id ?? null,
-              day_number: screenData?.day_number ?? null,
-              source_surface: "step_pill",
-            });
-          }
-          onAction?.({
-            type: "room_step_completed",
-            payload: {
-              room_id: roomId,
-              action_id: action.action_id,
-              analytics_key: action.analytics_key,
-              template_id: stepPl?.template_id,
-              writes_event:
-                stepPl?.persistence?.writes_event ??
-                action.persistence?.writes_event,
-              ...(extra.text ? { text: extra.text } : {}),
-              ...(extra.grounding ? { grounding: extra.grounding } : {}),
-            },
-          });
-          maybeAdvanceToNextAction(action.action_id);
-        }}
-      />
       <InquiryModal
         visible={inquiryModalVisible}
         label={activeAction?.label || "Inquiry"}
@@ -964,48 +1018,6 @@ export function RoomGuidedSection({
               text,
               category_id: cat.id,
               source: "inquiry",
-            },
-          });
-          maybeAdvanceToNextAction(action.action_id);
-        }}
-      />
-      <CarryCaptureModal
-        visible={carryModalVisible}
-        label={activeAction?.label || "Carry"}
-        roomId={roomId}
-        actionId={activeAction?.action_id || ""}
-        analyticsKey={activeAction?.analytics_key ?? null}
-        writesEvent={
-          activeAction?.carry_payload?.writes_event ??
-          activeAction?.carry_payload?.persistence?.writes_event ??
-          activeAction?.persistence?.writes_event ??
-          null
-        }
-        carryPayload={activeAction?.carry_payload}
-        lifeContext={screenData?.room_life_context ?? null}
-        journeyId={screenData?.journey_id ?? null}
-        dayNumber={screenData?.day_number ?? null}
-        onCancel={() => {
-          setCarryModalVisible(false);
-          setActiveAction(null);
-        }}
-        onSave={(_text, _sacredWriteOk) => {
-          const action = activeAction;
-          setCarryModalVisible(false);
-          setActiveAction(null);
-          if (!action) return;
-          onAction?.({
-            type: "room_carry_captured",
-            payload: {
-              room_id: roomId,
-              action_id: action.action_id,
-              analytics_key: action.analytics_key,
-              label: action.label,
-              writes_event:
-                action.carry_payload?.writes_event ??
-                action.carry_payload?.persistence?.writes_event ??
-                action.persistence?.writes_event ??
-                null,
             },
           });
           maybeAdvanceToNextAction(action.action_id);

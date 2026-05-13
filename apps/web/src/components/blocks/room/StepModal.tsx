@@ -12,7 +12,10 @@ declare global {
         play: () => void;
         pause: () => void;
         destroy: () => void;
-        playSegments: (segments: [number, number] | [number, number][], forceFlag?: boolean) => void;
+        playSegments: (
+          segments: [number, number] | [number, number][],
+          forceFlag?: boolean,
+        ) => void;
         goToAndStop: (value: number, isFrame?: boolean) => void;
         addEventListener: (name: string, cb: () => void) => void;
         removeEventListener: (name: string, cb: () => void) => void;
@@ -73,6 +76,7 @@ interface Props {
   onDone: (extra: StepModalResult) => void;
   errorMessage?: string | null;
   isSubmitting?: boolean;
+  presentation?: "modal" | "screen";
 }
 
 export function StepModal({
@@ -83,8 +87,10 @@ export function StepModal({
   onDone,
   errorMessage,
   isSubmitting = false,
+  presentation = "modal",
 }: Props) {
   const kind = classifyStep(stepPayload?.template_id);
+  const isScreen = presentation === "screen";
 
   useEffect(() => {
     if (!visible) return;
@@ -100,51 +106,59 @@ export function StepModal({
   return (
     <div
       style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.35)",
-        zIndex: 300,
+        position: isScreen ? "relative" : "fixed",
+        inset: isScreen ? undefined : 0,
+        background: isScreen ? "transparent" : "rgba(0,0,0,0.35)",
+        zIndex: isScreen ? undefined : 300,
         display: "flex",
-        alignItems: "flex-end",
+        alignItems: isScreen ? "stretch" : "flex-end",
         justifyContent: "center",
+        minHeight: isScreen ? "100%" : undefined,
       }}
-      onClick={(e) => e.target === e.currentTarget && onCancel()}
+      onClick={(e) => !isScreen && e.target === e.currentTarget && onCancel()}
     >
       <div
         data-testid="step-modal"
         style={{
           width: "100%",
-          maxWidth: 480,
-          background: "#fdf8ef",
-          backgroundImage: "url(/beige_bg.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          borderRadius: "24px 24px 0 0",
+          maxWidth: isScreen ? 780 : 480,
+          background: isScreen ? "transparent" : "#fdf8ef",
+          backgroundImage: isScreen ? "none" : "url(/beige_bg.png)",
+          backgroundSize: isScreen ? undefined : "cover",
+          backgroundPosition: isScreen ? undefined : "center",
+          borderRadius: isScreen ? 0 : "24px 24px 0 0",
           padding: "0 0 32px",
-          maxHeight: "90dvh",
+          minHeight: isScreen ? "100%" : undefined,
+          maxHeight: isScreen ? "100dvh" : "90dvh",
           overflowY: "auto",
         }}
       >
-        {/* Handle */}
+        {!isScreen && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              padding: "12px 0 4px",
+            }}
+          >
+            <div
+              style={{
+                width: 40,
+                height: 4,
+                borderRadius: 2,
+                background: "#E0E0E2",
+              }}
+            />
+          </div>
+        )}
+
+        {/* Header */}
         <div
           style={{
             display: "flex",
-            justifyContent: "center",
-            padding: "12px 0 4px",
+            padding: isScreen ? "22px 24px 8px" : "14px 16px 4px",
           }}
         >
-          <div
-            style={{
-              width: 40,
-              height: 4,
-              borderRadius: 2,
-              background: "#E0E0E2",
-            }}
-          />
-        </div>
-
-        {/* Header */}
-        <div style={{ display: "flex", padding: "14px 16px 4px" }}>
           <button
             data-testid="step-modal-cancel"
             onClick={onCancel}
@@ -166,7 +180,7 @@ export function StepModal({
             fontWeight: 600,
             color: "#1C1C1E",
             textAlign: "center",
-            padding: "0 20px 12px",
+            padding: isScreen ? "0 24px 20px" : "0 20px 12px",
             lineHeight: 1.4,
           }}
         >
@@ -175,7 +189,10 @@ export function StepModal({
 
         {/* Body */}
         <div
-          style={{ padding: "0 24px", opacity: isSubmitting ? 0.55 : 1 }}
+          style={{
+            padding: isScreen ? "0 24px 32px" : "0 24px",
+            opacity: isSubmitting ? 0.55 : 1,
+          }}
           data-testid="step-modal-body"
         >
           {(kind === "timer_breathe" ||

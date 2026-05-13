@@ -669,15 +669,94 @@ export function InnerPathPage() {
               onClick={() => setWhyChosenOpen((value) => !value)}
             />
             {whyChosenOpen && (
-              <div style={{ marginTop: 12, padding: "6px 4px 0" }}>
+              <div
+                style={{
+                  marginTop: 14,
+                  padding: "20px 18px 18px",
+                  borderRadius: 11,
+                  border: "1px solid rgba(233, 214, 179, 0.95)",
+                  background:
+                    "linear-gradient(180deg, rgba(255,251,245,0.98) 0%, rgba(255,247,235,0.94) 48%, rgba(252,242,226,0.96) 100%)",
+                  boxShadow:
+                    "0 18px 40px rgba(139, 106, 42, 0.08), inset 0 1px 0 rgba(255,255,255,0.85)",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background:
+                      "radial-gradient(circle at top right, rgba(243,224,188,0.45), transparent 30%), radial-gradient(circle at bottom left, rgba(214,188,134,0.22), transparent 32%)",
+                    pointerEvents: "none",
+                  }}
+                />
                 {whyTabs.length > 0 ? (
-                  <div>
+                  <div style={{ position: "relative", zIndex: 1 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        marginBottom: 18,
+                      }}
+                    >
+                      {/* <div
+                        style={{
+                          width: 38,
+                          height: 38,
+                          borderRadius: "50%",
+                          background:
+                            "linear-gradient(180deg, rgba(255,247,228,0.95), rgba(247,231,194,0.95))",
+                          border: "1px solid rgba(214,183,130,0.55)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          boxShadow:
+                            "0 8px 22px rgba(179,135,34,0.12), inset 0 1px 0 rgba(255,255,255,0.8)",
+                        }}
+                      >
+                        <img
+                          src="/lotus_icon.png"
+                          alt=""
+                          style={{ width: 18, height: 14, opacity: 0.82 }}
+                        />
+                      </div> */}
+                      <div>
+                        <p
+                          style={{
+                            margin: "0 0 3px",
+                            fontSize: 11,
+                            letterSpacing: 1.6,
+                            textTransform: "uppercase",
+                            color: "#B38722",
+                            fontWeight: 700,
+                          }}
+                        >
+                          Chosen with care
+                        </p>
+                        <p
+                          style={{
+                            margin: 0,
+                            fontFamily: "var(--kalpx-font-serif)",
+                            fontSize: 18,
+                            lineHeight: 1.2,
+                            color: "#432104",
+                          }}
+                        >
+                          Why this supports today
+                        </p>
+                      </div>
+                    </div>
                     <div
                       style={{
                         display: "flex",
                         gap: 8,
                         marginBottom: 18,
                         flexWrap: "wrap",
+                        justifyContent: "center",
                       }}
                     >
                       {whyTabs.map((item) => {
@@ -689,20 +768,23 @@ export function InnerPathPage() {
                             onClick={() => setActiveWhyTab(item.slot)}
                             style={{
                               border: isActive
-                                ? "1px solid rgba(179, 135, 34, 0.55)"
-                                : "1px solid rgba(214,183,130,0.35)",
-                              background: isActive
-                                ? "rgba(255, 248, 236, 0.95)"
-                                : "rgba(255,255,255,0.72)",
+                                ? "1px solid rgba(179, 135, 34, 0.68)"
+                                : "1px solid rgba(214,183,130,0.42)",
+
                               color: isActive ? "#8B6A2A" : "#7F6A52",
-                              padding: "8px 12px",
+                              padding: "8px 10px",
                               borderRadius: 999,
                               fontSize: 12,
                               fontWeight: 700,
-                              letterSpacing: 0.6,
+                              letterSpacing: 0.9,
                               textTransform: "uppercase",
                               cursor: "pointer",
                               fontFamily: "var(--kalpx-font-sans)",
+                              boxShadow: isActive
+                                ? "0 10px 20px rgba(179,135,34,0.12)"
+                                : "none",
+                              transition:
+                                "background 160ms ease, box-shadow 160ms ease, border-color 160ms ease",
                             }}
                           >
                             {item.label}
@@ -714,8 +796,8 @@ export function InnerPathPage() {
                     {activeWhyItem && (
                       <div
                         style={{
-                          borderTop: "1px solid rgba(214,183,130,0.35)",
-                          paddingTop: 18,
+                          borderTop: "1px solid rgba(214,183,130,0.36)",
+                          paddingTop: 20,
                         }}
                       >
                         <p
@@ -731,91 +813,212 @@ export function InnerPathPage() {
                         >
                           {activeWhyItem.label}
                         </p>
-                        {/* <p
+                        <p
                           style={{
-                            margin: "0 0 14px",
+                            margin: "0 0 18px",
                             fontFamily: "var(--kalpx-font-serif)",
-                            fontSize: 22,
+                            fontSize: 18,
                             fontWeight: 700,
-                            lineHeight: 1.35,
-                            color: "var(--kalpx-text)",
+                            lineHeight: 1.18,
+                            color: "#432104",
+                            textWrap: "balance",
                           }}
                         >
                           {activeWhyItem.title}
-                        </p> */}
+                        </p>
 
                         {activeWhyItem.slot === "sankalp"
                           ? !!activeWhyItem.context?.mitra_frame_through && (
-                              <p
+                              <div
                                 style={{
                                   margin: "0 0 14px",
-                                  fontSize: 15,
-                                  lineHeight: 1.75,
-                                  color: "#5D5348",
+                                  padding: "14px 16px",
+                                  borderRadius: 18,
+                                  background:
+                                    "linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,248,237,0.88))",
+                                  border: "1px solid rgba(230, 214, 186, 0.9)",
                                 }}
                               >
-                                {sentence(
-                                  `This is ${activeWhyItem.context.mitra_frame_through}`,
-                                )}
-                              </p>
+                                <p
+                                  style={{
+                                    margin: "0 0 6px",
+                                    fontSize: 11,
+                                    letterSpacing: 1.4,
+                                    textTransform: "uppercase",
+                                    color: "#A57A2B",
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  Essence
+                                </p>
+                                <p
+                                  style={{
+                                    margin: 0,
+                                    fontSize: 16,
+                                    lineHeight: 1.75,
+                                    color: "#5D5348",
+                                  }}
+                                >
+                                  {sentence(
+                                    `This is ${activeWhyItem.context.mitra_frame_through}`,
+                                  )}
+                                </p>
+                              </div>
                             )
                           : !!activeWhyItem.context?.mitra_frame_through && (
-                              <p
+                              <div
                                 style={{
                                   margin: "0 0 14px",
-                                  fontSize: 15,
-                                  lineHeight: 1.75,
-                                  color: "#5D5348",
+                                  padding: "14px 16px",
+                                  borderRadius: 18,
+                                  background:
+                                    "linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,248,237,0.88))",
+                                  border: "1px solid rgba(230, 214, 186, 0.9)",
                                 }}
                               >
-                                {sentence(
-                                  `${activeWhyItem.title || "This"} is ${activeWhyItem.context.mitra_frame_through}`,
-                                )}
-                              </p>
+                                <p
+                                  style={{
+                                    margin: "0 0 6px",
+                                    fontSize: 11,
+                                    letterSpacing: 1.4,
+                                    textTransform: "uppercase",
+                                    color: "#A57A2B",
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  Essence
+                                </p>
+                                <p
+                                  style={{
+                                    margin: 0,
+                                    fontSize: 16,
+                                    lineHeight: 1.75,
+                                    color: "#5D5348",
+                                  }}
+                                >
+                                  {sentence(
+                                    `${activeWhyItem.title || "This"} is ${activeWhyItem.context.mitra_frame_through}`,
+                                  )}
+                                </p>
+                              </div>
                             )}
 
                         {!!activeWhyItem.shift && (
-                          <p
+                          <div
                             style={{
                               margin: "0 0 14px",
-                              fontSize: 15,
-                              lineHeight: 1.75,
-                              color: "#5D5348",
+                              padding: "14px 16px",
+                              borderRadius: 18,
+                              background:
+                                "linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,248,237,0.88))",
+                              border: "1px solid rgba(230, 214, 186, 0.9)",
                             }}
                           >
-                            {sentence(
-                              `Mitra chose this to guide you from ${activeWhyItem.shift}`,
-                            )}
-                          </p>
+                            <p
+                              style={{
+                                margin: "0 0 6px",
+                                fontSize: 11,
+                                letterSpacing: 1.4,
+                                textTransform: "uppercase",
+                                color: "#A57A2B",
+                                fontWeight: 700,
+                              }}
+                            >
+                              Shift
+                            </p>
+                            <p
+                              style={{
+                                margin: 0,
+                                fontSize: 16,
+                                lineHeight: 1.75,
+                                color: "#5D5348",
+                              }}
+                            >
+                              {sentence(
+                                `Mitra chose this to guide you from ${activeWhyItem.shift}`,
+                              )}
+                            </p>
+                          </div>
                         )}
 
-                        {!!activeWhyItem.context?.mitra_use_for && (
-                          <p
-                            style={{
-                              margin: "0 0 14px",
-                              fontSize: 15,
-                              lineHeight: 1.75,
-                              color: "#5D5348",
-                            }}
-                          >
-                            <strong>It is useful for:</strong>{" "}
-                            {sentence(activeWhyItem.context.mitra_use_for)}
-                          </p>
-                        )}
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns:
+                              "repeat(auto-fit, minmax(220px, 1fr))",
+                            gap: 12,
+                          }}
+                        >
+                          {!!activeWhyItem.context?.mitra_use_for && (
+                            <div
+                              style={{
+                                padding: "14px 16px",
+                                borderRadius: 18,
+                                background: "rgba(255,255,255,0.64)",
+                                border: "1px solid rgba(230, 214, 186, 0.86)",
+                              }}
+                            >
+                              <p
+                                style={{
+                                  margin: "0 0 8px",
+                                  fontSize: 11,
+                                  letterSpacing: 1.4,
+                                  textTransform: "uppercase",
+                                  color: "#A57A2B",
+                                  fontWeight: 700,
+                                }}
+                              >
+                                Useful for
+                              </p>
+                              <p
+                                style={{
+                                  margin: 0,
+                                  fontSize: 15,
+                                  lineHeight: 1.7,
+                                  color: "#5D5348",
+                                }}
+                              >
+                                {sentence(activeWhyItem.context.mitra_use_for)}
+                              </p>
+                            </div>
+                          )}
 
-                        {!!activeWhyItem.context?.commentary_lineage && (
-                          <p
-                            style={{
-                              margin: 0,
-                              fontSize: 15,
-                              lineHeight: 1.75,
-                              color: "#5D5348",
-                            }}
-                          >
-                            <strong>It is rooted in:</strong>{" "}
-                            {sentence(activeWhyItem.context.commentary_lineage)}
-                          </p>
-                        )}
+                          {!!activeWhyItem.context?.commentary_lineage && (
+                            <div
+                              style={{
+                                padding: "14px 16px",
+                                borderRadius: 18,
+                                background: "rgba(255,255,255,0.64)",
+                                border: "1px solid rgba(230, 214, 186, 0.86)",
+                              }}
+                            >
+                              <p
+                                style={{
+                                  margin: "0 0 8px",
+                                  fontSize: 11,
+                                  letterSpacing: 1.4,
+                                  textTransform: "uppercase",
+                                  color: "#A57A2B",
+                                  fontWeight: 700,
+                                }}
+                              >
+                                Rooted in
+                              </p>
+                              <p
+                                style={{
+                                  margin: 0,
+                                  fontSize: 15,
+                                  lineHeight: 1.7,
+                                  color: "#5D5348",
+                                }}
+                              >
+                                {sentence(
+                                  activeWhyItem.context.commentary_lineage,
+                                )}
+                              </p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>

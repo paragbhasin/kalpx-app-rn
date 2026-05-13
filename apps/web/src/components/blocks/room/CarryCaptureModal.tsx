@@ -328,6 +328,7 @@ interface Props {
   onReturnHome?: () => void;
   isJoyCarry?: boolean;
   showConfirmationTray?: boolean;
+  presentation?: "modal" | "screen";
 }
 
 export function CarryCaptureModal({
@@ -347,6 +348,7 @@ export function CarryCaptureModal({
   onReturnHome,
   isJoyCarry = false,
   showConfirmationTray = true,
+  presentation = "modal",
 }: Props) {
   const [text, setText] = useState("");
   const [confirmation, setConfirmation] = useState<ConfirmationState>({
@@ -358,6 +360,7 @@ export function CarryCaptureModal({
   const copy = getCarryCopy(writesEvent, carryPayload, lifeContext);
   const trimmed = text.trim();
   const enabled = trimmed.length >= 1 && !isSubmitting;
+  const isScreen = presentation === "screen";
 
   useEffect(() => {
     if (!visible) {
@@ -410,16 +413,20 @@ export function CarryCaptureModal({
   return (
     <div
       style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.35)",
-        zIndex: 300,
+        position: isScreen ? "relative" : "fixed",
+        inset: isScreen ? undefined : 0,
+        background: isScreen ? "transparent" : "rgba(0,0,0,0.35)",
+        zIndex: isScreen ? undefined : 300,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        minHeight: isScreen ? "100%" : undefined,
       }}
       onClick={(e) =>
-        e.target === e.currentTarget && !confirmation.visible && onCancel()
+        !isScreen &&
+        e.target === e.currentTarget &&
+        !confirmation.visible &&
+        onCancel()
       }
       data-testid="carry-capture-modal-backdrop"
     >
@@ -428,34 +435,35 @@ export function CarryCaptureModal({
         style={{
           width: "100%",
           maxWidth: 780,
-          background: "#fdf8ef",
-          backgroundImage: "url(/beige_bg.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-
+          background: isScreen ? "transparent" : "#fdf8ef",
+          backgroundImage: isScreen ? "none" : "url(/beige_bg.png)",
+          backgroundSize: isScreen ? undefined : "cover",
+          backgroundPosition: isScreen ? undefined : "center",
+          minHeight: isScreen ? "100%" : undefined,
           padding: "0 0 32px",
-          maxHeight: "calc(100dvh - 40px)",
+          maxHeight: isScreen ? "100dvh" : "calc(100dvh - 40px)",
           overflowY: "auto",
-          boxShadow: "0 18px 50px rgba(48, 28, 6, 0.16)",
+          boxShadow: isScreen ? "none" : "0 18px 50px rgba(48, 28, 6, 0.16)",
         }}
       >
-        {/* Handle */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            padding: "12px 0 4px",
-          }}
-        >
+        {!isScreen && (
           <div
             style={{
-              width: 40,
-              height: 4,
-              borderRadius: 2,
-              background: "#E0E0E2",
+              display: "flex",
+              justifyContent: "center",
+              padding: "12px 0 4px",
             }}
-          />
-        </div>
+          >
+            <div
+              style={{
+                width: 40,
+                height: 4,
+                borderRadius: 2,
+                background: "#E0E0E2",
+              }}
+            />
+          </div>
+        )}
 
         {confirmation.visible ? (
           /* Confirmation state */
@@ -687,7 +695,7 @@ export function CarryCaptureModal({
                 maxLength={MAX_TEXT}
                 style={{
                   width: "100%",
-                  minHeight: 320,
+                  minHeight: 250,
                   border: "1px solid rgba(196, 181, 161, 0.92)",
                   borderRadius: 28,
                   padding: "28px 28px 54px",

@@ -125,7 +125,7 @@ function MantraTextCard({
           <View style={styles.expandArrowWrap}>
             <Ionicons
               name={expanded ? "chevron-up" : "chevron-down"}
-              size={18}
+              size={16}
               color="#B89450"
             />
           </View>
@@ -393,7 +393,6 @@ export default function QuickResetScreen({
 
         {mantra.audio_url ? (
           <View style={styles.audioWrap}>
-            <Text style={styles.audioLabel}>MANTRA AUDIO</Text>
             <AudioPlayerBlock
               block={{
                 audio_url: mantra.audio_url,
@@ -963,12 +962,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    rowGap: 12,
+    rowGap: 4,
     marginTop: 4,
   },
   repChip: {
-    width: 76,
-    height: 60,
+    width: 60,
+    height: 30,
     borderRadius: 22,
     borderWidth: 1,
     borderColor: "#E8C587",
@@ -1004,10 +1003,10 @@ const styles = StyleSheet.create({
     width: "100%",
     borderWidth: 1,
     borderColor: "rgba(218,194,142,0.65)",
-    borderRadius: 20,
+    borderRadius: 11,
     backgroundColor: "rgba(255,255,255,0.72)",
-    paddingHorizontal: 18,
-    paddingVertical: 18,
+    paddingHorizontal: 8,
+    paddingVertical: 10,
   },
   collapsibleHeader: {
     flexDirection: "row",
@@ -1034,15 +1033,15 @@ const styles = StyleSheet.create({
   },
   primaryBtn: {
     backgroundColor: "#C99317",
-    borderRadius: 15,
-    paddingHorizontal: 40,
-    paddingVertical: 16,
+    borderRadius: 11,
+    // paddingHorizontal: 40,
+    paddingVertical: 14,
     width: "100%",
     alignItems: "center",
     marginTop: 6,
   },
   primaryBtnText: {
-    fontSize: 17,
+    fontSize: 14,
     fontFamily: Fonts.sans.semiBold,
     color: "#fff",
   },
@@ -1069,8 +1068,8 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   secondaryActionIconWrap: {
-    width: 48,
-    height: 48,
+    width: 40,
+    height: 40,
     borderRadius: 24,
     borderWidth: 1,
     borderStyle: "dashed",

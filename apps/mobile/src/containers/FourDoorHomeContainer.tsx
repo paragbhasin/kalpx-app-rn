@@ -13,7 +13,6 @@ import {
 } from "@kalpx/contracts";
 import type { QuickCheckinPranaLabel } from "@kalpx/types";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import { BlurView } from "expo-blur";
 import React, {
   useCallback,
   useEffect,
@@ -26,6 +25,7 @@ import {
   ImageBackground,
   Platform,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -37,7 +37,6 @@ import M3Icon from "../../../web/public/mitra1.svg";
 import Mp2Icon from "../../../web/public/mitra2.svg";
 import Mp3Icon from "../../../web/public/mitra3.svg";
 import Mp4Icon from "../../../web/public/mitra4.svg";
-import Header from "../components/Header";
 import {
   mitraJourneyHomeV3,
   mitraPranaAcknowledge,
@@ -58,7 +57,8 @@ const FEELING_OPTIONS: FeelingOption[] = [
 
 const HERO_DAY = require("../../assets/imgsun.png");
 const HERO_NIGHT = require("../../assets/night-home.png");
-const HEADER_OVERLAY_HEIGHT = 48;
+const SHELL_HEADER_HEIGHT =
+  Platform.OS === "android" ? 45 + (StatusBar.currentHeight || 0) : 45;
 
 function getRhythmTimeBand(): "morning" | "afternoon" | "night" {
   const hour = new Date().getHours();
@@ -130,6 +130,10 @@ export default function FourDoorHomeContainer({
   const loadScreen = useScreenStore((state) => state.loadScreen);
   const updateScreenData = useScreenStore((state) => state.updateScreenData);
   const setCurrentScreen = useScreenStore((state) => state.setCurrentScreen);
+  const updateBackground = useScreenStore((state) => state.updateBackground);
+  const updateHeaderHidden = useScreenStore(
+    (state) => state.updateHeaderHidden,
+  );
   const screenData = useScreenStore((state) => state.screenData);
   const homeData = useSelector((state: any) => state.door?.homeData);
   const hasSkippedInitialFocusRefresh = useRef(false);
@@ -137,7 +141,6 @@ export default function FourDoorHomeContainer({
 
   const [loading, setLoading] = useState(!homeData);
   const [error, setError] = useState<string | null>(null);
-  const [isHeaderBlurred, setIsHeaderBlurred] = useState(false);
   const [selectedFeeling, setSelectedFeeling] = useState<FeelingOption | null>(
     null,
   );
@@ -183,10 +186,11 @@ export default function FourDoorHomeContainer({
     }, [loadHome]),
   );
 
-  const handleScroll = useCallback((event: any) => {
-    const offsetY = event.nativeEvent.contentOffset?.y ?? 0;
-    setIsHeaderBlurred(offsetY > 8);
-  }, []);
+  useEffect(() => {
+    updateBackground(require("../../assets/beige_bg.png"));
+    updateHeaderHidden(false);
+    return () => updateHeaderHidden(false);
+  }, [updateBackground, updateHeaderHidden]);
 
   const handleFeelingSelect = useCallback(
     async (feeling: FeelingOption) => {
@@ -327,39 +331,25 @@ export default function FourDoorHomeContainer({
   const acw = homeData.active_checkin_window;
   const windowActive = acw?.active === true;
   const hasRhythm = homeData?.companion_rhythm?.has_rhythm === true;
-  const currentRouteName = navigation.getState?.()?.routes?.slice(-1)?.[0]?.name;
+  const currentRouteName = navigation
+    .getState?.()
+    ?.routes?.slice(-1)?.[0]?.name;
 
   return (
     <View style={styles.screen}>
-      <View
-        style={[
-          styles.headerOverlay,
-          {
-            paddingTop: insets.top,
-            height: insets.top + HEADER_OVERLAY_HEIGHT,
-          },
-        ]}
-      >
-        {isHeaderBlurred ? (
-          <BlurView
-            intensity={28}
-            tint={greetingVisual.isNightGreeting ? "dark" : "light"}
-            style={styles.headerBlur}
-          >
-            <Header isTransparent />
-          </BlurView>
-        ) : (
-          <Header isTransparent />
-        )}
-      </View>
       <ScrollView
         style={styles.root}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        scrollEventThrottle={16}
-        onScroll={handleScroll}
       >
-        <View style={styles.heroWrap}>
+        <View
+          style={[
+            styles.heroWrap,
+            {
+              marginTop: -SHELL_HEADER_HEIGHT,
+            },
+          ]}
+        >
           <ImageBackground
             source={greetingVisual.image}
             resizeMode="cover"
@@ -370,8 +360,8 @@ export default function FourDoorHomeContainer({
                 styles.heroInner,
                 {
                   paddingTop: Math.max(
-                    insets.top + HEADER_OVERLAY_HEIGHT + 12,
-                    Platform.OS === "ios" ? 72 : 64,
+                    insets.top + SHELL_HEADER_HEIGHT + 18,
+                    92,
                   ),
                 },
               ]}
@@ -570,19 +560,11 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
+  screenBackground: {
+    opacity: 1,
+  },
   root: {
     flex: 1,
-  },
-  headerOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-  },
-  headerBlur: {
-    flex: 1,
-    backgroundColor: "rgba(255,255,255,0.08)",
   },
   scrollContent: {
     paddingBottom: 120,
@@ -615,8 +597,8 @@ const styles = StyleSheet.create({
     marginBottom: 22,
   },
   heroImage: {
-    minHeight: 260,
-    // justifyContent: "space-between",
+    minHeight: 320,
+    backgroundColor: "transparent",
   },
   heroInner: {
     flex: 1,
@@ -624,10 +606,14 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     justifyContent: "space-between",
   },
+  logo: {
+    width: 108,
+    height: 48,
+  },
   heroCopy: {
     gap: 6,
     paddingBottom: 10,
-    marginTop: 54,
+    marginTop: 24,
   },
   heroHeadline: {
     fontSize: 22,

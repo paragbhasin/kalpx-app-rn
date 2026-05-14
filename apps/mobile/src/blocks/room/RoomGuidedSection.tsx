@@ -223,6 +223,12 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     roomCtx.sanatan_insight_line ?? ctx.sanatan_insight_line ?? null;
   const principleBanner = envelope.principle_banner ?? null;
   const memoryEchoLine = envelope.memory_echo_line ?? null;
+  const completionMessage =
+    envelope.opening_line || "Complete. You stayed with the practice.";
+  const completionWisdom =
+    roomCtx.bridge_line ||
+    roomCtx.sanatan_insight_line ||
+    "Let what became clear stay with you.";
 
   const [whyExpanded, setWhyExpanded] = useState(false);
   const [recommendedExpanded, setRecommendedExpanded] = useState(false);
@@ -239,13 +245,6 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   const [pendingCategory, setPendingCategory] =
     useState<InquiryCategory | null>(null);
 
-  const triggerRoomReflection = useCallback(() => {
-    actionCtx.setScreenValue(true, "show_room_reflection");
-    actionCtx.setScreenValue(false, "room_sequence_active");
-    actionCtx.setScreenValue(null, "room_sequence_resume_action_id");
-    loadScreen({ container_id: "room", state_id: "render" } as any);
-  }, [actionCtx, loadScreen]);
-
   function maybeAdvanceToNextAction(completedActionId?: string | null) {
     if (!sequenceActive || !completedActionId) return;
     const currentIndex = orderedActions.findIndex(
@@ -255,7 +254,24 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     const nextAction = orderedActions[currentIndex + 1];
     if (!nextAction) {
       setSequenceActive(false);
-      triggerRoomReflection();
+      void executeAction(
+        {
+          type: "room_sequence_completed",
+          payload: {
+            room_id: roomId,
+            completion_return: {
+              message: completionMessage,
+              wisdom_anchor_line: completionWisdom,
+              reflection_prompt: "Anything to carry from this?",
+              return_home_cta: "Return to Mitra Home",
+              repeat_cta: "Repeat",
+              return_action: "return_to_mitra_home",
+              repeat_action: "repeat_room_sequence",
+            },
+          },
+        } as any,
+        actionCtx,
+      );
       return;
     }
     setTimeout(() => launchAction(nextAction), 120);
@@ -418,8 +434,9 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     }
   }, [
     actionCtx,
+    completionMessage,
+    completionWisdom,
     envelope?.room_id,
-    maybeAdvanceToNextAction,
     orderedActions,
     sequenceActive,
   ]);

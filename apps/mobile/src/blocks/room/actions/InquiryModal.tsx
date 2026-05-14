@@ -115,7 +115,9 @@ const InquiryModal: React.FC<Props> = ({
 
   const isScreen = presentation === "screen";
   const introText =
-    inquiryPayload?.body || inquiryPayload?.description || inquiryPayload?.prompt;
+    inquiryPayload?.body ||
+    inquiryPayload?.description ||
+    inquiryPayload?.prompt;
 
   return (
     <Modal
@@ -192,9 +194,9 @@ const InquiryModal: React.FC<Props> = ({
                     <Text style={styles.headerCancel}>Cancel</Text>
                   </TouchableOpacity>
                 )}
-                <Text style={styles.headerTitle} numberOfLines={1}>
+                {/* <Text style={styles.headerTitle} numberOfLines={1}>
                   {selected ? selected.label : label}
-                </Text>
+                </Text> */}
                 <View style={styles.headerSpacer} />
               </View>
 
@@ -224,7 +226,9 @@ const InquiryModal: React.FC<Props> = ({
                             <View style={styles.screenDividerLine} />
                           </View>
                           {introText ? (
-                            <Text style={styles.screenHeroBody}>{introText}</Text>
+                            <Text style={styles.screenHeroBody}>
+                              {introText}
+                            </Text>
                           ) : null}
                         </View>
                       ) : null}
@@ -464,7 +468,7 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   screenHeroTitle: {
-    fontSize: 36,
+    fontSize: 22,
     lineHeight: 42,
     fontWeight: "700",
     color: "#432104",
@@ -506,8 +510,8 @@ const styles = StyleSheet.create({
   },
 
   categoryRow: {
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
     borderRadius: 28,
     borderWidth: 0.4,
     borderColor: "#c89a47",
@@ -515,7 +519,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   screenCategoryRow: {
-    minHeight: 76,
+    // minHeight: 76,
     justifyContent: "center",
     borderRadius: 999,
     borderColor: "rgba(201,168,76,0.52)",
@@ -534,7 +538,7 @@ const styles = StyleSheet.create({
     color: "#432104",
   },
   screenCategoryLabel: {
-    fontSize: 18,
+    fontSize: 14,
     lineHeight: 24,
   },
 

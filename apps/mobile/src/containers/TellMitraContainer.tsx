@@ -22,6 +22,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Fonts } from '../theme/fonts';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -43,8 +44,18 @@ import { screenActions, loadScreenWithData, goBackWithData } from '../store/scre
 
 const MAX_CHARS = 1000;
 const THREAD_UI_ENABLED = (process.env.EXPO_PUBLIC_MITRA_TELL_MITRA_THREAD_UI ?? '0') === '1';
+const THREAD_STORAGE_KEY = 'tell_mitra_thread_v1';
+const RETURN_ROOM_KEY = 'tell_mitra_return_room_v1';
 
 function genId() { return `${Date.now()}_${Math.random().toString(36).slice(2, 7)}`; }
+
+async function persistTellMitraThread(
+  items: TellMitraConversationItem[],
+): Promise<void> {
+  try {
+    await AsyncStorage.setItem(THREAD_STORAGE_KEY, JSON.stringify(items));
+  } catch {}
+}
 
 export default function TellMitraContainer() {
   const dispatch = useDispatch();
@@ -97,6 +108,68 @@ export default function TellMitraContainer() {
     screenBridgeRef.current = screenBridge;
   });
 
+  useEffect(() => {
+    if (!THREAD_UI_ENABLED) return;
+    let cancelled = false;
+    (async () => {
+      let restored: TellMitraConversationItem[] = [];
+      try {
+        const raw = await AsyncStorage.getItem(THREAD_STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw) as TellMitraConversationItem[];
+          if (Array.isArray(parsed)) restored = parsed;
+        }
+      } catch {}
+
+      try {
+        const returnRaw = await AsyncStorage.getItem(RETURN_ROOM_KEY);
+        if (returnRaw) {
+          const pending = JSON.parse(returnRaw) as {
+            room_id: string;
+            room_label: string;
+            return_key?: string;
+            tell_mitra_event_id?: string | number | null;
+            room_entry_context?: TellMitraRoomEntryContext | null;
+          };
+          await AsyncStorage.removeItem(RETURN_ROOM_KEY);
+          const alreadyHasReturn = restored.some(
+            (item) =>
+              item.type === 'return_card' &&
+              (item.return_key
+                ? item.return_key === pending.return_key
+                : item.room_id === pending.room_id),
+          );
+          if (!alreadyHasReturn) {
+            restored.push({
+              id: genId(),
+              type: 'return_card',
+              room_id: pending.room_id,
+              room_label: pending.room_label,
+              return_key: pending.return_key,
+              tell_mitra_event_id: pending.tell_mitra_event_id,
+              room_entry_context: pending.room_entry_context,
+            });
+          }
+        }
+      } catch {}
+
+      if (cancelled || restored.length === 0) return;
+      setConversation(restored);
+      setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 150);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!THREAD_UI_ENABLED) return;
+    void AsyncStorage.setItem(THREAD_STORAGE_KEY, JSON.stringify(conversation)).catch(
+      () => {},
+    );
+  }, [conversation]);
+
   const buildActionContext = useCallback(() => {
     return {
       screenState: screenBridgeRef.current.screenData || {},
@@ -146,6 +219,7 @@ export default function TellMitraContainer() {
         }];
       });
       setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 150);
+      void AsyncStorage.removeItem(RETURN_ROOM_KEY).catch(() => {});
     }, [])
   );
 
@@ -453,18 +527,34 @@ export default function TellMitraContainer() {
       tell_mitra_event_id: item.tell_mitra_event_id,
       room_entry_context: item.room_entry_context,
     };
-    void executeAction(
-      {
-        type: 'enter_room',
-        payload: {
-          room_id: item.room_id,
-          source: 'tell_mitra',
-          tell_mitra_event_id: item.tell_mitra_event_id,
-          room_entry_context: item.room_entry_context,
-        },
-      } as any,
-      buildActionContext() as any,
-    );
+    void (async () => {
+      await persistTellMitraThread(conversation);
+      try {
+        await AsyncStorage.setItem(
+          RETURN_ROOM_KEY,
+          JSON.stringify({
+            room_id: item.room_id,
+            room_label: item.room_label,
+            tell_mitra_event_id: item.tell_mitra_event_id,
+            room_entry_context: item.room_entry_context,
+            timestamp: Date.now(),
+            return_key: returnKey,
+          }),
+        );
+      } catch {}
+      await executeAction(
+        {
+          type: 'enter_room',
+          payload: {
+            room_id: item.room_id,
+            source: 'tell_mitra',
+            tell_mitra_event_id: item.tell_mitra_event_id,
+            room_entry_context: item.room_entry_context,
+          },
+        } as any,
+        buildActionContext() as any,
+      );
+    })();
   };
 
   // ── Flag-on: thread render ────────────────────────────────────────────────
@@ -494,6 +584,8 @@ export default function TellMitraContainer() {
           lastReturnCardKeyRef.current = null;
           pendingTellMitraReturnRef.current = null;
           activeContextRef.current = { parentEventId: null, parentIntentType: null, lifeContext: null, supportNeed: null, patternKey: null, roomEntryContext: null };
+          void AsyncStorage.removeItem(THREAD_STORAGE_KEY).catch(() => {});
+          void AsyncStorage.removeItem(RETURN_ROOM_KEY).catch(() => {});
         }}
         onQuickStartChip={handleQuickStartChipThread}
         onWisdomOptionPress={opt => {
@@ -693,4 +785,3 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
 });
-

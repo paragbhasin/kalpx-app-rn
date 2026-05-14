@@ -4978,6 +4978,21 @@ export async function executeAction(
         break;
       }
 
+      case "room_sequence_completed": {
+        const completionReturn = payload?.completion_return ?? null;
+        setScreenValue(false, "show_room_reflection");
+        setScreenValue(false, "room_sequence_active");
+        setScreenValue(null, "room_sequence_resume_action_id");
+        setScreenValue(null, "room_sequence_action_ids");
+        setScreenValue(null, "room_sequence_index");
+        setScreenValue(completionReturn, "completion_return");
+        loadScreen({
+          container_id: "practice_runner",
+          state_id: "completion_return",
+        });
+        break;
+      }
+
       // WEEK 7 — Grief room enter/exit.
       // Spec: route_support_grief.md.
       // REG-015: clears runner_* so grief never overlaps with a practice

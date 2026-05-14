@@ -140,6 +140,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
     setScreenValue("runner_source", null);
     setScreenValue("runner_start_time", null);
     setScreenValue("runner_variant", null);
+    setScreenValue("completion_return", null);
   };
 
   const ensureCommunityAdditionalItem = async () => {
@@ -250,6 +251,13 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
       return;
     }
     const returnAction = slot("return_action");
+    if (returnAction === "return_to_mitra_home") {
+      loadScreen({
+        container_id: "companion_dashboard",
+        state_id: "day_active",
+      } as any);
+      return;
+    }
     const SUPPORT_SOURCES = new Set([
       "support_grief",
       "support_loneliness",
@@ -284,6 +292,16 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
   };
 
   const handleRepeat = () => {
+    const repeatAction = slot("repeat_action");
+    if (repeatAction === "repeat_room_sequence") {
+      setScreenValue("show_room_reflection", false);
+      setScreenValue("room_sequence_active", false);
+      setScreenValue("room_sequence_resume_action_id", null);
+      setScreenValue("room_sequence_action_ids", null);
+      setScreenValue("room_sequence_index", null);
+      loadScreen({ container_id: "room", state_id: "render" } as any);
+      return;
+    }
     mitraTrackEvent("completion_return_repeated", {
       meta: {
         item_type: resolvedVariant,

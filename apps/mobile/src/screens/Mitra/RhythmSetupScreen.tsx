@@ -476,6 +476,7 @@ export default function RhythmSetupScreen({
   const navigation = useNavigation<any>();
   const homeData = useSelector((state: any) => state.door?.homeData);
   const existingRhythm = homeData?.companion_rhythm;
+  const hasActiveInnerPath = homeData?.inner_path_summary?.has_active_path === true;
 
   // ── Screen bridge (needed for executeAction in wizard confirmation) ──────────
   const screenBridge = useScreenStore();
@@ -525,6 +526,48 @@ export default function RhythmSetupScreen({
     );
     navigation.navigate("DynamicEngine");
   }, [dispatch, navigation]);
+
+  const openInnerPath = useCallback(() => {
+    if (!hasActiveInnerPath) {
+      dispatch(
+        screenActions.setScreenValue({
+          key: "onboarding_turn",
+          value: "turn_2",
+        }),
+      );
+      dispatch(
+        screenActions.setScreenValue({
+          key: "onboarding_draft_state",
+          value: {
+            started_at: Date.now(),
+            entry_intention: "inner_path",
+          },
+        }),
+      );
+      dispatch(
+        loadScreenWithData({
+          containerId: "welcome_onboarding",
+          stateId: "turn_2",
+        }) as any,
+      );
+      navigation.navigate("DynamicEngine");
+      return;
+    }
+
+    dispatch(
+      screenActions.setScreenValue({
+        key: "dashboard_entry_surface",
+        value: "inner_path",
+      }),
+    );
+    dispatch(
+      loadScreenWithData({
+        containerId: "companion_dashboard",
+        stateId: "day_active",
+      }) as any,
+    );
+    navigation.navigate("DynamicEngine");
+  }, [dispatch, hasActiveInnerPath, navigation]);
 
   const leaveEmbeddedFlow = useCallback(() => {
     if (embedded) {
@@ -1479,19 +1522,13 @@ export default function RhythmSetupScreen({
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() => {
-              dispatch(
-                loadScreenWithData({
-                  containerId: "companion_dashboard",
-                  stateId: "day_active",
-                }) as any,
-              );
-              navigation.navigate("DynamicEngine" as any);
-            }}
+            onPress={openInnerPath}
             activeOpacity={0.7}
             style={wStyles.secondaryLinkRow}
           >
-            <Text style={wStyles.secondaryLink}>Add Inner Path →</Text>
+            <Text style={wStyles.secondaryLink}>
+              {hasActiveInnerPath ? "Inner Path →" : "Add Inner Path →"}
+            </Text>
           </TouchableOpacity>
         </ScrollView>
       </ImageBackground>

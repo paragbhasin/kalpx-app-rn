@@ -6726,20 +6726,19 @@ export const ContainerRegistry = {
 
 const _onResp = { type: "onboarding_turn_response" };
 
-// Sadhana Yatra 4-stage schema (2026-04-14). Path-aware branching map:
-//   turn_1            → turn_2
-//   turn_2 (path)     → turn_3_life_context (always)
-//   turn_3_life_context → turn_3_support   if path: "support"  (stashes stage1_choice = life_context chip)
-//   turn_3_life_context → turn_3_growth    if path: "growth"   (stashes stage1_choice = life_context chip)
-//   turn_3_support    → turn_4_support     (kosha — not staged; backend derives kosha from vritti/stage2)
-//   turn_3_growth     → turn_4_growth      (aliveness_state)
-//   turn_4_support    → turn_5_support     (stashes primary_vritti)
-//   turn_4_growth     → turn_5_growth      (stashes aspiration)
-//   turn_5_support    → turn_6             (stashes primary_klesha; life_context already in stage1)
-//   turn_5_growth     → turn_6             (stashes preferred_modality; life_context already in stage1)
-//   turn_6 (mode)     → turn_7             (calls /onboarding/recognition/)
-//   turn_7            → turn_8             (triad reveal)
-//   turn_8            → companion_dashboard/day_active
+// Sadhana Yatra adaptive flow (2026-05-13 — 3-tap minimum). Path-aware branching map:
+//   turn_1              → turn_2
+//   turn_2 (path)       → turn_3_life_context (always)
+//   turn_3_life_context → turn_3_felt  (fires stage=2 chip fetch after tap)
+//   turn_3_felt         → turn_7       if routing_decision.next_step == "recognition"
+//   turn_3_felt         → turn_3_clarify if routing_decision.next_step == "clarification"
+//   turn_3_clarify      → turn_7       (always — max_clarifications_reached=true)
+//   turn_7              → turn_8       (triad reveal)
+//   turn_8              → companion_dashboard/day_active
+//
+// Legacy states (turn_3_support, turn_3_growth, turn_4_support, turn_4_growth,
+//   turn_5_support, turn_5_growth, turn_6) are preserved as fallback definitions
+//   but are NOT navigated to in the adaptive flow. guidance_mode defaults to "hybrid".
 // Chip text is LOCKED per spec mitra_architecture_sadhana_yatra.md — do not paraphrase.
 export const WelcomeOnboardingContainer = {
   container_id: "welcome_onboarding",
@@ -6838,6 +6837,7 @@ export const WelcomeOnboardingContainer = {
             { id: "health_energy",     label: "Health & Energy",     style: "secondary" },
             { id: "money_security",    label: "Money & Security",    style: "secondary" },
             { id: "purpose_direction", label: "Purpose & Direction", style: "secondary" },
+            { id: "studies_exams",     label: "Studies & Exams",     style: "secondary" },
             { id: "daily_life",        label: "Daily Life",          style: "secondary" },
           ],
           open_input: { enabled: false },
@@ -7127,6 +7127,7 @@ export const WelcomeOnboardingContainer = {
             { id: "health_energy",     label: "Health & Energy",     style: "secondary" },
             { id: "money_security",    label: "Money & Security",    style: "secondary" },
             { id: "purpose_direction", label: "Purpose & Direction", style: "secondary" },
+            { id: "studies_exams",     label: "Studies & Exams",     style: "secondary" },
             { id: "daily_life",        label: "Daily Life",          style: "secondary" },
           ],
           open_input: { enabled: false },
@@ -7160,6 +7161,56 @@ export const WelcomeOnboardingContainer = {
           on_response: null,
         },
         { type: "guidance_mode_picker", on_response: _onResp },
+      ],
+    },
+
+    // Sadhana Yatra adaptive: context-specific felt statement (stage=2 chips from API)
+    turn_3_felt: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "headline",
+          content: "{{stage2_mitra_message}}",
+          style: { fontSize: "28px", lineHeight: 36, marginTop: -10 },
+        },
+        {
+          type: "subtext",
+          content: "{{stage2_sub_prompt}}",
+          variant: "multi_line",
+        },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn3_felt",
+          mitra_message: "",
+          reply_chips: [],  // always overridden from stage2_data
+          open_input: { enabled: false },
+          on_response: _onResp,
+        },
+      ],
+    },
+
+    // Sadhana Yatra adaptive: one-shot clarification (stage=3 chips from API)
+    turn_3_clarify: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "headline",
+          content: "{{stage3_mitra_message}}",
+          style: { fontSize: "28px", lineHeight: 36, marginTop: -10 },
+        },
+        {
+          type: "subtext",
+          content: "{{stage3_sub_prompt}}",
+          variant: "multi_line",
+        },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn3_clarify",
+          mitra_message: "",
+          reply_chips: [],  // always overridden from stage3_data
+          open_input: { enabled: false },
+          on_response: _onResp,
+        },
       ],
     },
 

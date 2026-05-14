@@ -64,7 +64,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
     sd[`day_${day}_decisions_available`] ||
     (day === 7
       ? ["continue", "lighten", "reset"]
-      : ["continue_same", "deepen", "change_focus"]);
+      : ["continue_same", "change_focus"]);
   const mitraReflection: string = sd.checkpoint_mitra_reflection || "";
   const dayStatuses: string[] = sd.journey_day_statuses || [];
   const trendGraph = sd.checkpoint_trend_graph || {

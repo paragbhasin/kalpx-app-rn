@@ -3238,6 +3238,24 @@ export async function executeAction(
         let nextStateId = "";
 
         try {
+          // Stale dev draft guard: if the user lands on a bypassed screen from
+          // the old flow, clear the draft and restart at the life-context picker.
+          const BYPASSED_STATES = new Set([
+            "turn_3_support", "turn_3_growth",
+            "turn_4_support", "turn_4_growth",
+            "turn_5_support", "turn_5_growth",
+            "turn_6",
+          ]);
+          if (BYPASSED_STATES.has(currentStateId)) {
+            setScreenValue(null, "onboarding_draft_state");
+            setScreenValue(null, "onboarding_turn");
+            loadScreen({
+              container_id: "welcome_onboarding",
+              state_id: "turn_3_life_context",
+            });
+            break;
+          }
+
           if (currentStateId === "turn_1") {
             if (p.chip_id === "returning") {
               draft.returning = true;
@@ -3258,27 +3276,9 @@ export async function executeAction(
             nextStateId = "turn_3_life_context";
 
           } else if (currentStateId === "turn_3_life_context") {
-            // Life context pick (stage1 — comes before kosha/vritti)
+            // Stage1 life context — fetch stage2 chips here for 3-tap flow
             draft.stage1_choice = p.chip_id || "self";
             draft.life_context = p.chip_id || null;
-            nextStateId =
-              draft.path === "growth" ? "turn_3_growth" : "turn_3_support";
-
-          } else if (
-            currentStateId === "turn_3_support" ||
-            currentStateId === "turn_3_growth"
-          ) {
-            // Kosha pick — not staged (backend derives kosha from vritti/stage2)
-            nextStateId =
-              draft.path === "growth" ? "turn_4_growth" : "turn_4_support";
-            if (p.freeform_text) {
-              draft.freeforms = {
-                ...(draft.freeforms || {}),
-                stage1: p.freeform_text,
-              };
-            }
-
-            // Fetch Stage 2 chips using life_context as stage1_choice
             const stage2 = await mitraFetchOnboardingChips({
               stage: 2,
               lane: draft.path,
@@ -3286,14 +3286,14 @@ export async function executeAction(
               stage1_choice: draft.stage1_choice,
             });
             setScreenValue(stage2 || null, "stage2_data");
-          } else if (
-            currentStateId === "turn_4_support" ||
-            currentStateId === "turn_4_growth"
-          ) {
-            // Stage 2 chip pick
-            draft.stage2_choice = p.chip_id || "selected_via_text";
-            nextStateId =
-              draft.path === "growth" ? "turn_5_growth" : "turn_5_support";
+            setScreenValue(stage2?.mitra_message || "", "stage2_mitra_message");
+            setScreenValue(stage2?.sub_prompt || "", "stage2_sub_prompt");
+            nextStateId = "turn_3_felt";
+
+          } else if (currentStateId === "turn_3_felt") {
+            // Stage2 felt statement — call onboarding/complete/ and route adaptively
+            draft.stage2_choice = p.chip_id || p.freeform_text || "";
+            draft.guidance_mode = "hybrid";
             if (p.freeform_text) {
               draft.freeforms = {
                 ...(draft.freeforms || {}),
@@ -3301,60 +3301,29 @@ export async function executeAction(
               };
             }
 
-            // Fetch Stage 3 chips (Help styles)
-            const stage3 = await mitraFetchOnboardingChips({
-              stage: 3,
-              lane: draft.path,
-              guidance_mode: "hybrid",
-              stage1_choice: draft.stage1_choice,
-              stage2_choice: draft.stage2_choice,
-            });
-            setScreenValue(stage3 || null, "stage3_data");
-          } else if (
-            currentStateId === "turn_5_support" ||
-            currentStateId === "turn_5_growth"
-          ) {
-            // Stage 3 chip pick
-            draft.stage3_choice = p.chip_id || "selected_via_text";
-            if (p.freeform_text) {
-              draft.freeforms = {
-                ...(draft.freeforms || {}),
-                stage3: p.freeform_text,
-              };
-            }
-            nextStateId = "turn_6";
-          } else if (currentStateId === "turn_6") {
-            // Mode picker
-            const mode = p.guidance_mode || p.chip_id || "hybrid";
-            draft.guidance_mode = mode;
-            nextStateId = "turn_7";
-
-            // Call POST onboarding/complete/
             const complete = await mitraCompleteOnboarding({
               stage0_choice: draft.stage0_choice || draft.path || "support",
               stage1_choice: draft.stage1_choice,
               stage2_choice: draft.stage2_choice,
-              stage3_choice: draft.stage3_choice,
-              guidance_mode: mode,
+              stage3_choice: null as unknown as string,
+              guidance_mode: "hybrid",
               life_context: draft.life_context || null,
               freeforms: {
                 stage1: draft.freeforms?.stage1 || null,
                 stage2: draft.freeforms?.stage2 || null,
-                stage3: draft.freeforms?.stage3 || null,
+                stage3: null,
               },
             });
 
             if (complete) {
               draft.recognition_line = complete.recognition?.line;
+              draft.inference = complete.inference;
               setScreenValue(complete.recognition?.line, "recognition_line");
-              // Recognition body — lane × mode closing paragraph (2026-04-17
-              // Option B). Moved from FE hardcoded block to backend spine.
               setScreenValue(
                 complete.recognition?.body_lines || [],
                 "recognition_body_lines",
               );
               setScreenValue(complete, "onboarding_complete_data");
-              // Use labels for triad templating
               setScreenValue(
                 complete.triad_labels?.sankalp || "SANKALP",
                 "sankalp_label",
@@ -3369,11 +3338,75 @@ export async function executeAction(
               );
               setScreenValue(complete.sankalp_prefix_line, "sankalp_prefix");
 
-              // Store inference fields for triad call
-              draft.inference = complete.inference;
+              const rd = (complete as any).routing_decision || {};
+              if (rd.next_step === "recognition") {
+                nextStateId = "turn_7";
+              } else {
+                const stage3 = await mitraFetchOnboardingChips({
+                  stage: 3,
+                  lane: draft.path,
+                  guidance_mode: "hybrid",
+                  stage1_choice: draft.stage1_choice,
+                  stage2_choice: draft.stage2_choice,
+                });
+                setScreenValue(stage3 || null, "stage3_data");
+                setScreenValue(stage3?.mitra_message || "", "stage3_mitra_message");
+                setScreenValue(stage3?.sub_prompt || "", "stage3_sub_prompt");
+                nextStateId = "turn_3_clarify";
+              }
+            } else {
+              nextStateId = "turn_3_felt"; // retry on network failure
             }
 
-            nextStateId = "turn_7";
+          } else if (currentStateId === "turn_3_clarify") {
+            // One clarification max — second onboarding/complete/ call, always → turn_7
+            draft.stage3_choice = p.chip_id || p.freeform_text || "";
+            if (p.freeform_text) {
+              draft.freeforms = {
+                ...(draft.freeforms || {}),
+                stage3: p.freeform_text,
+              };
+            }
+
+            const complete2 = await mitraCompleteOnboarding({
+              stage0_choice: draft.stage0_choice || draft.path || "support",
+              stage1_choice: draft.stage1_choice,
+              stage2_choice: draft.stage2_choice,
+              stage3_choice: draft.stage3_choice,
+              guidance_mode: "hybrid",
+              life_context: draft.life_context || null,
+              freeforms: {
+                stage1: draft.freeforms?.stage1 || null,
+                stage2: draft.freeforms?.stage2 || null,
+                stage3: draft.freeforms?.stage3 || null,
+              },
+            });
+
+            if (complete2) {
+              draft.recognition_line = complete2.recognition?.line;
+              draft.inference = complete2.inference;
+              setScreenValue(complete2.recognition?.line, "recognition_line");
+              setScreenValue(
+                complete2.recognition?.body_lines || [],
+                "recognition_body_lines",
+              );
+              setScreenValue(complete2, "onboarding_complete_data");
+              setScreenValue(
+                complete2.triad_labels?.sankalp || "SANKALP",
+                "sankalp_label",
+              );
+              setScreenValue(
+                complete2.triad_labels?.mantra || "MANTRA",
+                "mantra_label",
+              );
+              setScreenValue(
+                complete2.triad_labels?.practice || "PRACTICE",
+                "practice_label",
+              );
+              setScreenValue(complete2.sankalp_prefix_line, "sankalp_prefix");
+            }
+            nextStateId = "turn_7"; // always proceed — max_clarifications_reached=true
+
           } else if (currentStateId === "turn_7") {
             // "Show me my path" tapped. Flow:
             //   1. Check if authenticated

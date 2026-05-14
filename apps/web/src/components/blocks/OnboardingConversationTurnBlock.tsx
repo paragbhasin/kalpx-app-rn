@@ -43,7 +43,11 @@ export function OnboardingConversationTurnBlock({
       ? [block.mitra_message]
       : [];
 
-  const chips: Chip[] = block.reply_chips || [];
+  const dynamicChips =
+    block.id === 'turn3_felt' ? (screenData?.stage2_data?.chips || null)
+    : block.id === 'turn3_clarify' ? (screenData?.stage3_data?.chips || null)
+    : null;
+  const chips: Chip[] = dynamicChips || block.reply_chips || [];
   const inputEnabled = block.open_input?.enabled === true;
   const onResponse = block.on_response;
 

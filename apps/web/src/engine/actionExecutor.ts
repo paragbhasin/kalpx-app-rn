@@ -11,6 +11,7 @@ import {
   trackEvent as apiTrackEvent,
   trackCompletion as apiTrackCompletion,
   onboardingComplete,
+  fetchOnboardingChips,
   startJourneyV3,
   getDailyView,
   getDashboardView,
@@ -1168,6 +1169,20 @@ export async function executeAction(action: any, context: ActionContext): Promis
 
       dispatch(setSubmitting(true));
       try {
+        // Stale dev draft guard — restart from life-context picker if on bypassed state
+        const BYPASSED_STATES = new Set([
+          'turn_3_support', 'turn_3_growth',
+          'turn_4_support', 'turn_4_growth',
+          'turn_5_support', 'turn_5_growth',
+          'turn_6',
+        ]);
+        if (BYPASSED_STATES.has(stateId)) {
+          _setKey(dispatch, 'onboarding_draft_state', null);
+          _setKey(dispatch, 'onboarding_turn', null);
+          _navigateToOnboarding(dispatch, 'turn_3_life_context');
+          break;
+        }
+
         // Fire non-blocking telemetry
         void apiTrackEvent('onboarding_turn_response', {
           meta: {
@@ -1195,40 +1210,37 @@ export async function executeAction(action: any, context: ActionContext): Promis
           nextStateId = 'turn_3_life_context';
 
         } else if (stateId === 'turn_3_life_context') {
+          // Stage1 life context — fetch stage2 chips here for 3-tap flow
           draft.stage1_choice = p.chip_id || 'self';
           draft.life_context = p.chip_id || null;
-          nextStateId = draft.path === 'growth' ? 'turn_3_growth' : 'turn_3_support';
+          const stage2 = await fetchOnboardingChips({
+            stage: 2,
+            lane: draft.path || 'support',
+            guidance_mode: 'hybrid',
+            stage1_choice: draft.stage1_choice,
+          });
+          _setKey(dispatch, 'stage2_data', stage2 || null);
+          _setKey(dispatch, 'stage2_mitra_message', stage2?.mitra_message || '');
+          _setKey(dispatch, 'stage2_sub_prompt', stage2?.sub_prompt || '');
+          nextStateId = 'turn_3_felt';
 
-        } else if (stateId === 'turn_3_support' || stateId === 'turn_3_growth') {
-          if (p.freeform_text) draft.freeforms = { ...(draft.freeforms || {}), stage1: p.freeform_text };
-          nextStateId = draft.path === 'growth' ? 'turn_4_growth' : 'turn_4_support';
-
-        } else if (stateId === 'turn_4_support' || stateId === 'turn_4_growth') {
-          draft.stage2_choice = p.chip_id || 'selected_via_text';
+        } else if (stateId === 'turn_3_felt') {
+          // Stage2 felt statement — call onboarding/complete/ and route adaptively
+          draft.stage2_choice = p.chip_id || p.freeform_text || '';
+          draft.guidance_mode = 'hybrid';
           if (p.freeform_text) draft.freeforms = { ...(draft.freeforms || {}), stage2: p.freeform_text };
-          nextStateId = draft.path === 'growth' ? 'turn_5_growth' : 'turn_5_support';
 
-        } else if (stateId === 'turn_5_support' || stateId === 'turn_5_growth') {
-          draft.stage3_choice = p.chip_id || 'selected_via_text';
-          if (p.freeform_text) draft.freeforms = { ...(draft.freeforms || {}), stage3: p.freeform_text };
-          nextStateId = 'turn_6';
-
-        } else if (stateId === 'turn_6') {
-          const mode = p.guidance_mode || p.chip_id || 'hybrid';
-          draft.guidance_mode = mode;
-
-          // POST onboarding/complete/ — gets inference + recognition line + triad labels
           const complete = await onboardingComplete({
             stage0_choice: draft.stage0_choice || draft.path || 'support',
             stage1_choice: draft.stage1_choice || '',
             stage2_choice: draft.stage2_choice || '',
-            stage3_choice: draft.stage3_choice || '',
-            guidance_mode: mode,
+            stage3_choice: '',
+            guidance_mode: 'hybrid',
             life_context: draft.life_context || null,
             freeforms: {
               stage1: draft.freeforms?.stage1 || null,
               stage2: draft.freeforms?.stage2 || null,
-              stage3: draft.freeforms?.stage3 || null,
+              stage3: null,
             },
           });
 
@@ -1242,8 +1254,58 @@ export async function executeAction(action: any, context: ActionContext): Promis
             _setKey(dispatch, 'mantra_label', complete.triad_labels?.mantra || 'MANTRA');
             _setKey(dispatch, 'practice_label', complete.triad_labels?.practice || 'PRACTICE');
             _setKey(dispatch, 'sankalp_prefix', complete.sankalp_prefix_line || '');
+
+            const rd = (complete as any).routing_decision || {};
+            if (rd.next_step === 'recognition') {
+              nextStateId = 'turn_7';
+            } else {
+              const stage3 = await fetchOnboardingChips({
+                stage: 3,
+                lane: draft.path || 'support',
+                guidance_mode: 'hybrid',
+                stage1_choice: draft.stage1_choice,
+                stage2_choice: draft.stage2_choice,
+              });
+              _setKey(dispatch, 'stage3_data', stage3 || null);
+              _setKey(dispatch, 'stage3_mitra_message', stage3?.mitra_message || '');
+              _setKey(dispatch, 'stage3_sub_prompt', stage3?.sub_prompt || '');
+              nextStateId = 'turn_3_clarify';
+            }
+          } else {
+            nextStateId = 'turn_3_felt'; // retry on network failure
           }
-          nextStateId = 'turn_7';
+
+        } else if (stateId === 'turn_3_clarify') {
+          // One clarification max — second onboarding/complete/ call, always → turn_7
+          draft.stage3_choice = p.chip_id || p.freeform_text || '';
+          if (p.freeform_text) draft.freeforms = { ...(draft.freeforms || {}), stage3: p.freeform_text };
+
+          const complete2 = await onboardingComplete({
+            stage0_choice: draft.stage0_choice || draft.path || 'support',
+            stage1_choice: draft.stage1_choice || '',
+            stage2_choice: draft.stage2_choice || '',
+            stage3_choice: draft.stage3_choice || '',
+            guidance_mode: 'hybrid',
+            life_context: draft.life_context || null,
+            freeforms: {
+              stage1: draft.freeforms?.stage1 || null,
+              stage2: draft.freeforms?.stage2 || null,
+              stage3: draft.freeforms?.stage3 || null,
+            },
+          });
+
+          if (complete2) {
+            draft.inference = complete2.inference;
+            draft.recognition_line = complete2.recognition?.line;
+            _setKey(dispatch, 'recognition_line', complete2.recognition?.line || '');
+            _setKey(dispatch, 'recognition_body_lines', complete2.recognition?.body_lines || []);
+            _setKey(dispatch, 'onboarding_complete_data', complete2);
+            _setKey(dispatch, 'sankalp_label', complete2.triad_labels?.sankalp || 'SANKALP');
+            _setKey(dispatch, 'mantra_label', complete2.triad_labels?.mantra || 'MANTRA');
+            _setKey(dispatch, 'practice_label', complete2.triad_labels?.practice || 'PRACTICE');
+            _setKey(dispatch, 'sankalp_prefix', complete2.sankalp_prefix_line || '');
+          }
+          nextStateId = 'turn_7'; // always proceed — max_clarifications_reached=true
 
         } else if (stateId === 'turn_7') {
           const inf = draft.inference || {};

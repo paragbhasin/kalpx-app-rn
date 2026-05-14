@@ -2946,6 +2946,18 @@ export async function executeAction(
         setScreenValue(sp.variant, "runner_variant");
         setScreenValue(sp.source, "runner_source");
         setScreenValue((sp.action_id as string | null) ?? null, "runner_action_id");  // S17-D4A
+        setScreenValue(
+          (sp.room_sequence_active as boolean | null) ?? false,
+          "room_sequence_active",
+        );
+        setScreenValue(
+          (sp.room_sequence_action_ids as string[] | null) ?? null,
+          "room_sequence_action_ids",
+        );
+        setScreenValue(
+          (sp.room_sequence_index as number | null) ?? null,
+          "room_sequence_index",
+        );
         setScreenValue((sp.rhythm_slot as string | null) ?? null, "runner_rhythm_slot");
         setScreenValue(normalizedItem, "runner_active_item");
         setScreenValue(Date.now(), "runner_start_time");
@@ -3085,12 +3097,43 @@ export async function executeAction(
           );
         }
 
+        const _roomId = (screenState as any).room_id as string | null;
+        const _sequenceActive =
+          (screenState.room_sequence_active as boolean | null) ?? false;
+        const _sequenceActionIds =
+          (screenState.room_sequence_action_ids as string[] | null) ?? null;
+        const _sequenceIndex =
+          typeof screenState.room_sequence_index === "number"
+            ? (screenState.room_sequence_index as number)
+            : null;
+        const _nextSequenceActionId =
+          _sequenceActive &&
+          Array.isArray(_sequenceActionIds) &&
+          _sequenceIndex != null
+            ? (_sequenceActionIds[_sequenceIndex + 1] as string | undefined)
+            : null;
+
+        if (_sequenceActive && source === "support_room" && _roomId) {
+          setScreenValue(null, "runner_action_id");
+          if (_nextSequenceActionId) {
+            setScreenValue(_nextSequenceActionId, "room_sequence_resume_action_id");
+            loadScreen({ container_id: "room", state_id: "render" });
+          } else {
+            setScreenValue(false, "room_sequence_active");
+            setScreenValue(null, "room_sequence_resume_action_id");
+            setScreenValue(null, "room_sequence_action_ids");
+            setScreenValue(null, "room_sequence_index");
+            setScreenValue(true, "show_room_reflection");
+            loadScreen({ container_id: "room", state_id: "render" });
+          }
+          break;
+        }
+
         // S17-D4A: if this was the recommended room action, navigate back to
         // the room with show_room_reflection=true instead of completion_return.
         const _runnerActionId = (screenState.runner_action_id as string | null) ?? null;
         const _renderPayload = (screenState as any).room_render_payload;
         const _recId = _renderPayload?.room_context?.entry_context?.recommended_first_action_id ?? null;
-        const _roomId = (screenState as any).room_id as string | null;
         const _isGuidedCompletion = !!(
           _runnerActionId && _recId && _runnerActionId === _recId && source === "support_room" && _roomId
         );

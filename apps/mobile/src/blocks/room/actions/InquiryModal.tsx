@@ -19,6 +19,7 @@
 
 import React, { useState } from "react";
 import {
+  Image,
   ImageBackground,
   KeyboardAvoidingView,
   Modal,
@@ -30,6 +31,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import type { InquiryCategory, InquiryPayload } from "../types";
 
@@ -38,6 +40,7 @@ interface Props {
   label: string;
   inquiryPayload: InquiryPayload | null | undefined;
   onCancel: () => void;
+  presentation?: "sheet" | "screen";
   /** Fired when user taps "Try a practice" on a category with a template_id. */
   onLaunchPractice: (category: InquiryCategory, templateId: string) => void;
   /** Fired when user writes a journal entry and taps Done. */
@@ -55,11 +58,13 @@ const InquiryModal: React.FC<Props> = ({
   label,
   inquiryPayload,
   onCancel,
+  presentation = "sheet",
   onLaunchPractice,
   onSubmitJournal,
   onOpened,
   onCategorySelected,
 }) => {
+  const insets = useSafeAreaInsets();
   const [selected, setSelected] = useState<InquiryCategory | null>(null);
   const [journalOpen, setJournalOpen] = useState<boolean>(false);
   const [journalText, setJournalText] = useState<string>("");
@@ -108,33 +113,66 @@ const InquiryModal: React.FC<Props> = ({
     onLaunchPractice(selected, tid);
   };
 
+  const isScreen = presentation === "screen";
+  const introText =
+    inquiryPayload?.body || inquiryPayload?.description || inquiryPayload?.prompt;
+
   return (
     <Modal
       visible={visible}
       animationType="slide"
-      presentationStyle="overFullScreen"
+      presentationStyle="fullScreen"
       onRequestClose={onCancel}
-      transparent
+      transparent={presentation === "sheet"}
     >
-      <View style={styles.scrim}>
-        <TouchableOpacity
-          style={StyleSheet.absoluteFill}
-          activeOpacity={1}
-          onPress={onCancel}
-        />
-        <View style={styles.sheet}>
+      <View
+        style={[
+          styles.scrim,
+          presentation === "screen" ? styles.screenScrim : null,
+        ]}
+      >
+        {presentation === "sheet" ? (
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={onCancel}
+          />
+        ) : null}
+        <View
+          style={[
+            styles.sheet,
+            presentation === "screen" ? styles.screenSheet : null,
+          ]}
+        >
           <ImageBackground
             source={require("../../../../assets/beige_bg.png")}
             style={styles.sheetBackground}
-            imageStyle={styles.sheetImage}
+            imageStyle={[
+              styles.sheetImage,
+              presentation === "screen" ? styles.screenImage : null,
+            ]}
           >
             <KeyboardAvoidingView
-              style={styles.keyboardAvoid}
+              style={[
+                styles.keyboardAvoid,
+                presentation === "screen" ? styles.screenKeyboardAvoid : null,
+                presentation === "screen"
+                  ? {
+                      paddingTop: insets.top + 8,
+                      paddingBottom: Math.max(insets.bottom, 16),
+                    }
+                  : null,
+              ]}
               behavior={Platform.OS === "ios" ? "padding" : undefined}
               keyboardVerticalOffset={Platform.OS === "ios" ? 24 : 0}
             >
-              <View style={styles.handle} />
-              <View style={styles.header}>
+              {presentation === "sheet" ? <View style={styles.handle} /> : null}
+              <View
+                style={[
+                  styles.header,
+                  presentation === "screen" ? styles.screenHeader : null,
+                ]}
+              >
                 {selected ? (
                   <TouchableOpacity
                     onPress={handleBack}
@@ -162,30 +200,65 @@ const InquiryModal: React.FC<Props> = ({
 
               {!selected ? (
                 <ScrollView
-                  style={styles.body}
+                  style={[
+                    styles.body,
+                    presentation === "screen" ? styles.screenBody : null,
+                  ]}
                   testID="inquiry_modal_category_list"
                   keyboardShouldPersistTaps="handled"
                 >
                   {categories.length === 0 ? (
                     <Text style={styles.emptyHint}>No categories.</Text>
                   ) : (
-                    categories.map((cat) => (
-                      <TouchableOpacity
-                        key={cat.id}
-                        style={styles.categoryRow}
-                        onPress={() => handleSelect(cat)}
-                        accessibilityRole="button"
-                        accessibilityLabel={cat.label}
-                        testID={`inquiry_modal_category_${cat.id}`}
-                      >
-                        <Text style={styles.categoryLabel}>{cat.label}</Text>
-                      </TouchableOpacity>
-                    ))
+                    <>
+                      {isScreen ? (
+                        <View style={styles.screenHero}>
+                          <Image
+                            source={require("../../../../assets/lotus_icon.png")}
+                            style={styles.screenHeroLotus}
+                          />
+                          <Text style={styles.screenHeroTitle}>{label}</Text>
+                          <View style={styles.screenDivider}>
+                            <View style={styles.screenDividerLine} />
+                            <Text style={styles.screenDividerDiamond}>◇</Text>
+                            <View style={styles.screenDividerLine} />
+                          </View>
+                          {introText ? (
+                            <Text style={styles.screenHeroBody}>{introText}</Text>
+                          ) : null}
+                        </View>
+                      ) : null}
+                      {categories.map((cat) => (
+                        <TouchableOpacity
+                          key={cat.id}
+                          style={[
+                            styles.categoryRow,
+                            isScreen ? styles.screenCategoryRow : null,
+                          ]}
+                          onPress={() => handleSelect(cat)}
+                          accessibilityRole="button"
+                          accessibilityLabel={cat.label}
+                          testID={`inquiry_modal_category_${cat.id}`}
+                        >
+                          <Text
+                            style={[
+                              styles.categoryLabel,
+                              isScreen ? styles.screenCategoryLabel : null,
+                            ]}
+                          >
+                            {cat.label}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </>
                   )}
                 </ScrollView>
               ) : (
                 <ScrollView
-                  style={styles.body}
+                  style={[
+                    styles.body,
+                    presentation === "screen" ? styles.screenBody : null,
+                  ]}
                   testID="inquiry_modal_category_detail"
                   keyboardShouldPersistTaps="handled"
                 >
@@ -194,15 +267,28 @@ const InquiryModal: React.FC<Props> = ({
                       {selected.anchor_line}
                     </Text>
                   ) : null}
-                  <Text style={styles.reflectivePrompt}>
+                  <Text
+                    style={[
+                      styles.reflectivePrompt,
+                      isScreen ? styles.screenReflectivePrompt : null,
+                    ]}
+                  >
                     {selected.reflective_prompt || selected.prompt}
                   </Text>
 
                   {!journalOpen ? (
-                    <View style={styles.detailActions}>
+                    <View
+                      style={[
+                        styles.detailActions,
+                        isScreen ? styles.screenDetailActions : null,
+                      ]}
+                    >
                       {selected.suggested_practice_template_id ? (
                         <TouchableOpacity
-                          style={styles.primaryAction}
+                          style={[
+                            styles.primaryAction,
+                            isScreen ? styles.screenPrimaryAction : null,
+                          ]}
                           onPress={handlePractice}
                           testID="inquiry_modal_try_practice"
                         >
@@ -214,7 +300,10 @@ const InquiryModal: React.FC<Props> = ({
                         </TouchableOpacity>
                       ) : null}
                       <TouchableOpacity
-                        style={styles.primaryAction}
+                        style={[
+                          styles.primaryAction,
+                          isScreen ? styles.screenPrimaryAction : null,
+                        ]}
                         onPress={() => setJournalOpen(true)}
                         testID="inquiry_modal_open_journal"
                       >
@@ -224,7 +313,12 @@ const InquiryModal: React.FC<Props> = ({
                       </TouchableOpacity>
                     </View>
                   ) : (
-                    <View style={styles.journalBlock}>
+                    <View
+                      style={[
+                        styles.journalBlock,
+                        isScreen ? styles.screenJournalBlock : null,
+                      ]}
+                    >
                       <TextInput
                         value={journalText}
                         onChangeText={(v) =>
@@ -232,18 +326,27 @@ const InquiryModal: React.FC<Props> = ({
                         }
                         multiline
                         textAlignVertical="top"
-                        style={styles.textInput}
+                        style={[
+                          styles.textInput,
+                          isScreen ? styles.screenTextInput : null,
+                        ]}
                         placeholder="Write what comes..."
                         placeholderTextColor="#B0B0B5"
                         testID="inquiry_modal_journal_input"
                         maxLength={MAX_TEXT}
                       />
-                      <Text style={styles.textCounter}>
+                      <Text
+                        style={[
+                          styles.textCounter,
+                          isScreen ? styles.screenTextCounter : null,
+                        ]}
+                      >
                         {journalText.length} / {MAX_TEXT}
                       </Text>
                       <TouchableOpacity
                         style={[
                           styles.primaryAction,
+                          isScreen ? styles.screenPrimaryAction : null,
                           journalText.trim().length < 1
                             ? styles.disabled
                             : null,
@@ -272,6 +375,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.35)",
     justifyContent: "flex-end",
   },
+  screenScrim: {
+    backgroundColor: "#F8F2EA",
+  },
   sheet: {
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 24,
@@ -279,15 +385,29 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     maxHeight: "90%",
   },
+  screenSheet: {
+    flex: 1,
+    maxHeight: "100%",
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+  },
   sheetBackground: {
     width: "100%",
+    flex: 1,
   },
   sheetImage: {
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
   },
+  screenImage: {
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+  },
   keyboardAvoid: {
     flexShrink: 1,
+  },
+  screenKeyboardAvoid: {
+    flex: 1,
   },
   handle: {
     alignSelf: "center",
@@ -303,6 +423,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     backgroundColor: "transparent",
+  },
+  screenHeader: {
+    paddingTop: 0,
+    paddingBottom: 10,
   },
   headerCancel: {
     fontSize: 15,
@@ -324,6 +448,55 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: Platform.OS === "ios" ? 34 : 24,
   },
+  screenBody: {
+    flex: 1,
+    paddingBottom: 8,
+  },
+  screenHero: {
+    alignItems: "center",
+    marginBottom: 24,
+    paddingTop: 8,
+  },
+  screenHeroLotus: {
+    width: 34,
+    height: 28,
+    marginBottom: 14,
+    opacity: 0.9,
+  },
+  screenHeroTitle: {
+    fontSize: 36,
+    lineHeight: 42,
+    fontWeight: "700",
+    color: "#432104",
+    textAlign: "center",
+    marginBottom: 18,
+    fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
+  },
+  screenDivider: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 14,
+    marginBottom: 20,
+  },
+  screenDividerLine: {
+    width: 72,
+    height: 1,
+    backgroundColor: "rgba(212,166,74,0.42)",
+  },
+  screenDividerDiamond: {
+    fontSize: 16,
+    color: "#D4A64A",
+    lineHeight: 16,
+  },
+  screenHeroBody: {
+    fontSize: 16,
+    lineHeight: 30,
+    color: "#7A6A58",
+    textAlign: "center",
+    paddingHorizontal: 8,
+    fontStyle: "italic",
+  },
 
   emptyHint: {
     fontSize: 14,
@@ -341,10 +514,28 @@ const styles = StyleSheet.create({
     marginVertical: 6,
     alignItems: "center",
   },
+  screenCategoryRow: {
+    minHeight: 76,
+    justifyContent: "center",
+    borderRadius: 999,
+    borderColor: "rgba(201,168,76,0.52)",
+    borderWidth: 1,
+    backgroundColor: "rgba(255,255,255,0.58)",
+    shadowColor: "#A57A2B",
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.08,
+    shadowRadius: 22,
+    elevation: 2,
+    marginVertical: 7,
+  },
   categoryLabel: {
     fontSize: 15,
     fontWeight: "600",
     color: "#432104",
+  },
+  screenCategoryLabel: {
+    fontSize: 18,
+    lineHeight: 24,
   },
 
   anchorLine: {
@@ -354,6 +545,7 @@ const styles = StyleSheet.create({
     lineHeight: 28,
     marginBottom: 16,
     fontWeight: "300",
+    fontStyle: "italic",
   },
   reflectivePrompt: {
     fontSize: 15,
@@ -363,9 +555,19 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 24,
   },
+  screenReflectivePrompt: {
+    fontSize: 18,
+    lineHeight: 32,
+    color: "#4A3B2F",
+    marginBottom: 28,
+    paddingHorizontal: 8,
+  },
   detailActions: {
     gap: 10,
     marginTop: 8,
+  },
+  screenDetailActions: {
+    gap: 14,
   },
   actionBtn: {
     paddingVertical: 12,
@@ -406,6 +608,20 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     marginBottom: 10,
   },
+  screenPrimaryAction: {
+    minHeight: 58,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(214,183,130,0.22)",
+    backgroundColor: "rgba(255,255,255,0.72)",
+    justifyContent: "center",
+    shadowColor: "#A57A2B",
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.08,
+    shadowRadius: 22,
+    elevation: 2,
+    marginBottom: 0,
+  },
   primaryActionLabel: {
     fontSize: 17,
     fontWeight: "600",
@@ -415,6 +631,9 @@ const styles = StyleSheet.create({
 
   journalBlock: {
     marginTop: 8,
+  },
+  screenJournalBlock: {
+    marginTop: 10,
   },
   textInput: {
     minHeight: 180,
@@ -428,12 +647,27 @@ const styles = StyleSheet.create({
     lineHeight: 23,
     backgroundColor: "rgba(255,255,255,0.52)",
   },
+  screenTextInput: {
+    minHeight: 220,
+    borderRadius: 22,
+    borderColor: "rgba(201,168,76,0.3)",
+    backgroundColor: "rgba(255,255,255,0.76)",
+    paddingHorizontal: 20,
+    paddingVertical: 18,
+    fontSize: 16,
+    lineHeight: 26,
+  },
   textCounter: {
     fontSize: 12,
     color: "#8B6A43",
     textAlign: "right",
     marginTop: 6,
     marginBottom: 10,
+  },
+  screenTextCounter: {
+    fontSize: 13,
+    marginTop: 10,
+    marginBottom: 18,
   },
 });
 

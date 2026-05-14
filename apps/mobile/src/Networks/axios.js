@@ -53,6 +53,20 @@ const formatLogData = (data) => {
   return String(data);
 };
 
+const shouldLogFullRoomRender = (url) =>
+  typeof url === "string" &&
+  url.includes("mitra/rooms/") &&
+  url.includes("/render/");
+
+const formatFullJson = (data) => {
+  if (data == null) return "null";
+  try {
+    return JSON.stringify(data, null, 2);
+  } catch (_) {
+    return formatLogData(data);
+  }
+};
+
 /** ✅ Ensure guest UUID exists (with fallback if crypto fails) */
 const getGuestUUID = async () => {
   try {
@@ -175,12 +189,14 @@ api.interceptors.request.use(
  *  ------------------------------------------------- */
 api.interceptors.response.use(
   (response) => {
+    const fullUrl = `${response.config.baseURL}${response.config.url}`;
     console.log("✅ API RESPONSE");
-    console.log(
-      "➡️ URL:",
-      `${response.config.baseURL}${response.config.url}`,
-    );
-    console.log("📦 DATA:", formatLogData(response.data));
+    console.log("➡️ URL:", fullUrl);
+    if (shouldLogFullRoomRender(fullUrl)) {
+      console.log("📦 DATA FULL:", formatFullJson(response.data));
+    } else {
+      console.log("📦 DATA:", formatLogData(response.data));
+    }
     return response;
   },
   async (error) => {

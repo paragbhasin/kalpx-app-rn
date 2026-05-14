@@ -32,6 +32,7 @@ import React, {
 import {
   Animated,
   Clipboard,
+  Image,
   ImageBackground,
   Keyboard,
   LayoutChangeEvent,
@@ -79,6 +80,7 @@ interface Props {
   visible: boolean;
   stepPayload: StepPayload | null | undefined;
   label: string;
+  presentation?: "sheet" | "screen";
   onCancel: () => void;
   onDone: (extra: StepModalResult) => void;
   errorMessage?: string | null;
@@ -114,6 +116,7 @@ const StepModal: React.FC<Props> = ({
   visible,
   stepPayload,
   label,
+  presentation = "sheet",
   onCancel,
   onDone,
   errorMessage,
@@ -127,6 +130,8 @@ const StepModal: React.FC<Props> = ({
     () => classifyStep(stepPayload?.template_id),
     [stepPayload?.template_id],
   );
+  const isImmersiveTextInput =
+    presentation === "screen" && kind === "text_input";
 
   const handleSheetLayout = useCallback((event: LayoutChangeEvent) => {
     const nextHeight = event.nativeEvent.layout.height || 0;
@@ -173,49 +178,94 @@ const StepModal: React.FC<Props> = ({
     <Modal
       visible={visible}
       animationType="slide"
-      presentationStyle="overFullScreen"
+      presentationStyle="fullScreen"
       onRequestClose={onCancel}
-      transparent
+      transparent={presentation === "sheet"}
     >
-      <View style={styles.scrim}>
-        <TouchableOpacity
-          style={StyleSheet.absoluteFill}
-          activeOpacity={1}
-          onPress={onCancel}
-        />
+      <View
+        style={[
+          styles.scrim,
+          presentation === "screen" ? styles.screenScrim : null,
+        ]}
+      >
+        {presentation === "sheet" ? (
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={onCancel}
+          />
+        ) : null}
         <View
           onLayout={handleSheetLayout}
           style={[
             styles.sheet,
+            presentation === "screen" ? styles.screenSheet : null,
             keyboardLift > 0 && { marginBottom: keyboardLift },
           ]}
         >
           <ImageBackground
             source={require("../../../../assets/beige_bg.png")}
             style={styles.sheetBackground}
-            imageStyle={styles.sheetImage}
+            imageStyle={[
+              styles.sheetImage,
+              presentation === "screen" ? styles.screenImage : null,
+            ]}
           >
-            <View style={styles.keyboardAvoid}>
-              <View style={styles.handle} />
-              <View style={styles.headerCancelRow}>
-                <TouchableOpacity
-                  onPress={onCancel}
-                  accessibilityRole="button"
-                  accessibilityLabel="Cancel"
-                  testID="step_modal_cancel"
-                >
-                  <Text style={styles.headerCancel}>Cancel</Text>
-                </TouchableOpacity>
+            <View
+              style={[
+                styles.keyboardAvoid,
+                presentation === "screen" ? styles.screenKeyboardAvoid : null,
+                presentation === "screen"
+                  ? {
+                      paddingTop: insets.top + 8,
+                      paddingBottom: Math.max(insets.bottom, 16),
+                    }
+                  : null,
+              ]}
+            >
+              {presentation === "sheet" ? <View style={styles.handle} /> : null}
+              <View
+                style={[
+                  styles.headerCancelRow,
+                  presentation === "screen"
+                    ? styles.screenHeaderCancelRow
+                    : null,
+                ]}
+              >
+                {!isImmersiveTextInput ? (
+                  <TouchableOpacity
+                    onPress={onCancel}
+                    accessibilityRole="button"
+                    accessibilityLabel="Cancel"
+                    testID="step_modal_cancel"
+                  >
+                    <Text style={styles.headerCancel}>Cancel</Text>
+                  </TouchableOpacity>
+                ) : null}
               </View>
-              <Text style={styles.headerTitle} numberOfLines={2}>
-                {label}
-              </Text>
+              {!isImmersiveTextInput ? (
+                <Text style={styles.headerTitle} numberOfLines={2}>
+                  {label}
+                </Text>
+              ) : null}
 
               <View
-                style={[styles.body, isSubmitting && styles.bodySubmitting]}
+                style={[
+                  styles.body,
+                  presentation === "screen" ? styles.screenBody : null,
+                  isSubmitting && styles.bodySubmitting,
+                ]}
                 testID="step_modal_body"
                 pointerEvents={isSubmitting ? "none" : "auto"}
               >
+                {isImmersiveTextInput ? (
+                  <ScreenTextInputExperience
+                    stepPayload={stepPayload}
+                    label={label}
+                    onCancel={onCancel}
+                    onDone={onDone}
+                  />
+                ) : null}
                 {kind === "timer_breathe" ||
                 kind === "timer_walk" ||
                 kind === "timer_sit" ||
@@ -227,12 +277,19 @@ const StepModal: React.FC<Props> = ({
                   />
                 ) : null}
 
-                {kind === "text_input" ? (
-                  <TextInputBody stepPayload={stepPayload} onDone={onDone} />
+                {kind === "text_input" && !isImmersiveTextInput ? (
+                  <TextInputBody
+                    stepPayload={stepPayload}
+                    onDone={onDone}
+                    isScreen={presentation === "screen"}
+                  />
                 ) : null}
 
                 {kind === "grounding" ? (
-                  <GroundingBody onDone={onDone} />
+                  <GroundingBody
+                    onDone={onDone}
+                    isScreen={presentation === "screen"}
+                  />
                 ) : null}
 
                 {kind === "voice_note" ? (
@@ -548,11 +605,13 @@ const PROMPT_SLOT_TEXT: Record<string, string> = {
 interface TextInputBodyProps {
   stepPayload: StepPayload | null | undefined;
   onDone: (extra: StepModalResult) => void;
+  isScreen?: boolean;
 }
 
 const TextInputBody: React.FC<TextInputBodyProps> = ({
   stepPayload,
   onDone,
+  isScreen = false,
 }) => {
   const mm = stepPayload?.memory_modal;
   const [text, setText] = useState<string>("");
@@ -569,30 +628,58 @@ const TextInputBody: React.FC<TextInputBodyProps> = ({
   const enabled = trimmed.length >= 1;
 
   return (
-    <ScrollView style={styles.textRoot} keyboardShouldPersistTaps="handled">
+    <ScrollView
+      style={styles.textRoot}
+      contentContainerStyle={isScreen ? styles.screenTextContent : undefined}
+      keyboardShouldPersistTaps="handled"
+    >
       {!!mm?.sanatan_context && (
-        <Text style={styles.modalSanatanContext}>{mm.sanatan_context}</Text>
+        <Text
+          style={[
+            styles.modalSanatanContext,
+            isScreen ? styles.screenModalSanatanContext : null,
+          ]}
+        >
+          {mm.sanatan_context}
+        </Text>
       )}
       {!!mm?.why_we_ask && (
-        <Text style={styles.modalWhyWeAsk}>{mm.why_we_ask}</Text>
+        <Text
+          style={[
+            styles.modalWhyWeAsk,
+            isScreen ? styles.screenModalWhyWeAsk : null,
+          ]}
+        >
+          {mm.why_we_ask}
+        </Text>
       )}
-      <Text style={styles.textPrompt}>{promptText}</Text>
+      <Text
+        style={[styles.textPrompt, isScreen ? styles.screenTextPrompt : null]}
+      >
+        {promptText}
+      </Text>
       <TextInput
         value={text}
         onChangeText={(v) => setText(v.slice(0, MAX_TEXT))}
         multiline
         textAlignVertical="top"
-        style={styles.textInput}
+        style={[styles.textInput, isScreen ? styles.screenTextInput : null]}
         placeholder={placeholderText}
         placeholderTextColor="#B0B0B5"
         testID="step_modal_text_input"
         maxLength={MAX_TEXT}
       />
-      <Text style={styles.textCounter}>
+      <Text
+        style={[styles.textCounter, isScreen ? styles.screenTextCounter : null]}
+      >
         {text.length} / {MAX_TEXT}
       </Text>
       <TouchableOpacity
-        style={[styles.primaryAction, !enabled ? styles.ctrlDisabled : null]}
+        style={[
+          styles.primaryAction,
+          isScreen ? styles.screenPrimaryAction : null,
+          !enabled ? styles.ctrlDisabled : null,
+        ]}
         disabled={!enabled}
         onPress={() => onDone({ text: trimmed })}
         testID="step_modal_text_done"
@@ -603,11 +690,129 @@ const TextInputBody: React.FC<TextInputBodyProps> = ({
   );
 };
 
-// ─── Grounding (5-4-3-2-1) body ──────────────────────────────────────────
+interface ScreenTextInputExperienceProps {
+  stepPayload: StepPayload | null | undefined;
+  label: string;
+  onCancel: () => void;
+  onDone: (extra: StepModalResult) => void;
+}
 
-const GroundingBody: React.FC<{ onDone: (extra: StepModalResult) => void }> = ({
+const ScreenTextInputExperience: React.FC<ScreenTextInputExperienceProps> = ({
+  stepPayload,
+  label,
+  onCancel,
   onDone,
 }) => {
+  const mm = stepPayload?.memory_modal;
+  const [text, setText] = useState<string>("");
+  const promptSlot = stepPayload?.step_config?.prompt_slot;
+  const title = mm?.title || label;
+  const promptText =
+    mm?.prompt ||
+    (stepPayload?.prompt && String(stepPayload.prompt)) ||
+    (typeof promptSlot === "string" && PROMPT_SLOT_TEXT[promptSlot]) ||
+    "Take a moment and write what comes.";
+  const placeholderText = mm?.placeholder || "Type what you feel..";
+  const doneLabel = mm?.primary_label || "Done";
+  const trimmed = text.trim();
+  const enabled = trimmed.length >= 1;
+
+  return (
+    <ScrollView
+      style={styles.immersiveRoot}
+      contentContainerStyle={styles.immersiveContent}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.immersiveHeaderRow}>
+        <TouchableOpacity
+          onPress={onCancel}
+          accessibilityRole="button"
+          accessibilityLabel="Back"
+          testID="step_modal_back"
+          style={styles.immersiveBackButton}
+        >
+          <Text style={styles.immersiveBackIcon}>‹</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={onCancel}
+          accessibilityRole="button"
+          accessibilityLabel="Cancel"
+          testID="step_modal_cancel"
+        >
+          <Text style={styles.immersiveCancel}>Cancel</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.immersiveHero}>
+        <Image
+          source={require("../../../../assets/lotus_icon.png")}
+          style={styles.immersiveLotus}
+        />
+        <Text style={styles.immersiveTitle}>{title}</Text>
+        <View style={styles.immersiveDivider}>
+          <View style={styles.immersiveDividerLine} />
+          <Text style={styles.immersiveDividerDiamond}>◆</Text>
+          <View style={styles.immersiveDividerLine} />
+        </View>
+        {!!mm?.why_we_ask && (
+          <Text style={styles.immersiveDescription}>{mm.why_we_ask}</Text>
+        )}
+        {!!mm?.sanatan_context && (
+          <Text style={styles.immersiveSanatan}>{mm.sanatan_context}</Text>
+        )}
+      </View>
+
+      <Text style={styles.immersivePrompt}>{promptText}</Text>
+
+      <View style={styles.immersiveInputWrap}>
+        <TextInput
+          value={text}
+          onChangeText={(v) => setText(v.slice(0, MAX_TEXT))}
+          multiline
+          textAlignVertical="top"
+          style={styles.immersiveTextInput}
+          placeholder={placeholderText}
+          placeholderTextColor="#9C9893"
+          testID="step_modal_text_input"
+          maxLength={MAX_TEXT}
+        />
+        <Text style={styles.immersiveCounter}>
+          {text.length} / {MAX_TEXT}
+        </Text>
+      </View>
+
+      <TouchableOpacity
+        style={[
+          styles.immersivePrimaryAction,
+          !enabled ? styles.ctrlDisabled : null,
+        ]}
+        disabled={!enabled}
+        onPress={() => onDone({ text: trimmed })}
+        testID="step_modal_text_done"
+      >
+        <View style={styles.immersivePrimaryInner}>
+          <Image
+            source={require("../../../../assets/lotus_icon.png")}
+            style={styles.immersivePrimaryLotus}
+          />
+          <Text style={styles.immersivePrimaryLabel}>{doneLabel}</Text>
+        </View>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={onCancel} testID="step_modal_go_now">
+        <Text style={styles.immersiveSecondaryAction}>I&apos;ll go now</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
+};
+
+// ─── Grounding (5-4-3-2-1) body ──────────────────────────────────────────
+
+const GroundingBody: React.FC<{
+  onDone: (extra: StepModalResult) => void;
+  isScreen?: boolean;
+}> = ({ onDone, isScreen = false }) => {
   const [index, setIndex] = useState<number>(0);
   const [answers, setAnswers] = useState<string[]>(["", "", "", "", ""]);
   const current = answers[index] ?? "";
@@ -634,27 +839,42 @@ const GroundingBody: React.FC<{ onDone: (extra: StepModalResult) => void }> = ({
   };
 
   return (
-    <ScrollView style={styles.textRoot} keyboardShouldPersistTaps="handled">
+    <ScrollView
+      style={styles.textRoot}
+      contentContainerStyle={isScreen ? styles.screenTextContent : undefined}
+      keyboardShouldPersistTaps="handled"
+    >
       <Text
-        style={styles.groundingProgress}
+        style={[
+          styles.groundingProgress,
+          isScreen ? styles.screenGroundingProgress : null,
+        ]}
         testID="step_modal_grounding_progress"
       >
         {index + 1} of {GROUNDING_PROMPTS.length}
       </Text>
-      <Text style={styles.textPrompt}>{prompt}</Text>
+      <Text
+        style={[styles.textPrompt, isScreen ? styles.screenTextPrompt : null]}
+      >
+        {prompt}
+      </Text>
       <TextInput
         value={current}
         onChangeText={setCurrent}
         multiline
         textAlignVertical="top"
-        style={styles.textInput}
+        style={[styles.textInput, isScreen ? styles.screenTextInput : null]}
         placeholder="Type what you feel.."
         placeholderTextColor="#B0B0B5"
         testID="step_modal_grounding_input"
         maxLength={MAX_TEXT}
       />
       <TouchableOpacity
-        style={[styles.primaryAction, !enabled ? styles.ctrlDisabled : null]}
+        style={[
+          styles.primaryAction,
+          isScreen ? styles.screenPrimaryAction : null,
+          !enabled ? styles.ctrlDisabled : null,
+        ]}
         disabled={!enabled}
         onPress={handleNext}
         testID={
@@ -947,6 +1167,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.35)",
     justifyContent: "flex-end",
   },
+  screenScrim: {
+    backgroundColor: "#F8F2EA",
+  },
   sheet: {
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 24,
@@ -954,15 +1177,29 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     maxHeight: "90%",
   },
+  screenSheet: {
+    flex: 1,
+    maxHeight: "100%",
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+  },
   sheetBackground: {
     width: "100%",
+    flex: 1,
   },
   sheetImage: {
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
   },
+  screenImage: {
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+  },
   keyboardAvoid: {
     flexShrink: 1,
+  },
+  screenKeyboardAvoid: {
+    flex: 1,
   },
   handle: {
     alignSelf: "center",
@@ -977,6 +1214,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 14,
     paddingBottom: 4,
+  },
+  screenHeaderCancelRow: {
+    paddingTop: 0,
+    paddingBottom: 8,
   },
   headerCancel: {
     fontSize: 15,
@@ -995,6 +1236,178 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 12,
     paddingBottom: Platform.OS === "ios" ? 34 : 24,
+  },
+  screenBody: {
+    flex: 1,
+    paddingBottom: 8,
+  },
+  immersiveRoot: {
+    width: "100%",
+  },
+  immersiveContent: {
+    paddingBottom: 28,
+  },
+  immersiveHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 28,
+  },
+  immersiveBackButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 999,
+    borderWidth: 1.2,
+    borderColor: "rgba(191,151,84,0.75)",
+    backgroundColor: "rgba(255,255,255,0.52)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  immersiveBackIcon: {
+    fontSize: 30,
+    lineHeight: 32,
+    color: "#A7792E",
+    marginTop: -2,
+  },
+  immersiveCancel: {
+    fontSize: 16,
+    color: "#45403A",
+  },
+  immersiveHero: {
+    alignItems: "center",
+    marginBottom: 10,
+    marginTop: -55,
+  },
+  immersiveLotus: {
+    width: 34,
+    height: 26,
+    marginBottom: 18,
+    opacity: 0.95,
+  },
+  immersiveTitle: {
+    fontSize: 22,
+    lineHeight: 38,
+    color: "#2C1C11",
+    textAlign: "center",
+    fontWeight: "700",
+    fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
+    paddingHorizontal: 24,
+  },
+  immersiveDivider: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 14,
+    marginTop: 18,
+    marginBottom: 22,
+  },
+  immersiveDividerLine: {
+    width: 48,
+    height: 1,
+    backgroundColor: "rgba(184,134,50,0.42)",
+  },
+  immersiveDividerDiamond: {
+    fontSize: 16,
+    lineHeight: 16,
+    color: "#B88632",
+  },
+  immersiveDescription: {
+    fontSize: 14,
+    lineHeight: 28,
+    color: "#35302B",
+    textAlign: "center",
+    marginBottom: 18,
+    maxWidth: 640,
+    paddingHorizontal: 8,
+  },
+  immersiveSanatan: {
+    fontSize: 14,
+    lineHeight: 28,
+    color: "#A97817",
+    fontStyle: "italic",
+    textAlign: "center",
+    maxWidth: 560,
+    paddingHorizontal: 10,
+  },
+  immersivePrompt: {
+    fontSize: 14,
+    lineHeight: 24,
+    color: "#2E241B",
+    textAlign: "center",
+    fontWeight: "700",
+    fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
+    marginBottom: 18,
+    paddingHorizontal: 20,
+  },
+  immersiveInputWrap: {
+    position: "relative",
+    marginBottom: 24,
+  },
+  immersiveTextInput: {
+    width: "100%",
+    minHeight: 210,
+    borderWidth: 1,
+    borderColor: "rgba(196,181,161,0.92)",
+    borderRadius: 28,
+    paddingHorizontal: 28,
+    paddingTop: 5,
+    paddingBottom: 54,
+    fontSize: 13,
+    lineHeight: 27,
+    color: "#1C1C1E",
+    backgroundColor: "rgba(255,255,255,0.72)",
+    shadowColor: "#482E0D",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 3,
+  },
+  immersiveCounter: {
+    position: "absolute",
+    right: 22,
+    bottom: 18,
+    fontSize: 13,
+    color: "#75706A",
+  },
+  immersivePrimaryAction: {
+    width: "100%",
+    minHeight: 45,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(85,42,11,0.22)",
+    backgroundColor: "#5A2D0C",
+    shadowColor: "#5E330F",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 22,
+    elevation: 4,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 18,
+  },
+  immersivePrimaryInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+  },
+  immersivePrimaryLotus: {
+    width: 22,
+    height: 18,
+    tintColor: "#F1D089",
+  },
+  immersivePrimaryLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#FFF7EF",
+  },
+  immersiveSecondaryAction: {
+    alignSelf: "center",
+    fontSize: 14,
+    color: "#4A433C",
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(72,57,41,0.45)",
+    paddingBottom: 3,
   },
 
   // Timer
@@ -1025,7 +1438,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     overflow: "hidden", // Important for BlurView
     shadowColor: Platform.OS === "ios" ? "#000" : "transparent",
-    shadowOffset: Platform.OS === "ios" ? { width: 0, height: 8 } : { width: 0, height: 0 },
+    shadowOffset:
+      Platform.OS === "ios" ? { width: 0, height: 8 } : { width: 0, height: 0 },
     shadowOpacity: Platform.OS === "ios" ? 0.15 : 0,
     shadowRadius: Platform.OS === "ios" ? 16 : 0,
     elevation: Platform.OS === "android" ? 0 : 10,
@@ -1105,11 +1519,22 @@ const styles = StyleSheet.create({
   textRoot: {
     width: "100%",
   },
+  screenTextContent: {
+    paddingBottom: 28,
+  },
   textPrompt: {
     fontSize: 16,
     color: "#3C3C43",
     marginBottom: 16,
     lineHeight: 22,
+  },
+  screenTextPrompt: {
+    fontSize: 18,
+    color: "#4A3B2F",
+    textAlign: "center",
+    lineHeight: 32,
+    marginBottom: 22,
+    paddingHorizontal: 6,
   },
   textInput: {
     minHeight: 160, // Increased minHeight
@@ -1121,12 +1546,28 @@ const styles = StyleSheet.create({
     color: "#1C1C1E",
     backgroundColor: "rgba(255,255,255,0.5)", // Slight backing for readability
   },
+  screenTextInput: {
+    minHeight: 220,
+    borderRadius: 22,
+    borderColor: "rgba(201,168,76,0.32)",
+    backgroundColor: "rgba(255,255,255,0.76)",
+    paddingHorizontal: 20,
+    paddingVertical: 18,
+    fontSize: 16,
+    lineHeight: 26,
+  },
   textCounter: {
     fontSize: 12,
     color: "#8E8E93",
     textAlign: "right",
     marginTop: 6,
     marginBottom: 16,
+  },
+  screenTextCounter: {
+    color: "#8B6A43",
+    fontSize: 13,
+    marginTop: 10,
+    marginBottom: 22,
   },
 
   // Grounding
@@ -1135,6 +1576,11 @@ const styles = StyleSheet.create({
     color: "#8E8E93",
     textAlign: "center",
     marginBottom: 8,
+  },
+  screenGroundingProgress: {
+    color: "#8B6A43",
+    fontSize: 13,
+    marginBottom: 14,
   },
 
   // Controls
@@ -1177,11 +1623,37 @@ const styles = StyleSheet.create({
     width: "100%",
     marginTop: 20,
   },
+  screenPrimaryAction: {
+    height: 58,
+    borderRadius: 999,
+    borderColor: "rgba(214,183,130,0.24)",
+    backgroundColor: "rgba(255,255,255,0.72)",
+    shadowColor: "#A57A2B",
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.12,
+    shadowRadius: 22,
+    elevation: 3,
+    marginTop: 0,
+  },
   primaryActionLabel: {
     fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
     fontSize: 17,
     fontWeight: "600",
     color: "#432104",
+  },
+  screenModalSanatanContext: {
+    fontSize: 18,
+    lineHeight: 30,
+    color: "#A57A2B",
+    marginBottom: 14,
+    paddingHorizontal: 14,
+  },
+  screenModalWhyWeAsk: {
+    fontSize: 16,
+    lineHeight: 28,
+    color: "#6E6357",
+    marginBottom: 24,
+    paddingHorizontal: 10,
   },
 
   // Voice note

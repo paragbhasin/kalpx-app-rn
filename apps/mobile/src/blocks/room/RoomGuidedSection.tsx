@@ -2,7 +2,7 @@
  * RoomGuidedSection — mobile guided room surface aligned to the web layout.
  */
 import { ROOM_GUIDED_COPY } from "@kalpx/contracts";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Image,
   Modal,
@@ -25,9 +25,90 @@ import StepModal, { type StepModalResult } from "./actions/StepModal";
 import { LIFE_CONTEXT_LABELS, ROOM_DISPLAY_NAMES } from "./roomConstants";
 import type { InquiryCategory, RoomRenderV1, StepPayload } from "./types";
 
-const BEIGE_BG = require("../../../assets/beige_bg.png");
 const LOTUS_ICON = require("../../../assets/lotus_icon.png");
-const KALPX_LOGO = require("../../../assets/KalpXlogo.png");
+
+const CARRY_INPUT_TEMPLATE: Record<string, string> = {
+  growth_journal: "step_journal_growth",
+  connection_reach_out: "step_reach_out_connection",
+  connection_named: "step_text_input_connection_named",
+  joy_named: "step_text_input_joy_named",
+  release_named: "step_text_input_release_named",
+  stillness_named: "step_text_input_stillness_named",
+  clarity_journal: "step_text_input_clarity_journal",
+};
+
+const CARRY_MEMORY_MODAL: Record<
+  string,
+  NonNullable<StepPayload["memory_modal"]>
+> = {
+  connection_named: {
+    title: "Name someone who matters",
+    sanatan_context: "Sambandha reminds us that even one true bond can hold us.",
+    why_we_ask:
+      "Naming someone helps you return from feeling alone to one thread of care.",
+    prompt: "Who is close to your heart right now?",
+    placeholder: "Write a name, relationship, or a few words…",
+    primary_label: "Save this connection",
+  },
+  joy_named: {
+    title: "Write what’s good right now",
+    sanatan_context: "Santosha begins by noticing what is already enough.",
+    why_we_ask:
+      "Writing one good thing helps the mind stay with it instead of rushing past it.",
+    prompt: "What feels good, steady, or quietly enough right now?",
+    placeholder: "Write one good thing…",
+    primary_label: "Save this joy",
+  },
+  growth_journal: {
+    title: "Write what you noticed",
+    sanatan_context: "Growth ripens through one right action, not speed.",
+    why_we_ask:
+      "Naming what you noticed turns observation into the seed of a next step.",
+    prompt: "What did you notice, or what is forming?",
+    placeholder: "Write what came up…",
+    primary_label: "Save this",
+  },
+  connection_reach_out: {
+    title: "Reach out to one person",
+    sanatan_context:
+      "A short act of reaching is itself the practice of sambandha.",
+    why_we_ask:
+      "Writing the message, even without sending, brings the connection closer.",
+    prompt: "Write a short message to someone who matters.",
+    placeholder: "Your message…",
+    primary_label: "Save and copy message",
+  },
+  release_named: {
+    title: "Name what you’re setting down",
+    sanatan_context:
+      "Letting go is not giving up. It is loosening the grip so life can move again.",
+    why_we_ask:
+      "Naming the weight helps you separate yourself from what you are carrying.",
+    prompt: "What is ready to be set down for now?",
+    placeholder: "Write one word or a few lines…",
+    primary_label: "Save this release",
+  },
+  stillness_named: {
+    title: "Write what became still",
+    sanatan_context:
+      "Stillness begins when attention returns to one steady anchor.",
+    why_we_ask:
+      "Naming what settled helps you recognize the ground beneath the noise.",
+    prompt: "What feels quieter now?",
+    placeholder: "Write one word or a few lines…",
+    primary_label: "Save this stillness",
+  },
+  clarity_journal: {
+    title: "Write one honest question",
+    sanatan_context:
+      "Clarity comes when we stop obeying confusion and look at what is actually here.",
+    why_we_ask:
+      "Writing the question separates the real decision from the noise around it.",
+    prompt: "What is the question you are actually sitting with?",
+    placeholder: "Write your honest question…",
+    primary_label: "Save this question",
+  },
+};
 
 interface Props {
   envelope: RoomRenderV1;
@@ -76,7 +157,7 @@ function extractBecauseYouSharedLabel(
 
 const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   const insets = useSafeAreaInsets();
-  const { loadScreen, goBack } = useScreenStore();
+  const { loadScreen, goBack, screenData } = useScreenStore();
   const actionCtx = buildActionCtx({ loadScreen, goBack });
 
   const ctx = (envelope as any).room_context?.entry_context ?? {};
@@ -89,6 +170,9 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     ROOM_DISPLAY_NAMES[envelope.room_id] ||
     (envelope as any).room_display_name ||
     "";
+  const roomSteps = (envelope as any).room_steps;
+  const sequenceActiveFlag = (screenData as any)?.room_sequence_active;
+  const resumeActionId = (screenData as any)?.room_sequence_resume_action_id;
 
   const recAction = recId
     ? (envelope.actions.find((a: any) => a.action_id === recId) ?? null)
@@ -96,6 +180,31 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   const nonExitActions = envelope.actions.filter(
     (a: any) => a.action_type !== "exit",
   );
+  const orderedActions = useMemo(() => {
+    const actionMap = new Map(
+      envelope.actions.map((action: any) => [action.action_id, action]),
+    );
+    const steps = Array.isArray(roomSteps)
+      ? [...roomSteps].sort(
+          (a: any, b: any) => (a?.step_number ?? 0) - (b?.step_number ?? 0),
+        )
+      : [];
+
+    const orderedIds: string[] = [];
+    if (recId) orderedIds.push(recId);
+
+    for (const step of steps) {
+      const actionId = step?.action_id;
+      if (!actionId || orderedIds.includes(actionId)) continue;
+      orderedIds.push(actionId);
+    }
+
+    const fromSteps = orderedIds
+      .map((actionId) => actionMap.get(actionId))
+      .filter(Boolean);
+
+    return fromSteps.length > 0 ? fromSteps : nonExitActions;
+  }, [envelope.actions, nonExitActions, recId, roomSteps]);
 
   const situationAck =
     roomCtx.situation_acknowledgement_line ??
@@ -117,32 +226,39 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
 
   const [whyExpanded, setWhyExpanded] = useState(false);
   const [recommendedExpanded, setRecommendedExpanded] = useState(false);
+  const [sequenceActive, setSequenceActive] = useState(
+    !!(screenData as any)?.room_sequence_active,
+  );
   const [stepsOpen, setStepsOpen] = useState(false);
   const [inquiryAction, setInquiryAction] = useState<any | null>(null);
   const [stepAction, setStepAction] = useState<any | null>(null);
   const [stepPayload, setStepPayload] = useState<StepPayload | null>(null);
   const [stepLabel, setStepLabel] = useState("");
+  const [carryAction, setCarryAction] = useState<any | null>(null);
+  const [carryPayload, setCarryPayload] = useState<StepPayload | null>(null);
   const [pendingCategory, setPendingCategory] =
     useState<InquiryCategory | null>(null);
 
-  function triggerRoomReflection() {
+  const triggerRoomReflection = useCallback(() => {
     actionCtx.setScreenValue(true, "show_room_reflection");
+    actionCtx.setScreenValue(false, "room_sequence_active");
+    actionCtx.setScreenValue(null, "room_sequence_resume_action_id");
     loadScreen({ container_id: "room", state_id: "render" } as any);
-  }
+  }, [actionCtx, loadScreen]);
 
-  function handleBegin() {
-    if (!recAction) return;
-    if (envelope.room_id) {
-      actionCtx.setScreenValue(envelope.room_id, "room_id");
+  function maybeAdvanceToNextAction(completedActionId?: string | null) {
+    if (!sequenceActive || !completedActionId) return;
+    const currentIndex = orderedActions.findIndex(
+      (action: any) => action?.action_id === completedActionId,
+    );
+    if (currentIndex < 0) return;
+    const nextAction = orderedActions[currentIndex + 1];
+    if (!nextAction) {
+      setSequenceActive(false);
+      triggerRoomReflection();
+      return;
     }
-    void (trackRoomTelemetry as any)({
-      event_type: "recommended_action_started",
-      room_id: roomId,
-      render_id: renderId,
-      action_id: recAction.action_id,
-      surface: "room",
-    });
-    launchAction(recAction);
+    setTimeout(() => launchAction(nextAction), 120);
   }
 
   function handleExit() {
@@ -211,8 +327,13 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     );
   }
 
-  function launchAction(action: any) {
+  const launchAction = useCallback((
+    action: any,
+    options?: { forceSequenceActive?: boolean },
+  ) => {
     const actionType: string = action?.action_type ?? "";
+    const isSequenceActive =
+      options?.forceSequenceActive ?? sequenceActive;
     setStepsOpen(false);
 
     if (
@@ -230,9 +351,49 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
       return;
     }
 
+    if (actionType === "in_room_carry") {
+      const writesEvent =
+        action?.carry_payload?.writes_event ??
+        action?.carry_payload?.persistence?.writes_event ??
+        action?.persistence?.writes_event ??
+        null;
+      const templateId = writesEvent ? CARRY_INPUT_TEMPLATE[writesEvent] : null;
+      if (templateId) {
+        setCarryAction(action);
+        setCarryPayload({
+          template_id: templateId,
+          step_config: {},
+          input_slots: [],
+          memory_modal: writesEvent ? CARRY_MEMORY_MODAL[writesEvent] ?? null : null,
+        });
+      } else {
+        void executeAction(
+          {
+            type: "room_carry_captured",
+            payload: {
+              room_id: envelope?.room_id ?? null,
+              action_id: action.action_id,
+              analytics_key: action.analytics_key,
+              label: action.label,
+              writes_event:
+                action.carry_payload?.writes_event ??
+                action.persistence?.writes_event ??
+                null,
+            },
+          } as any,
+          actionCtx,
+        );
+        maybeAdvanceToNextAction(action.action_id);
+      }
+      return;
+    }
+
     if (actionType.startsWith("runner_")) {
       const rp = action?.runner_payload;
       if (!rp) return;
+      const currentIndex = orderedActions.findIndex(
+        (candidate: any) => candidate?.action_id === action.action_id,
+      );
       if (envelope.room_id) {
         actionCtx.setScreenValue(envelope.room_id, "room_id");
       }
@@ -245,11 +406,45 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
               (rp.runner_kind ?? actionType.replace("runner_", "")) || "mantra",
             item: rp,
             action_id: action.action_id,
+            room_sequence_active: isSequenceActive,
+            room_sequence_action_ids: orderedActions.map(
+              (candidate: any) => candidate.action_id,
+            ),
+            room_sequence_index: currentIndex,
           },
         } as any,
         actionCtx,
       );
     }
+  }, [
+    actionCtx,
+    envelope?.room_id,
+    maybeAdvanceToNextAction,
+    orderedActions,
+    sequenceActive,
+  ]);
+
+  function handleBegin() {
+    if (!recAction) return;
+    setSequenceActive(true);
+    if (envelope.room_id) {
+      actionCtx.setScreenValue(envelope.room_id, "room_id");
+    }
+    actionCtx.setScreenValue(false, "show_room_reflection");
+    actionCtx.setScreenValue(true, "room_sequence_active");
+    actionCtx.setScreenValue(
+      orderedActions.map((action: any) => action.action_id),
+      "room_sequence_action_ids",
+    );
+    actionCtx.setScreenValue(null, "room_sequence_resume_action_id");
+    void (trackRoomTelemetry as any)({
+      event_type: "recommended_action_started",
+      room_id: roomId,
+      render_id: renderId,
+      action_id: recAction.action_id,
+      surface: "room",
+    });
+    launchAction(recAction, { forceSequenceActive: true });
   }
 
   function handleLaunchPractice(category: InquiryCategory, templateId: string) {
@@ -298,7 +493,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
       category_id: category.id,
       source: "inquiry",
     });
-    triggerRoomReflection();
+    maybeAdvanceToNextAction(action.action_id);
   }
 
   function handleStepDone(extra: StepModalResult) {
@@ -317,12 +512,57 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
         : {}),
     });
 
-    if (pendingCategory) triggerRoomReflection();
+    maybeAdvanceToNextAction(stepAction.action_id);
     setStepAction(null);
     setStepPayload(null);
     setStepLabel("");
     setPendingCategory(null);
   }
+
+  function handleCarryDone(extra: StepModalResult) {
+    if (!carryAction) {
+      setCarryAction(null);
+      setCarryPayload(null);
+      return;
+    }
+    const action = carryAction;
+    void executeAction(
+      {
+        type: "room_carry_captured",
+        payload: {
+          room_id: envelope?.room_id ?? null,
+          action_id: action.action_id,
+          analytics_key: action.analytics_key,
+          label: action.label,
+          writes_event:
+            action.carry_payload?.writes_event ??
+            action.persistence?.writes_event ??
+            null,
+          ...(extra.text ? { text: extra.text } : {}),
+        },
+      } as any,
+      actionCtx,
+    );
+    setCarryAction(null);
+    setCarryPayload(null);
+    maybeAdvanceToNextAction(action.action_id);
+  }
+
+  useEffect(() => {
+    if (!sequenceActiveFlag) return;
+    setSequenceActive(true);
+  }, [sequenceActiveFlag]);
+
+  useEffect(() => {
+    if (!resumeActionId) return;
+    const action = orderedActions.find(
+      (candidate: any) => candidate?.action_id === resumeActionId,
+    );
+    if (!action) return;
+    actionCtx.setScreenValue(false, "show_room_reflection");
+    actionCtx.setScreenValue(null, "room_sequence_resume_action_id");
+    launchAction(action);
+  }, [actionCtx, launchAction, orderedActions, resumeActionId]);
 
   return (
     <View>
@@ -512,6 +752,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
 
       <InquiryModal
         visible={!!inquiryAction}
+        presentation="screen"
         label={inquiryAction?.label || "Inquiry"}
         inquiryPayload={inquiryAction?.inquiry_payload}
         onCancel={() => setInquiryAction(null)}
@@ -526,6 +767,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
 
       <StepModal
         visible={!!stepAction}
+        presentation="screen"
         stepPayload={stepPayload}
         label={stepLabel}
         onCancel={() => {
@@ -535,6 +777,18 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
           setPendingCategory(null);
         }}
         onDone={handleStepDone}
+      />
+
+      <StepModal
+        visible={!!carryAction}
+        presentation="screen"
+        stepPayload={carryPayload}
+        label={carryAction?.label || "Carry"}
+        onCancel={() => {
+          setCarryAction(null);
+          setCarryPayload(null);
+        }}
+        onDone={handleCarryDone}
       />
     </View>
   );

@@ -74,7 +74,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [progressOpen, setProgressOpen] = useState(false);
-  const [guidanceOpen, setGuidanceOpen] = useState(true);
+  const [guidanceOpen, setGuidanceOpen] = useState(false);
   const [whyChosenOpen, setWhyChosenOpen] = useState(false);
   const [activeWhyTab, setActiveWhyTab] = useState<
     "mantra" | "sankalp" | "practice"
@@ -674,6 +674,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 26,
     paddingHorizontal: 12,
+    marginTop: -50,
   },
   sparkle: {
     fontSize: 28,

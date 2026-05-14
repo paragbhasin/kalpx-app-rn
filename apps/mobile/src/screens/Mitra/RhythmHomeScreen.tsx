@@ -8,7 +8,7 @@
 
 import { RHYTHM_BAND_LABELS } from "@kalpx/contracts";
 import type { RhythmItem, RhythmTimeBand } from "@kalpx/types";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Image,
@@ -29,6 +29,8 @@ import {
   screenActions,
 } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
+
+const RHYTHM_BG = require("../../../assets/beige_bg.png");
 
 function beginLabel(itemType: string): string {
   if (itemType === "mantra") return "Begin Chanting";
@@ -170,6 +172,12 @@ export default function RhythmHomeScreen({
       currentScreen: screenBridgeRef.current.currentScreen,
     };
   }, [dispatch, navigation]);
+
+  useFocusEffect(
+    useCallback(() => {
+      screenBridgeRef.current.updateBackground(RHYTHM_BG);
+    }, []),
+  );
 
   const openRhythmSetup = useCallback(() => {
     dispatch(

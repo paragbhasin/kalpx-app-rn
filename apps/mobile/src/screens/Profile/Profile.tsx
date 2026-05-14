@@ -53,11 +53,27 @@ const Profile = () => {
     store.dispatch({ type: "RESET_APP" });
     // await GoogleSignin.signOut();
     // await GoogleSignin.revokeAccess();
-    const parentNav = navigation.getParent();
-    parentNav?.reset({
-      index: 0,
-      routes: [{ name: "Login" }],
-    });
+    const tabNav = navigation.getParent();
+    const drawerNav = tabNav?.getParent?.();
+
+    if (drawerNav) {
+      drawerNav.navigate("HomePage", {
+        screen: "HomePage",
+        params: {
+          screen: "Home",
+        },
+      });
+      return;
+    }
+
+    if (tabNav) {
+      tabNav.navigate("HomePage", {
+        screen: "Home",
+      });
+      return;
+    }
+
+    navigation.navigate("Home");
   };
 
   const handleDelete = () => {

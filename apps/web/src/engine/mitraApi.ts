@@ -1,5 +1,5 @@
 import { api } from '../lib/api';
-import type { MitraHomeV3Response, TellMitraV3Response, QuickCheckinEnergyState, QuickCheckinResponse, RhythmSuggestRequest, RhythmSuggestResponse, TellMitraFollowupMeta, QuickResetOpeningState, QuickChantCompleteRequest, QuickChantCompleteResponse, QuickResetSetDefaultResponse, RhythmCompleteResponse, RhythmResolvedItem } from '@kalpx/types';
+import type { MitraHomeV3Response, TellMitraV3Response, QuickCheckinEnergyState, QuickCheckinResponse, RhythmSuggestRequest, RhythmSuggestResponse, TellMitraFollowupMeta, QuickResetOpeningState, QuickChantCompleteRequest, QuickChantCompleteResponse, QuickResetSetDefaultResponse, RhythmCompleteResponse, RhythmResolvedItem, RhythmItemMutationResponse, RhythmSettingsResponse, RhythmTimeBand, RhythmItemType, RhythmItemSource, RhythmReminderPreference } from '@kalpx/types';
 import { normalizeTellMitraResult, normalizeRhythmSuggestResponse } from '@kalpx/contracts';
 import type { RhythmSetupPayload } from '@kalpx/contracts';
 
@@ -928,4 +928,61 @@ export async function postBrowseMantras(
     console.warn('[QuickReset] postBrowseMantras failed:', err?.message);
     return [];
   }
+}
+
+// ── F-7: Rhythm item-level mutations + settings ──────────────────────────────
+
+/** POST mitra/v3/rhythm/items/ — add one item to an existing rhythm slot. */
+export async function postRhythmItemAdd(payload: {
+  slot: RhythmTimeBand;
+  item_type: RhythmItemType;
+  item_id: string;
+  title_snapshot?: string;
+  description_snapshot?: string | null;
+  purpose?: string | null;
+  source: RhythmItemSource;
+  sort_order?: number;
+  reminder_enabled?: boolean;
+  reminder_time?: string | null;
+}): Promise<RhythmItemMutationResponse> {
+  const resp = await api.post<RhythmItemMutationResponse>('mitra/v3/rhythm/items/', payload);
+  invalidateMitraHomeV3Cache();
+  return resp.data;
+}
+
+/** PATCH mitra/v3/rhythm/items/<id>/ — partial update of one rhythm item. */
+export async function patchRhythmItem(
+  rhythmItemId: number,
+  patch: Partial<{
+    reminder_enabled: boolean;
+    reminder_time: string | null;
+    sort_order: number;
+    slot: RhythmTimeBand;
+    title_snapshot: string;
+    description_snapshot: string | null;
+    purpose: string | null;
+    source: RhythmItemSource;
+  }>,
+): Promise<RhythmItemMutationResponse> {
+  const resp = await api.patch<RhythmItemMutationResponse>(`mitra/v3/rhythm/items/${rhythmItemId}/`, patch);
+  invalidateMitraHomeV3Cache();
+  return resp.data;
+}
+
+/** DELETE mitra/v3/rhythm/items/<id>/ — remove one rhythm item and normalize sort_order. */
+export async function deleteRhythmItem(
+  rhythmItemId: number,
+): Promise<RhythmItemMutationResponse> {
+  const resp = await api.delete<RhythmItemMutationResponse>(`mitra/v3/rhythm/items/${rhythmItemId}/`);
+  invalidateMitraHomeV3Cache();
+  return resp.data;
+}
+
+/** PATCH mitra/v3/rhythm/settings/ — update reminder_preference without touching items. */
+export async function patchRhythmSettings(
+  patch: { reminder_preference: RhythmReminderPreference },
+): Promise<RhythmSettingsResponse> {
+  const resp = await api.patch<RhythmSettingsResponse>('mitra/v3/rhythm/settings/', patch);
+  invalidateMitraHomeV3Cache();
+  return resp.data;
 }

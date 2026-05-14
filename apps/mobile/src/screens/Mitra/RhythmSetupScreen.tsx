@@ -18,7 +18,7 @@ import {
 import type { RhythmTimeBand, RhythmWizardLocalItem } from "@kalpx/types";
 import { useNavigation } from "@react-navigation/native";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -62,8 +62,12 @@ import LibrarySearchModal, {
 } from "../../components/LibrarySearchModal";
 import { executeAction } from "../../engine/actionExecutor";
 import {
+  deleteRhythmItem,
   mitraJourneyHomeV3,
   mitraRhythmResolveItem,
+  patchRhythmItem,
+  patchRhythmSettings,
+  postRhythmItemAdd,
   postRhythmSetup,
   postRhythmSuggest,
 } from "../../engine/mitraApi";
@@ -86,10 +90,15 @@ type WizardStep =
   | "confirmation";
 
 interface BandItem {
+  rhythm_item_id?: number;
   item_id: string;
   item_type: string;
   title: string;
   description?: string | null;
+  source: string;
+  sort_order: number;
+  reminder_enabled: boolean;
+  reminder_time: string | null;
 }
 
 type BandItems = Record<RhythmTimeBand, BandItem[]>;
@@ -619,10 +628,15 @@ export default function RhythmSetupScreen({
     const slot = existingRhythm?.[band];
     if (!slot?.items?.length) return [];
     return slot.items.map((item: any) => ({
+      rhythm_item_id: item.rhythm_item_id,
       item_id: item.item_id,
       item_type: item.item_type,
       title: item.title_snapshot,
       description: item.description_snapshot ?? null,
+      source: item.source ?? "mitra_suggested",
+      sort_order: item.sort_order,
+      reminder_enabled: item.reminder_enabled ?? false,
+      reminder_time: item.reminder_time ?? null,
     }));
   };
 
@@ -638,22 +652,19 @@ export default function RhythmSetupScreen({
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [reminderPref, setReminderPref] = useState<"yes" | "no" | "later">(
-    hasExistingRhythmReminder(existingRhythm) ? "yes" : "later",
+    (existingRhythm?.reminder_preference as "yes" | "no" | "later") ??
+      (hasExistingRhythmReminder(existingRhythm) ? "yes" : "later"),
   );
-  const [bandReminderTimes, setBandReminderTimes] = useState<
-    Partial<Record<RhythmTimeBand, string | null>>
-  >(
-    BANDS.reduce(
-      (acc, band) => {
-        const reminderTime = getBandReminderTimeFromRhythm(
-          band,
-          existingRhythm,
-        );
-        if (reminderTime) acc[band] = reminderTime;
-        return acc;
-      },
-      {} as Partial<Record<RhythmTimeBand, string>>,
-    ),
+
+  // Frozen at mount — never recomputed during save to prevent stale snapshot
+  const originalBandItems = useMemo<BandItems>(() => ({
+    morning: seedBand("morning"),
+    afternoon: seedBand("afternoon"),
+    night: seedBand("night"),
+  }), []);
+  const originalReminderPref = useMemo(
+    () => (existingRhythm?.reminder_preference as "yes" | "no" | "later") ?? null,
+    [],
   );
 
   // ── Wizard methods ────────────────────────────────────────────────────────────
@@ -866,6 +877,10 @@ export default function RhythmSetupScreen({
             item_type: itemType,
             title: item.title,
             description: item.description ?? null,
+            source: "user_chosen",
+            sort_order: prev[libraryBand].length + 1,
+            reminder_enabled: false,
+            reminder_time: null,
           },
         ],
       };
@@ -873,53 +888,136 @@ export default function RhythmSetupScreen({
     setLibraryBand(null);
   };
 
-  const removeItem = (band: RhythmTimeBand, itemId: string) => {
-    setBandItems((prev) => ({
-      ...prev,
-      [band]: prev[band].filter((i) => i.item_id !== itemId),
-    }));
+  const removeItemAt = (band: RhythmTimeBand, idx: number) => {
+    setBandItems((prev) => {
+      const arr = [...prev[band]];
+      arr.splice(idx, 1);
+      return { ...prev, [band]: arr };
+    });
+  };
+
+  const moveBandItemUp = (band: RhythmTimeBand, idx: number) => {
+    setBandItems((prev) => {
+      const arr = [...prev[band]];
+      [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
+      return { ...prev, [band]: arr };
+    });
+  };
+
+  const moveBandItemDown = (band: RhythmTimeBand, idx: number) => {
+    setBandItems((prev) => {
+      const arr = [...prev[band]];
+      [arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]];
+      return { ...prev, [band]: arr };
+    });
+  };
+
+  const moveBandItemToSlot = (fromBand: RhythmTimeBand, idx: number, toSlot: RhythmTimeBand) => {
+    setBandItems((prev) => {
+      const fromArr = [...prev[fromBand]];
+      const [moved] = fromArr.splice(idx, 1);
+      return { ...prev, [fromBand]: fromArr, [toSlot]: [...prev[toSlot], { ...moved }] };
+    });
+  };
+
+  const updateBandItemField = (band: RhythmTimeBand, idx: number, patch: Partial<BandItem>) => {
+    setBandItems((prev) => {
+      const arr = [...prev[band]];
+      arr[idx] = { ...arr[idx], ...patch };
+      return { ...prev, [band]: arr };
+    });
   };
 
   const handleSave = async () => {
-    const activeReminderBands = BANDS.filter(
-      (band) => bandItems[band].length > 0,
-    );
-    if (reminderPref === "yes") {
-      const missingReminderBand = activeReminderBands.find(
-        (band) => !normalizeReminderTime(bandReminderTimes[band]),
-      );
-      if (missingReminderBand) {
-        setErrorMsg(
-          `Set a reminder time for ${RHYTHM_BAND_LABELS[missingReminderBand].toLowerCase()}.`,
-        );
-        return;
-      }
-    }
-
-    const allItems = BANDS.flatMap((band, _) =>
-      bandItems[band].map((item, idx) => ({
-        slot: band,
-        item_type: item.item_type as any,
-        item_id: item.item_id,
-        title_snapshot: item.title,
-        description_snapshot: item.description ?? null,
-        source: "user_chosen" as const,
-        sort_order: idx,
-        reminder_enabled: reminderPref === "yes",
-        reminder_time:
-          reminderPref === "yes"
-            ? normalizeReminderTime(bandReminderTimes[band])
-            : null,
-      })),
-    );
     setSaving(true);
     setErrorMsg("");
     try {
-      await postRhythmSetup({
-        items: allItems,
-        reminder_preference: reminderPref,
-      });
-      const newHomeData = await mitraJourneyHomeV3();
+      const hasExistingRhythm = BANDS.some((b) =>
+        originalBandItems[b].some((i) => i.rhythm_item_id != null),
+      );
+
+      if (!hasExistingRhythm) {
+        // First-time setup: full-replace via postRhythmSetup
+        const allItems = BANDS.flatMap((band) =>
+          bandItems[band].map((item, idx) => ({
+            slot: band,
+            item_type: item.item_type as any,
+            item_id: item.item_id,
+            title_snapshot: item.title,
+            description_snapshot: item.description ?? null,
+            source: item.source as any,
+            sort_order: idx + 1,
+            reminder_enabled: item.reminder_enabled,
+            reminder_time: item.reminder_time,
+          })),
+        );
+        await postRhythmSetup({ items: allItems, reminder_preference: reminderPref });
+      } else {
+        // Edit mode: global delta-save
+        if (BANDS.some((b) => originalBandItems[b] == null)) {
+          console.error("[RhythmSetup] originalBandItems missing — aborting delta");
+          return;
+        }
+
+        const originalAllItems = BANDS.flatMap((b) => originalBandItems[b]);
+        const currentAllItems = BANDS.flatMap((band) =>
+          bandItems[band].map((item, idx) => ({
+            ...item,
+            slot: band,            // current band = current slot (source of truth)
+            currentSortOrder: idx + 1,
+          })),
+        );
+        const currentExistingIds = new Set(
+          currentAllItems
+            .filter((i) => i.rhythm_item_id != null)
+            .map((i) => i.rhythm_item_id!),
+        );
+
+        // Step 1: DELETE — only items absent from ALL current slots
+        for (const orig of originalAllItems) {
+          if (orig.rhythm_item_id && !currentExistingIds.has(orig.rhythm_item_id)) {
+            await deleteRhythmItem(orig.rhythm_item_id);
+          }
+        }
+
+        // Step 2: POST — new items (no rhythm_item_id)
+        for (const item of currentAllItems) {
+          if (!item.rhythm_item_id) {
+            await postRhythmItemAdd({
+              slot: item.slot,
+              item_type: item.item_type as any,
+              item_id: item.item_id,
+              title_snapshot: item.title,
+              description_snapshot: item.description ?? null,
+              source: item.source as any,
+              sort_order: item.currentSortOrder,
+              reminder_enabled: item.reminder_enabled,
+              reminder_time: item.reminder_time,
+            });
+          }
+        }
+
+        // Step 3: PATCH — only changed fields; skip if nothing changed
+        for (const item of currentAllItems) {
+          if (!item.rhythm_item_id) continue;
+          const orig = originalAllItems.find((o) => o.rhythm_item_id === item.rhythm_item_id);
+          if (!orig) continue;
+          const patch: Record<string, unknown> = {};
+          if (orig.reminder_enabled !== item.reminder_enabled) patch.reminder_enabled = item.reminder_enabled;
+          if (orig.reminder_time !== item.reminder_time) patch.reminder_time = item.reminder_time;
+          if (orig.sort_order !== item.currentSortOrder) patch.sort_order = item.currentSortOrder;
+          if ((orig as any).slot !== item.slot) patch.slot = item.slot;
+          if (Object.keys(patch).length === 0) continue;
+          await patchRhythmItem(item.rhythm_item_id, patch);
+        }
+
+        // Step 4: PATCH reminder_preference only if changed
+        if (reminderPref !== originalReminderPref) {
+          await patchRhythmSettings({ reminder_preference: reminderPref });
+        }
+      }
+
+      const newHomeData = await mitraJourneyHomeV3({ forceFresh: true });
       dispatch(setHomeData(newHomeData));
       openRhythmHome();
     } catch {
@@ -1608,25 +1706,82 @@ export default function RhythmSetupScreen({
 
                 {isExpanded && (
                   <View style={styles.bandBody}>
-                    {bandItems[band].map((item) => (
-                      <View key={item.item_id} style={styles.addedItem}>
-                        <View style={styles.addedItemInfo}>
-                          <Text style={styles.addedItemType}>
-                            {item.item_type}
-                          </Text>
-                          <Text style={styles.addedItemTitle}>
-                            {item.title}
-                          </Text>
+                    {bandItems[band].map((item, idx) => {
+                      const isFirst = idx === 0;
+                      const isLast = idx === bandItems[band].length - 1;
+                      return (
+                        <View key={item.rhythm_item_id ?? `${item.item_id}-${idx}`} style={styles.addedItem}>
+                          {/* Item info */}
+                          <View style={styles.addedItemInfo}>
+                            <Text style={styles.addedItemType}>{item.item_type}</Text>
+                            <Text style={styles.addedItemTitle}>{item.title}</Text>
+                          </View>
+
+                          {/* Gentle reminder toggle */}
+                          <View style={styles.itemReminderRow}>
+                            <TouchableOpacity
+                              onPress={() => updateBandItemField(band, idx, { reminder_enabled: !item.reminder_enabled })}
+                              activeOpacity={0.7}
+                              style={styles.reminderToggleBtn}
+                            >
+                              <Text style={styles.reminderToggleText}>
+                                {item.reminder_enabled ? "Reminder on ✓" : "Remind me"}
+                              </Text>
+                            </TouchableOpacity>
+                            {item.reminder_enabled && (
+                              <ReminderTimeRow
+                                label=""
+                                value={item.reminder_time}
+                                onChange={(v) => updateBandItemField(band, idx, { reminder_time: v ? normalizeReminderTime(v) : null })}
+                              />
+                            )}
+                          </View>
+
+                          {/* Reorder */}
+                          <View style={styles.reorderRow}>
+                            <TouchableOpacity
+                              disabled={isFirst}
+                              onPress={() => moveBandItemUp(band, idx)}
+                              style={[styles.reorderBtn, isFirst && styles.reorderBtnDisabled]}
+                            >
+                              <Text style={styles.reorderBtnText}>↑</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              disabled={isLast}
+                              onPress={() => moveBandItemDown(band, idx)}
+                              style={[styles.reorderBtn, isLast && styles.reorderBtnDisabled]}
+                            >
+                              <Text style={styles.reorderBtnText}>↓</Text>
+                            </TouchableOpacity>
+                          </View>
+
+                          {/* Move to slot */}
+                          <View style={styles.moveSlotRow}>
+                            {(["morning", "afternoon", "night"] as RhythmTimeBand[])
+                              .filter((s) => s !== band)
+                              .map((s) => (
+                                <TouchableOpacity
+                                  key={s}
+                                  onPress={() => moveBandItemToSlot(band, idx, s)}
+                                  style={styles.moveSlotPill}
+                                  activeOpacity={0.7}
+                                >
+                                  <Text style={styles.moveSlotPillText}>Move to {s}</Text>
+                                </TouchableOpacity>
+                              ))}
+                          </View>
+
+                          {/* Remove */}
+                          <TouchableOpacity
+                            onPress={() => removeItemAt(band, idx)}
+                            activeOpacity={0.7}
+                            style={styles.removeBtn}
+                          >
+                            <Text style={styles.removeBtnText}>Remove</Text>
+                          </TouchableOpacity>
                         </View>
-                        <TouchableOpacity
-                          onPress={() => removeItem(band, item.item_id)}
-                          activeOpacity={0.7}
-                          style={styles.removeBtn}
-                        >
-                          <Text style={styles.removeBtnText}>Remove</Text>
-                        </TouchableOpacity>
-                      </View>
-                    ))}
+                      );
+                    })}
 
                     <TouchableOpacity
                       style={styles.addFromLibraryBtn}
@@ -1638,19 +1793,6 @@ export default function RhythmSetupScreen({
                         Add from library
                       </Text>
                     </TouchableOpacity>
-
-                    {reminderPref === "yes" && bandItems[band].length > 0 && (
-                      <ReminderTimeRow
-                        label="Reminder time"
-                        value={bandReminderTimes[band]}
-                        onChange={(value) =>
-                          setBandReminderTimes((prev) => ({
-                            ...prev,
-                            [band]: normalizeReminderTime(value) ?? value,
-                          }))
-                        }
-                      />
-                    )}
                   </View>
                 )}
               </View>
@@ -2339,16 +2481,16 @@ const styles = StyleSheet.create({
   chevron: { fontSize: 26, color: "#C99317", marginTop: -4 },
   bandBody: { paddingTop: 16, gap: 12 },
   addedItem: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: "column",
     borderRadius: 18,
     borderWidth: 1,
     borderColor: "rgba(226, 201, 151, 0.9)",
     backgroundColor: "rgba(255, 251, 244, 0.95)",
     paddingHorizontal: 16,
     paddingVertical: 16,
+    marginBottom: 10,
   },
-  addedItemInfo: { flex: 1, paddingRight: 12 },
+  addedItemInfo: { marginBottom: 8 },
   addedItemType: {
     fontSize: 12,
     fontFamily: Fonts.sans.bold,
@@ -2362,9 +2504,66 @@ const styles = StyleSheet.create({
     color: "#6A4523",
     lineHeight: 24,
   },
-  removeBtn: { paddingVertical: 6, paddingLeft: 8 },
-  removeBtnText: {
+  itemReminderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 8,
+  },
+  reminderToggleBtn: {
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(201,168,76,0.4)",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  reminderToggleText: {
+    fontSize: 11,
+    color: "#7B6550",
+    fontFamily: Fonts.sans.regular,
+  },
+  reorderRow: {
+    flexDirection: "row",
+    gap: 6,
+    marginBottom: 8,
+  },
+  reorderBtn: {
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "rgba(201,168,76,0.3)",
+    paddingHorizontal: 10,
+    paddingVertical: 2,
+  },
+  reorderBtnDisabled: {
+    opacity: 0.35,
+  },
+  reorderBtnText: {
     fontSize: 14,
+    color: "#7B6550",
+    fontFamily: Fonts.sans.regular,
+  },
+  moveSlotRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    marginBottom: 8,
+  },
+  moveSlotPill: {
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(201,168,76,0.3)",
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  moveSlotPillText: {
+    fontSize: 11,
+    color: "#7B6550",
+    fontFamily: Fonts.serif.regular,
+  },
+  removeBtn: { alignSelf: "flex-start", paddingVertical: 4 },
+  removeBtnText: {
+    fontSize: 13,
     color: "#DF4D35",
     fontFamily: Fonts.sans.semiBold,
   },

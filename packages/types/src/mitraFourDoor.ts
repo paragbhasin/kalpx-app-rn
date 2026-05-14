@@ -21,10 +21,12 @@ export type RhythmItemSource =
 export type RhythmReminderPreference = "yes" | "no" | "later";
 
 export interface RhythmItem {
-  id: number;
+  /** DB row PK — ONLY for PATCH/DELETE URLs, React keys, reorder. Never in runner/resolve/complete. */
+  rhythm_item_id: number;
+  /** Content identity (e.g. "mantra.gayatri") — use for resolve-item, runner, completion. */
+  item_id: string;
   slot: RhythmTimeBand;
   item_type: RhythmItemType;
-  item_id: string;
   title_snapshot: string;
   description_snapshot: string | null;
   purpose: string | null;
@@ -32,6 +34,20 @@ export interface RhythmItem {
   sort_order: number;
   reminder_enabled: boolean;
   reminder_time: string | null;
+}
+
+export interface RhythmItemMutationResponse {
+  rhythm_item_id: number;
+  slot: RhythmTimeBand;
+  sort_order?: number;
+  morning_items?: RhythmItem[];
+  afternoon_items?: RhythmItem[];
+  night_items?: RhythmItem[];
+  deleted?: true;
+}
+
+export interface RhythmSettingsResponse {
+  reminder_preference: RhythmReminderPreference;
 }
 
 export interface RhythmSlot {

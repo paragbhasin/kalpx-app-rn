@@ -1,16 +1,24 @@
 import { RHYTHM_BAND_LABELS, RHYTHM_BAND_SUBTITLES } from "@kalpx/contracts";
 import type { RhythmTimeBand } from "@kalpx/types";
 import { Check, ChevronDown, ChevronUp, Plus, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
 import { RhythmLibraryPickerModal } from "../../components/mitra/RhythmLibraryPickerModal";
-import { getMitraHomeV3, postRhythmSetup } from "../../engine/mitraApi";
+import {
+  deleteRhythmItem,
+  getMitraHomeV3,
+  patchRhythmItem,
+  patchRhythmSettings,
+  postRhythmItemAdd,
+  postRhythmSetup,
+} from "../../engine/mitraApi";
 import type { AppDispatch, RootState } from "../../store";
 import { setHomeData } from "../../store/doorSlice";
 
 type LocalItem = {
+  rhythm_item_id?: number;
   slot: RhythmTimeBand;
   item_type: "mantra" | "sankalp" | "practice" | "reflection" | "library";
   item_id: string;
@@ -19,7 +27,7 @@ type LocalItem = {
   source: "mitra_suggested" | "user_chosen" | "library";
   sort_order: number;
   reminder_enabled: boolean;
-  reminder_time?: string | null;
+  reminder_time: string | null;
 };
 
 const BANDS: RhythmTimeBand[] = ["morning", "afternoon", "night"];
@@ -30,28 +38,27 @@ const BAND_ART: Record<RhythmTimeBand, string> = {
   night: "/night1.svg",
 };
 
-function seedFromHomeData(homeData: any): LocalItem[] {
-  const items: LocalItem[] = [];
-  if (!homeData?.companion_rhythm?.has_rhythm) return items;
+function seedBandItems(homeData: any): Record<RhythmTimeBand, LocalItem[]> {
+  const result: Record<RhythmTimeBand, LocalItem[]> = { morning: [], afternoon: [], night: [] };
+  if (!homeData?.companion_rhythm?.has_rhythm) return result;
   const rhythm = homeData.companion_rhythm;
   for (const band of BANDS) {
     const slot = rhythm[band];
     if (!slot?.items) continue;
-    for (const item of slot.items) {
-      items.push({
-        slot: band,
-        item_type: item.item_type,
-        item_id: item.item_id,
-        title_snapshot: item.title_snapshot,
-        description_snapshot: item.description_snapshot ?? null,
-        source: item.source,
-        sort_order: item.sort_order,
-        reminder_enabled: item.reminder_enabled ?? false,
-        reminder_time: item.reminder_time ?? null,
-      });
-    }
+    result[band] = slot.items.map((item: any) => ({
+      rhythm_item_id: item.rhythm_item_id,
+      slot: band,
+      item_type: item.item_type,
+      item_id: item.item_id,
+      title_snapshot: item.title_snapshot,
+      description_snapshot: item.description_snapshot ?? null,
+      source: item.source ?? "mitra_suggested",
+      sort_order: item.sort_order,
+      reminder_enabled: item.reminder_enabled ?? false,
+      reminder_time: item.reminder_time ?? null,
+    }));
   }
-  return items;
+  return result;
 }
 
 export function RhythmSetupPage() {
@@ -59,46 +66,179 @@ export function RhythmSetupPage() {
   const navigate = useNavigate();
   const homeData = useSelector((s: RootState) => s.door.homeData);
 
-  const [items, setItems] = useState<LocalItem[]>(() =>
-    seedFromHomeData(homeData),
+  const [bandItems, setBandItems] = useState<Record<RhythmTimeBand, LocalItem[]>>(
+    () => seedBandItems(homeData),
   );
   const [openBand, setOpenBand] = useState<RhythmTimeBand | null>("morning");
   const [pickerBand, setPickerBand] = useState<RhythmTimeBand | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reminderPref, setReminderPref] = useState<"yes" | "no" | "later">(
-    "later",
+    (homeData?.companion_rhythm?.reminder_preference as "yes" | "no" | "later") ?? "later",
   );
-  const [bandTimes, setBandTimes] = useState<
-    Partial<Record<RhythmTimeBand, string>>
-  >({});
 
-  function addItem(item: LocalItem) {
-    setItems((prev) => [...prev, item]);
+  // Frozen at mount — never recomputed during save
+  const originalBandItems = useMemo(() => seedBandItems(homeData), []);
+  const originalReminderPref = useMemo(
+    () => (homeData?.companion_rhythm?.reminder_preference as "yes" | "no" | "later") ?? null,
+    [],
+  );
+
+  function updateItemField(band: RhythmTimeBand, idx: number, patch: Partial<LocalItem>) {
+    setBandItems((prev) => {
+      const arr = [...prev[band]];
+      arr[idx] = { ...arr[idx], ...patch };
+      return { ...prev, [band]: arr };
+    });
   }
 
-  function removeItem(idx: number) {
-    setItems((prev) => prev.filter((_, i) => i !== idx));
+  function moveItemUp(band: RhythmTimeBand, idx: number) {
+    setBandItems((prev) => {
+      const arr = [...prev[band]];
+      [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
+      return { ...prev, [band]: arr };
+    });
   }
 
-  function bandItems(band: RhythmTimeBand) {
-    return items.filter((it) => it.slot === band);
+  function moveItemDown(band: RhythmTimeBand, idx: number) {
+    setBandItems((prev) => {
+      const arr = [...prev[band]];
+      [arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]];
+      return { ...prev, [band]: arr };
+    });
   }
 
-  async function save() {
+  function moveItemToSlot(fromBand: RhythmTimeBand, idx: number, toSlot: RhythmTimeBand) {
+    if (fromBand === toSlot) return;
+    setBandItems((prev) => {
+      const fromArr = [...prev[fromBand]];
+      const [moved] = fromArr.splice(idx, 1);
+      const toArr = [...prev[toSlot], { ...moved, slot: toSlot }];
+      return { ...prev, [fromBand]: fromArr, [toSlot]: toArr };
+    });
+  }
+
+  function removeItemAt(band: RhythmTimeBand, idx: number) {
+    setBandItems((prev) => {
+      const arr = [...prev[band]];
+      arr.splice(idx, 1);
+      return { ...prev, [band]: arr };
+    });
+  }
+
+  function addPickedItem(picked: {
+    slot: RhythmTimeBand; item_type: any; item_id: string; title_snapshot: string;
+    description_snapshot: string | null; source: any; sort_order: number; reminder_enabled: boolean;
+  }) {
+    const band = picked.slot;
+    setBandItems((prev) => {
+      if (prev[band].some((i) => i.item_id === picked.item_id)) return prev;
+      const newItem: LocalItem = {
+        slot: band,
+        item_type: picked.item_type,
+        item_id: picked.item_id,
+        title_snapshot: picked.title_snapshot,
+        description_snapshot: picked.description_snapshot,
+        source: picked.source,
+        sort_order: prev[band].length + 1,
+        reminder_enabled: false,
+        reminder_time: null,
+      };
+      return { ...prev, [band]: [...prev[band], newItem] };
+    });
+  }
+
+  async function handleSave() {
     setSaving(true);
     setError(null);
     try {
-      const mappedItems = items.map((it) => {
-        const t = bandTimes[it.slot];
-        return { ...it, reminder_enabled: !!t, reminder_time: t ?? null };
-      });
-      await postRhythmSetup({
-        items: mappedItems,
-        reminder_preference: reminderPref,
-      });
-      const homeData = await getMitraHomeV3();
-      dispatch(setHomeData(homeData));
+      const hasExistingRhythm = BANDS.some((b) =>
+        originalBandItems[b].some((i) => i.rhythm_item_id != null),
+      );
+
+      if (!hasExistingRhythm) {
+        // First-time setup: full-replace via postRhythmSetup
+        const allItems = BANDS.flatMap((band) =>
+          bandItems[band].map((item, idx) => ({
+            slot: band,
+            item_type: item.item_type,
+            item_id: item.item_id,
+            title_snapshot: item.title_snapshot,
+            description_snapshot: item.description_snapshot,
+            source: item.source,
+            sort_order: idx + 1,
+            reminder_enabled: item.reminder_enabled,
+            reminder_time: item.reminder_time,
+          })),
+        );
+        await postRhythmSetup({ items: allItems, reminder_preference: reminderPref });
+      } else {
+        // Edit mode: global delta-save
+        const originalAllItems = BANDS.flatMap((b) => originalBandItems[b]);
+        if (BANDS.some((b) => originalBandItems[b] == null)) {
+          console.error("[RhythmSetup] originalBandItems missing — aborting delta");
+          return;
+        }
+
+        const currentAllItems = BANDS.flatMap((band) =>
+          bandItems[band].map((item, idx) => ({
+            ...item,
+            slot: band,            // current band = current slot (source of truth)
+            currentSortOrder: idx + 1,
+          })),
+        );
+        const currentExistingIds = new Set(
+          currentAllItems
+            .filter((i) => i.rhythm_item_id != null)
+            .map((i) => i.rhythm_item_id!),
+        );
+
+        // Step 1: DELETE — only items absent from ALL current slots
+        for (const orig of originalAllItems) {
+          if (orig.rhythm_item_id && !currentExistingIds.has(orig.rhythm_item_id)) {
+            await deleteRhythmItem(orig.rhythm_item_id);
+          }
+        }
+
+        // Step 2: POST — new items (no rhythm_item_id) in their final slot
+        for (const item of currentAllItems) {
+          if (!item.rhythm_item_id) {
+            await postRhythmItemAdd({
+              slot: item.slot,
+              item_type: item.item_type,
+              item_id: item.item_id,
+              title_snapshot: item.title_snapshot,
+              description_snapshot: item.description_snapshot,
+              source: item.source,
+              sort_order: item.currentSortOrder,
+              reminder_enabled: item.reminder_enabled,
+              reminder_time: item.reminder_time,
+            });
+          }
+        }
+
+        // Step 3: PATCH — only changed fields; skip if nothing changed
+        for (const item of currentAllItems) {
+          if (!item.rhythm_item_id) continue;
+          const orig = originalAllItems.find((o) => o.rhythm_item_id === item.rhythm_item_id);
+          if (!orig) continue;
+          const patch: Record<string, unknown> = {};
+          if (orig.reminder_enabled !== item.reminder_enabled) patch.reminder_enabled = item.reminder_enabled;
+          if (orig.reminder_time !== item.reminder_time) patch.reminder_time = item.reminder_time;
+          if (orig.slot !== item.slot) patch.slot = item.slot;
+          if (orig.sort_order !== item.currentSortOrder) patch.sort_order = item.currentSortOrder;
+          if (Object.keys(patch).length === 0) continue;
+          await patchRhythmItem(item.rhythm_item_id, patch);
+        }
+
+        // Step 4: PATCH reminder_preference only if changed
+        if (reminderPref !== originalReminderPref) {
+          await patchRhythmSettings({ reminder_preference: reminderPref });
+        }
+      }
+
+      const fresh = await getMitraHomeV3({ forceFresh: true });
+      dispatch(setHomeData(fresh));
       navigate("/en/mitra/rhythm");
     } catch {
       setError("Could not save. Please try again.");
@@ -235,49 +375,135 @@ export function RhythmSetupPage() {
 
               {openBand === band && (
                 <div style={{ padding: "12px 2px 0" }}>
-                  {bandItems(band).map((item, idx) => (
-                    <div
-                      key={`${item.item_id}-${idx}`}
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        padding: "12px 14px",
-                        borderRadius: 14,
-                        border: "1px solid rgba(201,168,76,0.2)",
-                        background: "rgba(255,252,248,0.9)",
-                        marginBottom: 10,
-                      }}
-                    >
-                      <div>
-                        <div
-                          style={{
-                            fontFamily: "var(--kalpx-font-serif)",
-                            fontSize: 15,
-                            fontWeight: 600,
-                            color: "#432104",
-                          }}
-                        >
-                          {item.title_snapshot}
-                        </div>
-                        <div style={{ fontSize: 12, color: "#A08060" }}>
-                          {item.item_type}
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => removeItem(items.indexOf(item))}
+                  {bandItems[band].map((item, idx) => {
+                    const isFirst = idx === 0;
+                    const isLast = idx === bandItems[band].length - 1;
+                    return (
+                      <div
+                        key={item.rhythm_item_id ?? `${item.item_id}-${idx}`}
                         style={{
-                          background: "none",
-                          border: "none",
-                          color: "#A08060",
-                          cursor: "pointer",
-                          fontSize: 16,
+                          padding: "12px 14px",
+                          borderRadius: 14,
+                          border: "1px solid rgba(201,168,76,0.2)",
+                          background: "rgba(255,252,248,0.9)",
+                          marginBottom: 10,
                         }}
                       >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
+                        {/* Item info */}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                          <div>
+                            <div
+                              style={{
+                                fontFamily: "var(--kalpx-font-serif)",
+                                fontSize: 15,
+                                fontWeight: 600,
+                                color: "#432104",
+                              }}
+                            >
+                              {item.title_snapshot}
+                            </div>
+                            <div style={{ fontSize: 12, color: "#A08060" }}>{item.item_type}</div>
+                          </div>
+                          <button
+                            onClick={() => removeItemAt(band, idx)}
+                            style={{ background: "none", border: "none", color: "#A08060", cursor: "pointer", fontSize: 16 }}
+                          >
+                            ✕
+                          </button>
+                        </div>
+
+                        {/* Gentle reminder toggle */}
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                          <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#7B6550", cursor: "pointer" }}>
+                            <input
+                              type="checkbox"
+                              checked={item.reminder_enabled}
+                              onChange={(e) => updateItemField(band, idx, { reminder_enabled: e.target.checked })}
+                            />
+                            <span>Gentle reminder</span>
+                          </label>
+                          {item.reminder_enabled && (
+                            <input
+                              type="time"
+                              value={item.reminder_time?.slice(0, 5) ?? ""}
+                              onChange={(e) =>
+                                updateItemField(band, idx, { reminder_time: e.target.value ? e.target.value + ":00" : null })
+                              }
+                              style={{
+                                border: "1px solid rgba(201,168,76,0.3)",
+                                borderRadius: 8,
+                                padding: "3px 6px",
+                                fontSize: 12,
+                                color: "#432104",
+                                background: "#fff",
+                                outline: "none",
+                              }}
+                            />
+                          )}
+                        </div>
+
+                        {/* Reorder within slot */}
+                        <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
+                          <button
+                            disabled={isFirst}
+                            onClick={() => moveItemUp(band, idx)}
+                            style={{
+                              background: "none",
+                              border: "1px solid rgba(201,168,76,0.3)",
+                              borderRadius: 6,
+                              padding: "2px 8px",
+                              cursor: isFirst ? "default" : "pointer",
+                              opacity: isFirst ? 0.35 : 1,
+                              fontSize: 14,
+                              color: "#7B6550",
+                            }}
+                          >
+                            ↑
+                          </button>
+                          <button
+                            disabled={isLast}
+                            onClick={() => moveItemDown(band, idx)}
+                            style={{
+                              background: "none",
+                              border: "1px solid rgba(201,168,76,0.3)",
+                              borderRadius: 6,
+                              padding: "2px 8px",
+                              cursor: isLast ? "default" : "pointer",
+                              opacity: isLast ? 0.35 : 1,
+                              fontSize: 14,
+                              color: "#7B6550",
+                            }}
+                          >
+                            ↓
+                          </button>
+                        </div>
+
+                        {/* Move to another slot */}
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          {(["morning", "afternoon", "night"] as RhythmTimeBand[])
+                            .filter((s) => s !== band)
+                            .map((s) => (
+                              <button
+                                key={s}
+                                onClick={() => moveItemToSlot(band, idx, s)}
+                                style={{
+                                  background: "none",
+                                  border: "1px solid rgba(201,168,76,0.3)",
+                                  borderRadius: 999,
+                                  padding: "2px 10px",
+                                  cursor: "pointer",
+                                  fontSize: 11,
+                                  color: "#7B6550",
+                                  fontFamily: "var(--kalpx-font-serif)",
+                                }}
+                              >
+                                Move to {s}
+                              </button>
+                            ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                   <button
                     onClick={() => setPickerBand(band)}
                     style={{
@@ -299,43 +525,6 @@ export function RhythmSetupPage() {
                     <Plus size={22} strokeWidth={2} />
                     Add from library
                   </button>
-                  {reminderPref === "yes" && bandItems(band).length > 0 && (
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 10,
-                        marginTop: 10,
-                        padding: "10px 14px",
-                        background: "rgba(201,168,76,0.06)",
-                        borderRadius: 14,
-                        border: "1px solid rgba(201,168,76,0.2)",
-                      }}
-                    >
-                      <span style={{ fontSize: 13, color: "#7B6550", flex: 1 }}>
-                        Reminder time
-                      </span>
-                      <input
-                        type="time"
-                        value={bandTimes[band] ?? ""}
-                        onChange={(e) =>
-                          setBandTimes((prev) => ({
-                            ...prev,
-                            [band]: e.target.value || undefined,
-                          }))
-                        }
-                        style={{
-                          border: "1px solid rgba(201,168,76,0.3)",
-                          borderRadius: 8,
-                          padding: "4px 8px",
-                          fontSize: 13,
-                          color: "#432104",
-                          background: "#fff",
-                          outline: "none",
-                        }}
-                      />
-                    </div>
-                  )}
                 </div>
               )}
             </div>
@@ -350,7 +539,7 @@ export function RhythmSetupPage() {
                 marginBottom: 14,
               }}
             >
-              Reminder preference
+              Gentle reminder preference for your rhythm
             </div>
             <div style={{ display: "flex", gap: 10 }}>
               {(
@@ -400,7 +589,7 @@ export function RhythmSetupPage() {
           )}
 
           <button
-            onClick={() => void save()}
+            onClick={() => void handleSave()}
             disabled={saving}
             style={{
               width: "100%",
@@ -439,9 +628,9 @@ export function RhythmSetupPage() {
       {pickerBand && (
         <RhythmLibraryPickerModal
           band={pickerBand}
-          onPick={addItem}
+          onPick={addPickedItem}
           onClose={() => setPickerBand(null)}
-          nextSortOrder={bandItems(pickerBand).length}
+          nextSortOrder={bandItems[pickerBand].length + 1}
         />
       )}
     </MitraMobileShell>

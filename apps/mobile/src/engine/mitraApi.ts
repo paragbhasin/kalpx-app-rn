@@ -2196,7 +2196,7 @@ export async function postQuickResetSetDefault(
 ): Promise<QuickResetSetDefaultResponse | null> {
   try {
     const resp = await api.post<QuickResetSetDefaultResponse>(
-      '/api/mitra/v3/quick_reset/set-default/', { mantra_ref },
+      'mitra/v3/quick_reset/set-default/', { mantra_ref },
     );
     return resp.data;
   } catch (err: any) {
@@ -2213,7 +2213,7 @@ export async function postBrowseMantras(
 ): Promise<unknown[]> {
   try {
     const resp = await api.post<{ mantras: unknown[]; count: number }>(
-      '/api/mitra/browse-mantras/', { focus },
+      'mitra/browse-mantras/', { focus },
     );
     return Array.isArray(resp.data?.mantras) ? resp.data.mantras : [];
   } catch (err: any) {

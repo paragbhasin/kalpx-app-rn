@@ -13,6 +13,7 @@ import { useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   ImageBackground,
   LayoutAnimation,
   Modal,
@@ -24,6 +25,8 @@ import {
   TouchableOpacity,
   UIManager,
   View,
+  Animated,
+  Easing,
 } from "react-native";
 import RudrakshBead from "../../../assets/rudraksh.svg";
 import AudioPlayerBlock from "../../blocks/AudioPlayerBlock";
@@ -79,6 +82,51 @@ function CollapsibleCard({
       </TouchableOpacity>
       {expanded ? <Text style={styles.collapsibleBody}>{children}</Text> : null}
     </View>
+  );
+}
+
+function HighlightedToast({
+  visible,
+  title,
+  message,
+  onClose,
+}: {
+  visible: boolean;
+  title: string;
+  message: string;
+  onClose: () => void;
+}) {
+  if (!visible) return null;
+
+  return (
+    <Modal transparent visible animationType="fade" onRequestClose={onClose}>
+      <View style={styles.toastOverlay}>
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={onClose}
+          style={styles.toastBackdrop}
+        />
+        <View style={styles.toastShell}>
+          <View style={styles.toastCard}>
+            <View style={styles.toastGlow} />
+            <View style={styles.toastIconWrap}>
+              <Ionicons name="flower-outline" size={28} color="#BE9A56" />
+            </View>
+            <View style={styles.toastCopy}>
+              <Text style={styles.toastTitle}>{title}</Text>
+              <Text style={styles.toastMessage}>{message}</Text>
+            </View>
+            <TouchableOpacity
+              onPress={onClose}
+              activeOpacity={0.7}
+              style={styles.toastCloseBtn}
+            >
+              <Text style={styles.toastCloseText}>×</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
   );
 }
 
@@ -161,8 +209,16 @@ export default function QuickResetScreen({
   const [pickerMantras, setPickerMantras] = useState<QuickResetMantra[]>([]);
   const [pickerLoading, setPickerLoading] = useState(false);
   const [defaultSetConfirmed, setDefaultSetConfirmed] = useState(false);
+  const [highlightedToastTitle, setHighlightedToastTitle] =
+    useState("Mantra Updated ✦");
+  const [highlightedToastMessage, setHighlightedToastMessage] = useState(
+    "Your rhythm has been gently realigned.",
+  );
+  const [mantraUpdatedToastVisible, setMantraUpdatedToastVisible] =
+    useState(false);
 
   const runnerStartedAt = useRef<number>(0);
+  const ringSpin = useRef(new Animated.Value(0)).current;
 
   const activeMantra = selectedMantra ?? openingState?.mantra ?? null;
 
@@ -183,6 +239,30 @@ export default function QuickResetScreen({
     loadOpening();
   }, [loadOpening]);
 
+  useEffect(() => {
+    ringSpin.setValue(0);
+    const animation = Animated.loop(
+      Animated.timing(ringSpin, {
+        toValue: 1,
+        duration: 40000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+    );
+    animation.start();
+    return () => {
+      animation.stop();
+    };
+  }, [ringSpin]);
+
+  useEffect(() => {
+    if (!mantraUpdatedToastVisible) return;
+    const timeout = setTimeout(() => {
+      setMantraUpdatedToastVisible(false);
+    }, 2600);
+    return () => clearTimeout(timeout);
+  }, [mantraUpdatedToastVisible]);
+
   // ── Secondary action: "Show another calming mantra" ────────────────────────
   const handleShowAnother = useCallback(async () => {
     if (!activeMantra) return;
@@ -190,7 +270,11 @@ export default function QuickResetScreen({
     const candidates = normalizeBrowseMantras(raw);
     const different = pickDifferentMantra(candidates, activeMantra.item_id);
     if (different) {
+      setDefaultSetConfirmed(false);
       setSelectedMantra(different);
+      setHighlightedToastTitle("Mantra Updated ✦");
+      setHighlightedToastMessage("Your rhythm has been gently realigned.");
+      setMantraUpdatedToastVisible(true);
     }
     // If none found, keep current — silent
   }, [activeMantra]);
@@ -200,6 +284,11 @@ export default function QuickResetScreen({
     async (mantra: QuickResetMantra) => {
       await postQuickResetSetDefault(mantra.item_id);
       setDefaultSetConfirmed(true);
+      setHighlightedToastTitle("Quick Reset Mantra Set ✦");
+      setHighlightedToastMessage(
+        "Your mantra has been set for future Quick Reset moments.",
+      );
+      setMantraUpdatedToastVisible(true);
       await loadOpening();
     },
     [loadOpening],
@@ -209,15 +298,22 @@ export default function QuickResetScreen({
   const openPicker = useCallback(async () => {
     setPickerVisible(true);
     setPickerLoading(true);
-    const raw = await postBrowseMantras("peacecalm");
-    setPickerMantras(normalizeBrowseMantras(raw));
-    setPickerLoading(false);
+    try {
+      const raw = await postBrowseMantras("peacecalm");
+      setPickerMantras(normalizeBrowseMantras(raw));
+    } finally {
+      setPickerLoading(false);
+    }
   }, []);
 
   const handlePickerSelect = useCallback((mantra: QuickResetMantra) => {
+    setDefaultSetConfirmed(false);
     setSelectedMantra(mantra);
     setPickerVisible(false);
     setPhase("preview");
+    setHighlightedToastTitle("Mantra Updated ✦");
+    setHighlightedToastMessage("Your rhythm has been gently realigned.");
+    setMantraUpdatedToastVisible(true);
   }, []);
 
   // ── Runner start ───────────────────────────────────────────────────────────
@@ -301,6 +397,10 @@ export default function QuickResetScreen({
       const cy = 115 + Math.sin(angle) * 86;
       return { cx, cy, i };
     });
+    const spin = ringSpin.interpolate({
+      inputRange: [0, 1],
+      outputRange: ["0deg", "360deg"],
+    });
 
     return (
       <View style={styles.openingShell}>
@@ -321,7 +421,9 @@ export default function QuickResetScreen({
         </View>
 
         <View style={styles.previewRingWrap}>
-          <View style={styles.previewRing}>
+          <Animated.View
+            style={[styles.previewRing, { transform: [{ rotate: spin }] }]}
+          >
             {beads.map(({ cx, cy, i }) => (
               <RudrakshBead
                 key={i}
@@ -336,7 +438,7 @@ export default function QuickResetScreen({
                 ]}
               />
             ))}
-          </View>
+          </Animated.View>
           <TouchableOpacity
             onPress={handleBeginChanting}
             activeOpacity={0.85}
@@ -453,11 +555,11 @@ export default function QuickResetScreen({
           ))}
         </View>
 
-        {defaultSetConfirmed ? (
+        {/* {defaultSetConfirmed ? (
           <Text style={styles.confirmText}>
             Set as your Quick Reset mantra.
           </Text>
-        ) : null}
+        ) : null} */}
       </View>
     );
   };
@@ -470,11 +572,14 @@ export default function QuickResetScreen({
     ));
 
   const handleBack = useCallback(() => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
     if (embedded) {
       goBack();
       return;
     }
-    navigation.goBack();
   }, [embedded, goBack, navigation]);
 
   // ── Phases ─────────────────────────────────────────────────────────────────
@@ -492,6 +597,12 @@ export default function QuickResetScreen({
           <View style={styles.centerContent}>
             <ActivityIndicator size="large" color="#C99317" />
           </View>
+          <HighlightedToast
+            visible={mantraUpdatedToastVisible}
+            title={highlightedToastTitle}
+            message={highlightedToastMessage}
+            onClose={() => setMantraUpdatedToastVisible(false)}
+          />
         </ImageBackground>
       </SafeAreaView>
     );
@@ -525,6 +636,12 @@ export default function QuickResetScreen({
               <Text style={styles.primaryBtnText}>Retry</Text>
             </TouchableOpacity>
           </View>
+          <HighlightedToast
+            visible={mantraUpdatedToastVisible}
+            title={highlightedToastTitle}
+            message={highlightedToastMessage}
+            onClose={() => setMantraUpdatedToastVisible(false)}
+          />
         </ImageBackground>
       </SafeAreaView>
     );
@@ -552,6 +669,12 @@ export default function QuickResetScreen({
             )}
           </ScrollView>
           {renderPickerModal()}
+          <HighlightedToast
+            visible={mantraUpdatedToastVisible}
+            title={highlightedToastTitle}
+            message={highlightedToastMessage}
+            onClose={() => setMantraUpdatedToastVisible(false)}
+          />
         </ImageBackground>
       </SafeAreaView>
     );
@@ -577,6 +700,12 @@ export default function QuickResetScreen({
             ])}
           </ScrollView>
           {renderPickerModal()}
+          <HighlightedToast
+            visible={mantraUpdatedToastVisible}
+            title={highlightedToastTitle}
+            message={highlightedToastMessage}
+            onClose={() => setMantraUpdatedToastVisible(false)}
+          />
         </ImageBackground>
       </SafeAreaView>
     );
@@ -616,6 +745,12 @@ export default function QuickResetScreen({
               </TouchableOpacity>
             </View>
           }
+        />
+        <HighlightedToast
+          visible={mantraUpdatedToastVisible}
+          title={highlightedToastTitle}
+          message={highlightedToastMessage}
+          onClose={() => setMantraUpdatedToastVisible(false)}
         />
       </SafeAreaView>
     );
@@ -673,6 +808,12 @@ export default function QuickResetScreen({
               <Text style={styles.primaryBtnText}>Close</Text>
             </TouchableOpacity>
           </View>
+          <HighlightedToast
+            visible={mantraUpdatedToastVisible}
+            title={highlightedToastTitle}
+            message={highlightedToastMessage}
+            onClose={() => setMantraUpdatedToastVisible(false)}
+          />
         </ImageBackground>
       </SafeAreaView>
     );
@@ -691,6 +832,12 @@ export default function QuickResetScreen({
         <View style={styles.centerContent}>
           <ActivityIndicator size="large" color="#C99317" />
         </View>
+        <HighlightedToast
+          visible={mantraUpdatedToastVisible}
+          title={highlightedToastTitle}
+          message={highlightedToastMessage}
+          onClose={() => setMantraUpdatedToastVisible(false)}
+        />
       </ImageBackground>
     </SafeAreaView>
   );
@@ -699,24 +846,35 @@ export default function QuickResetScreen({
     return (
       <Modal
         visible={pickerVisible}
-        animationType="slide"
-        transparent={false}
+        animationType="fade"
+        transparent
         onRequestClose={() => setPickerVisible(false)}
       >
-        <SafeAreaView style={styles.safeArea}>
+        <SafeAreaView style={styles.modalSafeArea}>
           <ImageBackground
             source={require("../../../assets/beige_bg.png")}
             style={styles.background}
             imageStyle={styles.backgroundImage}
           >
+            <Image
+              source={require("../../../assets/leaves-bird.png")}
+              resizeMode="contain"
+              style={styles.pickerLeaves}
+            />
             <View style={styles.pickerHeader}>
               <TouchableOpacity
                 onPress={() => setPickerVisible(false)}
                 activeOpacity={0.7}
+                style={styles.pickerBackBtn}
               >
                 <Text style={styles.contentBackBtnText}>← Back</Text>
               </TouchableOpacity>
               <Text style={styles.pickerTitle}>Choose a Mantra</Text>
+              <View style={styles.pickerDivider}>
+                <View style={styles.pickerDividerLine} />
+                <Text style={styles.pickerDividerIcon}>✦</Text>
+                <View style={styles.pickerDividerLine} />
+              </View>
             </View>
             {pickerLoading ? (
               <View style={styles.centerContent}>
@@ -756,6 +914,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFF8EF",
   },
+  modalSafeArea: {
+    flex: 1,
+    backgroundColor: "rgba(67, 33, 4, 0.12)",
+  },
   embeddedTransparent: {
     backgroundColor: "transparent",
   },
@@ -787,11 +949,12 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.medium,
   },
   openingHeading: {
-    fontSize: 28,
+    fontSize: 22,
     fontFamily: Fonts.serif.bold,
     color: "#432104",
     textAlign: "center",
     lineHeight: 36,
+    marginTop: -30,
   },
   openingSubhead: {
     fontSize: 12,
@@ -1151,37 +1314,151 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
   pickerList: {
-    padding: 16,
-    gap: 2,
+    paddingHorizontal: 16,
+    paddingBottom: 24,
   },
   pickerHeader: {
     paddingHorizontal: 16,
     paddingTop: 18,
-    paddingBottom: 20,
+    paddingBottom: 12,
+    position: "relative",
+  },
+  pickerLeaves: {
+    position: "absolute",
+    top: -80,
+    right: -50,
+    width: 300,
+    height: 300,
+    opacity: 0.95,
+  },
+  pickerBackBtn: {
+    alignSelf: "flex-start",
+    marginBottom: 26,
   },
   pickerTitle: {
-    marginTop: 24,
-    fontSize: 22,
+    fontSize: 24,
     fontFamily: Fonts.serif.bold,
     color: "#432104",
     textAlign: "center",
+    marginBottom: 16,
+  },
+  pickerDivider: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 14,
+    marginBottom: 6,
+  },
+  pickerDividerLine: {
+    width: 102,
+    height: 1,
+    backgroundColor: "rgba(199,160,72,0.45)",
+  },
+  pickerDividerIcon: {
+    color: "#C7A048",
+    fontSize: 18,
+    lineHeight: 18,
   },
   pickerItem: {
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#DAC28E",
-    gap: 4,
+    paddingVertical: 18,
+    paddingHorizontal: 22,
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: "rgba(218,194,142,0.55)",
+    backgroundColor: "rgba(255,255,255,0.82)",
+    shadowColor: "#C9A84C",
+    shadowOpacity: 0.06,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 2,
+    gap: 10,
+    marginBottom: 18,
   },
   pickerItemTitle: {
-    fontSize: 17,
+    fontSize: 18,
     fontFamily: Fonts.serif.bold,
     color: "#432104",
     fontWeight: "700",
+    textAlign: "center",
+    lineHeight: 24,
   },
   pickerItemDevanagari: {
-    fontSize: 15,
+    fontSize: 16,
     color: "#8B6914",
+    fontFamily: Fonts.sans.regular,
+    textAlign: "center",
+    lineHeight: 26,
+  },
+  toastOverlay: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+  toastBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(67, 33, 4, 0.12)",
+  },
+  toastShell: {
+    width: "100%",
+    maxWidth: 560,
+  },
+  toastCard: {
+    position: "relative",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 18,
+    padding: 15,
+    borderRadius: 32,
+    borderWidth: 1.5,
+    borderColor: "rgba(233, 186, 88, 0.9)",
+    backgroundColor: "rgba(255,250,241,0.96)",
+    overflow: "hidden",
+    shadowColor: "#D4A017",
+    shadowOpacity: 0.28,
+    shadowRadius: 28,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 10,
+  },
+  toastGlow: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "transparent",
+  },
+  toastIconWrap: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(250,225,155,0.72)",
+    borderWidth: 2,
+    borderColor: "rgba(255,249,235,0.95)",
+  },
+  toastCopy: {
+    flex: 1,
+    minWidth: 0,
+  },
+  toastTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
+    color: "#432104",
+    lineHeight: 22,
+    marginBottom: 8,
+  },
+  toastMessage: {
+    fontSize: 12,
+    lineHeight: 18,
+    color: "#6E563E",
+    fontFamily: Fonts.sans.regular,
+  },
+  toastCloseBtn: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 2,
+  },
+  toastCloseText: {
+    color: "#BE9A56",
+    fontSize: 32,
+    lineHeight: 32,
     fontFamily: Fonts.sans.regular,
   },
 });

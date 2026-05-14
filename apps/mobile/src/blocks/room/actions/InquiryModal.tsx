@@ -344,12 +344,17 @@ const InquiryModal: React.FC<Props> = ({
                       <TouchableOpacity
                         style={[
                           styles.primaryAction,
-                          isScreen ? styles.screenPrimaryAction : null,
+                          isScreen ? styles.screenSecondaryAction : null,
                         ]}
                         onPress={() => setJournalOpen(true)}
                         testID="inquiry_modal_open_journal"
                       >
-                        <Text style={styles.primaryActionLabel}>
+                        <Text
+                          style={[
+                            styles.primaryActionLabel,
+                            isScreen ? styles.screenSecondaryActionLabel : null,
+                          ]}
+                        >
                           Journal on this
                         </Text>
                       </TouchableOpacity>
@@ -620,9 +625,10 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   screenReflectivePrompt: {
-    fontSize: 18,
+    fontSize: 16,
     lineHeight: 32,
     color: "#4A3B2F",
+    textAlign: "center",
     marginBottom: 28,
     paddingHorizontal: 8,
   },
@@ -686,11 +692,28 @@ const styles = StyleSheet.create({
     elevation: 2,
     marginBottom: 0,
   },
+  screenSecondaryAction: {
+    minHeight: 40,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(214,183,130,0.42)",
+    backgroundColor: "rgba(255,251,245,0.82)",
+    justifyContent: "center",
+    shadowColor: "#A57A2B",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.06,
+    shadowRadius: 18,
+    elevation: 1,
+    marginBottom: 0,
+  },
   primaryActionLabel: {
     fontSize: 17,
     fontWeight: "600",
     color: "#ffffff",
     textAlign: "center",
+  },
+  screenSecondaryActionLabel: {
+    color: "#432104",
   },
 
   journalBlock: {

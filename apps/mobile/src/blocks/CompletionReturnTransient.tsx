@@ -10,6 +10,7 @@
  */
 
 import * as Haptics from "expo-haptics";
+import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -62,6 +63,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
     updateBackground,
     updateHeaderHidden,
   } = useScreenStore();
+  const navigation = useNavigation<any>();
   const ss = screenData as Record<string, any>;
 
   const resolvedVariant: "mantra" | "sankalp" | "practice" =
@@ -252,10 +254,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
     }
     const returnAction = slot("return_action");
     if (returnAction === "return_to_mitra_home") {
-      loadScreen({
-        container_id: "companion_dashboard",
-        state_id: "day_active",
-      } as any);
+      navigation.navigate("Home");
       return;
     }
     const SUPPORT_SOURCES = new Set([

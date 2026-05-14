@@ -274,6 +274,7 @@ const StepModal: React.FC<Props> = ({
                     kind={kind}
                     stepPayload={stepPayload}
                     onDone={onDone}
+                    isScreen={presentation === "screen"}
                   />
                 ) : null}
 
@@ -321,6 +322,7 @@ interface TimerBodyProps {
   kind: "timer_breathe" | "timer_walk" | "timer_sit" | "timer_heart";
   stepPayload: StepPayload | null | undefined;
   onDone: (extra: StepModalResult) => void;
+  isScreen?: boolean;
 }
 
 function defaultTimerSeconds(kind: TimerBodyProps["kind"]): number {
@@ -458,7 +460,12 @@ const BreathingOrb: React.FC<{
   );
 };
 
-const TimerBody: React.FC<TimerBodyProps> = ({ kind, stepPayload, onDone }) => {
+const TimerBody: React.FC<TimerBodyProps> = ({
+  kind,
+  stepPayload,
+  onDone,
+  isScreen = false,
+}) => {
   const totalSec = useMemo(() => {
     const raw = stepPayload?.duration_sec;
     if (typeof raw === "number" && raw > 0 && raw <= 60 * 60) return raw;
@@ -523,7 +530,7 @@ const TimerBody: React.FC<TimerBodyProps> = ({ kind, stepPayload, onDone }) => {
     .padStart(2, "0")}`;
 
   return (
-    <View style={styles.timerRoot}>
+    <View style={[styles.timerRoot, isScreen ? styles.screenTimerRoot : null]}>
       <Text style={styles.timerCue} testID="step_modal_timer_cue">
         {cueText}
       </Text>
@@ -1269,6 +1276,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 12,
     lineHeight: 21,
+    marginTop: 80,
   },
   body: {
     paddingHorizontal: 24,
@@ -1453,6 +1461,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 20,
+  },
+  screenTimerRoot: {
+    paddingTop: 36,
   },
   timerCue: {
     fontSize: 16,

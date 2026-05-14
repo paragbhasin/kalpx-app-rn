@@ -447,6 +447,21 @@ export default function FourDoorHomeContainer({
             label={DOOR_LABELS.inner_path}
             subtitle={innerPathSubtitle}
             onPress={() => {
+              if (homeData?.inner_path_summary?.has_active_path !== true) {
+                updateScreenData("onboarding_turn", "turn_2");
+                updateScreenData("onboarding_draft_state", {
+                  started_at: Date.now(),
+                  entry_intention: "inner_path",
+                });
+                loadScreen({
+                  container_id: "welcome_onboarding",
+                  state_id: "turn_2",
+                });
+                if (currentRouteName !== "DynamicEngine") {
+                  navigation.navigate("DynamicEngine" as any);
+                }
+                return;
+              }
               updateScreenData("dashboard_entry_surface", "inner_path");
               loadScreen({
                 container_id: "companion_dashboard",

@@ -465,23 +465,32 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
               onPress={() => handleTriadPress(item.slot as any, item.master)}
               style={styles.triadCard}
             >
-              <View style={styles.triadIconWrap}>
-                {item.IconComponent ? (
-                  <item.IconComponent width={28} height={28} />
-                ) : (
-                  <Ionicons
-                    name={item.iconName}
-                    size={20}
-                    color={Colors.goldBright}
-                  />
-                )}
+              <View style={styles.triadMain}>
+                <View style={styles.triadIconWrap}>
+                  {item.IconComponent ? (
+                    <item.IconComponent width={28} height={28} />
+                  ) : (
+                    <Ionicons
+                      name={item.iconName}
+                      size={20}
+                      color={Colors.goldBright}
+                    />
+                  )}
+                </View>
+                <View style={styles.triadCopy}>
+                  <Text style={styles.triadLabel}>{item.label}</Text>
+                  <Text style={styles.triadTitle}>{item.title}</Text>
+                  {!!item.subtitle && (
+                    <Text style={styles.triadSubtitle}>{item.subtitle}</Text>
+                  )}
+                </View>
               </View>
-              <View style={styles.triadCopy}>
-                <Text style={styles.triadLabel}>{item.label}</Text>
-                <Text style={styles.triadTitle}>{item.title}</Text>
-                {!!item.subtitle && (
-                  <Text style={styles.triadSubtitle}>{item.subtitle}</Text>
-                )}
+              <View style={styles.triadChevronWrap}>
+                <Ionicons
+                  name="chevron-forward"
+                  size={20}
+                  color={Colors.goldBright}
+                />
               </View>
             </TouchableOpacity>
           ))}
@@ -723,12 +732,21 @@ const styles = StyleSheet.create({
   triadCard: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 18,
-    padding: 10,
+    justifyContent: "space-between",
+    paddingVertical: 10,
+    paddingLeft: 10,
+    paddingRight: 14,
     borderRadius: 22,
     borderWidth: 1,
     borderColor: "rgba(242,223,182,0.95)",
     backgroundColor: "rgba(255,253,247,0.74)",
+  },
+  triadMain: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 18,
+    paddingRight: 12,
   },
   triadIconWrap: {
     width: 40,
@@ -742,6 +760,11 @@ const styles = StyleSheet.create({
   },
   triadCopy: {
     flex: 1,
+  },
+  triadChevronWrap: {
+    width: 28,
+    alignItems: "flex-end",
+    justifyContent: "center",
   },
   triadLabel: {
     fontFamily: Fonts.sans.bold,
@@ -836,16 +859,17 @@ const styles = StyleSheet.create({
   },
   guidanceItemRow: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "stretch",
     marginBottom: 12,
   },
   guidanceItemBar: {
     width: 2,
-    height: 50,
     borderRadius: 2,
     backgroundColor: Colors.goldBright,
     marginRight: 14,
     opacity: 0.9,
+    alignSelf: "stretch",
+    minHeight: 24,
   },
   guidanceItemText: {
     flex: 1,

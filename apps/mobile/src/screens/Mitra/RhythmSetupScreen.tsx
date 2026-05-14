@@ -23,6 +23,8 @@ import {
   ActivityIndicator,
   Image,
   ImageBackground,
+  Modal,
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -30,6 +32,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import DateTimePicker, {
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 import { useDispatch, useSelector } from "react-redux";
 import A1Icon from "../../../assets/a1.svg";
 import A2Icon from "../../../assets/a2.svg";
@@ -219,6 +224,203 @@ function itemTypeLabel(itemType: string): string {
   return "Library";
 }
 
+const DEFAULT_REMINDER_TIMES: Record<RhythmTimeBand, string> = {
+  morning: "08:00",
+  afternoon: "13:00",
+  night: "20:00",
+};
+
+function normalizeReminderTime(
+  value: string | null | undefined,
+): string | null {
+  if (!value) return null;
+  const match = value.match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return null;
+  return `${match[1].padStart(2, "0")}:${match[2]}`;
+}
+
+function toReminderParts(value: string | null | undefined): {
+  hour: string;
+  minute: string;
+  period: "AM" | "PM";
+} {
+  const normalized =
+    normalizeReminderTime(value) ?? DEFAULT_REMINDER_TIMES.morning;
+  const [hourText, minute] = normalized.split(":");
+  const hour = Number(hourText);
+  return {
+    hour: String(hour % 12 === 0 ? 12 : hour % 12).padStart(2, "0"),
+    minute,
+    period: hour >= 12 ? "PM" : "AM",
+  };
+}
+
+function toReminderDisplay(value: string | null | undefined): string {
+  if (!normalizeReminderTime(value)) return "--:-- --";
+  const parts = toReminderParts(value);
+  return `${parts.hour}:${parts.minute} ${parts.period}`;
+}
+
+function reminderTimeToDate(value: string | null | undefined): Date {
+  const normalized = normalizeReminderTime(value) ?? DEFAULT_REMINDER_TIMES.morning;
+  const [hourText, minuteText] = normalized.split(":");
+  const date = new Date();
+  date.setHours(Number(hourText), Number(minuteText), 0, 0);
+  return date;
+}
+
+function dateToReminderTime(date: Date): string {
+  return `${String(date.getHours()).padStart(2, "0")}:${String(
+    date.getMinutes(),
+  ).padStart(2, "0")}`;
+}
+
+function getBandReminderTimeFromRhythm(
+  band: RhythmTimeBand,
+  rhythm: any,
+): string | null {
+  const items = rhythm?.[band]?.items;
+  if (!Array.isArray(items) || items.length === 0) return null;
+  const enabledItem = items.find(
+    (item: any) => item?.reminder_enabled && item?.reminder_time,
+  );
+  const fallbackItem = items.find((item: any) => item?.reminder_time);
+  return normalizeReminderTime(
+    enabledItem?.reminder_time ?? fallbackItem?.reminder_time,
+  );
+}
+
+function hasExistingRhythmReminder(rhythm: any): boolean {
+  return BANDS.some((band) =>
+    Boolean(rhythm?.[band]?.items?.some((item: any) => item?.reminder_enabled)),
+  );
+}
+
+function CompactReminderTimeField({
+  value,
+  onChange,
+}: {
+  value: string | null | undefined;
+  onChange: (value: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [iosDraftDate, setIosDraftDate] = useState<Date>(reminderTimeToDate(value));
+
+  useEffect(() => {
+    if (!open || Platform.OS !== "ios") return;
+    setIosDraftDate(reminderTimeToDate(value));
+  }, [open, value]);
+
+  const openPicker = useCallback(() => {
+    if (Platform.OS === "ios") {
+      setIosDraftDate(reminderTimeToDate(value));
+    }
+    setOpen(true);
+  }, [value]);
+
+  const handleNativeChange = useCallback(
+    (event: DateTimePickerEvent, selectedDate?: Date) => {
+      if (Platform.OS === "android") {
+        setOpen(false);
+        if (event.type === "set" && selectedDate) {
+          onChange(dateToReminderTime(selectedDate));
+        }
+        return;
+      }
+
+      if (selectedDate) {
+        setIosDraftDate(selectedDate);
+      }
+    },
+    [onChange],
+  );
+
+  return (
+    <>
+      <TouchableOpacity
+        onPress={openPicker}
+        activeOpacity={0.8}
+        style={styles.compactReminderField}
+      >
+        <Text style={styles.compactReminderFieldText}>
+          {toReminderDisplay(value)}
+        </Text>
+        <Ionicons name="time-outline" size={12} color="#21160F" />
+      </TouchableOpacity>
+
+      {open && Platform.OS === "android" ? (
+        <DateTimePicker
+          value={reminderTimeToDate(value)}
+          mode="time"
+          display="default"
+          is24Hour={false}
+          onChange={handleNativeChange}
+        />
+      ) : null}
+
+      <Modal
+        transparent
+        visible={open && Platform.OS === "ios"}
+        animationType="fade"
+        onRequestClose={() => setOpen(false)}
+      >
+        <View style={styles.iosPickerOverlay}>
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => setOpen(false)}
+            style={styles.iosPickerBackdrop}
+          />
+          <View style={styles.iosPickerSheet}>
+            <View style={styles.iosPickerHeader}>
+              <TouchableOpacity onPress={() => setOpen(false)} activeOpacity={0.8}>
+                <Text style={styles.iosPickerHeaderAction}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  onChange(dateToReminderTime(iosDraftDate));
+                  setOpen(false);
+                }}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.iosPickerHeaderAction}>Done</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.iosPickerBody}>
+              <DateTimePicker
+                value={iosDraftDate}
+                mode="time"
+                display="spinner"
+                themeVariant="light"
+                style={styles.iosDateTimePicker}
+                onChange={handleNativeChange}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </>
+  );
+}
+
+function ReminderTimeRow({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string | null | undefined;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <View style={styles.reminderTimeCard}>
+      <Text style={styles.reminderTimeCardLabel}>{label}</Text>
+      <View style={styles.reminderTimeBtn}>
+        <CompactReminderTimeField value={value} onChange={onChange} />
+      </View>
+    </View>
+  );
+}
+
 function beginLabel(itemType: string): string {
   if (itemType === "mantra") return "Begin Chanting";
   if (itemType === "sankalp") return "Begin Embodying";
@@ -358,6 +560,9 @@ export default function RhythmSetupScreen({
   const [wizardReminderPref, setWizardReminderPref] = useState<
     "yes" | "no" | "later"
   >("later");
+  const [wizardReminderTimes, setWizardReminderTimes] = useState<
+    Partial<Record<RhythmTimeBand, string | null>>
+  >({});
   const [wizardPickerBand, setWizardPickerBand] =
     useState<RhythmTimeBand | null>(null);
   const [wizardSaving, setWizardSaving] = useState(false);
@@ -390,7 +595,22 @@ export default function RhythmSetupScreen({
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [reminderPref, setReminderPref] = useState<"yes" | "no" | "later">(
-    "later",
+    hasExistingRhythmReminder(existingRhythm) ? "yes" : "later",
+  );
+  const [bandReminderTimes, setBandReminderTimes] = useState<
+    Partial<Record<RhythmTimeBand, string | null>>
+  >(
+    BANDS.reduce(
+      (acc, band) => {
+        const reminderTime = getBandReminderTimeFromRhythm(
+          band,
+          existingRhythm,
+        );
+        if (reminderTime) acc[band] = reminderTime;
+        return acc;
+      },
+      {} as Partial<Record<RhythmTimeBand, string>>,
+    ),
   );
 
   // ── Wizard methods ────────────────────────────────────────────────────────────
@@ -409,13 +629,7 @@ export default function RhythmSetupScreen({
   }, [selectedMoments, purposes]);
 
   // Load suggestions once when entering suggestion step
-  useEffect(() => {
-    if (wizardStep === "suggestion" && !editMode && !suggestionsLoaded) {
-      void loadSuggestions();
-    }
-  }, [wizardStep, suggestionsLoaded]);
-
-  const loadSuggestions = async () => {
+  const loadSuggestions = useCallback(async () => {
     setSuggestLoading(true);
     setSuggestError(null);
     try {
@@ -446,7 +660,13 @@ export default function RhythmSetupScreen({
     } finally {
       setSuggestLoading(false);
     }
-  };
+  }, [purposes, selectedMoments]);
+
+  useEffect(() => {
+    if (wizardStep === "suggestion" && !editMode && !suggestionsLoaded) {
+      void loadSuggestions();
+    }
+  }, [editMode, loadSuggestions, suggestionsLoaded, wizardStep]);
 
   const advanceToSuggestion = () => {
     setWizardStep("suggestion");
@@ -474,16 +694,44 @@ export default function RhythmSetupScreen({
         reminder_time: null,
       },
     }));
+    setWizardReminderTimes((prev) => ({
+      ...prev,
+      [wizardPickerBand]: prev[wizardPickerBand] ?? null,
+    }));
     setWizardPickerBand(null);
   };
 
   const saveWizard = async () => {
+    const reminderBands = selectedMoments.filter((band) => wizardItems[band]);
+    if (wizardReminderPref === "yes") {
+      const missingReminderBand = reminderBands.find(
+        (band) => !normalizeReminderTime(wizardReminderTimes[band]),
+      );
+      if (missingReminderBand) {
+        setWizardError(
+          `Set a reminder time for ${MOMENT_COPY[missingReminderBand].label.toLowerCase()}.`,
+        );
+        return;
+      }
+    }
+
     setWizardSaving(true);
     setWizardError("");
     try {
-      const localItems = BANDS.filter((b) => wizardItems[b]).map(
-        (b) => wizardItems[b]!,
-      );
+      const localItems = BANDS.filter((b) => wizardItems[b]).map((b) => {
+        const item = wizardItems[b]!;
+        const reminderTime =
+          wizardReminderPref === "yes"
+            ? normalizeReminderTime(
+                wizardReminderTimes[b] ?? item.reminder_time,
+              )
+            : null;
+        return {
+          ...item,
+          reminder_enabled: wizardReminderPref === "yes",
+          reminder_time: reminderTime,
+        };
+      });
       const items = toRhythmSetupPayloadItems(localItems) as any[];
       await postRhythmSetup({ items, reminder_preference: wizardReminderPref });
       const newHomeData = await mitraJourneyHomeV3();
@@ -535,7 +783,7 @@ export default function RhythmSetupScreen({
               "",
           };
         }
-      } catch (_) {
+      } catch {
         // fall back to snapshot item
       }
 
@@ -590,6 +838,21 @@ export default function RhythmSetupScreen({
   };
 
   const handleSave = async () => {
+    const activeReminderBands = BANDS.filter(
+      (band) => bandItems[band].length > 0,
+    );
+    if (reminderPref === "yes") {
+      const missingReminderBand = activeReminderBands.find(
+        (band) => !normalizeReminderTime(bandReminderTimes[band]),
+      );
+      if (missingReminderBand) {
+        setErrorMsg(
+          `Set a reminder time for ${RHYTHM_BAND_LABELS[missingReminderBand].toLowerCase()}.`,
+        );
+        return;
+      }
+    }
+
     const allItems = BANDS.flatMap((band, _) =>
       bandItems[band].map((item, idx) => ({
         slot: band,
@@ -599,7 +862,11 @@ export default function RhythmSetupScreen({
         description_snapshot: item.description ?? null,
         source: "user_chosen" as const,
         sort_order: idx,
-        reminder_enabled: false,
+        reminder_enabled: reminderPref === "yes",
+        reminder_time:
+          reminderPref === "yes"
+            ? normalizeReminderTime(bandReminderTimes[band])
+            : null,
       })),
     );
     setSaving(true);
@@ -682,7 +949,7 @@ export default function RhythmSetupScreen({
                 You can select more than one
               </Text>
               <Text style={wStyles.helperBody}>
-                Choose all moments when you'd like Mitra to walk with you.
+                Choose all moments when you&apos;d like Mitra to walk with you.
               </Text>
             </View>
           </View>
@@ -1085,6 +1352,29 @@ export default function RhythmSetupScreen({
           ))}
         </View>
 
+        {wizardReminderPref === "yes" && (
+          <View style={styles.reminderTimeSection}>
+            {selectedMoments
+              .filter((band) => wizardItems[band])
+              .map((band) => (
+                <ReminderTimeRow
+                  key={band}
+                  label={`${MOMENT_COPY[band].label} reminder time`}
+                  value={
+                    wizardReminderTimes[band] ??
+                    wizardItems[band]?.reminder_time
+                  }
+                  onChange={(value) =>
+                    setWizardReminderTimes((prev) => ({
+                      ...prev,
+                      [band]: normalizeReminderTime(value) ?? value,
+                    }))
+                  }
+                />
+              ))}
+          </View>
+        )}
+
         {!!wizardError && <Text style={wStyles.errorText}>{wizardError}</Text>}
 
         <TouchableOpacity
@@ -1154,7 +1444,9 @@ export default function RhythmSetupScreen({
                       </Text>
                     </View>
                   </View>
-                  <Text style={wStyles.confirmTitle}>{item.title_snapshot}</Text>
+                  <Text style={wStyles.confirmTitle}>
+                    {item.title_snapshot}
+                  </Text>
                   <TouchableOpacity
                     style={wStyles.confirmActionBtn}
                     onPress={() =>
@@ -1247,11 +1539,14 @@ export default function RhythmSetupScreen({
             </Text>
           </View>
 
-          {BANDS.map((band) => {
+          {BANDS.map((band, index) => {
             const isExpanded = expandedBand === band;
             const Icon = BAND_ART[band];
             return (
-              <View key={band} style={styles.bandBlock}>
+              <View
+                key={band}
+                style={[styles.bandBlock, { zIndex: BANDS.length - index }]}
+              >
                 <TouchableOpacity
                   style={[
                     styles.bandHeaderCard,
@@ -1306,6 +1601,19 @@ export default function RhythmSetupScreen({
                         Add from library
                       </Text>
                     </TouchableOpacity>
+
+                    {reminderPref === "yes" && bandItems[band].length > 0 && (
+                      <ReminderTimeRow
+                        label="Reminder time"
+                        value={bandReminderTimes[band]}
+                        onChange={(value) =>
+                          setBandReminderTimes((prev) => ({
+                            ...prev,
+                            [band]: normalizeReminderTime(value) ?? value,
+                          }))
+                        }
+                      />
+                    )}
                   </View>
                 )}
               </View>
@@ -2089,4 +2397,91 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   reminderPillTextSelected: { color: "#fff" },
+  reminderTimeSection: {
+    gap: 12,
+    marginBottom: 18,
+  },
+  reminderTimeCard: {
+    borderWidth: 1,
+    borderColor: "rgba(226, 201, 151, 0.8)",
+    borderRadius: 11,
+    backgroundColor: "rgba(255, 251, 244, 0.92)",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    gap: 10,
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  reminderTimeCardLabel: {
+    fontSize: 15,
+    color: "#5E4328",
+    fontFamily: Fonts.serif.regular,
+    textAlignVertical: "center",
+  },
+  reminderTimeBtn: {
+    alignItems: "flex-end",
+  },
+  compactReminderField: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: 100,
+    // minHeight: 42,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(216, 188, 119, 0.95)",
+    backgroundColor: "#FFFDF9",
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+  },
+  compactReminderFieldText: {
+    fontSize: 12,
+    color: "#6A4E36",
+    fontFamily: Fonts.sans.medium,
+    letterSpacing: 0.4,
+  },
+  iosPickerOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(33, 22, 15, 0.18)",
+  },
+  iosPickerBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  iosPickerSheet: {
+    backgroundColor: "#FFFDF9",
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
+    paddingTop: 10,
+    paddingBottom: 24,
+    borderTopWidth: 1,
+    borderColor: "rgba(216, 188, 119, 0.35)",
+  },
+  iosPickerHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 18,
+    paddingBottom: 8,
+    marginBottom: 4,
+    borderBottomWidth: 1,
+    borderColor: "rgba(216, 188, 119, 0.2)",
+  },
+  iosPickerHeaderAction: {
+    fontSize: 16,
+    color: "#C99317",
+    fontFamily: Fonts.sans.semiBold,
+  },
+  iosPickerBody: {
+    minHeight: 216,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFFDF9",
+  },
+  iosDateTimePicker: {
+    width: "100%",
+    height: 216,
+    backgroundColor: "#FFFDF9",
+  },
 });

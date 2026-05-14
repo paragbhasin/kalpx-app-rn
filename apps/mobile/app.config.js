@@ -57,6 +57,7 @@ module.exports = {
       "./plugins/withAbiSplits",
       "./plugins/withModularHeaders",
       "expo-font",
+      "@react-native-community/datetimepicker",
       "@react-native-firebase/app",
       "@react-native-firebase/messaging",
       [

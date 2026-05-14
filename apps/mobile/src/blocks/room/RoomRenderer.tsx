@@ -46,6 +46,14 @@ const RoomRenderer: React.FC<RoomRendererProps> = ({
   const ctx = envelope.room_context;
   const isGuided = !!(ctx?.entry_context?.recommended_first_action_id);
 
+  if (isGuided) {
+    return (
+      <View style={styles.root} testID={`room_renderer_${envelope.room_id}`}>
+        <RoomGuidedSection envelope={envelope} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.root} testID={`room_renderer_${envelope.room_id}`}>
       <View style={styles.header}>
@@ -92,11 +100,7 @@ const RoomRenderer: React.FC<RoomRendererProps> = ({
       {ctx?.bridge_line ? (
         <Text style={styles.bridgeLine} testID="room_bridge_line">{ctx.bridge_line}</Text>
       ) : null}
-      {isGuided ? (
-        <RoomGuidedSection envelope={envelope} />
-      ) : (
-        <RoomActionList envelope={envelope} />
-      )}
+      <RoomActionList envelope={envelope} />
     </View>
   );
 };

@@ -152,11 +152,11 @@ export default function FourDoorHomeContainer({
   }, [homeData]);
 
   const loadHome = useCallback(
-    async (silent = false) => {
+    async (silent = false, forceFresh = false) => {
       if (!silent) setLoading(true);
       if (!silent) setError(null);
       try {
-        const data = await mitraJourneyHomeV3();
+        const data = await mitraJourneyHomeV3({ forceFresh });
         dispatch(setHomeData(data));
       } catch {
         if (!silent || !homeDataRef.current) {
@@ -216,7 +216,7 @@ export default function FourDoorHomeContainer({
           tz:
             Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
         });
-        await loadHome(true);
+        await loadHome(true, true);
       } finally {
         setFeelingLoading(false);
       }
@@ -226,7 +226,7 @@ export default function FourDoorHomeContainer({
 
   const handleDismissCheckin = useCallback(async () => {
     await postPranaAcknowledgeDismiss();
-    await loadHome(true);
+    await loadHome(true, true);
   }, [loadHome]);
 
   const openQuickResetSurface = useCallback(async () => {
@@ -523,6 +523,7 @@ export default function FourDoorHomeContainer({
                 <View style={styles.feelingGrid}>
                   {FEELING_OPTIONS.map((feeling) => {
                     const isSelected = selectedFeeling === feeling;
+                    const isSubmittingSelection = feelingLoading && isSelected;
                     return (
                       <TouchableOpacity
                         key={feeling}
@@ -535,14 +536,23 @@ export default function FourDoorHomeContainer({
                           feelingLoading && styles.feelingChipDisabled,
                         ]}
                       >
-                        <Text
-                          style={[
-                            styles.feelingChipText,
-                            isSelected && styles.feelingChipTextSelected,
-                          ]}
-                        >
-                          {feeling}
-                        </Text>
+                        <View style={styles.feelingChipContent}>
+                          <Text
+                            style={[
+                              styles.feelingChipText,
+                              isSelected && styles.feelingChipTextSelected,
+                            ]}
+                          >
+                            {feeling}
+                          </Text>
+                          {isSubmittingSelection ? (
+                            <ActivityIndicator
+                              size="small"
+                              color="#8A651B"
+                              style={styles.feelingChipLoader}
+                            />
+                          ) : null}
+                        </View>
                       </TouchableOpacity>
                     );
                   })}
@@ -808,6 +818,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     alignItems: "center",
   },
+  feelingChipContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 24,
+  },
   feelingChipSelected: {
     borderColor: "rgba(201,168,76,0.85)",
     backgroundColor: "rgba(243,220,168,0.95)",
@@ -825,6 +841,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 18,
     fontFamily: Fonts.sans.medium,
+  },
+  feelingChipLoader: {
+    marginLeft: 8,
   },
   feelingChipTextSelected: {
     fontFamily: Fonts.sans.bold,

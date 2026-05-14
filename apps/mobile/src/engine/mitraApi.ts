@@ -2098,12 +2098,16 @@ export async function postRoomReflection(
 // ---------------------------------------------------------------------------
 // mitraJourneyHomeV3 — GET /api/mitra/v3/journey/home/ (S04 FourDoor surface)
 // ---------------------------------------------------------------------------
-export async function mitraJourneyHomeV3(): Promise<MitraHomeV3Response> {
+export async function mitraJourneyHomeV3(opts?: {
+  forceFresh?: boolean;
+}): Promise<MitraHomeV3Response> {
   try {
+    const params: Record<string, string | number> = { tz: getTz() };
+    if (opts?.forceFresh) params._t = Date.now();
     const resp = await api.get<MitraHomeV3Response>(
       "mitra/v3/journey/home/",
       {
-        params: { tz: getTz() },
+        params,
       },
     );
     console.log("[MITRA_HOME_API] full response object:", resp);

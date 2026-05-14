@@ -118,6 +118,9 @@ const InquiryModal: React.FC<Props> = ({
     inquiryPayload?.body ||
     inquiryPayload?.description ||
     inquiryPayload?.prompt;
+  const showImmersiveList = isScreen && !selected;
+  const showImmersiveDetail = isScreen && !!selected && !journalOpen;
+  const showImmersiveJournal = isScreen && !!selected && journalOpen;
 
   return (
     <Modal
@@ -181,8 +184,21 @@ const InquiryModal: React.FC<Props> = ({
                     accessibilityRole="button"
                     accessibilityLabel="Back"
                     testID="inquiry_modal_back"
+                    style={
+                      showImmersiveDetail || showImmersiveJournal
+                        ? styles.screenBackButton
+                        : null
+                    }
                   >
-                    <Text style={styles.headerCancel}>Back</Text>
+                    <Text
+                      style={
+                        showImmersiveDetail || showImmersiveJournal
+                          ? styles.screenBackButtonText
+                          : styles.headerCancel
+                      }
+                    >
+                      Back
+                    </Text>
                   </TouchableOpacity>
                 ) : (
                   <TouchableOpacity
@@ -213,7 +229,7 @@ const InquiryModal: React.FC<Props> = ({
                     <Text style={styles.emptyHint}>No categories.</Text>
                   ) : (
                     <>
-                      {isScreen ? (
+                      {showImmersiveList ? (
                         <View style={styles.screenHero}>
                           <Image
                             source={require("../../../../assets/lotus_icon.png")}
@@ -266,19 +282,41 @@ const InquiryModal: React.FC<Props> = ({
                   testID="inquiry_modal_category_detail"
                   keyboardShouldPersistTaps="handled"
                 >
-                  {selected.anchor_line ? (
-                    <Text style={styles.anchorLine}>
-                      {selected.anchor_line}
-                    </Text>
-                  ) : null}
-                  <Text
-                    style={[
-                      styles.reflectivePrompt,
-                      isScreen ? styles.screenReflectivePrompt : null,
-                    ]}
-                  >
-                    {selected.reflective_prompt || selected.prompt}
-                  </Text>
+                  {showImmersiveDetail || showImmersiveJournal ? (
+                    <View style={styles.screenDetailHero}>
+                      <Image
+                        source={require("../../../../assets/lotus_icon.png")}
+                        style={styles.screenHeroLotus}
+                      />
+                      <Text style={styles.screenHeroTitle}>
+                        {selected.label}
+                      </Text>
+                      <View style={styles.screenDivider}>
+                        <View style={styles.screenDividerLine} />
+                        <Text style={styles.screenDividerDiamond}>◇</Text>
+                        <View style={styles.screenDividerLine} />
+                      </View>
+                      {selected.anchor_line ? (
+                        <Text style={styles.screenAnchorLine}>
+                          {selected.anchor_line}
+                        </Text>
+                      ) : null}
+                      <Text style={styles.screenReflectivePrompt}>
+                        {selected.reflective_prompt || selected.prompt}
+                      </Text>
+                    </View>
+                  ) : (
+                    <>
+                      {selected.anchor_line ? (
+                        <Text style={styles.anchorLine}>
+                          {selected.anchor_line}
+                        </Text>
+                      ) : null}
+                      <Text style={styles.reflectivePrompt}>
+                        {selected.reflective_prompt || selected.prompt}
+                      </Text>
+                    </>
+                  )}
 
                   {!journalOpen ? (
                     <View
@@ -501,6 +539,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     fontStyle: "italic",
   },
+  screenDetailHero: {
+    alignItems: "center",
+    marginBottom: 28,
+    paddingTop: 8,
+  },
+  screenBackButton: {
+    paddingVertical: 4,
+    paddingHorizontal: 0,
+  },
+  screenBackButtonText: {
+    fontSize: 16,
+    color: "#6E6E73",
+  },
 
   emptyHint: {
     fontSize: 14,
@@ -550,6 +601,15 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     fontWeight: "300",
     fontStyle: "italic",
+  },
+  screenAnchorLine: {
+    fontSize: 15,
+    lineHeight: 24,
+    color: "#B67912",
+    fontStyle: "italic",
+    textAlign: "center",
+    marginBottom: 18,
+    paddingHorizontal: 8,
   },
   reflectivePrompt: {
     fontSize: 15,
@@ -613,11 +673,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   screenPrimaryAction: {
-    minHeight: 58,
+    minHeight: 40,
     borderRadius: 999,
     borderWidth: 1,
     borderColor: "rgba(214,183,130,0.22)",
-    backgroundColor: "rgba(255,255,255,0.72)",
+    backgroundColor: "rgb(67, 33, 4)",
     justifyContent: "center",
     shadowColor: "#A57A2B",
     shadowOffset: { width: 0, height: 12 },
@@ -629,7 +689,7 @@ const styles = StyleSheet.create({
   primaryActionLabel: {
     fontSize: 17,
     fontWeight: "600",
-    color: "#432104",
+    color: "#ffffff",
     textAlign: "center",
   },
 

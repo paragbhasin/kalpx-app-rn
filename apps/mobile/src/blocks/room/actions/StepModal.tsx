@@ -812,7 +812,8 @@ const ScreenTextInputExperience: React.FC<ScreenTextInputExperienceProps> = ({
 const GroundingBody: React.FC<{
   onDone: (extra: StepModalResult) => void;
   isScreen?: boolean;
-}> = ({ onDone, isScreen = false }) => {
+  label?: string;
+}> = ({ onDone, isScreen = false, label = "Step" }) => {
   const [index, setIndex] = useState<number>(0);
   const [answers, setAnswers] = useState<string[]>(["", "", "", "", ""]);
   const current = answers[index] ?? "";
@@ -838,43 +839,80 @@ const GroundingBody: React.FC<{
     setIndex((i) => Math.min(GROUNDING_PROMPTS.length - 1, i + 1));
   };
 
+  if (isScreen) {
+    return (
+      <ScrollView
+        style={styles.textRoot}
+        contentContainerStyle={styles.screenGroundingContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.screenGroundingTitle}>{label}</Text>
+        <Text
+          style={[styles.groundingProgress, styles.screenGroundingProgress]}
+          testID="step_modal_grounding_progress"
+        >
+          {index + 1} of {GROUNDING_PROMPTS.length}
+        </Text>
+        <Text style={styles.screenGroundingPrompt}>{prompt}</Text>
+        <View style={styles.screenGroundingInputWrap}>
+          <TextInput
+            value={current}
+            onChangeText={setCurrent}
+            multiline
+            textAlignVertical="top"
+            style={styles.screenGroundingInput}
+            placeholder="Type what you feel.."
+            placeholderTextColor="#B0B0B5"
+            testID="step_modal_grounding_input"
+            maxLength={MAX_TEXT}
+          />
+        </View>
+        <TouchableOpacity
+          style={[
+            styles.screenGroundingAction,
+            !enabled ? styles.ctrlDisabled : null,
+          ]}
+          disabled={!enabled}
+          onPress={handleNext}
+          testID={
+            isLast ? "step_modal_grounding_done" : "step_modal_grounding_next"
+          }
+        >
+          <Text style={styles.screenGroundingActionLabel}>
+            {isLast ? "Done" : "Next"}
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    );
+  }
+
   return (
     <ScrollView
       style={styles.textRoot}
-      contentContainerStyle={isScreen ? styles.screenTextContent : undefined}
+      contentContainerStyle={styles.screenTextContent}
       keyboardShouldPersistTaps="handled"
     >
       <Text
-        style={[
-          styles.groundingProgress,
-          isScreen ? styles.screenGroundingProgress : null,
-        ]}
+        style={styles.groundingProgress}
         testID="step_modal_grounding_progress"
       >
         {index + 1} of {GROUNDING_PROMPTS.length}
       </Text>
-      <Text
-        style={[styles.textPrompt, isScreen ? styles.screenTextPrompt : null]}
-      >
-        {prompt}
-      </Text>
+      <Text style={styles.textPrompt}>{prompt}</Text>
       <TextInput
         value={current}
         onChangeText={setCurrent}
         multiline
         textAlignVertical="top"
-        style={[styles.textInput, isScreen ? styles.screenTextInput : null]}
+        style={styles.textInput}
         placeholder="Type what you feel.."
         placeholderTextColor="#B0B0B5"
         testID="step_modal_grounding_input"
         maxLength={MAX_TEXT}
       />
       <TouchableOpacity
-        style={[
-          styles.primaryAction,
-          isScreen ? styles.screenPrimaryAction : null,
-          !enabled ? styles.ctrlDisabled : null,
-        ]}
+        style={[styles.primaryAction, !enabled ? styles.ctrlDisabled : null]}
         disabled={!enabled}
         onPress={handleNext}
         testID={
@@ -1577,10 +1615,58 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 8,
   },
+  screenGroundingContent: {
+    paddingBottom: 28,
+  },
+  screenGroundingTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1C1C1E",
+    textAlign: "center",
+    marginBottom: 20,
+    lineHeight: 24,
+  },
   screenGroundingProgress: {
-    color: "#8B6A43",
-    fontSize: 13,
-    marginBottom: 14,
+    color: "#A57A2B",
+    fontSize: 14,
+    marginBottom: 18,
+  },
+  screenGroundingPrompt: {
+    fontSize: 18,
+    color: "#432104",
+    textAlign: "center",
+    lineHeight: 30,
+    marginBottom: 24,
+    paddingHorizontal: 10,
+  },
+  screenGroundingInputWrap: {
+    marginBottom: 18,
+  },
+  screenGroundingInput: {
+    minHeight: 210,
+    borderWidth: 1,
+    borderColor: "rgba(214, 183, 130, 0.7)",
+    borderRadius: 28,
+    paddingHorizontal: 24,
+    paddingVertical: 24,
+    fontSize: 16,
+    color: "#1C1C1E",
+    backgroundColor: "rgba(255,255,255,0.56)",
+    lineHeight: 26,
+  },
+  screenGroundingAction: {
+    width: "100%",
+    minHeight: 45,
+    borderRadius: 999,
+
+    backgroundColor: "rgb(67, 33, 4)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  screenGroundingActionLabel: {
+    fontSize: 17,
+    fontWeight: "600",
+    color: "#ffffff",
   },
 
   // Controls

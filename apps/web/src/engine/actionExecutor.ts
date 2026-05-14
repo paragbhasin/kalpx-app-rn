@@ -1409,6 +1409,10 @@ export async function executeAction(action: any, context: ActionContext): Promis
 
       } catch (err) {
         if (WEB_ENV.isDev) console.error('[actionExecutor] onboarding_turn_response failed:', err);
+        // Re-navigate to the current state so currentScreen stays loaded.
+        // Without this, the Redux screen slot becomes null and ScreenRenderer
+        // shows "No screen schema loaded." — an unrecoverable blank state.
+        _navigateToOnboarding(dispatch, stateId);
       } finally {
         dispatch(setSubmitting(false));
       }

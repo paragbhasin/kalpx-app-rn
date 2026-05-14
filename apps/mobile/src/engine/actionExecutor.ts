@@ -3612,6 +3612,9 @@ export async function executeAction(
           });
         } catch (err) {
           console.error("[onboarding_turn_response] failed:", err);
+          // Re-navigate to the current state so the screen schema remains loaded.
+          // Without this, the mobile screen silently stalls with no recovery path.
+          loadScreen({ container_id: "welcome_onboarding", state_id: currentStateId });
         }
         break;
       }

@@ -242,6 +242,19 @@ export default function FourDoorHomeContainer({
     }
   }, [loadScreen, navigation, setCurrentScreen, updateScreenData]);
 
+  const openTellMitraSurface = useCallback(async () => {
+    updateScreenData("dashboard_entry_surface", "tell_mitra");
+    await loadScreen({
+      container_id: "tell_mitra",
+      state_id: "opening",
+    });
+    setCurrentScreen({ blocks: [], overlay: false });
+    const routeName = navigation.getState?.()?.routes?.slice(-1)?.[0]?.name;
+    if (routeName !== "DynamicEngine") {
+      navigation.navigate("DynamicEngine" as any);
+    }
+  }, [loadScreen, navigation, setCurrentScreen, updateScreenData]);
+
   const rhythmBand = getRhythmTimeBand();
   const seg = (homeData?.user_surface_state?.segment ??
     "new") as MitraHomeSegment;
@@ -454,7 +467,7 @@ export default function FourDoorHomeContainer({
             Icon={Mp4Icon}
             label={DOOR_LABELS.tell_mitra}
             subtitle={tellMitraSubtitle}
-            onPress={() => navigation.navigate("TellMitra" as any)}
+            onPress={() => void openTellMitraSurface()}
           />
 
           <View style={styles.checkinCard}>
@@ -506,7 +519,7 @@ export default function FourDoorHomeContainer({
                     If this feels heavy to carry,{" "}
                     <Text
                       style={styles.boundaryLink}
-                      onPress={() => navigation.navigate("TellMitra" as any)}
+                      onPress={() => void openTellMitraSurface()}
                     >
                       Tell Mitra
                     </Text>{" "}

@@ -15,6 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Fonts } from '../../theme/fonts';
 import type {
   TellMitraConversationItem,
@@ -88,6 +89,8 @@ export default function TellMitraThreadView({
   onWisdomOptionPress,
   errorMsg,
 }: TellMitraThreadViewProps) {
+  const insets = useSafeAreaInsets();
+  const footerClearance = Math.max(insets.bottom + 72, 88);
 
   function renderItem(item: TellMitraConversationItem) {
     // ── user_message ─────────────────────────────────────────────────────────
@@ -281,6 +284,7 @@ export default function TellMitraThreadView({
         contentContainerStyle={[
           s.scrollContent,
           conversation.length === 0 && s.scrollContentEmpty,
+          { paddingBottom: footerClearance + 12 },
         ]}
         nestedScrollEnabled
         keyboardShouldPersistTaps="handled"
@@ -313,7 +317,7 @@ export default function TellMitraThreadView({
 
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         {!!errorMsg && <Text style={s.errorText}>{errorMsg}</Text>}
-        <View style={s.composerRow}>
+        <View style={[s.composerRow, { paddingBottom: footerClearance }]}>
           <TextInput
             ref={inputRef}
             style={s.composerInput}

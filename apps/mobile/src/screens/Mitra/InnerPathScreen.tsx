@@ -128,14 +128,25 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
           dispatch(
             screenActions.setScreenValue({ key: "checkpoint_day", value: 7 }),
           );
-          dispatch(
+          const r7 = await dispatch(
             loadScreenWithData({
               containerId: "checkpoint_reflection",
               stateId: "day_7",
             }) as any,
           );
           if (!embedded) {
-            navigation.replace("DynamicEngine" as any);
+            if (r7?.payload) {
+              navigation.replace("DynamicEngine" as any);
+            } else {
+              // Schema missing — fall back to daily_view so screen isn't blank
+              const dailyResult = await mitraJourneyDailyView(null);
+              if (cancelled) return;
+              if (!dailyResult.notModified && dailyResult.envelope) {
+                writeAll(ingestDailyView(dailyResult.envelope));
+              }
+              watchRunnerRef.current = true;
+              setLoading(false);
+            }
           }
           return;
         }
@@ -145,14 +156,25 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
           dispatch(
             screenActions.setScreenValue({ key: "checkpoint_day", value: 14 }),
           );
-          dispatch(
+          const r14 = await dispatch(
             loadScreenWithData({
               containerId: "checkpoint_reflection",
               stateId: "day_14",
             }) as any,
           );
           if (!embedded) {
-            navigation.replace("DynamicEngine" as any);
+            if (r14?.payload) {
+              navigation.replace("DynamicEngine" as any);
+            } else {
+              // Schema missing — fall back to daily_view so screen isn't blank
+              const dailyResult = await mitraJourneyDailyView(null);
+              if (cancelled) return;
+              if (!dailyResult.notModified && dailyResult.envelope) {
+                writeAll(ingestDailyView(dailyResult.envelope));
+              }
+              watchRunnerRef.current = true;
+              setLoading(false);
+            }
           }
           return;
         }

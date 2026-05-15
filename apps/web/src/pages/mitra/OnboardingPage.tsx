@@ -12,7 +12,8 @@ import { useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
 import { executeAction } from "../../engine/actionExecutor";
-import { startJourneyV3 } from "../../engine/mitraApi";
+import { apiPatchJourneyReminders, startJourneyV3 } from "../../engine/mitraApi";
+import { OnboardingReminderStep } from "./OnboardingReminderStep";
 import { ScreenRenderer } from "../../engine/ScreenRenderer";
 import { useGuestIdentity } from "../../hooks/useGuestIdentity";
 import {
@@ -52,13 +53,16 @@ export function OnboardingPage() {
       : null) ||
     "turn_1";
 
-  // Active journey users must not re-run onboarding — duplicate journey risk
+  // Active journey users must not re-run onboarding — duplicate journey risk.
+  // Exempt turn_9_reminders: the journey was just created during onboarding and
+  // hasActiveJourney will flip to true before the user finishes the reminder step.
   useEffect(() => {
     if (statusLoading) return;
+    if (stateId === "turn_9_reminders") return;
     if (hasActiveJourney === true) {
       navigate("/en/mitra/dashboard", { replace: true });
     }
-  }, [statusLoading, hasActiveJourney, navigate]);
+  }, [statusLoading, hasActiveJourney, stateId, navigate]);
 
   // Post-auth turn_7 recovery — mirrors RN Home.tsx navigateToMitra() post-auth hook.
   // When a guest hit turn_7, stashed inference, logged in, and was returned to turn_7,
@@ -174,6 +178,8 @@ export function OnboardingPage() {
   ]);
 
   useEffect(() => {
+    // turn_9_reminders is a local step — no backend schema to fetch
+    if (stateId === "turn_9_reminders") return;
     if (
       screenState.currentContainerId === "welcome_onboarding" &&
       screenState.currentStateId === stateId &&
@@ -218,23 +224,34 @@ export function OnboardingPage() {
   return (
     <MitraMobileShell backgroundImage={backgroundImage}>
       <div>
-        {resolving && (
-          <div
-            style={{
-              textAlign: "center",
-              paddingTop: 80,
-              color: "var(--kalpx-text-muted)",
-            }}
-          >
-            Loading…
-          </div>
-        )}
-        {!resolving && (
-          <ScreenRenderer
-            schema={screenState.currentScreen}
-            screenData={screenState.screenData}
-            onAction={(action) => executeAction(action, actionContext)}
+        {stateId === "turn_9_reminders" ? (
+          <OnboardingReminderStep
+            destination={
+              (screenState.screenData.post_onboarding_destination as string | undefined) || "/en/mitra"
+            }
+            patchReminders={apiPatchJourneyReminders}
           />
+        ) : (
+          <>
+            {resolving && (
+              <div
+                style={{
+                  textAlign: "center",
+                  paddingTop: 80,
+                  color: "var(--kalpx-text-muted)",
+                }}
+              >
+                Loading…
+              </div>
+            )}
+            {!resolving && (
+              <ScreenRenderer
+                schema={screenState.currentScreen}
+                screenData={screenState.screenData}
+                onAction={(action) => executeAction(action, actionContext)}
+              />
+            )}
+          </>
         )}
       </div>
     </MitraMobileShell>

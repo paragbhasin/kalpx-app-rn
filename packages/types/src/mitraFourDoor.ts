@@ -128,6 +128,10 @@ export interface QuickCheckinResponse {
   suggested_door: string | null;
   suggested_room_id: string | null;
   copy: string;
+  /** Not returned by the quick-checkin endpoint (backend returns room_id only).
+   *  Kept as optional so UI code that references these fields compiles. */
+  suggested_room_label?: string | null;
+  suggested_room_description?: string | null;
 }
 
 // ── Active Check-in Window (Wave QC-B) ───────────────────────────────────────
@@ -230,6 +234,27 @@ export interface MitraHomeV3ReminderSummary {
   afternoon: { enabled: boolean; time: string | null };
   night: { enabled: boolean; time: string | null };
   ask_later: boolean;
+}
+
+// ── Inner Path triad reminders ───────────────────────────────────────────────
+
+export interface JourneyTriadReminders {
+  has_journey: boolean;
+  mantra_reminder_enabled: boolean;
+  mantra_reminder_time: string | null;   // HH:MM:SS or null
+  sankalp_reminder_enabled: boolean;
+  sankalp_reminder_time: string | null;
+  practice_reminder_enabled: boolean;
+  practice_reminder_time: string | null;
+}
+
+export interface JourneyTriadRemindersPatch {
+  mantra_reminder_enabled?: boolean;
+  mantra_reminder_time?: string | null;
+  sankalp_reminder_enabled?: boolean;
+  sankalp_reminder_time?: string | null;
+  practice_reminder_enabled?: boolean;
+  practice_reminder_time?: string | null;
 }
 
 export type MitraHomeSegment =

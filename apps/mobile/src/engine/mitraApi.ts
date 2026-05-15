@@ -8,7 +8,7 @@
  */
 
 import api from "../Networks/axios";
-import type { MitraHomeV3Response, TellMitraV3Response, MitraHomeV3CompanionRhythm, QuickCheckinEnergyState, QuickCheckinResponse, RhythmSuggestRequest, RhythmSuggestResponse, TellMitraFollowupMeta, QuickResetOpeningState, QuickChantCompleteRequest, QuickChantCompleteResponse, QuickResetSetDefaultResponse, RhythmCompleteResponse, RhythmResolvedItem, RhythmItemMutationResponse, RhythmSettingsResponse, RhythmTimeBand, RhythmItemType, RhythmItemSource, RhythmReminderPreference } from '@kalpx/types';
+import type { MitraHomeV3Response, TellMitraV3Response, MitraHomeV3CompanionRhythm, QuickCheckinEnergyState, QuickCheckinResponse, RhythmSuggestRequest, RhythmSuggestResponse, TellMitraFollowupMeta, QuickResetOpeningState, QuickChantCompleteRequest, QuickChantCompleteResponse, QuickResetSetDefaultResponse, RhythmCompleteResponse, RhythmResolvedItem, RhythmItemMutationResponse, RhythmSettingsResponse, RhythmTimeBand, RhythmItemType, RhythmItemSource, RhythmReminderPreference, JourneyTriadReminders, JourneyTriadRemindersPatch } from '@kalpx/types';
 import type { RhythmSetupPayload } from '@kalpx/contracts';
 import { normalizeTellMitraResult, normalizeRhythmSuggestResponse } from '@kalpx/contracts';
 
@@ -2276,5 +2276,19 @@ export async function patchRhythmSettings(
   patch: { reminder_preference: RhythmReminderPreference },
 ): Promise<RhythmSettingsResponse> {
   const resp = await api.patch<RhythmSettingsResponse>('mitra/v3/rhythm/settings/', patch);
+  return resp.data;
+}
+
+/** GET mitra/v3/journey/reminders/ — fetch Inner Path triad reminder preferences. */
+export async function apiGetJourneyReminders(): Promise<JourneyTriadReminders> {
+  const resp = await api.get<JourneyTriadReminders>('mitra/v3/journey/reminders/');
+  return resp.data;
+}
+
+/** PATCH mitra/v3/journey/reminders/ — update one or more triad reminder fields (partial). */
+export async function apiPatchJourneyReminders(
+  patch: JourneyTriadRemindersPatch,
+): Promise<JourneyTriadReminders> {
+  const resp = await api.patch<JourneyTriadReminders>('mitra/v3/journey/reminders/', patch);
   return resp.data;
 }

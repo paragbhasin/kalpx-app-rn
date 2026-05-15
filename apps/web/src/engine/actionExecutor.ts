@@ -1385,18 +1385,20 @@ export async function executeAction(action: any, context: ActionContext): Promis
           } catch (e) {
             if (WEB_ENV.isDev) console.warn('[actionExecutor] post-onboarding daily hydrate failed:', e);
           }
-          // Clear onboarding transient state
+          // Stash the post-onboarding destination and clear onboarding transient state
+          const entryIntention = localStorage.getItem('mitra_entry_intention');
+          localStorage.removeItem('mitra_entry_intention');
+          const destination = entryIntention === 'inner_path' ? '/en/mitra/inner-path' : '/en/mitra';
           dispatch(updateScreenData({
             onboarding_draft_state: null,
             onboarding_turn: null,
+            post_onboarding_destination: destination,
           }));
           // Journey was created at turn_7 but the 60s cache still has hasActiveJourney=false
           // from the start of onboarding. RequiresJourney must re-fetch to get the real value.
           invalidateJourneyStatusCache();
-          // Route to Inner Path if the user entered via the inner_path intention (Stream O)
-          const entryIntention = localStorage.getItem('mitra_entry_intention');
-          localStorage.removeItem('mitra_entry_intention');
-          webNavigate(entryIntention === 'inner_path' ? '/en/mitra/inner-path' : '/en/mitra');
+          // Show the optional reminder step before final navigation
+          webNavigate(_onboardingPath('turn_9_reminders'));
           return;
         } else {
           if (WEB_ENV.isDev) console.warn('[actionExecutor] onboarding_turn_response: unknown state', stateId);

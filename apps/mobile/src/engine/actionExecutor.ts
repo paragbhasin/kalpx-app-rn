@@ -5390,9 +5390,9 @@ export async function executeAction(
       }
 
       case "return_to_rhythm_home": {
-        const runnerClearKeysRhythm = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz', 'completion_return_screen', 'runner_rhythm_slot', 'rhythm_complete_result'];
+        const runnerClearKeysRhythm = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz', 'completion_return_screen', 'runner_rhythm_slot', 'rhythm_complete_result', 'dashboard_entry_surface'];
         runnerClearKeysRhythm.forEach(k => setScreenValue(null, k));
-        rootNavigate('RhythmHome');
+        rootNavigate('Home');
         break;
       }
 

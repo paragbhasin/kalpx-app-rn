@@ -16,7 +16,7 @@ import {
   toRhythmSetupPayloadItems,
 } from "@kalpx/contracts";
 import type { RhythmTimeBand, RhythmWizardLocalItem } from "@kalpx/types";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
 import React, {
   useCallback,
@@ -425,6 +425,14 @@ export default function RhythmSetupScreen({
   useEffect(() => {
     screenBridgeRef.current = screenBridge;
   });
+
+  const updateBackground = useScreenStore((state) => state.updateBackground);
+  useFocusEffect(
+    useCallback(() => {
+      updateBackground(RHYTHM_BG);
+      return () => updateBackground(null);
+    }, [updateBackground]),
+  );
 
   const buildActionContext = useCallback(
     () => ({
@@ -1032,7 +1040,7 @@ export default function RhythmSetupScreen({
               onPress={leaveEmbeddedFlow}
               style={wStyles.backRow}
             >
-              <Text style={wStyles.backText}>{"< Back"}</Text>
+              <Ionicons name="chevron-back" size={22} color="#C99317" />
             </TouchableOpacity>
             {/* {renderStepDots("moments")} */}
             <Text style={wStyles.buildheading}>Build Your Daily Rhythm</Text>
@@ -1142,7 +1150,7 @@ export default function RhythmSetupScreen({
               onPress={() => setWizardStep("moments")}
               style={wStyles.backRow}
             >
-              <Text style={wStyles.backText}>{"< Back"}</Text>
+              <Ionicons name="chevron-back" size={22} color="#C99317" />
             </TouchableOpacity>
 
             <Text style={wStyles.heading}>
@@ -1260,7 +1268,7 @@ export default function RhythmSetupScreen({
                 onPress={() => setWizardStep("purpose")}
                 style={wStyles.backRow}
               >
-                <Text style={wStyles.backText}>{"< Back"}</Text>
+                <Ionicons name="chevron-back" size={22} color="#C99317" />
               </TouchableOpacity>
 
               <Text style={[wStyles.heading, wStyles.suggestionHeading]}>
@@ -1432,7 +1440,7 @@ export default function RhythmSetupScreen({
           onPress={() => setWizardStep("suggestion")}
           style={wStyles.backRow}
         >
-          <Text style={wStyles.backText}>{"< Back"}</Text>
+          <Ionicons name="chevron-back" size={22} color="#C99317" />
         </TouchableOpacity>
         {renderStepDots("reminders")}
         <Text style={wStyles.buildheading}>
@@ -1645,7 +1653,7 @@ export default function RhythmSetupScreen({
               activeOpacity={0.7}
               style={styles.backBtn}
             >
-              <Text style={styles.backBtnText}>{"< Back"}</Text>
+              <Ionicons name="chevron-back" size={22} color="#C99317" />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>
               {editMode ? "Edit My Rhythm" : "Set Up My Rhythm"}
@@ -1928,8 +1936,7 @@ const wStyles = StyleSheet.create({
     marginTop: 2,
     marginLeft: 2,
   },
-  backRow: { alignSelf: "flex-start", marginBottom: 18 },
-  backText: { fontSize: 16, color: "#C99317", fontFamily: Fonts.sans.medium },
+  backRow: { width: 36, height: 36, alignItems: "center", justifyContent: "center", alignSelf: "flex-start", marginBottom: 18 },
   dots: { flexDirection: "row", gap: 8, marginBottom: 24, alignSelf: "center" },
   dot: {
     width: 8,
@@ -2455,15 +2462,12 @@ const styles = StyleSheet.create({
     marginLeft: 2,
   },
   backBtn: {
+    width: 36,
+    height: 36,
+    alignItems: "center",
+    justifyContent: "center",
     alignSelf: "flex-start",
-    paddingVertical: 4,
-    paddingHorizontal: 2,
     marginBottom: 22,
-  },
-  backBtnText: {
-    fontSize: 16,
-    color: "#D19A18",
-    fontFamily: Fonts.sans.medium,
   },
   headerTitle: {
     fontSize: 28,

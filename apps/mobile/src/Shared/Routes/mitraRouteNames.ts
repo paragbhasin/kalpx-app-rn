@@ -10,6 +10,8 @@ export const MITRA_ROUTE_NAMES = [
   "QuickCheckin",
   "BrowseRooms",
   "RhythmHome",
+  "RhythmSetup",
+  "RhythmEdit",
 ] as const;
 
 export const isMitraRouteName = (name: string): boolean =>

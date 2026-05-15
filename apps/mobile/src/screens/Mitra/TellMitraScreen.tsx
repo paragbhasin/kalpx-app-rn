@@ -4,17 +4,28 @@
  * Standalone screen for "I want to tell Mitra" CTA paths (e.g. from QuickReset).
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { useScreenStore } from '../../engine/useScreenBridge';
 import TellMitraContainer from '../../containers/TellMitraContainer';
 import { Fonts } from '../../theme/fonts';
 
 export default function TellMitraScreen() {
+  const updateBackground = useScreenStore((state) => state.updateBackground);
+
+  useFocusEffect(
+    useCallback(() => {
+      updateBackground(require('../../../assets/beige_bg.png'));
+      return () => updateBackground(null);
+    }, [updateBackground]),
+  );
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>

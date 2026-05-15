@@ -12,6 +12,9 @@ export const MITRA_ROUTE_NAMES = [
   "RhythmHome",
   "RhythmSetup",
   "RhythmEdit",
+  "InnerPath",
+  "QuickReset",
+  "TellMitra",
 ] as const;
 
 export const isMitraRouteName = (name: string): boolean =>

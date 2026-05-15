@@ -9,7 +9,7 @@ import type {
   QuickResetMantra,
   QuickResetOpeningState,
 } from "@kalpx/types";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -184,7 +184,16 @@ export default function QuickResetScreen({
   embedded?: boolean;
 }) {
   const navigation = useNavigation<any>();
-  const { goBack } = useScreenStore();
+  const { goBack, updateBackground } = useScreenStore();
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!embedded) {
+        updateBackground(require("../../../assets/beige_bg.png"));
+        return () => updateBackground(null);
+      }
+    }, [updateBackground, embedded]),
+  );
 
   const [phase, setPhase] = useState<Phase>("loading");
   const [openingState, setOpeningState] =

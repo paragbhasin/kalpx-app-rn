@@ -22,8 +22,8 @@
  */
 
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { JourneyTriadReminders, JourneyTriadRemindersPatch } from "@kalpx/types";
 import { TimePickerModal } from "../../components/TimePickerModal";
 import {
@@ -77,7 +77,14 @@ if (
 export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
   const navigation = useNavigation<any>();
   const dispatch = useDispatch<any>();
-  const { loadScreen, goBack } = useScreenStore();
+  const { loadScreen, goBack, updateBackground } = useScreenStore();
+
+  useFocusEffect(
+    useCallback(() => {
+      updateBackground(require("../../../assets/beige_bg.png"));
+      return () => updateBackground(null);
+    }, [updateBackground]),
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [progressOpen, setProgressOpen] = useState(false);

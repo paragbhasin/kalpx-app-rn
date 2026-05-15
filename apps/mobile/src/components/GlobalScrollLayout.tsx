@@ -85,10 +85,14 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
     return { canGoBackInStack: false, isOnDynamicEngine: false };
   });
 
-  // Engine owner: show only when there is depth beyond the root engine screen.
+  // Engine owner: show when depth > 0 beyond the root engine screen.
+  // Also show when engine history is fully exhausted but DynamicEngine is still
+  // on the RN stack (e.g. room session launched from BrowseRooms) so the user
+  // can pop back to the launching direct-route screen instead of getting stuck.
   // Direct-route owner: show whenever the stack has depth (index > 0).
   const showBackButton = isOnDynamicEngine
-    ? !currentScreen?.overlay && history.length > 0 && !isRootScreen
+    ? (!currentScreen?.overlay && history.length > 0 && !isRootScreen) ||
+      (history.length === 0 && canGoBackInStack)
     : canGoBackInStack;
 
   // Reset header visibility when back button is not present (mostly root screens)
@@ -134,6 +138,13 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
 
     if (history.length > 0) {
       goBack();
+      return;
+    }
+
+    // Engine history exhausted but DynamicEngine still on RN stack — pop back
+    // to the direct-route screen that launched this engine session (e.g. BrowseRooms).
+    if (navigationRef.isReady() && navigationRef.canGoBack()) {
+      navigationRef.goBack();
       return;
     }
 

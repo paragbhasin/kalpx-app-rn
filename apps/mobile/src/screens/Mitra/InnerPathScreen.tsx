@@ -148,11 +148,21 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
           return;
         }
 
-        if (
-          !viewKey ||
-          viewKey === "onboarding_start" ||
-          viewKey === "welcome_back_surface"
-        ) {
+        if (!viewKey || viewKey === "onboarding_start") {
+          if (!embedded) {
+            // Seed schema before navigating — DynamicEngine has no schema without this.
+            dispatch(
+              loadScreenWithData({
+                containerId: "welcome_onboarding",
+                stateId: "turn_1",
+              }) as any,
+            );
+            navigation.replace("DynamicEngine" as any);
+          }
+          return;
+        }
+
+        if (viewKey === "welcome_back_surface") {
           if (!embedded) {
             navigation.replace("DynamicEngine" as any);
           }

@@ -49,7 +49,7 @@ export function InnerPathPage() {
           return;
         }
         if (!viewKey || viewKey === "onboarding_start") {
-          navigate("/en/mitra/onboarding", { replace: true });
+          navigate("/en/mitra/onboarding?stateId=turn_1", { replace: true });
           return;
         }
         if (viewKey !== "daily_view") {

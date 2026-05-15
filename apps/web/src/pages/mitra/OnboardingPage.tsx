@@ -42,9 +42,15 @@ export function OnboardingPage() {
   // Prevents the post-auth turn_7 recovery effect from firing more than once per page load
   const hasResumedRef = useRef(false);
 
-  // stateId drives which turn to show; default to turn_1 if missing
+  // stateId drives which turn to show; default to turn_1 if missing.
+  // Guard against stale Redux currentStateId from a different container (e.g. 'portal',
+  // 'practice_runner', 'dashboard') — only carry it forward when already in welcome_onboarding.
   const stateId: string =
-    searchParams.get("stateId") || screenState.currentStateId || "turn_1";
+    searchParams.get("stateId") ||
+    (screenState.currentContainerId === "welcome_onboarding"
+      ? screenState.currentStateId
+      : null) ||
+    "turn_1";
 
   // Active journey users must not re-run onboarding — duplicate journey risk
   useEffect(() => {

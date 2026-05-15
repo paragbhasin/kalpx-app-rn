@@ -50,6 +50,7 @@ import { TriggerPage } from "./pages/mitra/TriggerPage";
 import { WelcomeBackPage } from "./pages/mitra/WelcomeBackPage";
 import { NotificationsPage } from "./pages/notifications/NotificationsPage";
 import { NotificationPreferencesPage } from "./pages/settings/NotificationPreferencesPage";
+import { RemindersPage } from "./pages/settings/RemindersPage";
 import { ProfilePage } from "./pages/profile/ProfilePage";
 import { PrivacyPage } from "./pages/legal/PrivacyPage";
 import { TermsPage } from "./pages/legal/TermsPage";
@@ -330,6 +331,16 @@ export function AppRoutes() {
         element={
           <RequiresAuth>
             <NotificationPreferencesPage />
+          </RequiresAuth>
+        }
+      />
+
+      {/* Reminders */}
+      <Route
+        path="/en/settings/reminders"
+        element={
+          <RequiresAuth>
+            <RemindersPage />
           </RequiresAuth>
         }
       />

@@ -67,6 +67,7 @@ import RhythmEditScreen from "../screens/Mitra/RhythmEditScreen";
 import RhythmHomeScreen from "../screens/Mitra/RhythmHomeScreen";
 import RhythmSetupScreen from "../screens/Mitra/RhythmSetupScreen";
 import QuickResetScreen from "../screens/Mitra/QuickResetScreen";
+import RemindersScreen from "../screens/Mitra/RemindersScreen";
 import QuickCheckinScreen from "../screens/Mitra/QuickCheckinScreen";
 import BrowseRoomsScreen from "../screens/Mitra/BrowseRoomsScreen";
 import InnerPathScreen from "../screens/Mitra/InnerPathScreen";
@@ -424,6 +425,11 @@ export const ProfileStackNavigator = () => (
     <Stack.Screen
       name="RoomMemoryScreen"
       component={RoomMemoryScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="Reminders"
+      component={RemindersScreen}
       options={{ headerShown: false }}
     />
   </Stack.Navigator>

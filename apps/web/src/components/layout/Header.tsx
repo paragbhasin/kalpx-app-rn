@@ -1,6 +1,7 @@
 import { clearTokens } from "@kalpx/auth";
+import { ArrowLeft } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { webStorage } from "../../lib/webStorage";
 
@@ -16,11 +17,18 @@ const NAV_LINKS = [
 export function Header({
   transparent = false,
   hidden = false,
+  showBack = false,
+  backTo = "/en/mitra",
+  onBack,
 }: {
   transparent?: boolean;
   hidden?: boolean;
+  showBack?: boolean;
+  backTo?: string;
+  onBack?: () => void;
 }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { authed, userInitial, refresh } = useCurrentUser();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -56,6 +64,18 @@ export function Header({
     await clearTokens(webStorage);
     refresh();
     navigate("/login");
+  }
+
+  function handleBack() {
+    if (onBack) {
+      onBack();
+      return;
+    }
+    if (location.key && location.key !== "default") {
+      navigate(-1);
+      return;
+    }
+    navigate(backTo);
   }
 
   const navItemStyle = (active: boolean): React.CSSProperties => ({
@@ -113,22 +133,53 @@ export function Header({
               : "none",
         }}
       >
-        {/* Logo */}
-        <Link
-          to="/en"
+        <div
           style={{
             display: "flex",
             alignItems: "center",
-            textDecoration: "none",
+            gap: 10,
             flexShrink: 0,
           }}
         >
-          <img
-            src="/kalpx-logo.png"
-            alt="KalpX"
-            style={{ height: 33, width: "auto" }}
-          />
-        </Link>
+          {showBack && (
+            <button
+              type="button"
+              onClick={handleBack}
+              aria-label="Go back"
+              data-testid="header-back-btn"
+              style={{
+                width: 36,
+                height: 36,
+
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+
+                padding: 0,
+                flexShrink: 0,
+              }}
+            >
+              <ArrowLeft size={20} strokeWidth={2.2} />
+            </button>
+          )}
+
+          {/* Logo */}
+          <Link
+            to="/en"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              textDecoration: "none",
+              flexShrink: 0,
+            }}
+          >
+            <img
+              src="/kalpx-logo.png"
+              alt="KalpX"
+              style={{ height: 33, width: "auto", marginTop: 10 }}
+            />
+          </Link>
+        </div>
 
         {/* Desktop nav — hidden on mobile via CSS class */}
         <nav

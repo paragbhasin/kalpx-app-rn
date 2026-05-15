@@ -6,7 +6,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RhythmLibraryPickerModal } from "../../components/mitra/RhythmLibraryPickerModal";
 import { executeAction } from "../../engine/actionExecutor";
-import { getMitraHomeV3, postRhythmItemAdd, postRhythmResolveItem } from "../../engine/mitraApi";
+import {
+  getMitraHomeV3,
+  postRhythmItemAdd,
+  postRhythmResolveItem,
+} from "../../engine/mitraApi";
 import type { AppDispatch, RootState } from "../../store";
 import { setHomeData } from "../../store/doorSlice";
 import { useScreenState } from "../../store/screenSlice";
@@ -145,8 +149,17 @@ function RhythmItemCard({
         />
       </div>
       {item.reminder_enabled && item.reminder_time && (
-        <p style={{ fontSize: 12, color: "rgba(67,33,4,0.55)", marginTop: 0, marginBottom: 12, fontStyle: "italic", textAlign: "center" }}>
-          Mitra will gently remind you at {formatReminderTime(item.reminder_time)}
+        <p
+          style={{
+            fontSize: 12,
+            marginTop: 0,
+            marginBottom: 12,
+            fontStyle: "italic",
+            textAlign: "center",
+          }}
+        >
+          Mitra will gently remind you at{" "}
+          {formatReminderTime(item.reminder_time)}
         </p>
       )}
       {item.description_snapshot && (
@@ -235,9 +248,13 @@ function BandSection({
           color: "#D2A63D",
         }}
       >
-        <div style={{ width: 35, height: 1, background: "rgba(210,166,61,0.45)" }} />
+        <div
+          style={{ width: 35, height: 1, background: "rgba(210,166,61,0.45)" }}
+        />
         <span style={{ fontSize: 14, lineHeight: 1 }}>◇</span>
-        <div style={{ width: 35, height: 1, background: "rgba(210,166,61,0.45)" }} />
+        <div
+          style={{ width: 35, height: 1, background: "rgba(210,166,61,0.45)" }}
+        />
       </div>
       {slot.items.map((item) => (
         <RhythmItemCard
@@ -251,12 +268,12 @@ function BandSection({
         onClick={() => onAddItem(band)}
         style={{
           background: "transparent",
-          border: "1px dashed rgba(201,168,76,0.35)",
-          borderRadius: 18,
-          color: "rgba(107,83,60,0.65)",
-          fontSize: 13,
+          border: "1px dashed  #d4a017",
+          borderRadius: 11,
+
+          fontSize: 16,
           fontFamily: "var(--kalpx-font-serif)",
-          padding: "7px 18px",
+          padding: "10px 18px",
           cursor: "pointer",
           marginTop: 8,
           width: "100%",
@@ -294,7 +311,9 @@ export function RhythmHomePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resolvingItemId, setResolvingItemId] = useState<string | null>(null);
-  const [homePickerBand, setHomePickerBand] = useState<RhythmTimeBand | null>(null);
+  const [homePickerBand, setHomePickerBand] = useState<RhythmTimeBand | null>(
+    null,
+  );
 
   useEffect(() => {
     if (homeData) return;
@@ -307,23 +326,39 @@ export function RhythmHomePage() {
 
   const rhythm = homeData?.companion_rhythm;
 
-  const handleHomePickerAdd = useCallback(async (picked: {
-    slot: RhythmTimeBand; item_type: any; item_id: string; title_snapshot: string;
-    description_snapshot: string | null; source: any; sort_order: number; reminder_enabled: boolean;
-  }) => {
-    const slot = homePickerBand!;
-    const slotItems = homeData?.companion_rhythm?.[slot]?.items ?? [];
-    const alreadyInSlot = slotItems.some((i) => i.item_id === picked.item_id);
-    if (alreadyInSlot) { setHomePickerBand(null); return; }
-    setHomePickerBand(null);
-    try {
-      await postRhythmItemAdd({ ...picked, slot, sort_order: slotItems.length + 1 });
-      const fresh = await getMitraHomeV3({ forceFresh: true });
-      dispatch(setHomeData(fresh));
-    } catch (err: any) {
-      console.warn("[RhythmHome] addItem failed", err?.message);
-    }
-  }, [homePickerBand, homeData, dispatch]);
+  const handleHomePickerAdd = useCallback(
+    async (picked: {
+      slot: RhythmTimeBand;
+      item_type: any;
+      item_id: string;
+      title_snapshot: string;
+      description_snapshot: string | null;
+      source: any;
+      sort_order: number;
+      reminder_enabled: boolean;
+    }) => {
+      const slot = homePickerBand!;
+      const slotItems = homeData?.companion_rhythm?.[slot]?.items ?? [];
+      const alreadyInSlot = slotItems.some((i) => i.item_id === picked.item_id);
+      if (alreadyInSlot) {
+        setHomePickerBand(null);
+        return;
+      }
+      setHomePickerBand(null);
+      try {
+        await postRhythmItemAdd({
+          ...picked,
+          slot,
+          sort_order: slotItems.length + 1,
+        });
+        const fresh = await getMitraHomeV3({ forceFresh: true });
+        dispatch(setHomeData(fresh));
+      } catch (err: any) {
+        console.warn("[RhythmHome] addItem failed", err?.message);
+      }
+    },
+    [homePickerBand, homeData, dispatch],
+  );
 
   const actionContext = {
     dispatch,
@@ -341,14 +376,25 @@ export function RhythmHomePage() {
       item_type: item.item_type,
     };
     try {
-      const resolved = await postRhythmResolveItem(band, item.item_id, item.item_type);
+      const resolved = await postRhythmResolveItem(
+        band,
+        item.item_id,
+        item.item_type,
+      );
       if (resolved?.resolved) {
         enrichedItem = {
           ...enrichedItem,
           ...resolved,
-          title_snapshot: item.title_snapshot || resolved.title || resolved.title_snapshot || "",
+          title_snapshot:
+            item.title_snapshot ||
+            resolved.title ||
+            resolved.title_snapshot ||
+            "",
           description_snapshot:
-            item.description_snapshot || resolved.description_snapshot || resolved.subtitle || "",
+            item.description_snapshot ||
+            resolved.description_snapshot ||
+            resolved.subtitle ||
+            "",
         };
       }
     } catch (_) {
@@ -372,140 +418,147 @@ export function RhythmHomePage() {
 
   return (
     <>
-    <div style={SHELL_STYLE}>
-      <main
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          padding: "24px 16px calc(92px + env(safe-area-inset-bottom))",
-        }}
-      >
-        <div style={{ width: "100%", maxWidth: 420, position: "relative" }}>
-          <img
-            src="/leaves-bird.png"
-            alt=""
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              top: -135,
-              right: -22,
-              width: 245,
-              pointerEvents: "none",
-              userSelect: "none",
-              opacity: 0.5,
-            }}
-          />
-          <h2
-            style={{
-              fontFamily: "var(--kalpx-font-serif)",
-              fontWeight: 700,
-              fontSize: 34,
-              color: "#432104",
-              // margin: "0 0 24px",
-            }}
-          >
-            My Rhythm
-          </h2>
+      <div style={SHELL_STYLE}>
+        <main
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            padding: "24px 16px calc(92px + env(safe-area-inset-bottom))",
+          }}
+        >
+          <div style={{ width: "100%", maxWidth: 420, position: "relative" }}>
+            <img
+              src="/leaves-bird.png"
+              alt=""
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                top: -135,
+                right: -22,
+                width: 245,
+                pointerEvents: "none",
+                userSelect: "none",
+                opacity: 0.5,
+              }}
+            />
+            <h2
+              style={{
+                fontFamily: "var(--kalpx-font-serif)",
+                fontWeight: 700,
+                fontSize: 34,
+                color: "#432104",
+                // margin: "0 0 24px",
+              }}
+            >
+              My Rhythm
+            </h2>
 
-          {loading && (
-            <p style={{ color: "#A08060", textAlign: "center" }}>Loading…</p>
-          )}
-          {error && (
-            <p style={{ color: "#e06060", textAlign: "center" }}>{error}</p>
-          )}
+            {loading && (
+              <p style={{ color: "#A08060", textAlign: "center" }}>Loading…</p>
+            )}
+            {error && (
+              <p style={{ color: "#e06060", textAlign: "center" }}>{error}</p>
+            )}
 
-          {!loading && rhythm && !rhythm.has_rhythm && (
-            <div style={CARD_STYLE}>
-              <p
-                style={{
-                  fontFamily: "var(--kalpx-font-serif)",
-                  fontSize: 17,
-                  color: "#432104",
-                  marginBottom: 20,
-                }}
-              >
-                You haven't set up your rhythm yet.
-              </p>
-              <button
-                onClick={() => navigate("/en/mitra/rhythm/setup")}
-                style={{
-                  padding: "14px 28px",
-                  borderRadius: 14,
-                  border: "none",
-                  background:
-                    "linear-gradient(90deg, #C99317 0%, #E0AE21 50%, #C99317 100%)",
-                  color: "#fff",
-                  fontFamily: "var(--kalpx-font-serif)",
-                  fontSize: 16,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                }}
-              >
-                Set up My Rhythm
-              </button>
-            </div>
-          )}
+            {!loading && rhythm && !rhythm.has_rhythm && (
+              <div style={CARD_STYLE}>
+                <p
+                  style={{
+                    fontFamily: "var(--kalpx-font-serif)",
+                    fontSize: 17,
+                    color: "#432104",
+                    marginBottom: 20,
+                  }}
+                >
+                  You haven't set up your rhythm yet.
+                </p>
+                <button
+                  onClick={() => navigate("/en/mitra/rhythm/setup")}
+                  style={{
+                    padding: "14px 28px",
+                    borderRadius: 14,
+                    border: "none",
+                    background:
+                      "linear-gradient(90deg, #C99317 0%, #E0AE21 50%, #C99317 100%)",
+                    color: "#fff",
+                    fontFamily: "var(--kalpx-font-serif)",
+                    fontSize: 16,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  Set up My Rhythm
+                </button>
+              </div>
+            )}
 
-          {!loading && rhythm && rhythm.has_rhythm && (
-            <>
-              <BandSection
-                band="morning"
-                slot={rhythm.morning}
-                onItemAction={(item) => void handleItemAction(item, "morning")}
-                resolvingItemId={resolvingItemId}
-                onAddItem={setHomePickerBand}
-              />
-              <BandSection
-                band="afternoon"
-                slot={rhythm.afternoon}
-                onItemAction={(item) => void handleItemAction(item, "afternoon")}
-                resolvingItemId={resolvingItemId}
-                onAddItem={setHomePickerBand}
-              />
-              <BandSection
-                band="night"
-                slot={rhythm.night}
-                onItemAction={(item) => void handleItemAction(item, "night")}
-                resolvingItemId={resolvingItemId}
-                onAddItem={setHomePickerBand}
-              />
-              <button
-                onClick={() => navigate("/en/mitra/rhythm/edit")}
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                  borderRadius: 11,
-                  border: "1px solid rgba(201,168,76,0.55)",
-                  background: "rgba(255,252,247,0.6)",
-                  color: "#7B6550",
-                  fontSize: 17,
-                  fontFamily: "var(--kalpx-font-sans, Inter, sans-serif)",
-                  cursor: "pointer",
-                  marginTop: 8,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 14,
-                }}
-              >
-                <Pencil size={24} strokeWidth={1.8} color="#C99317" />
-                Edit My Rhythm
-              </button>
-            </>
-          )}
-        </div>
-      </main>
-    </div>
-    {homePickerBand && (
-      <RhythmLibraryPickerModal
-        band={homePickerBand}
-        onPick={(picked) => void handleHomePickerAdd(picked)}
-        onClose={() => setHomePickerBand(null)}
-        nextSortOrder={(homeData?.companion_rhythm?.[homePickerBand]?.items?.length ?? 0) + 1}
-      />
-    )}
+            {!loading && rhythm && rhythm.has_rhythm && (
+              <>
+                <BandSection
+                  band="morning"
+                  slot={rhythm.morning}
+                  onItemAction={(item) =>
+                    void handleItemAction(item, "morning")
+                  }
+                  resolvingItemId={resolvingItemId}
+                  onAddItem={setHomePickerBand}
+                />
+                <BandSection
+                  band="afternoon"
+                  slot={rhythm.afternoon}
+                  onItemAction={(item) =>
+                    void handleItemAction(item, "afternoon")
+                  }
+                  resolvingItemId={resolvingItemId}
+                  onAddItem={setHomePickerBand}
+                />
+                <BandSection
+                  band="night"
+                  slot={rhythm.night}
+                  onItemAction={(item) => void handleItemAction(item, "night")}
+                  resolvingItemId={resolvingItemId}
+                  onAddItem={setHomePickerBand}
+                />
+                <button
+                  onClick={() => navigate("/en/mitra/rhythm/edit")}
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    borderRadius: 11,
+                    border: "1px solid rgba(201,168,76,0.55)",
+                    background: "rgba(255,252,247,0.6)",
+                    color: "#7B6550",
+                    fontSize: 16,
+                    fontFamily: "var(--kalpx-font-sans, Inter, sans-serif)",
+                    cursor: "pointer",
+                    marginTop: 8,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 14,
+                  }}
+                >
+                  <Pencil size={24} strokeWidth={1.8} color="#C99317" />
+                  Edit My Rhythm
+                </button>
+              </>
+            )}
+          </div>
+        </main>
+      </div>
+      {homePickerBand && (
+        <RhythmLibraryPickerModal
+          band={homePickerBand}
+          onPick={(picked) => void handleHomePickerAdd(picked)}
+          onClose={() => setHomePickerBand(null)}
+          nextSortOrder={
+            (homeData?.companion_rhythm?.[homePickerBand]?.items?.length ?? 0) +
+            1
+          }
+        />
+      )}
     </>
   );
 }

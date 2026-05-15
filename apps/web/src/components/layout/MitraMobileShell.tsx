@@ -11,6 +11,9 @@ interface Props {
   hideBottomNav?: boolean;
   hideTopBar?: boolean;
   backgroundImage?: string;
+  showBack?: boolean;
+  backTo?: string;
+  onBack?: () => void;
 }
 
 export function MitraMobileShell({
@@ -18,6 +21,9 @@ export function MitraMobileShell({
   hideBottomNav,
   hideTopBar,
   backgroundImage,
+  showBack = true,
+  backTo = "/en/mitra",
+  onBack,
 }: Props) {
   // This shell always paints a background image, even when callers omit one
   // and we fall back to /beige_bg.png. Keep chrome transparent so the
@@ -56,7 +62,13 @@ export function MitraMobileShell({
       >
         {/* {!hideTopBar && <MitraTopBar transparent={transparentChrome} />} */}
         {!hideTopBar && (
-          <Header transparent={transparentChrome} hidden={shouldHideChrome} />
+          <Header
+            transparent={transparentChrome}
+            hidden={shouldHideChrome}
+            showBack={showBack}
+            backTo={backTo}
+            onBack={onBack}
+          />
         )}
         <main
           className="kalpx-shell-main kalpx-mitra-shell-main"

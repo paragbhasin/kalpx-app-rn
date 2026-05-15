@@ -449,21 +449,12 @@ export function RhythmWizardPage() {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    padding: "24px 16px calc(45px + env(safe-area-inset-bottom))",
+    padding: "10px 16px calc(45px + env(safe-area-inset-bottom))",
   };
   const container: React.CSSProperties = {
     width: "100%",
     maxWidth: 420,
     position: "relative",
-  };
-  const backBtn: React.CSSProperties = {
-    background: "none",
-    border: "none",
-    color: GOLD,
-    fontSize: 14,
-    cursor: "pointer",
-    marginBottom: 20,
-    padding: 0,
   };
   const goldBtn: React.CSSProperties = {
     width: "100%",
@@ -490,16 +481,15 @@ export function RhythmWizardPage() {
   };
 
   return (
-    <MitraMobileShell backgroundImage="/beige_bg.png">
+    <MitraMobileShell
+      backgroundImage="/beige_bg.png"
+      backTo={wizardBackTarget}
+      onBack={step !== "confirmation" ? handleBack : undefined}
+      showBack={step !== "confirmation"}
+    >
       <main style={main}>
         <div style={container}>
-          {step !== "confirmation" && (
-            <button onClick={handleBack} style={backBtn}>
-              ← Back
-            </button>
-          )}
-
-          {step !== "confirmation" && <StepDots step={step} />}
+          {/* {step !== "confirmation" && <StepDots step={step} />} */}
 
           {/* ── Step 1: Choose Moments ─────────────────────────────────── */}
           {step === "moments" && (
@@ -525,6 +515,7 @@ export function RhythmWizardPage() {
                   fontSize: 26,
                   color: DARK,
                   margin: "0 0 8px",
+                  textAlign: "center",
                 }}
               >
                 Build Your Daily Rhythm
@@ -533,12 +524,53 @@ export function RhythmWizardPage() {
                 style={{
                   color: MID,
                   fontSize: 15,
-                  marginBottom: 18,
+                  marginBottom: 10,
                   lineHeight: 1.6,
+                  textAlign: "center",
                 }}
               >
                 When would you like Mitra to support you?
               </p>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  marginBottom: 10,
+                  color: "#E4B44F",
+                  width: "100%",
+                }}
+              >
+                <div
+                  style={{
+                    width: 100,
+                    height: 1,
+                    background: "rgba(228,180,79,0.4)",
+                  }}
+                />
+
+                <span
+                  style={{
+                    fontSize: 13,
+                    lineHeight: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  ✦
+                </span>
+
+                <div
+                  style={{
+                    width: 100,
+                    height: 1,
+                    background: "rgba(228,180,79,0.4)",
+                  }}
+                />
+              </div>
 
               <div style={{ marginBottom: 24, textAlign: "center" }}>
                 <div
@@ -706,8 +738,8 @@ export function RhythmWizardPage() {
                 style={{
                   background: "none",
                   border: "none",
-                  color: LIGHT,
-                  fontSize: 14,
+                  color: "#432104",
+                  fontSize: 16,
                   cursor: "pointer",
                   marginTop: 14,
                   width: "100%",
@@ -1192,7 +1224,8 @@ export function RhythmWizardPage() {
                       setBandTimes((prev) => {
                         const next = { ...prev };
                         selectedMoments.forEach((band) => {
-                          if (!next[band]) next[band] = BAND_REMINDER_DEFAULTS[band];
+                          if (!next[band])
+                            next[band] = BAND_REMINDER_DEFAULTS[band];
                         });
                         return next;
                       });

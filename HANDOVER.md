@@ -124,7 +124,7 @@ First fix `f1618ec` removed inline buttons from the mantra runner branch. Second
 
 **MANDATORY before any nav/state/button change**: read the canonical docs in `kalpx-frontend/tests/e2e/`:
 - `APPROVED_FLOW_CONTRACTS.md`
-- `CANONICAL_INVARIANTS.md` (INV-1 to INV-12)
+- `CANONICAL_INVARIANTS.md` (INV-1 to INV-13)
 - `REGRESSION_CASES.md` (REG-001 to REG-020+)
 - `STATE_OWNERSHIP_MATRIX.md`
 - `FLOW_LIFECYCLE_CONTRACTS.md`
@@ -135,6 +135,7 @@ Key rules to never break:
 - **INV-12 / REG-015** — trigger buttons must not leak to core. `isTriggerSession` must scope to current state only.
 - **REG-002 / INV-4** — `initiate_trigger` must seed `trigger_mantra_text="OM"` synchronously, before `loadScreen`
 - **Rule 12 / REG-010** — `generate_companion` must not overwrite `day_number`/`identity_label`/`path_context` when `checkpoint_headline` is set (checkpoint context guard)
+- **INV-13** — Never route directly to deep Mitra surfaces (InnerPath, Rhythm, etc.) if persistent shell UI (background/header) must be retained. Always route via the owning container (`loadScreen({container_id:"companion_dashboard", state_id:"day_active"})`) and switch the embedded surface via `screenData.dashboard_entry_surface`. Clear the entry flag on back so the container returns to its default view.
 
 ## Memory files (for future Claude sessions)
 - `~/.claude/projects/-Users-paragbhasin/memory/rn_checkpoint_architecture.md` — 4-stage checkpoint flow, personas, seed system, screenshot pipeline

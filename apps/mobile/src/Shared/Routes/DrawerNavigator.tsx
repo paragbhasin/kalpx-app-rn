@@ -20,8 +20,8 @@ import Colors from "../../components/Colors";
 import TextComponent from "../../components/TextComponent";
 // Old tracker import removed — Mitra engine manages journey state
 import store, { RootState } from "../../store";
-import { screenActions } from "../../store/screenSlice";
 import { clearDoorState } from "../../store/doorSlice";
+import { screenActions } from "../../store/screenSlice";
 import BottomMenu from "./BottomMenu";
 
 const Drawer = createDrawerNavigator();
@@ -161,20 +161,20 @@ const CustomDrawerContent = (props) => {
       icon: require("../../../assets/Group.png"),
       isMitra: true,
     },
-    {
-      id: "2",
-      name: t("categories.explore"),
-      title: "Explore",
-      iconType: "image",
-      icon: require("../../../assets/Exploreicon.png"),
-    },
-    {
-      id: "3",
-      name: "KalpXHaat",
-      title: "HaatLandingView",
-      iconType: "image",
-      icon: require("../../../assets/marketplace.png"),
-    },
+    // {
+    //   id: "2",
+    //   name: t("categories.explore"),
+    //   title: "Explore",
+    //   iconType: "image",
+    //   icon: require("../../../assets/Exploreicon.png"),
+    // },
+    // {
+    //   id: "3",
+    //   name: "KalpXHaat",
+    //   title: "HaatLandingView",
+    //   iconType: "image",
+    //   icon: require("../../../assets/marketplace.png"),
+    // },
     {
       id: "4",
       name: t("drawer.community"),
@@ -183,13 +183,13 @@ const CustomDrawerContent = (props) => {
       icon: "people-outline",
       activeIcon: "people",
     },
-    {
-      id: "5",
-      name: "Retreats",
-      title: "RetreatsScreen",
-      iconType: "image",
-      icon: require("../../../assets/yoga.png"),
-    },
+    // {
+    //   id: "5",
+    //   name: "Retreats",
+    //   title: "RetreatsScreen",
+    //   iconType: "image",
+    //   icon: require("../../../assets/yoga.png"),
+    // },
     {
       id: "6",
       name: t("categories.classes"),

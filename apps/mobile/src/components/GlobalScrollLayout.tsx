@@ -97,9 +97,17 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
       isNavigatingBack.current = false;
     }, 500);
 
-    // Support flows (I Feel Triggered / Quick Check-In) accumulate many
-    // intermediate history entries. Jump straight to dashboard instead of
-    // stepping through each flow screen one-by-one.
+    // If the focused route is a direct-route screen (not DynamicEngine), the
+    // engine history is from a prior session and irrelevant — use RN stack back.
+    const currentRoute = navigationRef.isReady()
+      ? navigationRef.getCurrentRoute()?.name
+      : null;
+    if (currentRoute && currentRoute !== "DynamicEngine" && navigationRef.canGoBack()) {
+      navigationRef.goBack();
+      return;
+    }
+
+    // Engine-rendered screen: support flows jump straight to dashboard.
     if (isInSupportFlow) {
       loadScreen({
         container_id: "companion_dashboard",
@@ -113,7 +121,6 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    // Direct-route navigation stack back
     if (navigationRef.isReady() && navigationRef.canGoBack()) {
       navigationRef.goBack();
       return;

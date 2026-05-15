@@ -1,11 +1,12 @@
 import { RHYTHM_BAND_LABELS } from "@kalpx/contracts";
 import type { RhythmItem, RhythmSlot, RhythmTimeBand } from "@kalpx/types";
 import { Clock3, Pencil, Sparkles } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { RhythmLibraryPickerModal } from "../../components/mitra/RhythmLibraryPickerModal";
 import { executeAction } from "../../engine/actionExecutor";
-import { getMitraHomeV3, postRhythmResolveItem } from "../../engine/mitraApi";
+import { getMitraHomeV3, postRhythmItemAdd, postRhythmResolveItem } from "../../engine/mitraApi";
 import type { AppDispatch, RootState } from "../../store";
 import { setHomeData } from "../../store/doorSlice";
 import { useScreenState } from "../../store/screenSlice";
@@ -27,6 +28,12 @@ function cardLabel(itemType: string): string {
   if (itemType === "sankalp") return "SANKALP";
   if (itemType === "reflection") return "REFLECTION";
   return "PRACTICE";
+}
+
+function formatReminderTime(hms: string): string {
+  const [h, m] = hms.split(":").map(Number);
+  const suffix = h < 12 ? "AM" : "PM";
+  return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${suffix}`;
 }
 
 function itemDuration(item: RhythmItem): string | null {
@@ -137,6 +144,11 @@ function RhythmItemCard({
           }}
         />
       </div>
+      {item.reminder_enabled && item.reminder_time && (
+        <p style={{ fontSize: 12, color: "rgba(67,33,4,0.55)", marginTop: 0, marginBottom: 12, fontStyle: "italic", textAlign: "center" }}>
+          Mitra will gently remind you at {formatReminderTime(item.reminder_time)}
+        </p>
+      )}
       {item.description_snapshot && (
         <div style={{ marginBottom: 28 }}>
           <p
@@ -191,14 +203,16 @@ function BandSection({
   slot,
   onItemAction,
   resolvingItemId,
+  onAddItem,
 }: {
   band: RhythmTimeBand;
   slot: RhythmSlot | null;
   onItemAction: (item: RhythmItem) => void;
   resolvingItemId?: string | null;
+  onAddItem: (band: RhythmTimeBand) => void;
 }) {
-  if (!slot || slot.items.length === 0) return null;
-  const featuredItem = slot.items[0];
+  const hasItems = slot && slot.items.length > 0;
+  if (!hasItems) return null;
   return (
     <div style={{ marginBottom: 28 }}>
       <div
@@ -221,34 +235,40 @@ function BandSection({
           color: "#D2A63D",
         }}
       >
-        <div
-          style={{
-            width: 35,
-            height: 1,
-            background: "rgba(210,166,61,0.45)",
-          }}
-        />
+        <div style={{ width: 35, height: 1, background: "rgba(210,166,61,0.45)" }} />
         <span style={{ fontSize: 14, lineHeight: 1 }}>◇</span>
-        <div
-          style={{
-            width: 35,
-            height: 1,
-            background: "rgba(210,166,61,0.45)",
-          }}
-        />
+        <div style={{ width: 35, height: 1, background: "rgba(210,166,61,0.45)" }} />
       </div>
-      <RhythmItemCard
-        key={featuredItem.id}
-        item={featuredItem}
-        onAction={() => onItemAction(featuredItem)}
-        resolving={resolvingItemId === featuredItem.item_id}
-      />
+      {slot.items.map((item) => (
+        <RhythmItemCard
+          key={item.rhythm_item_id}
+          item={item}
+          onAction={() => onItemAction(item)}
+          resolving={resolvingItemId === item.item_id}
+        />
+      ))}
+      <button
+        onClick={() => onAddItem(band)}
+        style={{
+          background: "transparent",
+          border: "1px dashed rgba(201,168,76,0.35)",
+          borderRadius: 18,
+          color: "rgba(107,83,60,0.65)",
+          fontSize: 13,
+          fontFamily: "var(--kalpx-font-serif)",
+          padding: "7px 18px",
+          cursor: "pointer",
+          marginTop: 8,
+          width: "100%",
+        }}
+      >
+        Add to your {band} rhythm
+      </button>
     </div>
   );
 }
 
 const SHELL_STYLE: React.CSSProperties = {
-  minHeight: "100dvh",
   backgroundColor: "#FFF8EF",
   backgroundImage: 'url("/beige_bg.png")',
   backgroundSize: "cover",
@@ -256,6 +276,7 @@ const SHELL_STYLE: React.CSSProperties = {
   backgroundRepeat: "no-repeat",
   display: "flex",
   flexDirection: "column",
+  minHeight: "calc(100dvh - 120px)",
 };
 const CARD_STYLE: React.CSSProperties = {
   background: "rgba(250,245,240,0.95)",
@@ -273,6 +294,7 @@ export function RhythmHomePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resolvingItemId, setResolvingItemId] = useState<string | null>(null);
+  const [homePickerBand, setHomePickerBand] = useState<RhythmTimeBand | null>(null);
 
   useEffect(() => {
     if (homeData) return;
@@ -284,6 +306,24 @@ export function RhythmHomePage() {
   }, [homeData, dispatch]);
 
   const rhythm = homeData?.companion_rhythm;
+
+  const handleHomePickerAdd = useCallback(async (picked: {
+    slot: RhythmTimeBand; item_type: any; item_id: string; title_snapshot: string;
+    description_snapshot: string | null; source: any; sort_order: number; reminder_enabled: boolean;
+  }) => {
+    const slot = homePickerBand!;
+    const slotItems = homeData?.companion_rhythm?.[slot]?.items ?? [];
+    const alreadyInSlot = slotItems.some((i) => i.item_id === picked.item_id);
+    if (alreadyInSlot) { setHomePickerBand(null); return; }
+    setHomePickerBand(null);
+    try {
+      await postRhythmItemAdd({ ...picked, slot, sort_order: slotItems.length + 1 });
+      const fresh = await getMitraHomeV3({ forceFresh: true });
+      dispatch(setHomeData(fresh));
+    } catch (err: any) {
+      console.warn("[RhythmHome] addItem failed", err?.message);
+    }
+  }, [homePickerBand, homeData, dispatch]);
 
   const actionContext = {
     dispatch,
@@ -331,6 +371,7 @@ export function RhythmHomePage() {
   }
 
   return (
+    <>
     <div style={SHELL_STYLE}>
       <main
         style={{
@@ -356,20 +397,6 @@ export function RhythmHomePage() {
               opacity: 0.5,
             }}
           />
-          <button
-            onClick={() => navigate("/en/mitra")}
-            style={{
-              background: "none",
-              border: "none",
-              color: "#C99317",
-              fontSize: 14,
-              cursor: "pointer",
-              marginBottom: 16,
-              padding: 0,
-            }}
-          >
-            ← Back
-          </button>
           <h2
             style={{
               fontFamily: "var(--kalpx-font-serif)",
@@ -428,18 +455,21 @@ export function RhythmHomePage() {
                 slot={rhythm.morning}
                 onItemAction={(item) => void handleItemAction(item, "morning")}
                 resolvingItemId={resolvingItemId}
+                onAddItem={setHomePickerBand}
               />
               <BandSection
                 band="afternoon"
                 slot={rhythm.afternoon}
                 onItemAction={(item) => void handleItemAction(item, "afternoon")}
                 resolvingItemId={resolvingItemId}
+                onAddItem={setHomePickerBand}
               />
               <BandSection
                 band="night"
                 slot={rhythm.night}
                 onItemAction={(item) => void handleItemAction(item, "night")}
                 resolvingItemId={resolvingItemId}
+                onAddItem={setHomePickerBand}
               />
               <button
                 onClick={() => navigate("/en/mitra/rhythm/edit")}
@@ -468,5 +498,14 @@ export function RhythmHomePage() {
         </div>
       </main>
     </div>
+    {homePickerBand && (
+      <RhythmLibraryPickerModal
+        band={homePickerBand}
+        onPick={(picked) => void handleHomePickerAdd(picked)}
+        onClose={() => setHomePickerBand(null)}
+        nextSortOrder={(homeData?.companion_rhythm?.[homePickerBand]?.items?.length ?? 0) + 1}
+      />
+    )}
+    </>
   );
 }

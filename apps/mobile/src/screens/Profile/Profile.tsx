@@ -110,6 +110,11 @@ const Profile = () => {
       icon: "notifications-outline",
       route: "NotificationPreferences",
     },
+    {
+      key: "reminders",
+      icon: "time-outline",
+      route: "Reminders",
+    },
     { key: "language", icon: "globe-outline", route: "Language" },
     { key: "privacy", icon: "key-outline", route: "Privacy" },
     {
@@ -142,6 +147,7 @@ const Profile = () => {
         defaultValue: "Notification Preferences",
       });
     }
+    if (key === "reminders") return "Reminders";
     return t(`profile.menu.${key}`);
   };
 

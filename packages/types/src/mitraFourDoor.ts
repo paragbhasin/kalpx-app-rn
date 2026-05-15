@@ -21,10 +21,12 @@ export type RhythmItemSource =
 export type RhythmReminderPreference = "yes" | "no" | "later";
 
 export interface RhythmItem {
-  id: number;
+  /** DB row PK — ONLY for PATCH/DELETE URLs, React keys, reorder. Never in runner/resolve/complete. */
+  rhythm_item_id: number;
+  /** Content identity (e.g. "mantra.gayatri") — use for resolve-item, runner, completion. */
+  item_id: string;
   slot: RhythmTimeBand;
   item_type: RhythmItemType;
-  item_id: string;
   title_snapshot: string;
   description_snapshot: string | null;
   purpose: string | null;
@@ -32,6 +34,20 @@ export interface RhythmItem {
   sort_order: number;
   reminder_enabled: boolean;
   reminder_time: string | null;
+}
+
+export interface RhythmItemMutationResponse {
+  rhythm_item_id: number;
+  slot: RhythmTimeBand;
+  sort_order?: number;
+  morning_items?: RhythmItem[];
+  afternoon_items?: RhythmItem[];
+  night_items?: RhythmItem[];
+  deleted?: true;
+}
+
+export interface RhythmSettingsResponse {
+  reminder_preference: RhythmReminderPreference;
 }
 
 export interface RhythmSlot {
@@ -112,6 +128,10 @@ export interface QuickCheckinResponse {
   suggested_door: string | null;
   suggested_room_id: string | null;
   copy: string;
+  /** Not returned by the quick-checkin endpoint (backend returns room_id only).
+   *  Kept as optional so UI code that references these fields compiles. */
+  suggested_room_label?: string | null;
+  suggested_room_description?: string | null;
 }
 
 // ── Active Check-in Window (Wave QC-B) ───────────────────────────────────────
@@ -214,6 +234,27 @@ export interface MitraHomeV3ReminderSummary {
   afternoon: { enabled: boolean; time: string | null };
   night: { enabled: boolean; time: string | null };
   ask_later: boolean;
+}
+
+// ── Inner Path triad reminders ───────────────────────────────────────────────
+
+export interface JourneyTriadReminders {
+  has_journey: boolean;
+  mantra_reminder_enabled: boolean;
+  mantra_reminder_time: string | null;   // HH:MM:SS or null
+  sankalp_reminder_enabled: boolean;
+  sankalp_reminder_time: string | null;
+  practice_reminder_enabled: boolean;
+  practice_reminder_time: string | null;
+}
+
+export interface JourneyTriadRemindersPatch {
+  mantra_reminder_enabled?: boolean;
+  mantra_reminder_time?: string | null;
+  sankalp_reminder_enabled?: boolean;
+  sankalp_reminder_time?: string | null;
+  practice_reminder_enabled?: boolean;
+  practice_reminder_time?: string | null;
 }
 
 export type MitraHomeSegment =

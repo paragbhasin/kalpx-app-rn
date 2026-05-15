@@ -24,6 +24,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import type { JourneyTriadReminders, JourneyTriadRemindersPatch } from "@kalpx/types";
+import { TimePickerModal } from "../../components/TimePickerModal";
 import {
   ActivityIndicator,
   LayoutAnimation,
@@ -31,6 +33,7 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TouchableOpacity,
   UIManager,
@@ -41,7 +44,11 @@ import In1Icon from "../../../../web/public/in1.svg";
 import CycleProgressBlock from "../../blocks/dashboard/CycleProgressBlock";
 import { executeAction } from "../../engine/actionExecutor";
 import {
+  apiGetJourneyReminders,
+  apiPatchJourneyReminders,
   mitraJourneyDailyView,
+  mitraJourneyDay7View,
+  mitraJourneyDay14View,
   mitraJourneyEntryView,
 } from "../../engine/mitraApi";
 import { useScreenStore } from "../../engine/useScreenBridge";
@@ -79,6 +86,10 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
   const [activeWhyTab, setActiveWhyTab] = useState<
     "mantra" | "sankalp" | "practice"
   >("mantra");
+  const [remindersOpen, setRemindersOpen] = useState(false);
+  const [reminders, setReminders] = useState<JourneyTriadReminders | null>(null);
+  const [reminderSaving, setReminderSaving] = useState(false);
+  const [reminderPickerKey, setReminderPickerKey] = useState<"mantra" | "sankalp" | "practice" | null>(null);
 
   // After daily-view data is loaded, watch for runner container transitions.
   const watchRunnerRef = useRef(false);
@@ -96,6 +107,8 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
   // Common engine — same pipeline as web InnerPathPage.
   useEffect(() => {
     let cancelled = false;
+    const routeRunId = Date.now();
+    if (__DEV__) console.log("[InnerPathScreen] checkpoint fix e0aedef loaded — effect run", routeRunId);
 
     const writeAll = (flat: Record<string, any>) => {
       for (const [k, v] of Object.entries(flat)) {
@@ -107,52 +120,114 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
 
     (async () => {
       try {
+        if (__DEV__) console.log("[InnerPathScreen]", routeRunId, "calling entry-view");
         const entryResult = await mitraJourneyEntryView();
+        if (__DEV__) console.log("[InnerPathScreen]", routeRunId, "entry-view returned, cancelled:", cancelled);
         if (cancelled) return;
 
         const target = entryResult.envelope?.target;
         const viewKey = target?.view_key;
         const payload = target?.payload ?? {};
+        if (__DEV__) {
+          console.log("[InnerPathScreen]", routeRunId, "entry-view view_key:", viewKey);
+          console.log("[InnerPathScreen]", routeRunId, "viewKey raw JSON:", JSON.stringify(viewKey));
+          console.log("[InnerPathScreen]", routeRunId, "day14 equality:", viewKey === "day_14_view");
+          console.log("[InnerPathScreen]", routeRunId, "embedded:", embedded);
+        }
 
         if (viewKey === "day_7_view") {
-          writeAll(ingestDay7View(payload as any));
           dispatch(
             screenActions.setScreenValue({ key: "checkpoint_day", value: 7 }),
           );
-          dispatch(
-            loadScreenWithData({
-              containerId: "checkpoint_reflection",
-              stateId: "day_7",
-            }) as any,
-          );
-          if (!embedded) {
-            navigation.replace("DynamicEngine" as any);
+          // Checkpoint fetch runs regardless of embedded.
+          // Embedded: DynamicEngine (already on screen) re-renders when schema switches.
+          // Standalone: navigation.replace opens DynamicEngine.
+          try {
+            const env7 = await mitraJourneyDay7View();
+            if (cancelled) return;
+            if (__DEV__) {
+              console.log("[InnerPathScreen] day_7_view API wrapper keys:", env7 ? Object.keys(env7) : "null");
+              console.log("[InnerPathScreen] day_7_view envelope keys:", env7?.envelope ? Object.keys(env7.envelope) : "null");
+            }
+            if (env7?.envelope) {
+              const flat = ingestDay7View(env7.envelope as any);
+              if (__DEV__) console.log("[InnerPathScreen] day_7_view ingest keys:", Object.keys(flat).slice(0, 10));
+              writeAll(flat);
+              await dispatch(
+                loadScreenWithData({
+                  containerId: "cycle_transitions",
+                  stateId: "checkpoint_day_7",
+                }) as any,
+              );
+              if (__DEV__) console.log("[InnerPathScreen] day_7_view schema loaded, embedded:", embedded);
+              if (!embedded) {
+                navigation.replace("DynamicEngine" as any);
+              }
+            } else {
+              if (__DEV__) console.warn("[InnerPathScreen] day_7_view: checkpoint not ready (null envelope)");
+            }
+          } catch (e) {
+            if (__DEV__) console.warn("[InnerPathScreen] day_7_view checkpoint error:", e);
           }
           return;
         }
 
         if (viewKey === "day_14_view") {
-          writeAll(ingestDay14View(payload as any));
+          if (__DEV__) console.log("[InnerPathScreen]", routeRunId, "ENTERING day_14_view branch, embedded:", embedded);
           dispatch(
             screenActions.setScreenValue({ key: "checkpoint_day", value: 14 }),
           );
-          dispatch(
-            loadScreenWithData({
-              containerId: "checkpoint_reflection",
-              stateId: "day_14",
-            }) as any,
-          );
+          // Checkpoint fetch runs regardless of embedded.
+          // Embedded: DynamicEngine (already on screen) re-renders when schema switches.
+          // Standalone: navigation.replace opens DynamicEngine.
+          if (__DEV__) console.log("[InnerPathScreen]", routeRunId, "cancelled before day14 call:", cancelled);
+          try {
+            if (__DEV__) console.log("[InnerPathScreen]", routeRunId, "BEFORE mitraJourneyDay14View");
+            const env14 = await mitraJourneyDay14View();
+            if (__DEV__) console.log("[InnerPathScreen]", routeRunId, "AFTER mitraJourneyDay14View, cancelled:", cancelled, "env14 keys:", env14 ? Object.keys(env14) : null);
+            if (cancelled) return;
+            if (__DEV__) {
+              console.log("[InnerPathScreen] day_14_view API wrapper keys:", env14 ? Object.keys(env14) : "null");
+              console.log("[InnerPathScreen] day_14_view envelope keys:", env14?.envelope ? Object.keys(env14.envelope) : "null");
+            }
+            if (env14?.envelope) {
+              const flat = ingestDay14View(env14.envelope as any);
+              if (__DEV__) console.log("[InnerPathScreen] day_14_view ingest keys:", Object.keys(flat).slice(0, 10));
+              writeAll(flat);
+              await dispatch(
+                loadScreenWithData({
+                  containerId: "cycle_transitions",
+                  stateId: "checkpoint_day_14",
+                }) as any,
+              );
+              if (__DEV__) console.log("[InnerPathScreen] day_14_view schema loaded, embedded:", embedded);
+              if (!embedded) {
+                navigation.replace("DynamicEngine" as any);
+              }
+            } else {
+              if (__DEV__) console.warn("[InnerPathScreen] day_14_view: checkpoint not ready (null envelope)");
+            }
+          } catch (e) {
+            if (__DEV__) console.warn("[InnerPathScreen] day_14_view checkpoint error:", e);
+          }
+          return;
+        }
+
+        if (!viewKey || viewKey === "onboarding_start") {
           if (!embedded) {
+            // Seed schema before navigating — DynamicEngine has no schema without this.
+            dispatch(
+              loadScreenWithData({
+                containerId: "welcome_onboarding",
+                stateId: "turn_1",
+              }) as any,
+            );
             navigation.replace("DynamicEngine" as any);
           }
           return;
         }
 
-        if (
-          !viewKey ||
-          viewKey === "onboarding_start" ||
-          viewKey === "welcome_back_surface"
-        ) {
+        if (viewKey === "welcome_back_surface") {
           if (!embedded) {
             navigation.replace("DynamicEngine" as any);
           }
@@ -209,6 +284,12 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
       cancelled = true;
     };
   }, [dispatch, embedded, navigation]);
+
+  useEffect(() => {
+    apiGetJourneyReminders()
+      .then((r) => setReminders(r))
+      .catch(() => {});
+  }, []);
 
   const sd = useSelector((state: any) => state.screen?.screenData ?? {});
   const triadArr = Array.isArray(sd.today?.triad) ? sd.today.triad : [];
@@ -380,6 +461,54 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     );
     setWhyChosenOpen((value) => !value);
   };
+
+  const toggleReminders = () => {
+    LayoutAnimation.configureNext(
+      LayoutAnimation.create(220, "easeInEaseOut", "opacity"),
+    );
+    setRemindersOpen((value) => !value);
+  };
+
+  const TRIAD_REMINDER_DEFAULTS: Record<"mantra" | "sankalp" | "practice", string> = {
+    mantra: "07:00",
+    sankalp: "08:00",
+    practice: "18:00",
+  };
+
+  async function handleReminderToggle(key: "mantra" | "sankalp" | "practice") {
+    if (!reminders || reminderSaving) return;
+    const enabledKey = `${key}_reminder_enabled` as keyof JourneyTriadReminders;
+    const timeKey = `${key}_reminder_time` as keyof JourneyTriadReminders;
+    const currentEnabled = reminders[enabledKey] as boolean;
+    const patch: JourneyTriadRemindersPatch = {
+      [`${key}_reminder_enabled`]: !currentEnabled,
+    } as JourneyTriadRemindersPatch;
+    if (!currentEnabled && !reminders[timeKey]) {
+      (patch as any)[`${key}_reminder_time`] = TRIAD_REMINDER_DEFAULTS[key];
+    }
+    setReminderSaving(true);
+    try {
+      const updated = await apiPatchJourneyReminders(patch);
+      setReminders(updated);
+    } catch {
+      // non-fatal
+    } finally {
+      setReminderSaving(false);
+    }
+  }
+
+  async function handleReminderTime(key: "mantra" | "sankalp" | "practice", timeStr: string) {
+    setReminderPickerKey(null);
+    setReminderSaving(true);
+    try {
+      const updated = await apiPatchJourneyReminders({ [`${key}_reminder_time`]: timeStr } as JourneyTriadRemindersPatch);
+      setReminders(updated);
+    } catch {
+      // non-fatal
+    } finally {
+      setReminderSaving(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -646,6 +775,97 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                       </View>
                     )}
                   </View>
+                )}
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* Reminders accordion — shown when user has an active journey */}
+        {reminders?.has_journey && (
+          <View style={styles.accordionSection}>
+            <TouchableOpacity
+              onPress={toggleReminders}
+              activeOpacity={0.85}
+              style={styles.accordionHeader}
+            >
+              <View style={styles.accordionHeaderLeft}>
+                <Text style={styles.accordionHeaderTitle}>Reminders</Text>
+                {!remindersOpen && (
+                  <Text style={styles.accordionHeaderSubtitle}>
+                    {[
+                      reminders.mantra_reminder_enabled && "Mantra",
+                      reminders.sankalp_reminder_enabled && "Sankalp",
+                      reminders.practice_reminder_enabled && "Practice",
+                    ].filter(Boolean).join(", ") || "None set"}
+                  </Text>
+                )}
+              </View>
+              <Ionicons
+                name={remindersOpen ? "chevron-up" : "chevron-down"}
+                size={18}
+                color="#8B7864"
+              />
+            </TouchableOpacity>
+
+            {remindersOpen && (
+              <View style={{ paddingTop: 8 }}>
+                {(["mantra", "sankalp", "practice"] as const).map((key) => {
+                  const enabled = reminders[`${key}_reminder_enabled`] as boolean;
+                  const time = reminders[`${key}_reminder_time`] as string | null;
+                  const label = key.charAt(0).toUpperCase() + key.slice(1);
+                  const displayTime = time
+                    ? (() => {
+                        const t = time.slice(0, 5);
+                        const [h, m] = t.split(":").map(Number);
+                        const period = h >= 12 ? "PM" : "AM";
+                        const hour = h % 12 === 0 ? 12 : h % 12;
+                        return `${String(hour).padStart(2, "0")}:${String(m).padStart(2, "0")} ${period}`;
+                      })()
+                    : null;
+
+                  return (
+                    <View key={key} style={[styles.reminderRow, enabled && styles.reminderRowEnabled]}>
+                      <Text style={styles.reminderRowLabel}>Remind me for {label.toLowerCase()}</Text>
+                      <View style={styles.reminderRowRight}>
+                        {enabled && displayTime && (
+                          <TouchableOpacity
+                            onPress={() => setReminderPickerKey(key)}
+                            style={styles.reminderTimePill}
+                            activeOpacity={0.7}
+                          >
+                            <Text style={styles.reminderTimePillText}>{displayTime}</Text>
+                          </TouchableOpacity>
+                        )}
+                        <Switch
+                          value={enabled}
+                          onValueChange={() => void handleReminderToggle(key)}
+                          disabled={reminderSaving}
+                          trackColor={{ false: "rgba(0,0,0,0.12)", true: "#C99317" }}
+                          thumbColor="#fff"
+                        />
+                      </View>
+                    </View>
+                  );
+                })}
+
+                <TimePickerModal
+                  visible={!!reminderPickerKey}
+                  initialTime={
+                    reminderPickerKey
+                      ? ((reminders?.[`${reminderPickerKey}_reminder_time`] as string | null) ?? (TRIAD_REMINDER_DEFAULTS[reminderPickerKey] + ":00"))
+                      : null
+                  }
+                  onConfirm={(timeStr) => {
+                    if (reminderPickerKey) void handleReminderTime(reminderPickerKey, timeStr);
+                  }}
+                  onCancel={() => setReminderPickerKey(null)}
+                />
+
+                {reminderSaving && (
+                  <Text style={{ fontSize: 12, color: "#8B7864", textAlign: "center", marginTop: 4 }}>
+                    Saving…
+                  </Text>
                 )}
               </View>
             )}
@@ -998,5 +1218,86 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontFamily: Fonts.sans.bold,
+  },
+  accordionSection: {
+    marginTop: 16,
+    marginHorizontal: 0,
+  },
+  accordionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderBottomWidth: 0.5,
+    borderBottomColor: "rgba(255,218,169,0.9)",
+    borderRadius: 5,
+  },
+  accordionHeaderLeft: {
+    flex: 1,
+  },
+  accordionHeaderTitle: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
+    color: "#432104",
+  },
+  accordionHeaderSubtitle: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    color: "#8B7864",
+    marginTop: 2,
+  },
+  reminderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 12,
+    marginBottom: 8,
+    borderRadius: 10,
+    backgroundColor: "rgba(0,0,0,0.02)",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.06)",
+  },
+  reminderRowEnabled: {
+    backgroundColor: "rgba(201,168,76,0.08)",
+    borderColor: "rgba(201,168,76,0.25)",
+  },
+  reminderRowLabel: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 14,
+    color: "#432104",
+    flex: 1,
+  },
+  reminderRowRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  reminderTimePill: {
+    backgroundColor: "rgba(201,168,76,0.15)",
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    marginRight: 4,
+  },
+  reminderTimePillText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 12,
+    color: "#432104",
+  },
+  iosPicker: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    marginBottom: 8,
+    overflow: "hidden",
+  },
+  iosPickerDone: {
+    alignItems: "flex-end",
+    padding: 10,
+    paddingTop: 0,
+  },
+  iosPickerDoneText: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 14,
+    color: "#C99317",
   },
 });

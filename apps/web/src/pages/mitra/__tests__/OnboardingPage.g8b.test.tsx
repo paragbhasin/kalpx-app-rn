@@ -56,7 +56,7 @@ vi.mock('../../../components/layout/MitraMobileShell', () => ({
 
 import { useDispatch } from 'react-redux';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useScreenState, loadScreen, updateScreenData, setScreenValue } from '../../../store/screenSlice';
+import { useScreenState, loadScreen, updateScreenData, setScreenValue, loadScreenWithData } from '../../../store/screenSlice';
 import { useJourneyStatus, invalidateJourneyStatusCache } from '../../../hooks/useJourneyStatus';
 import { startJourneyV3 } from '../../../engine/mitraApi';
 import { webNavigate } from '../../../lib/webRouter';
@@ -253,5 +253,124 @@ describe('OnboardingPage — G8b post-auth turn_7 recovery', () => {
     // No navigation to turn_8
     const navigateCalls = (webNavigate as any).mock.calls.map((c: any[]) => c[0]);
     expect(navigateCalls.every((p: string) => !String(p).includes('turn_8'))).toBe(true);
+  });
+});
+
+// ── P0 stale-container guard ──────────────────────────────────────────────────
+
+describe('OnboardingPage — P0 stale-container guard (schema-load fix)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    Object.keys(_storage).forEach((k) => delete _storage[k]);
+  });
+  afterEach(cleanup);
+
+  it('uses turn_1 when currentContainerId is portal (initial Redux state, no stateId param)', async () => {
+    const dispatch = makeDispatch();
+    (useDispatch as any).mockReturnValue(dispatch);
+    (useNavigate as any).mockReturnValue(vi.fn());
+
+    // No stateId query param
+    (useSearchParams as any).mockReturnValue([new URLSearchParams(), vi.fn()]);
+
+    // Redux initial state: containerId=portal, stateId=portal (the truthy stale case)
+    (useScreenState as any).mockReturnValue({
+      screenData: {},
+      currentContainerId: 'portal',
+      currentStateId: 'portal',
+      currentScreen: null,
+    });
+
+    (useJourneyStatus as any).mockReturnValue({ loading: false, hasActiveJourney: false });
+
+    render(<OnboardingPage />);
+
+    await waitFor(() => {
+      expect(loadScreenWithData).toHaveBeenCalledWith({
+        containerId: 'welcome_onboarding',
+        stateId: 'turn_1',
+      });
+    });
+  });
+
+  it('uses turn_1 when currentContainerId is practice_runner (post-rhythm stale state)', async () => {
+    const dispatch = makeDispatch();
+    (useDispatch as any).mockReturnValue(dispatch);
+    (useNavigate as any).mockReturnValue(vi.fn());
+
+    (useSearchParams as any).mockReturnValue([new URLSearchParams(), vi.fn()]);
+
+    (useScreenState as any).mockReturnValue({
+      screenData: {},
+      currentContainerId: 'practice_runner',
+      currentStateId: 'free_mantra_chanting',
+      currentScreen: null,
+    });
+
+    (useJourneyStatus as any).mockReturnValue({ loading: false, hasActiveJourney: false });
+
+    render(<OnboardingPage />);
+
+    await waitFor(() => {
+      expect(loadScreenWithData).toHaveBeenCalledWith({
+        containerId: 'welcome_onboarding',
+        stateId: 'turn_1',
+      });
+    });
+  });
+
+  it('resumes at current state when already in welcome_onboarding (mid-onboarding)', async () => {
+    const dispatch = makeDispatch();
+    (useDispatch as any).mockReturnValue(dispatch);
+    (useNavigate as any).mockReturnValue(vi.fn());
+
+    (useSearchParams as any).mockReturnValue([new URLSearchParams(), vi.fn()]);
+
+    // User left mid-onboarding at turn_2; Redux has welcome_onboarding + turn_2
+    (useScreenState as any).mockReturnValue({
+      screenData: {},
+      currentContainerId: 'welcome_onboarding',
+      currentStateId: 'turn_2',
+      currentScreen: null,
+    });
+
+    (useJourneyStatus as any).mockReturnValue({ loading: false, hasActiveJourney: false });
+
+    render(<OnboardingPage />);
+
+    await waitFor(() => {
+      expect(loadScreenWithData).toHaveBeenCalledWith({
+        containerId: 'welcome_onboarding',
+        stateId: 'turn_2',
+      });
+    });
+  });
+
+  it('honours explicit ?stateId query param over Redux state', async () => {
+    const dispatch = makeDispatch();
+    (useDispatch as any).mockReturnValue(dispatch);
+    (useNavigate as any).mockReturnValue(vi.fn());
+
+    // URL has stateId=turn_3_felt
+    (useSearchParams as any).mockReturnValue([new URLSearchParams('stateId=turn_3_felt'), vi.fn()]);
+
+    // Redux has stale portal state
+    (useScreenState as any).mockReturnValue({
+      screenData: {},
+      currentContainerId: 'portal',
+      currentStateId: 'portal',
+      currentScreen: null,
+    });
+
+    (useJourneyStatus as any).mockReturnValue({ loading: false, hasActiveJourney: false });
+
+    render(<OnboardingPage />);
+
+    await waitFor(() => {
+      expect(loadScreenWithData).toHaveBeenCalledWith({
+        containerId: 'welcome_onboarding',
+        stateId: 'turn_3_felt',
+      });
+    });
   });
 });

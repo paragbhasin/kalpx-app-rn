@@ -1,4 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+// Load .env.test.local if present — provides PW_DAY3_* and other test credentials.
+// override: false so CI-injected env vars always win over the file.
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, '.env.test.local'), override: false });
 
 export default defineConfig({
   testDir: './e2e',

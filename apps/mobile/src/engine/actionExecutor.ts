@@ -3624,18 +3624,15 @@ export async function executeAction(
 
             setScreenValue(null, "onboarding_draft_state");
             setScreenValue(null, "onboarding_turn");
-            // Route to Inner Path if the user entered via the inner_path intention (Stream O)
+            // Embed the optional reminder step in Home (owning container after onboarding)
+            // via screenData flag — avoids deep-navigating to a standalone screen.
             const AsyncStorage = require("@react-native-async-storage/async-storage").default;
             const entryIntention = await AsyncStorage.getItem("mitra_entry_intention").catch(() => null);
             await AsyncStorage.removeItem("mitra_entry_intention").catch(() => {});
-            if (entryIntention === "inner_path") {
-              loadScreen({
-                container_id: "companion_dashboard",
-                state_id: "day_active",
-              });
-            } else {
-              rootNavigate("Home");
-            }
+            const postOnboardingDest = entryIntention === "inner_path" ? "InnerPath" : "Home";
+            setScreenValue(true, "onboarding_reminder_show");
+            setScreenValue(postOnboardingDest, "onboarding_reminder_destination");
+            rootNavigate("Home");
             break;
           }
 

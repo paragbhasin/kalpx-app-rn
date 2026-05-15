@@ -4,6 +4,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Clock,
   FileText,
   KeyRound,
   LogOut,
@@ -328,6 +329,12 @@ export function ProfilePage() {
         label: "Notification Preferences",
         icon: Bell,
         onClick: () => navigate("/en/settings/notifications"),
+      },
+      {
+        key: "reminders",
+        label: "Reminders",
+        icon: Clock,
+        onClick: () => navigate("/en/settings/reminders"),
       },
       {
         key: "privacy",

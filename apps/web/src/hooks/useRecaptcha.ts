@@ -6,20 +6,17 @@ const SCRIPT_ID = 'recaptcha-script';
 export function useRecaptcha() {
   useEffect(() => {
     if (!RECAPTCHA_SITE_KEY) return;
-    if (document.getElementById(SCRIPT_ID)) return;
-
-    const script = document.createElement('script');
-    script.id = SCRIPT_ID;
-    script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
-    script.async = true;
-    script.defer = true;
-    document.head.appendChild(script);
-
+    if (!document.getElementById(SCRIPT_ID)) {
+      const script = document.createElement('script');
+      script.id = SCRIPT_ID;
+      script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
+    document.body.classList.add('recaptcha-active');
     return () => {
-      document.getElementById(SCRIPT_ID)?.remove();
-      document.querySelector('.grecaptcha-badge')?.remove();
-      // Clean up the grecaptcha global so it reloads fresh next visit
-      delete (window as any).grecaptcha;
+      document.body.classList.remove('recaptcha-active');
     };
   }, []);
 }

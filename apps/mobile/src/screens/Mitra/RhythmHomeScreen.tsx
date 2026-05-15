@@ -20,9 +20,11 @@ import {
   View,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
+import LibrarySearchModal, { type LibrarySearchItem } from "../../components/LibrarySearchModal";
 import { executeAction } from "../../engine/actionExecutor";
-import { mitraRhythmResolveItem } from "../../engine/mitraApi";
+import { mitraJourneyHomeV3, mitraRhythmResolveItem, postRhythmItemAdd } from "../../engine/mitraApi";
 import { useScreenStore } from "../../engine/useScreenBridge";
+import { setHomeData } from "../../store/doorSlice";
 import {
   goBackWithData,
   loadScreenWithData,
@@ -31,6 +33,12 @@ import {
 import { Fonts } from "../../theme/fonts";
 
 const RHYTHM_BG = require("../../../assets/beige_bg.png");
+
+function formatReminderTime(hms: string): string {
+  const [h, m] = hms.split(":").map(Number);
+  const suffix = h < 12 ? "AM" : "PM";
+  return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${suffix}`;
+}
 
 function beginLabel(itemType: string): string {
   if (itemType === "mantra") return "Begin Chanting";
@@ -80,6 +88,11 @@ function RhythmItemCard({
         />
         <View style={styles.cardDividerLine} />
       </View>
+      {item.reminder_enabled && item.reminder_time ? (
+        <Text style={styles.reminderLine}>
+          Mitra will gently remind you at {formatReminderTime(item.reminder_time)}
+        </Text>
+      ) : null}
       {item.description_snapshot ? (
         <Text style={styles.itemDescription}>{item.description_snapshot}</Text>
       ) : null}
@@ -102,14 +115,15 @@ function RhythmBand({
   items,
   onItemAction,
   resolvingItemId,
+  onAddItem,
 }: {
   band: RhythmTimeBand;
   items: RhythmItem[];
   onItemAction: (item: RhythmItem) => void;
   resolvingItemId?: string | null;
+  onAddItem: (band: RhythmTimeBand) => void;
 }) {
   if (items.length === 0) return null;
-  const featuredItem = items[0];
   return (
     <View style={styles.band}>
       <Text style={styles.bandLabel}>{RHYTHM_BAND_LABELS[band]} Practice</Text>
@@ -118,12 +132,21 @@ function RhythmBand({
         <Text style={styles.bandDividerDiamond}>◇</Text>
         <View style={styles.bandDividerLine} />
       </View>
-      <RhythmItemCard
-        key={featuredItem.id}
-        item={featuredItem}
-        onAction={() => onItemAction(featuredItem)}
-        resolving={resolvingItemId === featuredItem.item_id}
-      />
+      {items.map((item) => (
+        <RhythmItemCard
+          key={item.rhythm_item_id}
+          item={item}
+          onAction={() => onItemAction(item)}
+          resolving={resolvingItemId === item.item_id}
+        />
+      ))}
+      <TouchableOpacity
+        onPress={() => onAddItem(band)}
+        activeOpacity={0.7}
+        style={styles.addToSlotBtn}
+      >
+        <Text style={styles.addToSlotText}>Add to your {band} rhythm</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -141,6 +164,7 @@ export default function RhythmHomeScreen({
   const hasRhythm = rhythm?.has_rhythm === true;
 
   const [resolvingItemId, setResolvingItemId] = useState<string | null>(null);
+  const [homeBand, setHomeBand] = useState<RhythmTimeBand | null>(null);
 
   const screenBridge = useScreenStore();
   const screenBridgeRef = useRef(screenBridge);
@@ -222,6 +246,33 @@ export default function RhythmHomeScreen({
     }
     navigation.goBack();
   }, [dispatch, embedded, navigation]);
+
+  const handleHomeBandItemSelected = useCallback(async (picked: LibrarySearchItem) => {
+    if (!homeBand) return;
+    const slot = homeBand;
+    const slotItems: RhythmItem[] = homeData?.companion_rhythm?.[slot]?.items ?? [];
+    const pickedItemId = picked.itemId || (picked as any).item_id || "";
+    const alreadyInSlot = slotItems.some((i) => i.item_id === pickedItemId);
+    setHomeBand(null);
+    if (alreadyInSlot) return;
+    try {
+      await postRhythmItemAdd({
+        slot,
+        item_type: ((picked as any).item_type || picked.itemType || "practice") as any,
+        item_id: pickedItemId,
+        title_snapshot: picked.title,
+        description_snapshot: picked.description ?? null,
+        source: "user_chosen",
+        sort_order: slotItems.length + 1,
+        reminder_enabled: false,
+        reminder_time: null,
+      });
+      const fresh = await mitraJourneyHomeV3({ forceFresh: true });
+      dispatch(setHomeData(fresh));
+    } catch (e: any) {
+      console.warn("[RhythmHome] addItem failed", e?.message);
+    }
+  }, [homeBand, homeData, dispatch]);
 
   async function handleItemAction(item: RhythmItem, band: RhythmTimeBand) {
     if (resolvingItemId) return;
@@ -318,6 +369,7 @@ export default function RhythmHomeScreen({
                     items={rhythm?.[band]?.items ?? []}
                     onItemAction={(item) => void handleItemAction(item, band)}
                     resolvingItemId={resolvingItemId}
+                    onAddItem={setHomeBand}
                   />
                 ),
               )}
@@ -333,6 +385,13 @@ export default function RhythmHomeScreen({
           )}
         </View>
       </ScrollView>
+      <LibrarySearchModal
+        isVisible={homeBand !== null}
+        onClose={() => setHomeBand(null)}
+        onItemAdded={() => {}}
+        mode="select_for_rhythm"
+        onItemSelected={handleHomeBandItemSelected}
+      />
     </SafeAreaView>
   );
 }
@@ -541,5 +600,29 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontFamily: Fonts.sans.regular,
     color: "#7B6550",
+  },
+  reminderLine: {
+    fontSize: 11,
+    color: "rgba(67,33,4,0.5)",
+    fontStyle: "italic",
+    textAlign: "center",
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  addToSlotBtn: {
+    borderRadius: 18,
+    borderWidth: 1,
+    borderStyle: "dashed",
+    borderColor: "rgba(201,168,76,0.35)",
+    paddingVertical: 7,
+    paddingHorizontal: 18,
+    marginTop: 8,
+    alignItems: "center",
+  },
+  addToSlotText: {
+    fontSize: 13,
+    fontStyle: "italic",
+    color: "rgba(107,83,60,0.65)",
+    fontFamily: Fonts.serif.regular,
   },
 });

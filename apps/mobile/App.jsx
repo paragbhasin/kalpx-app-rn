@@ -107,6 +107,7 @@ function SnackBarContainer() {
 function isMitraRouteName(routeName) {
   return (
     routeName === "Home" ||
+    routeName === "NewHome" ||
     routeName === "DynamicEngine" ||
     routeName === "MitraEngine" ||
     routeName === "GuidedGrowth" ||

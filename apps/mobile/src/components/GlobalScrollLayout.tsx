@@ -1,4 +1,3 @@
-import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
   Animated,
@@ -7,8 +6,7 @@ import {
   Platform,
   StatusBar,
   StyleSheet,
-  TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { useScrollContext } from "../context/ScrollContext";
 import { useScreenStore } from "../engine/useScreenBridge";
@@ -38,20 +36,20 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
   // steps to the Redux history. Pressing back one-by-one would land on random
   // flow screens. Instead, detect we're in a support flow and jump directly
   // to the Companion Dashboard.
-  const SUPPORT_FLOW_CONTAINERS = new Set(['awareness_trigger']);
+  const SUPPORT_FLOW_CONTAINERS = new Set(["awareness_trigger"]);
   const SUPPORT_FLOW_STATE_IDS = new Set([
-    'free_mantra_chanting',
-    'post_trigger_mantra',
-    'trigger_practice_runner',
-    'trigger_advice_reveal',
-    'trigger_awareness',
-    'checkin_breath_reset',
-    'checkin_support_mantra',
+    "free_mantra_chanting",
+    "post_trigger_mantra",
+    "trigger_practice_runner",
+    "trigger_advice_reveal",
+    "trigger_awareness",
+    "checkin_breath_reset",
+    "checkin_support_mantra",
   ]);
   const isInSupportFlow =
-    SUPPORT_FLOW_CONTAINERS.has(currentContainerId || '') ||
-    (currentContainerId === 'practice_runner' &&
-      SUPPORT_FLOW_STATE_IDS.has(currentStateId || ''));
+    SUPPORT_FLOW_CONTAINERS.has(currentContainerId || "") ||
+    (currentContainerId === "practice_runner" &&
+      SUPPORT_FLOW_STATE_IDS.has(currentStateId || ""));
 
   const isRootScreen =
     currentContainerId === "companion_dashboard" ||
@@ -82,13 +80,18 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
   const handleBack = React.useCallback(() => {
     if (isNavigatingBack.current) return;
     isNavigatingBack.current = true;
-    setTimeout(() => { isNavigatingBack.current = false; }, 500);
+    setTimeout(() => {
+      isNavigatingBack.current = false;
+    }, 500);
 
     // Support flows (I Feel Triggered / Quick Check-In) accumulate many
     // intermediate history entries. Jump straight to dashboard instead of
     // stepping through each flow screen one-by-one.
     if (isInSupportFlow) {
-      loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
+      loadScreen({
+        container_id: "companion_dashboard",
+        state_id: "day_active",
+      });
       return;
     }
 
@@ -137,7 +140,7 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
         >
           {/* Back button + Header in one row. */}
           <View style={styles.headerRow}>
-            {showBackButton ? (
+            {/* {showBackButton ? (
               <TouchableOpacity
                 style={styles.backButton}
                 onPress={handleBack}
@@ -145,7 +148,7 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
               >
                 <Ionicons name="arrow-back" size={20} color={backArrowColor} />
               </TouchableOpacity>
-            ) : null}
+            ) : null} */}
             <View style={styles.headerFlex}>
               <Header isTransparent={hasBg} />
             </View>

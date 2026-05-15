@@ -62,20 +62,27 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
     (currentContainerId === "welcome_onboarding" &&
       (currentStateId === "turn_1" || currentStateId === "turn_2"));
 
-  // Compute navigation owner in a single pass so showBackButton and handleBack
-  // both branch on the same value — avoids compound-OR false positives where
-  // canGoBackInStack was true on engine root screens (DynamicEngine at index 1).
+  // Drill through all nested navigators (Drawer → BottomTab → HomeStack …) to
+  // find the innermost stack and its currently focused leaf screen.
+  // Fixed-depth selectors broke because the app has 3+ navigator levels:
+  // reading index at the wrong level gave tab-selection (0/1/2) not stack depth.
   const { canGoBackInStack, isOnDynamicEngine } = useNavigationState((state) => {
     if (!state) return { canGoBackInStack: false, isOnDynamicEngine: false };
-    const focusedTab = state.routes?.[state.index ?? 0];
-    const nestedState = focusedTab?.state;
-    const stackIndex = nestedState?.index ?? 0;
-    const deepRoute = nestedState?.routes?.[stackIndex];
-    const routeName = deepRoute?.name ?? focusedTab?.name ?? null;
-    return {
-      canGoBackInStack: stackIndex > 0,
-      isOnDynamicEngine: routeName === "DynamicEngine",
-    };
+    let s: any = state;
+    while (s?.routes?.length) {
+      const idx: number = s.index ?? 0;
+      const focused = s.routes[idx];
+      if (!focused?.state?.routes?.length) {
+        // Leaf screen — s is the navigator that directly contains it.
+        // canGoBackInStack: only meaningful when s is a stack (not a tab or drawer).
+        return {
+          canGoBackInStack: s.type === "stack" && idx > 0,
+          isOnDynamicEngine: focused?.name === "DynamicEngine",
+        };
+      }
+      s = focused.state;
+    }
+    return { canGoBackInStack: false, isOnDynamicEngine: false };
   });
 
   // Engine owner: show only when there is depth beyond the root engine screen.

@@ -390,14 +390,6 @@ export default function QuickResetScreen({
 
     return (
       <View style={styles.openingShell}>
-        <TouchableOpacity
-          onPress={handleBack}
-          activeOpacity={0.7}
-          style={styles.contentBackBtn}
-        >
-          <Text style={styles.contentBackBtnText}>← Back</Text>
-        </TouchableOpacity>
-
         <Text style={styles.openingHeading}>{mantra.title}</Text>
         <Text style={styles.openingSubhead}>Quick Reset Mantra</Text>
 
@@ -583,13 +575,6 @@ export default function QuickResetScreen({
           imageStyle={styles.backgroundImage}
         >
           <View style={styles.centerContent}>
-            <TouchableOpacity
-              onPress={handleBack}
-              activeOpacity={0.7}
-              style={styles.contentBackBtn}
-            >
-              <Text style={styles.contentBackBtnText}>← Back</Text>
-            </TouchableOpacity>
             <Text style={styles.sectionTitle}>Unable to open Quick Reset</Text>
             <Text style={styles.subtleText}>Please try again.</Text>
             <TouchableOpacity
@@ -778,7 +763,7 @@ export default function QuickResetScreen({
                 activeOpacity={0.7}
                 style={styles.pickerBackBtn}
               >
-                <Text style={styles.contentBackBtnText}>← Back</Text>
+                <Text style={styles.contentBackBtnText}>Close</Text>
               </TouchableOpacity>
               <Text style={styles.pickerTitle}>Choose a Mantra</Text>
               <View style={styles.pickerDivider}>
@@ -849,10 +834,6 @@ const styles = StyleSheet.create({
     width: "100%",
     gap: 18,
     alignItems: "center",
-  },
-  contentBackBtn: {
-    alignSelf: "flex-start",
-    marginBottom: 14,
   },
   contentBackBtnText: {
     fontSize: 15,

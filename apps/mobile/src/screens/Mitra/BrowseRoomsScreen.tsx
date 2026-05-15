@@ -4,7 +4,6 @@
  * Room tap loads room via executeAction enter_room then navigates to DynamicEngine.
  */
 
-import { Ionicons } from '@expo/vector-icons';
 import React, { useCallback, useEffect } from 'react';
 import {
   SafeAreaView,
@@ -106,11 +105,7 @@ export default function BrowseRoomsScreen() {
     <SafeAreaView style={styles.safeArea}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={22} color="#C99317" />
-        </TouchableOpacity>
         <Text style={styles.headerTitle}>Browse Rooms</Text>
-        <View style={{ width: 50 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -149,12 +144,6 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     borderBottomWidth: 0.5,
     borderBottomColor: '#DAC28E',
-  },
-  backBtn: {
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   headerTitle: {
     fontSize: 22,

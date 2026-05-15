@@ -9,24 +9,16 @@ import {
   SafeAreaView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import TellMitraContainer from '../../containers/TellMitraContainer';
 import { Fonts } from '../../theme/fonts';
 
 export default function TellMitraScreen() {
-  const navigation = useNavigation<any>();
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7}>
-          <Text style={styles.backBtnText}>{'< Back'}</Text>
-        </TouchableOpacity>
         <Text style={styles.headerTitle}>Tell Mitra</Text>
-        <View style={{ width: 50 }} />
       </View>
       <View style={styles.body}>
         <TellMitraContainer />
@@ -49,11 +41,6 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     borderBottomWidth: 0.5,
     borderBottomColor: '#DAC28E',
-  },
-  backBtnText: {
-    fontSize: 16,
-    color: '#C99317',
-    fontFamily: Fonts.sans.medium,
   },
   headerTitle: {
     fontSize: 22,

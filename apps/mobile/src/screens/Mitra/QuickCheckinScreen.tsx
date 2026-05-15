@@ -206,14 +206,6 @@ export default function QuickCheckinScreen() {
               resizeMode="contain"
             />
 
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              activeOpacity={0.7}
-              style={styles.backBtn}
-            >
-              <Ionicons name="chevron-back" size={22} color="#C99317" />
-            </TouchableOpacity>
-
             {!result ? (
               <>
                 <View style={styles.introBlock}>
@@ -383,14 +375,6 @@ const styles = StyleSheet.create({
     width: 245,
     height: 245,
     opacity: 0.36,
-  },
-  backBtn: {
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-    alignSelf: 'flex-start',
-    marginBottom: 26,
   },
   introBlock: {
     alignItems: 'center',

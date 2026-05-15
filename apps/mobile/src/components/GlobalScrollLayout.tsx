@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
   Animated,
@@ -6,10 +7,13 @@ import {
   Platform,
   StatusBar,
   StyleSheet,
+  TouchableOpacity,
   View
 } from "react-native";
+import { useNavigationState } from "@react-navigation/native";
 import { useScrollContext } from "../context/ScrollContext";
 import { useScreenStore } from "../engine/useScreenBridge";
+import { navigationRef } from "../Shared/Routes/NavigationService";
 import Header from "./Header";
 
 // Total header height including status bar safe area on Android
@@ -58,8 +62,17 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
     (currentContainerId === "welcome_onboarding" &&
       (currentStateId === "turn_1" || currentStateId === "turn_2"));
 
+  // Detect if a direct-route navigation stack can go back (tab → focused stack index > 0)
+  const canGoBackInStack = useNavigationState((state) => {
+    if (!state) return false;
+    const focusedRoute = state.routes?.[state.index ?? 0];
+    const nestedState = focusedRoute?.state;
+    return (nestedState?.index ?? 0) > 0;
+  });
+
   const showBackButton =
-    !currentScreen?.overlay && history.length > 0 && !isRootScreen;
+    (!currentScreen?.overlay && history.length > 0 && !isRootScreen) ||
+    canGoBackInStack;
 
   // Reset header visibility when back button is not present (mostly root screens)
   React.useEffect(() => {
@@ -99,6 +112,13 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
       goBack();
       return;
     }
+
+    // Direct-route navigation stack back
+    if (navigationRef.isReady() && navigationRef.canGoBack()) {
+      navigationRef.goBack();
+      return;
+    }
+
     loadScreen({ container_id: "portal", state_id: "portal" });
   }, [isInSupportFlow, history.length, goBack, loadScreen]);
 
@@ -119,7 +139,7 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
 
   // Background-driven Mitra screens should not get any forced header fill.
   const hasBg = !!currentBackground;
-  const backArrowColor = hasBg ? "#432104" : "#432104";
+  const backArrowColor = hasBg ? "#C99317" : "#432104";
 
   return (
     <View style={styles.container}>
@@ -140,15 +160,15 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
         >
           {/* Back button + Header in one row. */}
           <View style={styles.headerRow}>
-            {/* {showBackButton ? (
+            {showBackButton ? (
               <TouchableOpacity
                 style={styles.backButton}
                 onPress={handleBack}
-                activeOpacity={0.8}
+                activeOpacity={0.7}
               >
-                <Ionicons name="arrow-back" size={20} color={backArrowColor} />
+                <Ionicons name="chevron-back" size={24} color={backArrowColor} />
               </TouchableOpacity>
-            ) : null} */}
+            ) : null}
             <View style={styles.headerFlex}>
               <Header isTransparent={hasBg} />
             </View>

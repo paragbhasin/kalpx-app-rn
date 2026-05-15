@@ -243,11 +243,7 @@ export default function RemindersScreen() {
       >
         {/* Header */}
         <View style={styles.topBar}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="chevron-back" size={22} color={Colors.goldBright} />
-          </TouchableOpacity>
           <Text style={styles.pageTitle}>Reminders</Text>
-          <View style={{ width: 36 }} />
         </View>
 
         <Text style={styles.subtitle}>Mitra will gently remind you at your chosen times.</Text>
@@ -346,12 +342,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 8,
-  },
-  backBtn: {
-    width: 36,
-    height: 36,
-    alignItems: "center",
-    justifyContent: "center",
   },
   pageTitle: {
     fontFamily: Fonts.serif.bold,

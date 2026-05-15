@@ -1,4 +1,3 @@
-import { Ionicons } from "@expo/vector-icons";
 import {
   ENTRY_INTENTION_HEADING,
   ENTRY_INTENTION_OPTIONS,
@@ -150,14 +149,6 @@ export default function MitraIntentionScreen() {
           scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
         >
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            activeOpacity={0.7}
-            style={styles.backBtn}
-          >
-            <Ionicons name="chevron-back" size={22} color="#C99317" />
-          </TouchableOpacity>
-
           <View style={styles.header}>
             <Text style={styles.heading}>{ENTRY_INTENTION_HEADING}</Text>
             <Text style={styles.subtext}>{ENTRY_INTENTION_SUBTEXT}</Text>
@@ -232,14 +223,6 @@ const styles = StyleSheet.create({
   },
   safe: {
     flex: 1,
-  },
-  backBtn: {
-    width: 36,
-    height: 36,
-    alignItems: "center",
-    justifyContent: "center",
-    alignSelf: "flex-start",
-    marginBottom: 8,
   },
   topRightLeaves: {
     position: "absolute",

@@ -432,7 +432,7 @@ export const ProfileStackNavigator = () => (
     <Stack.Screen
       name="Reminders"
       component={RemindersScreen}
-      options={{ headerShown: false, gestureEnabled: false }}
+      options={{ headerShown: false }}
     />
   </Stack.Navigator>
 );

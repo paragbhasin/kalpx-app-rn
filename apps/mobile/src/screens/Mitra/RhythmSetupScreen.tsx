@@ -1036,12 +1036,6 @@ export default function RhythmSetupScreen({
               resizeMode="contain"
             />
 
-            <TouchableOpacity
-              onPress={leaveEmbeddedFlow}
-              style={wStyles.backRow}
-            >
-              <Ionicons name="chevron-back" size={22} color="#C99317" />
-            </TouchableOpacity>
             {/* {renderStepDots("moments")} */}
             <Text style={wStyles.buildheading}>Build Your Daily Rhythm</Text>
             <Text style={wStyles.subheading}>
@@ -1145,13 +1139,6 @@ export default function RhythmSetupScreen({
               style={wStyles.leafArt}
               resizeMode="contain"
             />
-
-            <TouchableOpacity
-              onPress={() => setWizardStep("moments")}
-              style={wStyles.backRow}
-            >
-              <Ionicons name="chevron-back" size={22} color="#C99317" />
-            </TouchableOpacity>
 
             <Text style={wStyles.heading}>
               What should each{"\n"}moment give you?
@@ -1264,13 +1251,6 @@ export default function RhythmSetupScreen({
                 style={wStyles.leafArt}
                 resizeMode="contain"
               />
-              <TouchableOpacity
-                onPress={() => setWizardStep("purpose")}
-                style={wStyles.backRow}
-              >
-                <Ionicons name="chevron-back" size={22} color="#C99317" />
-              </TouchableOpacity>
-
               <Text style={[wStyles.heading, wStyles.suggestionHeading]}>
                 Mitra suggests this for you.
               </Text>
@@ -1436,12 +1416,6 @@ export default function RhythmSetupScreen({
         contentContainerStyle={wStyles.scroll}
         showsVerticalScrollIndicator={false}
       >
-        <TouchableOpacity
-          onPress={() => setWizardStep("suggestion")}
-          style={wStyles.backRow}
-        >
-          <Ionicons name="chevron-back" size={22} color="#C99317" />
-        </TouchableOpacity>
         {renderStepDots("reminders")}
         <Text style={wStyles.buildheading}>
           Would you like gentle reminder?
@@ -1648,13 +1622,6 @@ export default function RhythmSetupScreen({
               resizeMode="contain"
             />
 
-            <TouchableOpacity
-              onPress={handleEditBack}
-              activeOpacity={0.7}
-              style={styles.backBtn}
-            >
-              <Ionicons name="chevron-back" size={22} color="#C99317" />
-            </TouchableOpacity>
             <Text style={styles.headerTitle}>
               {editMode ? "Edit My Rhythm" : "Set Up My Rhythm"}
             </Text>
@@ -1936,7 +1903,6 @@ const wStyles = StyleSheet.create({
     marginTop: 2,
     marginLeft: 2,
   },
-  backRow: { width: 36, height: 36, alignItems: "center", justifyContent: "center", alignSelf: "flex-start", marginBottom: 18 },
   dots: { flexDirection: "row", gap: 8, marginBottom: 24, alignSelf: "center" },
   dot: {
     width: 8,
@@ -2460,14 +2426,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.regular,
     marginTop: 2,
     marginLeft: 2,
-  },
-  backBtn: {
-    width: 36,
-    height: 36,
-    alignItems: "center",
-    justifyContent: "center",
-    alignSelf: "flex-start",
-    marginBottom: 22,
   },
   headerTitle: {
     fontSize: 28,

@@ -540,14 +540,6 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <TouchableOpacity
-          onPress={handleBack}
-          hitSlop={12}
-          style={styles.backButton}
-        >
-          <Text style={styles.backText}>← Back</Text>
-        </TouchableOpacity>
-
         <View style={styles.heroBlock}>
           <Text style={styles.sparkle}>✧</Text>
           <Text style={styles.heroTitle}>
@@ -881,15 +873,6 @@ export default InnerPathScreen;
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-  },
-  backButton: {
-    alignSelf: "flex-start",
-    marginBottom: 22,
-  },
-  backText: {
-    fontSize: 16,
-    color: Colors.goldBright,
-    fontFamily: Fonts.serif.regular,
   },
   scroll: {
     flex: 1,

@@ -124,6 +124,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
         const target = entryResult.envelope?.target;
         const viewKey = target?.view_key;
         const payload = target?.payload ?? {};
+        if (__DEV__) console.log("[InnerPathScreen] entry-view view_key:", viewKey);
 
         if (viewKey === "day_7_view") {
           dispatch(
@@ -133,19 +134,31 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
             try {
               const env7 = await mitraJourneyDay7View();
               if (cancelled) return;
-              if (env7) {
-                writeAll(ingestDay7View(env7 as any));
+              if (__DEV__) {
+                console.log("[InnerPathScreen] day_7_view API wrapper keys:", env7 ? Object.keys(env7) : "null");
+                console.log("[InnerPathScreen] day_7_view envelope keys:", env7?.envelope ? Object.keys(env7.envelope) : "null");
+              }
+              // env7 is V3GetResult<V3Day7ViewEnvelope> = { envelope, etag, notModified }.
+              // ingestDay7View expects the raw envelope, not the wrapper.
+              if (env7?.envelope) {
+                const flat = ingestDay7View(env7.envelope as any);
+                if (__DEV__) console.log("[InnerPathScreen] day_7_view ingest keys:", Object.keys(flat).slice(0, 10));
+                writeAll(flat);
                 await dispatch(
                   loadScreenWithData({
                     containerId: "cycle_transitions",
                     stateId: "checkpoint_day_7",
                   }) as any,
                 );
+                if (__DEV__) console.log("[InnerPathScreen] day_7_view navigating to DynamicEngine");
+                navigation.replace("DynamicEngine" as any);
+              } else {
+                if (__DEV__) console.warn("[InnerPathScreen] day_7_view: checkpoint not ready (null envelope) — staying on screen");
               }
-            } catch {
-              // fall through to DynamicEngine regardless — it will show what it can
+            } catch (e) {
+              if (__DEV__) console.warn("[InnerPathScreen] day_7_view checkpoint error:", e);
+              // stay on InnerPathScreen — do not navigate to DynamicEngine with no data
             }
-            navigation.replace("DynamicEngine" as any);
           }
           return;
         }
@@ -158,19 +171,31 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
             try {
               const env14 = await mitraJourneyDay14View();
               if (cancelled) return;
-              if (env14) {
-                writeAll(ingestDay14View(env14 as any));
+              if (__DEV__) {
+                console.log("[InnerPathScreen] day_14_view API wrapper keys:", env14 ? Object.keys(env14) : "null");
+                console.log("[InnerPathScreen] day_14_view envelope keys:", env14?.envelope ? Object.keys(env14.envelope) : "null");
+              }
+              // env14 is V3GetResult<V3Day14ViewEnvelope> = { envelope, etag, notModified }.
+              // ingestDay14View expects the raw envelope, not the wrapper.
+              if (env14?.envelope) {
+                const flat = ingestDay14View(env14.envelope as any);
+                if (__DEV__) console.log("[InnerPathScreen] day_14_view ingest keys:", Object.keys(flat).slice(0, 10));
+                writeAll(flat);
                 await dispatch(
                   loadScreenWithData({
                     containerId: "cycle_transitions",
                     stateId: "checkpoint_day_14",
                   }) as any,
                 );
+                if (__DEV__) console.log("[InnerPathScreen] day_14_view navigating to DynamicEngine");
+                navigation.replace("DynamicEngine" as any);
+              } else {
+                if (__DEV__) console.warn("[InnerPathScreen] day_14_view: checkpoint not ready (null envelope) — staying on screen");
               }
-            } catch {
-              // fall through to DynamicEngine regardless
+            } catch (e) {
+              if (__DEV__) console.warn("[InnerPathScreen] day_14_view checkpoint error:", e);
+              // stay on InnerPathScreen — do not navigate to DynamicEngine with no data
             }
-            navigation.replace("DynamicEngine" as any);
           }
           return;
         }

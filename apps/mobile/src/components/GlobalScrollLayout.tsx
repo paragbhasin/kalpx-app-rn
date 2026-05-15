@@ -62,17 +62,27 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
     (currentContainerId === "welcome_onboarding" &&
       (currentStateId === "turn_1" || currentStateId === "turn_2"));
 
-  // Detect if a direct-route navigation stack can go back (tab → focused stack index > 0)
-  const canGoBackInStack = useNavigationState((state) => {
-    if (!state) return false;
-    const focusedRoute = state.routes?.[state.index ?? 0];
-    const nestedState = focusedRoute?.state;
-    return (nestedState?.index ?? 0) > 0;
+  // Compute navigation owner in a single pass so showBackButton and handleBack
+  // both branch on the same value — avoids compound-OR false positives where
+  // canGoBackInStack was true on engine root screens (DynamicEngine at index 1).
+  const { canGoBackInStack, isOnDynamicEngine } = useNavigationState((state) => {
+    if (!state) return { canGoBackInStack: false, isOnDynamicEngine: false };
+    const focusedTab = state.routes?.[state.index ?? 0];
+    const nestedState = focusedTab?.state;
+    const stackIndex = nestedState?.index ?? 0;
+    const deepRoute = nestedState?.routes?.[stackIndex];
+    const routeName = deepRoute?.name ?? focusedTab?.name ?? null;
+    return {
+      canGoBackInStack: stackIndex > 0,
+      isOnDynamicEngine: routeName === "DynamicEngine",
+    };
   });
 
-  const showBackButton =
-    (!currentScreen?.overlay && history.length > 0 && !isRootScreen) ||
-    canGoBackInStack;
+  // Engine owner: show only when there is depth beyond the root engine screen.
+  // Direct-route owner: show whenever the stack has depth (index > 0).
+  const showBackButton = isOnDynamicEngine
+    ? !currentScreen?.overlay && history.length > 0 && !isRootScreen
+    : canGoBackInStack;
 
   // Reset header visibility when back button is not present (mostly root screens)
   React.useEffect(() => {
@@ -97,17 +107,16 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
       isNavigatingBack.current = false;
     }, 500);
 
-    // If the focused route is a direct-route screen (not DynamicEngine), the
-    // engine history is from a prior session and irrelevant — use RN stack back.
-    const currentRoute = navigationRef.isReady()
-      ? navigationRef.getCurrentRoute()?.name
-      : null;
-    if (currentRoute && currentRoute !== "DynamicEngine" && navigationRef.canGoBack()) {
-      navigationRef.goBack();
+    // Direct-route owner: engine history is irrelevant — pop the RN stack.
+    if (!isOnDynamicEngine) {
+      if (navigationRef.isReady() && navigationRef.canGoBack()) {
+        navigationRef.goBack();
+      }
       return;
     }
 
-    // Engine-rendered screen: support flows jump straight to dashboard.
+    // Engine owner: support flows jump straight to dashboard rather than
+    // stepping through many intermediate history entries one-by-one.
     if (isInSupportFlow) {
       loadScreen({
         container_id: "companion_dashboard",
@@ -121,13 +130,8 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    if (navigationRef.isReady() && navigationRef.canGoBack()) {
-      navigationRef.goBack();
-      return;
-    }
-
     loadScreen({ container_id: "portal", state_id: "portal" });
-  }, [isInSupportFlow, history.length, goBack, loadScreen]);
+  }, [isOnDynamicEngine, isInSupportFlow, history.length, goBack, loadScreen]);
 
   // Android hardware back — delegate to the same handleBack logic so
   // hardware back honors support-flow jumps, debounce, and root guards.
@@ -136,13 +140,13 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
   React.useEffect(() => {
     if (Platform.OS !== "android") return;
     const onBackPress = () => {
-      if (isRootScreen) return false;
+      if (!showBackButton) return false;
       handleBack();
       return true;
     };
     const sub = BackHandler.addEventListener("hardwareBackPress", onBackPress);
     return () => sub.remove();
-  }, [handleBack, isRootScreen]);
+  }, [handleBack, showBackButton]);
 
   // Background-driven Mitra screens should not get any forced header fill.
   const hasBg = !!currentBackground;

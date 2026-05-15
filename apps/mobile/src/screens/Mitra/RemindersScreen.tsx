@@ -1,4 +1,3 @@
-import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -19,11 +18,12 @@ import type { JourneyTriadReminders, JourneyTriadRemindersPatch, RhythmItem, Rhy
 import {
   apiGetJourneyReminders,
   apiPatchJourneyReminders,
-  getMitraHomeV3,
+  mitraJourneyHomeV3 as getMitraHomeV3,
   patchRhythmItem,
 } from "../../engine/mitraApi";
 import type { AppDispatch, RootState } from "../../store";
 import { setHomeData } from "../../store/doorSlice";
+import { TimePickerModal } from "../../components/TimePickerModal";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 
@@ -56,23 +56,6 @@ function formatTime(hms: string | null): string {
   return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${suffix}`;
 }
 
-function parseTimeToDate(hms: string | null, fallback: string): Date {
-  const src = hms ?? fallback;
-  const [h, m] = src.split(":").map(Number);
-  const d = new Date();
-  d.setHours(h, m, 0, 0);
-  return d;
-}
-
-function dateToHHMM(date: Date): string {
-  const h = String(date.getHours()).padStart(2, "0");
-  const m = String(date.getMinutes()).padStart(2, "0");
-  return `${h}:${m}`;
-}
-
-function dateToHHMMSS(date: Date): string {
-  return dateToHHMM(date) + ":00";
-}
 
 // ── Section header ─────────────────────────────────────────────────────────────
 function SectionHeader({ label }: { label: string }) {
@@ -146,8 +129,8 @@ export default function RemindersScreen() {
 
   // Picker state
   const [pickerVisible, setPickerVisible] = useState(false);
-  const [pickerDate, setPickerDate] = useState<Date>(new Date());
-  const pickerCallback = useRef<((date: Date) => void) | null>(null);
+  const [pickerInitialTime, setPickerInitialTime] = useState<string | null>(null);
+  const pickerCallback = useRef<((timeStr: string) => void) | null>(null);
 
   useEffect(() => {
     apiGetJourneyReminders()
@@ -163,24 +146,10 @@ export default function RemindersScreen() {
       .catch(() => {});
   }, [homeData, dispatch]);
 
-  function openPicker(initialTime: string | null, fallback: string, onConfirm: (date: Date) => void) {
-    setPickerDate(parseTimeToDate(initialTime, fallback));
+  function openPicker(initialTime: string | null, fallback: string, onConfirm: (timeStr: string) => void) {
+    setPickerInitialTime(initialTime ?? fallback);
     pickerCallback.current = onConfirm;
     setPickerVisible(true);
-  }
-
-  function handlePickerChange(_: DateTimePickerEvent, date?: Date) {
-    if (Platform.OS === "android") {
-      setPickerVisible(false);
-      if (date) pickerCallback.current?.(date);
-    } else {
-      if (date) setPickerDate(date);
-    }
-  }
-
-  function confirmIOSPicker() {
-    pickerCallback.current?.(pickerDate);
-    setPickerVisible(false);
   }
 
   // ── Triad handlers ────────────────────────────────────────────────────────
@@ -212,12 +181,11 @@ export default function RemindersScreen() {
   function handleTriadTimePill(key: "mantra" | "sankalp" | "practice") {
     const timeKey = `${key}_reminder_time` as keyof JourneyTriadReminders;
     const current = reminders?.[timeKey] as string | null;
-    openPicker(current, TRIAD_DEFAULTS[key] + ":00", async (date) => {
-      const hhmm = dateToHHMMSS(date);
-      const patch: JourneyTriadRemindersPatch = { [`${key}_reminder_time`]: hhmm };
+    openPicker(current, TRIAD_DEFAULTS[key] + ":00", async (timeStr) => {
+      const patch: JourneyTriadRemindersPatch = { [`${key}_reminder_time`]: timeStr };
       setTriadSavingKey(key);
       const prev = reminders;
-      setReminders((r) => r ? { ...r, [`${key}_reminder_time`]: hhmm } : r);
+      setReminders((r) => r ? { ...r, [`${key}_reminder_time`]: timeStr } : r);
       try {
         const updated = await apiPatchJourneyReminders(patch);
         setReminders(updated);
@@ -246,11 +214,10 @@ export default function RemindersScreen() {
   }
 
   function handleRhythmTimePill(item: RhythmItem) {
-    openPicker(item.reminder_time, "07:00:00", async (date) => {
-      const hhmm = dateToHHMMSS(date);
+    openPicker(item.reminder_time, "07:00:00", async (timeStr) => {
       setRhythmSavingId(item.rhythm_item_id);
       try {
-        await patchRhythmItem(item.rhythm_item_id, { reminder_time: hhmm });
+        await patchRhythmItem(item.rhythm_item_id, { reminder_time: timeStr });
         const fresh = await getMitraHomeV3({ forceFresh: true });
         dispatch(setHomeData(fresh));
       } catch {
@@ -351,31 +318,15 @@ export default function RemindersScreen() {
         )}
       </ScrollView>
 
-      {/* ── iOS picker sheet ── */}
-      {pickerVisible && Platform.OS === "ios" && (
-        <View style={styles.iosPickerSheet}>
-          <TouchableOpacity style={styles.iosDoneBtn} onPress={confirmIOSPicker}>
-            <Text style={styles.iosDoneBtnText}>Done</Text>
-          </TouchableOpacity>
-          <DateTimePicker
-            value={pickerDate}
-            mode="time"
-            display="spinner"
-            onChange={handlePickerChange}
-            style={{ width: "100%" }}
-          />
-        </View>
-      )}
-
-      {/* ── Android picker (inline) ── */}
-      {pickerVisible && Platform.OS === "android" && (
-        <DateTimePicker
-          value={pickerDate}
-          mode="time"
-          display="default"
-          onChange={handlePickerChange}
-        />
-      )}
+      <TimePickerModal
+        visible={pickerVisible}
+        initialTime={pickerInitialTime}
+        onConfirm={(timeStr) => {
+          pickerCallback.current?.(timeStr);
+          setPickerVisible(false);
+        }}
+        onCancel={() => setPickerVisible(false)}
+      />
     </View>
   );
 }

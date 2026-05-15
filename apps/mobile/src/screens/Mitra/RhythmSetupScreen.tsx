@@ -32,10 +32,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import DateTimePicker, {
-  DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
 import { useDispatch, useSelector } from "react-redux";
+import { TimePickerModal } from "../../components/TimePickerModal";
 import A1Icon from "../../../assets/a1.svg";
 import A2Icon from "../../../assets/a2.svg";
 import A3Icon from "../../../assets/a3.svg";
@@ -313,41 +311,11 @@ function CompactReminderTimeField({
   onChange: (value: string) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [iosDraftDate, setIosDraftDate] = useState<Date>(reminderTimeToDate(value));
-
-  useEffect(() => {
-    if (!open || Platform.OS !== "ios") return;
-    setIosDraftDate(reminderTimeToDate(value));
-  }, [open, value]);
-
-  const openPicker = useCallback(() => {
-    if (Platform.OS === "ios") {
-      setIosDraftDate(reminderTimeToDate(value));
-    }
-    setOpen(true);
-  }, [value]);
-
-  const handleNativeChange = useCallback(
-    (event: DateTimePickerEvent, selectedDate?: Date) => {
-      if (Platform.OS === "android") {
-        setOpen(false);
-        if (event.type === "set" && selectedDate) {
-          onChange(dateToReminderTime(selectedDate));
-        }
-        return;
-      }
-
-      if (selectedDate) {
-        setIosDraftDate(selectedDate);
-      }
-    },
-    [onChange],
-  );
 
   return (
     <>
       <TouchableOpacity
-        onPress={openPicker}
+        onPress={() => setOpen(true)}
         activeOpacity={0.8}
         style={styles.compactReminderField}
       >
@@ -356,57 +324,15 @@ function CompactReminderTimeField({
         </Text>
         <Ionicons name="time-outline" size={12} color="#21160F" />
       </TouchableOpacity>
-
-      {open && Platform.OS === "android" ? (
-        <DateTimePicker
-          value={reminderTimeToDate(value)}
-          mode="time"
-          display="default"
-          is24Hour={false}
-          onChange={handleNativeChange}
-        />
-      ) : null}
-
-      <Modal
-        transparent
-        visible={open && Platform.OS === "ios"}
-        animationType="fade"
-        onRequestClose={() => setOpen(false)}
-      >
-        <View style={styles.iosPickerOverlay}>
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={() => setOpen(false)}
-            style={styles.iosPickerBackdrop}
-          />
-          <View style={styles.iosPickerSheet}>
-            <View style={styles.iosPickerHeader}>
-              <TouchableOpacity onPress={() => setOpen(false)} activeOpacity={0.8}>
-                <Text style={styles.iosPickerHeaderAction}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  onChange(dateToReminderTime(iosDraftDate));
-                  setOpen(false);
-                }}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.iosPickerHeaderAction}>Done</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.iosPickerBody}>
-              <DateTimePicker
-                value={iosDraftDate}
-                mode="time"
-                display="spinner"
-                themeVariant="light"
-                style={styles.iosDateTimePicker}
-                onChange={handleNativeChange}
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
+      <TimePickerModal
+        visible={open}
+        initialTime={value ?? null}
+        onConfirm={(timeStr) => {
+          onChange(timeStr);
+          setOpen(false);
+        }}
+        onCancel={() => setOpen(false)}
+      />
     </>
   );
 }

@@ -12,7 +12,6 @@ import {
   type MitraHomeSegment,
 } from "@kalpx/contracts";
 import type { JourneyTriadRemindersPatch, QuickCheckinPranaLabel } from "@kalpx/types";
-import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, {
   useCallback,
@@ -49,6 +48,7 @@ import {
 import { useScreenStore } from "../engine/useScreenBridge";
 import { setHomeData } from "../store/doorSlice";
 import { Fonts } from "../theme/fonts";
+import { TimePickerModal } from "../components/TimePickerModal";
 
 type FeelingOption = "Agitated" | "Drained" | "Steady" | "Open";
 
@@ -157,7 +157,6 @@ export default function FourDoorHomeContainer({
   const [reminderToggles, setReminderToggles] = useState<Record<"mantra" | "sankalp" | "practice", boolean>>({ mantra: false, sankalp: false, practice: false });
   const [reminderTimes, setReminderTimes] = useState<Record<"mantra" | "sankalp" | "practice", string>>({ mantra: "07:00", sankalp: "08:00", practice: "18:00" });
   const [reminderPickerKey, setReminderPickerKey] = useState<"mantra" | "sankalp" | "practice" | null>(null);
-  const [reminderPickerDate, setReminderPickerDate] = useState<Date>(new Date());
   const [reminderSaving, setReminderSaving] = useState(false);
 
   useEffect(() => {
@@ -355,24 +354,6 @@ export default function FourDoorHomeContainer({
     const period = h >= 12 ? "PM" : "AM";
     const hour = h % 12 === 0 ? 12 : h % 12;
     return `${String(hour).padStart(2, "0")}:${String(m).padStart(2, "0")} ${period}`;
-  }
-
-  function handleReminderPickerChange(event: DateTimePickerEvent, date?: Date) {
-    if (Platform.OS === "android") {
-      setReminderPickerKey(null);
-      if (event.type === "set" && date && reminderPickerKey) {
-        setReminderTimes((prev) => ({ ...prev, [reminderPickerKey]: dateToReminderTimeStr(date) }));
-      }
-      return;
-    }
-    if (date) setReminderPickerDate(date);
-  }
-
-  function confirmIOSReminderPicker() {
-    if (reminderPickerKey) {
-      setReminderTimes((prev) => ({ ...prev, [reminderPickerKey]: dateToReminderTimeStr(reminderPickerDate) }));
-    }
-    setReminderPickerKey(null);
   }
 
   function dismissReminderModal() {
@@ -688,10 +669,7 @@ export default function FourDoorHomeContainer({
                   <View style={styles.reminderRowRight}>
                     {enabled && (
                       <TouchableOpacity
-                        onPress={() => {
-                          setReminderPickerDate(parseReminderTimeToDate(reminderTimes[key]));
-                          setReminderPickerKey(key);
-                        }}
+                        onPress={() => setReminderPickerKey(key)}
                         style={styles.reminderTimePill}
                         activeOpacity={0.7}
                       >
@@ -711,28 +689,18 @@ export default function FourDoorHomeContainer({
               );
             })}
 
-            {reminderPickerKey && Platform.OS === "ios" && (
-              <View style={styles.iosPicker}>
-                <DateTimePicker
-                  mode="time"
-                  value={reminderPickerDate}
-                  onChange={handleReminderPickerChange}
-                  display="spinner"
-                  textColor="#432104"
-                />
-                <TouchableOpacity onPress={confirmIOSReminderPicker} style={styles.iosPickerDone}>
-                  <Text style={styles.iosPickerDoneText}>Done</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-            {reminderPickerKey && Platform.OS === "android" && (
-              <DateTimePicker
-                mode="time"
-                value={reminderPickerDate}
-                onChange={handleReminderPickerChange}
-                display="default"
-              />
-            )}
+            <TimePickerModal
+              visible={!!reminderPickerKey}
+              initialTime={reminderPickerKey ? (reminderTimes[reminderPickerKey] + ":00") : null}
+              onConfirm={(timeStr) => {
+                if (reminderPickerKey) {
+                  // store as HH:MM for display; strip seconds
+                  setReminderTimes((prev) => ({ ...prev, [reminderPickerKey]: timeStr.slice(0, 5) }));
+                  setReminderPickerKey(null);
+                }
+              }}
+              onCancel={() => setReminderPickerKey(null)}
+            />
 
             <TouchableOpacity
               onPress={() => void handleSaveReminders()}

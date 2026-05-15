@@ -269,7 +269,6 @@ function BandSection({
 }
 
 const SHELL_STYLE: React.CSSProperties = {
-  minHeight: "100dvh",
   backgroundColor: "#FFF8EF",
   backgroundImage: 'url("/beige_bg.png")',
   backgroundSize: "cover",
@@ -277,6 +276,7 @@ const SHELL_STYLE: React.CSSProperties = {
   backgroundRepeat: "no-repeat",
   display: "flex",
   flexDirection: "column",
+  minHeight: "calc(100dvh - 120px)",
 };
 const CARD_STYLE: React.CSSProperties = {
   background: "rgba(250,245,240,0.95)",
@@ -397,20 +397,6 @@ export function RhythmHomePage() {
               opacity: 0.5,
             }}
           />
-          <button
-            onClick={() => navigate("/en/mitra")}
-            style={{
-              background: "none",
-              border: "none",
-              color: "#C99317",
-              fontSize: 14,
-              cursor: "pointer",
-              marginBottom: 16,
-              padding: 0,
-            }}
-          >
-            ← Back
-          </button>
           <h2
             style={{
               fontFamily: "var(--kalpx-font-serif)",

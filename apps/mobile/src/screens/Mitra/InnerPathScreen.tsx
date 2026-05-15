@@ -47,6 +47,8 @@ import {
   apiGetJourneyReminders,
   apiPatchJourneyReminders,
   mitraJourneyDailyView,
+  mitraJourneyDay7View,
+  mitraJourneyDay14View,
   mitraJourneyEntryView,
 } from "../../engine/mitraApi";
 import { useScreenStore } from "../../engine/useScreenBridge";
@@ -124,57 +126,51 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
         const payload = target?.payload ?? {};
 
         if (viewKey === "day_7_view") {
-          writeAll(ingestDay7View(payload as any));
           dispatch(
             screenActions.setScreenValue({ key: "checkpoint_day", value: 7 }),
           );
-          const r7 = await dispatch(
-            loadScreenWithData({
-              containerId: "checkpoint_reflection",
-              stateId: "day_7",
-            }) as any,
-          );
           if (!embedded) {
-            if (r7?.payload) {
-              navigation.replace("DynamicEngine" as any);
-            } else {
-              // Schema missing — fall back to daily_view so screen isn't blank
-              const dailyResult = await mitraJourneyDailyView(null);
+            try {
+              const env7 = await mitraJourneyDay7View();
               if (cancelled) return;
-              if (!dailyResult.notModified && dailyResult.envelope) {
-                writeAll(ingestDailyView(dailyResult.envelope));
+              if (env7) {
+                writeAll(ingestDay7View(env7 as any));
+                await dispatch(
+                  loadScreenWithData({
+                    containerId: "cycle_transitions",
+                    stateId: "checkpoint_day_7",
+                  }) as any,
+                );
               }
-              watchRunnerRef.current = true;
-              setLoading(false);
+            } catch {
+              // fall through to DynamicEngine regardless — it will show what it can
             }
+            navigation.replace("DynamicEngine" as any);
           }
           return;
         }
 
         if (viewKey === "day_14_view") {
-          writeAll(ingestDay14View(payload as any));
           dispatch(
             screenActions.setScreenValue({ key: "checkpoint_day", value: 14 }),
           );
-          const r14 = await dispatch(
-            loadScreenWithData({
-              containerId: "checkpoint_reflection",
-              stateId: "day_14",
-            }) as any,
-          );
           if (!embedded) {
-            if (r14?.payload) {
-              navigation.replace("DynamicEngine" as any);
-            } else {
-              // Schema missing — fall back to daily_view so screen isn't blank
-              const dailyResult = await mitraJourneyDailyView(null);
+            try {
+              const env14 = await mitraJourneyDay14View();
               if (cancelled) return;
-              if (!dailyResult.notModified && dailyResult.envelope) {
-                writeAll(ingestDailyView(dailyResult.envelope));
+              if (env14) {
+                writeAll(ingestDay14View(env14 as any));
+                await dispatch(
+                  loadScreenWithData({
+                    containerId: "cycle_transitions",
+                    stateId: "checkpoint_day_14",
+                  }) as any,
+                );
               }
-              watchRunnerRef.current = true;
-              setLoading(false);
+            } catch {
+              // fall through to DynamicEngine regardless
             }
+            navigation.replace("DynamicEngine" as any);
           }
           return;
         }

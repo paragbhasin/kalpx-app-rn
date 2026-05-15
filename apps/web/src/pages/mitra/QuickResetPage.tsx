@@ -856,7 +856,13 @@ export function QuickResetPage() {
     const isExplicit = openingState?.screen_state === "explicit";
     return renderShell(
       <>
-        <main style={S.main}>
+        <main
+          style={{
+            ...S.main,
+            justifyContent: "center",
+            minHeight: "calc(100vh - 140px)",
+          }}
+        >
           <div style={S.container}>
             <p style={S.copyHeadline}>
               {renderCopyWithBreaks(completionData.copy.headline)}

@@ -90,6 +90,7 @@ export function MitraHomePage() {
     (typeof FEELING_OPTIONS)[number] | null
   >(null);
   const [feelingLoading, setFeelingLoading] = useState(false);
+  const [dismissingCheckin, setDismissingCheckin] = useState(false);
   const { loading, error, hasActiveJourney, rawStatus, refetch } =
     useJourneyStatus();
   const {
@@ -179,10 +180,14 @@ export function MitraHomePage() {
   }
 
   async function handleCheckinDismiss() {
+    setDismissingCheckin(true);
     try {
       await postPranaAcknowledgeDismiss();
       await refetchHome();
-    } catch {}
+    } catch {
+    } finally {
+      setDismissingCheckin(false);
+    }
   }
 
   // Derive segment from loaded home data (Stream O)
@@ -664,6 +669,8 @@ export function MitraHomePage() {
                 {(() => {
                   const acw = homeData?.active_checkin_window;
                   const windowActive = acw?.active === true;
+                  const checkinActionLoading =
+                    feelingLoading || dismissingCheckin;
                   return (
                     <div
                       style={{
@@ -674,8 +681,34 @@ export function MitraHomePage() {
                         boxShadow: "0 10px 25px rgba(67,33,4,0.08)",
                         background:
                           "linear-gradient(180deg, rgba(255,255,255,0.78) 0%, rgba(255,250,243,0.9) 100%)",
+                        position: "relative",
                       }}
                     >
+                      {checkinActionLoading && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            inset: 0,
+                            borderRadius: 20,
+                            background: "rgba(255, 248, 239, 0.55)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            zIndex: 2,
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 24,
+                              height: 24,
+                              border: "2px solid var(--kalpx-cta)",
+                              borderTopColor: "transparent",
+                              borderRadius: "50%",
+                              animation: "spin 1s linear infinite",
+                            }}
+                          />
+                        </div>
+                      )}
                       {windowActive ? (
                         <>
                           <div
@@ -701,10 +734,13 @@ export function MitraHomePage() {
                                 type="button"
                                 data-testid="dismiss-checkin"
                                 onClick={() => void handleCheckinDismiss()}
+                                disabled={checkinActionLoading}
                                 style={{
                                   background: "none",
                                   border: "none",
-                                  cursor: "pointer",
+                                  cursor: checkinActionLoading
+                                    ? "not-allowed"
+                                    : "pointer",
                                   color: "rgba(67,33,4,0.4)",
                                   fontSize: 18,
                                   lineHeight: 1,
@@ -837,7 +873,7 @@ export function MitraHomePage() {
                                     void handleFeelingSelect(feeling)
                                   }
                                   aria-pressed={isSelected}
-                                  disabled={feelingLoading}
+                                  disabled={checkinActionLoading}
                                   style={{
                                     width: "100%",
                                     border: isSelected
@@ -851,14 +887,14 @@ export function MitraHomePage() {
                                     padding: "10px 14px",
                                     fontSize: 14,
                                     fontWeight: isSelected ? 700 : 500,
-                                    cursor: feelingLoading
+                                    cursor: checkinActionLoading
                                       ? "not-allowed"
                                       : "pointer",
                                     boxShadow: isSelected
                                       ? "0 6px 14px rgba(201,168,76,0.18)"
                                       : "none",
                                     transition: "all 160ms ease",
-                                    opacity: feelingLoading ? 0.7 : 1,
+                                    opacity: checkinActionLoading ? 0.7 : 1,
                                   }}
                                 >
                                   {feeling}

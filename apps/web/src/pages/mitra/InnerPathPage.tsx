@@ -706,20 +706,21 @@ export function InnerPathPage() {
             style={{ flex: 1, height: 1, background: "rgba(214,183,130,0.35)" }}
           />
         </div>
-
-        <div style={{ marginBottom: 14 }}>
-          <AccordionRow
-            icon={<Sparkles size={18} strokeWidth={1.7} color="#8C6BC6" />}
-            title="Today's guidance"
-            open={guidanceOpen}
-            onClick={() => setGuidanceOpen((value) => !value)}
-          />
-          {guidanceOpen && hasSankalpCarry && (
-            <div style={{ marginTop: 12 }}>
-              <SankalpCarryBlock sd={sd} />
-            </div>
-          )}
-        </div>
+        {guidanceOpen && hasSankalpCarry && (
+          <div style={{ marginBottom: 14 }}>
+            <AccordionRow
+              icon={<Sparkles size={18} strokeWidth={1.7} color="#8C6BC6" />}
+              title="Today's guidance"
+              open={guidanceOpen}
+              onClick={() => setGuidanceOpen((value) => !value)}
+            />
+            {guidanceOpen && hasSankalpCarry && (
+              <div style={{ marginTop: 12 }}>
+                <SankalpCarryBlock sd={sd} />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Per-item transformation labels */}
         {hasWhyThis && (
@@ -1223,7 +1224,7 @@ export function InnerPathPage() {
                       <span
                         style={{
                           fontFamily: "var(--kalpx-font-serif)",
-                          fontSize: 14,
+                          fontSize: 16,
                           color: "#432104",
                           flex: 1,
                         }}

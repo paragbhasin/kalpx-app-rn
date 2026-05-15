@@ -171,8 +171,10 @@ function ReminderRow({
             padding: "4px 10px",
             cursor: "pointer",
             outline: "none",
-            width: 100,
-          }}
+            width: 86,
+            // hide browser clock icon via appearance
+            WebkitAppearance: "none",
+          } as React.CSSProperties}
         />
       )}
       {!enabled && time && (

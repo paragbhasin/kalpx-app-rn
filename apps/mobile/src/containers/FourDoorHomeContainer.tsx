@@ -11,7 +11,8 @@ import {
   TELL_MITRA_HAS_HISTORY_SUBTITLE,
   type MitraHomeSegment,
 } from "@kalpx/contracts";
-import type { QuickCheckinPranaLabel } from "@kalpx/types";
+import type { JourneyTriadRemindersPatch, QuickCheckinPranaLabel } from "@kalpx/types";
+import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, {
   useCallback,
@@ -23,10 +24,12 @@ import React, {
 import {
   ActivityIndicator,
   ImageBackground,
+  Modal,
   Platform,
   ScrollView,
   StatusBar,
   StyleSheet,
+  Switch,
   Text,
   TouchableOpacity,
   View,
@@ -38,6 +41,7 @@ import Mp2Icon from "../../../web/public/mitra2.svg";
 import Mp3Icon from "../../../web/public/mitra3.svg";
 import Mp4Icon from "../../../web/public/mitra4.svg";
 import {
+  apiPatchJourneyReminders,
   mitraJourneyHomeV3,
   mitraPranaAcknowledge,
   postPranaAcknowledgeDismiss,
@@ -146,6 +150,15 @@ export default function FourDoorHomeContainer({
   );
   const [feelingLoading, setFeelingLoading] = useState(false);
   const doorStates = (homeData?.door_states ?? {}) as Record<string, any>;
+
+  // Post-onboarding reminder step (embedded via screenData flag)
+  const showReminderModal = !!screenData?.onboarding_reminder_show;
+  const reminderDestination = (screenData?.onboarding_reminder_destination as string) || "Home";
+  const [reminderToggles, setReminderToggles] = useState<Record<"mantra" | "sankalp" | "practice", boolean>>({ mantra: false, sankalp: false, practice: false });
+  const [reminderTimes, setReminderTimes] = useState<Record<"mantra" | "sankalp" | "practice", string>>({ mantra: "07:00", sankalp: "08:00", practice: "18:00" });
+  const [reminderPickerKey, setReminderPickerKey] = useState<"mantra" | "sankalp" | "practice" | null>(null);
+  const [reminderPickerDate, setReminderPickerDate] = useState<Date>(new Date());
+  const [reminderSaving, setReminderSaving] = useState(false);
 
   useEffect(() => {
     homeDataRef.current = homeData;
@@ -324,6 +337,67 @@ export default function FourDoorHomeContainer({
         <ActivityIndicator size="small" color="#b8922a" />
       </View>
     );
+  }
+
+  function parseReminderTimeToDate(timeStr: string): Date {
+    const [h, m] = timeStr.split(":").map(Number);
+    const d = new Date();
+    d.setHours(h, m, 0, 0);
+    return d;
+  }
+
+  function dateToReminderTimeStr(date: Date): string {
+    return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+  }
+
+  function formatReminderTimeDisplay(timeStr: string): string {
+    const [h, m] = timeStr.split(":").map(Number);
+    const period = h >= 12 ? "PM" : "AM";
+    const hour = h % 12 === 0 ? 12 : h % 12;
+    return `${String(hour).padStart(2, "0")}:${String(m).padStart(2, "0")} ${period}`;
+  }
+
+  function handleReminderPickerChange(event: DateTimePickerEvent, date?: Date) {
+    if (Platform.OS === "android") {
+      setReminderPickerKey(null);
+      if (event.type === "set" && date && reminderPickerKey) {
+        setReminderTimes((prev) => ({ ...prev, [reminderPickerKey]: dateToReminderTimeStr(date) }));
+      }
+      return;
+    }
+    if (date) setReminderPickerDate(date);
+  }
+
+  function confirmIOSReminderPicker() {
+    if (reminderPickerKey) {
+      setReminderTimes((prev) => ({ ...prev, [reminderPickerKey]: dateToReminderTimeStr(reminderPickerDate) }));
+    }
+    setReminderPickerKey(null);
+  }
+
+  function dismissReminderModal() {
+    updateScreenData("onboarding_reminder_show", false);
+    updateScreenData("onboarding_reminder_destination", null);
+    if (reminderDestination === "InnerPath") {
+      navigation.navigate("InnerPath" as any);
+    }
+  }
+
+  async function handleSaveReminders() {
+    setReminderSaving(true);
+    try {
+      const patch: JourneyTriadRemindersPatch = {};
+      for (const key of ["mantra", "sankalp", "practice"] as const) {
+        (patch as any)[`${key}_reminder_enabled`] = reminderToggles[key];
+        if (reminderToggles[key]) (patch as any)[`${key}_reminder_time`] = reminderTimes[key];
+      }
+      await apiPatchJourneyReminders(patch);
+    } catch {
+      // non-fatal
+    } finally {
+      setReminderSaving(false);
+      dismissReminderModal();
+    }
   }
 
   if (!homeData) {
@@ -590,6 +664,100 @@ export default function FourDoorHomeContainer({
           </View>
         </View>
       </ScrollView>
+
+      {/* Post-onboarding reminder step — embedded via screenData flag */}
+      <Modal
+        visible={showReminderModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => dismissReminderModal()}
+      >
+        <View style={styles.reminderOverlay}>
+          <View style={styles.reminderSheet}>
+            <Text style={styles.reminderTitle}>Want gentle reminders?</Text>
+            <Text style={styles.reminderSubtitle}>
+              Mitra will gently remind you at the times you choose.
+            </Text>
+
+            {(["mantra", "sankalp", "practice"] as const).map((key) => {
+              const label = key.charAt(0).toUpperCase() + key.slice(1);
+              const enabled = reminderToggles[key];
+              return (
+                <View key={key} style={[styles.reminderRow, enabled && styles.reminderRowEnabled]}>
+                  <Text style={styles.reminderRowLabel}>Remind me for {label.toLowerCase()}</Text>
+                  <View style={styles.reminderRowRight}>
+                    {enabled && (
+                      <TouchableOpacity
+                        onPress={() => {
+                          setReminderPickerDate(parseReminderTimeToDate(reminderTimes[key]));
+                          setReminderPickerKey(key);
+                        }}
+                        style={styles.reminderTimePill}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={styles.reminderTimePillText}>
+                          {formatReminderTimeDisplay(reminderTimes[key])}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                    <Switch
+                      value={enabled}
+                      onValueChange={(val) => setReminderToggles((prev) => ({ ...prev, [key]: val }))}
+                      trackColor={{ false: "rgba(0,0,0,0.12)", true: "#C99317" }}
+                      thumbColor="#fff"
+                    />
+                  </View>
+                </View>
+              );
+            })}
+
+            {reminderPickerKey && Platform.OS === "ios" && (
+              <View style={styles.iosPicker}>
+                <DateTimePicker
+                  mode="time"
+                  value={reminderPickerDate}
+                  onChange={handleReminderPickerChange}
+                  display="spinner"
+                  textColor="#432104"
+                />
+                <TouchableOpacity onPress={confirmIOSReminderPicker} style={styles.iosPickerDone}>
+                  <Text style={styles.iosPickerDoneText}>Done</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            {reminderPickerKey && Platform.OS === "android" && (
+              <DateTimePicker
+                mode="time"
+                value={reminderPickerDate}
+                onChange={handleReminderPickerChange}
+                display="default"
+              />
+            )}
+
+            <TouchableOpacity
+              onPress={() => void handleSaveReminders()}
+              disabled={reminderSaving}
+              style={[styles.reminderPrimaryBtn, reminderSaving && styles.reminderBtnDisabled]}
+              activeOpacity={0.85}
+            >
+              {reminderSaving ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.reminderPrimaryBtnText}>Set reminders</Text>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={dismissReminderModal}
+              disabled={reminderSaving}
+              style={styles.reminderSkipBtn}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.reminderSkipText}>Skip for now</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -605,7 +773,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 120,
+    paddingBottom: 160,
   },
   centeredWrap: {
     flex: 1,
@@ -632,10 +800,10 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.semiBold,
   },
   heroWrap: {
-    marginBottom: 22,
+    marginBottom: 10,
   },
   heroImage: {
-    minHeight: 320,
+    minHeight: 260,
     backgroundColor: "transparent",
   },
   heroInner: {
@@ -875,5 +1043,108 @@ const styles = StyleSheet.create({
   },
   feelingChipTextSelected: {
     fontFamily: Fonts.sans.bold,
+  },
+  reminderOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+  reminderSheet: {
+    backgroundColor: "#FDF8F0",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 28,
+    paddingBottom: 48,
+  },
+  reminderTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 26,
+    color: "#432104",
+    marginBottom: 8,
+    lineHeight: 34,
+  },
+  reminderSubtitle: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 15,
+    color: "#7B6545",
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  reminderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 14,
+    marginBottom: 10,
+    borderRadius: 12,
+    backgroundColor: "rgba(0,0,0,0.02)",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.06)",
+  },
+  reminderRowEnabled: {
+    backgroundColor: "rgba(201,168,76,0.08)",
+    borderColor: "rgba(201,168,76,0.25)",
+  },
+  reminderRowLabel: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 16,
+    color: "#432104",
+    flex: 1,
+  },
+  reminderRowRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  reminderTimePill: {
+    backgroundColor: "rgba(201,168,76,0.15)",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginRight: 4,
+  },
+  reminderTimePillText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 13,
+    color: "#432104",
+  },
+  iosPicker: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    marginBottom: 12,
+    overflow: "hidden",
+  },
+  iosPickerDone: {
+    alignItems: "flex-end",
+    padding: 12,
+    paddingTop: 0,
+  },
+  iosPickerDoneText: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 14,
+    color: "#C99317",
+  },
+  reminderPrimaryBtn: {
+    backgroundColor: "#C99317",
+    borderRadius: 14,
+    padding: 18,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  reminderBtnDisabled: { opacity: 0.6 },
+  reminderPrimaryBtnText: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 17,
+    color: "#fff",
+  },
+  reminderSkipBtn: {
+    alignItems: "center",
+    padding: 14,
+    marginTop: 4,
+  },
+  reminderSkipText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 15,
+    color: "#7B6545",
   },
 });

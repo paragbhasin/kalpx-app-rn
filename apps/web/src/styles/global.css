@@ -4,6 +4,13 @@
   box-sizing: border-box;
 }
 
+/* reCAPTCHA badge: hidden globally, shown only on auth pages via body class */
+.grecaptcha-badge { visibility: hidden !important; }
+.recaptcha-active .grecaptcha-badge { visibility: visible !important; }
+
+/* Hide browser clock/calendar picker icon from time inputs */
+input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
+
 /* ── KalpX Design Tokens as CSS Custom Properties ── */
 :root {
   /* Backgrounds */

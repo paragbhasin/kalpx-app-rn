@@ -19,6 +19,7 @@ import SubmitDailyPracticesScreen from "../screens/DailyPractice/SubmitDailyPrac
 import Dharma from "../screens/Home/DailyDharma";
 import Explore from "../screens/Home/Explore";
 import Home from "../screens/Home/Home";
+import NewHome from "../screens/Home/NewHome";
 import LearnMore from "../screens/Home/LearnMore";
 import MySadana from "../screens/Home/MySadana";
 import PoojaScreen from "../screens/Home/PoojaScreen";
@@ -77,7 +78,7 @@ import MitraStartScreen from "../screens/Mitra/MitraStartScreen";
 
 const Stack: any = createNativeStackNavigator();
 
-export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
+export const HomeStackNavigator = ({ initialRouteName = "NewHome" }) => (
   <Stack.Navigator
     initialRouteName={initialRouteName}
     screenOptions={{
@@ -85,6 +86,11 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
       contentStyle: { backgroundColor: 'transparent' }
     }}
   >
+    <Stack.Screen
+      name="NewHome"
+      component={NewHome}
+      options={{ headerShown: false }}
+    />
     <Stack.Screen
       name="Home"
       component={Home}

@@ -96,7 +96,7 @@ const CustomDrawerContent = (props) => {
     // the user on a blank DynamicEngine screen.
     props.navigation.closeDrawer();
     props.navigation.navigate("HomePage", {
-      screen: "Home",
+      screen: "NewHome",
     });
   };
 
@@ -156,7 +156,7 @@ const CustomDrawerContent = (props) => {
     {
       id: "1",
       name: "Mitra",
-      title: "Home",
+      title: "NewHome",
       iconType: "image",
       icon: require("../../../assets/Group.png"),
       isMitra: true,

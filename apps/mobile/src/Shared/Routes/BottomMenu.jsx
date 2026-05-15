@@ -27,6 +27,7 @@ const TabBarButton = (props) => <TouchableOpacity {...props} activeOpacity={0.7}
 
 function isMitraRouteName(routeName) {
   return (
+    routeName === "NewHome" ||
     routeName === "Home" ||
     routeName === "DynamicEngine" ||
     routeName === "MitraEngine" ||
@@ -50,7 +51,7 @@ const BottomMenuContent = () => {
         screenOptions={({ route }) => {
           const nestedRouteName =
             route.name === "HomePage"
-              ? getFocusedRouteNameFromRoute(route) || "Home"
+              ? getFocusedRouteNameFromRoute(route) || "NewHome"
               : route.name;
           const shouldUseTransparentTabBar =
             !!currentBackground && isMitraRouteName(nestedRouteName);
@@ -109,7 +110,7 @@ const BottomMenuContent = () => {
                 params: {
                   screen: "HomePage",
                   params: {
-                    screen: "Home",
+                    screen: "NewHome",
                   },
                 },
               });

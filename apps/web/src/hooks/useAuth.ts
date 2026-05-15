@@ -218,7 +218,7 @@ export function useAuth() {
           }
           invalidateJourneyStatusCache();
           invalidateJourneyEntryViewCache();
-          navigate('/en/mitra/start');
+          navigate('/en/mitra/onboarding?containerId=welcome_onboarding&stateId=turn_1');
         } else {
           // Backend may not return tokens on register — navigate to login
           dispatch(showSnackBar('Account created. Please sign in.'));

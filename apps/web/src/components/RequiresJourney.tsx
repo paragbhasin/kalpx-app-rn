@@ -85,7 +85,14 @@ export function RequiresJourney({ children }: Props) {
     );
   }
 
-  if (!hasActiveJourney) return <Navigate to="/en/mitra/start" replace />;
+  if (!hasActiveJourney) {
+    return (
+      <Navigate
+        to="/en/mitra/onboarding?containerId=welcome_onboarding&stateId=turn_1"
+        replace
+      />
+    );
+  }
 
   const targetPath = viewKey ? mapJourneyEntryViewPath(viewKey) : null;
   const shouldRedirectToCheckpoint =

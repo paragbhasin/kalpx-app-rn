@@ -34,6 +34,9 @@ import type { AppDispatch, RootState } from "../../store";
 import { setHomeData } from "../../store/doorSlice";
 import { useScreenState } from "../../store/screenSlice";
 
+const ONBOARDING_TURN_1_PATH =
+  "/en/mitra/onboarding?containerId=welcome_onboarding&stateId=turn_1";
+
 function getRhythmTimeBand(): "morning" | "afternoon" | "night" {
   const hour = new Date().getHours();
   if (hour < 12) return "morning";
@@ -294,7 +297,6 @@ export function MitraHomePage() {
               style={{
                 width: "100%",
                 position: "relative",
-                marginTop: -60, // Overlap header
 
                 overflow: "hidden",
 
@@ -1075,7 +1077,7 @@ export function MitraHomePage() {
               }}
             />
             <Link
-              to="/en/mitra/start"
+              to={ONBOARDING_TURN_1_PATH}
               style={{
                 display: "block",
                 padding: "10px",

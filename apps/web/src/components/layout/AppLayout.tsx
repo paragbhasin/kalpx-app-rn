@@ -12,6 +12,7 @@ const IMMERSIVE_PREFIXES = [
   '/en/mitra/engine',
   '/en/mitra/inner-path',
   '/en/mitra/quick-reset',
+  '/en/mitra/rhythm',
   '/en/mitra/rhythm/setup',
   '/en/mitra/rhythm/edit',
   '/en/mitra/tell-mitra',

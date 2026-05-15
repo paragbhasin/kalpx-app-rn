@@ -4,6 +4,7 @@ import { Clock3, Pencil, Sparkles } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
 import { RhythmLibraryPickerModal } from "../../components/mitra/RhythmLibraryPickerModal";
 import { executeAction } from "../../engine/actionExecutor";
 import {
@@ -285,16 +286,6 @@ function BandSection({
   );
 }
 
-const SHELL_STYLE: React.CSSProperties = {
-  backgroundColor: "#FFF8EF",
-  backgroundImage: 'url("/beige_bg.png")',
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  backgroundRepeat: "no-repeat",
-  display: "flex",
-  flexDirection: "column",
-  minHeight: "calc(100dvh - 120px)",
-};
 const CARD_STYLE: React.CSSProperties = {
   background: "rgba(250,245,240,0.95)",
   border: "1px solid rgba(201,168,76,0.25)",
@@ -418,7 +409,7 @@ export function RhythmHomePage() {
 
   return (
     <>
-      <div style={SHELL_STYLE}>
+      <MitraMobileShell backgroundImage="/beige_bg.png">
         <main
           style={{
             flex: 1,
@@ -547,7 +538,7 @@ export function RhythmHomePage() {
             )}
           </div>
         </main>
-      </div>
+      </MitraMobileShell>
       {homePickerBand && (
         <RhythmLibraryPickerModal
           band={homePickerBand}

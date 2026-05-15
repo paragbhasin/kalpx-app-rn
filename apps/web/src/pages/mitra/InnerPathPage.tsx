@@ -1,5 +1,9 @@
 import { normalizeDashboardWhyThisState } from "@kalpx/contracts";
-import type { DashboardWhyThis, JourneyTriadReminders, JourneyTriadRemindersPatch } from "@kalpx/types";
+import type {
+  DashboardWhyThis,
+  JourneyTriadReminders,
+  JourneyTriadRemindersPatch,
+} from "@kalpx/types";
 import { Bell, Leaf, Music, Sparkles } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -9,7 +13,12 @@ import { CycleProgressBlock } from "../../components/blocks/dashboard/CycleProgr
 import { SankalpCarryBlock } from "../../components/blocks/dashboard/SankalpCarryBlock";
 import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
 import { executeAction } from "../../engine/actionExecutor";
-import { apiGetJourneyReminders, apiPatchJourneyReminders, getDashboardView, mitraJourneyEntryView } from "../../engine/mitraApi";
+import {
+  apiGetJourneyReminders,
+  apiPatchJourneyReminders,
+  getDashboardView,
+  mitraJourneyEntryView,
+} from "../../engine/mitraApi";
 import { ingestDailyView } from "../../engine/v3Ingest";
 import type { AppDispatch } from "../../store";
 import { updateScreenData, useScreenState } from "../../store/screenSlice";
@@ -27,7 +36,9 @@ export function InnerPathPage() {
     "mantra" | "sankalp" | "practice"
   >("mantra");
   const [remindersOpen, setRemindersOpen] = useState(false);
-  const [reminders, setReminders] = useState<JourneyTriadReminders | null>(null);
+  const [reminders, setReminders] = useState<JourneyTriadReminders | null>(
+    null,
+  );
   const [reminderSaving, setReminderSaving] = useState(false);
 
   useEffect(() => {
@@ -230,7 +241,10 @@ export function InnerPathPage() {
       .canOpenWhyThis ||
     l1Items.length > 0;
 
-  const TRIAD_REMINDER_DEFAULTS: Record<"mantra" | "sankalp" | "practice", string> = {
+  const TRIAD_REMINDER_DEFAULTS: Record<
+    "mantra" | "sankalp" | "practice",
+    string
+  > = {
     mantra: "07:00",
     sankalp: "08:00",
     practice: "18:00",
@@ -258,11 +272,16 @@ export function InnerPathPage() {
     }
   }
 
-  async function handleReminderTime(key: "mantra" | "sankalp" | "practice", time: string) {
+  async function handleReminderTime(
+    key: "mantra" | "sankalp" | "practice",
+    time: string,
+  ) {
     if (!reminders || reminderSaving) return;
     setReminderSaving(true);
     try {
-      const updated = await apiPatchJourneyReminders({ [`${key}_reminder_time`]: time } as JourneyTriadRemindersPatch);
+      const updated = await apiPatchJourneyReminders({
+        [`${key}_reminder_time`]: time,
+      } as JourneyTriadRemindersPatch);
       setReminders(updated);
     } catch {
       // non-fatal
@@ -328,7 +347,7 @@ export function InnerPathPage() {
             <p
               style={{
                 margin: "6px 0 0",
-                fontSize: 14,
+                fontSize: 16,
                 lineHeight: 1.6,
                 color: "var(--kalpx-text-soft)",
               }}
@@ -444,8 +463,8 @@ export function InnerPathPage() {
 
   return (
     <MitraMobileShell>
-      <div style={{ maxWidth: 480, margin: "0 auto", padding: "0 20px 120px" }}>
-        <button
+      <div style={{ maxWidth: 480, margin: "0 auto", padding: "15px" }}>
+        {/* <button
           onClick={() => navigate("/en/mitra")}
           style={{
             background: "none",
@@ -459,7 +478,7 @@ export function InnerPathPage() {
           }}
         >
           ← Back
-        </button>
+        </button> */}
 
         {/* Page identity */}
         <div style={{ marginBottom: 10, textAlign: "center" }}>
@@ -1177,8 +1196,12 @@ export function InnerPathPage() {
             {remindersOpen && (
               <div style={{ padding: "12px 4px 4px" }}>
                 {(["mantra", "sankalp", "practice"] as const).map((key) => {
-                  const enabled = reminders[`${key}_reminder_enabled`] as boolean;
-                  const time = reminders[`${key}_reminder_time`] as string | null;
+                  const enabled = reminders[
+                    `${key}_reminder_enabled`
+                  ] as boolean;
+                  const time = reminders[`${key}_reminder_time`] as
+                    | string
+                    | null;
                   const label = key.charAt(0).toUpperCase() + key.slice(1);
                   return (
                     <div
@@ -1189,7 +1212,9 @@ export function InnerPathPage() {
                         gap: 12,
                         marginBottom: 10,
                         padding: "12px 14px",
-                        background: enabled ? "rgba(201,168,76,0.08)" : "rgba(0,0,0,0.02)",
+                        background: enabled
+                          ? "rgba(201,168,76,0.08)"
+                          : "rgba(0,0,0,0.02)",
                         borderRadius: 10,
                         border: `1px solid ${enabled ? "rgba(201,168,76,0.25)" : "rgba(0,0,0,0.06)"}`,
                         transition: "all 0.2s",
@@ -1208,8 +1233,17 @@ export function InnerPathPage() {
                       {enabled && (
                         <input
                           type="time"
-                          value={time ? time.slice(0, 5) : TRIAD_REMINDER_DEFAULTS[key]}
-                          onChange={(e) => void handleReminderTime(key, e.target.value || TRIAD_REMINDER_DEFAULTS[key])}
+                          value={
+                            time
+                              ? time.slice(0, 5)
+                              : TRIAD_REMINDER_DEFAULTS[key]
+                          }
+                          onChange={(e) =>
+                            void handleReminderTime(
+                              key,
+                              e.target.value || TRIAD_REMINDER_DEFAULTS[key],
+                            )
+                          }
                           disabled={reminderSaving}
                           style={{
                             border: "1px solid rgba(201,168,76,0.3)",
@@ -1256,7 +1290,14 @@ export function InnerPathPage() {
                   );
                 })}
                 {reminderSaving && (
-                  <p style={{ fontSize: 12, color: "var(--kalpx-text-muted)", textAlign: "center", margin: "4px 0 0" }}>
+                  <p
+                    style={{
+                      fontSize: 12,
+                      color: "var(--kalpx-text-muted)",
+                      textAlign: "center",
+                      margin: "4px 0 0",
+                    }}
+                  >
                     Saving…
                   </p>
                 )}

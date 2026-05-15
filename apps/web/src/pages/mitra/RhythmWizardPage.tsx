@@ -243,6 +243,9 @@ export function RhythmWizardPage() {
   const homeData = useSelector((s: RootState) => s.door.homeData);
   const screenState = useScreenState();
   const hasExistingRhythm = homeData?.companion_rhythm?.has_rhythm === true;
+  const hasActiveInnerPath =
+    homeData?.inner_path_summary?.has_active_path === true ||
+    homeData?.user_surface_state?.has_inner_path === true;
   const wizardBackTarget =
     isEditMode || hasExistingRhythm ? "/en/mitra/rhythm" : "/en/mitra";
 
@@ -1501,20 +1504,22 @@ export function RhythmWizardPage() {
               <button onClick={() => navigate("/en/mitra")} style={ghostBtn}>
                 Return Home
               </button>
-              <div style={{ textAlign: "center", marginTop: 16 }}>
-                <button
-                  onClick={() => navigate("/en/mitra/inner-path")}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: LIGHT,
-                    fontSize: 13,
-                    cursor: "pointer",
-                  }}
-                >
-                  Add Inner Path →
-                </button>
-              </div>
+              {!hasActiveInnerPath && (
+                <div style={{ textAlign: "center", marginTop: 16 }}>
+                  <button
+                    onClick={() => navigate("/en/mitra/inner-path")}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: LIGHT,
+                      fontSize: 13,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Add Inner Path →
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>

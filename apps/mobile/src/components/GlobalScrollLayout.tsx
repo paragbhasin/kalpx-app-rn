@@ -149,6 +149,18 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
+    // Runner launched from a direct-route screen (InnerPath, RhythmHome).
+    // Engine history may have stale entries from prior sessions — pop the RN stack
+    // directly so one back press returns to the launching screen, not into old history.
+    if (
+      (currentContainerId === "cycle_transitions" ||
+        currentContainerId === "practice_runner") &&
+      canGoBackInStack
+    ) {
+      navigationRef.goBack();
+      return;
+    }
+
     if (history.length > 0) {
       goBack();
       return;

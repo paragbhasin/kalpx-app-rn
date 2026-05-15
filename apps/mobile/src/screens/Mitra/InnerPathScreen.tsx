@@ -446,6 +446,9 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
         screenState: store.getState().screen.screenData,
       },
     ).catch(() => {});
+    // Always navigate explicitly — watcher is silent when currentContainerId is
+    // already "cycle_transitions" from a prior session (dep unchanged → no fire).
+    navigation.navigate("DynamicEngine" as any);
   };
   const handleBack = () => {
     if (embedded) {

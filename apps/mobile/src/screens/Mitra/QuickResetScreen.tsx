@@ -30,7 +30,7 @@ import {
 } from "react-native";
 import RudrakshBead from "../../../assets/rudraksh.svg";
 import AudioPlayerBlock from "../../blocks/AudioPlayerBlock";
-import MalaMantraCounter from "../../components/MalaMantraCounter";
+import { navigate as rootNavigate } from "../../Shared/Routes/NavigationService";
 import type { MantraTextCardProps } from "../../containers/CycleTransitionsContainer";
 import {
   getQuickResetOpening,
@@ -41,19 +41,14 @@ import {
 import { useScreenStore } from "../../engine/useScreenBridge";
 import { Fonts } from "../../theme/fonts";
 
-type Phase = "loading" | "opening" | "preview" | "running" | "done" | "error";
-const REP_OPTIONS = [1, 9, 27, 54, 108];
+type Phase = "loading" | "opening" | "preview" | "done" | "error";
+const VISUAL_BEAD_COUNT = 18;
 
 if (
   Platform.OS === "android" &&
   UIManager.setLayoutAnimationEnabledExperimental
 ) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
-}
-
-function getVisualBeadCount(total: number): number {
-  if (total <= 1) return 1;
-  return Math.min(total, 18);
 }
 
 function CollapsibleCard({
@@ -200,7 +195,7 @@ export default function QuickResetScreen({
   const [completionData, setCompletionData] =
     useState<QuickChantCompleteResponse | null>(null);
   const [beadCount, setBeadCount] = useState(0);
-  const [selectedReps, setSelectedReps] = useState(108);
+  const [isChantingActive, setIsChantingActive] = useState(false);
   const [iastExpanded, setIastExpanded] = useState(false);
   const [devExpanded, setDevExpanded] = useState(false);
   const [meaningExpanded, setMeaningExpanded] = useState(false);
@@ -225,6 +220,8 @@ export default function QuickResetScreen({
   // ── Initial load ────────────────────────────────────────────────────────────
   const loadOpening = useCallback(async () => {
     setPhase("loading");
+    setBeadCount(0);
+    setIsChantingActive(false);
     const state = await getQuickResetOpening();
     if (state) {
       setOpeningState(state);
@@ -308,6 +305,8 @@ export default function QuickResetScreen({
 
   const handlePickerSelect = useCallback((mantra: QuickResetMantra) => {
     setDefaultSetConfirmed(false);
+    setBeadCount(0);
+    setIsChantingActive(false);
     setSelectedMantra(mantra);
     setPickerVisible(false);
     setPhase("preview");
@@ -317,16 +316,22 @@ export default function QuickResetScreen({
   }, []);
 
   // ── Runner start ───────────────────────────────────────────────────────────
-  const handleBeginChanting = useCallback(() => {
-    runnerStartedAt.current = Date.now();
-    setBeadCount(0);
-    setPhase("running");
-  }, []);
+  const handleTapBead = useCallback(() => {
+    if (!activeMantra) return;
+    if (!isChantingActive) {
+      runnerStartedAt.current = Date.now();
+      setBeadCount(0);
+      setIsChantingActive(true);
+    }
+    setBeadCount((count) => count + 1);
+  }, [activeMantra, isChantingActive]);
 
   // ── Done chanting ──────────────────────────────────────────────────────────
   const handleDoneChanting = useCallback(async () => {
     if (!activeMantra) return;
-    const duration_ms = Date.now() - runnerStartedAt.current;
+    const duration_ms = isChantingActive
+      ? Date.now() - runnerStartedAt.current
+      : 0;
     const result = await postQuickChantComplete({
       mantra_ref: activeMantra.item_id,
       duration_ms,
@@ -342,30 +347,11 @@ export default function QuickResetScreen({
         navigation.goBack();
       }
     }
-  }, [activeMantra, embedded, goBack, navigation]);
+  }, [activeMantra, embedded, goBack, isChantingActive, navigation]);
 
-  // ── End early — always silent ──────────────────────────────────────────────
-  const handleEndEarly = useCallback(async () => {
-    if (!activeMantra) {
-      if (embedded) {
-        goBack();
-      } else {
-        navigation.goBack();
-      }
-      return;
-    }
-    const duration_ms = Date.now() - runnerStartedAt.current;
-    postQuickChantComplete({
-      mantra_ref: activeMantra.item_id,
-      duration_ms,
-      completed: false,
-    });
-    if (embedded) {
-      goBack();
-    } else {
-      navigation.goBack();
-    }
-  }, [activeMantra, embedded, goBack, navigation]);
+  const handleCloseToHome = useCallback(() => {
+    rootNavigate("Home");
+  }, []);
 
   // ── Secondary actions handler ──────────────────────────────────────────────
   const handleSecondaryAction = useCallback(
@@ -387,10 +373,10 @@ export default function QuickResetScreen({
   // ── Render helpers ─────────────────────────────────────────────────────────
   const renderOpeningSurface = (
     mantra: QuickResetMantra,
-    primaryLabel: string,
     secondaryActions: string[],
   ) => {
-    const visualBeadCount = getVisualBeadCount(selectedReps);
+    const visualBeadCount = VISUAL_BEAD_COUNT;
+    const progressInCycle = beadCount % visualBeadCount;
     const beads = Array.from({ length: visualBeadCount }, (_, i) => {
       const angle = (i / visualBeadCount) * 2 * Math.PI - Math.PI / 2;
       const cx = 115 + Math.cos(angle) * 86;
@@ -416,8 +402,7 @@ export default function QuickResetScreen({
         <Text style={styles.openingSubhead}>Quick Reset Mantra</Text>
 
         <View style={styles.progressWrap}>
-          <Text style={styles.progressMain}>0</Text>
-          <Text style={styles.progressSub}>/ {selectedReps}</Text>
+          <Text style={styles.progressMain}>{beadCount}</Text>
         </View>
 
         <View style={styles.previewRingWrap}>
@@ -425,22 +410,25 @@ export default function QuickResetScreen({
             style={[styles.previewRing, { transform: [{ rotate: spin }] }]}
           >
             {beads.map(({ cx, cy, i }) => (
-              <RudrakshBead
+              <View
                 key={i}
-                width={28}
-                height={28}
                 style={[
-                  styles.previewBead,
+                  styles.previewBeadWrap,
                   {
                     left: cx - 14,
                     top: cy - 14,
+                    opacity: i < progressInCycle ? 0.2 : 1,
+                    transform: [{ scale: i < progressInCycle ? 0.6 : 1 }],
                   },
                 ]}
-              />
+              >
+                <RudrakshBead width={28} height={28} style={styles.previewBead} />
+                {i === progressInCycle && <View style={styles.previewBeadPointer} />}
+              </View>
             ))}
           </Animated.View>
           <TouchableOpacity
-            onPress={handleBeginChanting}
+            onPress={handleTapBead}
             activeOpacity={0.85}
             style={styles.previewTapButton}
           >
@@ -468,30 +456,6 @@ export default function QuickResetScreen({
             onToggle={() => setDevExpanded((value) => !value)}
           />
         )}
-
-        <View style={styles.repsRow}>
-          {REP_OPTIONS.map((count) => {
-            const selected = count === selectedReps;
-            return (
-              <TouchableOpacity
-                key={count}
-                onPress={() => setSelectedReps(count)}
-                activeOpacity={0.8}
-                style={[styles.repChip, selected && styles.repChipActive]}
-              >
-                <Text
-                  style={[
-                    styles.repChipText,
-                    selected && styles.repChipTextActive,
-                  ]}
-                >
-                  {count}
-                  {selected ? " ✓" : ""}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
 
         {mantra.audio_url ? (
           <View style={styles.audioWrap}>
@@ -526,10 +490,10 @@ export default function QuickResetScreen({
 
         <TouchableOpacity
           style={styles.primaryBtn}
-          onPress={handleBeginChanting}
+          onPress={handleDoneChanting}
           activeOpacity={0.8}
         >
-          <Text style={styles.primaryBtnText}>{primaryLabel}</Text>
+          <Text style={styles.primaryBtnText}>Done chanting</Text>
         </TouchableOpacity>
 
         <View style={styles.secondaryActions}>
@@ -664,7 +628,6 @@ export default function QuickResetScreen({
           >
             {renderOpeningSurface(
               displayMantra,
-              openingState.primary_cta,
               openingState.secondary_actions,
             )}
           </ScrollView>
@@ -694,7 +657,7 @@ export default function QuickResetScreen({
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
-            {renderOpeningSurface(selectedMantra, "Begin chanting", [
+            {renderOpeningSurface(selectedMantra, [
               "set_as_default",
               "change_mantra",
             ])}
@@ -707,51 +670,6 @@ export default function QuickResetScreen({
             onClose={() => setMantraUpdatedToastVisible(false)}
           />
         </ImageBackground>
-      </SafeAreaView>
-    );
-  }
-
-  if (phase === "running" && activeMantra) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <MalaMantraCounter
-          mantraTitle={activeMantra.title}
-          hindiText={activeMantra.devanagari}
-          mantraText={activeMantra.meaning}
-          targetCount={selectedReps}
-          currentCount={beadCount}
-          onIncrement={() => setBeadCount((c) => c + 1)}
-          onExit={handleEndEarly}
-          footerContent={
-            <View style={styles.runnerFooter}>
-              {activeMantra.audio_url ? (
-                <AudioPlayerBlock
-                  block={{ audio_url: activeMantra.audio_url }}
-                />
-              ) : null}
-              <TouchableOpacity
-                style={styles.primaryBtn}
-                onPress={handleDoneChanting}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.primaryBtnText}>Done chanting</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleEndEarly}
-                activeOpacity={0.7}
-                style={styles.endEarlyBtn}
-              >
-                <Text style={styles.endEarlyText}>End early</Text>
-              </TouchableOpacity>
-            </View>
-          }
-        />
-        <HighlightedToast
-          visible={mantraUpdatedToastVisible}
-          title={highlightedToastTitle}
-          message={highlightedToastMessage}
-          onClose={() => setMantraUpdatedToastVisible(false)}
-        />
       </SafeAreaView>
     );
   }
@@ -769,13 +687,6 @@ export default function QuickResetScreen({
           imageStyle={styles.backgroundImage}
         >
           <View style={styles.centerContent}>
-            <TouchableOpacity
-              onPress={handleBack}
-              activeOpacity={0.7}
-              style={styles.contentBackBtn}
-            >
-              <Text style={styles.contentBackBtnText}>← Back</Text>
-            </TouchableOpacity>
             <View style={styles.copyBlock}>
               {renderCopyWithBreaks(completionData.copy.headline)}
               {completionData.copy.subtext ? (
@@ -802,7 +713,7 @@ export default function QuickResetScreen({
             )}
             <TouchableOpacity
               style={styles.primaryBtn}
-              onPress={handleBack}
+              onPress={handleCloseToHome}
               activeOpacity={0.8}
             >
               <Text style={styles.primaryBtnText}>Close</Text>
@@ -976,12 +887,6 @@ const styles = StyleSheet.create({
     color: "#C7A048",
     fontFamily: Fonts.serif.regular,
   },
-  progressSub: {
-    fontSize: 28,
-    lineHeight: 34,
-    color: "#D8C6A2",
-    fontFamily: Fonts.serif.regular,
-  },
   previewRingWrap: {
     width: 230,
     height: 230,
@@ -991,12 +896,26 @@ const styles = StyleSheet.create({
   previewRing: {
     ...StyleSheet.absoluteFillObject,
   },
-  previewBead: {
+  previewBeadWrap: {
     position: "absolute",
+    width: 28,
+    height: 28,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  previewBead: {
     shadowColor: "#6B431A",
     shadowOpacity: 0.22,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
+  },
+  previewBeadPointer: {
+    position: "absolute",
+    top: -10,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#B89450",
   },
   previewTapButton: {
     position: "absolute",
@@ -1119,36 +1038,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 4,
     opacity: 0.6,
-  },
-  repsRow: {
-    width: "100%",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    rowGap: 4,
-    marginTop: 4,
-  },
-  repChip: {
-    width: 60,
-    height: 30,
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: "#E8C587",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "transparent",
-  },
-  repChipActive: {
-    backgroundColor: "#C7A048",
-    borderColor: "#C7A048",
-  },
-  repChipText: {
-    fontSize: 16,
-    color: "#8A7A5A",
-    fontFamily: Fonts.sans.semiBold,
-  },
-  repChipTextActive: {
-    color: "#fff",
   },
   audioWrap: {
     width: "100%",
@@ -1297,21 +1186,6 @@ const styles = StyleSheet.create({
     color: "#7B6550",
     textAlign: "center",
     marginTop: 8,
-  },
-  runnerFooter: {
-    gap: 12,
-    alignItems: "center",
-    paddingBottom: 16,
-  },
-  endEarlyBtn: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-  },
-  endEarlyText: {
-    fontSize: 14,
-    color: "#9b8b77",
-    fontFamily: Fonts.sans.regular,
-    textDecorationLine: "underline",
   },
   pickerList: {
     paddingHorizontal: 16,

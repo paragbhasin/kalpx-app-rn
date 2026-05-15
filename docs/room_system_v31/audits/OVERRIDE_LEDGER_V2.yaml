@@ -1,0 +1,61 @@
+---
+# Override Ledger V2
+# Status: EMPTY — no legitimate surface_override_* flags are currently set in the system.
+# Override fields were added in migration 0130 but never populated with authorized overrides.
+#
+# Founder-locked policy (2026-04-20): approval chain = founder + 1 curator (2-sig).
+# No override may be set without 2-sig entry and expiry_optional documentation.
+
+audit_date: 2026-04-21
+total_override_rows: 0
+status: empty
+
+migrations_checked:
+  - 0117_add_surface_eligibility.py
+  - 0120_seed_room_pools_v1.py
+  - 0121_seed_room_step_templates.py
+  - 0122_seed_room_inquiry_pools.py
+  - 0123_seed_room_content_packs_v1.py
+  - 0124_seed_step_and_inquiry_pools.py
+  - 0125_seed_carry_pools.py
+  - 0127_park_stillness_clarity_carry_pools.py
+  - 0129_park_wisdom_teaching_connection_joy.py
+  - 0130_add_surface_override_fields.py
+  - 0131_reserved
+
+fields_available_but_unused:
+  - surface_override_approved_by
+  - surface_override_reason
+  - surface_override_date
+  - surface_override_scope
+  - surface_override_expiry_optional
+
+rows_requiring_override_if_they_stay:
+  - row: mantra.soham
+    rooms: [room_stillness, room_connection]
+    status: not_sanctioned_yet
+    recommendation: remove from room_connection (keep stillness anchor)
+  - row: yoga_sutras_one_anchor_when_scattered
+    rooms: [room_stillness, room_clarity]
+    status: not_sanctioned_yet
+    recommendation: keep in room_clarity; remove from room_stillness
+  - row: practice.hand_on_heart
+    rooms: [room_stillness, room_connection]
+    status: not_sanctioned_yet
+    recommendation: remove from room_connection
+
+intentional_cross_surface_uses:
+  # The 13 wisdom-asset rows reused within room_clarity or room_growth across
+  # principle / wisdom_banner / wisdom_teaching / wisdom_reflection slots are
+  # by-design dual-use per ROOM_SYSTEM_STRATEGY_V1 §5.7.5. They do NOT require
+  # surface_override_* — they are same-row-different-slot within one room.
+  count: 13
+  requires_override_tagging: false
+  note: >
+    Document this as "intentional dual-use within room" in the canonical
+    strategy doc so future audits don't flag it.
+
+wave1_action_items:
+  - remove cross-room contamination (3 rows)
+  - populate surface_eligibility on 554 master-JSON rows
+  - add wave1 override entries for any exception approved by founder+curator

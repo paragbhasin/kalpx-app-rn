@@ -1,0 +1,1957 @@
+---
+# =============================================================================
+# LIFE_CONTEXT_TAG_PATCH — WAVE 1C (context population for Rule 5)
+# =============================================================================
+agent: Agent 3 (life_context operationalization)
+generated_at: 2026-04-21
+doctrine_ref:
+  - docs/room_system_v31/ROOM_SYSTEM_STRATEGY_V1.md  # §1 canonical context set (authoritative) + §2 room × context + §8 selection
+  - docs/room_system_v31/WAVE1_SYNTHESIS.md          # §1.4 thin contexts per room + §2 per-room class matrices
+  - docs/room_system_v31/audits/CONTENT_CLASS_AUDIT_V2.md  # §A.3 baseline: life_context_bias 0% populated
+  - docs/room_system_v31/audits/TAG_PATCH_WAVE1.yaml       # Wave 1A pattern + existing per-row proposals
+  - docs/room_system_v31/audits/ROOM_POOL_PLAN_V2.yaml     # per-room pool composition (target)
+  - docs/room_system_v31/audits/ROOM_TRADITION_ASSIGNMENT_V2.md
+  - docs/room_system_v31/audits/ROOM_CLASS_DOMINANCE_V2.md
+pool_version: "2026.04.v1-wave1c-life-context"
+curator_gate: true
+
+scope: >
+  Row-level life_context_bias + exclude_from_contexts population for the
+  ~232 rows that are named in Wave-1 pools (ROOM_POOL_PLAN_V2.yaml rotation
+  + anchor entries). Purpose: make Rule 5 (the +1 hint weight life_context
+  scorer) actually discriminate. Baseline is 0% populated on 200 master
+  mantra/sankalp/practice + 303 principle rows per CONTENT_CLASS_AUDIT_V2
+  §A.3; this patch closes that for the subset that is pool-eligible.
+
+# -----------------------------------------------------------------------------
+# CANONICAL CONTEXT SET (per STRATEGY §1 line 6)
+# -----------------------------------------------------------------------------
+# [work_career, relationships, self, health_energy, money_security,
+#  purpose_direction, daily_life]
+# Note: STRATEGY uses `self`. TAG_PATCH_WAVE1.yaml uses `self`. TAGGING_DRAFT_V1
+# uses `self`. ROOM_POOL_PLAN_V2.yaml is the ONLY artifact using `self_devotion`.
+# I use `self` per STRATEGY §1 authoritative canonical list. ROOM_POOL_PLAN_V2
+# is inconsistent with strategy and should be normalized in Wave 1b.
+# This is flagged under §E (founder review) of LIFE_CONTEXT_COVERAGE_REPORT.md.
+
+canonical_contexts:
+  - work_career
+  - relationships
+  - self
+  - health_energy
+  - money_security
+  - purpose_direction
+  - daily_life
+
+# -----------------------------------------------------------------------------
+# DENSITY DOCTRINE (from founder-locked brief)
+# -----------------------------------------------------------------------------
+density_doctrine:
+  mantra: sparse        # 0-2 contexts per row (universal sound; over-tag narrows availability)
+  practice: sparse      # 0-2 contexts per row (somatic generality)
+  sankalp: dense        # 2-5 contexts per row (user-voice resolve; context-specific is the point; skew toward 3)
+  principle: moderate   # 1-3 contexts per row (viveka applies in specific domains)
+  wisdom: moderate      # 1-3 contexts per row (banner/teaching/reflection)
+  stillness_rows: empty # NO life_context_bias (pre-cognitive; STRATEGY §1)
+
+# -----------------------------------------------------------------------------
+# ROOM × CONTEXT ALLOW/EXCLUDE (from STRATEGY §8 + ROOM_TRADITION_V2)
+# -----------------------------------------------------------------------------
+room_context_policy:
+  stillness:
+    allowed: []   # universal; NO life_context_bias on stillness-only rows
+    exclude: []   # intentionally vacant — not a filter; life_context stripped at router
+  connection:
+    primary:   [relationships, self, daily_life, purpose_direction]
+    secondary: [health_energy]
+    excluded:  [work_career, money_security]
+  release:
+    allowed:  [relationships, self, health_energy, money_security, daily_life, work_career]
+    excluded: [purpose_direction]
+  clarity:
+    allowed:  [work_career, relationships, self, health_energy, money_security, purpose_direction, daily_life]
+    excluded: []
+  growth:
+    allowed:  [work_career, relationships, self, health_energy, money_security, purpose_direction, daily_life]
+    excluded: []
+  joy:
+    primary:   [self, relationships, purpose_direction, daily_life, health_energy]
+    secondary: [work_career]
+    excluded:  [money_security]
+
+counts:
+  mantra_rows: 24
+  practice_rows: 21
+  sankalp_rows: 30
+  principle_rows: 125
+  wisdom_banner_only_rows: 6
+  stillness_universal_rows: 9   # 4 mantra + 5 practice (empty life_context_bias)
+  total_rows_tagged: 215
+
+# =============================================================================
+# MANTRAS (sparse: 0-2 contexts per row)
+# =============================================================================
+mantras:
+
+  # ---- STILLNESS (universal — NO life_context_bias) ----
+  - row_id: mantra.soham
+    class: mantra
+    room_fit: [stillness]
+    proposed_life_context_bias: []
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Stillness pre-cognitive; STRATEGY §1 forbids context bias. Soham = breath-witness, universal.
+    CURATOR_GATE: false
+
+  - row_id: mantra.peace_calm.om
+    class: mantra
+    room_fit: [stillness]
+    proposed_life_context_bias: []
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Pure Om — archetypal stillness seed, universal.
+    CURATOR_GATE: false
+
+  - row_id: mantra.shivoham
+    class: mantra
+    room_fit: [stillness]
+    proposed_life_context_bias: []
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Advaita non-dual identification; stillness-only; universal within room.
+    CURATOR_GATE: false
+
+  - row_id: mantra.om_shanti_om
+    class: mantra
+    room_fit: [stillness]
+    proposed_life_context_bias: []
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Shanti seed — universal stillness mantra.
+    CURATOR_GATE: false
+
+  # ---- CONNECTION (allowed: relationships/self/daily_life/purpose_direction; secondary health) ----
+  - row_id: mantra.om_namo_bhagavate_vasudevaya
+    class: mantra
+    room_fit: [connection]
+    proposed_life_context_bias: [relationships, self]
+    proposed_exclude_from_contexts: [work_career, money_security]
+    density_class: sparse
+    rationale: Vasudeva chant — devotional-relational; beloved-remembrance register.
+    CURATOR_GATE: false
+
+  - row_id: mantra.hare_krishna
+    class: mantra
+    room_fit: [connection]
+    proposed_life_context_bias: [relationships, daily_life]
+    proposed_exclude_from_contexts: [work_career, money_security]
+    density_class: sparse
+    rationale: Krishna-bhakti name-chant; relational-daily companionship.
+    CURATOR_GATE: false
+
+  - row_id: mantra.krishna_hare_krishna
+    class: mantra
+    room_fit: [connection]
+    proposed_life_context_bias: [relationships, self]
+    proposed_exclude_from_contexts: [work_career, money_security]
+    density_class: sparse
+    rationale: Same Krishna-bhakti family; paired with hare_krishna, tilts toward self-remembrance.
+    CURATOR_GATE: true
+
+  - row_id: mantra.emotional_healing.vasudevaya
+    class: mantra
+    room_fit: [connection]
+    proposed_life_context_bias: [self, health_energy]
+    proposed_exclude_from_contexts: [work_career, money_security]
+    density_class: sparse
+    rationale: Vasudeva emotional-healing variant; covers connection × health light.
+    CURATOR_GATE: false
+
+  # ---- RELEASE (allowed: all 6; exclude purpose_direction) ----
+  - row_id: mantra.maha_mrityunjaya
+    class: mantra
+    room_fit: [release]
+    proposed_life_context_bias: [health_energy, self]
+    proposed_exclude_from_contexts: [purpose_direction]
+    density_class: sparse
+    rationale: Shiva death-transcendence — grief/health-energy anchor for release.
+    CURATOR_GATE: false
+
+  - row_id: mantra.shiva_maha_mrityunjaya
+    class: mantra
+    room_fit: [release]
+    proposed_life_context_bias: [health_energy, relationships]
+    proposed_exclude_from_contexts: [purpose_direction]
+    density_class: sparse
+    rationale: Same family; relational-loss secondary biasing.
+    CURATOR_GATE: true
+
+  # mantra.shiva_om_tryambakam_healing STRIPPED — not in master_mantras.json (Wave 3 P0 hygiene 2026-04-21)
+
+  - row_id: mantra.asato_ma
+    class: mantra
+    room_fit: [release]
+    proposed_life_context_bias: [self]
+    proposed_exclude_from_contexts: [purpose_direction]
+    density_class: sparse
+    rationale: Asato ma — from unreal/darkness passage; self-grief and inner release.
+    CURATOR_GATE: false
+
+  # ---- CLARITY (all 7 allowed) ----
+  - row_id: mantra.hanuman_buddhi_balam
+    class: mantra
+    room_fit: [clarity]
+    proposed_life_context_bias: [work_career, purpose_direction]
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Hanuman buddhi/balam — discernment + courage anchor for work/calling.
+    CURATOR_GATE: false
+
+  - row_id: mantra.saraswati_om_aim_wisdom
+    class: mantra
+    room_fit: [clarity]
+    proposed_life_context_bias: [work_career, self]
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Saraswati wisdom — study/decision-making register.
+    CURATOR_GATE: false
+
+  # mantra.saraswati_om_saraswati_wisdom STRIPPED — not in master_mantras.json (Wave 3 P0 hygiene 2026-04-21)
+
+  - row_id: mantra.ganesha_om_gam_clarity
+    class: mantra
+    room_fit: [clarity]
+    proposed_life_context_bias: [work_career, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Ganesha obstacle-removal — work/daily hurdles.
+    CURATOR_GATE: false
+
+  # mantra.ganesha_om_gam_new_direction STRIPPED — not in master_mantras.json (Wave 3 P0 hygiene 2026-04-21)
+
+  - row_id: mantra.pavamana_asato_ma
+    class: mantra
+    room_fit: [clarity]
+    proposed_life_context_bias: [self, relationships]
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Pavamana — purify seeing; viveka register, self + relational confusion.
+    CURATOR_GATE: false
+
+  # ---- GROWTH (all 7 allowed) ----
+  - row_id: mantra.vedanta_om_tat_sat
+    class: mantra
+    room_fit: [growth]
+    proposed_life_context_bias: [self, purpose_direction]
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Om tat sat — BG 17.23 offering seal; purpose + self cultivation.
+    CURATOR_GATE: false
+
+  - row_id: mantra.gayatri
+    class: mantra
+    room_fit: [growth]
+    proposed_life_context_bias: [purpose_direction]
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Gayatri — illumination prayer, purpose/dharmic aspiration.
+    CURATOR_GATE: false
+
+  - row_id: mantra.gayatri_om_tat_savitur
+    class: mantra
+    room_fit: [growth]
+    proposed_life_context_bias: [purpose_direction, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Full Gayatri variant — paired with morning-rhythm practice surface.
+    CURATOR_GATE: true
+
+  - row_id: mantra.hreem_shreem_kleem_mahalakshmi
+    class: mantra
+    room_fit: [growth]
+    proposed_life_context_bias: [money_security, work_career]
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Mahalakshmi triad — abundance + work-flow. Rare money_security row in growth.
+    CURATOR_GATE: true
+
+  - row_id: mantra.rudra_om_namo_bhagavate
+    class: mantra
+    room_fit: [growth]
+    proposed_life_context_bias: [self]
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Rudra-namaskaram — self-transformation / tapas register.
+    CURATOR_GATE: true
+
+  # ---- JOY (primary: self/relationships/purpose_direction/daily_life/health_energy; secondary work_career; exclude money_security) ----
+  - row_id: mantra.purnamadah
+    class: mantra
+    room_fit: [joy]
+    proposed_life_context_bias: [self, daily_life]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: sparse
+    rationale: Purnamadah — fullness-from-fullness; universal joy anchor.
+    CURATOR_GATE: false
+
+  - row_id: mantra.lokah_samastah
+    class: mantra
+    room_fit: [joy]
+    proposed_life_context_bias: [relationships, daily_life]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: sparse
+    rationale: All-beings-happy blessing — outward seva register.
+    CURATOR_GATE: false
+
+  - row_id: mantra.sarve_bhavantu
+    class: mantra
+    room_fit: [joy]
+    proposed_life_context_bias: [relationships, health_energy]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: sparse
+    rationale: Universal-well-being prayer — relational + body blessing.
+    CURATOR_GATE: false
+
+  # mantra.krishna_govinda_joy STRIPPED — not in master_mantras.json (Wave 3 P0 hygiene 2026-04-21)
+
+  # mantra.krishna_govinda_gratitude STRIPPED — not in master_mantras.json (Wave 3 P0 hygiene 2026-04-21)
+
+  - row_id: mantra.lakshmi_om_shri_joy
+    class: mantra
+    room_fit: [joy]
+    proposed_life_context_bias: [self, purpose_direction]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: sparse
+    rationale: >
+      Lakshmi joy variant — note: money_security is EXCLUDED from joy per
+      STRATEGY §2 joy no-go; this row bias skews toward inner abundance/purpose,
+      not wealth acquisition. Curator verify joy-register appropriate.
+    CURATOR_GATE: true
+
+# =============================================================================
+# PRACTICES (sparse: 0-2 contexts per row)
+# =============================================================================
+practices:
+
+  # ---- STILLNESS (universal — NO life_context_bias) ----
+  - row_id: practice.belly_breathing
+    class: practice
+    room_fit: [stillness]
+    proposed_life_context_bias: []
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Stillness home; universal breath regulation.
+    CURATOR_GATE: false
+
+  - row_id: practice.four_four_six
+    class: practice
+    room_fit: [stillness]
+    proposed_life_context_bias: []
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Stillness home; universal breath pattern.
+    CURATOR_GATE: false
+
+  - row_id: practice.shanti_exhale_drop
+    class: practice
+    room_fit: [stillness]
+    proposed_life_context_bias: []
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Stillness home; universal exhale drop.
+    CURATOR_GATE: false
+
+  - row_id: practice.palm_soothing
+    class: practice
+    room_fit: [stillness]
+    proposed_life_context_bias: []
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Stillness home; universal self-soothe touch.
+    CURATOR_GATE: false
+
+  - row_id: practice.grounding_palm_press
+    class: practice
+    room_fit: [stillness]
+    proposed_life_context_bias: []
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Stillness home; grounding palm-press, universal.
+    CURATOR_GATE: false
+
+  # ---- CONNECTION ----
+  - row_id: practice.anahata_humming
+    class: practice
+    room_fit: [connection]
+    proposed_life_context_bias: [self, relationships]
+    proposed_exclude_from_contexts: [work_career, money_security]
+    density_class: sparse
+    rationale: Anahata humming — heart-center vibrational devotion; relational.
+    CURATOR_GATE: false
+
+  - row_id: practice.anahata_meditation
+    class: practice
+    room_fit: [connection]
+    proposed_life_context_bias: [self]
+    proposed_exclude_from_contexts: [work_career, money_security]
+    density_class: sparse
+    rationale: Heart-center meditation; self-devotion posture.
+    CURATOR_GATE: false
+
+  - row_id: practice.heart_softening
+    class: practice
+    room_fit: [connection]
+    proposed_life_context_bias: [relationships]
+    proposed_exclude_from_contexts: [work_career, money_security]
+    density_class: sparse
+    rationale: Heart-softening — pure relational.
+    CURATOR_GATE: false
+
+  # ---- RELEASE ----
+  - row_id: practice.bhramari
+    class: practice
+    room_fit: [release]
+    proposed_life_context_bias: [health_energy]
+    proposed_exclude_from_contexts: [purpose_direction]
+    density_class: sparse
+    rationale: Bhramari humming — body-regulation; health primary.
+    CURATOR_GATE: false
+
+  - row_id: practice.shanti_breath_cycle
+    class: practice
+    room_fit: [release]
+    proposed_life_context_bias: [health_energy, self]
+    proposed_exclude_from_contexts: [purpose_direction]
+    density_class: sparse
+    rationale: Shanti breath — post-release somatic settling.
+    CURATOR_GATE: false
+
+  - row_id: practice.heart_breath_release
+    class: practice
+    room_fit: [release]
+    proposed_life_context_bias: [relationships, self]
+    proposed_exclude_from_contexts: [purpose_direction]
+    density_class: sparse
+    rationale: Heart breath — relational/self grief somatic.
+    CURATOR_GATE: false
+
+  # ---- CLARITY ----
+  - row_id: practice.centering_drishti
+    class: practice
+    room_fit: [clarity]
+    proposed_life_context_bias: [work_career, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Centering drishti — single-point focus for decision work.
+    CURATOR_GATE: false
+
+  - row_id: practice.sakshi_breath
+    class: practice
+    room_fit: [clarity]
+    proposed_life_context_bias: [self]
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Sakshi-witness breath; sankhya-family self-clarity.
+    CURATOR_GATE: false
+
+  - row_id: practice.trataka
+    class: practice
+    room_fit: [clarity]
+    proposed_life_context_bias: [purpose_direction]
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Trataka candle-gaze; one-point concentration for direction.
+    CURATOR_GATE: true
+
+  - row_id: practice.shanti_trataka
+    class: practice
+    room_fit: [clarity]
+    proposed_life_context_bias: [daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Shanti trataka variant — daily-life steadying focus.
+    CURATOR_GATE: true
+
+  - row_id: practice.focus.ten_second_pause
+    class: practice
+    room_fit: [clarity]
+    proposed_life_context_bias: [work_career, relationships]
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Ten-second pause — pre-decision/pre-speech viveka.
+    CURATOR_GATE: false
+
+  # ---- GROWTH ----
+  - row_id: practice.mindful_55_walking
+    class: practice
+    room_fit: [growth]
+    proposed_life_context_bias: [daily_life, self]
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: 5/5 walking — abhyasa rhythm anchor.
+    CURATOR_GATE: false
+
+  - row_id: practice.one_sankalp_action
+    class: practice
+    room_fit: [growth]
+    proposed_life_context_bias: [purpose_direction, work_career]
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: One-sankalp micro-action — karma-yoga daily commitment.
+    CURATOR_GATE: false
+
+  - row_id: practice.mantra_journaling
+    class: practice
+    room_fit: [growth]
+    proposed_life_context_bias: [self]
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Mantra-journaling; svadhyaya practice, self primary.
+    CURATOR_GATE: false
+
+  - row_id: walking_meditation_mindful
+    class: practice
+    room_fit: [growth]
+    proposed_life_context_bias: [daily_life, health_energy]
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Walking meditation — daily + body-energy.
+    CURATOR_GATE: true
+
+  - row_id: practice.self_acceptance_pause
+    class: practice
+    room_fit: [growth]
+    proposed_life_context_bias: [self, relationships]
+    proposed_exclude_from_contexts: []
+    density_class: sparse
+    rationale: Self-acceptance pause — growth × self (Yamas ahimsa-toward-self register).
+    CURATOR_GATE: false
+
+# =============================================================================
+# SANKALPS (dense: 2-5 contexts, skew toward 3)
+# =============================================================================
+sankalps:
+
+  # ---- GROWTH (room context: all 7 allowed) ----
+  - row_id: sankalp.honor_my_skill
+    class: sankalp
+    room_fit: [growth]
+    proposed_life_context_bias: [work_career, purpose_direction, self]
+    proposed_exclude_from_contexts: []
+    density_class: dense
+    rationale: Svadharma-carry anchor — work/purpose/self triad matches BG 3.35 scope.
+    CURATOR_GATE: false
+
+  - row_id: sankalp.walk_dharma_path
+    class: sankalp
+    room_fit: [growth]
+    proposed_life_context_bias: [purpose_direction, self, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: dense
+    rationale: Path-walking dharmic resolve — purpose/self/daily rhythm.
+    CURATOR_GATE: false
+
+  - row_id: sankalp.move_with_dhriti
+    class: sankalp
+    room_fit: [growth]
+    proposed_life_context_bias: [work_career, daily_life, self]
+    proposed_exclude_from_contexts: []
+    density_class: dense
+    rationale: Dhriti perseverance — sustained-return register.
+    CURATOR_GATE: false
+
+  - row_id: sankalp.value_small_steps
+    class: sankalp
+    room_fit: [growth]
+    proposed_life_context_bias: [work_career, daily_life, health_energy]
+    proposed_exclude_from_contexts: []
+    density_class: dense
+    rationale: Small-steps abhyasa — work/daily/body health.
+    CURATOR_GATE: false
+
+  - row_id: sankalp.take_one_brave_step
+    class: sankalp
+    room_fit: [growth]
+    proposed_life_context_bias: [work_career, purpose_direction, relationships]
+    proposed_exclude_from_contexts: []
+    density_class: dense
+    rationale: Brave-step abhaya — work/purpose/relational courage.
+    CURATOR_GATE: false
+
+  - row_id: sankalp.remain_open_to_learning
+    class: sankalp
+    room_fit: [growth]
+    proposed_life_context_bias: [work_career, daily_life, purpose_direction]
+    proposed_exclude_from_contexts: []
+    density_class: dense
+    rationale: Svadhyaya open-to-learning — work/daily/purpose.
+    CURATOR_GATE: false
+
+  - row_id: sankalp.effort_over_outcome
+    class: sankalp
+    room_fit: [growth]
+    proposed_life_context_bias: [work_career, purpose_direction, self]
+    proposed_exclude_from_contexts: []
+    density_class: dense
+    rationale: Karma-yoga BG 2.47 applied — work/purpose/self.
+    CURATOR_GATE: false
+
+  - row_id: sankalp.seek_clarity_not_rush
+    class: sankalp
+    room_fit: [growth]
+    proposed_life_context_bias: [work_career, daily_life, relationships]
+    proposed_exclude_from_contexts: []
+    density_class: dense
+    rationale: Clarity-over-speed — work/daily/relational. Growth-only; do not route to clarity.
+    CURATOR_GATE: false
+
+  - row_id: sankalp.live_from_purpose
+    class: sankalp
+    room_fit: [growth]
+    proposed_life_context_bias: [purpose_direction, work_career, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: dense
+    rationale: Purpose-lived-from-within — purpose/work/daily.
+    CURATOR_GATE: false
+
+  # ---- JOY — gratitude subslot (primary: self/relationships/daily_life/purpose_direction/health_energy; exclude money_security) ----
+  - row_id: sankalp.live_in_gratitude
+    class: sankalp
+    room_fit: [joy]
+    proposed_life_context_bias: [self, daily_life, relationships]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: dense
+    rationale: Live-in-gratitude anchor — self/daily/relational.
+    CURATOR_GATE: false
+
+  - row_id: sankalp.choose_santosha
+    class: sankalp
+    room_fit: [joy]
+    proposed_life_context_bias: [self, daily_life, health_energy]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: dense
+    rationale: Santosha (YS 2.42) — self/daily/body contentment.
+    CURATOR_GATE: false
+
+  - row_id: sankalp.joyful_presence
+    class: sankalp
+    room_fit: [joy]
+    proposed_life_context_bias: [daily_life, relationships, self]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: dense
+    rationale: Joyful presence — daily/relational/self.
+    CURATOR_GATE: false
+
+  - row_id: notice_blessings
+    class: sankalp
+    room_fit: [joy]
+    proposed_life_context_bias: [daily_life, self]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: dense
+    rationale: Notice-blessings — gratitude subslot rotation; simple daily noticing.
+    CURATOR_GATE: true
+
+  - row_id: thank_three
+    class: sankalp
+    room_fit: [joy]
+    proposed_life_context_bias: [daily_life, relationships]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: dense
+    rationale: Thank-three micro — relational gratitude.
+    CURATOR_GATE: true
+
+  - row_id: write_gratitude
+    class: sankalp
+    room_fit: [joy]
+    proposed_life_context_bias: [self, daily_life]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: dense
+    rationale: Written gratitude — self-reflection + daily rhythm.
+    CURATOR_GATE: true
+
+  # ---- JOY — blessings subslot ----
+  - row_id: sankalp.give_grace
+    class: sankalp
+    room_fit: [joy]
+    proposed_life_context_bias: [relationships, self, daily_life]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: dense
+    rationale: Give-grace blessings anchor — relational/self/daily.
+    CURATOR_GATE: false
+
+  - row_id: sankalp.welcome_abundance
+    class: sankalp
+    room_fit: [joy]
+    proposed_life_context_bias: [self, purpose_direction, daily_life]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: dense
+    rationale: >
+      Welcome-abundance — inner-abundance register ONLY; money_security excluded
+      per joy doctrine. Curator check: ensure copy not read as wealth-attraction.
+    CURATOR_GATE: true
+
+  - row_id: sankalp.invite_abundance_gently
+    class: sankalp
+    room_fit: [joy]
+    proposed_life_context_bias: [self, daily_life, relationships]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: dense
+    rationale: Same abundance-family; same curator flag. Gentle relational register.
+    CURATOR_GATE: true
+
+  - row_id: sankalp.open_to_divine
+    class: sankalp
+    room_fit: [joy]
+    proposed_life_context_bias: [self, purpose_direction]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: dense
+    rationale: Divine-openness — ishvara-pranidhana bhakti-rasa.
+    CURATOR_GATE: false
+
+  - row_id: sankalp.see_goodness
+    class: sankalp
+    room_fit: [joy]
+    proposed_life_context_bias: [relationships, daily_life, self]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: dense
+    rationale: Seeing-goodness — YS 1.33 maitri-mudita; relational/daily/self.
+    CURATOR_GATE: false
+
+  - row_id: smile_at_all
+    class: sankalp
+    room_fit: [joy]
+    proposed_life_context_bias: [relationships, daily_life]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: dense
+    rationale: Smile-at-all — daily-relational seva gesture.
+    CURATOR_GATE: true
+
+  # ---- JOY — seva subslot ----
+  - row_id: dana_practice
+    class: sankalp
+    room_fit: [joy]
+    proposed_life_context_bias: [relationships, purpose_direction, daily_life]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: dense
+    rationale: >
+      Dana anchor — generosity practice. Note: money_security EXCLUDED per joy
+      doctrine; dana here = outward-gift posture, not financial self-security.
+    CURATOR_GATE: true
+
+  - row_id: secret_kindness
+    class: sankalp
+    room_fit: [joy]
+    proposed_life_context_bias: [relationships, daily_life]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: dense
+    rationale: Secret-kindness — relational/daily seva.
+    CURATOR_GATE: false
+
+  - row_id: help_one_person
+    class: sankalp
+    room_fit: [joy]
+    proposed_life_context_bias: [relationships, purpose_direction]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: dense
+    rationale: Help-one-person — relational seva + calling-extension.
+    CURATOR_GATE: false
+
+  - row_id: feed_being
+    class: sankalp
+    room_fit: [joy]
+    proposed_life_context_bias: [relationships, daily_life, health_energy]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: dense
+    rationale: Feed-being — bhuta-yajna; relational/daily/body.
+    CURATOR_GATE: true
+
+  - row_id: check_on_someone
+    class: sankalp
+    room_fit: [joy]
+    proposed_life_context_bias: [relationships, daily_life]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: dense
+    rationale: Check-on-someone — pure relational seva.
+    CURATOR_GATE: false
+
+  - row_id: share_knowledge
+    class: sankalp
+    room_fit: [joy]
+    proposed_life_context_bias: [relationships, purpose_direction, work_career]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: dense
+    rationale: >
+      Share-knowledge — seva + karma-yoga-craft. work_career appears as joy
+      SECONDARY context per §2; first seva row to credibly serve it.
+    CURATOR_GATE: true
+
+  - row_id: work_as_offering
+    class: sankalp
+    room_fit: [joy]
+    proposed_life_context_bias: [work_career, purpose_direction, daily_life]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: dense
+    rationale: >
+      Work-as-offering — the ONE karma-yoga-craft seva sankalp per
+      WAVE1_SYNTHESIS §1.4 joy × work_career gap note. Primary work_career anchor
+      within joy; until Wave 2 karma-yoga-craft authoring lands, this row carries.
+    CURATOR_GATE: true
+
+# =============================================================================
+# PRINCIPLES (moderate: 1-3 contexts per row)
+# =============================================================================
+# Source-of-truth for most principle row life_context_bias is TAG_PATCH_WAVE1.yaml
+# groups 2-4 already authored. Below are the additional principles named in
+# ROOM_POOL_PLAN_V2.yaml not covered by TAG_PATCH_WAVE1 groups 2-4 (i.e. rows
+# introduced by migrations 0134/0135 + Agent F/G wave2 authoring) OR rows where
+# TAG_PATCH_WAVE1 life_context_bias was empty/inconsistent and needs affirmation.
+#
+# For rows already tagged in TAG_PATCH_WAVE1 groups 2-4, this patch CONFIRMS
+# the existing proposed life_context_bias (no override) — see §confirmations below.
+# =============================================================================
+principles:
+
+  # ---- CLARITY × self ---- (Sankhya viveka corpus from 0134)
+  - row_id: sankhya_seer_is_not_the_seen
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Viveka-khyati — pure self-clarity; signature clarity × self.
+    CURATOR_GATE: false
+
+  - row_id: sankhya_misidentification_creates_bondage
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Asmita-misidentification; clarity × self.
+    CURATOR_GATE: false
+
+  - row_id: sankhya_discern_the_changing_from_the_constant
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [self, relationships]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Changing-from-constant — self + relational flux.
+    CURATOR_GATE: false
+
+  - row_id: sankhya_the_gunas_are_moving
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [self, health_energy]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Guna-motion — self + body-state observation.
+    CURATOR_GATE: false
+
+  - row_id: sankhya_rajas_needs_direction_not_more_fuel
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [work_career, health_energy]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Rajas — over-activity work/body register.
+    CURATOR_GATE: false
+
+  - row_id: sankhya_tamas_needs_lift_not_self_contempt
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [self, health_energy]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Tamas — inertia self-kindness register.
+    CURATOR_GATE: false
+
+  - row_id: sankhya_sattva_needs_protection
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [self, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Sattva-protection daily rhythm; guard the clear state.
+    CURATOR_GATE: false
+
+  - row_id: sankhya_buddhi_should_lead_not_reactivity
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [work_career, relationships]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Buddhi-lead — decision making + relational reactivity.
+    CURATOR_GATE: false
+
+  - row_id: sankhya_ahamkara_makes_it_personal_too_fast
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [relationships, work_career]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Ahamkara ego-take-it-personal; relational + work.
+    CURATOR_GATE: false
+
+  - row_id: sankhya_manas_collects_too_much_noise
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [daily_life, self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Manas-noise — daily info-overload + self-scatter.
+    CURATOR_GATE: false
+
+  - row_id: sankhya_prakriti_is_doing_the_moving
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Prakriti-moves; pure self-viveka.
+    CURATOR_GATE: false
+
+  - row_id: sankhya_witness_before_interpretation
+    class: principle
+    room_fit: [clarity, release]
+    proposed_life_context_bias: [self, relationships]
+    proposed_exclude_from_contexts: [purpose_direction]   # release-exclusion applies on release surface
+    density_class: moderate
+    rationale: Witness-before-interpretation — dual-room (clarity primary + release banner).
+    CURATOR_GATE: true
+
+  - row_id: sankhya_return_to_the_witnessing_center
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [self, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Return-to-witness — sakshi practice refrain.
+    CURATOR_GATE: false
+
+  - row_id: sankhya_do_not_confuse_clarity_with_coldness
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [relationships, self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Warm-clarity protection — relational not coldness.
+    CURATOR_GATE: false
+
+  # ---- CLARITY — YS klesha corpus (0134) ----
+  - row_id: yoga_name_the_vritti
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [self, work_career]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Name-the-vritti — naming reduces grip; self + decision work.
+    CURATOR_GATE: false
+
+  - row_id: yoga_kleshas_distort_seeing
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [self, relationships]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Kleshas distort — pervasive self + relational.
+    CURATOR_GATE: false
+
+  - row_id: yoga_avidya_is_the_root_confusion
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Avidya root — pure self.
+    CURATOR_GATE: false
+
+  - row_id: yoga_asmita_tightens_identity
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [self, work_career]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Asmita ego-identity — self + vocational identity grip.
+    CURATOR_GATE: false
+
+  - row_id: yoga_lower_the_obstacles_by_naming_them
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [self, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Name-obstacles-to-lower — daily + self practice.
+    CURATOR_GATE: false
+
+  - row_id: yoga_opposite_thought_when_harmful_patterns_rise
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [relationships, self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Pratipaksha-bhavana (YS 2.33) — relational + self.
+    CURATOR_GATE: false
+
+  - row_id: yoga_abhyasa_steady_return
+    class: principle
+    room_fit: [clarity, growth]
+    proposed_life_context_bias: [daily_life, self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Abhyasa — cross-room (clarity teaching + growth principle rotation).
+    CURATOR_GATE: false
+
+  - row_id: yoga_vairagya_release_the_grip
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [self, money_security]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Vairagya-release-grip — self-grip + money-grip grip-patterns.
+    CURATOR_GATE: true
+
+  - row_id: yoga_one_pointedness_gathers_the_mind
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [work_career, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Ekagrata — work/daily focus.
+    CURATOR_GATE: false
+
+  - row_id: yoga_steady_the_breath_to_steady_the_mind
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [health_energy, self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Pranayama-for-buddhi — body pathway to clarity.
+    CURATOR_GATE: false
+
+  - row_id: yoga_clear_perception_needs_inner_quiet
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [daily_life, self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Inner-quiet-for-seeing; daily + self.
+    CURATOR_GATE: false
+
+  - row_id: yoga_shorten_the_distance_between_noticing_and_return
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [self, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Faster-return abhyasa; self + daily practice.
+    CURATOR_GATE: false
+
+  - row_id: yoga_turn_inward_when_the_senses_are_scattering
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [self, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Pratyahara — senses scattered, turn inward.
+    CURATOR_GATE: false
+
+  - row_id: yoga_hold_attention_gently_on_one_place
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [work_career, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Dharana gentle-one-point — work/daily.
+    CURATOR_GATE: false
+
+  - row_id: yoga_let_attention_flow_without_breaking
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [work_career, self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Dhyana flow — sustained work attention + self.
+    CURATOR_GATE: false
+
+  - row_id: yoga_object_and_observer_can_temporarily_stop_fighting
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [self, relationships]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Samadhi-like object-observer collapse; self + relational.
+    CURATOR_GATE: true
+
+  - row_id: yoga_use_one_truthful_anchor
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [purpose_direction, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: YS 1.32 eka-tattvabhyasa (clarity replacement for decontaminated stillness anchor).
+    CURATOR_GATE: false
+
+  - row_id: yoga_befriend_the_calm_breath_pause
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [health_energy, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Breath-pause-befriend; body + daily.
+    CURATOR_GATE: false
+
+  # ---- CLARITY — Niti corpus (0134) ----
+  - row_id: niti_soften_when_the_bond_can_hold
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [relationships]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Relational soften-when-hold — pure relationships.
+    CURATOR_GATE: false
+
+  - row_id: niti_firm_boundary_when_delay_worsens_harm
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [relationships, work_career]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Firm-boundary — relational + work.
+    CURATOR_GATE: false
+
+  - row_id: niti_disengage_when_the_field_is_not_teachable
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [relationships, work_career]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Disengage-untrainable-field — relational + workplace.
+    CURATOR_GATE: false
+
+  - row_id: niti_protect_peace_over_winning
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [relationships, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Protect-peace — relational + daily-life.
+    CURATOR_GATE: false
+
+  - row_id: niti_speak_truth_with_timing
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [relationships, work_career]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Truth-with-timing — satya-by-timing.
+    CURATOR_GATE: false
+
+  - row_id: niti_read_pattern_not_promise
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [relationships, money_security, work_career]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Read-pattern — cross-domain pragmatic discernment.
+    CURATOR_GATE: false
+
+  - row_id: niti_choose_the_smallest_effective_move
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [work_career, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Small-effective — Chanakya pragmatic.
+    CURATOR_GATE: false
+
+  - row_id: niti_look_for_the_hidden_cost
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [money_security, work_career]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Hidden-cost discernment — money/work.
+    CURATOR_GATE: false
+
+  - row_id: niti_do_not_advise_the_unwilling_mid_fury
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [relationships]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: No-advise-in-fury — relational.
+    CURATOR_GATE: false
+
+  - row_id: niti_preserve_relationship_without_surrendering_truth
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [relationships]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Preserve-without-lie — pure relational.
+    CURATOR_GATE: false
+
+  # ---- CLARITY — BG tight verse set (0134) ----
+  - row_id: gita_return_the_wandering_mind
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [self, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: BG 6.26 chanchalam-manas return — self + daily.
+    CURATOR_GATE: false
+
+  - row_id: gita_unhook_from_liking_disliking
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [relationships, self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: BG 2.64 raga-dvesha unhook; relational + self.
+    CURATOR_GATE: false
+
+  # ---- CLARITY — Dharma dual-tagged (0134) ----
+  - row_id: dharma_clarity_before_loyalty_to_group_pressure
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [relationships, work_career]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Clarity-over-group-pressure — relational + work discrimination.
+    CURATOR_GATE: false
+
+  - row_id: dharma_when_in_doubt_return_to_non_harmful_duty
+    class: principle
+    room_fit: [clarity]
+    proposed_life_context_bias: [work_career, relationships, purpose_direction]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Ahimsa-default in doubt; work/relational/purpose.
+    CURATOR_GATE: false
+
+  # ---- RELEASE banner (0135) ----
+  - row_id: gita_stable_in_sorrow_and_pleasure
+    class: principle
+    room_fit: [release]
+    proposed_life_context_bias: [health_energy, self]
+    proposed_exclude_from_contexts: [purpose_direction]
+    density_class: moderate
+    rationale: BG 2.14-family sparse banner for release.
+    CURATOR_GATE: false
+
+  # ---- RELEASE — Ayurveda added (0135) ----
+  - row_id: ayur_warmth_for_fear_and_shakiness
+    class: principle
+    room_fit: [release]
+    proposed_life_context_bias: [health_energy, self]
+    proposed_exclude_from_contexts: [purpose_direction]
+    density_class: moderate
+    rationale: Warmth-for-shakiness — vata-release somatic.
+    CURATOR_GATE: false
+
+  # ---- RELEASE — Yamas aparigraha × money_security ----
+  - row_id: yamas_aparigraha_release_the_extra
+    class: principle
+    room_fit: [release]
+    proposed_life_context_bias: [money_security, self]
+    proposed_exclude_from_contexts: [purpose_direction]
+    density_class: moderate
+    rationale: Aparigraha release-extra — money-grief home.
+    CURATOR_GATE: false
+
+  - row_id: yamas_aparigraha_in_identity
+    class: principle
+    room_fit: [release]
+    proposed_life_context_bias: [money_security, self]
+    proposed_exclude_from_contexts: [purpose_direction]
+    density_class: moderate
+    rationale: Aparigraha-identity — money + identity release.
+    CURATOR_GATE: false
+
+  # ---- GROWTH — Yamas primary substrate (0135) ----
+  - row_id: yamas_ahimsa_toward_self
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [self, health_energy]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Ahimsa-toward-self — self-kindness cultivation.
+    CURATOR_GATE: false
+
+  - row_id: yamas_satya_clean_truth
+    class: principle
+    room_fit: [growth, clarity]
+    proposed_life_context_bias: [relationships, work_career]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Clean-truth — dual-room (growth cultivation + clarity relational viveka).
+    CURATOR_GATE: false
+
+  - row_id: yamas_asteya_not_taking_what_is_not_given
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [work_career, relationships]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Asteya — not-taking (credit/time/energy).
+    CURATOR_GATE: false
+
+  - row_id: yamas_brahmacharya_guard_the_vital_force
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [health_energy, self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Brahmacharya vital-force — body + self energy.
+    CURATOR_GATE: false
+
+  - row_id: yamas_brahmacharya_in_speech_and_attention
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [daily_life, work_career]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Brahmacharya-attention-speech; daily + work focus.
+    CURATOR_GATE: false
+
+  - row_id: yamas_tapas_warmth_not_punishment
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [self, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Tapas-as-warmth — self + daily cultivation.
+    CURATOR_GATE: false
+
+  - row_id: yamas_svadhyaya_study_the_pattern
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [self, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Svadhyaya-study-pattern — reflective self-practice.
+    CURATOR_GATE: false
+
+  - row_id: yamas_ishvara_pranidhana_release_final_control
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [purpose_direction, self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Ishvara-pranidhana release-control; purpose + self.
+    CURATOR_GATE: false
+
+  # ---- GROWTH — Niyamas (0135) ----
+  - row_id: niyamas_shaucha_clear_the_field
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [daily_life, health_energy]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Shaucha-clear-field — daily + body.
+    CURATOR_GATE: false
+
+  - row_id: niyamas_shaucha_reduce_inner_toxicity
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [self, health_energy]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Shaucha-inner-toxicity; self + body.
+    CURATOR_GATE: false
+
+  - row_id: niyamas_santosha_rest_in_enough
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [self, daily_life, money_security]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Santosha-enough — self/daily/money-enough.
+    CURATOR_GATE: false
+
+  - row_id: niyamas_santosha_without_stagnation
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [work_career, purpose_direction]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Content-without-complacency — work + purpose.
+    CURATOR_GATE: false
+
+  - row_id: niyamas_tapas_warm_discipline
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [daily_life, self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Warm-discipline tapas; daily + self.
+    CURATOR_GATE: false
+
+  - row_id: niyamas_tapas_keep_the_vow_small_and_true
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [daily_life, self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Small-vow tapas; abhyasa-small-true.
+    CURATOR_GATE: false
+
+  - row_id: niyamas_svadhyaya_read_the_pattern
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [self, work_career]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Svadhyaya-pattern-read; self + work.
+    CURATOR_GATE: false
+
+  - row_id: niyamas_svadhyaya_name_the_story_you_keep_telling
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [self, relationships]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Name-the-story — self + relational narrative.
+    CURATOR_GATE: false
+
+  - row_id: niyamas_return_after_break_without_shame
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [self, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Return-without-shame — abhyasa steady return.
+    CURATOR_GATE: false
+
+  - row_id: niyamas_order_the_day_around_the_sacred
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [daily_life, purpose_direction]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Day-ordered-around-sacred — daily dharmic rhythm.
+    CURATOR_GATE: false
+
+  # ---- GROWTH — BG growth-native (0135) ----
+  - row_id: gita_act_from_what_is_yours_to_do
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [work_career, purpose_direction]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: BG 3.35 svadharma-action variant.
+    CURATOR_GATE: false
+
+  - row_id: gita_lift_by_abhyasa_and_detachment
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [self, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: BG 6.35 abhyasa-vairagya — self + daily.
+    CURATOR_GATE: false
+
+  - row_id: gita_no_effort_is_lost
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [purpose_direction, self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: BG 2.40 no-effort-lost; purpose + self encouragement.
+    CURATOR_GATE: false
+
+  - row_id: gita_be_your_own_lamp_of_effort
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [self, purpose_direction]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Self-lamp effort — self + purpose.
+    CURATOR_GATE: false
+
+  - row_id: gita_walk_from_faith_not_only_mood
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [daily_life, self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Shraddha-beyond-mood — steady faith daily.
+    CURATOR_GATE: false
+
+  - row_id: gita_steady_in_success_failure
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [work_career, self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: BG 2.48 samatva — work + self equanimity.
+    CURATOR_GATE: false
+
+  - row_id: gita_qualities_of_the_steady_heart
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [self, relationships]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: BG 12 sthita-prajna qualities; self + relational.
+    CURATOR_GATE: false
+
+  - row_id: gita_right_measure_in_living
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [daily_life, health_energy]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: BG 6.16-17 right-measure yukta-ahara-vihara.
+    CURATOR_GATE: false
+
+  # ---- GROWTH — Dharma Tier-2 (0135) ----
+  - row_id: dharma_alignment_brings_inner_strength
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [purpose_direction, self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Alignment-strength — purpose + self.
+    CURATOR_GATE: false
+
+  - row_id: dharma_do_not_trade_integrity_for_short_term_relief
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [work_career, money_security]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Integrity-over-relief — work + money integrity.
+    CURATOR_GATE: false
+
+  - row_id: dharma_the_next_clean_step_is_already_the_path
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [daily_life, work_career]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Next-clean-step; daily + work micro-path.
+    CURATOR_GATE: false
+
+  - row_id: dharma_do_the_needed_thing_before_the_impressive_thing
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [work_career, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Needed-before-impressive; work discipline.
+    CURATOR_GATE: false
+
+  - row_id: dharma_keep_commitments_visible
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [relationships, work_career]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Visible-commitments; relational + work accountability.
+    CURATOR_GATE: false
+
+  # ---- GROWTH — YS abhyasa/tapas/svadhyaya (0135) ----
+  - row_id: yoga_samadhi_grows_from_refinement_not_force
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [self, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Refinement-over-force — subtle abhyasa.
+    CURATOR_GATE: false
+
+  - row_id: yoga_repeated_settling_changes_the_field
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [daily_life, self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Repetition changes field; daily + self.
+    CURATOR_GATE: false
+
+  - row_id: yoga_steadiness_is_built_in_the_middle_not_the_edge
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [daily_life, work_career]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Middle-not-edge steadiness; daily + work rhythm.
+    CURATOR_GATE: false
+
+  - row_id: yoga_devotion_can_also_steady_the_mind
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [self, purpose_direction]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: YS 1.23 ishvara-pranidhana as stabilizer.
+    CURATOR_GATE: false
+
+  - row_id: yoga_the_subtlest_obstacle_is_impatience
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [self, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Impatience-obstacle; self + daily patience.
+    CURATOR_GATE: false
+
+  # ---- GROWTH — Dinacharya (0135) ----
+  - row_id: dina_wake_before_rush
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [daily_life, health_energy]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Wake-before-rush; daily + body rhythm.
+    CURATOR_GATE: false
+
+  - row_id: dina_first_light_no_phone
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [daily_life, self]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Morning screen-restraint; daily + self.
+    CURATOR_GATE: false
+
+  - row_id: dina_warm_water_on_waking
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [daily_life, health_energy]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Warm-water wakeup; daily + body.
+    CURATOR_GATE: false
+
+  - row_id: dina_clear_the_body_early
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [health_energy, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Morning elimination; body + daily.
+    CURATOR_GATE: false
+
+  - row_id: dina_move_before_sitting_long
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [health_energy, work_career]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Move-before-sit; body + work.
+    CURATOR_GATE: false
+
+  - row_id: dina_same_time_meals
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [daily_life, health_energy]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Meal regularity; daily + body.
+    CURATOR_GATE: false
+
+  - row_id: dina_midday_main_effort
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [work_career, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Midday-main-effort; work + daily alignment with peak energy.
+    CURATOR_GATE: false
+
+  - row_id: dina_evening_lighten_tasks
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [daily_life, health_energy]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Evening taper — daily + body.
+    CURATOR_GATE: false
+
+  - row_id: dina_pre_sleep_same_sequence
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [daily_life, health_energy]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Pre-sleep routine; daily + body.
+    CURATOR_GATE: false
+
+  - row_id: dina_after_work_reset
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [work_career, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: After-work reset; work + daily boundary.
+    CURATOR_GATE: false
+
+  - row_id: dina_match_routine_to_life_stage_not_ideal_image
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [self, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Routine-to-life-stage; self + daily adaptive.
+    CURATOR_GATE: false
+
+  # ---- GROWTH — Ayurveda (0135) ----
+  - row_id: ayur_small_daily_care_prevents_spikes
+    class: principle
+    room_fit: [growth]
+    proposed_life_context_bias: [health_energy, daily_life]
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Small-care-prevents-spikes; body + daily.
+    CURATOR_GATE: false
+
+  # ---- CONNECTION — Bhakti banners (0135) ----
+  - row_id: bhakti_remember_the_beloved_in_the_middle_of_life
+    class: principle
+    room_fit: [connection]
+    proposed_life_context_bias: [relationships, daily_life]
+    proposed_exclude_from_contexts: [work_career, money_security]
+    density_class: moderate
+    rationale: Beloved-remembrance-in-life; relational + daily.
+    CURATOR_GATE: false
+
+  - row_id: bhakti_offer_the_moment_not_only_the_ritual
+    class: principle
+    room_fit: [connection, joy]
+    proposed_life_context_bias: [self, daily_life]
+    proposed_exclude_from_contexts: [work_career, money_security]
+    density_class: moderate
+    rationale: Offer-the-moment — dual-room (connection banner + joy banner).
+    CURATOR_GATE: true
+
+  - row_id: bhakti_love_softens_the_hard_inner_grip
+    class: principle
+    room_fit: [connection]
+    proposed_life_context_bias: [self, relationships]
+    proposed_exclude_from_contexts: [work_career, money_security]
+    density_class: moderate
+    rationale: Love-softens-grip; self + relational.
+    CURATOR_GATE: false
+
+  - row_id: bhakti_gratitude_keeps_the_heart_open
+    class: principle
+    room_fit: [connection, joy]
+    proposed_life_context_bias: [relationships, daily_life]
+    proposed_exclude_from_contexts: [work_career, money_security]
+    density_class: moderate
+    rationale: Gratitude-open-heart — dual-room banner.
+    CURATOR_GATE: true
+
+  - row_id: bhakti_humility_makes_room_for_grace
+    class: principle
+    room_fit: [connection]
+    proposed_life_context_bias: [self, purpose_direction]
+    proposed_exclude_from_contexts: [work_career, money_security]
+    density_class: moderate
+    rationale: Humility-for-grace; self + purpose.
+    CURATOR_GATE: false
+
+  - row_id: bhakti_the_name_can_be_home
+    class: principle
+    room_fit: [connection]
+    proposed_life_context_bias: [self, daily_life]
+    proposed_exclude_from_contexts: [work_career, money_security]
+    density_class: moderate
+    rationale: Name-as-home; self + daily anchor.
+    CURATOR_GATE: false
+
+  # ---- JOY Bhakti banners (0135) ----
+  - row_id: bhakti_trust_the_small_daily_turning
+    class: principle
+    room_fit: [joy]
+    proposed_life_context_bias: [daily_life, self]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: moderate
+    rationale: Small-daily-turning trust; daily + self.
+    CURATOR_GATE: false
+
+  - row_id: bhakti_stay_faithful_in_ordinary_time
+    class: principle
+    room_fit: [joy]
+    proposed_life_context_bias: [daily_life, relationships]
+    proposed_exclude_from_contexts: [money_security]
+    density_class: moderate
+    rationale: Faithful-ordinary-time; daily + relational.
+    CURATOR_GATE: false
+
+  # ---- STILLNESS — 0135 additions (NO life_context) ----
+  - row_id: yoga_rest_in_the_seer
+    class: principle
+    room_fit: [stillness]
+    proposed_life_context_bias: []
+    proposed_exclude_from_contexts: []
+    density_class: moderate
+    rationale: Vedanta-rest-in-seer — stillness universal banner; no life_context by policy.
+    CURATOR_GATE: false
+
+# =============================================================================
+# CONFIRMATIONS — rows already given life_context_bias in TAG_PATCH_WAVE1
+# =============================================================================
+# These rows had proposed life_context_bias in TAG_PATCH_WAVE1 groups 2-4
+# (pooled clarity principles + orphan Ayurveda + Yamas/Niyamas). This file
+# CONFIRMS those values (no override). Listed here so downstream tagging
+# automation has a single consolidated reference for Rule 5.
+#
+# For each row, the life_context_bias shipped in TAG_PATCH_WAVE1 is
+# considered accepted and requires no change except: (a) confirm `self` vs
+# `self_devotion` naming (use `self`), and (b) re-affirm stillness rows carry
+# empty life_context_bias.
+# =============================================================================
+
+confirmations_from_tag_patch_wave1:
+  # Group 2 — pooled clarity principles (31 rows; life_context_bias already set)
+  - gita_detached_action
+  - gita_choose_clarity_over_despair
+  - gita_clarity_after_desire_anger
+  - gita_see_desire_as_the_covering_force
+  - gita_endure_the_passing_contacts
+  - gita_become_instrument_not_controller
+  - gita_offer_action_without_ownership
+  - gita_impermanence_of_form
+  - gita_nishkama_karma_as_celebration
+  - gita_sthitaprajna_destination
+  - gita_svadharma_is_what_you_have
+  - dharma_choose_the_right_over_the_easy
+  - dharma_do_not_abandon_duty_in_fear
+  - dharma_right_order_before_right_speed
+  - dharma_carry_only_the_duty_that_is_yours
+  - dharma_small_clean_actions_hold_the_path
+  - dharma_community_as_seva
+  - niti_prefer_stability_over_dramatic_reversal
+  - niti_separate_fact_from_emotion_before_acting
+  - sankhya_freedom_grows_with_discrimination  # CORRECTION: was empty; should be [self]
+  - sankhya_witness_as_friend
+  - sankhya_witness_joy_without_clinging
+  - yoga_friendliness_compassion_joy_equanimity
+  - yoga_sutras_abhyasa_deepening
+  - yoga_sutras_one_anchor_when_scattered
+  - yoga_sutras_plateau_as_ripening
+  - yoga_sutras_santosha_as_practice
+  - yoga_sutras_subtler_not_intenser
+  - bhakti_keep_company_with_the_devotional
+  - bhakti_divine_as_constant_companion
+  - bhakti_amplify_gratitude
+  # Group 3 — Ayurveda orphans (partial list; tagged in Wave 1A)
+  - ayur_vata_ground_evening
+  - ayur_pitta_cool_midday_heat
+  - ayur_cool_after_conflict
+  - ayur_cool_food_when_heat_is_high
+  - ayur_warm_and_oil_when_dry
+  - ayur_soften_before_sleep_after_stress
+  - ayur_rhythm_over_intensity
+  - ayur_stability_through_repetition
+  - ayur_regular_sleep_wake_rhythm
+  - ayur_regular_meals_reduce_reactivity
+  - ayur_do_less_when_recovering
+  - ayur_pause_before_decision_when_agitated
+  - ayur_sleep_before_wisdom
+  - ayur_eat_before_hard_conversation
+  - ayur_warm_food_for_vata_scatter              # stillness — must be empty
+  - ayur_kapha_move_morning_inertia              # stillness — must be empty
+  - ayur_abhyanga_for_overwhelm
+  - ayur_evening_screen_restraint
+  - ayur_morning_elimination_and_clear_start
+  - ayur_sense_restraint_when_overloaded
+  # Group 4 — Yamas/Niyamas (partial)
+  - niyamas_svadhyaya_turn_to_teaching_not_only_self_reference
+  - niyamas_ishvara_pranidhana_release_final_burden
+  - niyamas_ishvara_pranidhana_trust_without_collapse
+  - niyamas_make_the_inner_space_habitable
+
+# =============================================================================
+# CORRECTIONS TO TAG_PATCH_WAVE1
+# =============================================================================
+corrections_to_tag_patch_wave1:
+  - row_id: sankhya_freedom_grows_with_discrimination
+    issue: >
+      TAG_PATCH_WAVE1 line 1146 set life_context_bias: [] but this is a CLARITY
+      anchor (not stillness). Density doctrine says principle = 1-3 contexts.
+      Should be [self] at minimum. Proposed: [self].
+    proposed_life_context_bias: [self]
+
+  - row_id: ayur_warm_food_for_vata_scatter
+    issue: >
+      TAG_PATCH_WAVE1 line 1700 correctly set life_context_bias: [] because
+      row is stillness-room-fit. CONFIRMED correct per STRATEGY §1 — stillness
+      must be empty. No change.
+    proposed_life_context_bias: []
+
+  - row_id: ayur_kapha_move_morning_inertia
+    issue: Same as ayur_warm_food_for_vata_scatter — correctly empty. Confirmed.
+    proposed_life_context_bias: []
+
+  - row_id: "self_devotion naming in ROOM_POOL_PLAN_V2.yaml"
+    issue: >
+      ROOM_POOL_PLAN_V2.yaml uses `self_devotion` throughout its
+      life_context_coverage blocks (lines 105-682). STRATEGY §1 canonical
+      context list (line 6) names the context `self`. TAGGING_DRAFT_V1 uses
+      `self`. TAG_PATCH_WAVE1 uses `self`. Outcome: Wave 1b normalization
+      migration must convert `self_devotion` → `self` in ROOM_POOL_PLAN_V2,
+      or strategy must be amended to use `self_devotion`. Agent 3 proceeds
+      with `self` per strategy authority. FOUNDER FLAG.
+    proposed_life_context_bias: "N/A — meta / governance"
+
+# =============================================================================
+# CURATOR ESCALATION LIST (non-obvious calls)
+# =============================================================================
+curator_escalation:
+  - category: dual-room life_context coherence
+    rows:
+      - sankhya_witness_before_interpretation  # clarity + release surfaces → context differs by room
+      - yoga_abhyasa_steady_return             # clarity + growth
+      - yamas_satya_clean_truth                # growth + clarity
+      - bhakti_offer_the_moment_not_only_the_ritual  # connection + joy
+      - bhakti_gratitude_keeps_the_heart_open  # connection + joy
+    question: >
+      Dual-room rows use single life_context_bias list. Both rooms should
+      honor it, but exclude_from_contexts must apply per the STRICTER room.
+      Current choice = strictest excludes (connection rules dominate for
+      bhakti dual; release rules dominate for sankhya dual). Confirm?
+  - category: money_security proximity in joy
+    rows:
+      - sankalp.welcome_abundance
+      - sankalp.invite_abundance_gently
+      - mantra.lakshmi_om_shri_joy
+      - dana_practice
+    question: >
+      These rows touch abundance/lakshmi/dana language but joy EXCLUDES
+      money_security. Our exclude_from_contexts: [money_security] is strict,
+      but copy may still *read* as money-adjacent. Curator: verify copy
+      does not drift toward wealth-attraction tonality.
+  - category: growth-only sankalps flagged wording-collision
+    rows:
+      - sankalp.release_limiting_beliefs  # says "release" — must not route to release room
+      - sankalp.seek_clarity_not_rush     # says "clarity" — must not route to clarity room
+      - sankalp.work_as_worship           # dual-fit growth+joy per TAG_PATCH_WAVE1
+    question: >
+      These wording collisions are already flagged in TAG_PATCH_WAVE1
+      uncertainty lists. life_context_bias set correctly per growth
+      context policy; router must enforce room_fit = growth only.
+  - category: stillness universality audit
+    rows:
+      - mantra.soham
+      - mantra.peace_calm.om
+      - mantra.shivoham
+      - mantra.om_shanti_om
+      - practice.belly_breathing
+      - practice.four_four_six
+      - practice.shanti_exhale_drop
+      - practice.palm_soothing
+      - practice.grounding_palm_press
+      - yoga_rest_in_the_seer
+      - ayur_vata_ground_evening   # banner surface only in stillness
+      - yoga_sutras_one_anchor_when_scattered
+      - ayur_warm_food_for_vata_scatter
+      - ayur_kapha_move_morning_inertia
+    question: >
+      All 14 stillness-surface rows carry life_context_bias: []. Affirm
+      STRATEGY §1 invariant: stillness router strips life_context param
+      before pool scoring (no Rule 5 score contribution).

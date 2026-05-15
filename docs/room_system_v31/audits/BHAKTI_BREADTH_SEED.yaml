@@ -1,0 +1,1358 @@
+# Bhakti Breadth Seed — Wave 3 (P1-B)
+#
+# Scope: Gauḍīya / Ālvār / Sant lineage breadth for connection + joy rooms.
+# Authored: 2026-04-21
+# Founder lock basis: F2 (2026-04-19) — Wave 3 expansion requirement.
+# Status: draft — all rows CURATOR_GATE=true; founder review required.
+#
+# Migration target: ingest via migration 0140 (next in sequence after 0139).
+# Migration pattern: mirrors 0135a seed-principle pattern.
+# Model: WisdomPrinciple
+# Sentinel: || SEED/0140 ||bhakti_breadth_wave3||
+#
+# DO NOT APPLY WITHOUT FOUNDER REVIEW.
+
+principles:
+
+  # ===========================================================================
+  # GAUḌĪYA VAIṢṆAVISM — 5 rows
+  # Texts: Caitanya-caritāmṛta, Bhakti-rasāmṛta-sindhu (Rūpa Gosvāmī),
+  #         Śikṣāṣṭakam, Ujjvala-nīlamaṇi
+  # Register: viraha-bhakti, mādhurya-bhāva, nāma-saṅkīrtana, ecstatic ānanda
+  # ===========================================================================
+
+  - principle_id: bhakti_gaudia_longing_itself_is_the_divine_nearness
+    tradition_family: bhakti
+    tier: 2
+    priority: 1
+    status: draft
+    principle_name: "Longing itself is the Divine nearness"
+    short_label: "Viraha is sāmīpya"
+
+    core_teaching: >
+      Gauḍīya Vaiṣṇavism teaches viraha-bhakti: the longing for the Beloved
+      is not the absence of the Beloved but the most intimate form of the
+      Beloved's presence. The ache and the meeting are not opposites.
+
+    plain_english: >
+      The longing you feel is not proof that the Divine is far away.
+      In the Gauḍīya teaching, longing is the form closeness takes when
+      love is deepest. You do not have to wait for the ache to stop
+      before you feel held.
+
+    universal_explanation: >
+      People experiencing longing often treat it as a problem to solve —
+      either by suppressing it or by finding what they are missing.
+      The Gauḍīya path offers a different register: the longing itself
+      is the relational contact, not the gap before it.
+
+    rooted_explanation: >
+      Caitanya-caritāmṛta Madhya 2.45 on mahābhāva: the highest
+      devotional state is experienced by Rādhā as viraha — the pain of
+      separation that is simultaneously the most intimate union.
+      Rūpa Gosvāmī's Bhakti-rasāmṛta-sindhu 2.1.288 codifies viraha
+      as śṛṅgāra-rasa at its peak — longing is not a deficit state
+      but the most refined form of devotional love.
+
+    sources:
+      - text: "Caitanya-caritāmṛta"
+        chapter: "Madhya 2"
+        verse_start: 45
+        verse_end: 45
+        source_reference: "CC Madhya 2.45"
+        note: "Viraha as mahābhāva — the highest devotional register."
+      - text: "Bhakti-rasāmṛta-sindhu (Rūpa Gosvāmī)"
+        chapter: 2
+        verse_start: 288
+        verse_end: 288
+        source_reference: "BRS 2.1.288"
+        note: "Viraha as peak śṛṅgāra-rasa; longing as devotional fullness."
+
+    state_tags:
+      - longing
+      - relational_ache
+      - divine_absence_feeling
+      - isolation
+
+    relevances:
+      - framework: guna
+        value: sattva
+      - framework: klesha
+        value: abhinivesha
+      - framework: kosha
+        value: anandamaya
+
+    tone_modes:
+      - mode: universal
+        text: "The ache of love is not proof of separation. It is the most intimate contact."
+      - mode: hybrid
+        text: "Longing is the Beloved's nearness in its deepest form."
+      - mode: rooted
+        text: "Viraha is sāmīpya — the longing and the meeting are not two different things."
+
+    why_this_levels:
+      level1: "The ache is not proof of distance. It is the form closeness takes."
+      level2: "Longing treated as a deficit makes the devotional life feel broken. Gauḍīya teaching restores it as the highest register."
+      level3: >
+        Rādhā's viraha in the Gauḍīya tradition is not a problem to solve
+        before the devotional life can begin. It is the devotional life
+        at its peak. The one who can sit with longing without collapsing
+        it is in the deepest form of contact the tradition names.
+
+    room_fit: [connection]
+    life_context_bias: [relationships, self]
+    surface_eligibility: [wisdom_teaching, wisdom_banner]
+    pool_role: anchor
+    emotional_function_tag: deepen
+    action_family: teaching
+    intensity: medium
+    standalone_safe_flag: true
+    repeat_tolerance_level: high
+    exclude_from_contexts: []
+    CURATOR_GATE: true
+
+  - principle_id: bhakti_gaudia_the_name_holds_what_the_mind_cannot
+    tradition_family: bhakti
+    tier: 2
+    priority: 1
+    status: draft
+    principle_name: "The Name holds what the mind cannot"
+    short_label: "Nāma-saṅkīrtana is the refuge"
+
+    core_teaching: >
+      In the Gauḍīya tradition, the Name of the Beloved (Kṛṣṇa, Rāma, Hari)
+      is not a technique or a mnemonic device. The Name is the actual presence
+      of the Lord — nāma and nāmī (the name and the named) are non-different.
+      When the mind cannot hold itself, the Name holds the mind.
+
+    plain_english: >
+      When the mind cannot hold itself together, say the Name.
+      Not as a ritual, but because the Name is already the presence.
+      Say it until the Name carries you, not the other way around.
+
+    universal_explanation: >
+      People in overwhelm often need something simpler than thought.
+      The Gauḍīya path offers the Name as exactly this: a presence
+      that is lighter than effort and more stable than the mind's
+      attempts at self-stabilization.
+
+    rooted_explanation: >
+      Caitanya Mahāprabhu's Śikṣāṣṭakam verse 1 (ceto-darpaṇa-mārjanam):
+      the Name cleans the mirror of consciousness, extinguishes the fire
+      of conditioned existence, and spreads the moon-beam of good fortune.
+      The Gauḍīya tradition treats this not as metaphor but as direct
+      experience accessible to any sincere utterance of the Name.
+      Bhāgavata 2.1.11 names the Name as the foremost sādhana in Kali.
+
+    sources:
+      - text: "Śikṣāṣṭakam (Caitanya Mahāprabhu)"
+        chapter: 1
+        verse_start: 1
+        verse_end: 1
+        source_reference: "Śikṣāṣṭakam 1"
+        note: "Ceto-darpaṇa-mārjanam — the Name as consciousness-mirror cleaner."
+        verse_iast: >
+          ceto-darpaṇa-mārjanaṁ bhava-mahā-dāvāgni-nirvāpaṇaṁ
+          śreyaḥ-kairava-candrikā-vitaraṇaṁ vidyā-vadhū-jīvanam
+      - text: "Śrīmad Bhāgavata Purāṇa"
+        chapter: 2
+        verse_start: 1
+        verse_end: 1
+        source_translation_base: "prabhupada"
+        source_reference: "Bhāg. 2.1.11"
+        note: "The Name as the highest sādhana in the current age."
+
+    state_tags:
+      - overwhelm
+      - mind_scattered
+      - spiritual_homesickness
+      - daily_stress
+
+    relevances:
+      - framework: guna
+        value: sattva
+      - framework: klesha
+        value: avidya
+      - framework: kosha
+        value: manomaya
+
+    tone_modes:
+      - mode: universal
+        text: "When the mind cannot hold itself, something else can hold it. Say the Name."
+      - mode: hybrid
+        text: "The Name is not a technique. It is a presence that carries you."
+      - mode: rooted
+        text: "Nāma and nāmī are non-different — the Name is the Lord's actual arrival."
+
+    why_this_levels:
+      level1: "Say the Name. The Name holds what the mind cannot."
+      level2: "Overwhelm needs something lighter than thought. The Name is lighter."
+      level3: >
+        The Gauḍīya tradition's insistence on nāma-saṅkīrtana as the
+        foremost sādhana of this age rests on a theological claim:
+        the Name is not a symbol pointing to the Lord but the Lord's
+        actual presence in sound. Utterance is already arrival.
+
+    room_fit: [connection]
+    life_context_bias: [daily_life, self]
+    surface_eligibility: [wisdom_teaching, wisdom_banner]
+    pool_role: rotation
+    emotional_function_tag: deepen
+    action_family: teaching
+    intensity: low
+    standalone_safe_flag: true
+    repeat_tolerance_level: high
+    exclude_from_contexts: []
+    CURATOR_GATE: true
+
+  - principle_id: bhakti_gaudia_love_that_aches_is_already_meeting
+    tradition_family: bhakti
+    tier: 2
+    priority: 2
+    status: draft
+    principle_name: "Love that aches is already a meeting"
+    short_label: "Viraha resolves in ānanda"
+
+    core_teaching: >
+      Gauḍīya theology teaches that viraha (the pain of love's longing)
+      is simultaneously the highest joy because it is the form love takes
+      when it is most complete. The ache and the fullness are not sequential —
+      they are the same state seen from two angles.
+
+    plain_english: >
+      The Gauḍīya saints teach that the ache of love is not the opposite
+      of its joy. It is how the joy deepens. Rādhā's longing is described
+      as the highest bliss. What you feel as reaching is already the
+      fullness arriving.
+
+    universal_explanation: >
+      People often experience longing and joy as opposites — either the
+      beloved is here (joy) or absent (pain). The Gauḍīya insight cuts
+      across this: the deepest love contains both registers simultaneously.
+      This is not a spiritual consolation prize; it is a precise
+      description of what the devotional heart actually experiences.
+
+    rooted_explanation: >
+      Caitanya-caritāmṛta Ādi 4.68 and Rūpa Gosvāmī's Ujjvala-nīlamaṇi
+      on mādhurya-bhāva: Rādhā's viraha is the devotional peak precisely
+      because it is where love and longing are indistinguishable. The
+      Gauḍīya tradition uniquely codes viraha not as the prelude to
+      ānanda but as ānanda's own most intense form.
+
+    sources:
+      - text: "Caitanya-caritāmṛta"
+        chapter: "Ādi 4"
+        verse_start: 68
+        verse_end: 68
+        source_reference: "CC Ādi 4.68"
+        note: "Viraha as the expression of the highest love — ānanda and vedanā united."
+      - text: "Ujjvala-nīlamaṇi (Rūpa Gosvāmī)"
+        chapter: 14
+        verse_start: 154
+        verse_end: 154
+        source_reference: "UN 14.154"
+        note: "Mahābhāva as the union of viraha and ānanda in Rādhā's love."
+
+    state_tags:
+      - longing
+      - bittersweet
+      - love_and_loss
+      - devotional_fullness
+
+    relevances:
+      - framework: guna
+        value: sattva
+      - framework: klesha
+        value: abhinivesha
+      - framework: kosha
+        value: anandamaya
+
+    tone_modes:
+      - mode: universal
+        text: "The ache of real love is already the fullness — not its absence."
+      - mode: hybrid
+        text: "Love that aches has already arrived. The ache is the meeting."
+      - mode: rooted
+        text: "Viraha and ānanda are not two states. In mahābhāva they are one."
+
+    why_this_levels:
+      level1: "The ache and the fullness are not sequential. They are the same thing."
+      level2: "Treating longing as a deficit blocks the recognition of what is already present."
+      level3: >
+        Rūpa Gosvāmī's codification of mahābhāva as the simultaneous
+        peak of viraha and ānanda is one of the most precise maps in
+        bhakti theology. The devotee who recognizes this stops waiting
+        for the ache to end before experiencing the fullness.
+
+    room_fit: [connection, joy]
+    life_context_bias: [relationships, self]
+    surface_eligibility: [wisdom_banner]
+    pool_role: rotation
+    emotional_function_tag: offer
+    action_family: teaching
+    intensity: low
+    standalone_safe_flag: true
+    repeat_tolerance_level: high
+    multi_room_justification: >
+      Gauḍīya viraha-bhakti doctrine explicitly collapses the connection/joy
+      distinction. Viraha is simultaneously reaching (connection) and the
+      highest joy (joy). Banner format only — teaching slots need single-register
+      instruction; this paradox is banner-native.
+    exclude_from_contexts: []
+    CURATOR_GATE: true
+
+  - principle_id: bhakti_gaudia_serve_the_beloved_through_every_ordinary_act
+    tradition_family: bhakti
+    tier: 2
+    priority: 1
+    status: draft
+    principle_name: "Serve the Beloved through every ordinary act"
+    short_label: "Sevā transforms the ordinary"
+
+    core_teaching: >
+      The Gauḍīya path teaches that every act done with love for the
+      Beloved becomes a form of worship. The ordinary life — cooking,
+      speaking, caring — is already the devotional life when the heart
+      is turned toward the Divine.
+
+    plain_english: >
+      You do not need a special time or place for devotional life.
+      Cooking, cleaning, speaking gently — none of it is too small
+      to be sevā. The ordinary life is already the devotional life
+      when the heart is turned right.
+
+    universal_explanation: >
+      People often split ordinary life from their spiritual practice,
+      treating one as preparation for the other. The Gauḍīya path
+      dissolves this split: the care you give in daily life is itself
+      the devotional offering when received in the right register.
+
+    rooted_explanation: >
+      Rūpa Gosvāmī's Bhakti-rasāmṛta-sindhu 1.2.187-195 catalogs the
+      nine forms of bhakti, including pāda-sevana (service) and dāsya
+      (devoted service) as forms that explicitly include the ordinary
+      acts of care and tending. The Gauḍīya practice of deity-sevā
+      (tending to the form of the Lord) extends this outward into all
+      acts done with love.
+
+    sources:
+      - text: "Bhakti-rasāmṛta-sindhu (Rūpa Gosvāmī)"
+        chapter: 1
+        verse_start: 187
+        verse_end: 195
+        source_reference: "BRS 1.2.187-195"
+        note: "The nine limbs of bhakti including pāda-sevana and dāsya — service as devotion."
+
+    state_tags:
+      - daily_life_disconnection
+      - spiritual_bypass
+      - relational_fatigue
+      - purpose_in_small_things
+
+    relevances:
+      - framework: guna
+        value: sattva
+      - framework: klesha
+        value: avidya
+      - framework: kosha
+        value: vijnanamaya
+
+    tone_modes:
+      - mode: universal
+        text: "The ordinary act done with love is already the spiritual practice."
+      - mode: hybrid
+        text: "Serve what is before you. In the Gauḍīya path, that is already sevā."
+      - mode: rooted
+        text: "Pāda-sevana and dāsya include the small daily acts of care."
+
+    why_this_levels:
+      level1: "What you do with love for the other is already the practice."
+      level2: "The split between devotional life and daily life is a false split. Gauḍīya sevā reconnects them."
+      level3: >
+        Rūpa Gosvāmī's nine-limb framework for bhakti was not meant
+        for specialists. Dāsya and pāda-sevana are available in the
+        kitchen and the conversation. The ordinary becomes sacred not
+        by being elevated but by being received differently.
+
+    room_fit: [connection]
+    life_context_bias: [daily_life, relationships]
+    surface_eligibility: [wisdom_teaching, wisdom_banner]
+    pool_role: rotation
+    emotional_function_tag: deepen
+    action_family: teaching
+    intensity: medium
+    standalone_safe_flag: true
+    repeat_tolerance_level: high
+    exclude_from_contexts: []
+    CURATOR_GATE: true
+
+  - principle_id: bhakti_gaudia_ecstatic_love_is_a_form_of_knowing
+    tradition_family: bhakti
+    tier: 2
+    priority: 2
+    status: draft
+    principle_name: "Ecstatic love is a form of knowing"
+    short_label: "Bhāva as epistemology"
+
+    core_teaching: >
+      The Gauḍīya tradition teaches that the ecstatic states of bhakti —
+      tears, trembling, loss of external awareness — are not irrationality
+      but the highest form of knowing. The purified heart in ecstasy
+      is in fuller contact with reality, not less.
+
+    plain_english: >
+      Chaitanya wept and danced and could not hold still — not because
+      he had lost his mind but because he had found something the mind
+      could not hold. Joy that overflows the container is not irrationality.
+      In the Gauḍīya teaching, it is the truest sight.
+
+    universal_explanation: >
+      People raised in rational frameworks often treat emotional ecstasy
+      as a sign of losing one's grip. The Gauḍīya tradition inverts this:
+      the sāttvika-bhāvas (ecstatic symptoms) are involuntary responses
+      of a heart in genuine contact. Overflow is not loss of control
+      but evidence of arrival.
+
+    rooted_explanation: >
+      Caitanya-caritāmṛta Ādi 7.83-95 describes mahābhāva symptoms
+      (tears, trembling, hair-standing-on-end, loss of speech) in
+      Caitanya as signs of genuine Kṛṣṇa-contact, not as emotional
+      excess. Rūpa Gosvāmī in Bhakti-rasāmṛta-sindhu 2.1 systematizes
+      sāttvika-bhāvas as involuntary signifiers of the presence of
+      the Beloved — they cannot be faked and they cannot be suppressed
+      by a heart in genuine bhāva.
+
+    sources:
+      - text: "Caitanya-caritāmṛta"
+        chapter: "Ādi 7"
+        verse_start: 83
+        verse_end: 95
+        source_reference: "CC Ādi 7.83-95"
+        note: "Mahābhāva symptoms as signs of genuine Kṛṣṇa-contact."
+      - text: "Bhakti-rasāmṛta-sindhu (Rūpa Gosvāmī)"
+        chapter: 2
+        verse_start: 1
+        verse_end: 48
+        source_reference: "BRS 2.1.1-48"
+        note: "Sāttvika-bhāvas — ecstatic symptoms as involuntary signs of genuine bhakti."
+
+    state_tags:
+      - joy_overflow
+      - spiritual_opening
+      - devotional_fullness
+      - ecstatic_register
+
+    relevances:
+      - framework: guna
+        value: sattva
+      - framework: klesha
+        value: avidya
+      - framework: kosha
+        value: anandamaya
+
+    tone_modes:
+      - mode: universal
+        text: "Joy that overflows the container is not irrationality. It is the truest sight."
+      - mode: hybrid
+        text: "When love goes beyond what the mind can hold, that is not breakdown. That is arrival."
+      - mode: rooted
+        text: "Sāttvika-bhāvas — the tears, the trembling — are how the Beloved announces presence."
+
+    why_this_levels:
+      level1: "Ecstatic joy is not irrational. It is a more complete knowing."
+      level2: "People suppress devotional overflow because they have been taught it is embarrassing. Gauḍīya tradition corrects this."
+      level3: >
+        Rūpa Gosvāmī's codification of ecstatic symptoms as devotional
+        signifiers (not as emotional excess) protects the devotee from
+        the error of suppressing or performing them. Genuine sāttvika-bhāvas
+        cannot be manufactured; what overflows in real bhakti is evidence
+        of genuine contact.
+
+    room_fit: [joy]
+    life_context_bias: [self, daily_life]
+    surface_eligibility: [wisdom_banner]
+    pool_role: rotation
+    emotional_function_tag: offer
+    action_family: teaching
+    intensity: medium
+    standalone_safe_flag: true
+    repeat_tolerance_level: medium
+    exclude_from_contexts: []
+    CURATOR_GATE: true
+
+
+  # ===========================================================================
+  # ĀLVĀR TRADITION — 4 rows
+  # Texts: Divya Prabandham (Nammāḷvār Tiruvāymoḻi, Āṇḍāḷ Tiruppāvai,
+  #         Tirumangai Ālvār Periya Tirumoli), Rāmānuja Gadya-traya
+  # Register: prapatti (surrender), daas (servant), divine nearness,
+  #            the ordinary illuminated by divine vision
+  # ===========================================================================
+
+  - principle_id: bhakti_alvar_i_am_yours_completely_and_that_is_the_rest
+    tradition_family: bhakti
+    tier: 2
+    priority: 1
+    status: draft
+    principle_name: "I am yours completely, and that is the rest"
+    short_label: "Prapatti as total ease"
+
+    core_teaching: >
+      The Ālvār tradition's theology of prapatti — total surrender — teaches
+      that the deepest rest is found not in effortful holding but in
+      complete self-giving. The one who has nothing left to protect
+      discovers a rest that effort alone cannot reach.
+
+    plain_english: >
+      Nammāḷvār sings: I have no self to protect, nothing of my own
+      to hold back. I am Yours entirely, and in that giving-over I find
+      I no longer need to carry myself. This is what the Ālvār teachers
+      call the rest that is deeper than sleep.
+
+    universal_explanation: >
+      The effort to maintain oneself — to hold the self together under
+      pressure — is one of the subtler forms of exhaustion. The Ālvār
+      tradition offers a different register: complete belonging
+      that does not require the self's constant effort to sustain.
+
+    rooted_explanation: >
+      Tiruvāymoḻi 6.10 (Nammāḷvār): āḷvarēn nilaiyē — "I belong
+      completely." The theology of śeṣatva (the self's absolute belonging
+      to the Lord) is foundational to Śrīvaiṣṇava doctrine. Rāmānuja's
+      Gadya-traya codifies ātma-nikṣepa (self-placement, the sixth aṅga
+      of prapatti) as the act by which the practitioner stops carrying
+      themselves and hands that weight entirely to the Lord.
+
+    sources:
+      - text: "Tiruvāymoḻi (Nammāḷvār)"
+        chapter: "6.10"
+        verse_start: 1
+        verse_end: 11
+        source_reference: "Tvm 6.10"
+        note: "Āḷvarēn nilaiyē — the declaration of complete belonging."
+      - text: "Gadya-traya (Rāmānuja)"
+        chapter: 1
+        verse_start: 1
+        verse_end: 6
+        source_reference: "GT Śaraṇāgati-gadya 1-6"
+        note: "Ātma-nikṣepa — self-placement as the sixth aṅga of prapatti."
+
+    state_tags:
+      - self_protection_exhaustion
+      - carrying_alone
+      - surrender
+      - deep_rest
+
+    relevances:
+      - framework: guna
+        value: sattva
+      - framework: klesha
+        value: abhinivesha
+      - framework: kosha
+        value: anandamaya
+
+    tone_modes:
+      - mode: universal
+        text: "The deepest rest is not earned by effort. It comes when you stop carrying yourself."
+      - mode: hybrid
+        text: "Give yourself completely over. In that giving, find the rest you've been looking for."
+      - mode: rooted
+        text: "Ātma-nikṣepa — self-placement — is prapatti's completion. The one who has given over is held."
+
+    why_this_levels:
+      level1: "Stop carrying yourself. You are already held."
+      level2: "Self-protection is exhausting. Prapatti does not require protection because it places the self in hands larger than its own effort."
+      level3: >
+        Nammāḷvār's theology of śeṣatva is not renunciation —
+        it is recognition. The self was never self-owned. Complete
+        belonging is not a practice to accomplish but a reality to
+        receive. Ātma-nikṣepa is the gesture that acknowledges what
+        is already true.
+
+    room_fit: [connection]
+    life_context_bias: [self, relationships]
+    surface_eligibility: [wisdom_teaching, wisdom_banner]
+    pool_role: anchor
+    emotional_function_tag: deepen
+    action_family: teaching
+    intensity: low
+    standalone_safe_flag: true
+    repeat_tolerance_level: high
+    exclude_from_contexts: []
+    CURATOR_GATE: true
+
+  - principle_id: bhakti_alvar_the_divine_is_not_far_it_is_waiting_at_the_door
+    tradition_family: bhakti
+    tier: 2
+    priority: 1
+    status: draft
+    principle_name: "The Divine is not far — it waits at your door"
+    short_label: "Perumāḷ's closeness"
+
+    core_teaching: >
+      The Ālvārs did not teach a distant God requiring elaborate approach.
+      They taught immediacy: Perumāḷ (the Lord Viṣṇu) is already present,
+      closer than the next breath, in the ordinary textures of daily life
+      — recognizable to the devotee who has learned to look.
+
+    plain_english: >
+      The Ālvārs did not teach that God is distant and must be approached
+      through elaborate discipline. They taught the opposite: Perumāḷ is
+      already here, standing at the threshold of the ordinary day, closer
+      than the next breath, easier to meet than we have been told.
+
+    universal_explanation: >
+      Spiritual practice is often framed as effort toward a distant
+      attainment. The Ālvār tradition reframes this: the effort is not
+      toward distance but toward recognition of presence. The Divine
+      is not earned; it is perceived.
+
+    rooted_explanation: >
+      Āṇḍāḷ's Tiruppāvai 21-22 calls out to Kṛṣṇa as immediately present
+      (ēlōr empāvāy — "our vow of all together"). Tirumangai Ālvār's
+      Periya Tirumoli repeatedly invokes Viṣṇu as tirumeṉi — the beautiful
+      form right here. The theological ground is Rāmānuja's doctrine of
+      the world as the body of God (viśiṣṭādvaita): the divine is not
+      spatially absent because it pervades and sustains all that exists.
+
+    sources:
+      - text: "Tiruppāvai (Āṇḍāḷ)"
+        chapter: 1
+        verse_start: 21
+        verse_end: 22
+        source_reference: "Tiruppāvai 21-22"
+        note: "Ēlōr empāvāy — the Lord as immediately present and invocable."
+      - text: "Periya Tirumoli (Tirumangai Ālvār)"
+        chapter: 1
+        verse_start: 1
+        verse_end: 10
+        source_reference: "Periya Tirumoli 1.1-10"
+        note: "Tirumeṉi — the divine form as present and perceivable in the ordinary."
+
+    state_tags:
+      - divine_distance_feeling
+      - spiritual_effort_fatigue
+      - ordinary_day_disconnection
+      - seeking
+
+    relevances:
+      - framework: guna
+        value: sattva
+      - framework: klesha
+        value: avidya
+      - framework: kosha
+        value: vijnanamaya
+
+    tone_modes:
+      - mode: universal
+        text: "The Divine is not far. It is at the threshold of the ordinary day."
+      - mode: hybrid
+        text: "Perumāḷ does not require a long journey. The meeting is already arranged."
+      - mode: rooted
+        text: "Tirumeṉi — the beautiful form — is perceivable in the ordinary world to the opened eye."
+
+    why_this_levels:
+      level1: "The Divine is not far. Look at the threshold of today."
+      level2: "Spiritual exhaustion often comes from treating the Divine as distant. The Ālvār teaching restores immediacy."
+      level3: >
+        Rāmānuja's viśiṣṭādvaita grounds the Ālvār intuition theologically:
+        if the world is the body of God, the Divine cannot be spatially absent.
+        The absence is a failure of perception, not of proximity. The Ālvārs
+        trained their eyes to see what was always there.
+
+    room_fit: [connection]
+    life_context_bias: [daily_life, self]
+    surface_eligibility: [wisdom_teaching, wisdom_banner]
+    pool_role: rotation
+    emotional_function_tag: deepen
+    action_family: teaching
+    intensity: low
+    standalone_safe_flag: true
+    repeat_tolerance_level: high
+    exclude_from_contexts: []
+    CURATOR_GATE: true
+
+  - principle_id: bhakti_alvar_no_ego_remains_when_the_beloved_fills_the_room
+    tradition_family: bhakti
+    tier: 2
+    priority: 2
+    status: draft
+    principle_name: "No ego remains when the Beloved fills the room"
+    short_label: "The self empties into love"
+
+    core_teaching: >
+      Nammāḷvār's final decade of the Tiruvāymoḻi describes the dissolution
+      of the separate self into divine love. This is not emptiness but
+      fullness — a fullness that belongs to the Beloved, not to the self
+      that dissolved.
+
+    plain_english: >
+      Nammāḷvār describes the moment when he stopped being a person and
+      became only the love. The Ālvārs are not shy about this: when the
+      Divine enters, the small self does not argue or analyze. It dissolves.
+      What remains is not emptiness but fullness — a fullness that is
+      the Beloved's, not the self's.
+
+    universal_explanation: >
+      The self-protective ego often prevents the fullness of devotional
+      surrender. The Ālvār tradition teaches that the dissolution of
+      the ego is not a loss but the discovery of a fuller belonging —
+      what was protecting the small self was also blocking the large one.
+
+    rooted_explanation: >
+      Nammāḷvār's Tiruvāymoḻi 10.10, the parama-padam (supreme state)
+      decade, describes the ālvār's experience of mokṣa as bhakti-completion:
+      the separate self dissolves into the Lord's presence, not as
+      jñāna-liberation but as the relational fullness of being entirely
+      received. The Ālvār tradition defines mukti as ānanda-service
+      (nitya-sevā), not as contentless awareness.
+
+    sources:
+      - text: "Tiruvāymoḻi (Nammāḷvār)"
+        chapter: "10.10"
+        verse_start: 1
+        verse_end: 11
+        source_reference: "Tvm 10.10.1-11"
+        note: "Parama-padam sequence — dissolution of the separate self into divine love."
+
+    state_tags:
+      - ego_dissolution
+      - self_release
+      - devotional_fullness
+      - belonging
+
+    relevances:
+      - framework: guna
+        value: sattva
+      - framework: klesha
+        value: asmita
+      - framework: kosha
+        value: anandamaya
+
+    tone_modes:
+      - mode: universal
+        text: "When the Beloved fills the room, there is no longer room for the small self. This is not loss."
+      - mode: hybrid
+        text: "Let the self dissolve into the love. What remains is larger."
+      - mode: rooted
+        text: "Parama-padam — the self that belongs completely has nowhere left to be separate."
+
+    why_this_levels:
+      level1: "The small self dissolves into love. What remains is larger, not smaller."
+      level2: "The ego that protects is also the ego that blocks the fuller belonging. The Ālvār tradition makes this explicit."
+      level3: >
+        Nammāḷvār's parama-padam is the Ālvār tradition's most complete
+        account of what genuine bhakti arrives at: not knowledge-liberation
+        (as Advaita would have it) but the fullness of being entirely
+        received in love. The ego does not get liberated; it gets dissolved
+        into the One it was always trying to find.
+
+    room_fit: [connection]
+    life_context_bias: [self, daily_life]
+    surface_eligibility: [wisdom_banner]
+    pool_role: rotation
+    emotional_function_tag: deepen
+    action_family: teaching
+    intensity: medium
+    standalone_safe_flag: true
+    repeat_tolerance_level: medium
+    exclude_from_contexts: []
+    CURATOR_GATE: true
+
+  - principle_id: bhakti_alvar_the_whole_world_shines_when_love_is_real
+    tradition_family: bhakti
+    tier: 2
+    priority: 1
+    status: draft
+    principle_name: "The whole world shines when love is real"
+    short_label: "Bhakti illuminates the ordinary"
+
+    core_teaching: >
+      The Ālvārs moved through ordinary Tamil landscapes and in every
+      direction they saw the Lord's beauty looking back at them.
+      Real love opens the eyes to what was always there — the ordinary
+      becomes luminous, not because it changed, but because the seeing did.
+
+    plain_english: >
+      The Ālvārs moved through temples and rivers and ordinary Tamil streets
+      and everywhere they looked they saw the Lord's beauty looking back.
+      The world was not an obstacle to the devotional life — it was the
+      devotional life itself. This is what love does: it turns the ordinary
+      into the luminous.
+
+    universal_explanation: >
+      The daily world often feels dull or burdensome, especially in
+      routine. The Ālvār teaching does not recommend finding a better world
+      but developing a different eye — one that perceives the auspicious
+      qualities of the Divine already present in what is in front of us.
+
+    rooted_explanation: >
+      Tirumangai Ālvār's Periya Tirumoli and Nammāḷvār's Tiruvāymoḻi 3.3
+      depict the divine beauty (tirumeṉi, divya-maṅgala-vigraha) reflected
+      in the natural world — rivers, mountains, temples, the human form —
+      as the devotee with opened eyes perceives it. The theological basis
+      is the Ālvār insight that the Lord's kalyāṇa-guṇas (auspicious
+      qualities) pervade and illuminate created things; seeing beauty
+      everywhere is not sentiment but devotional vision.
+
+    sources:
+      - text: "Tiruvāymoḻi (Nammāḷvār)"
+        chapter: "3.3"
+        verse_start: 1
+        verse_end: 11
+        source_reference: "Tvm 3.3.1-11"
+        note: "Nammāḷvār's vision of divine beauty in the natural world."
+      - text: "Periya Tirumoli (Tirumangai Ālvār)"
+        chapter: 1
+        verse_start: 1
+        verse_end: 10
+        source_reference: "PTM 1.1-10"
+        note: "Tirumeṉi — divine beauty perceivable in ordinary settings."
+
+    state_tags:
+      - devotional_joy
+      - ordinary_luminous
+      - gratitude
+      - beauty_perception
+
+    relevances:
+      - framework: guna
+        value: sattva
+      - framework: klesha
+        value: avidya
+      - framework: kosha
+        value: anandamaya
+
+    tone_modes:
+      - mode: universal
+        text: "Love opens the eyes. The ordinary world becomes luminous when love is real."
+      - mode: hybrid
+        text: "The Ālvārs walked through the same world we walk through and saw beauty everywhere. What they had was an opened eye."
+      - mode: rooted
+        text: "Kalyāṇa-guṇas — the Lord's auspicious qualities — are already in the world. Bhakti teaches us to see them."
+
+    why_this_levels:
+      level1: "The world becomes luminous when love is real. The world did not change; the seeing did."
+      level2: "Dull routines are often failures of perception, not of the world itself. Bhakti is a perceptual practice."
+      level3: >
+        The Ālvār poets were not romantics constructing a prettier world.
+        They were reporting what the devotional eye actually sees: the
+        Lord's kalyāṇa-guṇas reflected in everything that exists.
+        The ordinary is luminous for those whose perception bhakti has opened.
+
+    room_fit: [joy]
+    life_context_bias: [daily_life, self]
+    surface_eligibility: [wisdom_banner]
+    pool_role: rotation
+    emotional_function_tag: offer
+    action_family: teaching
+    intensity: low
+    standalone_safe_flag: true
+    repeat_tolerance_level: high
+    exclude_from_contexts: []
+    CURATOR_GATE: true
+
+
+  # ===========================================================================
+  # SANT TRADITION — 5 rows
+  # Texts: Kabīr dohas (Bījak, Kabīr Granthāvalī), Mirabai padas,
+  #         Tukaram abhangas, Nāmdeva abhangas
+  # Register: direct address, raw devotional honesty, universal access,
+  #            nirguṇa simplicity, craft-bhakti
+  # ===========================================================================
+
+  - principle_id: bhakti_sant_kabir_the_divine_has_no_address_look_inside
+    tradition_family: bhakti
+    tier: 2
+    priority: 1
+    status: draft
+    principle_name: "The Divine has no address — look inside"
+    short_label: "Kabīr's inward turn"
+
+    core_teaching: >
+      Kabīr's nirguṇa bhakti teaches that the formless divine cannot be
+      found in any external address — not in mosque, temple, or pilgrimage.
+      The search outward is the error. The turn inward is the correction.
+
+    plain_english: >
+      Kabīr said: you have been going to the mosque and the temple and the
+      river, searching everywhere outside. The One you seek is the only one
+      who has never left. Stop going out. Go in. The address was always
+      your own chest.
+
+    universal_explanation: >
+      Spiritual seeking often externalizes the search — the right
+      teacher, the right practice, the right place. Kabīr cuts through
+      this with a single direct statement: the formless divine is not
+      locatable outside because it has no form to locate. The inward
+      turn is not a technique but a recognition.
+
+    rooted_explanation: >
+      Kabīr's doha: Moko kahan dhundhe re bande, main to tere paas mein
+      (Where do you search for me, O seeker? I am right beside you).
+      This doha is among the most cited in the Sant corpus. Kabīr's
+      nirguṇa bhakti (devotion to the formless/attributeless divine)
+      cuts across pilgrimage-as-solution with theological precision:
+      the divine is not locatable in forms because it is formless
+      and interior. Source: Kabīr Granthāvalī, Sākhī section.
+
+    sources:
+      - text: "Kabīr Granthāvalī — Sākhī"
+        chapter: 1
+        verse_start: 1
+        verse_end: 1
+        source_reference: "KG Sākhī — Moko kahan dhundhe"
+        note: "The foundational doha on the divine's interior address."
+        verse_iast: >
+          moko kahāṁ dhūṁdhe re bande, maiṁ to tere pāsa meṁ |
+          na maiṁ devaḷ na maiṁ masjid, na kābe kailāsa meṁ ||
+
+    state_tags:
+      - searching
+      - external_seeking
+      - spiritual_homesickness
+      - simplicity
+
+    relevances:
+      - framework: guna
+        value: sattva
+      - framework: klesha
+        value: avidya
+      - framework: kosha
+        value: vijnanamaya
+
+    tone_modes:
+      - mode: universal
+        text: "Stop looking outside. What you are looking for has never been anywhere else."
+      - mode: hybrid
+        text: "Kabīr has a single direction: stop going out. Go in."
+      - mode: rooted
+        text: "Moko kahan dhundhe — the divine has no external address. The chest is the only landmark."
+
+    why_this_levels:
+      level1: "Stop going out. Go in. That is the whole direction."
+      level2: "External seeking is often a way of avoiding the inward turn. Kabīr forecloses the avoidance directly."
+      level3: >
+        The theological ground of Kabīr's inward turn is not mystical
+        vagueness but the precise claim of nirguṇa bhakti: the formless
+        divine has no spatial coordinates. To seek it in a building or
+        a river is a category error. The correction is immediate:
+        the seeker turns to the one place the formless actually is.
+
+    room_fit: [connection]
+    life_context_bias: [self, daily_life]
+    surface_eligibility: [wisdom_teaching, wisdom_banner]
+    pool_role: anchor
+    emotional_function_tag: deepen
+    action_family: teaching
+    intensity: medium
+    standalone_safe_flag: true
+    repeat_tolerance_level: high
+    exclude_from_contexts: []
+    CURATOR_GATE: true
+
+  - principle_id: bhakti_sant_mira_i_have_chosen_the_path_that_cannot_be_taken_back
+    tradition_family: bhakti
+    tier: 2
+    priority: 1
+    status: draft
+    principle_name: "I have chosen the path that cannot be taken back"
+    short_label: "Mirabai's irrevocable love"
+
+    core_teaching: >
+      Mirabai's bhakti is defined by its irrevocability. She left the palace,
+      left convention, left the possibility of return. The completeness of
+      the giving-over is what makes it real. Half-surrender is not the
+      Sant path.
+
+    plain_english: >
+      Mirabai sang: Main toh Giridhar ke ghar jāun — I am going to the house
+      of the One who holds the mountain. She had left the palace. She had left
+      convention. There was no return because she had given herself entirely,
+      and the giving was complete. The path of complete love has no backward door.
+
+    universal_explanation: >
+      People often protect themselves from full commitment in love —
+      spiritual or relational — by keeping a path of return open.
+      Mirabai's teaching is that the completeness of the surrender
+      is what makes it real. The kept exit-route is the thing that
+      prevents arrival.
+
+    rooted_explanation: >
+      Mirabai's pada "Main toh Giridhar ke ghar jāun" (I will go to
+      Giridhar's house) expresses irreversible surrender to Kṛṣṇa as
+      her divine husband. Her theology of kṛṣṇa-bhakti-as-svayambara —
+      the soul's self-choosing of the Lord as its true spouse — treats
+      complete surrender not as loss of self but as the soul's truest
+      self-recognition. The irrevocability is not desperation but
+      the sign of the surrender's authenticity.
+
+    sources:
+      - text: "Mirabai Padas — Main toh Giridhar ke ghar jāun"
+        chapter: 1
+        verse_start: 1
+        verse_end: 1
+        source_reference: "Mirabai — Main toh Giridhar"
+        note: "Declaration of irrevocable surrender to Kṛṣṇa as the divine spouse."
+        verse_iast: >
+          maiṁ to giridhar ke ghara jāuṁ |
+          giridhar mero sācā prītama, desa duniyā kī bāta na lāuṁ ||
+
+    state_tags:
+      - commitment
+      - complete_surrender
+      - irrevocable_love
+      - path_walking
+
+    relevances:
+      - framework: guna
+        value: sattva
+      - framework: klesha
+        value: abhinivesha
+      - framework: kosha
+        value: anandamaya
+
+    tone_modes:
+      - mode: universal
+        text: "Complete love has no backward door. This is not recklessness — it is the only kind of love that arrives."
+      - mode: hybrid
+        text: "Mirabai left everything behind. The leaving was not the tragedy. It was the practice."
+      - mode: rooted
+        text: "Svayambara — the soul's choosing of the Lord — is complete when it can no longer imagine the unchosen path."
+
+    why_this_levels:
+      level1: "Complete love has no backward door. The giving-over is what makes it real."
+      level2: "Half-surrender protects the self from the fullness of love. Mirabai's teaching is about removing that protection."
+      level3: >
+        Mirabai's path is often read as biographical martyrdom.
+        It is better read as theological precision: the kept
+        exit-route is the ego's hedge. Real surrender does not
+        hedge. The path that cannot be taken back is the one
+        that has actually been taken.
+
+    room_fit: [connection]
+    life_context_bias: [relationships, self]
+    surface_eligibility: [wisdom_teaching, wisdom_banner]
+    pool_role: rotation
+    emotional_function_tag: deepen
+    action_family: teaching
+    intensity: high
+    standalone_safe_flag: true
+    repeat_tolerance_level: medium
+    exclude_from_contexts: [grief_acute]
+    CURATOR_GATE: true
+
+  - principle_id: bhakti_sant_tukaram_grace_finds_the_one_who_stops_performing
+    tradition_family: bhakti
+    tier: 2
+    priority: 1
+    status: draft
+    principle_name: "Grace finds the one who stops performing"
+    short_label: "Tukaram's nakedness before the Divine"
+
+    core_teaching: >
+      Tukaram's abhangas teach that the devotee who arrives before Viṭṭhal
+      in honest confusion — not performing piety — is the one grace meets.
+      The Sant path prizes naked honesty over sophisticated spiritual
+      performance.
+
+    plain_english: >
+      Tukaram was a failed merchant, a social nobody by the standards
+      of his time. He went to Viṭṭhal not dressed in piety but collapsed
+      in honesty. He sang his confusion and his despair and his ordinary
+      mess. And Viṭṭhal came. Grace is not attracted to performance.
+      It finds the one who shows up as they actually are.
+
+    universal_explanation: >
+      Spiritual practice often carries the pressure to be in the right
+      state before approaching the Divine. Tukaram's teaching inverts
+      this: the ordinary mess is the presentation. The confusion
+      and the failure are the content of the prayer, not obstacles to it.
+
+    rooted_explanation: >
+      Tukaram's abhangas (Marathi devotional poems to Viṭṭhal at
+      Pandharpur) repeatedly address his own unworthiness, confusion,
+      and family difficulties as the direct content of prayer —
+      not as things to be resolved before prayer begins. His abhanga
+      beginning "Āhān to mi deva" (I am this before you, God) is
+      a paradigmatic expression of naked honesty as the highest
+      devotional virtue in the Maharashtra Sant tradition.
+
+    sources:
+      - text: "Tukaram Gāthā — Āhān to mi deva"
+        chapter: 1
+        verse_start: 1
+        verse_end: 4
+        source_reference: "TG — Āhān to mi deva"
+        note: "Naked self-presentation as the devotional offering — honesty over performance."
+
+    state_tags:
+      - spiritual_performance_fatigue
+      - unworthiness
+      - honest_prayer
+      - grace_reception
+
+    relevances:
+      - framework: guna
+        value: sattva
+      - framework: klesha
+        value: asmita
+      - framework: kosha
+        value: manomaya
+
+    tone_modes:
+      - mode: universal
+        text: "You do not need to be in a better state before you arrive. Show up as you are."
+      - mode: hybrid
+        text: "Tukaram brought his confusion. Viṭṭhal came. Grace does not wait for performance."
+      - mode: rooted
+        text: "Āhān to mi deva — I am this before you, God. The honesty is the prayer."
+
+    why_this_levels:
+      level1: "Show up as you are. Grace finds the honest one, not the performing one."
+      level2: "The pressure to perform spiritual correctness is its own obstacle. Tukaram removes it."
+      level3: >
+        The Maharashtra Sant tradition's valorization of honest
+        self-presentation over polished devotion is not a lowering
+        of standards but a different account of what the Divine
+        responds to. Viṭṭhal in Tukaram's abhangas consistently
+        comes to the broken, the confused, the farmer — not to
+        the accomplished. The teaching is a theological claim:
+        honest mess is more receivable than performed piety.
+
+    room_fit: [connection]
+    life_context_bias: [self, daily_life]
+    surface_eligibility: [wisdom_teaching, wisdom_banner]
+    pool_role: rotation
+    emotional_function_tag: deepen
+    action_family: teaching
+    intensity: medium
+    standalone_safe_flag: true
+    repeat_tolerance_level: high
+    exclude_from_contexts: []
+    CURATOR_GATE: true
+
+  - principle_id: bhakti_sant_kabir_love_does_not_ask_what_caste_you_belong_to
+    tradition_family: bhakti
+    tier: 2
+    priority: 2
+    status: draft
+    principle_name: "Love does not ask what caste you belong to"
+    short_label: "Kabīr's universal access"
+
+    core_teaching: >
+      Kabīr teaches that the nirguṇa divine — formless, without caste or
+      community — is freely and equally available to all. The democratic
+      accessibility of divine love is not a political statement but a
+      theological consequence of the divine's formlessness.
+
+    plain_english: >
+      Kabīr said: God did not make castes. Love made no such list.
+      The weaver from Varanasi and the Brahmin from the Ganges bank both
+      arrive at the same door, and the door opens the same way for both —
+      not through credentials, but through the simple turning of the heart.
+      The divine is freely available. This is the joy.
+
+    universal_explanation: >
+      Feelings of unworthiness or exclusion from the spiritual often carry
+      the shape of social rejection internalized. Kabīr's teaching cuts
+      through this directly: the divine does not operate by the categories
+      humans invented. Access requires only the turning of the heart.
+
+    rooted_explanation: >
+      Kabīr's doha: Jāti na pūcho sādhu kī, pūch lijiye jñān (Do not
+      ask the caste of a holy person, ask for their wisdom). His consistent
+      polemic against caste-based gatekeeping of the divine is theologically
+      grounded in nirguṇa bhakti: the formless divine cannot be the
+      possession of any community or lineage because it has no form.
+      Universal access is not egalitarianism added to spirituality;
+      it is a logical consequence of the divine's own nature.
+      Source: Kabīr Granthāvalī, Doha section.
+
+    sources:
+      - text: "Kabīr Granthāvalī — Doha section"
+        chapter: 1
+        verse_start: 1
+        verse_end: 1
+        source_reference: "KG — Jāti na pūcho"
+        note: "The foundational teaching on universal divine access over caste-credential."
+        verse_iast: >
+          jāti na pūcho sādhu kī, pūcha lijiye jñāna |
+          mola karo talawāra kā, paḍā rahana do myāna ||
+
+    state_tags:
+      - unworthiness
+      - exclusion_feeling
+      - universal_belonging
+      - joy_of_access
+
+    relevances:
+      - framework: guna
+        value: sattva
+      - framework: klesha
+        value: asmita
+      - framework: kosha
+        value: anandamaya
+
+    tone_modes:
+      - mode: universal
+        text: "The door opens the same way for everyone. Credentials are not the key."
+      - mode: hybrid
+        text: "Kabīr: God has no waiting list and no caste register. Turn the heart. That is the whole requirement."
+      - mode: rooted
+        text: "Jāti na pūcho — the formless divine has no caste. Universal access is the theological consequence."
+
+    why_this_levels:
+      level1: "The door is open. No credential required. The heart's turning is enough."
+      level2: "Exclusion-feelings often borrow the shape of social rejection and apply it to the divine. Kabīr corrects this directly."
+      level3: >
+        The theological logic of Kabīr's universal-access teaching is
+        precise: the nirguṇa divine has no attributes, no form, no
+        community. A formless reality cannot be owned by any form-based
+        community. Therefore access is universal by necessity, not by
+        generosity. The joy of this is the subject of the teaching.
+
+    room_fit: [joy]
+    life_context_bias: [self, daily_life, relationships]
+    surface_eligibility: [wisdom_banner]
+    pool_role: rotation
+    emotional_function_tag: offer
+    action_family: teaching
+    intensity: low
+    standalone_safe_flag: true
+    repeat_tolerance_level: high
+    exclude_from_contexts: []
+    CURATOR_GATE: true
+
+  - principle_id: bhakti_sant_namdeva_the_divine_is_in_the_work_of_your_hands
+    tradition_family: bhakti
+    tier: 2
+    priority: 1
+    status: draft
+    principle_name: "The Divine is in the work of your hands"
+    short_label: "Nāmdeva's craft-bhakti"
+
+    core_teaching: >
+      Nāmdeva taught bhakti through his craft as a tailor. The devotional
+      life and the working life were not separate for him — every garment
+      stitched with love was a devotional act. Skilled work done with the
+      heart toward the Divine is itself a form of bhakti.
+
+    plain_english: >
+      Nāmdeva was a tailor. He stitched cloth and sang to Viṭṭhal and in
+      his teaching the two were never separate. The devotional life was not
+      other than the working life. Every garment stitched with attention
+      was a stitch toward the Lord. Your ordinary skilled work can be this:
+      not distraction from the sacred, but the shape it takes today.
+
+    universal_explanation: >
+      Work and spiritual life are often experienced as competing demands.
+      Nāmdeva's teaching dissolves this competition: when skilled work
+      is done with the heart turned toward the Divine, the work itself
+      becomes the devotional practice. The ordinary craft is the bhakti.
+
+    rooted_explanation: >
+      Nāmdeva (13th–14th c., Maharashtra) was a tailor and a companion
+      of Jñāneśvara. His abhangas address Viṭṭhal through the metaphor
+      of tailoring — preparing cloth as a metaphor for the soul being
+      prepared for the Lord. His craft-bhakti teaching is doctrinally
+      distinct from BG karma-yoga (detached action as discipline):
+      it is bhakti expressed through and in the craft, not detachment
+      from the craft. The heart turned in love transforms the work's
+      register, not the work's form.
+
+    sources:
+      - text: "Nāmdeva Gāthā"
+        chapter: 1
+        verse_start: 1
+        verse_end: 10
+        source_reference: "NG — Shivta shivta"
+        note: "Nāmdeva's abhangas on tailoring as devotional act — craft-bhakti in the Sant tradition."
+
+    state_tags:
+      - work_disconnection
+      - purpose_in_daily_work
+      - craft_as_spiritual
+      - daily_life_sanctified
+
+    relevances:
+      - framework: guna
+        value: sattva
+      - framework: klesha
+        value: avidya
+      - framework: kosha
+        value: vijnanamaya
+
+    tone_modes:
+      - mode: universal
+        text: "Skilled work done with love is already the practice. Not preparation for it."
+      - mode: hybrid
+        text: "Nāmdeva stitched cloth and sang. In his teaching, those were the same act."
+      - mode: rooted
+        text: "Craft-bhakti — the heart turned toward the Divine makes the work itself the offering."
+
+    why_this_levels:
+      level1: "The work you do with care is already the practice. Not a distraction from it."
+      level2: "The split between work and spiritual life is a false split. Nāmdeva's teaching reconnects them through love."
+      level3: >
+        Nāmdeva's craft-bhakti differs from BG karma-yoga in a precise way:
+        karma-yoga teaches detachment from the fruit of action;
+        craft-bhakti teaches that love for the Divine transforms the
+        action's register without detaching from it. The tailor who sings
+        to Viṭṭhal while stitching is not detached from the cloth.
+        The cloth is the offering.
+
+    room_fit: [connection]
+    life_context_bias: [daily_life, purpose_direction]
+    surface_eligibility: [wisdom_teaching, wisdom_banner]
+    pool_role: rotation
+    emotional_function_tag: deepen
+    action_family: teaching
+    intensity: low
+    standalone_safe_flag: true
+    repeat_tolerance_level: high
+    exclude_from_contexts: []
+    CURATOR_GATE: true
+
+
+# ===========================================================================
+# POOL ASSIGNMENT INSTRUCTIONS (for migration 0140)
+# ===========================================================================
+#
+# These rows are WisdomPrinciple rows and must be ADDED to the relevant
+# RoomContentPool rotation_refs after ingestion.
+#
+# Connection banner additions:
+#   bhakti_gaudia_longing_itself_is_the_divine_nearness
+#   bhakti_gaudia_the_name_holds_what_the_mind_cannot
+#   bhakti_gaudia_love_that_aches_is_already_meeting          (also joy banner)
+#   bhakti_gaudia_serve_the_beloved_through_every_ordinary_act
+#   bhakti_alvar_i_am_yours_completely_and_that_is_the_rest
+#   bhakti_alvar_the_divine_is_not_far_it_is_waiting_at_the_door
+#   bhakti_alvar_no_ego_remains_when_the_beloved_fills_the_room
+#   bhakti_sant_kabir_the_divine_has_no_address_look_inside
+#   bhakti_sant_mira_i_have_chosen_the_path_that_cannot_be_taken_back
+#   bhakti_sant_tukaram_grace_finds_the_one_who_stops_performing
+#   bhakti_sant_namdeva_the_divine_is_in_the_work_of_your_hands
+#
+# Connection teaching additions (subset of above that have wisdom_teaching eligibility):
+#   bhakti_gaudia_longing_itself_is_the_divine_nearness
+#   bhakti_gaudia_the_name_holds_what_the_mind_cannot
+#   bhakti_gaudia_serve_the_beloved_through_every_ordinary_act
+#   bhakti_alvar_i_am_yours_completely_and_that_is_the_rest
+#   bhakti_alvar_the_divine_is_not_far_it_is_waiting_at_the_door
+#   bhakti_sant_kabir_the_divine_has_no_address_look_inside
+#   bhakti_sant_mira_i_have_chosen_the_path_that_cannot_be_taken_back
+#   bhakti_sant_tukaram_grace_finds_the_one_who_stops_performing
+#   bhakti_sant_namdeva_the_divine_is_in_the_work_of_your_hands
+#
+# Joy banner additions:
+#   bhakti_gaudia_love_that_aches_is_already_meeting          (dual, from connection also)
+#   bhakti_gaudia_ecstatic_love_is_a_form_of_knowing
+#   bhakti_alvar_the_whole_world_shines_when_love_is_real
+#   bhakti_sant_kabir_love_does_not_ask_what_caste_you_belong_to
+#
+# Doctrinal minimum post-P1-B:
+#   Connection banner bhakti rows: 18 (existing) + 11 (new) = 29 total
+#   Joy banner bhakti rows: 5 (existing) + 4 (new) = 9 total
+#   Both well above doctrinal minimums (connection: 6; joy: 3)

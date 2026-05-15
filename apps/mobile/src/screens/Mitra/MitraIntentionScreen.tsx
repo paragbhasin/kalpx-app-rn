@@ -80,6 +80,11 @@ export default function MitraIntentionScreen() {
         navigation.navigate("RhythmSetup");
         break;
       case "inner_path":
+        if (process.env.EXPO_PUBLIC_MITRA_NEW_SHELL === "1") {
+          store.dispatch(screenActions.setBackground(require("../../../assets/beige_bg.png")));
+          navigation.navigate("NewMitraHome");
+          break;
+        }
         await AsyncStorage.setItem("mitra_entry_intention", "inner_path");
         store.dispatch(
           screenActions.setScreenValue({

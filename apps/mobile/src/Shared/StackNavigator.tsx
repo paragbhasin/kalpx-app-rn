@@ -74,6 +74,7 @@ import InnerPathScreen from "../screens/Mitra/InnerPathScreen";
 import TellMitraScreen from "../screens/Mitra/TellMitraScreen";
 import MitraIntentionScreen from "../screens/Mitra/MitraIntentionScreen";
 import MitraStartScreen from "../screens/Mitra/MitraStartScreen";
+import NewMitraShell from "../screens/Mitra/NewMitraShell";
 
 const Stack: any = createNativeStackNavigator();
 
@@ -376,6 +377,7 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen name="TellMitra" component={TellMitraScreen} options={{ headerShown: false }} />
     <Stack.Screen name="MitraIntention" component={MitraIntentionScreen} options={{ headerShown: false }} />
     <Stack.Screen name="MitraStart" component={MitraStartScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="NewMitraHome" component={NewMitraShell} options={{ headerShown: false }} />
   </Stack.Navigator>
 );
 

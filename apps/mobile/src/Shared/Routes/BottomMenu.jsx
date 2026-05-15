@@ -18,24 +18,13 @@ import {
   NotificationStackNavigator,
   ProfileStackNavigator,
 } from "../StackNavigator";
+import { isMitraRouteName } from "./mitraRouteNames";
 
 const Tab = createBottomTabNavigator();
 import { useScreenStore } from "../../engine/useScreenBridge";
 
 const NullComponent = () => null;
 const TabBarButton = (props) => <TouchableOpacity {...props} activeOpacity={0.7} />;
-
-function isMitraRouteName(routeName) {
-  return (
-    routeName === "Home" ||
-    routeName === "DynamicEngine" ||
-    routeName === "MitraEngine" ||
-    routeName === "GuidedGrowth" ||
-    routeName === "MitraPhilosophy" ||
-    routeName === "MitraStart" ||
-    routeName === "MitraIntention"
-  );
-}
 
 const BottomMenuContent = () => {
   const { t } = useTranslation();

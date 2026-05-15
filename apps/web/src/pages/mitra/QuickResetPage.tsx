@@ -8,7 +8,7 @@ import type {
   QuickResetMantra,
   QuickResetOpeningState,
 } from "@kalpx/types";
-import { ArrowLeft, RotateCw, SlidersHorizontal } from "lucide-react";
+import { RotateCw, SlidersHorizontal } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AudioPlayerBlock } from "../../components/blocks/AudioPlayerBlock";
@@ -31,9 +31,8 @@ const QUICK_RESET_RING_CSS = `
 @keyframes kalpx-quickreset-ring-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 `;
 
-function getVisualBeadCount(total: number): number {
-  if (total <= 1) return 1;
-  return Math.min(total, 18);
+function getVisualBeadCount(): number {
+  return 18;
 }
 
 // ── Shared styles ──────────────────────────────────────────────────────────────
@@ -305,7 +304,6 @@ export function QuickResetPage() {
   const [completionData, setCompletionData] =
     useState<QuickChantCompleteResponse | null>(null);
   const [beadCount, setBeadCount] = useState(0);
-  const [selectedReps, setSelectedReps] = useState(108);
   const [iastExpanded, setIastExpanded] = useState(false);
   const [devExpanded, setDevExpanded] = useState(false);
   const [meaningExpanded, setMeaningExpanded] = useState(false);
@@ -314,9 +312,8 @@ export function QuickResetPage() {
   const [pickerMantras, setPickerMantras] = useState<QuickResetMantra[]>([]);
   const [pickerLoading, setPickerLoading] = useState(false);
   const [defaultSetConfirmed, setDefaultSetConfirmed] = useState(false);
-  const [highlightedToastTitle, setHighlightedToastTitle] = useState(
-    "Mantra Updated ✦",
-  );
+  const [highlightedToastTitle, setHighlightedToastTitle] =
+    useState("Mantra Updated ✦");
   const [highlightedToastMessage, setHighlightedToastMessage] = useState(
     "Your rhythm has been gently realigned.",
   );
@@ -415,6 +412,16 @@ export function QuickResetPage() {
     setPhase("running");
   }, []);
 
+  const handleTapBead = useCallback(() => {
+    if (phase !== "running") {
+      runnerStartedAt.current = Date.now();
+      setBeadCount(1);
+      setPhase("running");
+      return;
+    }
+    setBeadCount((count) => count + 1);
+  }, [phase]);
+
   // ── Done chanting ──────────────────────────────────────────────────────────
   const handleDoneChanting = useCallback(async () => {
     if (!activeMantra) return;
@@ -469,25 +476,26 @@ export function QuickResetPage() {
     mantra: QuickResetMantra,
     primaryLabel: string,
     secondaryActions: string[],
+    isRunning = false,
   ) => {
-    const visualBeadCount = getVisualBeadCount(selectedReps);
+    const visualBeadCount = getVisualBeadCount();
     const beads = Array.from({ length: visualBeadCount }, (_, i) => {
       const angle = (i / visualBeadCount) * 2 * Math.PI - Math.PI / 2;
       const cx = 115 + Math.cos(angle) * 86;
       const cy = 115 + Math.sin(angle) * 86;
-      return { cx, cy, i };
+      const lit = i < beadCount % visualBeadCount;
+      return { cx, cy, i, lit };
     });
 
     return (
       <div style={S.openingShell}>
-        {renderBackBtn()}
+        {/* {renderBackBtn()} */}
         <div style={{ height: 18 }} />
         <p style={S.openingHeading}>{mantra.title}</p>
         <p style={S.openingSubhead}>Quick Reset Mantra</p>
 
         <div style={S.progressWrap}>
-          <span style={S.progressMain}>0</span>
-          <span style={S.progressSub}>/ {selectedReps}</span>
+          <span style={S.progressMain}>{beadCount}</span>
         </div>
 
         <div
@@ -505,7 +513,7 @@ export function QuickResetPage() {
               animation: "kalpx-quickreset-ring-spin 40s linear infinite",
             }}
           >
-            {beads.map(({ cx, cy, i }) => (
+            {beads.map(({ cx, cy, i, lit }) => (
               <img
                 key={i}
                 src="/rudraksh.svg"
@@ -517,6 +525,8 @@ export function QuickResetPage() {
                   height: 28,
                   left: cx - 14,
                   top: cy - 14,
+                  opacity: lit ? 0.18 : 1,
+                  transition: "opacity 0.25s ease",
                   userSelect: "none",
                   pointerEvents: "none",
                 }}
@@ -524,7 +534,7 @@ export function QuickResetPage() {
             ))}
           </div>
           <button
-            onClick={handleBeginChanting}
+            onClick={handleTapBead}
             style={{
               position: "absolute",
               top: "50%",
@@ -565,22 +575,6 @@ export function QuickResetPage() {
             >
               HERE
             </span>
-            <span
-              style={{
-                width: 24,
-                height: 24,
-                borderRadius: "50%",
-                border: "1px solid #b89450",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                marginTop: 4,
-                color: "#b89450",
-                fontSize: 13,
-              }}
-            >
-              ✓
-            </span>
           </button>
         </div>
 
@@ -605,31 +599,6 @@ export function QuickResetPage() {
             </div>
           )}
         </div>
-        <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
-          {[1, 9, 27, 54, 108].map((n) => {
-            const selected = n === selectedReps;
-            return (
-              <button
-                key={n}
-                onClick={() => setSelectedReps(n)}
-                style={{
-                  padding: "10px 18px",
-                  borderRadius: 20,
-                  border: `1px solid ${selected ? "#C7A048" : "#e8c587"}`,
-                  background: selected ? "#C7A048" : "transparent",
-                  color: selected ? "#fff" : "#8a7a5a",
-                  fontSize: 15,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                {n}
-                {selected ? " ✓" : ""}
-              </button>
-            );
-          })}
-        </div>
-
         {mantra.audio_url && (
           <div style={{ width: "100%", marginBottom: 20 }}>
             <AudioPlayerBlock
@@ -670,9 +639,20 @@ export function QuickResetPage() {
         )}
 
         <div style={S.openingActions}>
-          <button style={S.primaryBtn} onClick={handleBeginChanting}>
-            {primaryLabel}
-          </button>
+          {isRunning ? (
+            <button style={S.primaryBtn} onClick={handleDoneChanting}>
+              Done chanting
+            </button>
+          ) : (
+            <button style={S.primaryBtn} onClick={handleBeginChanting}>
+              {primaryLabel}
+            </button>
+          )}
+          {isRunning && (
+            <button style={S.endEarlyBtn} onClick={handleEndEarly}>
+              End early
+            </button>
+          )}
           {secondaryActions.map((action) => (
             <button
               key={action}
@@ -752,11 +732,11 @@ export function QuickResetPage() {
       </span>
     ));
 
-  const renderBackBtn = (label = "← Back") => (
-    <button style={S.backBtn} onClick={() => navigate(-1)}>
-      {label}
-    </button>
-  );
+  // const renderBackBtn = (label = "← Back") => (
+  //   <button style={S.backBtn} onClick={() => navigate(-1)}>
+  //     {label}
+  //   </button>
+  // );
 
   const renderShell = (content: React.ReactNode) => (
     <MitraMobileShell backgroundImage="/beige_bg.png">
@@ -792,7 +772,7 @@ export function QuickResetPage() {
       <>
         <main style={S.main}>
           <div style={S.container}>
-            {renderBackBtn()}
+            {/* {renderBackBtn()} */}
             <p style={S.copyHeadline}>Unable to open Quick Reset</p>
             <p style={S.subtleText}>Please try again.</p>
             <button style={S.primaryBtn} onClick={loadOpening}>
@@ -816,6 +796,7 @@ export function QuickResetPage() {
             displayMantra,
             openingState.primary_cta,
             openingState.secondary_actions,
+            false,
           )}
         </main>
         {pickerOpen && renderPickerOverlay()}
@@ -830,10 +811,12 @@ export function QuickResetPage() {
         <main
           style={{ ...S.main, justifyContent: "flex-start", paddingTop: 24 }}
         >
-          {renderOpeningMantraSurface(selectedMantra, "Begin chanting", [
-            "set_as_default",
-            "change_mantra",
-          ])}
+          {renderOpeningMantraSurface(
+            selectedMantra,
+            "Begin chanting",
+            ["set_as_default", "change_mantra"],
+            false,
+          )}
         </main>
         {pickerOpen && renderPickerOverlay()}
       </>,
@@ -842,17 +825,6 @@ export function QuickResetPage() {
 
   // ── Phase: running ─────────────────────────────────────────────────────────
   if (phase === "running" && activeMantra) {
-    const visualBeadCount = getVisualBeadCount(selectedReps);
-    const beads = Array.from({ length: visualBeadCount }, (_, i) => {
-      const angle = (i / visualBeadCount) * 2 * Math.PI - Math.PI / 2;
-      const cx = 115 + Math.cos(angle) * 86;
-      const cy = 115 + Math.sin(angle) * 86;
-      const lit =
-        selectedReps > visualBeadCount
-          ? i < beadCount % visualBeadCount
-          : i < beadCount;
-      return { cx, cy, i, lit };
-    });
     return renderShell(
       <>
         {audioUrl && (
@@ -864,71 +836,15 @@ export function QuickResetPage() {
             style={{ display: "none" }}
           />
         )}
-        <main style={S.main}>
-          <div style={S.container}>
-            <div style={S.progressWrap}>
-              <span style={S.progressMain}>{beadCount}</span>
-              <span style={S.progressSub}>/ {selectedReps}</span>
-            </div>
-            <p style={S.mantraTitle}>{activeMantra.title}</p>
-            <div
-              style={{
-                position: "relative",
-                width: 230,
-                height: 230,
-                marginBottom: 12,
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  animation: "kalpx-quickreset-ring-spin 40s linear infinite",
-                }}
-              >
-                {beads.map(({ cx, cy, i, lit }) => (
-                  <img
-                    key={i}
-                    src="/rudraksh.svg"
-                    alt=""
-                    draggable={false}
-                    style={{
-                      position: "absolute",
-                      width: 28,
-                      height: 28,
-                      left: cx - 14,
-                      top: cy - 14,
-                      opacity: lit ? 0.18 : 1,
-                      transition: "opacity 0.25s ease",
-                      userSelect: "none",
-                      pointerEvents: "none",
-                    }}
-                  />
-                ))}
-              </div>
-              <button
-                style={
-                  {
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%,-50%)",
-                    ...S.beadCircle,
-                  } as React.CSSProperties
-                }
-                onClick={() => setBeadCount((c) => c + 1)}
-              >
-                {beadCount || "TAP"}
-              </button>
-            </div>
-            <p style={S.mantraDevanagari}>{activeMantra.devanagari}</p>
-            <button style={S.primaryBtn} onClick={handleDoneChanting}>
-              Done chanting
-            </button>
-            <button style={S.endEarlyBtn} onClick={handleEndEarly}>
-              End early
-            </button>
-          </div>
+        <main
+          style={{ ...S.main, justifyContent: "flex-start", paddingTop: 24 }}
+        >
+          {renderOpeningMantraSurface(
+            activeMantra,
+            openingState?.primary_cta || "Begin chanting",
+            [],
+            true,
+          )}
         </main>
       </>,
     );
@@ -1006,7 +922,7 @@ export function QuickResetPage() {
               userSelect: "none",
             }}
           />
-          <button
+          {/* <button
             style={{
               ...S.backBtn,
               marginBottom: 24,
@@ -1018,7 +934,7 @@ export function QuickResetPage() {
           >
             <ArrowLeft size={22} strokeWidth={2} />
             Back
-          </button>
+          </button> */}
           <div style={{ textAlign: "center" }}>
             <p style={{ ...S.pageTitle, margin: "0 0 12px", fontSize: 22 }}>
               Choose a Mantra

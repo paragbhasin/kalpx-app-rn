@@ -37,6 +37,7 @@ import { mitraTrackEvent } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { interpolate } from "../engine/utils/interpolation";
 import { Fonts } from "../theme/fonts";
+import { navigationRef } from "../Shared/Routes/NavigationService";
 
 const { width } = Dimensions.get("window");
 
@@ -160,6 +161,18 @@ const ImmersiveV3Runner: React.FC<{ schema: any }> = ({ schema }) => {
     // For completion_return, back == Return Home (practice already tracked).
     // For runners, back == early abandon (exit to dashboard; block's own
     // cleanup on unmount handles state clear).
+    const { screenActions: sActions } = require("../store/screenSlice");
+    const { store: storeRef } = require("../store");
+    const launchSurface = (screenData as any).practice_launch_surface ?? null;
+    storeRef.dispatch(sActions.setScreenValue({ key: "practice_launch_surface", value: null }));
+    if (launchSurface === "rhythm") {
+      (navigationRef as any).navigate("RhythmHome");
+      return;
+    }
+    if (launchSurface === "inner_path") {
+      (navigationRef as any).navigate("InnerPath");
+      return;
+    }
     executeAction(
       {
         type: "navigate",
@@ -169,9 +182,7 @@ const ImmersiveV3Runner: React.FC<{ schema: any }> = ({ schema }) => {
         loadScreen,
         goBack,
         setScreenValue: (value: any, key: string) => {
-          const { screenActions } = require("../store/screenSlice");
-          const { store } = require("../store");
-          store.dispatch(screenActions.setScreenValue({ key, value }));
+          storeRef.dispatch(sActions.setScreenValue({ key, value }));
         },
         screenState: { ...screenData },
       },
@@ -1527,18 +1538,26 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     ];
     setMicroWinMessage(messages[Math.floor(Math.random() * messages.length)]);
     setShowMicroWin(true);
+    const launchSurface = (screenState as any).practice_launch_surface ?? null;
+    updateScreenData("practice_launch_surface", null);
     setTimeout(() => {
-      executeAction(
-        {
-          type: "submit",
-          payload: { practiceId: schema.id || "practice", completed },
-          target: {
-            container_id: "companion_dashboard",
-            state_id: "day_active",
+      if (launchSurface === "rhythm") {
+        (navigationRef as any).navigate("RhythmHome");
+      } else if (launchSurface === "inner_path") {
+        (navigationRef as any).navigate("InnerPath");
+      } else {
+        executeAction(
+          {
+            type: "submit",
+            payload: { practiceId: schema.id || "practice", completed },
+            target: {
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            },
           },
-        },
-        buildActionContext(),
-      );
+          buildActionContext(),
+        );
+      }
     }, 2500);
   };
 

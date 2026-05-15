@@ -421,6 +421,9 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     slot: "mantra" | "sankalp" | "practice",
     item: any,
   ) => {
+    store.dispatch(
+      screenActions.setScreenValue({ key: "practice_launch_surface", value: "inner_path" }),
+    );
     executeAction(
       {
         type: "start_runner",

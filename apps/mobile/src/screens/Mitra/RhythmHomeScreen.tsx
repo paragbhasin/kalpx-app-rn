@@ -211,36 +211,12 @@ export default function RhythmHomeScreen({
   );
 
   const openRhythmSetup = useCallback(() => {
-    dispatch(
-      screenActions.setScreenValue({
-        key: "dashboard_entry_surface",
-        value: "my_rhythm_setup",
-      }),
-    );
-    dispatch(
-      loadScreenWithData({
-        containerId: "companion_dashboard",
-        stateId: "day_active",
-      }) as any,
-    );
-    navigation.navigate("DynamicEngine");
-  }, [dispatch, navigation]);
+    navigation.navigate("RhythmSetup" as any);
+  }, [navigation]);
 
   const openRhythmEdit = useCallback(() => {
-    dispatch(
-      screenActions.setScreenValue({
-        key: "dashboard_entry_surface",
-        value: "my_rhythm_edit",
-      }),
-    );
-    dispatch(
-      loadScreenWithData({
-        containerId: "companion_dashboard",
-        stateId: "day_active",
-      }) as any,
-    );
-    navigation.navigate("DynamicEngine");
-  }, [dispatch, navigation]);
+    navigation.navigate("RhythmEdit" as any);
+  }, [navigation]);
 
   const handleBack = useCallback(() => {
     if (embedded) {
@@ -323,6 +299,9 @@ export default function RhythmHomeScreen({
     } finally {
       setResolvingItemId(null);
     }
+    dispatch(
+      screenActions.setScreenValue({ key: "practice_launch_surface", value: "rhythm" }),
+    );
     void executeAction(
       {
         type: "start_runner",

@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 40,
+    paddingBottom: 104,
     justifyContent: "space-between",
   },
   logo: {

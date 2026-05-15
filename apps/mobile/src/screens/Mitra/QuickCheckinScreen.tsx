@@ -4,7 +4,7 @@ import type {
   QuickCheckinEnergyState,
   QuickCheckinResponse,
 } from '@kalpx/types';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -107,6 +107,14 @@ export default function QuickCheckinScreen() {
   const navigation = useNavigation<any>();
   const dispatch = useDispatch();
   const screenData = useScreenStore((state) => state.screenData);
+  const updateBackground = useScreenStore((state) => state.updateBackground);
+
+  useFocusEffect(
+    useCallback(() => {
+      updateBackground(BEIGE_BG);
+      return () => updateBackground(null);
+    }, [updateBackground]),
+  );
 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<QuickCheckinResponse | null>(null);
@@ -203,8 +211,7 @@ export default function QuickCheckinScreen() {
               activeOpacity={0.7}
               style={styles.backBtn}
             >
-              <Ionicons name="arrow-back" size={20} color="#C99317" />
-              <Text style={styles.backBtnText}>Back</Text>
+              <Ionicons name="chevron-back" size={22} color="#C99317" />
             </TouchableOpacity>
 
             {!result ? (
@@ -378,16 +385,12 @@ const styles = StyleSheet.create({
     opacity: 0.36,
   },
   backBtn: {
-    flexDirection: 'row',
+    width: 36,
+    height: 36,
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'center',
     alignSelf: 'flex-start',
     marginBottom: 26,
-  },
-  backBtnText: {
-    color: '#C99317',
-    fontSize: 15,
-    fontFamily: Fonts.sans.medium,
   },
   introBlock: {
     alignItems: 'center',

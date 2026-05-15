@@ -4,6 +4,7 @@
  * Room tap loads room via executeAction enter_room then navigates to DynamicEngine.
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import React, { useCallback, useEffect } from 'react';
 import {
   SafeAreaView,
@@ -14,7 +15,7 @@ import {
   View,
 } from 'react-native';
 import { useDispatch } from 'react-redux';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { ROOM_LABELS, ROOM_DESCRIPTIONS } from '@kalpx/contracts';
 import type { VerifiedRoomId } from '@kalpx/types';
 import { executeAction } from '../../engine/actionExecutor';
@@ -51,6 +52,15 @@ export default function BrowseRoomsScreen() {
   useEffect(() => {
     screenBridgeRef.current = screenBridge;
   });
+
+  const updateBackground = useScreenStore((state) => state.updateBackground);
+
+  useFocusEffect(
+    useCallback(() => {
+      updateBackground(require('../../../assets/beige_bg.png'));
+      return () => updateBackground(null);
+    }, [updateBackground]),
+  );
 
   const buildActionContext = useCallback(() => {
     return {
@@ -96,8 +106,8 @@ export default function BrowseRoomsScreen() {
     <SafeAreaView style={styles.safeArea}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7}>
-          <Text style={styles.backBtnText}>{'< Back'}</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7} style={styles.backBtn}>
+          <Ionicons name="chevron-back" size={22} color="#C99317" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Browse Rooms</Text>
         <View style={{ width: 50 }} />
@@ -140,10 +150,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: '#DAC28E',
   },
-  backBtnText: {
-    fontSize: 16,
-    color: '#C99317',
-    fontFamily: Fonts.sans.medium,
+  backBtn: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerTitle: {
     fontSize: 22,

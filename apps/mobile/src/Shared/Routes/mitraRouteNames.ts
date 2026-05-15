@@ -7,6 +7,8 @@ export const MITRA_ROUTE_NAMES = [
   "MitraStart",
   "MitraIntention",
   "NewMitraHome",
+  "QuickCheckin",
+  "BrowseRooms",
 ] as const;
 
 export const isMitraRouteName = (name: string): boolean =>

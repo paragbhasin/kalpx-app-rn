@@ -372,7 +372,7 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen name="RhythmEdit" component={RhythmEditScreen} options={{ headerShown: false }} />
     <Stack.Screen name="QuickReset" component={QuickResetScreen} options={{ headerShown: false }} />
     <Stack.Screen name="QuickCheckin" component={QuickCheckinScreen} options={{ headerShown: false }} />
-    <Stack.Screen name="BrowseRooms" component={BrowseRoomsScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="BrowseRooms" component={BrowseRoomsScreen} options={{ headerShown: false, gestureEnabled: false }} />
     <Stack.Screen name="InnerPath" component={InnerPathScreen} options={{ headerShown: false }} />
     <Stack.Screen name="TellMitra" component={TellMitraScreen} options={{ headerShown: false }} />
     <Stack.Screen name="MitraIntention" component={MitraIntentionScreen} options={{ headerShown: false }} />
@@ -432,7 +432,7 @@ export const ProfileStackNavigator = () => (
     <Stack.Screen
       name="Reminders"
       component={RemindersScreen}
-      options={{ headerShown: false }}
+      options={{ headerShown: false, gestureEnabled: false }}
     />
   </Stack.Navigator>
 );

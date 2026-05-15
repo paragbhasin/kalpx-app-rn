@@ -13,7 +13,13 @@ const NAV_LINKS = [
   { to: "/en/community", label: "Community", match: "/en/community" },
 ];
 
-export function Header({ transparent = false }: { transparent?: boolean }) {
+export function Header({
+  transparent = false,
+  hidden = false,
+}: {
+  transparent?: boolean;
+  hidden?: boolean;
+}) {
   const navigate = useNavigate();
   const { authed, userInitial, refresh } = useCurrentUser();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -94,8 +100,12 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
           position: "sticky",
           top: 0,
           zIndex: 60,
+          transform: hidden
+            ? "translate3d(0, -100%, 0)"
+            : "translate3d(0, 0, 0)",
           transition:
-            "background 0.3s, backdrop-filter 0.3s, border-color 0.3s",
+            "transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s, backdrop-filter 0.3s, border-color 0.3s",
+          willChange: "transform",
           borderBottom: useTransparentChrome
             ? "none"
             : isScrolled

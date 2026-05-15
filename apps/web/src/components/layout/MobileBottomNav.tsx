@@ -49,8 +49,10 @@ const TABS = [
 
 export function MobileBottomNav({
   transparent = false,
+  hidden = false,
 }: {
   transparent?: boolean;
+  hidden?: boolean;
 }) {
   const { authed, userInitial } = useCurrentUser();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -75,6 +77,12 @@ export function MobileBottomNav({
           zIndex: 50,
           paddingBottom: "env(safe-area-inset-bottom)",
           boxShadow: "0 -8px 24px rgba(67, 33, 4, 0.08)",
+          transform: hidden
+            ? "translate3d(0, 100%, 0)"
+            : "translate3d(0, 0, 0)",
+          transition: "transform 0.24s cubic-bezier(0.22, 1, 0.36, 1)",
+          willChange: "transform",
+          pointerEvents: hidden ? "none" : "auto",
         }}
       >
         {TABS.map(({ to, label, exact }) => (

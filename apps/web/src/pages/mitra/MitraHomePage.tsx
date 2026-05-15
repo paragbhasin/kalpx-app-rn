@@ -2,14 +2,14 @@ import { AUTH_KEYS } from "@kalpx/api-client";
 import {
   DOOR_LABELS,
   type MitraHomeSegment,
-  SEGMENT_RHYTHM_NO_STATE_SUBTITLE,
-  SEGMENT_INNER_PATH_NO_STATE_SUBTITLE,
   QUICK_CHANT_HAS_MANTRA_SUBTITLE,
   QUICK_CHANT_HISTORY_ONLY_SUBTITLE,
   QUICK_CHANT_NO_STATE_SUBTITLE,
-  TELL_MITRA_HAS_HISTORY_SUBTITLE,
+  SEGMENT_INNER_PATH_NO_STATE_SUBTITLE,
+  SEGMENT_RHYTHM_NO_STATE_SUBTITLE,
   TELL_MITRA_ACTIVE_PATH_SUBTITLE,
   TELL_MITRA_DEFAULT_SUBTITLE,
+  TELL_MITRA_HAS_HISTORY_SUBTITLE,
 } from "@kalpx/contracts";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -181,13 +181,15 @@ export function MitraHomePage() {
   }
 
   // Derive segment from loaded home data (Stream O)
-  const segment = (homeData?.user_surface_state?.segment ?? null) as MitraHomeSegment | null;
-  const hasAnyState = (!!segment && segment !== "new") || hasActiveJourney === true;
+  const segment = (homeData?.user_surface_state?.segment ??
+    null) as MitraHomeSegment | null;
+  const hasAnyState =
+    (!!segment && segment !== "new") || hasActiveJourney === true;
 
   // Block on LoadingScreen only while we lack enough data to make a render decision.
   // Never block on entry-view/ — the redirect check below uses `viewKey &&` so it
   // is safe when viewKey is still null, and it handles checkpoints when they arrive.
-  const homeReady = !!(homeData?.user_surface_state);
+  const homeReady = !!homeData?.user_surface_state;
   if (
     fourDoorLoading ||
     (isAuthed && !homeData && !fourDoorError) ||
@@ -198,7 +200,7 @@ export function MitraHomePage() {
 
   // Entry-view redirects for active-journey users (checkpoint / welcome-back / onboarding)
   // daily_view falls through to the four-door companion home (Stream O)
-  if (hasActiveJourney === true && viewKey && viewKey !== 'daily_view') {
+  if (hasActiveJourney === true && viewKey && viewKey !== "daily_view") {
     const redirectPath = mapJourneyEntryViewPath(viewKey);
     if (redirectPath) return <Navigate to={redirectPath} replace />;
   }
@@ -209,9 +211,12 @@ export function MitraHomePage() {
     const innerPathSummary = homeData?.inner_path_summary;
     const greeting = homeData?.greeting;
     const hasRhythm = homeData?.companion_rhythm?.has_rhythm === true;
-    const hasMantra = homeData?.user_surface_state?.has_quick_chant_mantra === true;
-    const hasQuickChantHistory = homeData?.user_surface_state?.has_quick_chant_history === true;
-    const hasTMHistory = homeData?.user_surface_state?.has_tell_mitra_history === true;
+    const hasMantra =
+      homeData?.user_surface_state?.has_quick_chant_mantra === true;
+    const hasQuickChantHistory =
+      homeData?.user_surface_state?.has_quick_chant_history === true;
+    const hasTMHistory =
+      homeData?.user_surface_state?.has_tell_mitra_history === true;
     const hasIP = homeData?.user_surface_state?.has_inner_path === true;
     const myRhythmTarget = hasRhythm
       ? "/en/mitra/rhythm"
@@ -234,12 +239,16 @@ export function MitraHomePage() {
         doorStates?.my_rhythm?.subtitle ??
         doorStates?.my_rhythm?.cta ??
         "")
-      : (segment ? SEGMENT_RHYTHM_NO_STATE_SUBTITLE[segment] : "Build a gentle daily rhythm.");
+      : segment
+        ? SEGMENT_RHYTHM_NO_STATE_SUBTITLE[segment]
+        : "Build a gentle daily rhythm.";
 
     // Inner Path: prefer Day X of Y when path is active, fallback to segment-aware no-path copy
     const innerPathSubtitle = innerPathSummary?.has_active_path
       ? `Day ${innerPathSummary.day_number} of ${innerPathSummary.total_days}`
-      : (segment ? SEGMENT_INNER_PATH_NO_STATE_SUBTITLE[segment] : "Begin a 14-day path for what you are moving through.");
+      : segment
+        ? SEGMENT_INNER_PATH_NO_STATE_SUBTITLE[segment]
+        : "Begin a 14-day path for what you are moving through.";
 
     // Quick Chant subtitle — 3-way conditional (CRITICAL: only show "chosen mantra" if has_quick_chant_mantra)
     const quickChantSubtitle = hasMantra
@@ -251,7 +260,7 @@ export function MitraHomePage() {
     // Tell Mitra subtitle — conditional on state
     const tellMitraSubtitle = hasTMHistory
       ? TELL_MITRA_HAS_HISTORY_SUBTITLE
-      : (hasIP || segment === "rhythm_and_path")
+      : hasIP || segment === "rhythm_and_path"
         ? TELL_MITRA_ACTIVE_PATH_SUBTITLE
         : TELL_MITRA_DEFAULT_SUBTITLE;
 
@@ -922,6 +931,7 @@ export function MitraHomePage() {
               flex: 1,
               minHeight: 0,
               paddingBottom: 20,
+              marginTop: 60,
             }}
           >
             <div

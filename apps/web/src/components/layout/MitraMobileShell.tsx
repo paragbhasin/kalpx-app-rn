@@ -1,4 +1,5 @@
 import React from "react";
+import { useScrollDirection } from "../../hooks/useScrollDirection";
 import { Header } from "./Header";
 import { MobileBottomNav } from "./MobileBottomNav";
 // import { MitraTopBar } from './MitraTopBar';
@@ -22,46 +23,59 @@ export function MitraMobileShell({
   // and we fall back to /beige_bg.png. Keep chrome transparent so the
   // Mitra surfaces show that background consistently.
   const transparentChrome = true;
+  const { shouldHideChrome } = useScrollDirection();
+  const shellStyle = {
+    minHeight: "100vh",
+    backgroundImage: backgroundImage
+      ? `url(${backgroundImage})`
+      : "url(/beige_bg.png)",
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "cover",
+    backgroundPosition: "top 92%",
+    backgroundAttachment: "scroll",
+    "--kalpx-shell-top-space": hideTopBar
+      ? "0px"
+      : "calc(60px + env(safe-area-inset-top))",
+    "--kalpx-shell-bottom-space": hideBottomNav
+      ? "32px"
+      : "calc(152px + env(safe-area-inset-bottom))",
+    "--kalpx-shell-scroll-room": "160px",
+  } as React.CSSProperties;
 
   return (
     <div
       className="kalpx-mitra-shell"
-      style={{
-        height: "100dvh",
-        overflow: "hidden",
-        backgroundImage: backgroundImage
-          ? `url(${backgroundImage})`
-          : "url(/beige_bg.png)",
-        backgroundRepeat: "no-repeat",
-        backgroundSize: "cover",
-        backgroundPosition: "top 92%",
-        backgroundAttachment: "fixed",
-      }}
+      style={shellStyle}
     >
       <div
         className="kalpx-mitra-shell-frame"
         style={{
           display: "flex",
           flexDirection: "column",
-          height: "100%",
-          minHeight: 0,
+          minHeight: "100vh",
         }}
       >
         {/* {!hideTopBar && <MitraTopBar transparent={transparentChrome} />} */}
-        {!hideTopBar && <Header transparent={transparentChrome} />}
+        {!hideTopBar && (
+          <Header transparent={transparentChrome} hidden={shouldHideChrome} />
+        )}
         <main
           className="kalpx-shell-main kalpx-mitra-shell-main"
           style={{
             flex: 1,
-            minHeight: 0,
-            overflowY: "auto",
+            overflowY: "visible",
             WebkitOverflowScrolling: "touch",
           }}
         >
           {children}
         </main>
         {/* {!hideBottomNav && <MitraBottomNav4Tab transparent={transparentChrome} onMenuOpen={() => setMenuOpen(true)} />} */}
-        {!hideBottomNav && <MobileBottomNav transparent={transparentChrome} />}
+        {!hideBottomNav && (
+          <MobileBottomNav
+            transparent={transparentChrome}
+            hidden={shouldHideChrome}
+          />
+        )}
       </div>
       {/* {menuOpen && <MitraMenuDrawer onClose={() => setMenuOpen(false)} />} */}
     </div>

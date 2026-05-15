@@ -572,6 +572,8 @@ const styles = StyleSheet.create({
   bottomSection: {
     width: "100%",
     alignItems: "center",
+    marginTop: -300,
+    marginBottom: 96,
   },
   lotusWrap: {
     // marginBottom: 10,

@@ -37,9 +37,8 @@ export function MitraMobileShell({
       ? "0px"
       : "calc(60px + env(safe-area-inset-top))",
     "--kalpx-shell-bottom-space": hideBottomNav
-      ? "32px"
-      : "calc(152px + env(safe-area-inset-bottom))",
-    "--kalpx-shell-scroll-room": "160px",
+      ? "24px"
+      : "calc(72px + env(safe-area-inset-bottom))",
   } as React.CSSProperties;
 
   return (

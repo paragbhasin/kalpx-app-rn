@@ -154,8 +154,7 @@ button {
   min-height: 100vh;
   overflow: visible;
   --kalpx-shell-top-space: calc(60px + env(safe-area-inset-top));
-  --kalpx-shell-bottom-space: calc(152px + env(safe-area-inset-bottom));
-  --kalpx-shell-scroll-room: 160px;
+  --kalpx-shell-bottom-space: calc(72px + env(safe-area-inset-bottom));
 }
 
 .kalpx-mitra-shell-frame {
@@ -216,28 +215,19 @@ button {
   .kalpx-app-main,
   .kalpx-mitra-shell-main {
     padding-top: calc(60px + env(safe-area-inset-top));
-    min-height: calc(100lvh + 96px);
   }
 
   .kalpx-mitra-shell-main {
     padding-top: var(--kalpx-shell-top-space);
     padding-bottom: var(--kalpx-shell-bottom-space);
-    min-height: calc(100lvh + var(--kalpx-shell-scroll-room));
   }
 
   .kalpx-shell-main.kalpx-mitra-shell-main {
     padding-bottom: var(--kalpx-shell-bottom-space);
   }
 
-  .kalpx-mitra-shell-main::after {
-    content: "";
-    display: block;
-    height: var(--kalpx-shell-scroll-room);
-    pointer-events: none;
-  }
-
   .kalpx-shell-main {
-    padding-bottom: calc(152px + env(safe-area-inset-bottom));
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
   }
 }
 

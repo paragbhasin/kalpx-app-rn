@@ -28,6 +28,7 @@ import {
   useJourneyEntryView,
 } from "../../hooks/useJourneyEntryView";
 import { useJourneyStatus } from "../../hooks/useJourneyStatus";
+import { useScrollDirection } from "../../hooks/useScrollDirection";
 import { WEB_ENV } from "../../lib/env";
 import type { AppDispatch, RootState } from "../../store";
 import { setHomeData } from "../../store/doorSlice";
@@ -54,7 +55,7 @@ function LoadingScreen() {
   return (
     <div
       style={{
-        minHeight: "100dvh",
+        minHeight: "100vh",
         background: "#FFF8EF",
         display: "flex",
         alignItems: "center",
@@ -81,6 +82,7 @@ export function MitraHomePage() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const screenState = useScreenState();
+  const { shouldHideChrome } = useScrollDirection();
   const [selectedFeeling, setSelectedFeeling] = useState<
     (typeof FEELING_OPTIONS)[number] | null
   >(null);
@@ -267,7 +269,7 @@ export function MitraHomePage() {
     return (
       <div
         style={{
-          minHeight: "100dvh",
+          minHeight: "100vh",
           backgroundImage: "url(/beige_bg.png)",
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -276,7 +278,7 @@ export function MitraHomePage() {
           flexDirection: "column",
         }}
       >
-        <Header transparent />
+        <Header transparent hidden={shouldHideChrome} />
         <main
           style={{
             flex: 1,
@@ -284,7 +286,7 @@ export function MitraHomePage() {
             flexDirection: "column",
             alignItems: "center",
             width: "100%",
-            paddingBottom: "calc(92px + env(safe-area-inset-bottom))",
+            paddingBottom: "calc(72px + env(safe-area-inset-bottom))",
           }}
         >
           {greeting && (
@@ -872,7 +874,7 @@ export function MitraHomePage() {
           </div>
         </main>
         <Footer transparent />
-        <MobileBottomNav transparent />
+        <MobileBottomNav transparent hidden={shouldHideChrome} />
       </div>
     );
   }
@@ -889,7 +891,7 @@ export function MitraHomePage() {
   return (
     <div
       style={{
-        minHeight: "100dvh",
+        minHeight: "100vh",
         backgroundImage: "url(/new_home.png)",
         backgroundSize: "cover",
         backgroundPosition: "center",
@@ -898,7 +900,7 @@ export function MitraHomePage() {
         flexDirection: "column",
       }}
     >
-      <Header transparent />
+      <Header transparent hidden={shouldHideChrome} />
       <main
         style={{
           flex: 1,
@@ -1059,7 +1061,7 @@ export function MitraHomePage() {
               alignItems: "center",
               marginTop: "auto",
               paddingTop: 8,
-              paddingBottom: 94,
+              paddingBottom: 32,
             }}
           >
             <img
@@ -1125,7 +1127,7 @@ export function MitraHomePage() {
           )}
       </main>
       <Footer transparent />
-      <MobileBottomNav transparent />
+      <MobileBottomNav transparent hidden={shouldHideChrome} />
     </div>
   );
 }

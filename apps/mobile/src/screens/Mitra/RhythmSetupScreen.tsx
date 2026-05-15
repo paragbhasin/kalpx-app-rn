@@ -461,20 +461,8 @@ export default function RhythmSetupScreen({
   );
 
   const openRhythmHome = useCallback(() => {
-    dispatch(
-      screenActions.setScreenValue({
-        key: "dashboard_entry_surface",
-        value: "my_rhythm",
-      }),
-    );
-    dispatch(
-      loadScreenWithData({
-        containerId: "companion_dashboard",
-        stateId: "day_active",
-      }) as any,
-    );
-    navigation.navigate("DynamicEngine");
-  }, [dispatch, navigation]);
+    navigation.navigate("RhythmHome" as any);
+  }, [navigation]);
 
   const openInnerPath = useCallback(() => {
     if (!hasActiveInnerPath) {
@@ -503,19 +491,7 @@ export default function RhythmSetupScreen({
       return;
     }
 
-    dispatch(
-      screenActions.setScreenValue({
-        key: "dashboard_entry_surface",
-        value: "inner_path",
-      }),
-    );
-    dispatch(
-      loadScreenWithData({
-        containerId: "companion_dashboard",
-        stateId: "day_active",
-      }) as any,
-    );
-    navigation.navigate("DynamicEngine");
+    navigation.navigate("InnerPath" as any);
   }, [dispatch, hasActiveInnerPath, navigation]);
 
   const leaveEmbeddedFlow = useCallback(() => {

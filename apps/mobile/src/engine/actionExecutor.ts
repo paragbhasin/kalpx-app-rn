@@ -17,7 +17,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert, Linking } from "react-native";
 import api from "../Networks/axios";
-import { navigate as rootNavigate } from "../Shared/Routes/NavigationService";
+import { navigate as rootNavigate, navigationRef } from "../Shared/Routes/NavigationService";
 import { cleanupFlowState, GUARDED_ACTIONS, hasTellMitraRoomEntryContext } from "@kalpx/contracts";
 import {
   // Audit fix F1/F2/F3/F9 (2026-04-13) — wrappers for dashboard_load orchestration
@@ -4800,17 +4800,15 @@ export async function executeAction(
         // a subsequent room entry.
         setScreenValue(null, "room_id");
         setScreenValue(null, "_overlay_parent_container");
-        // Route to the v3 dashboard when the new-dashboard flag is on,
-        // otherwise legacy. Mirrors continue_practice handler at line
-        // ~494 of this file.
-        const dashboardContainer =
-          process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
-            ? "companion_dashboard_v3"
-            : "companion_dashboard";
-        loadScreen({
-          container_id: dashboardContainer,
-          state_id: "day_active",
-        } as any);
+        // Return to the surface that launched this room session.
+        // When a direct-route screen (BrowseRooms, TellMitra, Four Door Home, etc.)
+        // pushed DynamicEngine onto the stack, goBack() returns there cleanly.
+        // Fallback to portal if no RN stack depth (legacy engine-only path).
+        if (navigationRef.isReady() && navigationRef.canGoBack()) {
+          navigationRef.goBack();
+        } else {
+          loadScreen({ container_id: "portal", state_id: "portal" } as any);
+        }
         break;
       }
 

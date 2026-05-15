@@ -66,8 +66,8 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
   // find the innermost stack and its currently focused leaf screen.
   // Fixed-depth selectors broke because the app has 3+ navigator levels:
   // reading index at the wrong level gave tab-selection (0/1/2) not stack depth.
-  const { canGoBackInStack, isOnDynamicEngine } = useNavigationState((state) => {
-    if (!state) return { canGoBackInStack: false, isOnDynamicEngine: false };
+  const { canGoBackInStack, isOnDynamicEngine, leafRouteName } = useNavigationState((state) => {
+    if (!state) return { canGoBackInStack: false, isOnDynamicEngine: false, leafRouteName: null as string | null };
     let s: any = state;
     while (s?.routes?.length) {
       const idx: number = s.index ?? 0;
@@ -78,22 +78,28 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
         return {
           canGoBackInStack: s.type === "stack" && idx > 0,
           isOnDynamicEngine: focused?.name === "DynamicEngine",
+          leafRouteName: (focused?.name ?? null) as string | null,
         };
       }
       s = focused.state;
     }
-    return { canGoBackInStack: false, isOnDynamicEngine: false };
+    return { canGoBackInStack: false, isOnDynamicEngine: false, leafRouteName: null as string | null };
   });
+
+  // Routes that are stable home bases — back button never shows even if the RN
+  // stack has depth (e.g. navigate("Home") pushes a new entry on an existing stack).
+  const DIRECT_ROOT_ROUTES = new Set(["Home"]);
 
   // Engine owner: show when depth > 0 beyond the root engine screen.
   // Also show when engine history is fully exhausted but DynamicEngine is still
   // on the RN stack (e.g. room session launched from BrowseRooms) so the user
   // can pop back to the launching direct-route screen instead of getting stuck.
-  // Direct-route owner: show whenever the stack has depth (index > 0).
+  // Direct-route owner: show whenever the stack has depth (index > 0), unless the
+  // current route is a designated root (Four Door Home, etc.).
   const showBackButton = isOnDynamicEngine
     ? (!currentScreen?.overlay && history.length > 0 && !isRootScreen) ||
       (history.length === 0 && canGoBackInStack)
-    : canGoBackInStack;
+    : canGoBackInStack && !DIRECT_ROOT_ROUTES.has(leafRouteName ?? "");
 
   // Reset header visibility when back button is not present (mostly root screens)
   React.useEffect(() => {
@@ -136,6 +142,13 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
+    // Room sessions are entered from direct-route screens (BrowseRooms, TellMitra, etc.).
+    // Pop the RN stack to return to the launching surface — matches room_exit behavior.
+    if (currentContainerId === "room" && canGoBackInStack) {
+      navigationRef.goBack();
+      return;
+    }
+
     if (history.length > 0) {
       goBack();
       return;
@@ -148,8 +161,9 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    loadScreen({ container_id: "portal", state_id: "portal" });
-  }, [isOnDynamicEngine, isInSupportFlow, history.length, goBack, loadScreen]);
+    // Last resort: return to Four Door Home — the product root for logged-in users.
+    (navigationRef as any).navigate("Home");
+  }, [isOnDynamicEngine, isInSupportFlow, currentContainerId, canGoBackInStack, history.length, goBack, loadScreen]);
 
   // Android hardware back — delegate to the same handleBack logic so
   // hardware back honors support-flow jumps, debounce, and root guards.

@@ -133,7 +133,6 @@ export default function FourDoorHomeContainer({
   const navigation = useNavigation<any>();
   const loadScreen = useScreenStore((state) => state.loadScreen);
   const updateScreenData = useScreenStore((state) => state.updateScreenData);
-  const setCurrentScreen = useScreenStore((state) => state.setCurrentScreen);
   const updateBackground = useScreenStore((state) => state.updateBackground);
   const updateHeaderHidden = useScreenStore(
     (state) => state.updateHeaderHidden,
@@ -241,31 +240,13 @@ export default function FourDoorHomeContainer({
     await loadHome(true, true);
   }, [loadHome]);
 
-  const openQuickResetSurface = useCallback(async () => {
-    updateScreenData("dashboard_entry_surface", "quick_reset");
-    await loadScreen({
-      container_id: "quick_reset",
-      state_id: "opening",
-    });
-    setCurrentScreen({ blocks: [], overlay: false });
-    const routeName = navigation.getState?.()?.routes?.slice(-1)?.[0]?.name;
-    if (routeName !== "DynamicEngine") {
-      navigation.navigate("DynamicEngine" as any);
-    }
-  }, [loadScreen, navigation, setCurrentScreen, updateScreenData]);
+  const openQuickResetSurface = useCallback(() => {
+    navigation.navigate("QuickReset" as any);
+  }, [navigation]);
 
-  const openTellMitraSurface = useCallback(async () => {
-    updateScreenData("dashboard_entry_surface", "tell_mitra");
-    await loadScreen({
-      container_id: "tell_mitra",
-      state_id: "opening",
-    });
-    setCurrentScreen({ blocks: [], overlay: false });
-    const routeName = navigation.getState?.()?.routes?.slice(-1)?.[0]?.name;
-    if (routeName !== "DynamicEngine") {
-      navigation.navigate("DynamicEngine" as any);
-    }
-  }, [loadScreen, navigation, setCurrentScreen, updateScreenData]);
+  const openTellMitraSurface = useCallback(() => {
+    navigation.navigate("TellMitra" as any);
+  }, [navigation]);
 
   const rhythmBand = getRhythmTimeBand();
   const seg = (homeData?.user_surface_state?.segment ??
@@ -398,7 +379,6 @@ export default function FourDoorHomeContainer({
 
   const acw = homeData.active_checkin_window;
   const windowActive = acw?.active === true;
-  const hasRhythm = homeData?.companion_rhythm?.has_rhythm === true;
   const currentRouteName = navigation
     .getState?.()
     ?.routes?.slice(-1)?.[0]?.name;
@@ -476,25 +456,7 @@ export default function FourDoorHomeContainer({
             label={DOOR_LABELS.my_rhythm}
             subtitle={rhythmSubtitle}
             onPress={() => {
-              if (!hasRhythm) {
-                updateScreenData("dashboard_entry_surface", "my_rhythm_setup");
-                loadScreen({
-                  container_id: "companion_dashboard",
-                  state_id: "day_active",
-                });
-                if (currentRouteName !== "DynamicEngine") {
-                  navigation.navigate("DynamicEngine" as any);
-                }
-                return;
-              }
-              updateScreenData("dashboard_entry_surface", "my_rhythm");
-              loadScreen({
-                container_id: "companion_dashboard",
-                state_id: "day_active",
-              });
-              if (currentRouteName !== "DynamicEngine") {
-                navigation.navigate("DynamicEngine" as any);
-              }
+              navigation.navigate("RhythmHome" as any);
             }}
           />
           <DoorCard
@@ -517,14 +479,7 @@ export default function FourDoorHomeContainer({
                 }
                 return;
               }
-              updateScreenData("dashboard_entry_surface", "inner_path");
-              loadScreen({
-                container_id: "companion_dashboard",
-                state_id: "day_active",
-              });
-              if (currentRouteName !== "DynamicEngine") {
-                navigation.navigate("DynamicEngine" as any);
-              }
+              navigation.navigate("InnerPath" as any);
             }}
           />
           <DoorCard

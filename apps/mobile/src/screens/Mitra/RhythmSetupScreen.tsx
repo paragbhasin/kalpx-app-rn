@@ -1830,7 +1830,7 @@ export default function RhythmSetupScreen({
             );
           })}
 
-          <View style={styles.reminderSection}>
+          {/* <View style={styles.reminderSection}>
             <Text style={styles.reminderLabel}>Reminder preference</Text>
             <View style={styles.reminderPills}>
               {(
@@ -1864,7 +1864,7 @@ export default function RhythmSetupScreen({
                 </TouchableOpacity>
               ))}
             </View>
-          </View>
+          </View> */}
 
           {!!errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
 

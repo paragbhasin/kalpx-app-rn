@@ -20,9 +20,15 @@ import {
   View,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import LibrarySearchModal, { type LibrarySearchItem } from "../../components/LibrarySearchModal";
+import LibrarySearchModal, {
+  type LibrarySearchItem,
+} from "../../components/LibrarySearchModal";
 import { executeAction } from "../../engine/actionExecutor";
-import { mitraJourneyHomeV3, mitraRhythmResolveItem, postRhythmItemAdd } from "../../engine/mitraApi";
+import {
+  mitraJourneyHomeV3,
+  mitraRhythmResolveItem,
+  postRhythmItemAdd,
+} from "../../engine/mitraApi";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import { setHomeData } from "../../store/doorSlice";
 import {
@@ -90,7 +96,8 @@ function RhythmItemCard({
       </View>
       {item.reminder_enabled && item.reminder_time ? (
         <Text style={styles.reminderLine}>
-          Mitra will gently remind you at {formatReminderTime(item.reminder_time)}
+          Mitra will gently remind you at{" "}
+          {formatReminderTime(item.reminder_time)}
         </Text>
       ) : null}
       {item.description_snapshot ? (
@@ -247,32 +254,38 @@ export default function RhythmHomeScreen({
     navigation.goBack();
   }, [dispatch, embedded, navigation]);
 
-  const handleHomeBandItemSelected = useCallback(async (picked: LibrarySearchItem) => {
-    if (!homeBand) return;
-    const slot = homeBand;
-    const slotItems: RhythmItem[] = homeData?.companion_rhythm?.[slot]?.items ?? [];
-    const pickedItemId = picked.itemId || (picked as any).item_id || "";
-    const alreadyInSlot = slotItems.some((i) => i.item_id === pickedItemId);
-    setHomeBand(null);
-    if (alreadyInSlot) return;
-    try {
-      await postRhythmItemAdd({
-        slot,
-        item_type: ((picked as any).item_type || picked.itemType || "practice") as any,
-        item_id: pickedItemId,
-        title_snapshot: picked.title,
-        description_snapshot: picked.description ?? null,
-        source: "user_chosen",
-        sort_order: slotItems.length + 1,
-        reminder_enabled: false,
-        reminder_time: null,
-      });
-      const fresh = await mitraJourneyHomeV3({ forceFresh: true });
-      dispatch(setHomeData(fresh));
-    } catch (e: any) {
-      console.warn("[RhythmHome] addItem failed", e?.message);
-    }
-  }, [homeBand, homeData, dispatch]);
+  const handleHomeBandItemSelected = useCallback(
+    async (picked: LibrarySearchItem) => {
+      if (!homeBand) return;
+      const slot = homeBand;
+      const slotItems: RhythmItem[] =
+        homeData?.companion_rhythm?.[slot]?.items ?? [];
+      const pickedItemId = picked.itemId || (picked as any).item_id || "";
+      const alreadyInSlot = slotItems.some((i) => i.item_id === pickedItemId);
+      setHomeBand(null);
+      if (alreadyInSlot) return;
+      try {
+        await postRhythmItemAdd({
+          slot,
+          item_type: ((picked as any).item_type ||
+            picked.itemType ||
+            "practice") as any,
+          item_id: pickedItemId,
+          title_snapshot: picked.title,
+          description_snapshot: picked.description ?? null,
+          source: "user_chosen",
+          sort_order: slotItems.length + 1,
+          reminder_enabled: false,
+          reminder_time: null,
+        });
+        const fresh = await mitraJourneyHomeV3({ forceFresh: true });
+        dispatch(setHomeData(fresh));
+      } catch (e: any) {
+        console.warn("[RhythmHome] addItem failed", e?.message);
+      }
+    },
+    [homeBand, homeData, dispatch],
+  );
 
   async function handleItemAction(item: RhythmItem, band: RhythmTimeBand) {
     if (resolvingItemId) return;
@@ -492,7 +505,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     backgroundColor: "rgba(255,252,247,0.9)",
     padding: 15,
-    // marginBottom: 18,
+    marginBottom: 18,
     shadowColor: "#C9A84C",
     shadowOpacity: 0.08,
     shadowRadius: 24,
@@ -613,16 +626,16 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     borderStyle: "dashed",
-    borderColor: "rgba(201,168,76,0.35)",
-    paddingVertical: 7,
+    borderColor: "#d4a01b",
+    paddingVertical: 10,
     paddingHorizontal: 18,
-    marginTop: 8,
+    marginTop: 12,
     alignItems: "center",
   },
   addToSlotText: {
     fontSize: 13,
     fontStyle: "italic",
-    color: "rgba(107,83,60,0.65)",
-    fontFamily: Fonts.serif.regular,
+    color: "#432104",
+    fontFamily: Fonts.sans.regular,
   },
 });

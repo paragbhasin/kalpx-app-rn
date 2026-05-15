@@ -96,9 +96,16 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
   // can pop back to the launching direct-route screen instead of getting stuck.
   // Direct-route owner: show whenever the stack has depth (index > 0), unless the
   // current route is a designated root (Four Door Home, etc.).
+  //
+  // canGoBackInStack alone: runner/overlay screens launched from direct-route
+  // screens (InnerPath, RhythmHome) carry overlay:true in their schema (designed
+  // for companion_dashboard use), which suppresses both engine-history conditions.
+  // Whenever a direct-route screen is below DynamicEngine in the RN stack
+  // (canGoBackInStack=true), always show back — the overlay flag is irrelevant
+  // in this context because the user entered via a stable direct route.
   const showBackButton = isOnDynamicEngine
-    ? (!currentScreen?.overlay && history.length > 0 && !isRootScreen) ||
-      (history.length === 0 && canGoBackInStack)
+    ? canGoBackInStack ||
+      (!currentScreen?.overlay && history.length > 0 && !isRootScreen)
     : canGoBackInStack && !DIRECT_ROOT_ROUTES.has(leafRouteName ?? "");
 
   // Reset header visibility when back button is not present (mostly root screens)

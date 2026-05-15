@@ -1,14 +1,11 @@
 // components/Privacy.js
-import { useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   BackHandler,
   ScrollView,
-  TouchableOpacity,
   View
 } from "react-native";
-import Ionicons from "react-native-vector-icons/Ionicons";
 import Colors from "../../components/Colors";
 import FontSize from "../../components/FontSize";
 import TextComponent from "../../components/TextComponent";
@@ -16,7 +13,6 @@ import TextComponent from "../../components/TextComponent";
 const Privacy = ({ onClose }) => {
   const [visible, setVisible] = useState(true);
   const { t } = useTranslation();
-  const navigation = useNavigation();
 
   const closeModal = useCallback(() => {
     setVisible(false);
@@ -52,9 +48,7 @@ const Privacy = ({ onClose }) => {
           }}
         >
           <TextComponent type="semiBoldText" style={{  fontSize: FontSize.CONSTS.FS_18, color: Colors.Colors.BLACK, }}>{t("privacy.title")}</TextComponent>
-          <TouchableOpacity onPress={() => {navigation.goBack()}}>
-            <Ionicons name="close" size={26} color="#000" />
-          </TouchableOpacity>
+          <View style={{ width: 26 }} />
         </View>
 
         {/* Scrollable Privacy Policy Text */}

@@ -162,9 +162,7 @@ const Profile = () => {
       >
         {/* Header */}
         <View style={[styles.header, { marginTop: -50 }]}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="#000" />
-          </TouchableOpacity>
+          <View style={{ width: 24 }} />
           <TextComponent type="headerText" style={styles.headerText}>
             {t("profile.title")}
           </TextComponent>

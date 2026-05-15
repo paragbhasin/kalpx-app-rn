@@ -1,4 +1,3 @@
-import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, TouchableOpacity, View } from "react-native";
@@ -12,7 +11,6 @@ import styles from "./languageStyle";
 const ENABLED_LOCALES = ["en"];
 
 const Language = () => {
-  const navigation: any = useNavigation();
   const { i18n } = useTranslation();
 
   // Full language registry — entries become available when added to ENABLED_LOCALES
@@ -48,9 +46,7 @@ const Language = () => {
     <ScrollView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
-        </TouchableOpacity>
+        <View style={{ width: 24 }} />
         <TextComponent type="headerText" style={styles.headerText}>Language</TextComponent>
         <View style={{ width: 24 }} />
       </View>

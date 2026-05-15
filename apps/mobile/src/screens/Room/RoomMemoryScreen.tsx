@@ -237,14 +237,7 @@ const RoomMemoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     <SafeAreaView style={styles.root}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          accessibilityLabel="Back"
-          accessibilityRole="button"
-        >
-          <Ionicons name="arrow-back" size={22} color={Colors.brownDeep} />
-        </TouchableOpacity>
+        <View style={styles.headerRight} />
         <Text style={styles.headerTitle}>Saved reflections</Text>
         <View style={styles.headerRight} />
       </View>

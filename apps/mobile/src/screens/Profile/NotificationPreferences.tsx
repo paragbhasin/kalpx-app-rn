@@ -1,4 +1,3 @@
-import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -9,7 +8,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useDispatch, useSelector } from 'react-redux';
 import TextComponent from '../../components/TextComponent';
 import { AppDispatch, RootState } from '../../store';
@@ -129,7 +127,6 @@ function isValidHHMM(val: string): boolean {
 }
 
 const NotificationPreferences = () => {
-  const navigation: any = useNavigation();
   const dispatch = useDispatch<AppDispatch>();
   const notifications = useSelector((s: RootState) => s.preferences.notifications);
   const quietHours = useSelector((s: RootState) => s.preferences.quiet_hours);
@@ -209,9 +206,7 @@ const NotificationPreferences = () => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-          <Ionicons name="arrow-back" size={22} color="#3a2e24" />
-        </TouchableOpacity>
+        <View style={{ width: 22 }} />
         <TextComponent type="headerText" style={styles.headerText}>
           Notification Preferences
         </TextComponent>

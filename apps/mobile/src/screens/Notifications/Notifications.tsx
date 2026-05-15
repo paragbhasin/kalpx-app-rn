@@ -1,4 +1,4 @@
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useFocusEffect } from "@react-navigation/native";
 import { AnyAction } from "@reduxjs/toolkit";
 import moment from "moment";
 import React, { useCallback } from "react";
@@ -26,7 +26,6 @@ import { useScrollContext } from "../../context/ScrollContext";
 export default function Notifications() {
   const { i18n } = useTranslation();
   const { handleScroll } = useScrollContext();
-  const navigation = useNavigation();
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
 
   const { data, loading, page, hasMore } = useSelector(
@@ -87,9 +86,7 @@ export default function Notifications() {
       {/* Standard header can stay if you want, or you can hide it with the global one */}
       {/* If you want it to hide with global one, wrap it in Animated.View or just remove it if redundant */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
-        </TouchableOpacity>
+        <View style={{ width: 24 }} />
         <TextComponent type="headerText" style={styles.headerText}>
           Notifications
         </TextComponent>

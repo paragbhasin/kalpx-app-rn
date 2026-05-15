@@ -129,9 +129,7 @@ const ProfileDetails = () => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="#000" />
-          </Pressable>
+          <View style={{ width: 24 }} />
           <TextComponent type="headerText" style={styles.headerText}>
             {t("profileScreen.myProfile")}
           </TextComponent>

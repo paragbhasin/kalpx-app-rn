@@ -18,13 +18,17 @@ import {
 import type { RhythmTimeBand, RhythmWizardLocalItem } from "@kalpx/types";
 import { useNavigation } from "@react-navigation/native";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ActivityIndicator,
   Image,
   ImageBackground,
-  Modal,
-  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -33,7 +37,6 @@ import {
   View,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { TimePickerModal } from "../../components/TimePickerModal";
 import A1Icon from "../../../assets/a1.svg";
 import A2Icon from "../../../assets/a2.svg";
 import A3Icon from "../../../assets/a3.svg";
@@ -58,6 +61,7 @@ import NightIcon from "../../../assets/night1.svg";
 import LibrarySearchModal, {
   LibrarySearchItem,
 } from "../../components/LibrarySearchModal";
+import { TimePickerModal } from "../../components/TimePickerModal";
 import { executeAction } from "../../engine/actionExecutor";
 import {
   deleteRhythmItem,
@@ -269,7 +273,8 @@ function toReminderDisplay(value: string | null | undefined): string {
 }
 
 function reminderTimeToDate(value: string | null | undefined): Date {
-  const normalized = normalizeReminderTime(value) ?? DEFAULT_REMINDER_TIMES.morning;
+  const normalized =
+    normalizeReminderTime(value) ?? DEFAULT_REMINDER_TIMES.morning;
   const [hourText, minuteText] = normalized.split(":");
   const date = new Date();
   date.setHours(Number(hourText), Number(minuteText), 0, 0);
@@ -411,7 +416,8 @@ export default function RhythmSetupScreen({
   const navigation = useNavigation<any>();
   const homeData = useSelector((state: any) => state.door?.homeData);
   const existingRhythm = homeData?.companion_rhythm;
-  const hasActiveInnerPath = homeData?.inner_path_summary?.has_active_path === true;
+  const hasActiveInnerPath =
+    homeData?.inner_path_summary?.has_active_path === true;
 
   // ── Screen bridge (needed for executeAction in wizard confirmation) ──────────
   const screenBridge = useScreenStore();
@@ -583,13 +589,17 @@ export default function RhythmSetupScreen({
   );
 
   // Frozen at mount — never recomputed during save to prevent stale snapshot
-  const originalBandItems = useMemo<BandItems>(() => ({
-    morning: seedBand("morning"),
-    afternoon: seedBand("afternoon"),
-    night: seedBand("night"),
-  }), []);
+  const originalBandItems = useMemo<BandItems>(
+    () => ({
+      morning: seedBand("morning"),
+      afternoon: seedBand("afternoon"),
+      night: seedBand("night"),
+    }),
+    [],
+  );
   const originalReminderPref = useMemo(
-    () => (existingRhythm?.reminder_preference as "yes" | "no" | "later") ?? null,
+    () =>
+      (existingRhythm?.reminder_preference as "yes" | "no" | "later") ?? null,
     [],
   );
 
@@ -838,15 +848,27 @@ export default function RhythmSetupScreen({
     });
   };
 
-  const moveBandItemToSlot = (fromBand: RhythmTimeBand, idx: number, toSlot: RhythmTimeBand) => {
+  const moveBandItemToSlot = (
+    fromBand: RhythmTimeBand,
+    idx: number,
+    toSlot: RhythmTimeBand,
+  ) => {
     setBandItems((prev) => {
       const fromArr = [...prev[fromBand]];
       const [moved] = fromArr.splice(idx, 1);
-      return { ...prev, [fromBand]: fromArr, [toSlot]: [...prev[toSlot], { ...moved }] };
+      return {
+        ...prev,
+        [fromBand]: fromArr,
+        [toSlot]: [...prev[toSlot], { ...moved }],
+      };
     });
   };
 
-  const updateBandItemField = (band: RhythmTimeBand, idx: number, patch: Partial<BandItem>) => {
+  const updateBandItemField = (
+    band: RhythmTimeBand,
+    idx: number,
+    patch: Partial<BandItem>,
+  ) => {
     setBandItems((prev) => {
       const arr = [...prev[band]];
       arr[idx] = { ...arr[idx], ...patch };
@@ -877,11 +899,16 @@ export default function RhythmSetupScreen({
             reminder_time: item.reminder_time,
           })),
         );
-        await postRhythmSetup({ items: allItems, reminder_preference: reminderPref });
+        await postRhythmSetup({
+          items: allItems,
+          reminder_preference: reminderPref,
+        });
       } else {
         // Edit mode: global delta-save
         if (BANDS.some((b) => originalBandItems[b] == null)) {
-          console.error("[RhythmSetup] originalBandItems missing — aborting delta");
+          console.error(
+            "[RhythmSetup] originalBandItems missing — aborting delta",
+          );
           return;
         }
 
@@ -889,7 +916,7 @@ export default function RhythmSetupScreen({
         const currentAllItems = BANDS.flatMap((band) =>
           bandItems[band].map((item, idx) => ({
             ...item,
-            slot: band,            // current band = current slot (source of truth)
+            slot: band, // current band = current slot (source of truth)
             currentSortOrder: idx + 1,
           })),
         );
@@ -901,7 +928,10 @@ export default function RhythmSetupScreen({
 
         // Step 1: DELETE — only items absent from ALL current slots
         for (const orig of originalAllItems) {
-          if (orig.rhythm_item_id && !currentExistingIds.has(orig.rhythm_item_id)) {
+          if (
+            orig.rhythm_item_id &&
+            !currentExistingIds.has(orig.rhythm_item_id)
+          ) {
             await deleteRhythmItem(orig.rhythm_item_id);
           }
         }
@@ -926,12 +956,17 @@ export default function RhythmSetupScreen({
         // Step 3: PATCH — only changed fields; skip if nothing changed
         for (const item of currentAllItems) {
           if (!item.rhythm_item_id) continue;
-          const orig = originalAllItems.find((o) => o.rhythm_item_id === item.rhythm_item_id);
+          const orig = originalAllItems.find(
+            (o) => o.rhythm_item_id === item.rhythm_item_id,
+          );
           if (!orig) continue;
           const patch: Record<string, unknown> = {};
-          if (orig.reminder_enabled !== item.reminder_enabled) patch.reminder_enabled = item.reminder_enabled;
-          if (orig.reminder_time !== item.reminder_time) patch.reminder_time = item.reminder_time;
-          if (orig.sort_order !== item.currentSortOrder) patch.sort_order = item.currentSortOrder;
+          if (orig.reminder_enabled !== item.reminder_enabled)
+            patch.reminder_enabled = item.reminder_enabled;
+          if (orig.reminder_time !== item.reminder_time)
+            patch.reminder_time = item.reminder_time;
+          if (orig.sort_order !== item.currentSortOrder)
+            patch.sort_order = item.currentSortOrder;
           if ((orig as any).slot !== item.slot) patch.slot = item.slot;
           if (Object.keys(patch).length === 0) continue;
           await patchRhythmItem(item.rhythm_item_id, patch);
@@ -1653,11 +1688,18 @@ export default function RhythmSetupScreen({
                       const isFirst = idx === 0;
                       const isLast = idx === bandItems[band].length - 1;
                       return (
-                        <View key={item.rhythm_item_id ?? `${item.item_id}-${idx}`} style={styles.addedItem}>
+                        <View
+                          key={item.rhythm_item_id ?? `${item.item_id}-${idx}`}
+                          style={styles.addedItem}
+                        >
                           {/* Item info */}
                           <View style={styles.addedItemInfo}>
-                            <Text style={styles.addedItemType}>{item.item_type}</Text>
-                            <Text style={styles.addedItemTitle}>{item.title}</Text>
+                            <Text style={styles.addedItemType}>
+                              {item.item_type}
+                            </Text>
+                            <Text style={styles.addedItemTitle}>
+                              {item.title}
+                            </Text>
                           </View>
 
                           {/* Gentle reminder toggle */}
@@ -1668,7 +1710,10 @@ export default function RhythmSetupScreen({
                                 updateBandItemField(band, idx, {
                                   reminder_enabled: enabled,
                                   ...(enabled && item.reminder_time == null
-                                    ? { reminder_time: DEFAULT_REMINDER_TIMES[band] }
+                                    ? {
+                                        reminder_time:
+                                          DEFAULT_REMINDER_TIMES[band],
+                                      }
                                     : {}),
                                 });
                               }}
@@ -1676,60 +1721,95 @@ export default function RhythmSetupScreen({
                               style={styles.reminderToggleBtn}
                             >
                               <Text style={styles.reminderToggleText}>
-                                {item.reminder_enabled ? "Reminder on ✓" : "Remind me"}
+                                {item.reminder_enabled
+                                  ? "Reminder on ✓"
+                                  : "Remind me"}
                               </Text>
                             </TouchableOpacity>
                             {item.reminder_enabled && (
                               <ReminderTimeRow
                                 label=""
                                 value={item.reminder_time}
-                                onChange={(v) => updateBandItemField(band, idx, { reminder_time: v ? normalizeReminderTime(v) : null })}
+                                onChange={(v) =>
+                                  updateBandItemField(band, idx, {
+                                    reminder_time: v
+                                      ? normalizeReminderTime(v)
+                                      : null,
+                                  })
+                                }
                               />
                             )}
                           </View>
+                          <View style={wStyles.mantraDividerline} />
 
                           {/* Reorder */}
-                          <View style={styles.reorderRow}>
+                          {/* <View style={styles.reorderRow}>
                             <TouchableOpacity
                               disabled={isFirst}
                               onPress={() => moveBandItemUp(band, idx)}
-                              style={[styles.reorderBtn, isFirst && styles.reorderBtnDisabled]}
+                              style={[
+                                styles.reorderBtn,
+                                isFirst && styles.reorderBtnDisabled,
+                              ]}
                             >
                               <Text style={styles.reorderBtnText}>↑</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                               disabled={isLast}
                               onPress={() => moveBandItemDown(band, idx)}
-                              style={[styles.reorderBtn, isLast && styles.reorderBtnDisabled]}
+                              style={[
+                                styles.reorderBtn,
+                                isLast && styles.reorderBtnDisabled,
+                              ]}
                             >
                               <Text style={styles.reorderBtnText}>↓</Text>
                             </TouchableOpacity>
-                          </View>
+                          </View> */}
 
                           {/* Move to slot */}
-                          <View style={styles.moveSlotRow}>
-                            {(["morning", "afternoon", "night"] as RhythmTimeBand[])
-                              .filter((s) => s !== band)
-                              .map((s) => (
-                                <TouchableOpacity
-                                  key={s}
-                                  onPress={() => moveBandItemToSlot(band, idx, s)}
-                                  style={styles.moveSlotPill}
-                                  activeOpacity={0.7}
-                                >
-                                  <Text style={styles.moveSlotPillText}>Move to {s}</Text>
-                                </TouchableOpacity>
-                              ))}
-                          </View>
-
-                          {/* Remove */}
-                          <TouchableOpacity
-                            onPress={() => removeItemAt(band, idx)}
-                            activeOpacity={0.7}
-                            style={styles.removeBtn}
+                          <View
+                            style={{
+                              display: "flex",
+                              flexDirection: "row",
+                              gap: 12,
+                              marginTop: 10,
+                              justifyContent: "flex-end",
+                            }}
                           >
-                            <Text style={styles.removeBtnText}>Remove</Text>
-                          </TouchableOpacity>
+                            <View style={styles.moveSlotRow}>
+                              {(
+                                [
+                                  "morning",
+                                  "afternoon",
+                                  "night",
+                                ] as RhythmTimeBand[]
+                              )
+                                .filter((s) => s !== band)
+                                .map((s) => (
+                                  <TouchableOpacity
+                                    key={s}
+                                    onPress={() =>
+                                      moveBandItemToSlot(band, idx, s)
+                                    }
+                                    style={styles.moveSlotPill}
+                                    activeOpacity={0.7}
+                                  >
+                                    <Text style={styles.moveSlotPillText}>
+                                      Move to {s}
+                                    </Text>
+                                  </TouchableOpacity>
+                                ))}
+                            </View>
+
+                            {/* Remove */}
+                            <TouchableOpacity
+                              onPress={() => removeItemAt(band, idx)}
+                              activeOpacity={0.7}
+                              style={styles.removeBtn}
+                            >
+                              <Text style={styles.removeBtnText}>Remove</Text>
+                            </TouchableOpacity>
+                          </View>
                         </View>
                       );
                     })}
@@ -1951,6 +2031,11 @@ const wStyles = StyleSheet.create({
   },
   momentDividerLine: {
     width: 56,
+    height: 1,
+    backgroundColor: "rgba(228,180,79,0.4)",
+  },
+  mantraDividerline: {
+    width: "100%",
     height: 1,
     backgroundColor: "rgba(228,180,79,0.4)",
   },
@@ -2436,7 +2521,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     borderColor: "rgba(226, 201, 151, 0.9)",
-    backgroundColor: "rgba(255, 251, 244, 0.95)",
+    backgroundColor: "#ffffff",
     paddingHorizontal: 16,
     paddingVertical: 16,
     marginBottom: 10,
@@ -2450,33 +2535,36 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   addedItemTitle: {
-    fontSize: 14,
-    fontFamily: Fonts.serif.regular,
-    color: "#6A4523",
+    fontSize: 13,
+    fontFamily: Fonts.sans.medium,
+    color: "#432104",
     lineHeight: 24,
+    fontWeight: "700",
   },
   itemReminderRow: {
     flexDirection: "row",
     alignItems: "center",
     flexWrap: "wrap",
     gap: 8,
-    marginBottom: 8,
+    marginBottom: 10,
+    marginTop: 10,
   },
   reminderToggleBtn: {
-    borderRadius: 999,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: "rgba(201,168,76,0.4)",
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 5,
   },
   reminderToggleText: {
-    fontSize: 11,
+    fontSize: 13,
     color: "#7B6550",
     fontFamily: Fonts.sans.regular,
   },
   reorderRow: {
     flexDirection: "row",
-    gap: 6,
+    alignItems: "center",
+    justifyContent: "flex-end",
     marginBottom: 8,
   },
   reorderBtn: {
@@ -2503,16 +2591,16 @@ const styles = StyleSheet.create({
   moveSlotPill: {
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: "rgba(201,168,76,0.3)",
+    borderColor: "#d4a01b",
     paddingHorizontal: 10,
-    paddingVertical: 3,
+    paddingVertical: 5,
   },
   moveSlotPillText: {
-    fontSize: 11,
-    color: "#7B6550",
-    fontFamily: Fonts.serif.regular,
+    fontSize: 10,
+    color: "#432104",
+    fontFamily: Fonts.sans.regular,
   },
-  removeBtn: { alignSelf: "flex-start", paddingVertical: 4 },
+  removeBtn: { paddingVertical: 4 },
   removeBtnText: {
     fontSize: 13,
     color: "#DF4D35",
@@ -2539,7 +2627,7 @@ const styles = StyleSheet.create({
   addFromLibraryText: {
     fontSize: 17,
     color: "#D39A14",
-    fontFamily: Fonts.serif.regular,
+    fontFamily: Fonts.serif.bold,
   },
   errorText: { fontSize: 14, color: "#c0392b", textAlign: "center" },
   saveBtn: {
@@ -2589,13 +2677,9 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   reminderTimeCard: {
-    borderWidth: 1,
-    borderColor: "rgba(226, 201, 151, 0.8)",
-    borderRadius: 11,
-    backgroundColor: "rgba(255, 251, 244, 0.92)",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    gap: 10,
+    // paddingHorizontal: 16,
+    // paddingVertical: 10,
+    // gap: 10,
     display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",

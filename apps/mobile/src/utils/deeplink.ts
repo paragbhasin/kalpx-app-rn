@@ -68,17 +68,44 @@ export function parseMitraDeepLink(url: string): ParsedMitraDeepLink | null {
   }
 }
 
+// Direct-route containers: navigate to a named HomeStack screen instead of
+// MitraEngine. These screens handle their own data loading; no screenData
+// seeding or loadScreenWithData dispatch is needed.
+const DIRECT_ROUTE_CONTAINERS: Record<string, string> = {
+  quick_reset: "QuickReset",
+  tell_mitra: "TellMitra",
+  inner_path: "InnerPath",
+  rhythm_home: "RhythmHome",
+  quick_checkin: "QuickCheckin",
+  browse_rooms: "BrowseRooms",
+};
+
 /**
  * Handle a resolved deeplink — seeds screenData, navigates to MitraEngine,
  * and dispatches the screen load. No-ops when the URL doesn't match.
+ *
+ * Direct-route containers (quick_reset, tell_mitra, inner_path, rhythm_home,
+ * quick_checkin, browse_rooms) navigate straight to the registered screen;
+ * back from them returns to Four Door Home, not AppDrawer.
  */
 export function handleMitraDeepLink(url: string | null | undefined): boolean {
   if (!url) return false;
   const parsed = parseMitraDeepLink(url);
   if (!parsed) return false;
 
-  // Seed screenData with any query-string context before the container
-  // mounts, so block-level on-mount effects see the data.
+  const directRoute = DIRECT_ROUTE_CONTAINERS[parsed.containerId];
+  if (directRoute) {
+    try {
+      navigate(directRoute);
+    } catch (err) {
+      console.warn("[deeplink] direct navigate failed:", err);
+    }
+    console.log(`[deeplink] → ${directRoute} (direct): ${parsed.containerId}/${parsed.stateId}`);
+    return true;
+  }
+
+  // Engine-owned screen: seed screenData with any query-string context before
+  // the container mounts, then navigate to MitraEngine and dispatch schema load.
   Object.entries(parsed.data).forEach(([key, value]) => {
     store.dispatch(
       screenActions.setScreenValue({
@@ -88,9 +115,6 @@ export function handleMitraDeepLink(url: string | null | undefined): boolean {
     );
   });
 
-  // MitraEngine is the generic server-driven screen host. Navigate THEN
-  // dispatch load — the thunk resolves the schema from
-  // allContainers.js via screenResolver when the API is offline.
   try {
     navigate("MitraEngine");
   } catch (err) {

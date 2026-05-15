@@ -2,7 +2,6 @@ export const MITRA_ROUTE_NAMES = [
   "Home",
   "DynamicEngine",
   "MitraEngine",
-  "GuidedGrowth",
   "MitraPhilosophy",
   "MitraStart",
   "MitraIntention",

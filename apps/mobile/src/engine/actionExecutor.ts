@@ -5478,6 +5478,13 @@ export async function executeAction(
         break;
       }
 
+      case "tell_mitra_navigate": {
+        // RoomContainer "Tell Mitra more" button — route back to TellMitra
+        // screen rather than falling through to the unknown-action warning.
+        navigationRef.navigate("TellMitra" as any);
+        break;
+      }
+
       default:
         console.warn(`[ACTION] Unknown action type: ${type}`);
     }

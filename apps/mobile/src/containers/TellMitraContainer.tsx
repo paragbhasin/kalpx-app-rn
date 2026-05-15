@@ -287,7 +287,7 @@ export default function TellMitraContainer() {
           console.warn('[TellMitraContainer] room nav failed:', navErr?.message);
         }
       } else if (result.suggested_action === 'navigate_to_door' && result.door) {
-        navigation.navigate("DynamicEngine" as any);
+        navigation.navigate("Home" as any);
       }
     } catch {
       setErrorMsg('Something went wrong. Please try again.');
@@ -595,7 +595,7 @@ export default function TellMitraContainer() {
               buildActionContext() as any,
             );
           } else if (opt.action_type === 'navigate_to_door' && opt.door) {
-            navigation.navigate('DynamicEngine' as any);
+            navigation.navigate('Home' as any);
           }
         }}
         buildActionContext={buildActionContext}

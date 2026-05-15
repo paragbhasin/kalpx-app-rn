@@ -6,6 +6,7 @@
  * If has_rhythm === true: morning/afternoon/night band cards.
  */
 
+import { Ionicons } from "@expo/vector-icons";
 import { RHYTHM_BAND_LABELS } from "@kalpx/contracts";
 import type { RhythmItem, RhythmTimeBand } from "@kalpx/types";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -354,7 +355,7 @@ export default function RhythmHomeScreen({
             activeOpacity={0.7}
             style={styles.backBtn}
           >
-            <Text style={styles.backBtnText}>← Back</Text>
+            <Ionicons name="chevron-back" size={22} color="#C99317" />
           </TouchableOpacity>
 
           <Text style={styles.headerTitle}>My Rhythm</Text>
@@ -414,13 +415,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   backBtn: {
+    width: 36,
+    height: 36,
+    alignItems: "center",
+    justifyContent: "center",
     alignSelf: "flex-start",
     marginBottom: 16,
-  },
-  backBtnText: {
-    fontSize: 14,
-    color: "#C99317",
-    fontFamily: Fonts.sans.regular,
   },
   headerTitle: {
     fontSize: 28,

@@ -376,7 +376,7 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen name="InnerPath" component={InnerPathScreen} options={{ headerShown: false }} />
     <Stack.Screen name="TellMitra" component={TellMitraScreen} options={{ headerShown: false }} />
     <Stack.Screen name="MitraIntention" component={MitraIntentionScreen} options={{ headerShown: false }} />
-    <Stack.Screen name="MitraStart" component={MitraStartScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="MitraStart" component={MitraStartScreen} options={{ headerShown: false, gestureEnabled: false }} />
     <Stack.Screen name="NewMitraHome" component={NewMitraShell} options={{ headerShown: false }} />
   </Stack.Navigator>
 );

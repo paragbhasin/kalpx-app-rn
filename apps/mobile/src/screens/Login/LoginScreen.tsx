@@ -433,6 +433,15 @@ if (key === "pending_classes_data") {
             contentContainerStyle={styles.scrollContainer}
             keyboardShouldPersistTaps="handled"
           >
+            {navigation.canGoBack() && (
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={{ alignSelf: "flex-start", padding: 8, marginLeft: 4, marginTop: 4 }}
+                activeOpacity={0.7}
+              >
+                <Icon name="chevron-back" size={26} color="#432104" />
+              </TouchableOpacity>
+            )}
             <TextComponent type="headerBigText" style={styles.brand}>
               {t("login.brand")}
             </TextComponent>

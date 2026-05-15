@@ -87,7 +87,6 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [checkpointDay, setCheckpointDay] = useState<7 | 14 | null>(null);
   const [progressOpen, setProgressOpen] = useState(false);
   const [guidanceOpen, setGuidanceOpen] = useState(false);
   const [whyChosenOpen, setWhyChosenOpen] = useState(false);
@@ -169,8 +168,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
               );
               if (__DEV__) console.log("[InnerPathScreen] day_7_view schema loaded, embedded:", embedded);
               if (!embedded) {
-                setLoading(false);
-                setCheckpointDay(7);
+                navigation.navigate("DynamicEngine" as any);
               }
             } else {
               if (__DEV__) console.warn("[InnerPathScreen] day_7_view: checkpoint not ready (null envelope)");
@@ -212,8 +210,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
               );
               if (__DEV__) console.log("[InnerPathScreen] day_14_view schema loaded, embedded:", embedded);
               if (!embedded) {
-                setLoading(false);
-                setCheckpointDay(14);
+                navigation.navigate("DynamicEngine" as any);
               }
             } else {
               if (__DEV__) console.warn("[InnerPathScreen] day_14_view: checkpoint not ready (null envelope)");
@@ -533,35 +530,6 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
       <SafeAreaView style={styles.safe}>
         <View style={styles.centered}>
           <ActivityIndicator size="small" color="#C99317" />
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  if (checkpointDay !== null) {
-    return (
-      <SafeAreaView style={styles.safe}>
-        <View style={styles.checkpointWrap}>
-          <Text style={styles.checkpointTitle}>
-            Day {checkpointDay} Reflection is ready
-          </Text>
-          <Text style={styles.checkpointBody}>
-            You've reached an important pause in your path.
-          </Text>
-          <TouchableOpacity
-            style={styles.checkpointPrimaryBtn}
-            activeOpacity={0.85}
-            onPress={() => navigation.navigate("DynamicEngine" as any)}
-          >
-            <Text style={styles.checkpointPrimaryBtnText}>Begin Reflection</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.checkpointSecondaryBtn}
-            activeOpacity={0.7}
-            onPress={() => navigation.goBack()}
-          >
-            <Text style={styles.checkpointSecondaryBtnText}>Return to Inner Path</Text>
-          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
@@ -920,51 +888,6 @@ export default InnerPathScreen;
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-  },
-  checkpointWrap: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 32,
-    gap: 16,
-  },
-  checkpointTitle: {
-    fontFamily: Fonts.serif.bold,
-    fontSize: 22,
-    color: Colors.brownDeep,
-    textAlign: "center",
-    marginBottom: 4,
-  },
-  checkpointBody: {
-    fontFamily: Fonts.sans.regular,
-    fontSize: 15,
-    color: Colors.brownMuted,
-    textAlign: "center",
-    lineHeight: 22,
-    marginBottom: 8,
-  },
-  checkpointPrimaryBtn: {
-    backgroundColor: Colors.goldBright,
-    borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 36,
-    alignItems: "center",
-    width: "100%",
-  },
-  checkpointPrimaryBtnText: {
-    fontFamily: Fonts.serif.bold,
-    fontSize: 16,
-    color: Colors.brownDeep,
-  },
-  checkpointSecondaryBtn: {
-    paddingVertical: 10,
-    alignItems: "center",
-  },
-  checkpointSecondaryBtnText: {
-    fontFamily: Fonts.sans.regular,
-    fontSize: 14,
-    color: Colors.brownMuted,
-    textDecorationLine: "underline",
   },
   scroll: {
     flex: 1,

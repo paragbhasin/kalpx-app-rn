@@ -297,6 +297,15 @@ export default function SignupScreen({ navigation }) {
         style={styles.background}
       >
         <ScrollView contentContainerStyle={styles.scrollContainer}>
+          {navigation.canGoBack() && (
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={{ alignSelf: "flex-start", padding: 8, marginLeft: 4, marginTop: 4 }}
+              activeOpacity={0.7}
+            >
+              <Icon name="chevron-back" size={26} color="#432104" />
+            </TouchableOpacity>
+          )}
           <TextComponent type="headerBigText" style={styles.brand}>{t("login.brand")}</TextComponent>
           <TextComponent type="headerIncreaseText" style={styles.heading}>{t("signup.getStarted")}</TextComponent>
 

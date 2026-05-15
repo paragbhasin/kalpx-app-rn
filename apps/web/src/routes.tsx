@@ -111,9 +111,9 @@ export function AppRoutes() {
       <Route
         path="/en/mitra/engine"
         element={
-          <RequiresJourney>
+          <RequiresAuth>
             <MitraEnginePage />
-          </RequiresJourney>
+          </RequiresAuth>
         }
       />
       <Route
@@ -127,9 +127,9 @@ export function AppRoutes() {
       <Route
         path="/en/mitra/room/:roomId"
         element={
-          <RequiresJourney>
+          <RequiresAuth>
             <RoomPage />
-          </RequiresJourney>
+          </RequiresAuth>
         }
       />
       <Route

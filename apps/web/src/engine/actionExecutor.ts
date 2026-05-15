@@ -510,7 +510,8 @@ export async function executeAction(action: any, context: ActionContext): Promis
         const repsCompleted: number = (screenData.runner_reps_completed as number) || 0;
         const tz: string = (screenData.runner_tz as string) || Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
 
-        if (itemId) {
+        // rhythm_daily is not a JourneyActivity completion path — postRhythmComplete handles it.
+        if (itemId && rawRunnerSource !== 'rhythm_daily') {
           const meta: Record<string, any> = { variant, actual_seconds: actualSeconds };
           if (variant === 'mantra') meta.reps_completed = repsCompleted;
 

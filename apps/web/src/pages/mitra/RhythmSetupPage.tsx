@@ -32,6 +32,12 @@ type LocalItem = {
 
 const BANDS: RhythmTimeBand[] = ["morning", "afternoon", "night"];
 
+const BAND_REMINDER_DEFAULTS: Record<RhythmTimeBand, string> = {
+  morning: "06:00:00",
+  afternoon: "13:00:00",
+  night: "21:00:00",
+};
+
 const BAND_ART: Record<RhythmTimeBand, string> = {
   morning: "/morning.svg",
   afternoon: "/aft.svg",
@@ -418,7 +424,15 @@ export function RhythmSetupPage() {
                             <input
                               type="checkbox"
                               checked={item.reminder_enabled}
-                              onChange={(e) => updateItemField(band, idx, { reminder_enabled: e.target.checked })}
+                              onChange={(e) => {
+                                const enabled = e.target.checked;
+                                updateItemField(band, idx, {
+                                  reminder_enabled: enabled,
+                                  ...(enabled && item.reminder_time == null
+                                    ? { reminder_time: BAND_REMINDER_DEFAULTS[band] }
+                                    : {}),
+                                });
+                              }}
                             />
                             <span>Gentle reminder</span>
                           </label>

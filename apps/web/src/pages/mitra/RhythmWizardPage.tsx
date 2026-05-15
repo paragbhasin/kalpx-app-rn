@@ -173,6 +173,14 @@ function sortBands(bands: RhythmTimeBand[]): RhythmTimeBand[] {
   return BANDS.filter((band) => bands.includes(band));
 }
 
+// ─── Reminder defaults (morning 6 AM, afternoon 1 PM, night 9 PM) ────────────
+
+const BAND_REMINDER_DEFAULTS: Record<RhythmTimeBand, string> = {
+  morning: "06:00",
+  afternoon: "13:00",
+  night: "21:00",
+};
+
 // ─── Shared style tokens ──────────────────────────────────────────────────────
 
 const SERIF = "var(--kalpx-font-serif)";
@@ -693,6 +701,23 @@ export function RhythmWizardPage() {
               >
                 Continue →
               </button>
+              <button
+                onClick={() => navigate("/en/mitra/rhythm/edit")}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: LIGHT,
+                  fontSize: 14,
+                  cursor: "pointer",
+                  marginTop: 14,
+                  width: "100%",
+                  padding: "8px 0",
+                  fontFamily: SERIF,
+                  letterSpacing: 0.3,
+                }}
+              >
+                Set up myself
+              </button>
             </>
           )}
 
@@ -1163,7 +1188,16 @@ export function RhythmWizardPage() {
                   )}
 
                   <button
-                    onClick={() => setStep("reminders")}
+                    onClick={() => {
+                      setBandTimes((prev) => {
+                        const next = { ...prev };
+                        selectedMoments.forEach((band) => {
+                          if (!next[band]) next[band] = BAND_REMINDER_DEFAULTS[band];
+                        });
+                        return next;
+                      });
+                      setStep("reminders");
+                    }}
                     style={{
                       ...goldBtn,
                       marginTop: 20,

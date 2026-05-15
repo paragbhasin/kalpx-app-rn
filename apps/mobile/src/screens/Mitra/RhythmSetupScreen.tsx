@@ -234,9 +234,9 @@ function itemTypeLabel(itemType: string): string {
 }
 
 const DEFAULT_REMINDER_TIMES: Record<RhythmTimeBand, string> = {
-  morning: "08:00",
+  morning: "06:00",
   afternoon: "13:00",
-  night: "20:00",
+  night: "21:00",
 };
 
 function normalizeReminderTime(
@@ -1144,6 +1144,14 @@ export default function RhythmSetupScreen({
           >
             <Text style={wStyles.primaryBtnText}>Continue →</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setWizardStep(null)}
+            activeOpacity={0.7}
+            style={[wStyles.secondaryLinkRow, { marginBottom: 32 }]}
+          >
+            <Text style={wStyles.secondaryLink}>Set up myself</Text>
+          </TouchableOpacity>
         </ScrollView>
       </ImageBackground>
     </SafeAreaView>
@@ -1412,7 +1420,16 @@ export default function RhythmSetupScreen({
                 wStyles.primaryBtn,
                 acceptDisabled && wStyles.primaryBtnDisabled,
               ]}
-              onPress={() => setWizardStep("reminders")}
+              onPress={() => {
+                setWizardReminderTimes((prev) => {
+                  const next = { ...prev };
+                  selectedMoments.forEach((band) => {
+                    if (!next[band]) next[band] = DEFAULT_REMINDER_TIMES[band];
+                  });
+                  return next;
+                });
+                setWizardStep("reminders");
+              }}
               activeOpacity={0.85}
               disabled={acceptDisabled}
             >
@@ -1720,7 +1737,15 @@ export default function RhythmSetupScreen({
                           {/* Gentle reminder toggle */}
                           <View style={styles.itemReminderRow}>
                             <TouchableOpacity
-                              onPress={() => updateBandItemField(band, idx, { reminder_enabled: !item.reminder_enabled })}
+                              onPress={() => {
+                                const enabled = !item.reminder_enabled;
+                                updateBandItemField(band, idx, {
+                                  reminder_enabled: enabled,
+                                  ...(enabled && item.reminder_time == null
+                                    ? { reminder_time: DEFAULT_REMINDER_TIMES[band] }
+                                    : {}),
+                                });
+                              }}
                               activeOpacity={0.7}
                               style={styles.reminderToggleBtn}
                             >

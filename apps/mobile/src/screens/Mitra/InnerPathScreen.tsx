@@ -107,6 +107,8 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
   // Common engine — same pipeline as web InnerPathPage.
   useEffect(() => {
     let cancelled = false;
+    const routeRunId = Date.now();
+    if (__DEV__) console.log("[InnerPathScreen] checkpoint fix e0aedef loaded — effect run", routeRunId);
 
     const writeAll = (flat: Record<string, any>) => {
       for (const [k, v] of Object.entries(flat)) {
@@ -118,13 +120,20 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
 
     (async () => {
       try {
+        if (__DEV__) console.log("[InnerPathScreen]", routeRunId, "calling entry-view");
         const entryResult = await mitraJourneyEntryView();
+        if (__DEV__) console.log("[InnerPathScreen]", routeRunId, "entry-view returned, cancelled:", cancelled);
         if (cancelled) return;
 
         const target = entryResult.envelope?.target;
         const viewKey = target?.view_key;
         const payload = target?.payload ?? {};
-        if (__DEV__) console.log("[InnerPathScreen] entry-view view_key:", viewKey);
+        if (__DEV__) {
+          console.log("[InnerPathScreen]", routeRunId, "entry-view view_key:", viewKey);
+          console.log("[InnerPathScreen]", routeRunId, "viewKey raw JSON:", JSON.stringify(viewKey));
+          console.log("[InnerPathScreen]", routeRunId, "day14 equality:", viewKey === "day_14_view");
+          console.log("[InnerPathScreen]", routeRunId, "embedded:", embedded);
+        }
 
         if (viewKey === "day_7_view") {
           dispatch(
@@ -164,12 +173,16 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
         }
 
         if (viewKey === "day_14_view") {
+          if (__DEV__) console.log("[InnerPathScreen]", routeRunId, "ENTERING day_14_view branch, embedded:", embedded);
           dispatch(
             screenActions.setScreenValue({ key: "checkpoint_day", value: 14 }),
           );
           if (!embedded) {
+            if (__DEV__) console.log("[InnerPathScreen]", routeRunId, "cancelled before day14 call:", cancelled);
             try {
+              if (__DEV__) console.log("[InnerPathScreen]", routeRunId, "BEFORE mitraJourneyDay14View");
               const env14 = await mitraJourneyDay14View();
+              if (__DEV__) console.log("[InnerPathScreen]", routeRunId, "AFTER mitraJourneyDay14View, cancelled:", cancelled, "env14 keys:", env14 ? Object.keys(env14) : null);
               if (cancelled) return;
               if (__DEV__) {
                 console.log("[InnerPathScreen] day_14_view API wrapper keys:", env14 ? Object.keys(env14) : "null");

@@ -111,10 +111,12 @@ export default function TellMitraContainer() {
     screenBridgeRef.current = screenBridge;
   });
 
+  const [hasHadOpener, setHasHadOpener] = useState(false);
   const pranaContext = useSelector((state: any) => state.door?.pranaContext ?? null);
   useEffect(() => {
     if (!pranaContext) return;
     setPranaOpener(pranaContext);
+    setHasHadOpener(true);
     dispatch(clearPranaContext());
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -582,8 +584,8 @@ export default function TellMitraContainer() {
                     key={chip}
                     style={styles.pranaChip}
                     onPress={() => {
-                      setThreadDraft(chip);
                       setPranaOpener(null);
+                      handleQuickStartChipThread(chip, chip);
                     }}
                   >
                     <Text style={styles.pranaChipText}>{chip}</Text>
@@ -621,7 +623,7 @@ export default function TellMitraContainer() {
             void AsyncStorage.removeItem(RETURN_ROOM_KEY).catch(() => {});
           }}
           onQuickStartChip={handleQuickStartChipThread}
-          hideQuickStart={!!pranaOpener}
+          hideQuickStart={hasHadOpener}
           onWisdomOptionPress={opt => {
             if (opt.action_type === 'navigate_to_room' && opt.room_id) {
               void executeAction(
@@ -652,8 +654,8 @@ export default function TellMitraContainer() {
                   key={chip}
                   style={styles.pranaChip}
                   onPress={() => {
-                    dispatch(setTellMitraDraft(chip));
                     setPranaOpener(null);
+                    void handleSubmit({ text: chip, sourceSurface: 'tell_mitra_prana_chip' });
                   }}
                 >
                   <Text style={styles.pranaChipText}>{chip}</Text>

@@ -68,7 +68,6 @@ export interface TellMitraThreadViewProps {
   onWisdomOptionPress: (opt: TellMitraNextOption) => void;
   buildActionContext: () => any;
   errorMsg?: string;
-  hideQuickStart?: boolean;
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -89,7 +88,6 @@ export default function TellMitraThreadView({
   onQuickStartChip,
   onWisdomOptionPress,
   errorMsg,
-  hideQuickStart = false,
 }: TellMitraThreadViewProps) {
   const insets = useSafeAreaInsets();
   const footerClearance = Math.max(insets.bottom + 72, 88);
@@ -297,21 +295,19 @@ export default function TellMitraThreadView({
             <Text style={s.emptyTitle}>Tell Mitra</Text>
             <Text style={s.emptySubtext}>What would you like Mitra to understand today?</Text>
             <Text style={s.emptyHint}>You can write freely — one line is enough.</Text>
-            {!hideQuickStart && (
-              <View style={[s.chipsWrap, { marginTop: 20 }]}>
-                {QUICK_START_CHIPS.map(chip => (
-                  <TouchableOpacity
-                    key={chip.value}
-                    onPress={() => onQuickStartChip(chip.value, chip.label)}
-                    disabled={submitting}
-                    style={[s.chip, submitting && s.chipDisabled]}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={s.chipText}>{chip.label}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
+            <View style={[s.chipsWrap, { marginTop: 20 }]}>
+              {QUICK_START_CHIPS.map(chip => (
+                <TouchableOpacity
+                  key={chip.value}
+                  onPress={() => onQuickStartChip(chip.value, chip.label)}
+                  disabled={submitting}
+                  style={[s.chip, submitting && s.chipDisabled]}
+                  activeOpacity={0.7}
+                >
+                  <Text style={s.chipText}>{chip.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
         )}
 

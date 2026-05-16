@@ -46,7 +46,7 @@ import {
   postPranaAcknowledgeDismiss,
 } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
-import { setHomeData, setPranaContext } from "../store/doorSlice";
+import { setHomeData } from "../store/doorSlice";
 import { Fonts } from "../theme/fonts";
 import { TimePickerModal } from "../components/TimePickerModal";
 
@@ -158,9 +158,6 @@ export default function FourDoorHomeContainer({
   const [reminderPickerKey, setReminderPickerKey] = useState<"mantra" | "sankalp" | "practice" | null>(null);
   const [reminderSaving, setReminderSaving] = useState(false);
 
-  // Opener stored locally until user decides to talk to Mitra (not dispatched to Redux yet)
-  const [pendingOpener, setPendingOpener] = useState<{ prana_type: string; text: string; chips: string[] } | null>(null);
-
   useEffect(() => {
     homeDataRef.current = homeData;
   }, [homeData]);
@@ -231,11 +228,8 @@ export default function FourDoorHomeContainer({
             Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
         });
         if (pranaType === "agitated" || pranaType === "drained") {
-          const opener = ackResult?.tell_mitra_opener;
-          if (opener?.text) {
-            setPendingOpener({ prana_type: pranaType, text: opener.text, chips: opener.chips || [] });
-          }
-          await loadHome(true, true);
+          const initialMessage = pranaType === "agitated" ? "I am agitated" : "I am drained";
+          navigation.navigate("TellMitra" as any, { initialMessage });
         } else {
           await loadHome(true, true);
         }
@@ -243,11 +237,10 @@ export default function FourDoorHomeContainer({
         setFeelingLoading(false);
       }
     },
-    [dispatch, loadHome, navigation, screenData],
+    [loadHome, navigation, screenData],
   );
 
   const handleDismissCheckin = useCallback(async () => {
-    setPendingOpener(null);
     await postPranaAcknowledgeDismiss();
     await loadHome(true, true);
   }, [loadHome]);
@@ -532,25 +525,7 @@ export default function FourDoorHomeContainer({
                   </Text>
                 )}
 
-                {!!pendingOpener ? (
-                  // Agitated/Drained: gentle offer to go to Tell Mitra
-                  <TouchableOpacity
-                    activeOpacity={0.82}
-                    onPress={() => {
-                      dispatch(setPranaContext({
-                        prana_type: pendingOpener.prana_type,
-                        opener_text: pendingOpener.text,
-                        chips: pendingOpener.chips,
-                      }));
-                      setPendingOpener(null);
-                      navigation.navigate("TellMitra" as any);
-                    }}
-                    style={styles.suggestionButton}
-                  >
-                    <Text style={styles.suggestionButtonText}>Talk to Mitra →</Text>
-                  </TouchableOpacity>
-                ) : !!acw?.suggestion ? (
-                  // Steady suggestion (Quick Reset)
+                {!!acw?.suggestion && (
                   <>
                     {!!acw.suggestion.card_header && (
                       <Text style={styles.suggestionHeader}>
@@ -567,19 +542,9 @@ export default function FourDoorHomeContainer({
                       </Text>
                     </TouchableOpacity>
                   </>
-                ) : !!acw?.prana_label ? (
-                  // Steady/Open without suggestion — soft navigation CTAs
-                  <View style={{ flexDirection: "row", gap: 12, marginTop: 12, flexWrap: "wrap" }}>
-                    <TouchableOpacity onPress={() => navigation.navigate("InnerPath" as any)}>
-                      <Text style={styles.softCtaLink}>Continue Inner Path</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => navigation.navigate("RhythmHome" as any)}>
-                      <Text style={styles.softCtaLink}>My Rhythm</Text>
-                    </TouchableOpacity>
-                  </View>
-                ) : null}
+                )}
 
-                {!pendingOpener && acw?.companion_boundary && (
+                {acw?.companion_boundary && (
                   <Text style={styles.boundaryText}>
                     If this feels heavy to carry,{" "}
                     <Text
@@ -590,6 +555,16 @@ export default function FourDoorHomeContainer({
                     </Text>{" "}
                     is here.
                   </Text>
+                )}
+                {!acw?.suggestion && !!acw?.prana_label && (
+                  <View style={{ flexDirection: "row", gap: 12, marginTop: 12, flexWrap: "wrap" }}>
+                    <TouchableOpacity onPress={() => navigation.navigate("InnerPath" as any)}>
+                      <Text style={styles.softCtaLink}>Continue Inner Path</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => navigation.navigate("RhythmHome" as any)}>
+                      <Text style={styles.softCtaLink}>My Rhythm</Text>
+                    </TouchableOpacity>
+                  </View>
                 )}
               </>
             ) : (

@@ -25,7 +25,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Fonts } from '../theme/fonts';
 import { useDispatch, useSelector } from 'react-redux';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { CHIP_SUBMIT_TEXT, getRoomLabel, isValidRoomId } from '@kalpx/contracts';
 import TellMitraThreadView from '../components/mitra/TellMitraThreadView';
 import type {
@@ -39,7 +39,7 @@ import type {
 import { postTellMitraV3 } from '../engine/mitraApi';
 import { executeAction } from '../engine/actionExecutor';
 import { useScreenStore } from '../engine/useScreenBridge';
-import { setTellMitraDraft, setTellMitraResult, clearPranaContext } from '../store/doorSlice';
+import { setTellMitraDraft, setTellMitraResult } from '../store/doorSlice';
 import { screenActions, loadScreenWithData, goBackWithData } from '../store/screenSlice';
 
 const MAX_CHARS = 1000;
@@ -60,6 +60,8 @@ async function persistTellMitraThread(
 export default function TellMitraContainer() {
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
+  const route = useRoute<any>();
+  const initialMessage = (route?.params as any)?.initialMessage as string | undefined;
   const draft = useSelector(
     (state: any) => state.door?.tellMitra?.inputDraft ?? '',
   );
@@ -94,8 +96,7 @@ export default function TellMitraContainer() {
   const lastReturnCardKeyRef = useRef<string | null>(null);
   const freshResetPendingRef = useRef(false);
 
-  // ── Prana opener (from quick check-in agitated/drained flow) ─────────────
-  const [pranaOpener, setPranaOpener] = useState<{ prana_type: string; opener_text: string; chips: string[] } | null>(null);
+  // ── Prana entry (from quick check-in agitated/drained flow) ─────────────
   const activeContextRef = useRef<{
     parentEventId: string | number | null;
     parentIntentType: string | null;
@@ -111,18 +112,13 @@ export default function TellMitraContainer() {
     screenBridgeRef.current = screenBridge;
   });
 
-  const [hasHadOpener, setHasHadOpener] = useState(false);
-  const pranaContext = useSelector((state: any) => state.door?.pranaContext ?? null);
-  useEffect(() => {
-    if (!pranaContext) return;
-    setPranaOpener(pranaContext);
-    setHasHadOpener(true);
-    dispatch(clearPranaContext());
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   useEffect(() => {
     if (!THREAD_UI_ENABLED) return;
+    // Prana entry: auto-submit "I am agitated/drained" and skip prior conversation restoration.
+    if (initialMessage) {
+      void submitThread(initialMessage, 'tell_mitra_prana_entry');
+      return;
+    }
     let cancelled = false;
     (async () => {
       let restored: TellMitraConversationItem[] = [];
@@ -534,17 +530,6 @@ export default function TellMitraContainer() {
     void submitThread(apiText, 'tell_mitra_quick_start');
   };
 
-  // Opener chips carry both prana state and topic context.
-  // "I want to write" is a meta-response — clear the opener and let the user type.
-  const handleOpenerChipSubmit = (chip: string, pranaType: string) => {
-    setPranaOpener(null);
-    if (chip === 'I want to write') return;
-    const pranaLabel = pranaType === 'agitated' ? 'agitated' : 'drained';
-    const apiText = `I feel ${pranaLabel}. ${chip}.`;
-    setConversation(prev => [...prev, { id: genId(), type: 'user_message', text: chip, created_at: new Date().toISOString() }]);
-    void submitThread(apiText, 'tell_mitra_prana_chip', undefined, pranaType);
-  };
-
   const handleEnterRoomThread = (item: Extract<TellMitraConversationItem, { type: 'room_recommendation' }>) => {
     const returnKey = `return_card:${item.room_id}:${item.tell_mitra_event_id ?? Math.floor(Date.now() / 60000)}`;
     pendingTellMitraReturnRef.current = {
@@ -587,24 +572,6 @@ export default function TellMitraContainer() {
   if (THREAD_UI_ENABLED) {
     return (
       <>
-        {!!pranaOpener && (
-          <View style={styles.pranaOpenerBanner}>
-            <Text style={styles.pranaOpenerText}>{pranaOpener.opener_text}</Text>
-            {pranaOpener.chips.length > 0 && (
-              <View style={styles.pranaChipsRow}>
-                {pranaOpener.chips.map((chip) => (
-                  <TouchableOpacity
-                    key={chip}
-                    style={styles.pranaChip}
-                    onPress={() => handleOpenerChipSubmit(chip, pranaOpener.prana_type)}
-                  >
-                    <Text style={styles.pranaChipText}>{chip}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-          </View>
-        )}
         <TellMitraThreadView
           conversation={conversation}
           submitting={isSubmitting}
@@ -633,7 +600,6 @@ export default function TellMitraContainer() {
             void AsyncStorage.removeItem(RETURN_ROOM_KEY).catch(() => {});
           }}
           onQuickStartChip={handleQuickStartChipThread}
-          hideQuickStart={hasHadOpener}
           onWisdomOptionPress={opt => {
             if (opt.action_type === 'navigate_to_room' && opt.room_id) {
               void executeAction(
@@ -654,24 +620,6 @@ export default function TellMitraContainer() {
   // ── Flag-off: original render (completely unchanged) ──────────────────────
   return (
     <View style={styles.root}>
-      {!!pranaOpener && (
-        <View style={styles.pranaOpenerBanner}>
-          <Text style={styles.pranaOpenerText}>{pranaOpener.opener_text}</Text>
-          {pranaOpener.chips.length > 0 && (
-            <View style={styles.pranaChipsRow}>
-              {pranaOpener.chips.map((chip) => (
-                <TouchableOpacity
-                  key={chip}
-                  style={styles.pranaChip}
-                  onPress={() => handleOpenerChipSubmit(chip, pranaOpener.prana_type)}
-                >
-                  <Text style={styles.pranaChipText}>{chip}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-        </View>
-      )}
       <TextInput
         style={styles.input}
         value={draft}
@@ -848,37 +796,5 @@ const styles = StyleSheet.create({
     color: '#9b8b77',
     fontFamily: Fonts.sans.regular,
     textDecorationLine: 'underline',
-  },
-  pranaOpenerBanner: {
-    backgroundColor: '#FBF5EB',
-    borderRadius: 12,
-    padding: 16,
-    margin: 16,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: '#F2E3C7',
-  },
-  pranaOpenerText: {
-    fontSize: 15,
-    color: '#432104',
-    lineHeight: 23,
-    marginBottom: 12,
-  },
-  pranaChipsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  pranaChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#E0A92F',
-  },
-  pranaChipText: {
-    fontSize: 13,
-    color: '#432104',
   },
 });

@@ -62,7 +62,14 @@ export function VerifyPage() {
           <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14, lineHeight: 1.6, margin: 0 }}>
             Your email has been verified. You're now signed in.
           </p>
-          <KalpXButton onClick={() => navigate('/en/mitra/start')} fullWidth>
+          <KalpXButton
+            onClick={() =>
+              navigate(
+                '/en/mitra/onboarding?containerId=welcome_onboarding&stateId=turn_1',
+              )
+            }
+            fullWidth
+          >
             Continue
           </KalpXButton>
         </div>

@@ -38,7 +38,6 @@ import { InnerPathPage } from "./pages/mitra/InnerPathPage";
 import { MitraEnginePage } from "./pages/mitra/MitraEnginePage";
 import { MitraHomePage } from "./pages/mitra/MitraHomePage";
 import { MitraIntentionPage } from "./pages/mitra/MitraIntentionPage";
-import { MitraStartPage } from "./pages/mitra/MitraStartPage";
 import { OnboardingPage } from "./pages/mitra/OnboardingPage";
 import { QuickCheckinPage } from "./pages/mitra/QuickCheckinPage";
 import { RhythmHomePage } from "./pages/mitra/RhythmHomePage";
@@ -73,6 +72,9 @@ import { RetreatDetailsPage } from "./pages/retreats/RetreatDetailsPage";
 import { RetreatPackageDetailsPage } from "./pages/retreats/RetreatPackageDetailsPage";
 import { RetreatsInterestPage } from "./pages/retreats/RetreatsInterestPage";
 
+const ONBOARDING_TURN_1_PATH =
+  "/en/mitra/onboarding?containerId=welcome_onboarding&stateId=turn_1";
+
 export function AppRoutes() {
   return (
     <Routes>
@@ -89,7 +91,10 @@ export function AppRoutes() {
 
       {/* Mitra — home is an open routing hub */}
       <Route path="/en/mitra" element={<MitraHomePage />} />
-      <Route path="/en/mitra/start" element={<MitraStartPage />} />
+      <Route
+        path="/en/mitra/start"
+        element={<Navigate to={ONBOARDING_TURN_1_PATH} replace />}
+      />
       <Route path="/en/mitra/intention" element={<MitraIntentionPage />} />
       <Route path="/en/mitra/onboarding" element={<OnboardingPage />} />
       <Route

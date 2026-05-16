@@ -2,14 +2,14 @@ import { AUTH_KEYS } from "@kalpx/api-client";
 import {
   DOOR_LABELS,
   type MitraHomeSegment,
-  SEGMENT_RHYTHM_NO_STATE_SUBTITLE,
-  SEGMENT_INNER_PATH_NO_STATE_SUBTITLE,
   QUICK_CHANT_HAS_MANTRA_SUBTITLE,
   QUICK_CHANT_HISTORY_ONLY_SUBTITLE,
   QUICK_CHANT_NO_STATE_SUBTITLE,
-  TELL_MITRA_HAS_HISTORY_SUBTITLE,
+  SEGMENT_INNER_PATH_NO_STATE_SUBTITLE,
+  SEGMENT_RHYTHM_NO_STATE_SUBTITLE,
   TELL_MITRA_ACTIVE_PATH_SUBTITLE,
   TELL_MITRA_DEFAULT_SUBTITLE,
+  TELL_MITRA_HAS_HISTORY_SUBTITLE,
 } from "@kalpx/contracts";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -28,10 +28,14 @@ import {
   useJourneyEntryView,
 } from "../../hooks/useJourneyEntryView";
 import { useJourneyStatus } from "../../hooks/useJourneyStatus";
+import { useScrollDirection } from "../../hooks/useScrollDirection";
 import { WEB_ENV } from "../../lib/env";
 import type { AppDispatch, RootState } from "../../store";
 import { setHomeData } from "../../store/doorSlice";
 import { useScreenState } from "../../store/screenSlice";
+
+const ONBOARDING_TURN_1_PATH =
+  "/en/mitra/onboarding?containerId=welcome_onboarding&stateId=turn_1";
 
 function getRhythmTimeBand(): "morning" | "afternoon" | "night" {
   const hour = new Date().getHours();
@@ -54,7 +58,7 @@ function LoadingScreen() {
   return (
     <div
       style={{
-        minHeight: "100dvh",
+        minHeight: "100vh",
         background: "#FFF8EF",
         display: "flex",
         alignItems: "center",
@@ -81,10 +85,12 @@ export function MitraHomePage() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const screenState = useScreenState();
+  const { shouldHideChrome } = useScrollDirection();
   const [selectedFeeling, setSelectedFeeling] = useState<
     (typeof FEELING_OPTIONS)[number] | null
   >(null);
   const [feelingLoading, setFeelingLoading] = useState(false);
+  const [dismissingCheckin, setDismissingCheckin] = useState(false);
   const { loading, error, hasActiveJourney, rawStatus, refetch } =
     useJourneyStatus();
   const {
@@ -179,20 +185,26 @@ export function MitraHomePage() {
   }
 
   async function handleCheckinDismiss() {
+    setDismissingCheckin(true);
     try {
       await postPranaAcknowledgeDismiss();
       await refetchHome();
-    } catch {}
+    } catch {
+    } finally {
+      setDismissingCheckin(false);
+    }
   }
 
   // Derive segment from loaded home data (Stream O)
-  const segment = (homeData?.user_surface_state?.segment ?? null) as MitraHomeSegment | null;
-  const hasAnyState = (!!segment && segment !== "new") || hasActiveJourney === true;
+  const segment = (homeData?.user_surface_state?.segment ??
+    null) as MitraHomeSegment | null;
+  const hasAnyState =
+    (!!segment && segment !== "new") || hasActiveJourney === true;
 
   // Block on LoadingScreen only while we lack enough data to make a render decision.
   // When the user has an active journey, also wait for entry-view so we never
   // flash the four-door home before a checkpoint redirect fires.
-  const homeReady = !!(homeData?.user_surface_state);
+  const homeReady = !!homeData?.user_surface_state;
   if (
     fourDoorLoading ||
     (isAuthed && !homeData && !fourDoorError) ||
@@ -204,7 +216,7 @@ export function MitraHomePage() {
 
   // Entry-view redirects for active-journey users (checkpoint / welcome-back / onboarding)
   // daily_view falls through to the four-door companion home (Stream O)
-  if (hasActiveJourney === true && viewKey && viewKey !== 'daily_view') {
+  if (hasActiveJourney === true && viewKey && viewKey !== "daily_view") {
     const redirectPath = mapJourneyEntryViewPath(viewKey);
     if (redirectPath) return <Navigate to={redirectPath} replace />;
   }
@@ -215,9 +227,12 @@ export function MitraHomePage() {
     const innerPathSummary = homeData?.inner_path_summary;
     const greeting = homeData?.greeting;
     const hasRhythm = homeData?.companion_rhythm?.has_rhythm === true;
-    const hasMantra = homeData?.user_surface_state?.has_quick_chant_mantra === true;
-    const hasQuickChantHistory = homeData?.user_surface_state?.has_quick_chant_history === true;
-    const hasTMHistory = homeData?.user_surface_state?.has_tell_mitra_history === true;
+    const hasMantra =
+      homeData?.user_surface_state?.has_quick_chant_mantra === true;
+    const hasQuickChantHistory =
+      homeData?.user_surface_state?.has_quick_chant_history === true;
+    const hasTMHistory =
+      homeData?.user_surface_state?.has_tell_mitra_history === true;
     const hasIP = homeData?.user_surface_state?.has_inner_path === true;
     const myRhythmTarget = hasRhythm
       ? "/en/mitra/rhythm"
@@ -240,12 +255,16 @@ export function MitraHomePage() {
         doorStates?.my_rhythm?.subtitle ??
         doorStates?.my_rhythm?.cta ??
         "")
-      : (segment ? SEGMENT_RHYTHM_NO_STATE_SUBTITLE[segment] : "Build a gentle daily rhythm.");
+      : segment
+        ? SEGMENT_RHYTHM_NO_STATE_SUBTITLE[segment]
+        : "Build a gentle daily rhythm.";
 
     // Inner Path: prefer Day X of Y when path is active, fallback to segment-aware no-path copy
     const innerPathSubtitle = innerPathSummary?.has_active_path
       ? `Day ${innerPathSummary.day_number} of ${innerPathSummary.total_days}`
-      : (segment ? SEGMENT_INNER_PATH_NO_STATE_SUBTITLE[segment] : "Begin a 14-day path for what you are moving through.");
+      : segment
+        ? SEGMENT_INNER_PATH_NO_STATE_SUBTITLE[segment]
+        : "Begin a 14-day path for what you are moving through.";
 
     // Quick Chant subtitle — 3-way conditional (CRITICAL: only show "chosen mantra" if has_quick_chant_mantra)
     const quickChantSubtitle = hasMantra
@@ -257,14 +276,14 @@ export function MitraHomePage() {
     // Tell Mitra subtitle — conditional on state
     const tellMitraSubtitle = hasTMHistory
       ? TELL_MITRA_HAS_HISTORY_SUBTITLE
-      : (hasIP || segment === "rhythm_and_path")
+      : hasIP || segment === "rhythm_and_path"
         ? TELL_MITRA_ACTIVE_PATH_SUBTITLE
         : TELL_MITRA_DEFAULT_SUBTITLE;
 
     return (
       <div
         style={{
-          minHeight: "100dvh",
+          minHeight: "100vh",
           backgroundImage: "url(/beige_bg.png)",
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -273,7 +292,7 @@ export function MitraHomePage() {
           flexDirection: "column",
         }}
       >
-        <Header transparent />
+        <Header transparent hidden={shouldHideChrome} />
         <main
           style={{
             flex: 1,
@@ -281,7 +300,7 @@ export function MitraHomePage() {
             flexDirection: "column",
             alignItems: "center",
             width: "100%",
-            paddingBottom: "calc(92px + env(safe-area-inset-bottom))",
+            paddingBottom: "calc(72px + env(safe-area-inset-bottom))",
           }}
         >
           {greeting && (
@@ -289,7 +308,6 @@ export function MitraHomePage() {
               style={{
                 width: "100%",
                 position: "relative",
-                marginTop: -60, // Overlap header
 
                 overflow: "hidden",
 
@@ -657,6 +675,8 @@ export function MitraHomePage() {
                 {(() => {
                   const acw = homeData?.active_checkin_window;
                   const windowActive = acw?.active === true;
+                  const checkinActionLoading =
+                    feelingLoading || dismissingCheckin;
                   return (
                     <div
                       style={{
@@ -667,8 +687,34 @@ export function MitraHomePage() {
                         boxShadow: "0 10px 25px rgba(67,33,4,0.08)",
                         background:
                           "linear-gradient(180deg, rgba(255,255,255,0.78) 0%, rgba(255,250,243,0.9) 100%)",
+                        position: "relative",
                       }}
                     >
+                      {checkinActionLoading && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            inset: 0,
+                            borderRadius: 20,
+                            background: "rgba(255, 248, 239, 0.55)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            zIndex: 2,
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 24,
+                              height: 24,
+                              border: "2px solid var(--kalpx-cta)",
+                              borderTopColor: "transparent",
+                              borderRadius: "50%",
+                              animation: "spin 1s linear infinite",
+                            }}
+                          />
+                        </div>
+                      )}
                       {windowActive ? (
                         <>
                           <div
@@ -694,10 +740,13 @@ export function MitraHomePage() {
                                 type="button"
                                 data-testid="dismiss-checkin"
                                 onClick={() => void handleCheckinDismiss()}
+                                disabled={checkinActionLoading}
                                 style={{
                                   background: "none",
                                   border: "none",
-                                  cursor: "pointer",
+                                  cursor: checkinActionLoading
+                                    ? "not-allowed"
+                                    : "pointer",
                                   color: "rgba(67,33,4,0.4)",
                                   fontSize: 18,
                                   lineHeight: 1,
@@ -830,7 +879,7 @@ export function MitraHomePage() {
                                     void handleFeelingSelect(feeling)
                                   }
                                   aria-pressed={isSelected}
-                                  disabled={feelingLoading}
+                                  disabled={checkinActionLoading}
                                   style={{
                                     width: "100%",
                                     border: isSelected
@@ -844,14 +893,14 @@ export function MitraHomePage() {
                                     padding: "10px 14px",
                                     fontSize: 14,
                                     fontWeight: isSelected ? 700 : 500,
-                                    cursor: feelingLoading
+                                    cursor: checkinActionLoading
                                       ? "not-allowed"
                                       : "pointer",
                                     boxShadow: isSelected
                                       ? "0 6px 14px rgba(201,168,76,0.18)"
                                       : "none",
                                     transition: "all 160ms ease",
-                                    opacity: feelingLoading ? 0.7 : 1,
+                                    opacity: checkinActionLoading ? 0.7 : 1,
                                   }}
                                 >
                                   {feeling}
@@ -869,7 +918,7 @@ export function MitraHomePage() {
           </div>
         </main>
         <Footer transparent />
-        <MobileBottomNav transparent />
+        <MobileBottomNav transparent hidden={shouldHideChrome} />
       </div>
     );
   }
@@ -886,7 +935,7 @@ export function MitraHomePage() {
   return (
     <div
       style={{
-        minHeight: "100dvh",
+        minHeight: "100vh",
         backgroundImage: "url(/new_home.png)",
         backgroundSize: "cover",
         backgroundPosition: "center",
@@ -895,7 +944,7 @@ export function MitraHomePage() {
         flexDirection: "column",
       }}
     >
-      <Header transparent />
+      <Header transparent hidden={shouldHideChrome} />
       <main
         style={{
           flex: 1,
@@ -928,6 +977,7 @@ export function MitraHomePage() {
               flex: 1,
               minHeight: 0,
               paddingBottom: 20,
+              marginTop: 60,
             }}
           >
             <div
@@ -1055,7 +1105,7 @@ export function MitraHomePage() {
               alignItems: "center",
               marginTop: "auto",
               paddingTop: 8,
-              paddingBottom: 94,
+              paddingBottom: 32,
             }}
           >
             <img
@@ -1069,7 +1119,7 @@ export function MitraHomePage() {
               }}
             />
             <Link
-              to="/en/mitra/start"
+              to={ONBOARDING_TURN_1_PATH}
               style={{
                 display: "block",
                 padding: "10px",
@@ -1121,7 +1171,7 @@ export function MitraHomePage() {
           )}
       </main>
       <Footer transparent />
-      <MobileBottomNav transparent />
+      <MobileBottomNav transparent hidden={shouldHideChrome} />
     </div>
   );
 }

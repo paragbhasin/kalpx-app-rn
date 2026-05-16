@@ -1202,7 +1202,8 @@ export async function executeAction(action: any, context: ActionContext): Promis
             return;
           }
           if (p.freeform_text) draft.intro_freeform = p.freeform_text;
-          nextStateId = 'turn_2';
+          webNavigate('/en/mitra/intention');
+          return;
 
         } else if (stateId === 'turn_2') {
           const path = p.chip_id === 'growth' ? 'growth' : 'support';

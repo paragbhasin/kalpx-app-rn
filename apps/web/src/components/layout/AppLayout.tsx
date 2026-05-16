@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import { MobileBottomNav } from './MobileBottomNav';
+import { useScrollDirection } from '../../hooks/useScrollDirection';
 import { stopRoomAmbient } from '../../lib/audio/calmMusic';
 
 // Routes that are full-screen immersive — no header/footer/bottom-nav
@@ -11,6 +12,7 @@ const IMMERSIVE_PREFIXES = [
   '/en/mitra/engine',
   '/en/mitra/inner-path',
   '/en/mitra/quick-reset',
+  '/en/mitra/rhythm',
   '/en/mitra/rhythm/setup',
   '/en/mitra/rhythm/edit',
   '/en/mitra/tell-mitra',
@@ -37,6 +39,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const isAuth = AUTH_ROUTES.some((p) => pathname === p || pathname.startsWith(p + '?'));
   const isMitraHome = pathname === '/en' || pathname === '/en/mitra';
   const isRoomRoute = pathname.startsWith('/en/mitra/room/');
+  const { shouldHideChrome } = useScrollDirection();
 
   useEffect(() => {
     if (!isRoomRoute) stopRoomAmbient();
@@ -48,23 +51,24 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div
+      className="kalpx-app-shell"
       style={{
-        minHeight: '100dvh',
+        minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
         background: isRoomRoute ? '#FFF8EF' : undefined,
         backgroundImage: isRoomRoute ? 'url(/rooms_bg.jpg)' : undefined,
         backgroundSize: isRoomRoute ? 'cover' : undefined,
         backgroundRepeat: isRoomRoute ? 'no-repeat' : undefined,
-        backgroundAttachment: isRoomRoute ? 'fixed' : undefined,
+        backgroundAttachment: isRoomRoute ? 'scroll' : undefined,
       }}
     >
-      <Header transparent={isRoomRoute} />
-      <main style={{ flex: 1 }}>
+      <Header transparent={isRoomRoute} hidden={shouldHideChrome} />
+      <main className="kalpx-shell-main kalpx-app-main" style={{ flex: 1 }}>
         {children}
       </main>
       <Footer />
-      <MobileBottomNav />
+      <MobileBottomNav hidden={shouldHideChrome} />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 # KalpX Mitra Experience Handoff
 
-**Last updated:** 2026-05-09 | **Source of truth:** code on `dev` branch  
+**Last updated:** 2026-05-16 | **Source of truth:** code on `main` branch (dev deployed)  
 **Full handoff:** `docs/mitra-experience-handoff.md` | **Flags reference:** `docs/feature-flags-and-env.md`
 
 ---
@@ -16,7 +16,7 @@
 | Tell Mitra | Implemented | BE: `core/tell_mitra_view.py` / Web: `TellMitraPage.tsx` / Mobile: `TellMitraContainer.tsx` | Thread UI behind flag; 201 backend tests |
 | Quick Reset | Implemented (routing only) | BE: `core/mitra_views.py:2772` (prana-acknowledge) / Mobile: `QuickResetScreen.tsx` | Not a dedicated endpoint — routing destination from prana-acknowledge |
 | Quick Check-in | Implemented | BE: `core/mitra_views.py:2772` / Mobile: `QuickCheckinScreen.tsx` | prana-acknowledge: 4 states → routes + updates CompanionState |
-| Rooms | Implemented | BE: `core/rooms/views.py` / Web: `RoomGuidedSection.tsx` / Mobile: `RoomContainer.tsx` | 6 rooms; guided experience gated by MITRA_ROOM_GUIDED |
+| Rooms | Implemented | BE: `core/rooms/views.py` / Web: `RoomGuidedSection.tsx` / Mobile: `RoomContainer.tsx` | 6 rooms; guided experience; preview card + See all steps live; room-specific completion copy + reflection chips; between-step 1.8s pacing |
 | Room Return | Implemented | Web: `TellMitraPage.tsx` (sessionStorage) / Mobile: `TellMitraContainer.tsx` (useFocusEffect + refs) | return_card item in conversation; lastReturnCardKeyRef deduplication |
 | Telemetry | Implemented | BE: `core/models.py` (TellMitraEvent, RoomTelemetryEvent, RoomRenderLog) | 14 room event types; outcome reports via management commands |
 
@@ -38,7 +38,10 @@ User opens Mitra
 **Key rules:**
 - Tell Mitra moves users: feeling → `life_context` → `specific_context` → `support_need` → room
 - Broad life-context question only when `life_context` is unknown. Never repeat it after context is established.
-- Rooms are guided spaces, not menus. Each has a recommended starting action.
+- Rooms are guided spaces, not menus. Each has a recommended starting action shown in a preview card before Begin.
+- Room completion shows room-specific closure copy (e.g. "You set something down.") + subtext + 4 reflection chips. Not a form.
+- Between steps: 1.8s companion line overlay before next step opens. No tap required.
+- `completion_source: "room_sequence"` in the completion payload is the guard that distinguishes room completion from Quick Chant / mantra / sankalp completions in `CompletionReturnTransient`.
 - Room return preserves context unless user taps Start Fresh.
 
 ---

@@ -163,7 +163,12 @@ export function MitraHomePage() {
         locale: (screenState.screenData.locale as string) || "en",
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
       });
-      await refetchHome();
+      if (pranaType === "agitated" || pranaType === "drained") {
+        const initialMessage = pranaType === "agitated" ? "I am agitated" : "I am drained";
+        navigate(`/en/mitra/tell-mitra?initialMessage=${encodeURIComponent(initialMessage)}`);
+      } else {
+        await refetchHome();
+      }
     } catch {
       if (WEB_ENV.isDev) {
         console.warn("[MitraHomePage] feeling support fetch failed");

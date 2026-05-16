@@ -15,7 +15,7 @@ import type {
 import { ArrowLeft, LockKeyhole, Sparkles } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { TellMitraThreadView } from "../../components/mitra/TellMitraThreadView";
 import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
 import { executeAction } from "../../engine/actionExecutor";
@@ -52,6 +52,8 @@ function _id() {
 export function TellMitraPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  const [searchParams] = useSearchParams();
+  const initialMessage = searchParams.get("initialMessage") ?? undefined;
   const screenState = useScreenState();
 
   // ── Shared state (used by both flag-off and flag-on paths) ────────────────
@@ -92,6 +94,11 @@ export function TellMitraPage() {
   // ── Session restore + return-from-room detection (flag-on only, single call) ─
   useEffect(() => {
     if (!THREAD_UI_ENABLED) return;
+    // Prana entry: auto-submit "I am agitated/drained" and skip prior session restoration.
+    if (initialMessage) {
+      void submitThread(initialMessage, "tell_mitra_prana_entry");
+      return;
+    }
     let restored: TellMitraConversationItem[] = [];
     try {
       const raw = sessionStorage.getItem(THREAD_STORAGE_KEY);

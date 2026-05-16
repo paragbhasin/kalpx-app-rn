@@ -185,13 +185,14 @@ export function MitraHomePage() {
   const hasAnyState = (!!segment && segment !== "new") || hasActiveJourney === true;
 
   // Block on LoadingScreen only while we lack enough data to make a render decision.
-  // Never block on entry-view/ — the redirect check below uses `viewKey &&` so it
-  // is safe when viewKey is still null, and it handles checkpoints when they arrive.
+  // When the user has an active journey, also wait for entry-view so we never
+  // flash the four-door home before a checkpoint redirect fires.
   const homeReady = !!(homeData?.user_surface_state);
   if (
     fourDoorLoading ||
     (isAuthed && !homeData && !fourDoorError) ||
-    (!homeReady && loading)
+    (!homeReady && loading) ||
+    (hasActiveJourney === true && entryLoading)
   ) {
     return <LoadingScreen />;
   }

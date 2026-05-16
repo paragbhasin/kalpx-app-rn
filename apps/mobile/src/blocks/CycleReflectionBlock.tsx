@@ -11,7 +11,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import Svg, { Circle, Path } from "react-native-svg";
 import uuidv4 from "react-native-uuid";
 import { useToast } from "../context/ToastContext";
 import {
@@ -275,6 +274,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   const [day7ReflectionText, setDay7ReflectionText] = useState("");
   const [progressData, setProgressData] = useState<any>(null);
   const [isSubmittingDay7, setIsSubmittingDay7] = useState(false);
+  const [showLightenConfirm, setShowLightenConfirm] = useState(false);
 
   useEffect(() => {
     if (!showJourneyView) return;
@@ -323,39 +323,6 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
       });
     }
 
-    const metrics_src = ss.checkpoint_metrics || {};
-    const metricLabels = Object.keys(metrics_src)
-      .map((k) => METRIC_ALLOWLIST[k])
-      .filter(Boolean);
-    const seriesA = {
-      label: metricLabels[0] || "Consistency",
-      points: [] as { x: number; y: number }[],
-    };
-    const seriesB = {
-      label: metricLabels[1] || "Clarity",
-      points: [] as { x: number; y: number }[],
-    };
-
-    for (let i = 1; i <= milestoneDayCount; i++) {
-      const progress = (i - 1) / (milestoneDayCount - 1);
-      const x = 20 + (i - 1) * (260 / (milestoneDayCount - 1));
-      const valA = 3 + 2 * progress + ((i % 3) - 1) * 0.3;
-      const valB = 2 + 2 * progress + ((i % 4) - 2) * 0.2;
-      seriesA.points.push({ x, y: 100 - valA * 8 });
-      seriesB.points.push({ x, y: 100 - valB * 8 });
-    }
-
-    const createPath = (pts: { x: number; y: number }[]) => {
-      if (pts.length === 0) return "";
-      let d = `M ${pts[0].x} ${pts[0].y}`;
-      for (let i = 0; i < pts.length - 1; i++) {
-        const curr = pts[i],
-          next = pts[i + 1];
-        d += ` Q ${(curr.x + next.x) / 2} ${curr.y}, ${next.x} ${next.y}`;
-      }
-      return d;
-    };
-
     const weeklyStats: any[] = [];
     const weeklyTotals = {
       checkinCount: 0,
@@ -394,7 +361,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           else if (e.action === "submit" && pId) dcore++;
         });
       }
-      weeklyStats.push({ day: d, total: dc + dt + dm + ds + dcore });
+      weeklyStats.push({ day: d, total: dm + ds + dcore });
       weeklyTotals.checkinCount += dc;
       weeklyTotals.triggerCount += dt;
       weeklyTotals.mantraCount += dm;
@@ -413,18 +380,11 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
       weeklyStats,
       weeklyTotals,
       maxWeeklyTotal: Math.max(...weeklyStats.map((s) => s.total), 1),
-      trend: {
-        pathA: createPath(seriesA.points),
-        pathB: createPath(seriesB.points),
-        currentA: seriesA.points[selectedDay - 1] || { x: 0, y: 0 },
-        currentB: seriesB.points[selectedDay - 1] || { x: 0, y: 0 },
-      },
       maxUnlockedDay: currentDay,
     };
   }, [
     ss.journey_log,
     ss.day_number,
-    ss.checkpoint_metrics,
     selectedDay,
     milestoneDayCount,
     progressData,
@@ -514,12 +474,9 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
               );
           }
         }
-        // FIX-2: lighten confirmation — key off persisted cycle_burden_level, not transient flag
-        if (
-          decision === "lighten" &&
-          (nv.payload as any)?.arc_state?.cycle_burden_level === "L0"
-        ) {
-          showToast("Your path has been lightened.", 4000, "info");
+        if (decision === "lighten") {
+          setShowLightenConfirm(true);
+          return;
         }
         store.dispatch(
           loadScreenWithData({
@@ -733,6 +690,33 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     );
   }
 
+  if (showLightenConfirm) {
+    return (
+      <View style={styles.introContainer}>
+        <View style={[styles.introOverlay, { padding: 32, justifyContent: "center", alignItems: "center" }]}>
+          <Text style={[styles.overlayTitleDark, { color: "#432104", textAlign: "center", marginBottom: 16, fontSize: 24 }]}>
+            Your path is now lighter.
+          </Text>
+          <Text style={[styles.introSubtitle, { textAlign: "center", marginBottom: 36 }]}>
+            Mitra will keep the essence, but make the daily step gentler.
+          </Text>
+          <TouchableOpacity
+            style={styles.primaryBtn}
+            onPress={() => navigation.navigate("InnerPath" as any)}
+          >
+            <Text style={styles.primaryBtnText}>Return to Inner Path</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{ marginTop: 16 }}
+            onPress={() => navigation.navigate("Home" as any)}
+          >
+            <Text style={styles.skipBtnText}>Go Home</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
   if (showIntro && is7DayCycle) {
     const introHeadline = d7.intro_headline || "A Week Into Your Journey";
     const ctaLabel = d7.intro_cta_label || "Reflect on My Journey";
@@ -915,29 +899,15 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
         </View>
 
         {is14DayCycle && (
-          <View style={styles.mirrorCard}>
-            <Text style={styles.mirrorCardTitle}>Baseline Comparison</Text>
-            <Text style={styles.mirrorCardSubtitle}>
-              Then vs now across your tracked baseline metrics
+          <View style={[styles.mirrorCard, { paddingVertical: 18 }]}>
+            <Text style={[styles.mirrorCardTitle, { fontSize: 20, color: "#432104" }]}>
+              {(ss.ceremony_engaged_days as number) ?? engagedTotal} of {milestoneDayCount} days held.
             </Text>
-
-            <View style={styles.comparisonArea}>
-              <ComparisonRow
-                label="Days Engaged"
-                thenVal="–"
-                nowVal={`${engagedTotal}/${milestoneDayCount}`}
-              />
-              <ComparisonRow
-                label="Fully Completed"
-                thenVal="–"
-                nowVal={`${completedTotal}/${milestoneDayCount}`}
-              />
-              <ComparisonRow
-                label="Total Days"
-                thenVal="–"
-                nowVal={`${milestoneDayCount}/${milestoneDayCount}`}
-              />
-            </View>
+            {completedTotal > 0 && completedTotal !== ((ss.ceremony_engaged_days as number) ?? engagedTotal) && (
+              <Text style={[styles.mirrorCardSubtitle, { marginTop: 6 }]}>
+                {completedTotal} {completedTotal === 1 ? "day was" : "days were"} fully complete.
+              </Text>
+            )}
           </View>
         )}
 
@@ -1248,7 +1218,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     const finaleNarrative =
       typeof m25.narrative_template === "string" && m25.narrative_template
         ? m25.narrative_template
-            .replace("{completed_count}", String(ceremony.completed_days ?? ""))
+            .replace("{completed_count}", String((ceremony as any).engaged_days ?? ceremony.completed_days ?? ""))
             .replace("{total_days}", String(ceremony.total_days ?? 14))
         : "";
     const finaleSovereignty = ceremony.sovereignty_line || "";
@@ -1463,40 +1433,6 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
               <ScrollView>
                 {activeTab === "day" ? (
                   <View>
-                    <View style={styles.trendBox}>
-                      <Text style={styles.trendTitle}>Growth Trend</Text>
-                      <Svg width="300" height="120" viewBox="0 0 300 120">
-                        <Path
-                          d={journeyData.trend.pathA}
-                          stroke="#2D7A5F"
-                          strokeWidth="3"
-                          fill="none"
-                        />
-                        <Path
-                          d={journeyData.trend.pathB}
-                          stroke="#D9A557"
-                          strokeWidth="3"
-                          fill="none"
-                          strokeDasharray="4,4"
-                        />
-                        <Circle
-                          cx={journeyData.trend.currentA.x}
-                          cy={journeyData.trend.currentA.y}
-                          r="4"
-                          fill="white"
-                          stroke="#2D7A5F"
-                          strokeWidth="2"
-                        />
-                        <Circle
-                          cx={journeyData.trend.currentB.x}
-                          cy={journeyData.trend.currentB.y}
-                          r="4"
-                          fill="white"
-                          stroke="#D9A557"
-                          strokeWidth="2"
-                        />
-                      </Svg>
-                    </View>
                     <ActivityList activity={journeyData.activity} />
                   </View>
                 ) : (
@@ -1550,8 +1486,6 @@ const ActivityList = ({
   isWeekly?: boolean;
 }) => {
   const items = [
-    { label: "Check-Ins", count: activity.checkinCount, color: "#3A8FB7" },
-    { label: "Triggers", count: activity.triggerCount, color: "#D9A557" },
     { label: "Mantra", count: activity.mantraCount, color: "#9067C6" },
     { label: "Sankalp", count: activity.sankalpCount, color: "#2D7A5F" },
     { label: "Core", count: activity.coreCount, color: "#E97451" },
@@ -2240,34 +2174,5 @@ const styles = StyleSheet.create({
   },
   progressFill: { height: "100%", borderRadius: 6 },
 });
-
-const ComparisonRow = ({ label, thenVal, nowVal }: any) => (
-  <View style={styles.comparisonItem}>
-    <View style={styles.comparisonLabelRow}>
-      <Text style={styles.comparisonLabel}>{label}</Text>
-      <Text style={styles.comparisonValue}>
-        {thenVal} → {nowVal}
-      </Text>
-    </View>
-    <View style={styles.comparisonProgressRow}>
-      <View style={styles.progressSegment}>
-        <View
-          style={[
-            styles.progressFill,
-            { backgroundColor: "#d4c3ab", width: "25%" },
-          ]}
-        />
-      </View>
-      <View style={styles.progressSegment}>
-        <View
-          style={[
-            styles.progressFill,
-            { backgroundColor: "#2d7a5f", width: "30%" },
-          ]}
-        />
-      </View>
-    </View>
-  </View>
-);
 
 export default CycleReflectionBlock;

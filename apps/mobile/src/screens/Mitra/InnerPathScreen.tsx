@@ -168,7 +168,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
               );
               if (__DEV__) console.log("[InnerPathScreen] day_7_view schema loaded, embedded:", embedded);
               if (!embedded) {
-                navigation.navigate("DynamicEngine" as any);
+                navigation.replace("DynamicEngine" as any);
               }
             } else {
               if (__DEV__) console.warn("[InnerPathScreen] day_7_view: checkpoint not ready (null envelope)");
@@ -210,7 +210,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
               );
               if (__DEV__) console.log("[InnerPathScreen] day_14_view schema loaded, embedded:", embedded);
               if (!embedded) {
-                navigation.navigate("DynamicEngine" as any);
+                navigation.replace("DynamicEngine" as any);
               }
             } else {
               if (__DEV__) console.warn("[InnerPathScreen] day_14_view: checkpoint not ready (null envelope)");

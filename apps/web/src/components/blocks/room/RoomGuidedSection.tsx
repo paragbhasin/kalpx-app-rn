@@ -167,6 +167,8 @@ export function RoomGuidedSection({
   const [activeStepPayload, setActiveStepPayload] = useState<any>(null);
   const [interstitialLine, setInterstitialLine] = useState<string | null>(null);
   const interstitialIndexRef = useRef(0);
+  const [mantrasOpeningCardAction, setMantrasOpeningCardAction] = useState<any | null>(null);
+  const [exitConfirmVisible, setExitConfirmVisible] = useState(false);
 
   function maybeAdvanceToNextAction(completedActionId?: string | null) {
     if (!sequenceActive || !completedActionId) return;
@@ -203,7 +205,7 @@ export function RoomGuidedSection({
 
   function openAction(
     action: any,
-    options?: { forceSequenceActive?: boolean },
+    options?: { forceSequenceActive?: boolean; skipOpeningCard?: boolean },
   ) {
     if (!action) return;
     setStepsOpen(false);
@@ -239,6 +241,13 @@ export function RoomGuidedSection({
 
     if (action.action_type === "in_room_carry") {
       setCarryModalVisible(true);
+      return;
+    }
+
+    // Strict guard — only intercept runner_mantra, not other runner types.
+    // skipOpeningCard=true is passed by the "Begin →" handler so the runner actually launches.
+    if (action.action_type === "runner_mantra" && roomId && !options?.skipOpeningCard) {
+      setMantrasOpeningCardAction(action);
       return;
     }
 
@@ -373,7 +382,12 @@ export function RoomGuidedSection({
     openAction(recAction, { forceSequenceActive: true });
   }
 
-  function handleExit() {
+  function handleExitRequest() {
+    setExitConfirmVisible(true);
+  }
+
+  function handleConfirmExit() {
+    setExitConfirmVisible(false);
     void postRoomTelemetry({
       room_id: roomId,
       event_type: "room_exited",
@@ -392,6 +406,7 @@ export function RoomGuidedSection({
         presentation="screen"
         stepPayload={activeStepPayload}
         label={activeAction?.label || "Step"}
+        isRoomGuided={true}
         onCancel={() => {
           setStepModalVisible(false);
           setActiveStepPayload(null);
@@ -496,6 +511,7 @@ export function RoomGuidedSection({
         presentation="screen"
         label={activeAction?.label || "Inquiry"}
         inquiryPayload={activeAction?.inquiry_payload}
+        isRoomGuided={true}
         onCancel={() => {
           setInquiryModalVisible(false);
           setActiveAction(null);
@@ -1015,7 +1031,7 @@ export function RoomGuidedSection({
 
         <div style={{ textAlign: "center" }}>
           <button
-            onClick={handleExit}
+            onClick={handleExitRequest}
             data-testid="room-guided-exit"
             style={{
               background: "none",
@@ -1057,6 +1073,113 @@ export function RoomGuidedSection({
           >
             {interstitialLine}
           </p>
+        </div>
+      )}
+
+      {/* Mantra opening card — shown before launching room mantra runner */}
+      {mantrasOpeningCardAction && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "#FAF4E8",
+            zIndex: 50,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "0 32px",
+            textAlign: "center",
+          }}
+        >
+          <img
+            src="/lotus_icon.png"
+            alt=""
+            style={{ width: 48, height: 38, opacity: 0.88, marginBottom: 24 }}
+          />
+          <p style={{
+            fontSize: 10, fontWeight: 600, letterSpacing: 1.6, color: "#8b7a55",
+            textTransform: "uppercase" as const, marginBottom: 14,
+          }}>
+            MITRA INVITES YOU TO BEGIN WITH
+          </p>
+          <p style={{
+            fontFamily: "var(--kalpx-font-serif)",
+            fontSize: 28, color: "#432104", fontWeight: 700,
+            lineHeight: 1.3, marginBottom: 12,
+          }}>
+            {mantrasOpeningCardAction.label}
+          </p>
+          {mantrasOpeningCardAction.helper_line && (
+            <p style={{
+              fontSize: 15, color: "#6b5a45", lineHeight: 1.5, marginBottom: 32,
+            }}>
+              {mantrasOpeningCardAction.helper_line}
+            </p>
+          )}
+          <button
+            onClick={() => {
+              const act = mantrasOpeningCardAction;
+              setMantrasOpeningCardAction(null);
+              openAction(act, { skipOpeningCard: true });
+            }}
+            style={{
+              fontSize: 16, fontWeight: 600, color: "#432104",
+              background: "none", border: "none", cursor: "pointer",
+              letterSpacing: 0.5,
+            }}
+          >
+            Begin →
+          </button>
+        </div>
+      )}
+
+      {/* Exit confirmation */}
+      {exitConfirmVisible && (
+        <div
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)",
+            zIndex: 400, display: "flex", alignItems: "flex-end", justifyContent: "center",
+          }}
+          onClick={() => setExitConfirmVisible(false)}
+        >
+          <div
+            style={{
+              background: "#FFF8EF", borderRadius: "18px 18px 0 0",
+              width: "100%", maxWidth: 480,
+              padding: "24px 28px calc(32px + env(safe-area-inset-bottom))",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p style={{
+              fontSize: 16, color: "#432104", textAlign: "center",
+              lineHeight: 1.6, marginBottom: 24,
+            }}>
+              This room will close. You can return anytime.
+            </p>
+            <button
+              onClick={handleConfirmExit}
+              style={{
+                display: "block", width: "100%", padding: "14px",
+                borderRadius: 999, border: "1.5px solid #1C1C1E",
+                background: "rgba(255,255,255,0.28)", fontSize: 15,
+                color: "#432104", cursor: "pointer", marginBottom: 12,
+              }}
+            >
+              Yes, go now
+            </button>
+            <button
+              onClick={() => setExitConfirmVisible(false)}
+              style={{
+                display: "block", width: "100%", padding: "14px",
+                borderRadius: 999, border: "1.5px solid #D8D8D8",
+                background: "#F6F1EE", fontSize: 15, fontWeight: 600,
+                color: "#432104", cursor: "pointer",
+              }}
+            >
+              Stay in room
+            </button>
+          </div>
         </div>
       )}
 

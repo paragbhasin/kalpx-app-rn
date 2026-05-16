@@ -3102,16 +3102,37 @@ export async function executeAction(
           (screenState.room_sequence_active as boolean | null) ?? false;
         const _sequenceActionIds =
           (screenState.room_sequence_action_ids as string[] | null) ?? null;
-        const _sequenceIndex =
+        let _sequenceIndex =
           typeof screenState.room_sequence_index === "number"
             ? (screenState.room_sequence_index as number)
             : null;
+
+        if (_sequenceIndex === null) {
+          const _ids = Array.isArray(screenState.room_sequence_action_ids)
+            ? (screenState.room_sequence_action_ids as string[])
+            : [];
+          const _runnerActionId = screenState.runner_action_id as string | null;
+          const _foundIndex = _runnerActionId
+            ? _ids.findIndex((id) => id === _runnerActionId)
+            : -1;
+          _sequenceIndex = _foundIndex >= 0 ? _foundIndex : null;
+          console.log("[room-seq] index fallback:", { _foundIndex, _sequenceIndex });
+        }
+
         const _nextSequenceActionId =
           _sequenceActive &&
           Array.isArray(_sequenceActionIds) &&
           _sequenceIndex != null
             ? (_sequenceActionIds[_sequenceIndex + 1] as string | undefined)
             : null;
+
+        console.log("[room-seq] complete_runner snapshot:", {
+          runner_action_id: screenState.runner_action_id,
+          room_sequence_index: screenState.room_sequence_index,
+          room_sequence_action_ids: screenState.room_sequence_action_ids,
+          _sequenceIndex,
+          _nextSequenceActionId,
+        });
 
         if (_sequenceActive && source === "support_room" && _roomId) {
           setScreenValue(null, "runner_action_id");

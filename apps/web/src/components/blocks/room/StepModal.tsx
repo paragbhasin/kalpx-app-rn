@@ -66,7 +66,33 @@ const GROUNDING_PROMPTS = [
   "Name 1 thing you can taste",
 ];
 
+const GROUNDING_PROMPTS_ROOM = [
+  "What do you see around you?",
+  "What sounds do you notice?",
+  "What do you feel against your skin?",
+  "Is there a scent nearby?",
+  "What taste is in your mouth?",
+];
+
+const TIMER_COMPLETION_LINES: Record<string, string> = {
+  timer_breathe: "You made space.",
+  timer_sit: "You sat with it.",
+  timer_heart: "Your heart has steadied.",
+  timer_walk: "You moved through it.",
+};
+
+const HEART_PHASES = [
+  "Rest your hand on your heart.",
+  "Feel the warmth.",
+  "Breathe slowly.",
+];
+
 const MAX_TEXT = 1000;
+
+const ROOM_TIMER_KEYFRAMES = `
+@keyframes kalpx-sit-pulse{0%,100%{opacity:0.35}50%{opacity:0.65}}
+@keyframes kalpx-heart-beat{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+`;
 
 interface Props {
   visible: boolean;
@@ -77,6 +103,8 @@ interface Props {
   errorMessage?: string | null;
   isSubmitting?: boolean;
   presentation?: "modal" | "screen";
+  /** When true: enables room-guided UX (auto-start, companion prompts, optional input). */
+  isRoomGuided?: boolean;
 }
 
 export function StepModal({
@@ -88,6 +116,7 @@ export function StepModal({
   errorMessage,
   isSubmitting = false,
   presentation = "modal",
+  isRoomGuided = false,
 }: Props) {
   const kind = classifyStep(stepPayload?.template_id);
   const isScreen = presentation === "screen";
@@ -199,13 +228,13 @@ export function StepModal({
             kind === "timer_walk" ||
             kind === "timer_sit" ||
             kind === "timer_heart") && (
-            <TimerBody kind={kind} stepPayload={stepPayload} onDone={onDone} />
+            <TimerBody kind={kind} stepPayload={stepPayload} onDone={onDone} isRoomGuided={isRoomGuided} />
           )}
           {kind === "text_input" && (
             <TextInputBody stepPayload={stepPayload} onDone={onDone} />
           )}
           {kind === "grounding" && (
-            <GroundingBody onDone={onDone} isScreen={isScreen} />
+            <GroundingBody onDone={onDone} isScreen={isScreen} isRoomGuided={isRoomGuided} />
           )}
           {kind === "voice_note" && <VoiceNoteBody onDone={onDone} />}
           {kind === "reach_out" && <ReachOutBody onDone={onDone} />}
@@ -242,7 +271,7 @@ function defaultInstruction(kind: string): string {
   if (kind === "timer_heart") return "Rest your hand on your heart. Breathe.";
   if (kind === "timer_breathe") return "Breathe gently.";
   if (kind === "timer_walk") return "Walk at your own pace.";
-  return "Sit quietly.";
+  return "Let your thoughts settle like dust in still water.";
 }
 
 let lottieScriptPromise: Promise<void> | null = null;
@@ -483,9 +512,10 @@ interface TimerBodyProps {
   kind: string;
   stepPayload: any;
   onDone: (extra: StepModalResult) => void;
+  isRoomGuided?: boolean;
 }
 
-function TimerBody({ kind, stepPayload, onDone }: TimerBodyProps) {
+function TimerBody({ kind, stepPayload, onDone, isRoomGuided = false }: TimerBodyProps) {
   const totalSec = (() => {
     const raw = stepPayload?.duration_sec;
     if (typeof raw === "number" && raw > 0 && raw <= 3600) return raw;
@@ -499,13 +529,40 @@ function TimerBody({ kind, stepPayload, onDone }: TimerBodyProps) {
     return defaultTimerSeconds(kind);
   })();
 
-  const cueText =
+  const baseCueText =
     (stepPayload?.cue_text && String(stepPayload.cue_text)) ||
     defaultInstruction(kind);
+
   const [remaining, setRemaining] = useState(totalSec);
   const [running, setRunning] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const atZero = remaining <= 0;
+  const hasCompletedRef = useRef(false);
+
+  const autoStartKinds = ["timer_breathe", "timer_sit", "timer_heart"];
+  const isAutoStart = isRoomGuided && autoStartKinds.includes(kind);
+  const [preStartVisible, setPreStartVisible] = useState(isAutoStart);
+
+  useEffect(() => {
+    if (!isAutoStart) return;
+    hasCompletedRef.current = false;
+    setPreStartVisible(true);
+    const t = setTimeout(() => {
+      setPreStartVisible(false);
+      setRunning(true);
+    }, 600);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAutoStart]);
+
+  const [heartPhase, setHeartPhase] = useState(0);
+  useEffect(() => {
+    if (kind !== "timer_heart" || !running || !isRoomGuided) return;
+    const t = setInterval(() => {
+      setHeartPhase((p) => Math.min(p + 1, HEART_PHASES.length - 1));
+    }, 10000);
+    return () => clearInterval(t);
+  }, [kind, running, isRoomGuided]);
 
   useEffect(() => {
     if (!running) return;
@@ -527,24 +584,59 @@ function TimerBody({ kind, stepPayload, onDone }: TimerBodyProps) {
     if (atZero) setRunning(false);
   }, [atZero]);
 
+  const [completionLineText, setCompletionLineText] = useState<string | null>(null);
+  useEffect(() => {
+    if (!atZero || !isRoomGuided || hasCompletedRef.current) return;
+    hasCompletedRef.current = true;
+    const line = TIMER_COMPLETION_LINES[kind] ?? null;
+    if (line) setCompletionLineText(line);
+    const t = setTimeout(() => { onDone({}); }, 1500);
+    return () => clearTimeout(t);
+  }, [atZero, isRoomGuided, kind, onDone]);
+
   const mm = Math.floor(remaining / 60);
   const ss = remaining % 60;
   const timeLabel = `${mm}:${ss.toString().padStart(2, "0")}`;
   const inhaleSec = Number(stepPayload?.step_config?.inhale ?? 4) || 4;
   const exhaleSec = Number(stepPayload?.step_config?.exhale ?? 6) || 6;
 
+  const displayCue = (kind === "timer_heart" && isRoomGuided)
+    ? HEART_PHASES[heartPhase]
+    : baseCueText;
+
   return (
-    <div style={{ textAlign: "center", paddingTop: 8 }}>
+    <div style={{ textAlign: "center", paddingTop: 8, position: "relative" }}>
+      {/* CSS keyframes for room animations */}
+      {isRoomGuided && (
+        <style dangerouslySetInnerHTML={{ __html: ROOM_TIMER_KEYFRAMES }} />
+      )}
+
+      {/* Completion line overlay */}
+      {completionLineText && (
+        <div style={{
+          position: "absolute", inset: 0, display: "flex",
+          alignItems: "center", justifyContent: "center", zIndex: 10,
+        }}>
+          <p style={{
+            fontFamily: "var(--kalpx-font-serif, Georgia, serif)",
+            fontSize: 22, fontStyle: "italic", color: "#432104",
+            textAlign: "center", maxWidth: 340, lineHeight: 1.5,
+          }}>
+            {completionLineText}
+          </p>
+        </div>
+      )}
+
       <p
-        style={{
-          fontSize: 16,
-          color: "#4A4A50",
-          marginBottom: 18,
-          lineHeight: 1.4,
+        style={isRoomGuided ? {
+          fontFamily: "var(--kalpx-font-serif, Georgia, serif)",
+          fontSize: 19, color: "#4a3a20", marginBottom: 18, lineHeight: 1.5,
+        } : {
+          fontSize: 16, color: "#4A4A50", marginBottom: 18, lineHeight: 1.4,
         }}
         data-testid="step-modal-timer-cue"
       >
-        {cueText}
+        {preStartVisible ? "Let's begin gently…" : displayCue}
       </p>
 
       {kind === "timer_breathe" ? (
@@ -554,18 +646,43 @@ function TimerBody({ kind, stepPayload, onDone }: TimerBodyProps) {
           exhaleSec={exhaleSec}
         />
       ) : null}
+
+      {kind === "timer_sit" && isRoomGuided && (
+        <div style={{ display: "flex", justifyContent: "center", margin: "20px 0" }}>
+          <img
+            src="/lotus_icon.png"
+            alt=""
+            style={{
+              width: 48, height: 40, opacity: 0.5,
+              animation: "kalpx-sit-pulse 4s ease-in-out infinite",
+            }}
+          />
+        </div>
+      )}
+
+      {kind === "timer_heart" && isRoomGuided && (
+        <div style={{ display: "flex", justifyContent: "center", margin: "12px 0" }}>
+          <span style={{
+            fontSize: 32, lineHeight: 1, color: "#A68246",
+            display: "inline-block",
+            animation: "kalpx-heart-beat 1.2s ease-in-out infinite",
+          }}>
+            ♥
+          </span>
+        </div>
+      )}
+
       {kind === "timer_walk" ? (
         <WalkLottie running={running} atZero={atZero} />
       ) : null}
 
       <p
-        style={{
-          fontSize: 76,
-          color: "#1C1C1E",
-          margin: "0 0 32px",
-          fontVariantNumeric: "tabular-nums",
-          lineHeight: 1,
-          letterSpacing: -2,
+        style={isRoomGuided ? {
+          fontSize: 14, color: "#8b7a55", margin: "0 0 24px",
+          fontVariantNumeric: "tabular-nums", lineHeight: 1,
+        } : {
+          fontSize: 76, color: "#1C1C1E", margin: "0 0 32px",
+          fontVariantNumeric: "tabular-nums", lineHeight: 1, letterSpacing: -2,
         }}
         data-testid="step-modal-timer-digits"
       >
@@ -580,7 +697,7 @@ function TimerBody({ kind, stepPayload, onDone }: TimerBodyProps) {
           flexWrap: "wrap",
         }}
       >
-        {!running && !atZero && (
+        {!running && !atZero && !isAutoStart && (
           <button
             data-testid="step-modal-timer-start"
             onClick={() => setRunning(true)}
@@ -613,12 +730,15 @@ function TimerBody({ kind, stepPayload, onDone }: TimerBodyProps) {
               cursor: "pointer",
             }}
           >
-            Pause
+            {isRoomGuided ? "Rest" : "Pause"}
           </button>
         )}
         <button
           data-testid="step-modal-timer-done"
-          onClick={() => onDone({})}
+          onClick={() => {
+            hasCompletedRef.current = true;
+            onDone({});
+          }}
           style={{
             minWidth: 124,
             padding: "14px 24px",
@@ -765,17 +885,22 @@ function TextInputBody({ stepPayload, onDone }: TextInputBodyProps) {
 function GroundingBody({
   onDone,
   isScreen = false,
+  isRoomGuided = false,
 }: {
   onDone: (extra: StepModalResult) => void;
   isScreen?: boolean;
+  isRoomGuided?: boolean;
 }) {
+  const prompts = isRoomGuided ? GROUNDING_PROMPTS_ROOM : GROUNDING_PROMPTS;
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<string[]>(["", "", "", "", ""]);
+  const [closingText, setClosingText] = useState<string | null>(null);
+  const hasCompletedRef = useRef(false);
   const current = answers[index] ?? "";
-  const prompt = GROUNDING_PROMPTS[index];
-  const isLast = index === GROUNDING_PROMPTS.length - 1;
+  const prompt = prompts[index];
+  const isLast = index === prompts.length - 1;
   const trimmed = current.trim();
-  const enabled = trimmed.length >= 1;
+  const enabled = isRoomGuided ? true : trimmed.length >= 1;
 
   const setCurrent = (v: string) => {
     setAnswers((prev) => {
@@ -788,14 +913,44 @@ function GroundingBody({
   const handleNext = () => {
     if (!enabled) return;
     if (isLast) {
-      onDone({ grounding: answers.map((a) => a.trim()) });
+      if (isRoomGuided && !hasCompletedRef.current) {
+        hasCompletedRef.current = true;
+        setClosingText("The world is present around you.");
+        setTimeout(() => {
+          onDone({ grounding: answers.map((a) => a.trim()) });
+        }, 1500);
+      } else if (!isRoomGuided) {
+        onDone({ grounding: answers.map((a) => a.trim()) });
+      }
       return;
     }
-    setIndex((i) => Math.min(GROUNDING_PROMPTS.length - 1, i + 1));
+    setIndex((i) => Math.min(prompts.length - 1, i + 1));
   };
+
+  if (closingText) {
+    return (
+      <div style={{ textAlign: "center", paddingTop: 40 }}>
+        <p style={{
+          fontFamily: "var(--kalpx-font-serif, Georgia, serif)",
+          fontSize: 22, fontStyle: "italic", color: "#432104", lineHeight: 1.5,
+        }}>
+          {closingText}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ paddingTop: isScreen ? 8 : 8 }}>
+      {isRoomGuided && index === 0 && (
+        <p style={{
+          fontFamily: "var(--kalpx-font-serif, Georgia, serif)",
+          fontSize: 15, fontStyle: "italic", color: "#8b7a55",
+          textAlign: "center", marginBottom: 16, lineHeight: 1.5,
+        }}>
+          Let us return to the room around you.
+        </p>
+      )}
       <p
         data-testid="step-modal-grounding-progress"
         style={{
@@ -805,7 +960,7 @@ function GroundingBody({
           marginBottom: isScreen ? 18 : 8,
         }}
       >
-        {index + 1} of {GROUNDING_PROMPTS.length}
+        {index + 1} of {prompts.length}
       </p>
       <p
         style={{
@@ -863,6 +1018,14 @@ function GroundingBody({
           </p>
         )}
       </div>
+      {isRoomGuided && (
+        <p style={{
+          fontSize: 13, color: "#8b7a55", textAlign: "center",
+          marginTop: 8, marginBottom: 4, fontStyle: "italic",
+        }}>
+          or just notice quietly.
+        </p>
+      )}
       <button
         data-testid={
           isLast ? "step-modal-grounding-done" : "step-modal-grounding-next"

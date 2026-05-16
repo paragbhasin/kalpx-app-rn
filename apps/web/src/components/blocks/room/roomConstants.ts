@@ -1,10 +1,6 @@
+// Canonical labels for the 6 verified rooms come from @kalpx/contracts ROOM_LABELS.
+// This map only covers rooms not yet in contracts.
 export const ROOM_DISPLAY_NAMES: Record<string, string> = {
-  room_stillness: 'Find Calm',
-  room_clarity: 'Find Clarity',
-  room_release: 'Set It Down',
-  room_connection: 'Feel Connected',
-  room_growth: 'Take the Next Step',
-  room_joy: "Notice What's Good",
   room_grief: 'Grief',
   room_loneliness: 'Loneliness',
 };

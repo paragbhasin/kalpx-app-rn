@@ -33,6 +33,8 @@ interface Props {
   onOpened?: () => void;
   onCategorySelected?: (category: InquiryCategory) => void;
   presentation?: "modal" | "screen";
+  /** When true: enables room-guided UX (auto-select single category, optional journal, companion label). */
+  isRoomGuided?: boolean;
 }
 
 export function InquiryModal({
@@ -45,6 +47,7 @@ export function InquiryModal({
   onOpened,
   onCategorySelected,
   presentation = "modal",
+  isRoomGuided = false,
 }: Props) {
   const [selected, setSelected] = useState<InquiryCategory | null>(null);
   const [journalOpen, setJournalOpen] = useState(false);
@@ -63,6 +66,17 @@ export function InquiryModal({
       setJournalText("");
     }
   }, [visible, openedFired, onOpened]);
+
+  // Auto-select single category in room context.
+  useEffect(() => {
+    if (isRoomGuided && visible && !selected) {
+      const cats = inquiryPayload?.categories ?? [];
+      if (cats.length === 1) {
+        setSelected(cats[0]);
+        onCategorySelected?.(cats[0]);
+      }
+    }
+  }, [isRoomGuided, visible, inquiryPayload, selected, onCategorySelected]);
 
   useEffect(() => {
     if (!visible) return;
@@ -94,7 +108,7 @@ export function InquiryModal({
   const handleJournalDone = () => {
     if (!selected) return;
     const trimmed = journalText.trim();
-    if (trimmed.length < 1) return;
+    if (!isRoomGuided && trimmed.length < 1) return;
     onSubmitJournal(selected, trimmed);
   };
 
@@ -578,7 +592,7 @@ export function InquiryModal({
                         : "0 3px 8px rgba(0,0,0,0.1)",
                     }}
                   >
-                    Journal on this
+                    {isRoomGuided ? "Write a few words" : "Journal on this"}
                   </button>
                 </div>
               ) : (
@@ -716,7 +730,7 @@ export function InquiryModal({
                   </div>
                   <button
                     data-testid="inquiry-modal-journal-done"
-                    disabled={journalText.trim().length < 1}
+                    disabled={!isRoomGuided && journalText.trim().length < 1}
                     onClick={handleJournalDone}
                     style={{
                       width: "100%",
@@ -731,8 +745,8 @@ export function InquiryModal({
                       fontWeight: 600,
                       color: showImmersiveJournal ? "#FFF8EF" : "#432104",
                       cursor:
-                        journalText.trim().length >= 1 ? "pointer" : "default",
-                      opacity: journalText.trim().length >= 1 ? 1 : 0.45,
+                        (isRoomGuided || journalText.trim().length >= 1) ? "pointer" : "default",
+                      opacity: (isRoomGuided || journalText.trim().length >= 1) ? 1 : 0.45,
                       boxShadow: showImmersiveJournal
                         ? "0 14px 30px rgba(140, 103, 63, 0.16)"
                         : undefined,

@@ -20,6 +20,7 @@
  * Not a dependency addition — uses react-native stdlib Modal + TextInput.
  */
 
+import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import LottieView from "lottie-react-native";
 import React, {
@@ -85,6 +86,8 @@ interface Props {
   onDone: (extra: StepModalResult) => void;
   errorMessage?: string | null;
   isSubmitting?: boolean;
+  /** When true: enables room-guided UX (auto-start, companion prompts, optional input). */
+  isRoomGuided?: boolean;
 }
 
 /** Derive the UI kind from the template_id prefix. */
@@ -110,6 +113,27 @@ const GROUNDING_PROMPTS = [
   "Name 1 thing you can taste",
 ];
 
+const GROUNDING_PROMPTS_ROOM = [
+  "What do you see around you?",
+  "What sounds do you notice?",
+  "What do you feel against your skin?",
+  "Is there a scent nearby?",
+  "What taste is in your mouth?",
+];
+
+const TIMER_COMPLETION_LINES: Record<string, string> = {
+  timer_breathe: "You made space.",
+  timer_sit:     "You sat with it.",
+  timer_heart:   "Your heart has steadied.",
+  timer_walk:    "You moved through it.",
+};
+
+const HEART_PHASES = [
+  "Rest your hand on your heart.",
+  "Feel the warmth.",
+  "Breathe slowly.",
+];
+
 const MAX_TEXT = 1000;
 
 const StepModal: React.FC<Props> = ({
@@ -121,6 +145,7 @@ const StepModal: React.FC<Props> = ({
   onDone,
   errorMessage,
   isSubmitting = false,
+  isRoomGuided = false,
 }) => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [sheetHeight, setSheetHeight] = useState(0);
@@ -275,6 +300,7 @@ const StepModal: React.FC<Props> = ({
                     stepPayload={stepPayload}
                     onDone={onDone}
                     isScreen={presentation === "screen"}
+                    isRoomGuided={isRoomGuided}
                   />
                 ) : null}
 
@@ -290,6 +316,7 @@ const StepModal: React.FC<Props> = ({
                   <GroundingBody
                     onDone={onDone}
                     isScreen={presentation === "screen"}
+                    isRoomGuided={isRoomGuided}
                   />
                 ) : null}
 
@@ -323,6 +350,7 @@ interface TimerBodyProps {
   stepPayload: StepPayload | null | undefined;
   onDone: (extra: StepModalResult) => void;
   isScreen?: boolean;
+  isRoomGuided?: boolean;
 }
 
 function defaultTimerSeconds(kind: TimerBodyProps["kind"]): number {
@@ -336,7 +364,7 @@ function defaultInstruction(kind: TimerBodyProps["kind"]): string {
   }
   if (kind === "timer_breathe") return "Breathe gently.";
   if (kind === "timer_walk") return "Walk at your own pace.";
-  return "Sit quietly.";
+  return "Let your thoughts settle like dust in still water.";
 }
 
 const WALK_ANIMATION_END_FRAME = 68;
@@ -465,6 +493,7 @@ const TimerBody: React.FC<TimerBodyProps> = ({
   stepPayload,
   onDone,
   isScreen = false,
+  isRoomGuided = false,
 }) => {
   const totalSec = useMemo(() => {
     const raw = stepPayload?.duration_sec;
@@ -483,7 +512,7 @@ const TimerBody: React.FC<TimerBodyProps> = ({
     return defaultTimerSeconds(kind);
   }, [stepPayload?.duration_sec, stepPayload?.step_config, kind]);
 
-  const cueText =
+  const baseCueText =
     (stepPayload?.cue_text && String(stepPayload.cue_text)) ||
     defaultInstruction(kind);
 
@@ -492,6 +521,63 @@ const TimerBody: React.FC<TimerBodyProps> = ({
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lottieRef = useRef<LottieView>(null);
   const atZero = remaining <= 0;
+  const hasCompletedRef = useRef(false);
+
+  // Pre-start state for room-guided auto-start kinds.
+  const autoStartKinds = ["timer_breathe", "timer_sit", "timer_heart"];
+  const isAutoStart = isRoomGuided && autoStartKinds.includes(kind);
+  const [preStartVisible, setPreStartVisible] = useState(isAutoStart);
+
+  // Soft pre-start: show "Let's begin gently…" for 600ms then start timer.
+  useEffect(() => {
+    if (!isAutoStart) return;
+    hasCompletedRef.current = false;
+    setPreStartVisible(true);
+    const t = setTimeout(() => {
+      setPreStartVisible(false);
+      setRunning(true);
+    }, 600);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAutoStart]);
+
+  // Heart phase rotation: cycle every 10s when running.
+  const [heartPhase, setHeartPhase] = useState(0);
+  useEffect(() => {
+    if (kind !== "timer_heart" || !running || !isRoomGuided) return;
+    const t = setInterval(() => {
+      setHeartPhase((p) => Math.min(p + 1, HEART_PHASES.length - 1));
+    }, 10000);
+    return () => clearInterval(t);
+  }, [kind, running, isRoomGuided]);
+
+  // Sit ambient pulse animation.
+  const sitOpacity = useRef(new Animated.Value(0.35)).current;
+  useEffect(() => {
+    if (kind !== "timer_sit" || !isRoomGuided) return;
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(sitOpacity, { toValue: 0.65, duration: 2000, useNativeDriver: true }),
+        Animated.timing(sitOpacity, { toValue: 0.35, duration: 2000, useNativeDriver: true }),
+      ]),
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [kind, isRoomGuided, sitOpacity]);
+
+  // Heart pulse animation.
+  const heartScale = useRef(new Animated.Value(1.0)).current;
+  useEffect(() => {
+    if (kind !== "timer_heart" || !isRoomGuided) return;
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(heartScale, { toValue: 1.08, duration: 600, useNativeDriver: true }),
+        Animated.timing(heartScale, { toValue: 1.0, duration: 600, useNativeDriver: true }),
+      ]),
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [kind, isRoomGuided, heartScale]);
 
   useEffect(() => {
     if (kind !== "timer_walk") return;
@@ -523,16 +609,45 @@ const TimerBody: React.FC<TimerBodyProps> = ({
     if (atZero) setRunning(false);
   }, [atZero]);
 
+  // Auto-advance with completion line at zero (room-guided only).
+  const [completionLineText, setCompletionLineText] = useState<string | null>(null);
+  useEffect(() => {
+    if (!atZero || !isRoomGuided || hasCompletedRef.current) return;
+    hasCompletedRef.current = true;
+    const line = TIMER_COMPLETION_LINES[kind] ?? null;
+    if (line) setCompletionLineText(line);
+    const t = setTimeout(() => {
+      onDone({});
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [atZero, isRoomGuided, kind, onDone]);
+
   const mm = Math.floor(remaining / 60);
   const ss = remaining % 60;
   const timeLabel = `${mm.toString().padStart(1, "0")}:${ss
     .toString()
     .padStart(2, "0")}`;
 
+  // Display cue: heart uses phase rotation in room context; others use baseCueText.
+  const displayCue = (kind === "timer_heart" && isRoomGuided)
+    ? HEART_PHASES[heartPhase]
+    : baseCueText;
+
   return (
     <View style={[styles.timerRoot, isScreen ? styles.screenTimerRoot : null]}>
-      <Text style={styles.timerCue} testID="step_modal_timer_cue">
-        {cueText}
+      {/* Completion line overlay (room-guided) */}
+      {completionLineText ? (
+        <View style={styles.timerCompletionOverlay} pointerEvents="none">
+          <Text style={styles.timerCompletionLine}>{completionLineText}</Text>
+        </View>
+      ) : null}
+
+      {/* Pre-start hint */}
+      <Text
+        style={isRoomGuided ? styles.timerCueRoom : styles.timerCue}
+        testID="step_modal_timer_cue"
+      >
+        {preStartVisible ? "Let's begin gently…" : displayCue}
       </Text>
 
       {kind === "timer_breathe" && (
@@ -542,6 +657,21 @@ const TimerBody: React.FC<TimerBodyProps> = ({
           exhaleMs={Number(stepPayload?.step_config?.exhale ?? 0) * 1000}
         />
       )}
+
+      {/* Sit ambient: pulsing lotus icon */}
+      {kind === "timer_sit" && isRoomGuided && (
+        <Animated.View style={[styles.sitIconWrap, { opacity: sitOpacity }]}>
+          <Ionicons name="leaf-outline" size={48} color="#A68246" />
+        </Animated.View>
+      )}
+
+      {/* Hand on heart: pulsing heart icon */}
+      {kind === "timer_heart" && isRoomGuided && (
+        <Animated.View style={[styles.heartIconWrap, { transform: [{ scale: heartScale }] }]}>
+          <Ionicons name="heart-outline" size={32} color="#A68246" />
+        </Animated.View>
+      )}
+
       {kind === "timer_walk" && (
         <View style={styles.walkingAnimationContainer}>
           <LottieView
@@ -563,11 +693,15 @@ const TimerBody: React.FC<TimerBodyProps> = ({
         </View>
       )}
 
-      <Text style={styles.timerDigits} testID="step_modal_timer_digits">
+      <Text
+        style={isRoomGuided ? styles.timerDigitsRoom : styles.timerDigits}
+        testID="step_modal_timer_digits"
+      >
         {timeLabel}
       </Text>
       <View style={styles.timerControls}>
-        {!running && !atZero ? (
+        {/* Auto-start kinds hide the Start button in room context */}
+        {!running && !atZero && !isAutoStart ? (
           <TouchableOpacity
             style={styles.ctrlBtn}
             onPress={() => setRunning(true)}
@@ -582,12 +716,15 @@ const TimerBody: React.FC<TimerBodyProps> = ({
             onPress={() => setRunning(false)}
             testID="step_modal_timer_pause"
           >
-            <Text style={styles.ctrlBtnLabel}>Pause</Text>
+            <Text style={styles.ctrlBtnLabel}>{isRoomGuided ? "Rest" : "Pause"}</Text>
           </TouchableOpacity>
         ) : null}
         <TouchableOpacity
           style={[styles.ctrlBtn, styles.ctrlDone]}
-          onPress={() => onDone({})}
+          onPress={() => {
+            hasCompletedRef.current = true;
+            onDone({});
+          }}
           testID="step_modal_timer_done"
           accessibilityState={{ disabled: false }}
         >
@@ -820,14 +957,18 @@ const GroundingBody: React.FC<{
   onDone: (extra: StepModalResult) => void;
   isScreen?: boolean;
   label?: string;
-}> = ({ onDone, isScreen = false, label = "Step" }) => {
+  isRoomGuided?: boolean;
+}> = ({ onDone, isScreen = false, label = "Step", isRoomGuided = false }) => {
+  const prompts = isRoomGuided ? GROUNDING_PROMPTS_ROOM : GROUNDING_PROMPTS;
   const [index, setIndex] = useState<number>(0);
   const [answers, setAnswers] = useState<string[]>(["", "", "", "", ""]);
+  const [closingText, setClosingText] = useState<string | null>(null);
+  const hasCompletedRef = useRef(false);
   const current = answers[index] ?? "";
-  const prompt = GROUNDING_PROMPTS[index];
-  const isLast = index === GROUNDING_PROMPTS.length - 1;
+  const prompt = prompts[index];
+  const isLast = index === prompts.length - 1;
   const trimmed = current.trim();
-  const enabled = trimmed.length >= 1;
+  const enabled = isRoomGuided ? true : trimmed.length >= 1;
 
   const setCurrent = (v: string) => {
     setAnswers((prev) => {
@@ -840,11 +981,27 @@ const GroundingBody: React.FC<{
   const handleNext = () => {
     if (!enabled) return;
     if (isLast) {
-      onDone({ grounding: answers.map((a) => a.trim()) });
+      if (isRoomGuided && !hasCompletedRef.current) {
+        hasCompletedRef.current = true;
+        setClosingText("The world is present around you.");
+        setTimeout(() => {
+          onDone({ grounding: answers.map((a) => a.trim()) });
+        }, 1500);
+      } else if (!isRoomGuided) {
+        onDone({ grounding: answers.map((a) => a.trim()) });
+      }
       return;
     }
-    setIndex((i) => Math.min(GROUNDING_PROMPTS.length - 1, i + 1));
+    setIndex((i) => Math.min(prompts.length - 1, i + 1));
   };
+
+  if (closingText) {
+    return (
+      <View style={styles.timerRoot}>
+        <Text style={styles.timerCompletionLine}>{closingText}</Text>
+      </View>
+    );
+  }
 
   if (isScreen) {
     return (
@@ -859,7 +1016,7 @@ const GroundingBody: React.FC<{
           style={[styles.groundingProgress, styles.screenGroundingProgress]}
           testID="step_modal_grounding_progress"
         >
-          {index + 1} of {GROUNDING_PROMPTS.length}
+          {index + 1} of {prompts.length}
         </Text>
         <Text style={styles.screenGroundingPrompt}>{prompt}</Text>
         <View style={styles.screenGroundingInputWrap}>
@@ -900,11 +1057,16 @@ const GroundingBody: React.FC<{
       contentContainerStyle={styles.screenTextContent}
       keyboardShouldPersistTaps="handled"
     >
+      {isRoomGuided && index === 0 ? (
+        <Text style={styles.groundingOpeningLine}>
+          Let us return to the room around you.
+        </Text>
+      ) : null}
       <Text
         style={styles.groundingProgress}
         testID="step_modal_grounding_progress"
       >
-        {index + 1} of {GROUNDING_PROMPTS.length}
+        {index + 1} of {prompts.length}
       </Text>
       <Text style={styles.textPrompt}>{prompt}</Text>
       <TextInput
@@ -918,6 +1080,9 @@ const GroundingBody: React.FC<{
         testID="step_modal_grounding_input"
         maxLength={MAX_TEXT}
       />
+      {isRoomGuided ? (
+        <Text style={styles.groundingHint}>or just notice quietly.</Text>
+      ) : null}
       <TouchableOpacity
         style={[styles.primaryAction, !enabled ? styles.ctrlDisabled : null]}
         disabled={!enabled}
@@ -1471,12 +1636,53 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 24,
   },
+  timerCueRoom: {
+    fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
+    fontSize: 18,
+    color: "#4a3a20",
+    textAlign: "center",
+    marginBottom: 20,
+    lineHeight: 26,
+  },
   timerDigits: {
     fontSize: 64,
     fontVariant: ["tabular-nums"],
     color: "#1C1C1E",
     marginBottom: 32,
     marginTop: 24,
+  },
+  timerDigitsRoom: {
+    fontSize: 13,
+    fontVariant: ["tabular-nums"],
+    color: "#8b7a55",
+    marginBottom: 24,
+    marginTop: 16,
+  },
+  timerCompletionOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+    backgroundColor: "transparent",
+  },
+  timerCompletionLine: {
+    fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
+    fontSize: 20,
+    fontStyle: "italic",
+    color: "#432104",
+    textAlign: "center",
+    paddingHorizontal: 32,
+    lineHeight: 30,
+  },
+  sitIconWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginVertical: 16,
+  },
+  heartIconWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginVertical: 8,
   },
   circle: {
     width: 220,
@@ -1625,6 +1831,23 @@ const styles = StyleSheet.create({
     color: "#8E8E93",
     textAlign: "center",
     marginBottom: 8,
+  },
+  groundingOpeningLine: {
+    fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
+    fontSize: 15,
+    fontStyle: "italic",
+    color: "#8b7a55",
+    textAlign: "center",
+    marginBottom: 16,
+    lineHeight: 22,
+  },
+  groundingHint: {
+    fontSize: 13,
+    color: "#8b7a55",
+    textAlign: "center",
+    marginTop: 8,
+    marginBottom: 4,
+    fontStyle: "italic",
   },
   screenGroundingContent: {
     paddingBottom: 28,

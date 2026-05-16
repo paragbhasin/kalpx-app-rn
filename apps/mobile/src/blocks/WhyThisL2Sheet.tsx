@@ -55,7 +55,7 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
           onPress={handleGotIt}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Text style={styles.dismissText}>Got it</Text>
+          <Text style={styles.dismissText}>{isRoomCtx ? "Let this stay with me" : "Got it"}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -83,7 +83,11 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
     );
   };
 
-  const headerLabel = isRoomCtx ? "WHY THIS MAY HELP" : "WHY THIS";
+  const sourceLine: string =
+    p.principle_banner?.source_line ||
+    (isRoomCtx ? null : p.tradition_family) ||
+    "A thought from the tradition.";
+  const headerLabel = isRoomCtx ? sourceLine : "WHY THIS";
 
   return (
     <View style={styles.sheet}>
@@ -126,7 +130,7 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
         accessibilityLabel="Dismiss"
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        <Text style={styles.dismissText}>Got it</Text>
+        <Text style={styles.dismissText}>{isRoomCtx ? "Let this stay with me" : "Got it"}</Text>
       </TouchableOpacity>
     </View>
   );

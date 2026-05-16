@@ -21,7 +21,8 @@ import RoomActionList from "./RoomActionList";
 import RoomOpeningExperience from "./RoomOpeningExperience";
 import RoomPrincipleBanner from "./RoomPrincipleBanner";
 import RoomGuidedSection from "./RoomGuidedSection";
-import { LIFE_CONTEXT_LABELS, ROOM_DISPLAY_NAMES } from "./roomConstants";
+import { ROOM_LABELS } from "@kalpx/contracts";
+import { LIFE_CONTEXT_LABELS } from "./roomConstants";
 import type { RoomRendererProps } from "./types";
 
 function isFlagOn(): boolean {
@@ -39,7 +40,7 @@ const RoomRenderer: React.FC<RoomRendererProps> = ({
   // HARD GATE: flag off → render nothing. No side effects, no subtree.
   if (!flagOn) return null;
 
-  const roomDisplayName = ROOM_DISPLAY_NAMES[envelope.room_id];
+  const roomDisplayName = ROOM_LABELS[envelope.room_id as keyof typeof ROOM_LABELS];
   const lifeContextLabel = envelope.life_context
     ? LIFE_CONTEXT_LABELS[envelope.life_context]
     : null;

@@ -16,7 +16,12 @@ export function WhyThisL2SheetBlock({ screenData, onAction }: Props) {
   const linkedType: string | null = sd.why_this?.linked_item_type ?? null;
   const isSubmitting = !!sd._isSubmitting;
   const isRoomCtx = isRoomWhyThisContext(sd);
-  const headerLabel = isRoomCtx ? 'Why This May Help' : 'Why This';
+  const sourceLine: string =
+    (principle?.principle_banner as any)?.source_line ||
+    (isRoomCtx ? null : principle?.tradition) ||
+    'A thought from the tradition.';
+  const headerLabel = isRoomCtx ? sourceLine : 'WHY THIS';
+  const ctaLabel = isRoomCtx ? 'Let this stay with me' : 'Got it';
 
   function handleDismiss() {
     onAction?.({ type: 'dismiss_why_this' });
@@ -51,7 +56,7 @@ export function WhyThisL2SheetBlock({ screenData, onAction }: Props) {
             <div style={{ width: 44, height: 4, borderRadius: 2, background: '#d9cfb8', margin: '0 auto 20px' }} />
             <p style={{ color: 'var(--kalpx-text-muted)', fontSize: 14, textAlign: 'center', marginTop: 16 }}>Principle not available.</p>
             <div style={{ textAlign: 'center', marginTop: 24 }}>
-              <button onClick={handleDismiss} style={gotItStyle}>Got it</button>
+              <button onClick={handleDismiss} style={gotItStyle}>{ctaLabel}</button>
             </div>
           </div>
         </div>
@@ -141,14 +146,14 @@ export function WhyThisL2SheetBlock({ screenData, onAction }: Props) {
             </button>
           )}
 
-          {/* "Got it" pill dismiss */}
+          {/* Dismiss pill */}
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <button
               data-testid="why-this-l2-close"
               onClick={handleDismiss}
               style={gotItStyle}
             >
-              Got it
+              {ctaLabel}
             </button>
           </div>
         </div>

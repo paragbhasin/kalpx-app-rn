@@ -2,6 +2,7 @@
  * RoomGuidedSection — mobile guided room surface aligned to the web layout.
  */
 import { ROOM_GUIDED_COPY, ROOM_LABELS } from "@kalpx/contracts";
+import { Ionicons } from "@expo/vector-icons";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Image,
@@ -191,6 +192,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   const roomSteps = (envelope as any).room_steps;
   const sequenceActiveFlag = (screenData as any)?.room_sequence_active;
   const resumeActionId = (screenData as any)?.room_sequence_resume_action_id;
+  const pendingCarryActionId = (screenData as any)?.room_pending_carry_action_id as string | null;
 
   const recAction = recId
     ? (envelope.actions.find((a: any) => a.action_id === recId) ?? null)
@@ -263,6 +265,11 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     useState<InquiryCategory | null>(null);
   const [interstitialLine, setInterstitialLine] = useState<string | null>(null);
   const interstitialIndexRef = useRef(0);
+  const launchActionRef = useRef<((action: any, options?: { forceSequenceActive?: boolean; skipOpeningCard?: boolean }) => void) | null>(null);
+  const handledResumeActionIdRef = useRef<string | null>(null);
+  const carryOpenedForRef = useRef<string | null>(null);
+  const [mantrasOpeningCardAction, setMantrasOpeningCardAction] = useState<any | null>(null);
+  const [exitConfirmVisible, setExitConfirmVisible] = useState(false);
 
   function maybeAdvanceToNextAction(completedActionId?: string | null) {
     if (!sequenceActive || !completedActionId) return;
@@ -301,14 +308,19 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     }, 1800);
   }
 
-  function handleExit() {
+  function handleExitRequest() {
+    setExitConfirmVisible(true);
+  }
+
+  function handleConfirmExit() {
+    setExitConfirmVisible(false);
     void trackRoomTelemetry({
       event_type: "room_exited" as any,
       room_id: roomId,
       surface: "room",
     });
     void executeAction(
-      { type: "exit_tapped", payload: { room_id: roomId } } as any,
+      { type: "room_exit", payload: { room_id: roomId } } as any,
       actionCtx,
     );
   }
@@ -369,7 +381,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
 
   const launchAction = useCallback((
     action: any,
-    options?: { forceSequenceActive?: boolean },
+    options?: { forceSequenceActive?: boolean; skipOpeningCard?: boolean },
   ) => {
     const actionType: string = action?.action_type ?? "";
     const isSequenceActive =
@@ -425,6 +437,15 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
         );
         maybeAdvanceToNextAction(action.action_id);
       }
+      return;
+    }
+
+    // Room mantra opening card: show contextual card before launching bead counter.
+    // Strict guard: only runner_mantra from a room (envelope.room_id present).
+    // skipOpeningCard=true is passed by the "Begin →" handler so the second
+    // call (from the card) bypasses the check and actually dispatches start_runner.
+    if (actionType === "runner_mantra" && envelope?.room_id && !options?.skipOpeningCard) {
+      setMantrasOpeningCardAction(action);
       return;
     }
 
@@ -584,6 +605,8 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
       } as any,
       actionCtx,
     );
+    actionCtx.setScreenValue(null, "room_pending_carry_action_id");
+    carryOpenedForRef.current = null;
     setCarryAction(null);
     setCarryPayload(null);
     maybeAdvanceToNextAction(action.action_id);
@@ -594,16 +617,57 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     setSequenceActive(true);
   }, [sequenceActiveFlag]);
 
+  // Open carry modal from Redux-persisted action ID so it survives room re-mounts.
+  // carryOpenedForRef guards against the loop caused by orderedActions being a new
+  // reference on every render (nonExitActions is inline, no useMemo).
+  useEffect(() => {
+    if (!pendingCarryActionId || !orderedActions.length) return;
+    if (carryOpenedForRef.current === pendingCarryActionId) return;
+    const action = orderedActions.find((a: any) => a?.action_id === pendingCarryActionId);
+    if (!action) return;
+    const writesEvent =
+      action?.carry_payload?.writes_event ??
+      action?.carry_payload?.persistence?.writes_event ??
+      action?.persistence?.writes_event ??
+      null;
+    const templateId = writesEvent ? CARRY_INPUT_TEMPLATE[writesEvent] : null;
+    if (templateId) {
+      carryOpenedForRef.current = pendingCarryActionId;
+      setCarryAction(action);
+      setCarryPayload({
+        template_id: templateId,
+        step_config: {},
+        input_slots: [],
+        memory_modal: writesEvent ? CARRY_MEMORY_MODAL[writesEvent] ?? null : null,
+      });
+    }
+  }, [pendingCarryActionId, orderedActions]);
+
+  // Keep launchActionRef current so the resume effect can call the latest
+  // launchAction without re-triggering the effect on every render.
+  useEffect(() => { launchActionRef.current = launchAction; });
+
   useEffect(() => {
     if (!resumeActionId) return;
+    if (handledResumeActionIdRef.current === resumeActionId) {
+      console.log("[room-seq] resumeActionId already handled, skipping:", resumeActionId);
+      return;
+    }
     const action = orderedActions.find(
       (candidate: any) => candidate?.action_id === resumeActionId,
     );
     if (!action) return;
+    handledResumeActionIdRef.current = resumeActionId;
+    console.log("[room-seq] resumeActionId consuming:", resumeActionId);
     actionCtx.setScreenValue(false, "show_room_reflection");
     actionCtx.setScreenValue(null, "room_sequence_resume_action_id");
-    launchAction(action);
-  }, [actionCtx, launchAction, orderedActions, resumeActionId]);
+    // Carry actions must survive room re-mounts: persist in Redux instead of local state.
+    if (action.action_type === "in_room_carry") {
+      actionCtx.setScreenValue(resumeActionId, "room_pending_carry_action_id");
+    } else {
+      launchActionRef.current?.(action);
+    }
+  }, [orderedActions, resumeActionId]);
 
   return (
     <View>
@@ -764,7 +828,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={handleExit} testID="room_guided_exit">
+          <TouchableOpacity onPress={handleExitRequest} testID="room_guided_exit">
             <Text style={styles.exitText}>{ROOM_GUIDED_COPY.exitLabel}</Text>
           </TouchableOpacity>
         </View>
@@ -820,6 +884,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
         }
         onLaunchPractice={handleLaunchPractice}
         onSubmitJournal={handleSubmitJournal}
+        isRoomGuided={true}
       />
 
       <StepModal
@@ -834,6 +899,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
           setPendingCategory(null);
         }}
         onDone={handleStepDone}
+        isRoomGuided={true}
       />
 
       <StepModal
@@ -842,10 +908,13 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
         stepPayload={carryPayload}
         label={carryAction?.label || "Carry"}
         onCancel={() => {
+          actionCtx.setScreenValue(null, "room_pending_carry_action_id");
+          carryOpenedForRef.current = null;
           setCarryAction(null);
           setCarryPayload(null);
         }}
         onDone={handleCarryDone}
+        isRoomGuided={true}
       />
 
       {interstitialLine ? (
@@ -853,6 +922,60 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
           <Text style={styles.interstitialText}>{interstitialLine}</Text>
         </View>
       ) : null}
+
+      {/* Mantra opening card — room-context framing before bead counter launches */}
+      {mantrasOpeningCardAction ? (
+        <View style={styles.mantrasOpeningCard}>
+          <Ionicons name="flower-outline" size={32} color="#A68246" style={{ marginBottom: 16 }} />
+          <Text style={styles.mantrasOpeningEyebrow}>MITRA INVITES YOU TO BEGIN WITH</Text>
+          <Text style={styles.mantrasOpeningLabel}>{mantrasOpeningCardAction.label}</Text>
+          {mantrasOpeningCardAction.helper_line ? (
+            <Text style={styles.mantrasOpeningHelper}>{mantrasOpeningCardAction.helper_line}</Text>
+          ) : null}
+          <TouchableOpacity
+            style={styles.mantrasOpeningBeginBtn}
+            onPress={() => {
+              const act = mantrasOpeningCardAction;
+              setMantrasOpeningCardAction(null);
+              launchAction(act, { skipOpeningCard: true });
+            }}
+            testID="mantra_opening_begin_btn"
+          >
+            <Text style={styles.mantrasOpeningBeginLabel}>Begin →</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
+
+      {/* Exit confirmation */}
+      <Modal
+        visible={exitConfirmVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setExitConfirmVisible(false)}
+      >
+        <View style={styles.exitConfirmOverlay}>
+          <View style={styles.exitConfirmSheet}>
+            <Text style={styles.exitConfirmText}>
+              {ROOM_LABELS[envelope?.room_id as keyof typeof ROOM_LABELS] ?? "This room"} will close.{" "}
+              You can return anytime.
+            </Text>
+            <TouchableOpacity
+              style={styles.exitConfirmYes}
+              onPress={handleConfirmExit}
+              testID="room_exit_confirm_yes"
+            >
+              <Text style={styles.exitConfirmYesLabel}>Yes, go now</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.exitConfirmStay}
+              onPress={() => setExitConfirmVisible(false)}
+              testID="room_exit_confirm_stay"
+            >
+              <Text style={styles.exitConfirmStayLabel}>Stay in room</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -1192,6 +1315,100 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     textAlign: "center",
     paddingHorizontal: 40,
+  },
+  mantrasOpeningCard: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#FBF6EF",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 36,
+    zIndex: 50,
+  },
+  mantrasOpeningEyebrow: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 11,
+    letterSpacing: 1.4,
+    color: "#9A7A52",
+    textAlign: "center",
+    marginBottom: 12,
+  },
+  mantrasOpeningLabel: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 28,
+    lineHeight: 38,
+    color: "#432104",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  mantrasOpeningHelper: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 15,
+    lineHeight: 22,
+    color: "#8A7968",
+    fontStyle: "italic",
+    textAlign: "center",
+    marginBottom: 36,
+  },
+  mantrasOpeningBeginBtn: {
+    borderWidth: 1,
+    borderColor: "#DAC28E",
+    borderRadius: 28,
+    paddingVertical: 14,
+    paddingHorizontal: 48,
+    backgroundColor: "#FFFAF4",
+  },
+  mantrasOpeningBeginLabel: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 16,
+    color: "#432104",
+    letterSpacing: 0.3,
+  },
+  exitConfirmOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(30,20,10,0.45)",
+    justifyContent: "flex-end",
+  },
+  exitConfirmSheet: {
+    backgroundColor: "#FFF8EF",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 28,
+    paddingHorizontal: 28,
+    paddingBottom: 40,
+    alignItems: "center",
+  },
+  exitConfirmText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 17,
+    lineHeight: 26,
+    color: "#432104",
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  exitConfirmYes: {
+    width: "100%",
+    paddingVertical: 14,
+    backgroundColor: "#FAF0E4",
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "#DAC28E",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  exitConfirmYesLabel: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 15,
+    color: "#432104",
+  },
+  exitConfirmStay: {
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  exitConfirmStayLabel: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 14,
+    color: "#8A7968",
+    textDecorationLine: "underline",
   },
 });
 

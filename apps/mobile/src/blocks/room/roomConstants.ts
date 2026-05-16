@@ -1,12 +1,3 @@
-export const ROOM_DISPLAY_NAMES: Record<string, string> = {
-  room_stillness: "Find Calm",
-  room_clarity: "Find Clarity",
-  room_release: "Set It Down",
-  room_connection: "Feel Connected",
-  room_growth: "Take the Next Step",
-  room_joy: "Notice What's Good",
-};
-
 export const LIFE_CONTEXT_LABELS: Record<string, string> = {
   work_career: "Work or career",
   relationships: "A relationship",

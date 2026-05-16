@@ -17,7 +17,7 @@
  * dispatch shape stays consistent with the existing Room pill pattern.
  */
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   ImageBackground,
@@ -49,6 +49,8 @@ interface Props {
   onOpened?: () => void;
   /** Fired when a category row is tapped — used for room_inquiry_category_selected. */
   onCategorySelected?: (category: InquiryCategory) => void;
+  /** When true: auto-skip category list for single-category rooms; optional journal input. */
+  isRoomGuided?: boolean;
 }
 
 const MAX_TEXT = 1000;
@@ -63,6 +65,7 @@ const InquiryModal: React.FC<Props> = ({
   onSubmitJournal,
   onOpened,
   onCategorySelected,
+  isRoomGuided = false,
 }) => {
   const insets = useSafeAreaInsets();
   const [selected, setSelected] = useState<InquiryCategory | null>(null);
@@ -84,6 +87,17 @@ const InquiryModal: React.FC<Props> = ({
     }
   }, [visible, openedFired, onOpened]);
 
+  // Room-guided: skip category list when only one option exists.
+  useEffect(() => {
+    if (isRoomGuided && visible && !selected) {
+      const cats = inquiryPayload?.categories ?? [];
+      if (cats.length === 1) {
+        setSelected(cats[0]);
+        onCategorySelected?.(cats[0]);
+      }
+    }
+  }, [isRoomGuided, visible, inquiryPayload, selected, onCategorySelected]);
+
   const categories = inquiryPayload?.categories ?? [];
 
   const handleSelect = (cat: InquiryCategory) => {
@@ -102,7 +116,7 @@ const InquiryModal: React.FC<Props> = ({
   const handleJournalDone = () => {
     if (!selected) return;
     const trimmed = journalText.trim();
-    if (trimmed.length < 1) return;
+    if (!isRoomGuided && trimmed.length < 1) return;
     onSubmitJournal(selected, trimmed);
   };
 
@@ -355,7 +369,7 @@ const InquiryModal: React.FC<Props> = ({
                             isScreen ? styles.screenSecondaryActionLabel : null,
                           ]}
                         >
-                          Journal on this
+                          {isRoomGuided ? "Write a few words" : "Journal on this"}
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -394,11 +408,11 @@ const InquiryModal: React.FC<Props> = ({
                         style={[
                           styles.primaryAction,
                           isScreen ? styles.screenPrimaryAction : null,
-                          journalText.trim().length < 1
+                          (!isRoomGuided && journalText.trim().length < 1)
                             ? styles.disabled
                             : null,
                         ]}
-                        disabled={journalText.trim().length < 1}
+                        disabled={!isRoomGuided && journalText.trim().length < 1}
                         onPress={handleJournalDone}
                         testID="inquiry_modal_journal_done"
                       >

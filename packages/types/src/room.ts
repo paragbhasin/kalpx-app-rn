@@ -197,6 +197,9 @@ export interface InquiryCategory {
 
 export interface InquiryPayload {
   categories: InquiryCategory[];
+  body?: string;
+  description?: string;
+  prompt?: string;
 }
 
 export type StepTemplateId =
@@ -367,6 +370,7 @@ export interface PrincipleBanner {
   principle_id: string;
   principle_name: string;
   wisdom_anchor_line: string;
+  source_line?: string;
 }
 
 // ───────────────────────────────────────────────────────────────────────────

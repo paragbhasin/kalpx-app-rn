@@ -291,7 +291,7 @@ export function ingestDay14View(env: V3Day14ViewEnvelope | null): V3FlatIngest {
     },
     journey_day_statuses: Array(14)
       .fill("completed")
-      .map((_s, i) => (i < (ceremony.completed_days ?? 13) ? "completed" : "pending")),
+      .map((_s, i) => (i < ((ceremony as any).engaged_days ?? ceremony.completed_days ?? 13) ? "completed" : "pending")),
     checkpoint_framing: reflection.reflection_prompt ?? "",
     journey_narrative: reflection.mitra_reflection ?? "",
     what_grew_section: String(env.insights?.resilience_narrative?.summary_line ?? ""),
@@ -306,6 +306,7 @@ export function ingestDay14View(env: V3Day14ViewEnvelope | null): V3FlatIngest {
       ...env.m25_narrative,
     },
     completion_ceremony: ceremony,
+    ceremony_engaged_days: (ceremony as any).engaged_days ?? null,
     v3_status: env.status,
   };
 }

@@ -621,6 +621,7 @@ export default function TellMitraContainer() {
             void AsyncStorage.removeItem(RETURN_ROOM_KEY).catch(() => {});
           }}
           onQuickStartChip={handleQuickStartChipThread}
+          hideQuickStart={!!pranaOpener}
           onWisdomOptionPress={opt => {
             if (opt.action_type === 'navigate_to_room' && opt.room_id) {
               void executeAction(

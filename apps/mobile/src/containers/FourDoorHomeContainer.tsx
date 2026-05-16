@@ -46,7 +46,7 @@ import {
   postPranaAcknowledgeDismiss,
 } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
-import { setHomeData } from "../store/doorSlice";
+import { setHomeData, setPranaContext } from "../store/doorSlice";
 import { Fonts } from "../theme/fonts";
 import { TimePickerModal } from "../components/TimePickerModal";
 
@@ -209,7 +209,7 @@ export default function FourDoorHomeContainer({
       setSelectedFeeling(feeling);
       setFeelingLoading(true);
       try {
-        await mitraPranaAcknowledge({
+        const ackResult = await mitraPranaAcknowledge({
           pranaType,
           focus:
             (screenData?.scan_focus as string) ||
@@ -227,12 +227,24 @@ export default function FourDoorHomeContainer({
           tz:
             Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
         });
-        await loadHome(true, true);
+        if (pranaType === "agitated" || pranaType === "drained") {
+          const opener = ackResult?.tell_mitra_opener;
+          if (opener?.text) {
+            dispatch(setPranaContext({
+              prana_type: pranaType,
+              opener_text: opener.text,
+              chips: opener.chips || [],
+            }));
+          }
+          navigation.navigate("TellMitra" as any);
+        } else {
+          await loadHome(true, true);
+        }
       } finally {
         setFeelingLoading(false);
       }
     },
-    [loadHome, screenData],
+    [dispatch, loadHome, navigation, screenData],
   );
 
   const handleDismissCheckin = useCallback(async () => {
@@ -550,6 +562,16 @@ export default function FourDoorHomeContainer({
                     </Text>{" "}
                     is here.
                   </Text>
+                )}
+                {!acw?.suggestion && !!acw?.prana_label && (
+                  <View style={{ flexDirection: "row", gap: 12, marginTop: 12, flexWrap: "wrap" }}>
+                    <TouchableOpacity onPress={() => navigation.navigate("InnerPath" as any)}>
+                      <Text style={styles.softCtaLink}>Continue Inner Path</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => navigation.navigate("RhythmHome" as any)}>
+                      <Text style={styles.softCtaLink}>My Rhythm</Text>
+                    </TouchableOpacity>
+                  </View>
                 )}
               </>
             ) : (
@@ -911,6 +933,11 @@ const styles = StyleSheet.create({
   },
   boundaryLink: {
     color: "#C99317",
+    textDecorationLine: "underline",
+  },
+  softCtaLink: {
+    fontSize: 13,
+    color: "#8A651B",
     textDecorationLine: "underline",
   },
   checkinSubtitle: {

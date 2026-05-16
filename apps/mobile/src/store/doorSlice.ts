@@ -19,6 +19,11 @@ interface DoorSliceState {
     source_item_id: string | null;
   };
   tellMitra: TellMitraLocalState;
+  pranaContext: {
+    prana_type: string;
+    opener_text: string;
+    chips: string[];
+  } | null;
 }
 
 const initialState: DoorSliceState = {
@@ -27,6 +32,7 @@ const initialState: DoorSliceState = {
   activeDoor: null,
   quickReset: { source_item_id: null },
   tellMitra: { inputDraft: "", lastResult: null },
+  pranaContext: null,
 };
 
 const doorSlice = createSlice({
@@ -52,11 +58,18 @@ const doorSlice = createSlice({
     clearDoorState() {
       return initialState;
     },
+    setPranaContext(state, action: PayloadAction<{ prana_type: string; opener_text: string; chips: string[] }>) {
+      state.pranaContext = action.payload;
+    },
+    clearPranaContext(state) {
+      state.pranaContext = null;
+    },
   },
 });
 
 export const {
   setHomeData, setActiveDoor,
   setTellMitraDraft, setTellMitraResult, clearDoorState,
+  setPranaContext, clearPranaContext,
 } = doorSlice.actions;
 export default doorSlice.reducer;

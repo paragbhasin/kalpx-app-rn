@@ -39,7 +39,7 @@ import type {
 import { postTellMitraV3 } from '../engine/mitraApi';
 import { executeAction } from '../engine/actionExecutor';
 import { useScreenStore } from '../engine/useScreenBridge';
-import { setTellMitraDraft, setTellMitraResult } from '../store/doorSlice';
+import { setTellMitraDraft, setTellMitraResult, clearPranaContext } from '../store/doorSlice';
 import { screenActions, loadScreenWithData, goBackWithData } from '../store/screenSlice';
 
 const MAX_CHARS = 1000;
@@ -93,6 +93,9 @@ export default function TellMitraContainer() {
   } | null>(null);
   const lastReturnCardKeyRef = useRef<string | null>(null);
   const freshResetPendingRef = useRef(false);
+
+  // ── Prana opener (from quick check-in agitated/drained flow) ─────────────
+  const [pranaOpener, setPranaOpener] = useState<{ prana_type: string; opener_text: string; chips: string[] } | null>(null);
   const activeContextRef = useRef<{
     parentEventId: string | number | null;
     parentIntentType: string | null;
@@ -107,6 +110,14 @@ export default function TellMitraContainer() {
   useEffect(() => {
     screenBridgeRef.current = screenBridge;
   });
+
+  const pranaContext = useSelector((state: any) => state.door?.pranaContext ?? null);
+  useEffect(() => {
+    if (!pranaContext) return;
+    setPranaOpener(pranaContext);
+    dispatch(clearPranaContext());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!THREAD_UI_ENABLED) return;
@@ -560,53 +571,97 @@ export default function TellMitraContainer() {
   // ── Flag-on: thread render ────────────────────────────────────────────────
   if (THREAD_UI_ENABLED) {
     return (
-      <TellMitraThreadView
-        conversation={conversation}
-        submitting={isSubmitting}
-        draft={threadDraft}
-        composerPlaceholder={composerPlaceholder}
-        inputRef={composerInputRef}
-        scrollRef={scrollViewRef}
-        onDraftChange={t => { setThreadDraft(t.slice(0, MAX_CHARS)); if (errorMsg) setErrorMsg(''); }}
-        onSubmit={input => {
-          setConversation(prev => [...prev, { id: genId(), type: 'user_message', text: input, created_at: new Date().toISOString() }]);
-          setThreadDraft('');
-          void submitThread(input, 'tell_mitra_door');
-        }}
-        onChipClick={handleChipClickThread}
-        onEnterRoom={handleEnterRoomThread}
-        onTellMitraMore={handleTellMitraMoreThread}
-        onStartFresh={() => {
-          setConversation([]);
-          setThreadDraft('');
-          setComposerPlaceholder("What's on your mind?");
-          freshResetPendingRef.current = true;
-          lastReturnCardKeyRef.current = null;
-          pendingTellMitraReturnRef.current = null;
-          activeContextRef.current = { parentEventId: null, parentIntentType: null, lifeContext: null, supportNeed: null, patternKey: null, roomEntryContext: null };
-          void AsyncStorage.removeItem(THREAD_STORAGE_KEY).catch(() => {});
-          void AsyncStorage.removeItem(RETURN_ROOM_KEY).catch(() => {});
-        }}
-        onQuickStartChip={handleQuickStartChipThread}
-        onWisdomOptionPress={opt => {
-          if (opt.action_type === 'navigate_to_room' && opt.room_id) {
-            void executeAction(
-              { type: 'enter_room', payload: { room_id: opt.room_id, source: 'tell_mitra_next_option' } } as any,
-              buildActionContext() as any,
-            );
-          } else if (opt.action_type === 'navigate_to_door' && opt.door) {
-            navigation.navigate('Home' as any);
-          }
-        }}
-        buildActionContext={buildActionContext}
-        errorMsg={errorMsg}
-      />
+      <>
+        {!!pranaOpener && (
+          <View style={styles.pranaOpenerBanner}>
+            <Text style={styles.pranaOpenerText}>{pranaOpener.opener_text}</Text>
+            {pranaOpener.chips.length > 0 && (
+              <View style={styles.pranaChipsRow}>
+                {pranaOpener.chips.map((chip) => (
+                  <TouchableOpacity
+                    key={chip}
+                    style={styles.pranaChip}
+                    onPress={() => {
+                      setThreadDraft(chip);
+                      setPranaOpener(null);
+                    }}
+                  >
+                    <Text style={styles.pranaChipText}>{chip}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
+        )}
+        <TellMitraThreadView
+          conversation={conversation}
+          submitting={isSubmitting}
+          draft={threadDraft}
+          composerPlaceholder={composerPlaceholder}
+          inputRef={composerInputRef}
+          scrollRef={scrollViewRef}
+          onDraftChange={t => { setThreadDraft(t.slice(0, MAX_CHARS)); if (errorMsg) setErrorMsg(''); }}
+          onSubmit={input => {
+            setConversation(prev => [...prev, { id: genId(), type: 'user_message', text: input, created_at: new Date().toISOString() }]);
+            setThreadDraft('');
+            void submitThread(input, 'tell_mitra_door');
+          }}
+          onChipClick={handleChipClickThread}
+          onEnterRoom={handleEnterRoomThread}
+          onTellMitraMore={handleTellMitraMoreThread}
+          onStartFresh={() => {
+            setConversation([]);
+            setThreadDraft('');
+            setComposerPlaceholder("What's on your mind?");
+            freshResetPendingRef.current = true;
+            lastReturnCardKeyRef.current = null;
+            pendingTellMitraReturnRef.current = null;
+            activeContextRef.current = { parentEventId: null, parentIntentType: null, lifeContext: null, supportNeed: null, patternKey: null, roomEntryContext: null };
+            void AsyncStorage.removeItem(THREAD_STORAGE_KEY).catch(() => {});
+            void AsyncStorage.removeItem(RETURN_ROOM_KEY).catch(() => {});
+          }}
+          onQuickStartChip={handleQuickStartChipThread}
+          onWisdomOptionPress={opt => {
+            if (opt.action_type === 'navigate_to_room' && opt.room_id) {
+              void executeAction(
+                { type: 'enter_room', payload: { room_id: opt.room_id, source: 'tell_mitra_next_option' } } as any,
+                buildActionContext() as any,
+              );
+            } else if (opt.action_type === 'navigate_to_door' && opt.door) {
+              navigation.navigate('Home' as any);
+            }
+          }}
+          buildActionContext={buildActionContext}
+          errorMsg={errorMsg}
+        />
+      </>
     );
   }
 
   // ── Flag-off: original render (completely unchanged) ──────────────────────
   return (
     <View style={styles.root}>
+      {!!pranaOpener && (
+        <View style={styles.pranaOpenerBanner}>
+          <Text style={styles.pranaOpenerText}>{pranaOpener.opener_text}</Text>
+          {pranaOpener.chips.length > 0 && (
+            <View style={styles.pranaChipsRow}>
+              {pranaOpener.chips.map((chip) => (
+                <TouchableOpacity
+                  key={chip}
+                  style={styles.pranaChip}
+                  onPress={() => {
+                    dispatch(setTellMitraDraft(chip));
+                    setPranaOpener(null);
+                  }}
+                >
+                  <Text style={styles.pranaChipText}>{chip}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
+      )}
       <TextInput
         style={styles.input}
         value={draft}
@@ -783,5 +838,37 @@ const styles = StyleSheet.create({
     color: '#9b8b77',
     fontFamily: Fonts.sans.regular,
     textDecorationLine: 'underline',
+  },
+  pranaOpenerBanner: {
+    backgroundColor: '#FBF5EB',
+    borderRadius: 12,
+    padding: 16,
+    margin: 16,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#F2E3C7',
+  },
+  pranaOpenerText: {
+    fontSize: 15,
+    color: '#432104',
+    lineHeight: 23,
+    marginBottom: 12,
+  },
+  pranaChipsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  pranaChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E0A92F',
+  },
+  pranaChipText: {
+    fontSize: 13,
+    color: '#432104',
   },
 });

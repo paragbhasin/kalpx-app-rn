@@ -108,6 +108,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
   const message = _isRhythmCompletion
     ? (_rhythmResult!.copy.headline ?? slot("message"))
     : slot("message");
+  const subtext = _isRhythmCompletion ? "" : slot("subtext");
   const wisdomAnchorLine = _isRhythmCompletion
     ? (_rhythmResult!.copy.subtext ?? "")
     : slot("wisdom_anchor_line");
@@ -117,6 +118,15 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
   const checkProgress = useRef(new Animated.Value(0)).current;
   const messageOpacity = useRef(new Animated.Value(0)).current;
   const [communityAddLoading, setCommunityAddLoading] = useState(false);
+  const [showWriteInput, setShowWriteInput] = useState(false);
+
+  const REFLECTION_CHIPS = ["A little more calm", "One clear thing", "A softer heart", "I need more time"];
+
+  const handleChipTap = (chipLabel: string) => {
+    mitraTrackEvent("room_completion_chip_tapped", {
+      meta: { chip_label: chipLabel, room_id: screenData.room_id || null },
+    }).catch(() => {});
+  };
 
   const isCommunityRunner = screenData.runner_source === "community";
   const activeRunnerItem = screenData.runner_active_item || {};
@@ -384,6 +394,11 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
               <Text style={styles.messageText} testID="completion_message">
                 {message}
               </Text>
+              {!!subtext && (
+                <Text style={styles.subtextText} testID="completion_subtext">
+                  {subtext}
+                </Text>
+              )}
             </View>
 
             {!!wisdomAnchorLine && (
@@ -431,14 +446,37 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
               </View>
             )}
 
-            <View
-              style={styles.voiceInputWrap}
-              testID="completion_reflection_placeholder"
-            >
-              <VoiceTextInput
-                placeholder={slot("reflection_prompt")}
-                onSend={(text, type) => handleSubmitReflection(text, type)}
-              />
+            <View style={styles.chipsWrap} testID="completion_reflection_chips">
+              <View style={styles.chipsRow}>
+                {REFLECTION_CHIPS.map((chip) => (
+                  <TouchableOpacity
+                    key={chip}
+                    style={styles.chip}
+                    activeOpacity={0.75}
+                    onPress={() => handleChipTap(chip)}
+                    testID={`completion_chip_${chip.replace(/\s+/g, "_").toLowerCase()}`}
+                  >
+                    <Text style={styles.chipText}>{chip}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              {!showWriteInput ? (
+                <TouchableOpacity
+                  onPress={() => setShowWriteInput(true)}
+                  activeOpacity={0.7}
+                  style={styles.writeWordsBtn}
+                  testID="completion_write_words_btn"
+                >
+                  <Text style={styles.writeWordsBtnText}>Write a few words</Text>
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.voiceInputWrap}>
+                  <VoiceTextInput
+                    placeholder="Anything to carry from this?"
+                    onSend={(text, type) => handleSubmitReflection(text, type)}
+                  />
+                </View>
+              )}
             </View>
           </Animated.View>
         </Animated.View>
@@ -475,14 +513,6 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
               <Text style={styles.primaryCtaText}>
                 {_isRhythmCompletion ? "Return to My Rhythm" : slot("return_home_cta")}
               </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.secondaryCta}
-              onPress={handleRepeat}
-              activeOpacity={0.6}
-            >
-              <Text style={styles.secondaryCtaText}>{slot("repeat_cta")}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -534,10 +564,52 @@ const styles = StyleSheet.create({
     lineHeight: 38,
     color: "#5C3A12",
   },
+  subtextText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 15,
+    lineHeight: 22,
+    color: "#8A6845",
+    fontStyle: "italic",
+    marginTop: 8,
+  },
+  chipsWrap: {
+    width: "100%",
+    marginBottom: 8,
+  },
+  chipsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 12,
+  },
+  chip: {
+    backgroundColor: "rgba(255, 248, 239, 0.9)",
+    borderWidth: 1,
+    borderColor: "rgba(200, 180, 154, 0.6)",
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  chipText: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    color: "#5C3A12",
+    letterSpacing: 0.2,
+  },
+  writeWordsBtn: {
+    paddingVertical: 4,
+    alignSelf: "flex-start",
+  },
+  writeWordsBtnText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 14,
+    color: "#946A47",
+    textDecorationLine: "underline",
+    fontStyle: "italic",
+  },
   voiceInputWrap: {
     width: "100%",
-    // marginBottom: 8,
-    // paddingHorizontal: -100,
+    marginTop: 8,
   },
   // Track 1 — third-beat wisdom anchor block (below message, above input).
   wisdomAnchorCard: {

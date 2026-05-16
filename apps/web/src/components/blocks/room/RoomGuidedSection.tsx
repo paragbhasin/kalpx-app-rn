@@ -4,7 +4,7 @@
  */
 import { ROOM_GUIDED_COPY } from "@kalpx/contracts";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { postRoomSacred, postRoomTelemetry } from "../../../engine/mitraApi";
 import { WEB_ENV } from "../../../lib/env";
 import { CarryCaptureModal } from "./CarryCaptureModal";
@@ -60,6 +60,24 @@ function extractBecauseYouSharedLabel(
   const parts = [inlineRemainder, ...bulletLines].filter(Boolean);
   return parts.length ? parts.join(" · ") : null;
 }
+
+const ROOM_COMPLETION_LINES: Record<string, { message: string; subtext: string }> = {
+  room_stillness:  { message: "You made space.",                  subtext: "Let this quiet stay with you for a little while." },
+  room_release:    { message: "You set something down.",          subtext: "You do not have to carry it in the same way now." },
+  room_clarity:    { message: "You sat with the question.",       subtext: "One clear seeing is enough for now." },
+  room_growth:     { message: "You moved toward what matters.",   subtext: "Small sincere action is still action." },
+  room_connection: { message: "You softened toward connection.",  subtext: "Let the heart stay open, gently." },
+  room_joy:        { message: "You noticed what is good.",        subtext: "Let this become part of your day." },
+};
+const COMPLETION_FALLBACK = { message: "You stayed with it.", subtext: "You can return to this room anytime." };
+
+const BETWEEN_STEP_LINES = [
+  "Good. Take one breath.",
+  "You stayed with that.",
+  "Let this settle for a moment.",
+  "One step is complete.",
+  "Now, gently, the next step.",
+];
 
 export function RoomGuidedSection({
   envelope,
@@ -130,12 +148,11 @@ export function RoomGuidedSection({
   const openingLine = envelope.opening_line ?? "";
   const secondBeatLine = envelope.second_beat_line ?? "";
   const memoryEchoLine = envelope.memory_echo_line ?? null;
-  const completionMessage =
-    envelope.opening_line || "Complete. You stayed with the practice.";
+  const completionCopy = ROOM_COMPLETION_LINES[roomId] ?? COMPLETION_FALLBACK;
   const completionWisdom =
     roomCtx.bridge_line ||
     roomCtx.sanatan_insight_line ||
-    "Let what became clear stay with you.";
+    "";
 
   const [whyExpanded, setWhyExpanded] = useState(false);
   const [recommendedExpanded, setRecommendedExpanded] = useState(false);
@@ -148,6 +165,8 @@ export function RoomGuidedSection({
   const [carryModalVisible, setCarryModalVisible] = useState(false);
   const [activeAction, setActiveAction] = useState<any | null>(null);
   const [activeStepPayload, setActiveStepPayload] = useState<any>(null);
+  const [interstitialLine, setInterstitialLine] = useState<string | null>(null);
+  const interstitialIndexRef = useRef(0);
 
   function maybeAdvanceToNextAction(completedActionId?: string | null) {
     if (!sequenceActive || !completedActionId) return;
@@ -163,17 +182,22 @@ export function RoomGuidedSection({
         payload: {
           room_id: roomId,
           completion_return: {
-            message: completionMessage,
+            message: completionCopy.message,
+            subtext: completionCopy.subtext,
             wisdom_anchor_line: completionWisdom,
             return_home_cta: "Return to Mitra Home",
-            repeat_cta: "Repeat",
-            reflection_prompt: "Anything to carry from this?",
           },
         },
       });
       return;
     }
-    setTimeout(() => openAction(nextAction), 120);
+    const lineIndex = interstitialIndexRef.current % BETWEEN_STEP_LINES.length;
+    interstitialIndexRef.current += 1;
+    setInterstitialLine(BETWEEN_STEP_LINES[lineIndex]);
+    setTimeout(() => {
+      setInterstitialLine(null);
+      openAction(nextAction);
+    }, 1800);
   }
 
   function openAction(
@@ -654,6 +678,53 @@ export function RoomGuidedSection({
         )} */}
       </div>
 
+      {recAction && (
+        <div
+          style={{
+            background: "#FAF5EE",
+            border: "1px solid rgba(200, 180, 154, 0.5)",
+            borderRadius: 10,
+            padding: 14,
+            margin: "12px 20px",
+          }}
+        >
+          <p
+            style={{
+              fontSize: 11,
+              color: "#B0936B",
+              letterSpacing: 0.5,
+              textTransform: "uppercase",
+              margin: "0 0 6px",
+            }}
+          >
+            Mitra suggests beginning with
+          </p>
+          <p
+            style={{
+              fontSize: 17,
+              color: "#432104",
+              fontFamily: "Georgia, serif",
+              margin: "0 0 4px",
+            }}
+          >
+            {(recAction as any).label}
+          </p>
+          {(recAction as any).helper_line && (
+            <p
+              style={{
+                fontSize: 13,
+                fontStyle: "italic",
+                color: "#8A7968",
+                lineHeight: 1.5,
+                margin: 0,
+              }}
+            >
+              {(recAction as any).helper_line}
+            </p>
+          )}
+        </div>
+      )}
+
       <button
         onClick={handleBegin}
         data-testid="room-guided-begin"
@@ -923,6 +994,24 @@ export function RoomGuidedSection({
           </div>
         )}
 
+        <div style={{ textAlign: "center", marginBottom: 8 }}>
+          <button
+            type="button"
+            onClick={() => setStepsOpen(true)}
+            data-testid="room-guided-view-all-steps"
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: 13,
+              color: "#8A7968",
+              textDecoration: "underline",
+            }}
+          >
+            {ROOM_GUIDED_COPY.viewAllSteps}
+          </button>
+        </div>
+
         <div style={{ textAlign: "center" }}>
           <button
             onClick={handleExit}
@@ -939,6 +1028,36 @@ export function RoomGuidedSection({
           </button>
         </div>
       </div>
+
+      {interstitialLine && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(251, 246, 239, 0.93)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 200,
+            pointerEvents: "none",
+          }}
+        >
+          <p
+            style={{
+              fontFamily: "var(--kalpx-font-serif)",
+              fontSize: 20,
+              lineHeight: "32px",
+              color: "#5C3A12",
+              fontStyle: "italic",
+              textAlign: "center",
+              padding: "0 40px",
+              margin: 0,
+            }}
+          >
+            {interstitialLine}
+          </p>
+        </div>
+      )}
 
       {stepsOpen && (
         <div

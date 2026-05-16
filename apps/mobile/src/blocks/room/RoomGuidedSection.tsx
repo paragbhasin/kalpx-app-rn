@@ -1,8 +1,8 @@
 /**
  * RoomGuidedSection — mobile guided room surface aligned to the web layout.
  */
-import { ROOM_GUIDED_COPY } from "@kalpx/contracts";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { ROOM_GUIDED_COPY, ROOM_LABELS } from "@kalpx/contracts";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Image,
   Modal,
@@ -22,7 +22,7 @@ import { Fonts } from "../../theme/fonts";
 import { buildActionCtx } from "./actions/actionContextHelper";
 import InquiryModal from "./actions/InquiryModal";
 import StepModal, { type StepModalResult } from "./actions/StepModal";
-import { LIFE_CONTEXT_LABELS, ROOM_DISPLAY_NAMES } from "./roomConstants";
+import { LIFE_CONTEXT_LABELS } from "./roomConstants";
 import type { InquiryCategory, RoomRenderV1, StepPayload } from "./types";
 
 const LOTUS_ICON = require("../../../assets/lotus_icon.png");
@@ -155,6 +155,24 @@ function extractBecauseYouSharedLabel(
   return parts.length ? parts.join(" · ") : null;
 }
 
+const ROOM_COMPLETION_LINES: Record<string, { message: string; subtext: string }> = {
+  room_stillness:  { message: "You made space.",                  subtext: "Let this quiet stay with you for a little while." },
+  room_release:    { message: "You set something down.",          subtext: "You do not have to carry it in the same way now." },
+  room_clarity:    { message: "You sat with the question.",       subtext: "One clear seeing is enough for now." },
+  room_growth:     { message: "You moved toward what matters.",   subtext: "Small sincere action is still action." },
+  room_connection: { message: "You softened toward connection.",  subtext: "Let the heart stay open, gently." },
+  room_joy:        { message: "You noticed what is good.",        subtext: "Let this become part of your day." },
+};
+const COMPLETION_FALLBACK = { message: "You stayed with it.", subtext: "You can return to this room anytime." };
+
+const BETWEEN_STEP_LINES = [
+  "Good. Take one breath.",
+  "You stayed with that.",
+  "Let this settle for a moment.",
+  "One step is complete.",
+  "Now, gently, the next step.",
+];
+
 const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   const insets = useSafeAreaInsets();
   const { loadScreen, goBack, screenData } = useScreenStore();
@@ -167,7 +185,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   const roomId: string = envelope.room_id;
   const renderId: string = (envelope as any).provenance?.render_id ?? "";
   const roomDisplayName =
-    ROOM_DISPLAY_NAMES[envelope.room_id] ||
+    ROOM_LABELS[envelope.room_id as keyof typeof ROOM_LABELS] ||
     (envelope as any).room_display_name ||
     "";
   const roomSteps = (envelope as any).room_steps;
@@ -223,12 +241,11 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     roomCtx.sanatan_insight_line ?? ctx.sanatan_insight_line ?? null;
   const principleBanner = envelope.principle_banner ?? null;
   const memoryEchoLine = envelope.memory_echo_line ?? null;
-  const completionMessage =
-    envelope.opening_line || "Complete. You stayed with the practice.";
+  const completionCopy = ROOM_COMPLETION_LINES[roomId] ?? COMPLETION_FALLBACK;
   const completionWisdom =
     roomCtx.bridge_line ||
     roomCtx.sanatan_insight_line ||
-    "Let what became clear stay with you.";
+    "";
 
   const [whyExpanded, setWhyExpanded] = useState(false);
   const [recommendedExpanded, setRecommendedExpanded] = useState(false);
@@ -244,6 +261,8 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   const [carryPayload, setCarryPayload] = useState<StepPayload | null>(null);
   const [pendingCategory, setPendingCategory] =
     useState<InquiryCategory | null>(null);
+  const [interstitialLine, setInterstitialLine] = useState<string | null>(null);
+  const interstitialIndexRef = useRef(0);
 
   function maybeAdvanceToNextAction(completedActionId?: string | null) {
     if (!sequenceActive || !completedActionId) return;
@@ -260,13 +279,11 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
           payload: {
             room_id: roomId,
             completion_return: {
-              message: completionMessage,
+              message: completionCopy.message,
+              subtext: completionCopy.subtext,
               wisdom_anchor_line: completionWisdom,
-              reflection_prompt: "Anything to carry from this?",
               return_home_cta: "Return to Mitra Home",
-              repeat_cta: "Repeat",
               return_action: "return_to_mitra_home",
-              repeat_action: "repeat_room_sequence",
             },
           },
         } as any,
@@ -274,7 +291,13 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
       );
       return;
     }
-    setTimeout(() => launchAction(nextAction), 120);
+    const lineIndex = interstitialIndexRef.current % BETWEEN_STEP_LINES.length;
+    interstitialIndexRef.current += 1;
+    setInterstitialLine(BETWEEN_STEP_LINES[lineIndex]);
+    setTimeout(() => {
+      setInterstitialLine(null);
+      launchAction(nextAction);
+    }, 1800);
   }
 
   function handleExit() {
@@ -434,7 +457,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     }
   }, [
     actionCtx,
-    completionMessage,
+    completionCopy,
     completionWisdom,
     envelope?.room_id,
     orderedActions,
@@ -614,6 +637,22 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
           ) : null}
         </View>
 
+        {recAction ? (
+          <View style={styles.recommendedPreviewCard}>
+            <Text style={styles.recommendedPreviewLabel}>
+              Mitra suggests beginning with
+            </Text>
+            <Text style={styles.recommendedPreviewTitle}>
+              {(recAction as any).label}
+            </Text>
+            {(recAction as any).helper_line ? (
+              <Text style={styles.recommendedPreviewHelper}>
+                {(recAction as any).helper_line}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
+
         <TouchableOpacity
           style={styles.beginBtn}
           onPress={handleBegin}
@@ -715,14 +754,14 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
             </View>
           ) : null}
 
-          {/* <TouchableOpacity
+          <TouchableOpacity
             onPress={() => setStepsOpen(true)}
             testID="room_guided_view_all_steps"
           >
             <Text style={styles.viewStepsLink}>
               {ROOM_GUIDED_COPY.viewAllSteps}
             </Text>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
 
           <TouchableOpacity onPress={handleExit} testID="room_guided_exit">
             <Text style={styles.exitText}>{ROOM_GUIDED_COPY.exitLabel}</Text>
@@ -807,6 +846,12 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
         }}
         onDone={handleCarryDone}
       />
+
+      {interstitialLine ? (
+        <View style={styles.interstitialOverlay} pointerEvents="none">
+          <Text style={styles.interstitialText}>{interstitialLine}</Text>
+        </View>
+      ) : null}
     </View>
   );
 };
@@ -1031,6 +1076,38 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: "#3E2A15",
   },
+  recommendedPreviewCard: {
+    backgroundColor: "#FAF5EE",
+    borderWidth: 1,
+    borderColor: "rgba(200, 180, 154, 0.5)",
+    borderRadius: 10,
+    padding: 14,
+    marginHorizontal: 20,
+    marginVertical: 12,
+  },
+  recommendedPreviewLabel: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 11,
+    lineHeight: 16,
+    color: "#B0936B",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+    marginBottom: 6,
+  },
+  recommendedPreviewTitle: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 17,
+    lineHeight: 24,
+    color: "#432104",
+    marginBottom: 4,
+  },
+  recommendedPreviewHelper: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    lineHeight: 19,
+    color: "#8A7968",
+    fontStyle: "italic",
+  },
   viewStepsLink: {
     fontFamily: Fonts.sans.regular,
     fontSize: 15,
@@ -1098,6 +1175,22 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     color: "#8B6914",
     fontStyle: "italic",
+  },
+  interstitialOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(251, 246, 239, 0.93)",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 100,
+  },
+  interstitialText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 20,
+    lineHeight: 32,
+    color: "#5C3A12",
+    fontStyle: "italic",
+    textAlign: "center",
+    paddingHorizontal: 40,
   },
 });
 

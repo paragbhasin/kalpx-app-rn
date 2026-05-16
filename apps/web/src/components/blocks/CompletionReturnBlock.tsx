@@ -89,15 +89,17 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
     ? _rhythmResult!.copy.headline
     : (slots.message || FALLBACKS[variant]?.headline || FALLBACKS.mantra.headline);
 
+  const subtext: string = _isRhythmCompletion ? "" : (slots.subtext || "");
+
   // wisdom anchor line — optional third beat; for rhythm this is copy.subtext
   const wisdomAnchorLine: string = _isRhythmCompletion
     ? (_rhythmResult!.copy.subtext ?? "")
     : (slots.wisdom_anchor_line || "");
 
   // CTA labels — API-driven; fall back to static English
-  const returnHomeLabel: string  = _isRhythmCompletion ? "Return to My Rhythm" : (slots.return_home_cta || "Return to Mitra Home");
-  const repeatLabel: string      = slots.repeat_cta        || "Repeat";
-  const reflectionPrompt: string = slots.reflection_prompt || "Anything to carry from this?";
+  const returnHomeLabel: string = _isRhythmCompletion ? "Return to My Rhythm" : (slots.return_home_cta || "Return to Mitra Home");
+
+  const REFLECTION_CHIPS = ["A little more calm", "One clear thing", "A softer heart", "I need more time"];
 
   /* ── Return action (G17 / G27 parity) ── */
   const SUPPORT_SOURCES = new Set(["support_room", "support_trigger"]);
@@ -106,6 +108,19 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
     : SUPPORT_SOURCES.has(returnSource)
       ? "return_to_source"
       : "return_to_dashboard";
+
+  /* ── Reflection chips ── */
+  const [showWriteInput, setShowWriteInput] = useState(false);
+
+  function handleChipTap(chipLabel: string) {
+    onAction?.({
+      type: "track_event",
+      payload: {
+        eventName: "room_completion_chip_tapped",
+        meta: { chip_label: chipLabel, room_id: (screenData["room_id"] as string) || null },
+      },
+    });
+  }
 
   /* ── Reflection submit ── */
   function handleSubmitReflection(text: string, responseType: "text" | "voice") {
@@ -211,6 +226,21 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
             >
               {message}
             </p>
+            {subtext && (
+              <p
+                data-testid="completion-subtext"
+                style={{
+                  fontFamily: "var(--kalpx-font-serif)",
+                  fontSize: 15,
+                  lineHeight: "22px",
+                  color: "#8A6845",
+                  fontStyle: "italic",
+                  margin: "8px 0 0 0",
+                }}
+              >
+                {subtext}
+              </p>
+            )}
           </div>
 
           {/* 3 ── Wisdom anchor (italic, optional third beat) */}
@@ -239,15 +269,66 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
             </div>
           )}
 
-          {/* 4 ── Reflection input — reuses web VoiceTextInput (matches mobile VoiceTextInput) */}
+          {/* 4 ── Reflection chips + optional write input */}
           <div
             style={{ width: "100%", marginBottom: 8 }}
-            data-testid="completion-reflection-placeholder"
+            data-testid="completion-reflection-chips"
           >
-            <VoiceTextInput
-              placeholder={reflectionPrompt}
-              onSend={handleSubmitReflection}
-            />
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 8,
+                marginBottom: 12,
+              }}
+            >
+              {REFLECTION_CHIPS.map((chip) => (
+                <button
+                  key={chip}
+                  data-testid={`completion_chip_${chip.replace(/\s+/g, "_").toLowerCase()}`}
+                  onClick={() => handleChipTap(chip)}
+                  style={{
+                    background: "rgba(255, 248, 239, 0.9)",
+                    border: "1px solid rgba(200, 180, 154, 0.6)",
+                    borderRadius: 20,
+                    padding: "8px 14px",
+                    fontSize: 13,
+                    color: BROWN,
+                    cursor: "pointer",
+                    fontFamily: "var(--kalpx-font-sans, sans-serif)",
+                    letterSpacing: 0.2,
+                  }}
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+            {!showWriteInput ? (
+              <button
+                data-testid="completion_write_words_btn"
+                onClick={() => setShowWriteInput(true)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: 14,
+                  fontFamily: "var(--kalpx-font-serif)",
+                  color: MUTED,
+                  textDecoration: "underline",
+                  fontStyle: "italic",
+                  padding: "4px 0",
+                }}
+              >
+                Write a few words
+              </button>
+            ) : (
+              <div style={{ marginTop: 8 }}>
+                <VoiceTextInput
+                  placeholder="Anything to carry from this?"
+                  onSend={handleSubmitReflection}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -311,26 +392,6 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
           {returnHomeLabel}
         </button>
 
-        {/* 7 ── Repeat underlined link */}
-        <button
-          onClick={() => onAction?.({ type: "repeat_runner" })}
-          data-testid="repeat-runner-btn"
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            fontSize: 18,
-            fontFamily: "var(--kalpx-font-serif)",
-            color: "#432104",
-            textDecoration: "underline",
-            letterSpacing: 0.5,
-            marginTop: 10,
-            padding: "10px 0",
-            marginBottom: 88,
-          }}
-        >
-          {repeatLabel}
-        </button>
       </div>
     </div>
   );

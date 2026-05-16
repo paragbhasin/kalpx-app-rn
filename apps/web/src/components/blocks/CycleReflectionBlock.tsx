@@ -130,42 +130,6 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
     [totalDays],
   );
 
-  const dayTrendPoints = useMemo(() => {
-    const count = Math.max(totalDays, 2);
-    const pointsA: { x: number; y: number }[] = [];
-    const pointsB: { x: number; y: number }[] = [];
-
-    for (let i = 1; i <= count; i += 1) {
-      const progress = (i - 1) / (count - 1);
-      const x = 20 + (i - 1) * (220 / (count - 1));
-      const valA = 3 + 2 * progress + ((i % 3) - 1) * 0.3;
-      const valB = 2 + 2 * progress + ((i % 4) - 2) * 0.2;
-      pointsA.push({ x, y: 100 - valA * 8 });
-      pointsB.push({ x, y: 100 - valB * 8 });
-    }
-
-    function createPath(points: { x: number; y: number }[]) {
-      if (points.length === 0) return "";
-      let d = `M ${points[0].x} ${points[0].y}`;
-      for (let i = 0; i < points.length - 1; i += 1) {
-        const curr = points[i];
-        const next = points[i + 1];
-        d += ` Q ${(curr.x + next.x) / 2} ${curr.y}, ${next.x} ${next.y}`;
-      }
-      return d;
-    }
-
-    const currentIndex = Math.min(Math.max(selectedDay - 1, 0), count - 1);
-    return {
-      engagedPath: createPath(pointsA),
-      completedPath: createPath(pointsB),
-      currentAX: pointsA[currentIndex]?.x ?? 0,
-      currentAY: pointsA[currentIndex]?.y ?? 0,
-      currentBX: pointsB[currentIndex]?.x ?? 0,
-      currentBY: pointsB[currentIndex]?.y ?? 0,
-    };
-  }, [totalDays, selectedDay]);
-
   const dayActivity = useMemo(
     () => ({
       engaged: Number(trendGraph.engaged?.[selectedDay - 1] ?? 0),
@@ -553,145 +517,90 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                 </div>
 
                 {activeTab === "day" ? (
-                  <>
-                    <div
-                      style={{
-                        background: "#fff",
-                        borderRadius: 24,
-                        padding: "20px 16px 16px",
-                        boxShadow: "0 8px 24px rgba(67,33,4,0.05)",
-                        marginBottom: 22,
-                      }}
-                    >
-                      <p
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 14,
+                    }}
+                  >
+                    {[
+                      {
+                        label: "Engaged",
+                        color: "#2D7A5F",
+                        value: dayActivity.engaged,
+                      },
+                      {
+                        label: "Fully Completed",
+                        color: "#D9A557",
+                        value: dayActivity.completed,
+                      },
+                      {
+                        label: "Mantra",
+                        color: "#8B6BCB",
+                        value: dayActivity.mantra,
+                      },
+                      {
+                        label: "Sankalp",
+                        color: "#2D7A5F",
+                        value: dayActivity.sankalp,
+                      },
+                      {
+                        label: "Core",
+                        color: "#E7774E",
+                        value: dayActivity.practice,
+                      },
+                    ].map((item) => (
+                      <div
+                        key={item.label}
                         style={{
-                          textAlign: "center",
-                          fontSize: 18,
-                          fontWeight: 700,
-                          color: "var(--kalpx-text)",
-                          marginBottom: 12,
+                          display: "grid",
+                          gridTemplateColumns: "24px 1fr 24px",
+                          alignItems: "center",
+                          gap: 10,
                         }}
                       >
-                        Growth Trend
-                      </p>
-                      <svg width="100%" height="170" viewBox="0 0 260 120">
-                        <path
-                          d={dayTrendPoints.engagedPath}
-                          stroke="#2D7A5F"
-                          strokeWidth="4"
-                          fill="none"
-                        />
-                        <path
-                          d={dayTrendPoints.completedPath}
-                          stroke="#D9A557"
-                          strokeWidth="4"
-                          fill="none"
-                          strokeDasharray="6 6"
-                        />
-                        <circle
-                          cx={dayTrendPoints.currentAX}
-                          cy={dayTrendPoints.currentAY}
-                          r="6"
-                          fill="#fff"
-                          stroke="#2D7A5F"
-                          strokeWidth="3"
-                        />
-                        <circle
-                          cx={dayTrendPoints.currentBX}
-                          cy={dayTrendPoints.currentBY}
-                          r="6"
-                          fill="#fff"
-                          stroke="#D9A557"
-                          strokeWidth="3"
-                        />
-                      </svg>
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 14,
-                      }}
-                    >
-                      {[
-                        {
-                          label: "Engaged",
-                          color: "#2D7A5F",
-                          value: dayActivity.engaged,
-                        },
-                        {
-                          label: "Fully Completed",
-                          color: "#D9A557",
-                          value: dayActivity.completed,
-                        },
-                        {
-                          label: "Mantra",
-                          color: "#8B6BCB",
-                          value: dayActivity.mantra,
-                        },
-                        {
-                          label: "Sankalp",
-                          color: "#2D7A5F",
-                          value: dayActivity.sankalp,
-                        },
-                        {
-                          label: "Core",
-                          color: "#E7774E",
-                          value: dayActivity.practice,
-                        },
-                      ].map((item) => (
                         <div
-                          key={item.label}
                           style={{
-                            display: "grid",
-                            gridTemplateColumns: "24px 1fr 24px",
-                            alignItems: "center",
-                            gap: 10,
+                            width: 12,
+                            height: 12,
+                            borderRadius: "50%",
+                            background: item.color,
+                            justifySelf: "center",
                           }}
-                        >
-                          <div
-                            style={{
-                              width: 12,
-                              height: 12,
-                              borderRadius: "50%",
-                              background: item.color,
-                              justifySelf: "center",
-                            }}
-                          />
-                          <div>
-                            <div
-                              style={{
-                                fontSize: 14,
-                                color: "var(--kalpx-text)",
-                                marginBottom: 6,
-                              }}
-                            >
-                              {item.label}
-                            </div>
-                            <div
-                              style={{
-                                width: "100%",
-                                height: 6,
-                                borderRadius: 999,
-                                background: "#efe7dd",
-                              }}
-                            />
-                          </div>
+                        />
+                        <div>
                           <div
                             style={{
                               fontSize: 14,
                               color: "var(--kalpx-text)",
-                              fontWeight: 700,
-                              textAlign: "right",
+                              marginBottom: 6,
                             }}
                           >
-                            {item.value}
+                            {item.label}
                           </div>
+                          <div
+                            style={{
+                              width: "100%",
+                              height: 6,
+                              borderRadius: 999,
+                              background: "#efe7dd",
+                            }}
+                          />
                         </div>
-                      ))}
-                    </div>
-                  </>
+                        <div
+                          style={{
+                            fontSize: 14,
+                            color: "var(--kalpx-text)",
+                            fontWeight: 700,
+                            textAlign: "right",
+                          }}
+                        >
+                          {item.value}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 ) : (
                   <div
                     style={{
@@ -971,145 +880,90 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                 </div>
 
                 {activeTab === "day" ? (
-                  <>
-                    <div
-                      style={{
-                        background: "#fff",
-                        borderRadius: 24,
-                        padding: "20px 16px 16px",
-                        boxShadow: "0 8px 24px rgba(67,33,4,0.05)",
-                        marginBottom: 22,
-                      }}
-                    >
-                      <p
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 14,
+                    }}
+                  >
+                    {[
+                      {
+                        label: "Engaged",
+                        color: "#2D7A5F",
+                        value: dayActivity.engaged,
+                      },
+                      {
+                        label: "Fully Completed",
+                        color: "#D9A557",
+                        value: dayActivity.completed,
+                      },
+                      {
+                        label: "Mantra",
+                        color: "#8B6BCB",
+                        value: dayActivity.mantra,
+                      },
+                      {
+                        label: "Sankalp",
+                        color: "#2D7A5F",
+                        value: dayActivity.sankalp,
+                      },
+                      {
+                        label: "Core",
+                        color: "#E7774E",
+                        value: dayActivity.practice,
+                      },
+                    ].map((item) => (
+                      <div
+                        key={item.label}
                         style={{
-                          textAlign: "center",
-                          fontSize: 18,
-                          fontWeight: 700,
-                          color: "var(--kalpx-text)",
-                          marginBottom: 12,
+                          display: "grid",
+                          gridTemplateColumns: "24px 1fr 24px",
+                          alignItems: "center",
+                          gap: 10,
                         }}
                       >
-                        Growth Trend
-                      </p>
-                      <svg width="100%" height="170" viewBox="0 0 260 120">
-                        <path
-                          d={dayTrendPoints.engagedPath}
-                          stroke="#2D7A5F"
-                          strokeWidth="4"
-                          fill="none"
-                        />
-                        <path
-                          d={dayTrendPoints.completedPath}
-                          stroke="#D9A557"
-                          strokeWidth="4"
-                          fill="none"
-                          strokeDasharray="6 6"
-                        />
-                        <circle
-                          cx={dayTrendPoints.currentAX}
-                          cy={dayTrendPoints.currentAY}
-                          r="6"
-                          fill="#fff"
-                          stroke="#2D7A5F"
-                          strokeWidth="3"
-                        />
-                        <circle
-                          cx={dayTrendPoints.currentBX}
-                          cy={dayTrendPoints.currentBY}
-                          r="6"
-                          fill="#fff"
-                          stroke="#D9A557"
-                          strokeWidth="3"
-                        />
-                      </svg>
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 14,
-                      }}
-                    >
-                      {[
-                        {
-                          label: "Engaged",
-                          color: "#2D7A5F",
-                          value: dayActivity.engaged,
-                        },
-                        {
-                          label: "Fully Completed",
-                          color: "#D9A557",
-                          value: dayActivity.completed,
-                        },
-                        {
-                          label: "Mantra",
-                          color: "#8B6BCB",
-                          value: dayActivity.mantra,
-                        },
-                        {
-                          label: "Sankalp",
-                          color: "#2D7A5F",
-                          value: dayActivity.sankalp,
-                        },
-                        {
-                          label: "Core",
-                          color: "#E7774E",
-                          value: dayActivity.practice,
-                        },
-                      ].map((item) => (
                         <div
-                          key={item.label}
                           style={{
-                            display: "grid",
-                            gridTemplateColumns: "24px 1fr 24px",
-                            alignItems: "center",
-                            gap: 10,
+                            width: 12,
+                            height: 12,
+                            borderRadius: "50%",
+                            background: item.color,
+                            justifySelf: "center",
                           }}
-                        >
-                          <div
-                            style={{
-                              width: 12,
-                              height: 12,
-                              borderRadius: "50%",
-                              background: item.color,
-                              justifySelf: "center",
-                            }}
-                          />
-                          <div>
-                            <div
-                              style={{
-                                fontSize: 14,
-                                color: "var(--kalpx-text)",
-                                marginBottom: 6,
-                              }}
-                            >
-                              {item.label}
-                            </div>
-                            <div
-                              style={{
-                                width: "100%",
-                                height: 6,
-                                borderRadius: 999,
-                                background: "#efe7dd",
-                              }}
-                            />
-                          </div>
+                        />
+                        <div>
                           <div
                             style={{
                               fontSize: 14,
                               color: "var(--kalpx-text)",
-                              fontWeight: 700,
-                              textAlign: "right",
+                              marginBottom: 6,
                             }}
                           >
-                            {item.value}
+                            {item.label}
                           </div>
+                          <div
+                            style={{
+                              width: "100%",
+                              height: 6,
+                              borderRadius: 999,
+                              background: "#efe7dd",
+                            }}
+                          />
                         </div>
-                      ))}
-                    </div>
-                  </>
+                        <div
+                          style={{
+                            fontSize: 14,
+                            color: "var(--kalpx-text)",
+                            fontWeight: 700,
+                            textAlign: "right",
+                          }}
+                        >
+                          {item.value}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 ) : (
                   <div
                     style={{
@@ -1681,6 +1535,11 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
           >
             {narrativeText}
           </p>
+          {completedTotal > 0 && completedTotal !== completedCount && (
+            <p style={{ fontSize: 13, color: "var(--kalpx-text-soft)", marginTop: 4 }}>
+              {completedTotal} {completedTotal === 1 ? "day was" : "days were"} fully complete.
+            </p>
+          )}
         </div>
 
         {sd.checkpoint_classification_headline && (

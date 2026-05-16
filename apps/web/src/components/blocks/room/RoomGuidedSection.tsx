@@ -182,6 +182,7 @@ export function RoomGuidedSection({
         payload: {
           room_id: roomId,
           completion_return: {
+            completion_source: "room_sequence",
             message: completionCopy.message,
             subtext: completionCopy.subtext,
             wisdom_anchor_line: completionWisdom,

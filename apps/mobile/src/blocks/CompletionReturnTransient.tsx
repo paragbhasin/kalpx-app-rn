@@ -105,10 +105,12 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
   const _isRhythmCompletion = String(ss.runner_source || '') === 'rhythm_daily' && !!_rhythmResult;
 
   // For rhythm_daily completions, use frozen F-C copy from backend instead of registry.
+  const isRoomSequenceCompletion = slot("completion_source") === "room_sequence";
+
   const message = _isRhythmCompletion
     ? (_rhythmResult!.copy.headline ?? slot("message"))
     : slot("message");
-  const subtext = _isRhythmCompletion ? "" : slot("subtext");
+  const subtext = isRoomSequenceCompletion ? slot("subtext") : "";
   const wisdomAnchorLine = _isRhythmCompletion
     ? (_rhythmResult!.copy.subtext ?? "")
     : slot("wisdom_anchor_line");
@@ -446,38 +448,50 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
               </View>
             )}
 
-            <View style={styles.chipsWrap} testID="completion_reflection_chips">
-              <View style={styles.chipsRow}>
-                {REFLECTION_CHIPS.map((chip) => (
-                  <TouchableOpacity
-                    key={chip}
-                    style={styles.chip}
-                    activeOpacity={0.75}
-                    onPress={() => handleChipTap(chip)}
-                    testID={`completion_chip_${chip.replace(/\s+/g, "_").toLowerCase()}`}
-                  >
-                    <Text style={styles.chipText}>{chip}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              {!showWriteInput ? (
-                <TouchableOpacity
-                  onPress={() => setShowWriteInput(true)}
-                  activeOpacity={0.7}
-                  style={styles.writeWordsBtn}
-                  testID="completion_write_words_btn"
-                >
-                  <Text style={styles.writeWordsBtnText}>Write a few words</Text>
-                </TouchableOpacity>
-              ) : (
-                <View style={styles.voiceInputWrap}>
-                  <VoiceTextInput
-                    placeholder="Anything to carry from this?"
-                    onSend={(text, type) => handleSubmitReflection(text, type)}
-                  />
+            {isRoomSequenceCompletion ? (
+              <View style={styles.chipsWrap} testID="completion_reflection_chips">
+                <View style={styles.chipsRow}>
+                  {REFLECTION_CHIPS.map((chip) => (
+                    <TouchableOpacity
+                      key={chip}
+                      style={styles.chip}
+                      activeOpacity={0.75}
+                      onPress={() => handleChipTap(chip)}
+                      testID={`completion_chip_${chip.replace(/\s+/g, "_").toLowerCase()}`}
+                    >
+                      <Text style={styles.chipText}>{chip}</Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
-              )}
-            </View>
+                {!showWriteInput ? (
+                  <TouchableOpacity
+                    onPress={() => setShowWriteInput(true)}
+                    activeOpacity={0.7}
+                    style={styles.writeWordsBtn}
+                    testID="completion_write_words_btn"
+                  >
+                    <Text style={styles.writeWordsBtnText}>Write a few words</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <View style={styles.voiceInputWrap}>
+                    <VoiceTextInput
+                      placeholder="Anything to carry from this?"
+                      onSend={(text, type) => handleSubmitReflection(text, type)}
+                    />
+                  </View>
+                )}
+              </View>
+            ) : (
+              <View
+                style={styles.voiceInputWrap}
+                testID="completion_reflection_placeholder"
+              >
+                <VoiceTextInput
+                  placeholder={slot("reflection_prompt")}
+                  onSend={(text, type) => handleSubmitReflection(text, type)}
+                />
+              </View>
+            )}
           </Animated.View>
         </Animated.View>
 
@@ -514,6 +528,16 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
                 {_isRhythmCompletion ? "Return to My Rhythm" : slot("return_home_cta")}
               </Text>
             </TouchableOpacity>
+
+            {!isRoomSequenceCompletion && !!slot("repeat_cta") && (
+              <TouchableOpacity
+                style={styles.secondaryCta}
+                onPress={handleRepeat}
+                activeOpacity={0.6}
+              >
+                <Text style={styles.secondaryCtaText}>{slot("repeat_cta")}</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </ScrollView>

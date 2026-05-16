@@ -89,7 +89,9 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
     ? _rhythmResult!.copy.headline
     : (slots.message || FALLBACKS[variant]?.headline || FALLBACKS.mantra.headline);
 
-  const subtext: string = _isRhythmCompletion ? "" : (slots.subtext || "");
+  const isRoomSequenceCompletion: boolean = slots.completion_source === "room_sequence";
+
+  const subtext: string = isRoomSequenceCompletion ? (slots.subtext || "") : "";
 
   // wisdom anchor line — optional third beat; for rhythm this is copy.subtext
   const wisdomAnchorLine: string = _isRhythmCompletion
@@ -98,6 +100,7 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
 
   // CTA labels — API-driven; fall back to static English
   const returnHomeLabel: string = _isRhythmCompletion ? "Return to My Rhythm" : (slots.return_home_cta || "Return to Mitra Home");
+  const repeatLabel: string = slots.repeat_cta || "Repeat";
 
   const REFLECTION_CHIPS = ["A little more calm", "One clear thing", "A softer heart", "I need more time"];
 
@@ -269,67 +272,79 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
             </div>
           )}
 
-          {/* 4 ── Reflection chips + optional write input */}
-          <div
-            style={{ width: "100%", marginBottom: 8 }}
-            data-testid="completion-reflection-chips"
-          >
+          {/* 4 ── Reflection section: chips for room, text input for others */}
+          {isRoomSequenceCompletion ? (
             <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 8,
-                marginBottom: 12,
-              }}
+              style={{ width: "100%", marginBottom: 8 }}
+              data-testid="completion-reflection-chips"
             >
-              {REFLECTION_CHIPS.map((chip) => (
-                <button
-                  key={chip}
-                  data-testid={`completion_chip_${chip.replace(/\s+/g, "_").toLowerCase()}`}
-                  onClick={() => handleChipTap(chip)}
-                  style={{
-                    background: "rgba(255, 248, 239, 0.9)",
-                    border: "1px solid rgba(200, 180, 154, 0.6)",
-                    borderRadius: 20,
-                    padding: "8px 14px",
-                    fontSize: 13,
-                    color: BROWN,
-                    cursor: "pointer",
-                    fontFamily: "var(--kalpx-font-sans, sans-serif)",
-                    letterSpacing: 0.2,
-                  }}
-                >
-                  {chip}
-                </button>
-              ))}
-            </div>
-            {!showWriteInput ? (
-              <button
-                data-testid="completion_write_words_btn"
-                onClick={() => setShowWriteInput(true)}
+              <div
                 style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: 14,
-                  fontFamily: "var(--kalpx-font-serif)",
-                  color: MUTED,
-                  textDecoration: "underline",
-                  fontStyle: "italic",
-                  padding: "4px 0",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 8,
+                  marginBottom: 12,
                 }}
               >
-                Write a few words
-              </button>
-            ) : (
-              <div style={{ marginTop: 8 }}>
-                <VoiceTextInput
-                  placeholder="Anything to carry from this?"
-                  onSend={handleSubmitReflection}
-                />
+                {REFLECTION_CHIPS.map((chip) => (
+                  <button
+                    key={chip}
+                    data-testid={`completion_chip_${chip.replace(/\s+/g, "_").toLowerCase()}`}
+                    onClick={() => handleChipTap(chip)}
+                    style={{
+                      background: "rgba(255, 248, 239, 0.9)",
+                      border: "1px solid rgba(200, 180, 154, 0.6)",
+                      borderRadius: 20,
+                      padding: "8px 14px",
+                      fontSize: 13,
+                      color: BROWN,
+                      cursor: "pointer",
+                      fontFamily: "var(--kalpx-font-sans, sans-serif)",
+                      letterSpacing: 0.2,
+                    }}
+                  >
+                    {chip}
+                  </button>
+                ))}
               </div>
-            )}
-          </div>
+              {!showWriteInput ? (
+                <button
+                  data-testid="completion_write_words_btn"
+                  onClick={() => setShowWriteInput(true)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: 14,
+                    fontFamily: "var(--kalpx-font-serif)",
+                    color: MUTED,
+                    textDecoration: "underline",
+                    fontStyle: "italic",
+                    padding: "4px 0",
+                  }}
+                >
+                  Write a few words
+                </button>
+              ) : (
+                <div style={{ marginTop: 8 }}>
+                  <VoiceTextInput
+                    placeholder="Anything to carry from this?"
+                    onSend={handleSubmitReflection}
+                  />
+                </div>
+              )}
+            </div>
+          ) : (
+            <div
+              style={{ width: "100%", marginBottom: 8 }}
+              data-testid="completion-reflection-placeholder"
+            >
+              <VoiceTextInput
+                placeholder={slots.reflection_prompt || "Anything to carry from this?"}
+                onSend={handleSubmitReflection}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -392,6 +407,27 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
           {returnHomeLabel}
         </button>
 
+        {!isRoomSequenceCompletion && repeatLabel && (
+          <button
+            onClick={() => onAction?.({ type: "repeat_runner" })}
+            data-testid="repeat-runner-btn"
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: 18,
+              fontFamily: "var(--kalpx-font-serif)",
+              color: "#432104",
+              textDecoration: "underline",
+              letterSpacing: 0.5,
+              marginTop: 10,
+              padding: "10px 0",
+              marginBottom: 88,
+            }}
+          >
+            {repeatLabel}
+          </button>
+        )}
       </div>
     </div>
   );

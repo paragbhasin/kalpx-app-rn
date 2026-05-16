@@ -351,6 +351,7 @@ export default function TellMitraContainer() {
     inputText: string,
     sourceSurface: string,
     followupMeta?: TellMitraFollowupMeta,
+    energyState?: string,
   ) => {
     const effectiveSource = freshResetPendingRef.current ? 'tell_mitra_start_fresh' : sourceSurface;
     const isReset = freshResetPendingRef.current;
@@ -372,6 +373,7 @@ export default function TellMitraContainer() {
         source_surface: effectiveSource,
         ...(followupMeta ? { followup: followupMeta } : {}),
         ...(isReset ? { reset_context: true } : {}),
+        ...(energyState ? { energy_state: energyState } : {}),
       });
       if (__DEV__) console.log('[S17-D4B] tell_mitra response', {
         suggested_action: result.suggested_action,
@@ -532,6 +534,17 @@ export default function TellMitraContainer() {
     void submitThread(apiText, 'tell_mitra_quick_start');
   };
 
+  // Opener chips carry both prana state and topic context.
+  // "I want to write" is a meta-response — clear the opener and let the user type.
+  const handleOpenerChipSubmit = (chip: string, pranaType: string) => {
+    setPranaOpener(null);
+    if (chip === 'I want to write') return;
+    const pranaLabel = pranaType === 'agitated' ? 'agitated' : 'drained';
+    const apiText = `I feel ${pranaLabel}. ${chip}.`;
+    setConversation(prev => [...prev, { id: genId(), type: 'user_message', text: chip, created_at: new Date().toISOString() }]);
+    void submitThread(apiText, 'tell_mitra_prana_chip', undefined, pranaType);
+  };
+
   const handleEnterRoomThread = (item: Extract<TellMitraConversationItem, { type: 'room_recommendation' }>) => {
     const returnKey = `return_card:${item.room_id}:${item.tell_mitra_event_id ?? Math.floor(Date.now() / 60000)}`;
     pendingTellMitraReturnRef.current = {
@@ -583,10 +596,7 @@ export default function TellMitraContainer() {
                   <TouchableOpacity
                     key={chip}
                     style={styles.pranaChip}
-                    onPress={() => {
-                      setPranaOpener(null);
-                      handleQuickStartChipThread(chip, chip);
-                    }}
+                    onPress={() => handleOpenerChipSubmit(chip, pranaOpener.prana_type)}
                   >
                     <Text style={styles.pranaChipText}>{chip}</Text>
                   </TouchableOpacity>
@@ -653,10 +663,7 @@ export default function TellMitraContainer() {
                 <TouchableOpacity
                   key={chip}
                   style={styles.pranaChip}
-                  onPress={() => {
-                    setPranaOpener(null);
-                    void handleSubmit({ text: chip, sourceSurface: 'tell_mitra_prana_chip' });
-                  }}
+                  onPress={() => handleOpenerChipSubmit(chip, pranaOpener.prana_type)}
                 >
                   <Text style={styles.pranaChipText}>{chip}</Text>
                 </TouchableOpacity>

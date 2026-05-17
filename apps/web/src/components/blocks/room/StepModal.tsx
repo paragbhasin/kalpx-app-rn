@@ -105,6 +105,7 @@ interface Props {
   presentation?: "modal" | "screen";
   /** When true: enables room-guided UX (auto-start, companion prompts, optional input). */
   isRoomGuided?: boolean;
+  helperLine?: string | null;
 }
 
 export function StepModal({
@@ -117,9 +118,15 @@ export function StepModal({
   isSubmitting = false,
   presentation = "modal",
   isRoomGuided = false,
+  helperLine = null,
 }: Props) {
   const kind = classifyStep(stepPayload?.template_id);
   const isScreen = presentation === "screen";
+  const contextLine: string | null =
+    stepPayload?.memory_modal?.sanatan_context ??
+    stepPayload?.memory_modal?.why_we_ask ??
+    helperLine ??
+    null;
 
   useEffect(() => {
     if (!visible) return;
@@ -228,13 +235,13 @@ export function StepModal({
             kind === "timer_walk" ||
             kind === "timer_sit" ||
             kind === "timer_heart") && (
-            <TimerBody kind={kind} stepPayload={stepPayload} onDone={onDone} isRoomGuided={isRoomGuided} />
+            <TimerBody kind={kind} stepPayload={stepPayload} onDone={onDone} isRoomGuided={isRoomGuided} contextLine={contextLine} />
           )}
           {kind === "text_input" && (
             <TextInputBody stepPayload={stepPayload} onDone={onDone} />
           )}
           {kind === "grounding" && (
-            <GroundingBody onDone={onDone} isScreen={isScreen} isRoomGuided={isRoomGuided} />
+            <GroundingBody onDone={onDone} isScreen={isScreen} isRoomGuided={isRoomGuided} contextLine={contextLine} />
           )}
           {kind === "voice_note" && <VoiceNoteBody onDone={onDone} />}
           {kind === "reach_out" && <ReachOutBody onDone={onDone} />}
@@ -513,9 +520,10 @@ interface TimerBodyProps {
   stepPayload: any;
   onDone: (extra: StepModalResult) => void;
   isRoomGuided?: boolean;
+  contextLine?: string | null;
 }
 
-function TimerBody({ kind, stepPayload, onDone, isRoomGuided = false }: TimerBodyProps) {
+function TimerBody({ kind, stepPayload, onDone, isRoomGuided = false, contextLine = null }: TimerBodyProps) {
   const totalSec = (() => {
     const raw = stepPayload?.duration_sec;
     if (typeof raw === "number" && raw > 0 && raw <= 3600) return raw;
@@ -674,6 +682,12 @@ function TimerBody({ kind, stepPayload, onDone, isRoomGuided = false }: TimerBod
 
       {kind === "timer_walk" ? (
         <WalkLottie running={running} atZero={atZero} />
+      ) : null}
+
+      {isRoomGuided && contextLine ? (
+        <p style={{ fontSize: 13, color: "#8b7a55", fontStyle: "italic", textAlign: "center", margin: "8px 0 4px", padding: "0 24px", lineHeight: 1.5 }}>
+          {contextLine}
+        </p>
       ) : null}
 
       <p
@@ -886,10 +900,12 @@ function GroundingBody({
   onDone,
   isScreen = false,
   isRoomGuided = false,
+  contextLine = null,
 }: {
   onDone: (extra: StepModalResult) => void;
   isScreen?: boolean;
   isRoomGuided?: boolean;
+  contextLine?: string | null;
 }) {
   const prompts = isRoomGuided ? GROUNDING_PROMPTS_ROOM : GROUNDING_PROMPTS;
   const [index, setIndex] = useState(0);
@@ -951,6 +967,11 @@ function GroundingBody({
           Let us return to the room around you.
         </p>
       )}
+      {isRoomGuided && index === 0 && contextLine ? (
+        <p style={{ fontSize: 13, color: "#8b7a55", fontStyle: "italic", textAlign: "center", margin: "-8px 0 12px", padding: "0 20px", lineHeight: 1.5 }}>
+          {contextLine}
+        </p>
+      ) : null}
       <p
         data-testid="step-modal-grounding-progress"
         style={{

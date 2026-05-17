@@ -192,7 +192,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   const roomSteps = (envelope as any).room_steps;
   const sequenceActiveFlag = (screenData as any)?.room_sequence_active;
   const resumeActionId = (screenData as any)?.room_sequence_resume_action_id;
-  const pendingCarryActionId = (screenData as any)?.room_pending_carry_action_id as string | null;
+  const pendingResumeActionId = (screenData as any)?.room_pending_resume_action_id as string | null;
 
   const recAction = recId
     ? (envelope.actions.find((a: any) => a.action_id === recId) ?? null)
@@ -267,7 +267,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   const interstitialIndexRef = useRef(0);
   const launchActionRef = useRef<((action: any, options?: { forceSequenceActive?: boolean; skipOpeningCard?: boolean }) => void) | null>(null);
   const handledResumeActionIdRef = useRef<string | null>(null);
-  const carryOpenedForRef = useRef<string | null>(null);
+  const pendingOpenedForRef = useRef<string | null>(null);
   const [mantrasOpeningCardAction, setMantrasOpeningCardAction] = useState<any | null>(null);
   const [exitConfirmVisible, setExitConfirmVisible] = useState(false);
 
@@ -512,6 +512,9 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   function handleLaunchPractice(category: InquiryCategory, templateId: string) {
     if (!inquiryAction) return;
     const action = inquiryAction;
+    actionCtx.setScreenValue(null, "room_pending_resume_action_id");
+    actionCtx.setScreenValue(null, "room_pending_carry_action_id");
+    pendingOpenedForRef.current = null;
     setInquiryAction(null);
     setPendingCategory(category);
     const durationMatch = templateId.match(/_(\d+)min$/);
@@ -549,6 +552,9 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   function handleSubmitJournal(category: InquiryCategory, text: string) {
     if (!inquiryAction) return;
     const action = inquiryAction;
+    actionCtx.setScreenValue(null, "room_pending_resume_action_id");
+    actionCtx.setScreenValue(null, "room_pending_carry_action_id");
+    pendingOpenedForRef.current = null;
     setInquiryAction(null);
     dispatchStepCompleted(action, "step_journal_inquiry", {
       text,
@@ -574,6 +580,9 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
         : {}),
     });
 
+    actionCtx.setScreenValue(null, "room_pending_resume_action_id");
+    actionCtx.setScreenValue(null, "room_pending_carry_action_id");
+    pendingOpenedForRef.current = null;
     maybeAdvanceToNextAction(stepAction.action_id);
     setStepAction(null);
     setStepPayload(null);
@@ -605,8 +614,9 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
       } as any,
       actionCtx,
     );
+    actionCtx.setScreenValue(null, "room_pending_resume_action_id");
     actionCtx.setScreenValue(null, "room_pending_carry_action_id");
-    carryOpenedForRef.current = null;
+    pendingOpenedForRef.current = null;
     setCarryAction(null);
     setCarryPayload(null);
     maybeAdvanceToNextAction(action.action_id);
@@ -617,31 +627,65 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     setSequenceActive(true);
   }, [sequenceActiveFlag]);
 
-  // Open carry modal from Redux-persisted action ID so it survives room re-mounts.
-  // carryOpenedForRef guards against the loop caused by orderedActions being a new
-  // reference on every render (nonExitActions is inline, no useMemo).
+  // Open the right modal from Redux-persisted action ID so it survives room re-mounts.
+  // pendingOpenedForRef guards against the loop caused by orderedActions being a new
+  // reference on every render (nonExitActions is computed inline, no useMemo).
   useEffect(() => {
-    if (!pendingCarryActionId || !orderedActions.length) return;
-    if (carryOpenedForRef.current === pendingCarryActionId) return;
-    const action = orderedActions.find((a: any) => a?.action_id === pendingCarryActionId);
+    if (!pendingResumeActionId || !orderedActions.length) return;
+    if (pendingOpenedForRef.current === pendingResumeActionId) return;
+    const action = orderedActions.find((a: any) => a?.action_id === pendingResumeActionId);
     if (!action) return;
-    const writesEvent =
-      action?.carry_payload?.writes_event ??
-      action?.carry_payload?.persistence?.writes_event ??
-      action?.persistence?.writes_event ??
-      null;
-    const templateId = writesEvent ? CARRY_INPUT_TEMPLATE[writesEvent] : null;
-    if (templateId) {
-      carryOpenedForRef.current = pendingCarryActionId;
-      setCarryAction(action);
-      setCarryPayload({
-        template_id: templateId,
-        step_config: {},
-        input_slots: [],
-        memory_modal: writesEvent ? CARRY_MEMORY_MODAL[writesEvent] ?? null : null,
-      });
+
+    const actionType: string = action?.action_type ?? "";
+    console.log("[room-seq] pending effect: actionType=", actionType, "id=", pendingResumeActionId, "ref=", pendingOpenedForRef.current);
+
+    if (actionType === "in_room_carry") {
+      const writesEvent =
+        action?.carry_payload?.writes_event ??
+        action?.carry_payload?.persistence?.writes_event ??
+        action?.persistence?.writes_event ??
+        null;
+      const templateId = writesEvent ? CARRY_INPUT_TEMPLATE[writesEvent] : null;
+      if (templateId) {
+        pendingOpenedForRef.current = pendingResumeActionId;
+        setCarryAction(action);
+        setCarryPayload({
+          template_id: templateId,
+          step_config: {},
+          input_slots: [],
+          memory_modal: writesEvent ? CARRY_MEMORY_MODAL[writesEvent] ?? null : null,
+        });
+      } else {
+        console.warn("[room-seq] carry templateId missing for writes_event:", writesEvent, "action_id:", action.action_id, "— falling back to launchAction");
+        actionCtx.setScreenValue(null, "room_pending_resume_action_id");
+        actionCtx.setScreenValue(null, "room_pending_carry_action_id");
+        pendingOpenedForRef.current = null;
+        launchActionRef.current?.(action);
+      }
+      return;
     }
-  }, [pendingCarryActionId, orderedActions]);
+
+    if (actionType === "in_room_step" && action?.step_payload) {
+      pendingOpenedForRef.current = pendingResumeActionId;
+      setStepAction(action);
+      setStepPayload(action.step_payload);
+      setStepLabel(action.label || "Step");
+      return;
+    }
+
+    if (actionType === "inquiry" && action?.inquiry_payload?.categories?.length) {
+      pendingOpenedForRef.current = pendingResumeActionId;
+      setInquiryAction(action);
+      return;
+    }
+
+    // Runner/teaching/exit types — route through launchAction directly.
+    console.log("[room-seq] pending effect: non-local-state action, routing via launchAction:", actionType);
+    actionCtx.setScreenValue(null, "room_pending_resume_action_id");
+    actionCtx.setScreenValue(null, "room_pending_carry_action_id");
+    pendingOpenedForRef.current = null;
+    launchActionRef.current?.(action);
+  }, [pendingResumeActionId, orderedActions]);
 
   // Keep launchActionRef current so the resume effect can call the latest
   // launchAction without re-triggering the effect on every render.
@@ -661,9 +705,11 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     console.log("[room-seq] resumeActionId consuming:", resumeActionId);
     actionCtx.setScreenValue(false, "show_room_reflection");
     actionCtx.setScreenValue(null, "room_sequence_resume_action_id");
-    // Carry actions must survive room re-mounts: persist in Redux instead of local state.
-    if (action.action_type === "in_room_carry") {
-      actionCtx.setScreenValue(resumeActionId, "room_pending_carry_action_id");
+    // Persist action ID in Redux so it survives room re-mounts (local state resets on remount).
+    // Applies to all action types that open a modal via local state.
+    console.log("[room-seq] resumeActionId routing: action_type=", action.action_type, "id=", resumeActionId);
+    if (["in_room_carry", "in_room_step", "inquiry"].includes(action.action_type)) {
+      actionCtx.setScreenValue(resumeActionId, "room_pending_resume_action_id");
     } else {
       launchActionRef.current?.(action);
     }
@@ -876,7 +922,12 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
         presentation="screen"
         label={inquiryAction?.label || "Inquiry"}
         inquiryPayload={inquiryAction?.inquiry_payload}
-        onCancel={() => setInquiryAction(null)}
+        onCancel={() => {
+          actionCtx.setScreenValue(null, "room_pending_resume_action_id");
+          actionCtx.setScreenValue(null, "room_pending_carry_action_id");
+          pendingOpenedForRef.current = null;
+          setInquiryAction(null);
+        }}
         onOpened={() => inquiryAction && dispatchInquiryOpened(inquiryAction)}
         onCategorySelected={(category) =>
           inquiryAction &&
@@ -892,7 +943,11 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
         presentation="screen"
         stepPayload={stepPayload}
         label={stepLabel}
+        helperLine={(stepAction as any)?.helper_line ?? (roomCtx as any)?.sanatan_insight_line ?? null}
         onCancel={() => {
+          actionCtx.setScreenValue(null, "room_pending_resume_action_id");
+          actionCtx.setScreenValue(null, "room_pending_carry_action_id");
+          pendingOpenedForRef.current = null;
           setStepAction(null);
           setStepPayload(null);
           setStepLabel("");
@@ -908,8 +963,9 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
         stepPayload={carryPayload}
         label={carryAction?.label || "Carry"}
         onCancel={() => {
+          actionCtx.setScreenValue(null, "room_pending_resume_action_id");
           actionCtx.setScreenValue(null, "room_pending_carry_action_id");
-          carryOpenedForRef.current = null;
+          pendingOpenedForRef.current = null;
           setCarryAction(null);
           setCarryPayload(null);
         }}

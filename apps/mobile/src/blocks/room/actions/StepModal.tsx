@@ -88,6 +88,8 @@ interface Props {
   isSubmitting?: boolean;
   /** When true: enables room-guided UX (auto-start, companion prompts, optional input). */
   isRoomGuided?: boolean;
+  /** Fallback context line (action.helper_line or room_context.sanatan_insight_line) shown only when step_payload.memory_modal has no sanatan_context or why_we_ask. */
+  helperLine?: string | null;
 }
 
 /** Derive the UI kind from the template_id prefix. */
@@ -146,6 +148,7 @@ const StepModal: React.FC<Props> = ({
   errorMessage,
   isSubmitting = false,
   isRoomGuided = false,
+  helperLine = null,
 }) => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [sheetHeight, setSheetHeight] = useState(0);
@@ -157,6 +160,11 @@ const StepModal: React.FC<Props> = ({
   );
   const isImmersiveTextInput =
     presentation === "screen" && kind === "text_input";
+  const contextLine: string | null =
+    stepPayload?.memory_modal?.sanatan_context ??
+    stepPayload?.memory_modal?.why_we_ask ??
+    helperLine ??
+    null;
 
   const handleSheetLayout = useCallback((event: LayoutChangeEvent) => {
     const nextHeight = event.nativeEvent.layout.height || 0;
@@ -301,6 +309,7 @@ const StepModal: React.FC<Props> = ({
                     onDone={onDone}
                     isScreen={presentation === "screen"}
                     isRoomGuided={isRoomGuided}
+                    contextLine={contextLine}
                   />
                 ) : null}
 
@@ -317,6 +326,7 @@ const StepModal: React.FC<Props> = ({
                     onDone={onDone}
                     isScreen={presentation === "screen"}
                     isRoomGuided={isRoomGuided}
+                    contextLine={contextLine}
                   />
                 ) : null}
 
@@ -351,6 +361,7 @@ interface TimerBodyProps {
   onDone: (extra: StepModalResult) => void;
   isScreen?: boolean;
   isRoomGuided?: boolean;
+  contextLine?: string | null;
 }
 
 function defaultTimerSeconds(kind: TimerBodyProps["kind"]): number {
@@ -494,6 +505,7 @@ const TimerBody: React.FC<TimerBodyProps> = ({
   onDone,
   isScreen = false,
   isRoomGuided = false,
+  contextLine = null,
 }) => {
   const totalSec = useMemo(() => {
     const raw = stepPayload?.duration_sec;
@@ -692,6 +704,10 @@ const TimerBody: React.FC<TimerBodyProps> = ({
           />
         </View>
       )}
+
+      {isRoomGuided && contextLine ? (
+        <Text style={styles.timerContextLine}>{contextLine}</Text>
+      ) : null}
 
       <Text
         style={isRoomGuided ? styles.timerDigitsRoom : styles.timerDigits}
@@ -958,7 +974,8 @@ const GroundingBody: React.FC<{
   isScreen?: boolean;
   label?: string;
   isRoomGuided?: boolean;
-}> = ({ onDone, isScreen = false, label = "Step", isRoomGuided = false }) => {
+  contextLine?: string | null;
+}> = ({ onDone, isScreen = false, label = "Step", isRoomGuided = false, contextLine = null }) => {
   const prompts = isRoomGuided ? GROUNDING_PROMPTS_ROOM : GROUNDING_PROMPTS;
   const [index, setIndex] = useState<number>(0);
   const [answers, setAnswers] = useState<string[]>(["", "", "", "", ""]);
@@ -1061,6 +1078,9 @@ const GroundingBody: React.FC<{
         <Text style={styles.groundingOpeningLine}>
           Let us return to the room around you.
         </Text>
+      ) : null}
+      {isRoomGuided && index === 0 && contextLine ? (
+        <Text style={styles.groundingContextLine}>{contextLine}</Text>
       ) : null}
       <Text
         style={styles.groundingProgress}
@@ -1840,6 +1860,26 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 16,
     lineHeight: 22,
+  },
+  groundingContextLine: {
+    fontSize: 13,
+    color: "#8b7a55",
+    fontStyle: "italic",
+    textAlign: "center",
+    marginTop: -8,
+    marginBottom: 12,
+    paddingHorizontal: 20,
+    lineHeight: 19,
+  },
+  timerContextLine: {
+    fontSize: 13,
+    color: "#8b7a55",
+    fontStyle: "italic",
+    textAlign: "center",
+    marginTop: 8,
+    marginBottom: 4,
+    paddingHorizontal: 24,
+    lineHeight: 19,
   },
   groundingHint: {
     fontSize: 13,

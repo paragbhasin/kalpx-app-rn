@@ -74,6 +74,9 @@ const VoiceConsentSheet: React.FC<{ block?: any }> = () => {
       {expanded && (
         <View style={styles.moreCard}>
           <Text style={styles.moreText}>{slot('consent_more_detail')}</Text>
+          <Text style={styles.transcriptNote}>
+            Your voice is transcribed securely to help Mitra understand what you shared. Raw audio is deleted within 24 hours. The meaning Mitra draws from your words may be held as part of your companion memory while your account is active.
+          </Text>
         </View>
       )}
 
@@ -154,6 +157,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 20,
     color: '#432104',
+    marginBottom: 10,
+  },
+  transcriptNote: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 12,
+    lineHeight: 18,
+    color: '#7a6347',
   },
   primary: {
     backgroundColor: '#eddeb4',

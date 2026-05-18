@@ -394,6 +394,26 @@ export function SignupPage() {
                 )}
               </button>
 
+              <p
+                style={{
+                  fontSize: 12,
+                  color: '#888',
+                  textAlign: 'center',
+                  margin: '4px 0 0',
+                  lineHeight: 1.5,
+                }}
+              >
+                By creating an account, you agree to KalpX&apos;s{' '}
+                <Link to="/en/terms" style={{ color: '#b8864b', textDecoration: 'none', fontWeight: 600 }}>
+                  Terms of Service
+                </Link>{' '}
+                and acknowledge our{' '}
+                <Link to="/en/privacy" style={{ color: '#b8864b', textDecoration: 'none', fontWeight: 600 }}>
+                  Privacy Policy
+                </Link>
+                .
+              </p>
+
               <div className="auth-footer">
                 Already have an account? <Link to="/login">Login</Link>
               </div>

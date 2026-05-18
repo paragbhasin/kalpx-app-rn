@@ -125,16 +125,18 @@ export function DataDeletionPage() {
             <p style={{ marginBottom: "12px" }}>
               Send an email to{" "}
               <a
-                href="mailto:support@kalpx.com"
+                href="mailto:privacy@kalpx.com"
                 style={{ color: "#b8864b", textDecoration: "none", fontWeight: 600 }}
               >
-                support@kalpx.com
+                privacy@kalpx.com
               </a>{" "}
               with the subject line: <strong>“Delete My KalpX Account”</strong>.
             </p>
             <p>
               We will process your request and permanently delete your data
-              within 7 business days.
+              generally within 30 days of a verified request. Backup copies may
+              persist for 30&ndash;90 days through normal backup rotation. Some
+              data may remain in anonymized or aggregated form.
             </p>
           </section>
 
@@ -180,10 +182,10 @@ export function DataDeletionPage() {
               If you have any questions or concerns about your data or this
               process, please contact us at{" "}
               <a
-                href="mailto:support@kalpx.com"
+                href="mailto:privacy@kalpx.com"
                 style={{ color: "#b8864b", textDecoration: "none", fontWeight: 600 }}
               >
-                support@kalpx.com
+                privacy@kalpx.com
               </a>
               .
             </p>

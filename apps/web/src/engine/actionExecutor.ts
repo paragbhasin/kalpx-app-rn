@@ -7,6 +7,7 @@
 import { hasTellMitraRoomEntryContext } from '@kalpx/contracts';
 import type { AppDispatch } from '../store';
 import { loadScreen, setScreenValue, updateScreenData, setSubmitting, goBack } from '../store/screenSlice';
+import { sanitizeBackendMeta } from '../lib/webAnalytics';
 import {
   trackEvent as apiTrackEvent,
   trackCompletion as apiTrackCompletion,
@@ -277,7 +278,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
       await apiTrackEvent(eventName, {
         journey_id: screenData.journey_id,
         day_number: screenData.day_number || 1,
-        ...(payload.meta || {}),
+        ...sanitizeBackendMeta(payload.meta || {}),
       });
       if (action.target) {
         const dest = _resolveTarget(action.target);

@@ -49,6 +49,16 @@ export function Footer({ transparent = false }: { transparent?: boolean }) {
         >
           Terms of Service
         </Link>
+        <Link
+          to="/en/data-deletion"
+          style={{
+            fontSize: 12,
+            color: "var(--kalpx-text-muted)",
+            textDecoration: "none",
+          }}
+        >
+          Data Deletion
+        </Link>
         <span style={{ fontSize: 12, color: "var(--kalpx-text-muted)" }}>
           Follow us:
         </span>

@@ -93,6 +93,16 @@ const Profile = () => {
     { key: "language", icon: "globe-outline", route: "Language" },
     { key: "privacy", icon: "key-outline", route: "Privacy" },
     {
+      key: "terms",
+      icon: "document-text-outline",
+      action: () => Linking.openURL("https://kalpx.com/en/terms"),
+    },
+    {
+      key: "dataDeletion",
+      icon: "trash-bin-outline",
+      action: () => Linking.openURL("https://kalpx.com/en/data-deletion"),
+    },
+    {
       key: "logout",
       icon: "log-out-outline",
       action: () => setShowLogoutPopup(true),
@@ -112,6 +122,16 @@ const Profile = () => {
     },
     { key: "language", icon: "globe-outline", route: "Language" },
     { key: "privacy", icon: "key-outline", route: "Privacy" },
+    {
+      key: "terms",
+      icon: "document-text-outline",
+      action: () => Linking.openURL("https://kalpx.com/en/terms"),
+    },
+    {
+      key: "dataDeletion",
+      icon: "trash-bin-outline",
+      action: () => Linking.openURL("https://kalpx.com/en/data-deletion"),
+    },
   ];
 
   const menuItems = isLoggedIn ? [...loggedInItems] : [...guestItems];
@@ -123,6 +143,8 @@ const Profile = () => {
       });
     }
     if (key === "reminders") return "Reminders";
+    if (key === "terms") return "Terms of Service";
+    if (key === "dataDeletion") return "Data Deletion";
     return t(`profile.menu.${key}`);
   };
 

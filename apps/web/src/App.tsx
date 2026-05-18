@@ -7,6 +7,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { SnackBar } from './components/SnackBar';
 import { setWebNavigate } from './lib/webRouter';
 import { AppLayout } from './components/layout/AppLayout';
+import { ConsentBanner } from './components/ConsentBanner';
 
 function NavigateInjector() {
   const navigate = useNavigate();
@@ -37,6 +38,7 @@ export function App() {
             <AppRoutes />
           </AppLayout>
           <SnackBar />
+          <ConsentBanner />
         </BrowserRouter>
       </Provider>
     </ErrorBoundary>

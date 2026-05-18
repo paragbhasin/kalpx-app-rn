@@ -1,8 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { AnyAction } from "@reduxjs/toolkit";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -16,12 +14,13 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
+import { AnyAction } from "@reduxjs/toolkit";
 import Colors from "../../components/Colors";
 import TextComponent from "../../components/TextComponent";
 // Old tracker import removed — Mitra engine manages journey state
 import store, { RootState } from "../../store";
-import { clearDoorState } from "../../store/doorSlice";
 import { screenActions } from "../../store/screenSlice";
+import { performLogout } from "../../utils/logout";
 import BottomMenu from "./BottomMenu";
 
 const Drawer = createDrawerNavigator();
@@ -79,17 +78,7 @@ const CustomDrawerContent = (props) => {
   }, [isLoggedIn]);
 
   const handleLogout = async () => {
-    await AsyncStorage.clear();
-    store.dispatch(clearDoorState());
-    store.dispatch({ type: "RESET_APP" });
-
-    try {
-      await GoogleSignin.signOut();
-      await GoogleSignin.revokeAccess();
-    } catch (error) {
-      console.log("Google Sign-In Logout Error:", error);
-    }
-
+    await performLogout();
     // Close the drawer first, then navigate to Home tab as a logged-out guest.
     // Previously used parentNav?.reset({ routes: [{ name: "Login" }] }) which
     // silently failed when parentNav resolved to the wrong navigator — leaving

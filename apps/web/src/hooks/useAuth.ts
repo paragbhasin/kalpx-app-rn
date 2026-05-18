@@ -106,7 +106,25 @@ export function useAuth() {
   );
 
   const logout = useCallback(async () => {
-    if (typeof window !== 'undefined') googleLogout(); // revoke Google OAuth session if active (no-op for email logins)
+    // Read token before clearing — backend call must happen while it is still present
+    const refreshToken = await webStorage.getItem(AUTH_KEYS.refreshToken);
+
+    // Revoke Google OAuth session (no-op for email logins)
+    if (typeof window !== 'undefined') googleLogout();
+
+    // Best-effort backend logout: blacklists refresh token server-side.
+    // Failure must never prevent local logout — always continue regardless.
+    if (refreshToken) {
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 5000);
+        await api.post('users/logout/', { refresh: refreshToken }, { signal: controller.signal });
+        clearTimeout(timer);
+      } catch {
+        // Swallow — network failure or expired token must not block logout
+      }
+    }
+
     await webStorage.removeItem(AUTH_KEYS.accessToken);
     await webStorage.removeItem(AUTH_KEYS.refreshToken);
     try {

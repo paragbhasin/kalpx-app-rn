@@ -29,14 +29,14 @@ import {
   View,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProfileDetails } from "../Profile/actions";
+import FourDoorHomeContainer from "../../containers/FourDoorHomeContainer";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import api from "../../Networks/axios";
 import store, { AppDispatch, RootState } from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
+import { fetchProfileDetails } from "../Profile/actions";
 import ContinueJourney from "./ContinueJourney";
-import FourDoorHomeContainer from "../../containers/FourDoorHomeContainer";
 // Legacy WelcomeBack screen removed 2026-04-18 — all returning users
 // (3d+, including 30+d) now flow through ContinueJourney →
 // GET /api/mitra/journey/home/ which resolves to M12 (short-gap or
@@ -109,19 +109,13 @@ export default function Home() {
 
   useFocusEffect(
     React.useCallback(() => {
-      updateBackground(mitraJourneyId ? CONTINUE_BG : HOME_BACKGROUND);
+      updateBackground(HOME_BACKGROUND);
       updateHeaderHidden(false);
       return () => {
         updateBackground(null);
         updateHeaderHidden(false);
       };
-    }, [
-      updateBackground,
-      updateHeaderHidden,
-      mitraJourneyId,
-      CONTINUE_BG,
-      HOME_BACKGROUND,
-    ]),
+    }, [updateBackground, updateHeaderHidden, mitraJourneyId, HOME_BACKGROUND]),
   );
 
   const seedJourneyStatus = React.useCallback((status: any) => {
@@ -237,7 +231,9 @@ export default function Home() {
 
       checkJourney();
 
-      return () => { cancelled = true; };
+      return () => {
+        cancelled = true;
+      };
     }, [isLoggedIn, navigation, dispatch]),
   );
 
@@ -272,7 +268,8 @@ export default function Home() {
     hasJourney: boolean,
     initialTarget?: { containerId: string; stateId: string },
   ) => {
-    const stashedInference = store.getState().screen.screenData.stashed_inference_state;
+    const stashedInference =
+      store.getState().screen.screenData.stashed_inference_state;
     if (hasJourney || stashedInference) {
       setIsProcessing(true);
       try {
@@ -480,9 +477,7 @@ export default function Home() {
 
           // v3 journey: post-resume hydrate from daily-view envelope.
           // Replaces the legacy generate_companion action dispatch.
-          console.log(
-            "📡 Calling: v3/journey/daily-view (resume hydrate)",
-          );
+          console.log("📡 Calling: v3/journey/daily-view (resume hydrate)");
           try {
             const { mitraJourneyDailyView } = require("../../engine/mitraApi");
             const { ingestDailyView } = require("../../engine/v3Ingest");
@@ -492,12 +487,17 @@ export default function Home() {
                 ingestDailyView(result.envelope),
               )) {
                 if (v !== undefined) {
-                  store.dispatch(screenActions.setScreenValue({ key: k, value: v }));
+                  store.dispatch(
+                    screenActions.setScreenValue({ key: k, value: v }),
+                  );
                 }
               }
             }
           } catch (_err: any) {
-            console.warn("[Home] v3 daily-view resume hydrate failed:", _err?.message);
+            console.warn(
+              "[Home] v3 daily-view resume hydrate failed:",
+              _err?.message,
+            );
           }
           console.log("✅ resume companion data loaded");
 
@@ -506,7 +506,9 @@ export default function Home() {
           // Checkpoint) to ensure the target screen is hydrated with its
           // correct v3 envelope data.
           if (process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1") {
-            console.log("[Home] v3 detected: delegating entry route to ContinueJourney");
+            console.log(
+              "[Home] v3 detected: delegating entry route to ContinueJourney",
+            );
             return;
           }
 
@@ -834,11 +836,9 @@ export default function Home() {
             "friend"
           }
         />
-      ) : isLoggedIn && checkingJourney ? (
-        // Authenticated user while segment check is in progress — show nothing so the
-        // welcome page never flashes for users Mitra already knows.
-        null
-      ) : mitraJourneyId ? (
+      ) : isLoggedIn &&
+        checkingJourney ? // welcome page never flashes for users Mitra already knows. // Authenticated user while segment check is in progress — show nothing so the
+      null : mitraJourneyId ? (
         // ContinueJourney v2 — backend-driven via GET /journey/home/.
         // All chip copy + navigation (including 30+d welcome-back)
         // comes from the backend response; the parent only provides
@@ -888,7 +888,8 @@ export default function Home() {
               Grounded in timeless Sanatan wisdom.
             </Text>
             <Text style={styles.companionDesc}>
-              support what you carry, strengthen what is growing, and walk one day at a time
+              support what you carry, strengthen what is growing, and walk one
+              day at a time
             </Text>
           </View>
 

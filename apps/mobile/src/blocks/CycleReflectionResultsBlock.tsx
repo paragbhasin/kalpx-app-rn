@@ -133,7 +133,7 @@ const CycleReflectionResultsBlock: React.FC<
   };
 
   if (isStrong) {
-    pushAction("change_focus", "choice_stack", "discipline_select");
+    pushAction("change_focus", "welcome_onboarding", "turn_2");
     if (daysEngaged >= totalDays) {
       pushAction("deepen", "companion_dashboard", "day_active");
     }
@@ -147,8 +147,8 @@ const CycleReflectionResultsBlock: React.FC<
     // the generic change_focus labeling above).
     pushAction(
       "change_focus",
-      "choice_stack",
-      "discipline_select",
+      "welcome_onboarding",
+      "turn_2",
       "action_alter_label",
       "action_alter_desc",
     );

@@ -3321,11 +3321,6 @@ export async function executeAction(
           }
 
           if (currentStateId === "turn_1") {
-            if (p.chip_id === "returning") {
-              draft.returning = true;
-              rootNavigate("Login");
-              return; // Do not proceed to turn_2
-            }
             if (p.freeform_text) draft.intro_freeform = p.freeform_text;
             nextStateId = "entry_intention";
           } else if (currentStateId === "entry_intention") {

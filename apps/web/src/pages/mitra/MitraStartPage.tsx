@@ -194,29 +194,6 @@ export function MitraStartPage() {
               Yes, let&apos;s begin →
             </button>
 
-            <button
-              type="button"
-              onClick={() =>
-                navigate(
-                  "/login?returnTo=" +
-                    encodeURIComponent("/en/mitra/welcome-back"),
-                )
-              }
-              style={{
-                width: "100%",
-                borderRadius: 999,
-                padding: "16px 20px",
-                background: "rgba(255, 251, 244, 0.95)",
-                color: "#432104",
-                fontSize: 16,
-                fontWeight: 700,
-                cursor: "pointer",
-                border: "1px solid rgba(201, 168, 76, 0.55)",
-                boxShadow: "0 10px 24px rgba(67, 33, 4, 0.08)",
-              }}
-            >
-              I&apos;m returning
-            </button>
           </div>
         </div>
       </div>

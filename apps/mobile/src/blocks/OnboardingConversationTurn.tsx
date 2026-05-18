@@ -287,9 +287,6 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
           style={[styles.turnOneResponseWrap, { opacity: replyAnim }]}
         >
           {(block.reply_chips || []).map((chip) => {
-            const isReturning = chip.label.toLowerCase().includes("returning");
-            if (isReturning) return null; // Rendered at the bottom instead
-
             const chipTestID = `onboarding_turn_${turn}_chip_${chip.id}`;
             return (
               <TouchableOpacity
@@ -333,38 +330,6 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
               </TouchableOpacity>
             );
           })}
-
-          {(() => {
-            const returningChip = (block.reply_chips || []).find((c) =>
-              c.label.toLowerCase().includes("returning"),
-            );
-            if (!returningChip && !isIntroTurn) return null;
-            if (isLoggedIn) return null; // Hide returning button if already logged in
-
-            const finalId = returningChip?.id || "returning";
-            const finalLabel = returningChip?.label || "I'm returning";
-
-            return (
-              <TouchableOpacity
-                key={finalId}
-                activeOpacity={0.85}
-                onPress={() =>
-                  fire({ chip_id: finalId, response_type: "chip" })
-                }
-                style={{ paddingBottom: 10 }}
-                testID="onboarding_im_returning"
-                accessibilityLabel="onboarding_im_returning"
-              >
-                <View
-                  style={[styles.turnOneButton, styles.turnOneSecondaryButton]}
-                >
-                  <Text style={styles.turnOneSecondaryButtonText}>
-                    {finalLabel}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            );
-          })()}
 
           {block.open_input?.enabled && renderStyledInput(true)}
         </Animated.View>
@@ -554,27 +519,6 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
           )}
 
           {(block.reply_chips || []).map((chip) => {
-            const isReturning = chip.label.toLowerCase().includes("returning");
-
-            if (isReturning) {
-              if (isLoggedIn) return null; // Hide returning button if already logged in
-              return (
-                <TouchableOpacity
-                  key={chip.id}
-                  activeOpacity={0.75}
-                  onPress={() =>
-                    fire({ chip_id: chip.id, response_type: "chip" })
-                  }
-                  testID="onboarding_im_returning"
-                  accessibilityLabel="onboarding_im_returning"
-                >
-                  <View style={[styles.chip, styles.chipSecondary]}>
-                    <Text style={styles.chipLabel}>{chip.label}</Text>
-                  </View>
-                </TouchableOpacity>
-              );
-            }
-
             // Turn 1 "Yes, let's begin" primary chip also carries a stable
             // semantic testID in addition to the turn-scoped one.
             const isYesLetsBegin =

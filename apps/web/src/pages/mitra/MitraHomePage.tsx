@@ -105,6 +105,15 @@ export function MitraHomePage() {
   const [fourDoorLoading, setFourDoorLoading] = useState(false);
   const [fourDoorError, setFourDoorError] = useState<string | null>(null);
 
+  // T4 — first-visit orientation gate (localStorage, never overwrites on error/null segment)
+  const FOUR_DOOR_VISITED_KEY = "mitra_four_door_home_visited_v1";
+  const [isFirstVisit, setIsFirstVisit] = useState<boolean>(false);
+  useEffect(() => {
+    if (!localStorage.getItem(FOUR_DOOR_VISITED_KEY)) {
+      setIsFirstVisit(true);
+    }
+  }, []);
+
   // Computed once per render — guards both the fetch and the loading check below.
   const isAuthed = !!(
     localStorage.getItem(AUTH_KEYS.accessToken) ||
@@ -139,6 +148,17 @@ export function MitraHomePage() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthed, dispatch]);
+
+  // T4 — write visited key once after first successful four-door render for new-segment users
+  useEffect(() => {
+    if (
+      isFirstVisit &&
+      homeData?.user_surface_state?.segment === "new" &&
+      !fourDoorError
+    ) {
+      localStorage.setItem(FOUR_DOOR_VISITED_KEY, "1");
+    }
+  }, [isFirstVisit, homeData?.user_surface_state?.segment, fourDoorError]);
 
   async function refetchHome() {
     try {
@@ -498,6 +518,11 @@ export function MitraHomePage() {
                     >
                       {rhythmSubtitle}
                     </div>
+                    {segment === "new" && isFirstVisit && (
+                      <div style={{ color: "rgba(67,33,4,0.38)", fontSize: 12, fontStyle: "italic", marginTop: 3 }}>
+                        Shape the day with a simple rhythm.
+                      </div>
+                    )}
                   </div>
                   <div style={{ color: "#C9A84C", opacity: 0.5, fontSize: 18 }}>
                     →
@@ -509,11 +534,10 @@ export function MitraHomePage() {
                   onClick={() => navigate("/en/mitra/inner-path")}
                   style={{
                     width: "100%",
-                    border: "1px solid rgba(201,168,76,0.28)",
+                    border: segment === "rhythm_only" ? "1.5px solid rgba(201,168,76,0.55)" : "1px solid rgba(201,168,76,0.28)",
                     borderRadius: 20,
-
                     padding: "10px",
-                    boxShadow: "0 10px 25px rgba(67,33,4,0.08)",
+                    boxShadow: segment === "rhythm_only" ? "0 10px 25px rgba(201,168,76,0.14)" : "0 10px 25px rgba(67,33,4,0.08)",
                     textAlign: "left",
                     cursor: "pointer",
                     display: "flex",
@@ -555,6 +579,11 @@ export function MitraHomePage() {
                     >
                       {innerPathSubtitle}
                     </div>
+                    {segment === "new" && isFirstVisit && (
+                      <div style={{ color: "rgba(67,33,4,0.38)", fontSize: 12, fontStyle: "italic", marginTop: 3 }}>
+                        Walk a 14-day path with Mitra beside you.
+                      </div>
+                    )}
                   </div>
                   <div style={{ color: "#C9A84C", opacity: 0.5, fontSize: 18 }}>
                     →
@@ -612,6 +641,11 @@ export function MitraHomePage() {
                     >
                       {quickChantSubtitle}
                     </div>
+                    {segment === "new" && isFirstVisit && (
+                      <div style={{ color: "rgba(67,33,4,0.38)", fontSize: 12, fontStyle: "italic", marginTop: 3 }}>
+                        Return through mantra, in a single moment.
+                      </div>
+                    )}
                   </div>
                   <div style={{ color: "#C9A84C", opacity: 0.5, fontSize: 18 }}>
                     →
@@ -669,6 +703,11 @@ export function MitraHomePage() {
                     >
                       {tellMitraSubtitle}
                     </div>
+                    {segment === "new" && isFirstVisit && (
+                      <div style={{ color: "rgba(67,33,4,0.38)", fontSize: 12, fontStyle: "italic", marginTop: 3 }}>
+                        Share what is moving. Mitra will listen.
+                      </div>
+                    )}
                   </div>
                   <div style={{ color: "#C9A84C", opacity: 0.5, fontSize: 18 }}>
                     →
@@ -1097,7 +1136,7 @@ export function MitraHomePage() {
                 marginBottom: 0,
               }}
             >
-              A calmer, clearer way to navigate life - one day at a time.
+              support what you carry, strengthen what is growing, and walk one day at a time
             </p>
 
             {error && (

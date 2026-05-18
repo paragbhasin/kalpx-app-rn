@@ -1196,11 +1196,6 @@ export async function executeAction(action: any, context: ActionContext): Promis
         let nextStateId = '';
 
         if (stateId === 'turn_1') {
-          if (p.chip_id === 'returning') {
-            // Returning user — redirect to login
-            webNavigate('/login');
-            return;
-          }
           if (p.freeform_text) draft.intro_freeform = p.freeform_text;
           webNavigate('/en/mitra/intention');
           return;

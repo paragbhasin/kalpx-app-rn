@@ -39,6 +39,7 @@ import M3Icon from "../../../web/public/mitra1.svg";
 import Mp2Icon from "../../../web/public/mitra2.svg";
 import Mp3Icon from "../../../web/public/mitra3.svg";
 import Mp4Icon from "../../../web/public/mitra4.svg";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   apiPatchJourneyReminders,
   mitraJourneyHomeV3,
@@ -98,18 +99,25 @@ function DoorCard({
   Icon,
   label,
   subtitle,
+  orientationLine,
+  highlighted,
   onPress,
 }: {
   Icon: any;
   label: string;
   subtitle?: string | null;
+  orientationLine?: string | null;
+  highlighted?: boolean;
   onPress: () => void;
 }) {
   return (
     <TouchableOpacity
       activeOpacity={0.86}
       onPress={onPress}
-      style={styles.doorCard}
+      style={[
+        styles.doorCard,
+        highlighted && styles.doorCardHighlighted,
+      ]}
     >
       <View style={styles.doorIconWrap}>
         <Icon width={40} height={40} />
@@ -117,6 +125,9 @@ function DoorCard({
       <View style={styles.doorBody}>
         <Text style={styles.doorLabel}>{label}</Text>
         {!!subtitle && <Text style={styles.doorSubtitle}>{subtitle}</Text>}
+        {!!orientationLine && (
+          <Text style={styles.doorOrientationLine}>{orientationLine}</Text>
+        )}
       </View>
       <Text style={styles.doorArrow}>→</Text>
     </TouchableOpacity>
@@ -150,6 +161,15 @@ export default function FourDoorHomeContainer({
   const [feelingLoading, setFeelingLoading] = useState(false);
   const doorStates = (homeData?.door_states ?? {}) as Record<string, any>;
 
+  // T4 — first-visit orientation gate
+  const FOUR_DOOR_VISITED_KEY = "mitra_four_door_home_visited_v1";
+  const [isFirstVisit, setIsFirstVisit] = useState<boolean>(false);
+  useEffect(() => {
+    void AsyncStorage.getItem(FOUR_DOOR_VISITED_KEY).then((val) => {
+      if (!val) setIsFirstVisit(true);
+    });
+  }, []);
+
   // Post-onboarding reminder step (embedded via screenData flag)
   const showReminderModal = !!screenData?.onboarding_reminder_show;
   const reminderDestination = (screenData?.onboarding_reminder_destination as string) || "Home";
@@ -162,6 +182,17 @@ export default function FourDoorHomeContainer({
   useEffect(() => {
     homeDataRef.current = homeData;
   }, [homeData]);
+
+  // T4 — write visited key after first successful four-door render for new-segment users
+  useEffect(() => {
+    if (
+      isFirstVisit &&
+      homeData?.user_surface_state?.segment === "new" &&
+      !error
+    ) {
+      void AsyncStorage.setItem(FOUR_DOOR_VISITED_KEY, "1");
+    }
+  }, [isFirstVisit, homeData?.user_surface_state?.segment, error]);
 
   const loadHome = useCallback(
     async (silent = false, forceFresh = false) => {
@@ -463,6 +494,7 @@ export default function FourDoorHomeContainer({
             Icon={M3Icon}
             label={DOOR_LABELS.my_rhythm}
             subtitle={rhythmSubtitle}
+            orientationLine={seg === "new" && isFirstVisit ? "Shape the day with a simple rhythm." : null}
             onPress={() => {
               navigation.navigate("RhythmHome" as any);
             }}
@@ -471,6 +503,8 @@ export default function FourDoorHomeContainer({
             Icon={Mp3Icon}
             label={DOOR_LABELS.inner_path}
             subtitle={innerPathSubtitle}
+            orientationLine={seg === "new" && isFirstVisit ? "Walk a 14-day path with Mitra beside you." : null}
+            highlighted={seg === "rhythm_only"}
             onPress={() => {
               if (homeData?.inner_path_summary?.has_active_path !== true) {
                 updateScreenData("onboarding_turn", "turn_2");
@@ -494,12 +528,14 @@ export default function FourDoorHomeContainer({
             Icon={Mp2Icon}
             label={DOOR_LABELS.quick_reset}
             subtitle={quickResetSubtitle}
+            orientationLine={seg === "new" && isFirstVisit ? "Return through mantra, in a single moment." : null}
             onPress={() => void openQuickResetSurface()}
           />
           <DoorCard
             Icon={Mp4Icon}
             label={DOOR_LABELS.tell_mitra}
             subtitle={tellMitraSubtitle}
+            orientationLine={seg === "new" && isFirstVisit ? "Share what is moving. Mitra will listen." : null}
             onPress={() => void openTellMitraSurface()}
           />
 
@@ -853,6 +889,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     fontFamily: Fonts.sans.regular,
+  },
+  doorCardHighlighted: {
+    borderColor: "rgba(201,168,76,0.55)",
+    shadowColor: "#C9A84C",
+    shadowOpacity: 0.16,
+  },
+  doorOrientationLine: {
+    color: "rgba(67,33,4,0.38)",
+    fontSize: 12,
+    lineHeight: 16,
+    fontFamily: Fonts.sans.regular,
+    fontStyle: "italic",
+    marginTop: 3,
   },
   doorArrow: {
     color: "#C9A84C",

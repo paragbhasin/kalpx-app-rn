@@ -888,7 +888,7 @@ export default function Home() {
               Grounded in timeless Sanatan wisdom.
             </Text>
             <Text style={styles.companionDesc}>
-              A calmer, clearer way to navigate life - one day at a time.
+              support what you carry, strengthen what is growing, and walk one day at a time
             </Text>
           </View>
 

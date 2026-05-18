@@ -21,6 +21,8 @@ import RoomActionList from "./RoomActionList";
 import RoomOpeningExperience from "./RoomOpeningExperience";
 import RoomPrincipleBanner from "./RoomPrincipleBanner";
 import RoomGuidedSection from "./RoomGuidedSection";
+import RoomJourneyRenderer from "./RoomJourneyRenderer";
+import { isJourneyEnabled } from "./roomJourneyConfig";
 import { ROOM_LABELS } from "@kalpx/contracts";
 import { LIFE_CONTEXT_LABELS } from "./roomConstants";
 import type { RoomRendererProps } from "./types";
@@ -48,6 +50,11 @@ const RoomRenderer: React.FC<RoomRendererProps> = ({
   const isGuided = !!(ctx?.entry_context?.recommended_first_action_id);
 
   if (isGuided) {
+    if (isJourneyEnabled(envelope.room_id)) {
+      // No wrapper View — RoomJourneyRenderer owns its own minHeight via useWindowDimensions.
+      // A flex:1 wrapper inside the parent ScrollView collapses to 0 and defeats minHeight.
+      return <RoomJourneyRenderer envelope={envelope} />;
+    }
     return (
       <View style={styles.root} testID={`room_renderer_${envelope.room_id}`}>
         <RoomGuidedSection envelope={envelope} />

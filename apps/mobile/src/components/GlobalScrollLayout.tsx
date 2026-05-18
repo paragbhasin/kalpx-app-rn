@@ -15,6 +15,10 @@ import { useScrollContext } from "../context/ScrollContext";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { isMitraRouteName } from "../Shared/Routes/mitraRouteNames";
 import { navigationRef } from "../Shared/Routes/NavigationService";
+<<<<<<< HEAD
+=======
+import { isMitraRouteName } from "../Shared/Routes/mitraRouteNames";
+>>>>>>> 64cbb495894f85bb11d58f53ab5269b277c6d69c
 import { store } from "../store";
 import Header from "./Header";
 
@@ -222,17 +226,7 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
 
     // Last resort: return to Four Door Home — the product root for logged-in users.
     (navigationRef as any).navigate("Home");
-  }, [
-    isOnDynamicEngine,
-    isInSupportFlow,
-    currentContainerId,
-    screenData?.runner_source,
-    screenData?.practice_launch_surface,
-    canGoBackInStack,
-    history.length,
-    goBack,
-    loadScreen,
-  ]);
+  }, [isOnDynamicEngine, isInSupportFlow, currentContainerId, screenData?.runner_source, screenData?.practice_launch_surface, canGoBackInStack, history.length, goBack, loadScreen]);
 
   // Android hardware back — delegate to the same handleBack logic so
   // hardware back honors support-flow jumps, debounce, and root guards.
@@ -275,9 +269,7 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
             styles.headerContainer,
             { transform: [{ translateY: headerY }] },
             !hasBg &&
-              (shouldUseDefaultSurface
-                ? styles.defaultSurface
-                : styles.headerSolid),
+              (shouldUseDefaultSurface ? styles.defaultSurface : styles.headerSolid),
           ]}
         >
           {/* Back button + Header in one row. */}

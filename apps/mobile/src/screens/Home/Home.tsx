@@ -10,7 +10,11 @@
  */
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect, useIsFocused, useNavigation } from "@react-navigation/native";
+import {
+  useFocusEffect,
+  useIsFocused,
+  useNavigation,
+} from "@react-navigation/native";
 
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
@@ -861,9 +865,7 @@ export default function Home() {
             "friend"
           }
         />
-      ) : isLoggedIn &&
-        checkingJourney ? // welcome page never flashes for users Mitra already knows. // Authenticated user while segment check is in progress — show nothing so the
-      null : mitraJourneyId ? (
+      ) : isLoggedIn && checkingJourney ? null : mitraJourneyId ? ( // welcome page never flashes for users Mitra already knows. // Authenticated user while segment check is in progress — show nothing so the
         // ContinueJourney v2 — backend-driven via GET /journey/home/.
         // All chip copy + navigation (including 30+d welcome-back)
         // comes from the backend response; the parent only provides

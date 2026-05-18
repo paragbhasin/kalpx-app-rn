@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { CommonActions } from "@react-navigation/native";
 import { AnyAction } from "@reduxjs/toolkit";
@@ -20,8 +19,8 @@ import { ThunkDispatch } from "redux-thunk";
 import Colors from "../../components/Colors";
 import TextComponent from "../../components/TextComponent";
 // Old tracker import removed — Mitra engine manages journey state
-import store, { RootState } from "../../store";
-import { clearDoorState } from "../../store/doorSlice";
+import { RootState } from "../../store";
+import { performLogout } from "../../utils/logout";
 import BottomMenu from "./BottomMenu";
 
 const Drawer = createDrawerNavigator();
@@ -79,17 +78,7 @@ const CustomDrawerContent = (props) => {
   }, [isLoggedIn]);
 
   const handleLogout = async () => {
-    await AsyncStorage.clear();
-    store.dispatch(clearDoorState());
-    store.dispatch({ type: "RESET_APP" });
-
-    try {
-      await GoogleSignin.signOut();
-      await GoogleSignin.revokeAccess();
-    } catch (error) {
-      console.log("Google Sign-In Logout Error:", error);
-    }
-
+    await performLogout();
     props.navigation.closeDrawer();
     const rootNav = props.navigation.getParent?.() || props.navigation;
     rootNav.dispatch(

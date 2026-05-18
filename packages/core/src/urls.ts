@@ -14,11 +14,11 @@ export const api = {
     onboardingComplete: () => `${API_BASE_URL}/mitra/onboarding/complete/`,
   },
   auth: {
-    login: () => `${API_BASE_URL}/auth/login/`,
-    logout: () => `${API_BASE_URL}/auth/logout/`,
-    refresh: () => `${API_BASE_URL}/auth/token/refresh/`,
-    signup: () => `${API_BASE_URL}/auth/register/`,
-    forgotPassword: () => `${API_BASE_URL}/auth/password-reset/`,
+    login: () => `${API_BASE_URL}/users/login/`,
+    logout: () => `${API_BASE_URL}/users/logout/`,
+    refresh: () => `${API_BASE_URL}/token/refresh/`,
+    signup: () => `${API_BASE_URL}/users/register/`,
+    forgotPassword: () => `${API_BASE_URL}/users/generate_otp/`,
   },
   image: (path: string) => `${IMAGE_BASE_URL}${path}`,
 } as const;

@@ -18,7 +18,7 @@ import LogoutPopup from "../../components/LogoutPopup";
 import TextComponent from "../../components/TextComponent";
 import { useScrollContext } from "../../context/ScrollContext";
 import store, { RootState } from "../../store";
-import { clearDoorState } from "../../store/doorSlice";
+import { performLogout } from "../../utils/logout";
 import unregisterDeviceFromBackend from "../../utils/unregisterDevice";
 import { deleteUserAccount } from "./actions";
 import Privacy from "./Privacy";
@@ -47,33 +47,8 @@ const Profile = () => {
   }, []);
 
   const handleLogout = async () => {
-    await AsyncStorage.clear();
-    await unregisterDeviceFromBackend();
-    store.dispatch(clearDoorState());
-    store.dispatch({ type: "RESET_APP" });
-    // await GoogleSignin.signOut();
-    // await GoogleSignin.revokeAccess();
-    const tabNav = navigation.getParent();
-    const drawerNav = tabNav?.getParent?.();
-
-    if (drawerNav) {
-      drawerNav.navigate("HomePage", {
-        screen: "HomePage",
-        params: {
-          screen: "Home",
-        },
-      });
-      return;
-    }
-
-    if (tabNav) {
-      tabNav.navigate("HomePage", {
-        screen: "Home",
-      });
-      return;
-    }
-
-    navigation.navigate("Home");
+    await performLogout();
+    navigation.navigate("HomePage", { screen: "Home" } as any);
   };
 
   const handleDelete = () => {

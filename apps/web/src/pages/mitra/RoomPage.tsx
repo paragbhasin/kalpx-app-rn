@@ -71,6 +71,9 @@ export function RoomPage() {
   const roomEntryContext = (sd?.room_entry_context as TellMitraRoomEntryContext | null) ?? null;
   const hasTellMitraRoomContext = hasTellMitraRoomEntryContext(roomEntryContext);
 
+  // Derived early so hooks can depend on it (hooks must precede conditional returns).
+  const showReflection = !!(sd?.show_room_reflection);
+
   const [phase, setPhase] = useState<"picker" | "loading" | "render" | "error">(
     storedEnvelope
       ? "render"
@@ -85,6 +88,12 @@ export function RoomPage() {
 
   // Gate 6D — dedupe guard: prevents double-fire of room_entered on re-renders.
   const hasFiredEntry = useRef(false);
+
+  // Passive room_exited telemetry — fires on unmount only when user did NOT
+  // explicitly exit (via action, room_exit type, or reflection shown).
+  const hasExplicitlyExitedRef = useRef(false);
+  const hasRoomExitedFiredRef = useRef(false);
+  const fullRoomIdRef = useRef<string>("");
 
   // Room ambient audio — start on render phase, stop on unmount (mirrors RoomContainer.tsx)
   useEffect(() => {
@@ -104,6 +113,37 @@ export function RoomPage() {
       void trackRoomTelemetry({ event_type: 'room_entered', room_id: fullRoomId, surface: 'room' });
     }
   }, [phase, fullRoomId]);
+
+  // Sync fullRoomId into ref so the unmount cleanup can access the latest value.
+  useEffect(() => {
+    fullRoomIdRef.current = fullRoomId;
+  }, [fullRoomId]);
+
+  // When reflection is shown the user completed the room — mark as explicit exit.
+  useEffect(() => {
+    if (showReflection) {
+      hasExplicitlyExitedRef.current = true;
+    }
+  }, [showReflection]);
+
+  // Passive room_exited telemetry — fires on unmount only when the user did NOT
+  // explicitly exit (navigated away mid-room without completing or tapping exit).
+  useEffect(() => {
+    return () => {
+      if (
+        !hasExplicitlyExitedRef.current &&
+        !hasRoomExitedFiredRef.current &&
+        fullRoomIdRef.current
+      ) {
+        hasRoomExitedFiredRef.current = true;
+        void trackRoomTelemetry({
+          event_type: 'room_exited',
+          room_id: fullRoomIdRef.current,
+          surface: 'room',
+        });
+      }
+    };
+  }, []); // empty deps — fires only on unmount
 
   const actionContext = {
     dispatch,
@@ -156,6 +196,10 @@ export function RoomPage() {
   const handleActionRef = useRef<(action: any) => void>(() => {});
 
   const handleAction = (action: any) => {
+    // Mark explicit exit so passive room_exited telemetry does not double-fire.
+    if (action?.type === "room_exit" || action?.action_type === "exit") {
+      hasExplicitlyExitedRef.current = true;
+    }
     void executeAction(action, actionContext);
   };
 
@@ -253,8 +297,6 @@ export function RoomPage() {
     );
   }
 
-  const showReflection = !!(sd?.show_room_reflection);
-
   function handleCloseReflection() {
     dispatch(updateScreenData({ show_room_reflection: false }));
   }
@@ -312,7 +354,7 @@ export function RoomPage() {
           onClose={handleCloseReflection}
           onNavigateTellMitra={handleReflectionNavigateTellMitra}
           onViewAllSteps={handleReflectionViewAllSteps}
-          onReturnHome={() => { dispatch(updateScreenData({ show_room_reflection: false })); webNavigate("/en/mitra/dashboard"); }}
+          onReturnHome={() => { hasExplicitlyExitedRef.current = true; dispatch(updateScreenData({ show_room_reflection: false })); webNavigate("/en/mitra/dashboard"); }}
         />
       )}
     </div>

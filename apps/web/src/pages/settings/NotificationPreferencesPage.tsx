@@ -12,6 +12,7 @@ import {
   type NotificationPrefs,
   type GlobalConsent,
 } from '../../store/preferencesSlice';
+import { getUserProfile, updateUserProfile } from '../../lib/userApi';
 
 const PAGE_BG = '#fffaf5';
 const SECTION_BG = '#fff8f0';
@@ -108,6 +109,44 @@ const SENSITIVE_CATEGORIES: CategoryConfig[] = [
   },
 ];
 
+const RHYTHM_CATEGORIES: CategoryConfig[] = [
+  {
+    key: 'rhythm_reminders',
+    label: 'Daily Rhythm reminders',
+    description: 'A soft call to your rhythm at the time you set.',
+    defaultOn: true,
+  },
+  {
+    key: 'checkin_companion_nudge',
+    label: 'Check-in companion',
+    description: 'A quiet follow-up when Mitra can offer a gentle anchor.',
+    defaultOn: true,
+  },
+  {
+    key: 'quick_chant_reminders',
+    label: 'Mantra reminders',
+    description: 'An occasional return to your chosen sound. Off by default — you choose.',
+    defaultOn: false,
+  },
+];
+
+const TIMEZONE_OPTIONS = [
+  { label: 'India Standard Time (IST)', value: 'Asia/Kolkata' },
+  { label: 'Gulf Standard Time (GST)', value: 'Asia/Dubai' },
+  { label: 'Sri Lanka Standard Time (SLST)', value: 'Asia/Colombo' },
+  { label: 'British Time (GMT/BST)', value: 'Europe/London' },
+  { label: 'Central European Time (CET/CEST)', value: 'Europe/Berlin' },
+  { label: 'Eastern Time (US & Canada)', value: 'America/New_York' },
+  { label: 'Central Time (US & Canada)', value: 'America/Chicago' },
+  { label: 'Mountain Time (US & Canada)', value: 'America/Denver' },
+  { label: 'Pacific Time (US & Canada)', value: 'America/Los_Angeles' },
+  { label: 'Australian Eastern Time (AEST/AEDT)', value: 'Australia/Sydney' },
+  { label: 'Australian Western Time (AWST)', value: 'Australia/Perth' },
+  { label: 'Singapore Time (SGT)', value: 'Asia/Singapore' },
+  { label: 'Hong Kong Time (HKT)', value: 'Asia/Hong_Kong' },
+  { label: 'South Africa Standard Time (SAST)', value: 'Africa/Johannesburg' },
+];
+
 const FREQUENCY_OPTIONS = [
   { label: 'Normal', value: 'normal', description: 'Full companion rhythm' },
   { label: 'Reduced', value: 'reduced', description: 'Fewer, more spaced' },
@@ -133,11 +172,43 @@ export function NotificationPreferencesPage() {
   const [savingQuiet, setSavingQuiet] = useState(false);
   const [quietSaved, setQuietSaved] = useState(false);
 
+  // Timezone state
+  const [currentTimezone, setCurrentTimezone] = useState('');
+  const [selectedTimezone, setSelectedTimezone] = useState('');
+  const [showTimezoneSelector, setShowTimezoneSelector] = useState(false);
+  const [savingTimezone, setSavingTimezone] = useState(false);
+  const [timezoneSaved, setTimezoneSaved] = useState(false);
+  const detectedTimezone = (() => {
+    try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return ''; }
+  })();
+
   useEffect(() => {
     dispatch(fetchPreferences());
     dispatch(fetchNotificationPrefs());
     dispatch(fetchGlobalConsent());
+    // Load current timezone from user profile
+    void getUserProfile().then((profile) => {
+      const tz = profile?.timezone as string | undefined;
+      if (tz) {
+        setCurrentTimezone(tz);
+        setSelectedTimezone(tz);
+      }
+    });
   }, [dispatch]);
+
+  const handleSaveTimezone = async (tz: string) => {
+    setSavingTimezone(true);
+    try {
+      await updateUserProfile({ timezone: tz } as any);
+      setCurrentTimezone(tz);
+      setSelectedTimezone(tz);
+      setShowTimezoneSelector(false);
+      setTimezoneSaved(true);
+      setTimeout(() => setTimezoneSaved(false), 2000);
+    } finally {
+      setSavingTimezone(false);
+    }
+  };
 
   useEffect(() => {
     setQuietStart(quietHours.start);
@@ -205,6 +276,99 @@ export function NotificationPreferencesPage() {
       ) : (
         <div style={{ maxWidth: 520, margin: '0 auto', padding: '16px 16px 48px' }}>
 
+          {/* Timezone */}
+          <Section title="Your Timezone" subtitle="Mitra uses your timezone to send reminders at the right time.">
+            {!currentTimezone || currentTimezone === 'Asia/Kolkata' ? (
+              <div style={{ padding: '8px 0', borderTop: `1px solid ${BORDER}` }}>
+                <p style={{ margin: '0 0 10px', fontSize: 13, color: TEXT_SECONDARY }}>
+                  To remind you at the right time, Mitra needs your timezone.
+                  {detectedTimezone ? ` We detected your timezone as ${detectedTimezone}.` : ''}
+                </p>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {detectedTimezone && (
+                    <button
+                      onClick={() => void handleSaveTimezone(detectedTimezone)}
+                      disabled={savingTimezone}
+                      style={{
+                        backgroundColor: GOLD, color: '#fff', border: 'none', borderRadius: 8,
+                        padding: '8px 14px', fontSize: 13, fontWeight: 600,
+                        cursor: savingTimezone ? 'not-allowed' : 'pointer', opacity: savingTimezone ? 0.7 : 1,
+                      }}
+                    >
+                      Use this timezone
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setShowTimezoneSelector(true)}
+                    style={{
+                      backgroundColor: '#fff', color: GOLD, border: `1px solid ${GOLD}`, borderRadius: 8,
+                      padding: '8px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                    }}
+                  >
+                    Choose manually
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderTop: `1px solid ${BORDER}` }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 500, color: TEXT }}>{currentTimezone}</div>
+                  {timezoneSaved && <div style={{ fontSize: 12, color: GOLD, marginTop: 2 }}>Saved</div>}
+                </div>
+                <button
+                  onClick={() => setShowTimezoneSelector((v) => !v)}
+                  style={{
+                    backgroundColor: '#fff', color: GOLD, border: `1px solid ${GOLD}`, borderRadius: 8,
+                    padding: '6px 12px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                  }}
+                >
+                  Change
+                </button>
+              </div>
+            )}
+            {showTimezoneSelector && (
+              <div style={{ marginTop: 10 }}>
+                <select
+                  value={selectedTimezone}
+                  onChange={(e) => setSelectedTimezone(e.target.value)}
+                  style={{
+                    width: '100%', height: 44, borderRadius: 8, border: `1px solid ${BORDER}`,
+                    padding: '0 12px', fontSize: 14, color: TEXT, outline: 'none',
+                    backgroundColor: '#fff',
+                  }}
+                >
+                  <option value="">Select timezone</option>
+                  {TIMEZONE_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                  <button
+                    onClick={() => void handleSaveTimezone(selectedTimezone)}
+                    disabled={savingTimezone || !selectedTimezone}
+                    style={{
+                      backgroundColor: GOLD, color: '#fff', border: 'none', borderRadius: 8,
+                      padding: '8px 16px', fontSize: 13, fontWeight: 600,
+                      cursor: (savingTimezone || !selectedTimezone) ? 'not-allowed' : 'pointer',
+                      opacity: (savingTimezone || !selectedTimezone) ? 0.7 : 1,
+                    }}
+                  >
+                    {savingTimezone ? 'Saving...' : 'Save'}
+                  </button>
+                  <button
+                    onClick={() => { setShowTimezoneSelector(false); setSelectedTimezone(currentTimezone); }}
+                    style={{
+                      backgroundColor: '#fff', color: TEXT_SECONDARY, border: `1px solid ${BORDER}`,
+                      borderRadius: 8, padding: '8px 16px', fontSize: 13, cursor: 'pointer',
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </Section>
+
           {/* Global consent */}
           <Section title="Notification Consent" subtitle="Master switches for all Mitra notifications.">
             <CategoryRow
@@ -256,6 +420,22 @@ export function NotificationPreferencesPage() {
             subtitle="These are deeply personal. Turn them on only if you want Mitra to support you in these moments."
           >
             {SENSITIVE_CATEGORIES.map((cat) => (
+              <CategoryRow
+                key={cat.key}
+                label={cat.label}
+                description={cat.description}
+                value={notifications[cat.key] ?? cat.defaultOn}
+                onToggle={(v) => handleToggle(cat.key, v)}
+              />
+            ))}
+          </Section>
+
+          {/* Rhythm & Practice */}
+          <Section
+            title="Rhythm & Practice"
+            subtitle="Reminders tied to your daily rhythm and chosen practices."
+          >
+            {RHYTHM_CATEGORIES.map((cat) => (
               <CategoryRow
                 key={cat.key}
                 label={cat.label}

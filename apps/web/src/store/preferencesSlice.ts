@@ -33,6 +33,9 @@ export interface NotificationPrefs {
   milestone_reflections: boolean;
   predictive_suggestions: boolean;
   post_room_continuity: boolean;
+  rhythm_reminders: boolean;
+  checkin_companion_nudge: boolean;
+  quick_chant_reminders: boolean;
 }
 
 export interface GlobalConsent {
@@ -78,6 +81,9 @@ const initialState: PreferencesSlice = {
     milestone_reflections: true,
     predictive_suggestions: true,
     post_room_continuity: true,
+    rhythm_reminders: true,
+    checkin_companion_nudge: true,
+    quick_chant_reminders: false,
   },
   global_consent: { receive_push_notifications: true, receive_emails: true },
   voice_consent_given: false,

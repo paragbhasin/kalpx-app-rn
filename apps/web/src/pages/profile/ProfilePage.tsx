@@ -34,27 +34,8 @@ type ProfileFormState = {
   profileName: string;
   ageGroup: string;
   language: string;
-  timezone: string;
-  emails: boolean;
-  pushNotification: boolean;
 };
 
-const TIMEZONES = [
-  { label: "India Standard Time (IST)", value: "Asia/Kolkata" },
-  { label: "Gulf Standard Time (GST)", value: "Asia/Dubai" },
-  { label: "Sri Lanka Standard Time (SLST)", value: "Asia/Colombo" },
-  { label: "British Time (GMT/BST)", value: "Europe/London" },
-  { label: "Central European Time (CET/CEST)", value: "Europe/Berlin" },
-  { label: "Eastern Time (US & Canada)", value: "America/New_York" },
-  { label: "Central Time (US & Canada)", value: "America/Chicago" },
-  { label: "Mountain Time (US & Canada)", value: "America/Denver" },
-  { label: "Pacific Time (US & Canada)", value: "America/Los_Angeles" },
-  { label: "Australian Eastern Time (AEST/AEDT)", value: "Australia/Sydney" },
-  { label: "Australian Western Time (AWST)", value: "Australia/Perth" },
-  { label: "Singapore Time (SGT)", value: "Asia/Singapore" },
-  { label: "Hong Kong Time (HKT)", value: "Asia/Hong_Kong" },
-  { label: "South Africa Standard Time (SAST)", value: "Africa/Johannesburg" },
-];
 
 const PAGE_BG = "#fffaf5";
 const BORDER = "1px solid rgba(184, 134, 75, 0.26)";
@@ -134,9 +115,6 @@ function getInitialForm(profile: UserProfile | null): ProfileFormState {
     language: String(
       (profile?.languages as Array<{ id?: number }> | undefined)?.[0]?.id ?? "",
     ),
-    timezone: String(profile?.timezone ?? "Asia/Kolkata"),
-    emails: Boolean(profile?.emails ?? true),
-    pushNotification: Boolean(profile?.push_notification ?? true),
   };
 }
 
@@ -202,16 +180,13 @@ export function ProfilePage() {
 
   async function handleSaveProfile() {
     const profileName = form.profileName.trim();
-    if (!profileName || !form.language || !form.timezone) return;
+    if (!profileName || !form.language) return;
 
     setSavingProfile(true);
     const payload = {
       profile_name: profileName,
       age_group_id: form.ageGroup ? Number(form.ageGroup) : null,
       language_ids: [Number(form.language)],
-      timezone: form.timezone,
-      emails: form.emails,
-      push_notification: form.pushNotification,
     };
 
     const updated = await updateUserProfile(payload as Partial<UserProfile>);
@@ -220,9 +195,6 @@ export function ProfilePage() {
         ...(profile ?? {}),
         ...updated,
         profile_name: payload.profile_name,
-        timezone: payload.timezone,
-        emails: payload.emails,
-        push_notification: payload.push_notification,
         age_group: findOptionById(options?.age_groups, payload.age_group_id),
         languages: [
           findOptionById(options?.languages, Number(form.language)),
@@ -449,25 +421,6 @@ export function ProfilePage() {
             >
               All notifications will be sent in chosen language
             </p>
-
-            <FieldLabel required>Choose Your Timezone</FieldLabel>
-            <SelectField
-              value={form.timezone}
-              placeholder="Select timezone"
-              options={TIMEZONES}
-              onChange={(value) =>
-                setForm((prev) => ({ ...prev, timezone: value }))
-              }
-            />
-
-            <FieldLabel style={{ marginBottom: 10 }}>Reminders</FieldLabel>
-            <CheckboxRow
-              label="Email Notifications"
-              checked={form.emails}
-              onToggle={() =>
-                setForm((prev) => ({ ...prev, emails: !prev.emails }))
-              }
-            />
           </div>
 
           <div
@@ -483,7 +436,7 @@ export function ProfilePage() {
               loading={savingProfile}
               loadingText="Updating..."
               disabled={
-                !form.profileName.trim() || !form.language || !form.timezone
+                !form.profileName.trim() || !form.language
               }
               data-testid="profile-save-btn"
             >
@@ -856,62 +809,6 @@ function SelectField({
         }}
       />
     </div>
-  );
-}
-
-function CheckboxRow({
-  label,
-  checked,
-  onToggle,
-}: {
-  label: string;
-  checked: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 16,
-        padding: "8px 0",
-        background: "none",
-        border: "none",
-        cursor: "pointer",
-      }}
-    >
-      <span
-        style={{
-          width: 24,
-          height: 24,
-          borderRadius: 3,
-          border: `2px solid ${CTA}`,
-          background: checked ? CTA : "#fff",
-          boxSizing: "border-box",
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#fff",
-          fontSize: 16,
-          lineHeight: 1,
-          flexShrink: 0,
-        }}
-      >
-        {checked ? "✓" : ""}
-      </span>
-      <span
-        style={{
-          fontSize: 16,
-          fontWeight: 500,
-          color: "#222",
-          textAlign: "left",
-        }}
-      >
-        {label}
-      </span>
-    </button>
   );
 }
 

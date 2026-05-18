@@ -44,11 +44,12 @@ export const ROOM_REFLECTION_OPTIONS: Record<VerifiedRoomId, RoomReflectionOptio
 
 // D-C Surface A: per-room completion acknowledgement header shown in RoomReflectionSheet.
 // COPY STATUS: FROZEN — approved by founder 2026-05-11.
+// PARTIAL OVERRIDE 2026-05-17: room_release + room_clarity headers updated per founder approval.
 export const ROOM_COMPLETION_HEADER: Partial<Record<VerifiedRoomId, string>> = {
   room_stillness:  "Pratyahara. The turning inward was the practice.",
   room_connection: "Bhakti. The heart turned.",
-  room_release:    "Sharanagati. One offering, however small.",
-  room_clarity:    "Viveka — the space was given.",
+  room_release:    "Sharanagati. You let one thing go.",
+  room_clarity:    "Viveka. You made space to see.",
   room_growth:     "Tapasya. You stayed.",
   room_joy:        "Ananda. You noticed.",
 };

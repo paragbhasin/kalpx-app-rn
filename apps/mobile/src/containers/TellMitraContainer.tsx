@@ -125,7 +125,7 @@ export default function TellMitraContainer() {
           if (i >= initialMessage.length) {
             clearInterval(interval!);
             setTimeout(() => {
-              void submitThread(initialMessage, 'tell_mitra_prana_entry');
+              void submitThread(initialMessage, 'tell_mitra_prana_entry', undefined, undefined, true);
               setThreadDraft('');
             }, 400);
           }
@@ -365,9 +365,10 @@ export default function TellMitraContainer() {
     sourceSurface: string,
     followupMeta?: TellMitraFollowupMeta,
     energyState?: string,
+    forceReset?: boolean,
   ) => {
     const effectiveSource = freshResetPendingRef.current ? 'tell_mitra_start_fresh' : sourceSurface;
-    const isReset = freshResetPendingRef.current;
+    const isReset = freshResetPendingRef.current || (forceReset === true);
     freshResetPendingRef.current = false;
     const loadingId = genId();
     const now = new Date().toISOString();

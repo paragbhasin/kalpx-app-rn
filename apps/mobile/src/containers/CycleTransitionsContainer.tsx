@@ -41,6 +41,7 @@ import { executeAction } from "../engine/actionExecutor";
 import { mitraAddAdditionalItem } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { interpolate } from "../engine/utils/interpolation";
+import { navigationRef } from "../Shared/Routes/NavigationService";
 import { store } from "../store";
 import { showSnackBar } from "../store/snackBarSlice";
 import { Fonts } from "../theme/fonts";
@@ -936,6 +937,18 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
         state_id: target.state_id || target.id,
       });
     } else {
+      const state = store.getState() as any;
+      const hasActiveInnerPath =
+        state?.door?.homeData?.inner_path_summary?.has_active_path === true;
+      const isRhythmSurface =
+        screenData.runner_source === "rhythm_daily" ||
+        screenData.practice_launch_surface === "rhythm";
+
+      if (isRhythmSurface && !hasActiveInnerPath) {
+        (navigationRef as any).navigate("Home");
+        return;
+      }
+
       loadScreen({
         container_id: "companion_dashboard",
         state_id: "day_active",

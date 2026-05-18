@@ -1,8 +1,7 @@
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useScreenStore } from "../../engine/useScreenBridge";
-
 import React from "react";
+import { useSelector } from "react-redux";
 import {
   Image,
   ImageBackground,
@@ -13,6 +12,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useScreenStore } from "../../engine/useScreenBridge";
+import type { RootState } from "../../store";
 import { Fonts } from "../../theme/fonts";
 
 const INTRO_LINES = [
@@ -24,6 +25,10 @@ const START_BACKGROUND = require("../../../assets/new_home.png");
 
 export default function MitraStartScreen() {
   const navigation = useNavigation<any>();
+  const user = useSelector(
+    (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
+  );
+  const isLoggedIn = !!user;
 
   const updateBackground = useScreenStore((state) => state.updateBackground);
   const updateHeaderHidden = useScreenStore(
@@ -98,13 +103,15 @@ export default function MitraStartScreen() {
               </LinearGradient>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => navigation.navigate("Login")}
-              activeOpacity={0.8}
-              style={styles.returningButton}
-            >
-              <Text style={styles.returningText}>I'm returning</Text>
-            </TouchableOpacity>
+            {!isLoggedIn ? (
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Login")}
+                activeOpacity={0.8}
+                style={styles.returningButton}
+              >
+                <Text style={styles.returningText}>I'm returning</Text>
+              </TouchableOpacity>
+            ) : null}
           </View>
         </ScrollView>
       </SafeAreaView>

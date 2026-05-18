@@ -111,6 +111,7 @@ export default function MitraIntentionScreen() {
           loadScreenWithData({
             containerId: "welcome_onboarding",
             stateId: "turn_2",
+            replace: true,
           }),
         );
         navigation.navigate("DynamicEngine");

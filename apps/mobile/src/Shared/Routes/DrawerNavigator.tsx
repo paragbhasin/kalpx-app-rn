@@ -1,6 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createDrawerNavigator } from "@react-navigation/drawer";
+import { CommonActions } from "@react-navigation/native";
+import { AnyAction } from "@reduxjs/toolkit";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -14,12 +16,10 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
-import { AnyAction } from "@reduxjs/toolkit";
 import Colors from "../../components/Colors";
 import TextComponent from "../../components/TextComponent";
 // Old tracker import removed — Mitra engine manages journey state
 import store, { RootState } from "../../store";
-import { screenActions } from "../../store/screenSlice";
 import { performLogout } from "../../utils/logout";
 import BottomMenu from "./BottomMenu";
 
@@ -79,14 +79,30 @@ const CustomDrawerContent = (props) => {
 
   const handleLogout = async () => {
     await performLogout();
-    // Close the drawer first, then navigate to Home tab as a logged-out guest.
-    // Previously used parentNav?.reset({ routes: [{ name: "Login" }] }) which
-    // silently failed when parentNav resolved to the wrong navigator — leaving
-    // the user on a blank DynamicEngine screen.
     props.navigation.closeDrawer();
-    props.navigation.navigate("HomePage", {
-      screen: "Home",
-    });
+    const rootNav = props.navigation.getParent?.() || props.navigation;
+    rootNav.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          {
+            name: "AppDrawer",
+            state: {
+              index: 0,
+              routes: [
+                {
+                  name: "HomePage",
+                  state: {
+                    index: 0,
+                    routes: [{ name: "Home" }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      }),
+    );
   };
 
   const handleLogin = () => {
@@ -201,16 +217,10 @@ const CustomDrawerContent = (props) => {
       style={{ flexDirection: "row", alignItems: "center", padding: 12 }}
       onPress={() => {
         if (item.name === t("drawer.myRoutine")) {
-          store.dispatch(
-            screenActions.loadScreen({
-              containerId: "portal",
-              stateId: "portal",
-            }),
-          );
           props.navigation.navigate("HomePage", {
             screen: "HomePage",
             params: {
-              screen: "DynamicEngine",
+              screen: "Home",
             },
           });
         } else if (item.title === "Profile") {

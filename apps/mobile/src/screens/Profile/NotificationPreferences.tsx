@@ -134,7 +134,7 @@ const SENSITIVE_CATEGORIES: CategoryConfig[] = [
     key: 'grief_follow',
     label: 'Grief Companionship',
     description: 'Very gentle support during tender times.',
-    defaultOn: false,
+    defaultOn: true,
   },
 ];
 
@@ -154,8 +154,8 @@ const RHYTHM_AND_CHECKIN_CATEGORIES: CategoryConfig[] = [
   {
     key: 'notif_quick_chant_reminders',
     label: 'Mantra Reminders',
-    description: 'An occasional return to your chosen sound. Off by default — you choose.',
-    defaultOn: false,
+    description: 'An occasional return to your chosen sound.',
+    defaultOn: true,
   },
 ];
 

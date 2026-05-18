@@ -100,7 +100,7 @@ const initialState: PreferencesSlice = {
     prep_heads_up: true,
     post_conflict_follow: true,
     evening_reflection: true,
-    grief_follow: false,
+    grief_follow: true,
     festival_ritucharya: true,
     gentle_reengagement: true,
     community_updates: true,
@@ -110,7 +110,7 @@ const initialState: PreferencesSlice = {
     // Gate 1: rhythm, check-in, and mantra reminders
     notif_rhythm_reminders: true,
     notif_checkin_companion_nudge: true,
-    notif_quick_chant_reminders: false,
+    notif_quick_chant_reminders: true,
   },
   global_consent: { receive_push_notifications: true, receive_emails: true },
   voice_consent_given: false,

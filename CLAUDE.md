@@ -15,6 +15,10 @@ pnpm install   # from monorepo root
 cd apps/mobile && npx expo start
 ```
 
+## Cross-Surface Parity Rule
+
+`apps/mobile/src/blocks/room/roomStepCopy.ts` and `apps/web/src/lib/roomStepCopy.ts` must always be identical in copy values. Any change to one must be applied to the other in the same commit. The only allowed structural differences are import paths and type references (`ActionEnvelope` on mobile vs local `ActionLike` on web). `ROOM_COMPLETION_HEADER` and `ROOM_NEXT_STEP_LINE` live in `@kalpx/contracts` and sync automatically — no manual action needed for those.
+
 ## Maestro MCP
 
 The Maestro MCP server is configured in `~/.claude.json`. At the start of every session:

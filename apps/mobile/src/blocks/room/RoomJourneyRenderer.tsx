@@ -400,7 +400,11 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
       action_id: orderedActions[0]?.action_id,
       surface: 'room',
     });
-    setPhase({ id: 'action_intro', actionIndex: 0 });
+    if (!orderedActions[0]) {
+      setPhase({ id: 'completion_return' });
+      return;
+    }
+    handleActionBegin(0);
   }
 
   // ─── "Begin" tap on action_intro ─────────────────────────────────────────

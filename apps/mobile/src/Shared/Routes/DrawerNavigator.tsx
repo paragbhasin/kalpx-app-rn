@@ -22,7 +22,6 @@ import TextComponent from "../../components/TextComponent";
 // Old tracker import removed — Mitra engine manages journey state
 import store, { RootState } from "../../store";
 import { clearDoorState } from "../../store/doorSlice";
-import { screenActions } from "../../store/screenSlice";
 import BottomMenu from "./BottomMenu";
 
 const Drawer = createDrawerNavigator();
@@ -229,16 +228,10 @@ const CustomDrawerContent = (props) => {
       style={{ flexDirection: "row", alignItems: "center", padding: 12 }}
       onPress={() => {
         if (item.name === t("drawer.myRoutine")) {
-          store.dispatch(
-            screenActions.loadScreen({
-              containerId: "portal",
-              stateId: "portal",
-            }),
-          );
           props.navigation.navigate("HomePage", {
             screen: "HomePage",
             params: {
-              screen: "DynamicEngine",
+              screen: "Home",
             },
           });
         } else if (item.title === "Profile") {

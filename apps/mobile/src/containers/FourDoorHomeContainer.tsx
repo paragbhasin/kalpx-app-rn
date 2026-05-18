@@ -429,6 +429,26 @@ export default function FourDoorHomeContainer({
   const currentRouteName = navigation
     .getState?.()
     ?.routes?.slice(-1)?.[0]?.name;
+  const openInnerPathSurface = () => {
+    if (homeData?.inner_path_summary?.has_active_path !== true) {
+      updateScreenData("onboarding_turn", "turn_2");
+      updateScreenData("onboarding_draft_state", {
+        started_at: Date.now(),
+        entry_intention: "inner_path",
+      });
+      loadScreen({
+        container_id: "welcome_onboarding",
+        state_id: "turn_2",
+        replace: true,
+      });
+      if (currentRouteName !== "DynamicEngine") {
+        navigation.navigate("DynamicEngine" as any);
+      }
+      return;
+    }
+
+    navigation.navigate("InnerPath" as any);
+  };
 
   return (
     <View style={styles.screen}>
@@ -511,24 +531,7 @@ export default function FourDoorHomeContainer({
             subtitle={innerPathSubtitle}
             orientationLine={seg === "new" && isFirstVisit ? "Walk a 14-day path with Mitra beside you." : null}
             highlighted={seg === "rhythm_only"}
-            onPress={() => {
-              if (homeData?.inner_path_summary?.has_active_path !== true) {
-                updateScreenData("onboarding_turn", "turn_2");
-                updateScreenData("onboarding_draft_state", {
-                  started_at: Date.now(),
-                  entry_intention: "inner_path",
-                });
-                loadScreen({
-                  container_id: "welcome_onboarding",
-                  state_id: "turn_2",
-                });
-                if (currentRouteName !== "DynamicEngine") {
-                  navigation.navigate("DynamicEngine" as any);
-                }
-                return;
-              }
-              navigation.navigate("InnerPath" as any);
-            }}
+            onPress={openInnerPathSurface}
           />
           <DoorCard
             Icon={Mp2Icon}
@@ -616,7 +619,7 @@ export default function FourDoorHomeContainer({
                 )}
                 {!acw?.suggestion && !!acw?.prana_label && (
                   <View style={{ flexDirection: "row", gap: 12, marginTop: 12, flexWrap: "wrap" }}>
-                    <TouchableOpacity onPress={() => navigation.navigate("InnerPath" as any)}>
+                    <TouchableOpacity onPress={openInnerPathSurface}>
                       <Text style={styles.softCtaLink}>Continue Inner Path</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => void openMyRhythmSurface()}>

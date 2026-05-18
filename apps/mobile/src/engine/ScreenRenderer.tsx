@@ -17,7 +17,6 @@ import GenericContainer from "../containers/GenericContainer";
 import InsightsProgressContainer from "../containers/InsightsProgressContainer";
 import InsightSummaryContainer from "../containers/InsightSummaryContainer";
 import LockRitualContainer from "../containers/LockRitualContainer";
-import PortalContainer from "../containers/PortalContainer";
 import PortalSplashContainer from "../containers/PortalSplashContainer";
 import PracticeRunnerContainer from "../containers/PracticeRunnerContainer";
 import RoutineBuilderContainer from "../containers/RoutineBuilderContainer";
@@ -57,7 +56,6 @@ import TellMitraContainer from "../containers/TellMitraContainer";
 import NewDashboardContainer from "../containers/NewDashboardContainer";
 
 const containerMap: Record<string, React.ComponentType<any>> = {
-  portal: PortalContainer,
   generic: GenericContainer,
   choice_stack: ChoiceStackContainer,
   stable_scan: StableScanContainer,

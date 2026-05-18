@@ -155,13 +155,20 @@ export type OnboardingDraftState = {
 
 const STORAGE_KEY = 'kalpx_journey_state';
 
+const normalizeScreenTarget = (containerId: string, stateId: string) => {
+  if (containerId === 'portal') {
+    return { containerId: 'welcome_onboarding', stateId: 'turn_1' };
+  }
+  return { containerId, stateId };
+};
+
 // ---------------------------------------------------------------------------
 // Initial state
 // ---------------------------------------------------------------------------
 
 const initialState: ScreenState = {
-  currentContainerId: 'portal',
-  currentStateId: 'portal',
+  currentContainerId: 'welcome_onboarding',
+  currentStateId: 'turn_1',
   currentScreen: null,
   currentBackground: null,
   isHeaderHidden: false,
@@ -215,17 +222,18 @@ export const loadScreenWithData = createAsyncThunk(
   ) => {
     // Resolve the schema first, then atomically update nav + schema in one
     // dispatch so ScreenRenderer never sees a null currentScreen gap.
-    const screenSchema = await getScreen(containerId, stateId);
+    const target = normalizeScreenTarget(containerId, stateId);
+    const screenSchema = await getScreen(target.containerId, target.stateId);
     if (screenSchema) {
       dispatch({
         type: 'screen/loadScreenWithSchema',
-        payload: { containerId, stateId, schema: screenSchema, replace },
+        payload: { ...target, schema: screenSchema, replace },
       });
     } else {
       // Schema unavailable — fall back to the old clear-then-navigate path.
-      dispatch({ type: 'screen/loadScreen', payload: { containerId, stateId, replace } });
+      dispatch({ type: 'screen/loadScreen', payload: { ...target, replace } });
       console.warn(
-        `[SCREEN_SLICE] No schema found for ${containerId}/${stateId}`,
+        `[SCREEN_SLICE] No schema found for ${target.containerId}/${target.stateId}`,
       );
     }
 
@@ -240,18 +248,19 @@ export const goBackWithData = createAsyncThunk(
     if (screen.history.length === 0) return null;
 
     const previous = screen.history[screen.history.length - 1];
-    const screenSchema = await getScreen(previous.containerId, previous.stateId);
+    const target = normalizeScreenTarget(previous.containerId, previous.stateId);
+    const screenSchema = await getScreen(target.containerId, target.stateId);
 
     if (screenSchema) {
       dispatch({
         type: 'screen/goBackWithSchema',
-        payload: { schema: screenSchema },
+        payload: { ...target, schema: screenSchema },
       });
     } else {
       // Schema unavailable — fall back to clear-then-navigate.
       dispatch({ type: 'screen/goBack' });
       console.warn(
-        `[SCREEN_SLICE] No schema found for back target ${previous.containerId}/${previous.stateId}`,
+        `[SCREEN_SLICE] No schema found for back target ${target.containerId}/${target.stateId}`,
       );
     }
 
@@ -268,7 +277,11 @@ const screenSlice = createSlice({
   initialState,
   reducers: {
     loadScreen(state, action: PayloadAction<{ containerId: string; stateId: string; replace?: boolean }>) {
-      const { containerId, stateId, replace = false } = action.payload;
+      const { replace = false } = action.payload;
+      const { containerId, stateId } = normalizeScreenTarget(
+        action.payload.containerId,
+        action.payload.stateId,
+      );
       if (!replace && state.currentContainerId && state.currentStateId) {
         state.history.push({
           containerId: state.currentContainerId,
@@ -289,7 +302,11 @@ const screenSlice = createSlice({
       state,
       action: PayloadAction<{ containerId: string; stateId: string; schema: any; replace?: boolean }>,
     ) {
-      const { containerId, stateId, schema, replace = false } = action.payload;
+      const { schema, replace = false } = action.payload;
+      const { containerId, stateId } = normalizeScreenTarget(
+        action.payload.containerId,
+        action.payload.stateId,
+      );
       if (!replace && state.currentContainerId && state.currentStateId) {
         state.history.push({
           containerId: state.currentContainerId,
@@ -304,9 +321,10 @@ const screenSlice = createSlice({
     goBack(state) {
       if (state.history.length === 0) return;
       const previous = state.history[state.history.length - 1];
+      const target = normalizeScreenTarget(previous.containerId, previous.stateId);
       state.history = state.history.slice(0, -1);
-      state.currentContainerId = previous.containerId;
-      state.currentStateId = previous.stateId;
+      state.currentContainerId = target.containerId;
+      state.currentStateId = target.stateId;
       // Clear schema immediately — prevents ScreenRenderer from briefly
       // mounting the parent container with the child screen's schema while
       // the parent schema is being resolved asynchronously.
@@ -315,12 +333,19 @@ const screenSlice = createSlice({
 
     // Atomic back navigation: pop history, set previous IDs, and set schema
     // in one dispatch so ScreenRenderer never sees a null gap.
-    goBackWithSchema(state, action: PayloadAction<{ schema: any }>) {
+    goBackWithSchema(
+      state,
+      action: PayloadAction<{ containerId?: string; stateId?: string; schema: any }>,
+    ) {
       if (state.history.length === 0) return;
       const previous = state.history[state.history.length - 1];
+      const target = normalizeScreenTarget(
+        action.payload.containerId ?? previous.containerId,
+        action.payload.stateId ?? previous.stateId,
+      );
       state.history = state.history.slice(0, -1);
-      state.currentContainerId = previous.containerId;
-      state.currentStateId = previous.stateId;
+      state.currentContainerId = target.containerId;
+      state.currentStateId = target.stateId;
       state.currentScreen = action.payload.schema;
     },
 

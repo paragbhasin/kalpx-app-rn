@@ -2107,10 +2107,9 @@ export async function executeAction(
       }
 
       // ================================================================
-      // RETURN_TO_START — navigate back to portal / onboarding
+      // RETURN_TO_START — navigate back to the Home flow.
       // ================================================================
       case "return_to_start": {
-        loadScreen({ container_id: "portal", state_id: "portal" });
         rootNavigate("AppDrawer", {
           screen: "HomePage",
           params: {
@@ -4819,11 +4818,19 @@ export async function executeAction(
         // Return to the surface that launched this room session.
         // When a direct-route screen (BrowseRooms, TellMitra, Four Door Home, etc.)
         // pushed DynamicEngine onto the stack, goBack() returns there cleanly.
-        // Fallback to portal if no RN stack depth (legacy engine-only path).
+        // Fallback to Home if no RN stack depth (legacy engine-only path).
         if (navigationRef.isReady() && navigationRef.canGoBack()) {
           navigationRef.goBack();
         } else {
-          loadScreen({ container_id: "portal", state_id: "portal" } as any);
+          rootNavigate("AppDrawer", {
+            screen: "HomePage",
+            params: {
+              screen: "HomePage",
+              params: {
+                screen: "Home",
+              },
+            },
+          });
         }
         break;
       }

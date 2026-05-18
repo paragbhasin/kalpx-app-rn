@@ -14,14 +14,16 @@ import { useNavigationState } from "@react-navigation/native";
 import { useScrollContext } from "../context/ScrollContext";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { navigationRef } from "../Shared/Routes/NavigationService";
+import { isMitraRouteName } from "../Shared/Routes/mitraRouteNames";
 import Header from "./Header";
 
 // Total header height including status bar safe area on Android
 const HEADER_HEIGHT =
   Platform.OS === "android" ? 45 + (StatusBar.currentHeight || 0) : 45;
+const DEFAULT_SURFACE = "#FAF7F2";
 
 const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
-  const { headerY, headerBgOpacity, toggleVisibility } = useScrollContext();
+  const { headerY, toggleVisibility } = useScrollContext();
   const currentBackground = useScreenStore((state) => state.currentBackground);
   const isHeaderHidden = useScreenStore((state) => state.isHeaderHidden);
 
@@ -201,10 +203,14 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
 
   // Background-driven Mitra screens should not get any forced header fill.
   const hasBg = !!currentBackground;
+  const shouldUseDefaultSurface =
+    !hasBg && isMitraRouteName(leafRouteName ?? "");
   const backArrowColor = hasBg ? "#C99317" : "#432104";
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, shouldUseDefaultSurface && styles.defaultSurface]}
+    >
       {currentBackground && (
         <ImageBackground
           source={currentBackground}
@@ -217,7 +223,8 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
           style={[
             styles.headerContainer,
             { transform: [{ translateY: headerY }] },
-            !hasBg && styles.headerSolid,
+            !hasBg &&
+              (shouldUseDefaultSurface ? styles.defaultSurface : styles.headerSolid),
           ]}
         >
           {/* Back button + Header in one row. */}
@@ -232,7 +239,12 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
               </TouchableOpacity>
             ) : null}
             <View style={styles.headerFlex}>
-              <Header isTransparent={hasBg} />
+              <Header
+                isTransparent={hasBg}
+                backgroundColor={
+                  shouldUseDefaultSurface ? DEFAULT_SURFACE : undefined
+                }
+              />
             </View>
           </View>
         </Animated.View>
@@ -240,6 +252,7 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
       <View
         style={[
           styles.content,
+          shouldUseDefaultSurface && styles.defaultSurface,
           !isHeaderHidden && { paddingTop: HEADER_HEIGHT },
         ]}
       >
@@ -286,6 +299,9 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  defaultSurface: {
+    backgroundColor: DEFAULT_SURFACE,
   },
 });
 

@@ -729,7 +729,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#432104',
     minHeight: 80,
-    backgroundColor: '#FFFCF6',
+    backgroundColor: '#FAF7F2',
     textAlignVertical: 'top',
   },
   charCount: {

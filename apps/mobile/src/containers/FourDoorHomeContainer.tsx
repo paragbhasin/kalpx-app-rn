@@ -229,11 +229,13 @@ export default function FourDoorHomeContainer({
     }, [loadHome]),
   );
 
-  useEffect(() => {
-    updateBackground(require("../../assets/beige_bg.png"));
-    updateHeaderHidden(false);
-    return () => updateHeaderHidden(false);
-  }, [updateBackground, updateHeaderHidden]);
+  useFocusEffect(
+    useCallback(() => {
+      updateBackground(require("../../assets/beige_bg.png"));
+      updateHeaderHidden(false);
+      return () => updateHeaderHidden(false);
+    }, [updateBackground, updateHeaderHidden]),
+  );
 
   const handleFeelingSelect = useCallback(
     async (feeling: FeelingOption) => {
@@ -286,6 +288,12 @@ export default function FourDoorHomeContainer({
   const openTellMitraSurface = useCallback(() => {
     navigation.navigate("TellMitra" as any);
   }, [navigation]);
+
+  const openMyRhythmSurface = useCallback(() => {
+    const hasRhythm = homeData?.companion_rhythm?.has_rhythm === true;
+    const target = hasRhythm ? "RhythmHome" : "RhythmSetup";
+    navigation.navigate(target as any);
+  }, [homeData?.companion_rhythm?.has_rhythm, navigation]);
 
   const rhythmBand = getRhythmTimeBand();
   const seg = (homeData?.user_surface_state?.segment ??
@@ -495,9 +503,7 @@ export default function FourDoorHomeContainer({
             label={DOOR_LABELS.my_rhythm}
             subtitle={rhythmSubtitle}
             orientationLine={seg === "new" && isFirstVisit ? "Shape the day with a simple rhythm." : null}
-            onPress={() => {
-              navigation.navigate("RhythmHome" as any);
-            }}
+            onPress={() => void openMyRhythmSurface()}
           />
           <DoorCard
             Icon={Mp3Icon}
@@ -613,7 +619,7 @@ export default function FourDoorHomeContainer({
                     <TouchableOpacity onPress={() => navigation.navigate("InnerPath" as any)}>
                       <Text style={styles.softCtaLink}>Continue Inner Path</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => navigation.navigate("RhythmHome" as any)}>
+                    <TouchableOpacity onPress={() => void openMyRhythmSurface()}>
                       <Text style={styles.softCtaLink}>My Rhythm</Text>
                     </TouchableOpacity>
                   </View>

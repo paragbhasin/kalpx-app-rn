@@ -13,6 +13,8 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Animated,
+  Easing,
   Image,
   ImageBackground,
   LayoutAnimation,
@@ -25,12 +27,9 @@ import {
   TouchableOpacity,
   UIManager,
   View,
-  Animated,
-  Easing,
 } from "react-native";
 import RudrakshBead from "../../../assets/rudraksh.svg";
 import AudioPlayerBlock from "../../blocks/AudioPlayerBlock";
-import { navigate as rootNavigate } from "../../Shared/Routes/NavigationService";
 import type { MantraTextCardProps } from "../../containers/CycleTransitionsContainer";
 import {
   getQuickResetOpening,
@@ -39,6 +38,7 @@ import {
   postQuickResetSetDefault,
 } from "../../engine/mitraApi";
 import { useScreenStore } from "../../engine/useScreenBridge";
+import { navigate as rootNavigate } from "../../Shared/Routes/NavigationService";
 import { Fonts } from "../../theme/fonts";
 
 type Phase = "loading" | "opening" | "preview" | "done" | "error";
@@ -88,7 +88,7 @@ function HighlightedToast({
 }: {
   visible: boolean;
   title: string;
-  message: string;
+  message?: string | null;
   onClose: () => void;
 }) {
   if (!visible) return null;
@@ -109,7 +109,9 @@ function HighlightedToast({
             </View>
             <View style={styles.toastCopy}>
               <Text style={styles.toastTitle}>{title}</Text>
-              <Text style={styles.toastMessage}>{message}</Text>
+              {message ? (
+                <Text style={styles.toastMessage}>{message}</Text>
+              ) : null}
             </View>
             <TouchableOpacity
               onPress={onClose}
@@ -184,15 +186,19 @@ export default function QuickResetScreen({
   embedded?: boolean;
 }) {
   const navigation = useNavigation<any>();
-  const { goBack, updateBackground } = useScreenStore();
+  const { goBack, updateBackground, updateHeaderHidden } = useScreenStore();
 
   useFocusEffect(
     useCallback(() => {
       if (!embedded) {
         updateBackground(require("../../../assets/beige_bg.png"));
-        return () => updateBackground(null);
+        updateHeaderHidden(false);
+        return () => {
+          updateBackground(null);
+          updateHeaderHidden(false);
+        };
       }
-    }, [updateBackground, embedded]),
+    }, [updateBackground, updateHeaderHidden, embedded]),
   );
 
   const [phase, setPhase] = useState<Phase>("loading");
@@ -219,6 +225,8 @@ export default function QuickResetScreen({
     "Your rhythm has been gently realigned.",
   );
   const [mantraUpdatedToastVisible, setMantraUpdatedToastVisible] =
+    useState(false);
+  const [returnToFourDoorOnToastClose, setReturnToFourDoorOnToastClose] =
     useState(false);
 
   const runnerStartedAt = useRef<number>(0);
@@ -261,13 +269,29 @@ export default function QuickResetScreen({
     };
   }, [ringSpin]);
 
+  const handleHighlightedToastClose = useCallback(() => {
+    setMantraUpdatedToastVisible(false);
+    if (!returnToFourDoorOnToastClose) return;
+
+    setReturnToFourDoorOnToastClose(false);
+    if (embedded) {
+      goBack();
+      return;
+    }
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+    rootNavigate("Home");
+  }, [embedded, goBack, navigation, returnToFourDoorOnToastClose]);
+
   useEffect(() => {
     if (!mantraUpdatedToastVisible) return;
     const timeout = setTimeout(() => {
-      setMantraUpdatedToastVisible(false);
+      handleHighlightedToastClose();
     }, 2600);
     return () => clearTimeout(timeout);
-  }, [mantraUpdatedToastVisible]);
+  }, [handleHighlightedToastClose, mantraUpdatedToastVisible]);
 
   // ── Secondary action: "Show another calming mantra" ────────────────────────
   const handleShowAnother = useCallback(async () => {
@@ -348,7 +372,10 @@ export default function QuickResetScreen({
     });
     if (result && result.copy) {
       setCompletionData(result);
-      setPhase("done");
+      setHighlightedToastTitle(result.copy.headline);
+      setHighlightedToastMessage(result.copy.subtext ?? "");
+      setReturnToFourDoorOnToastClose(true);
+      setMantraUpdatedToastVisible(true);
     } else {
       if (embedded) {
         goBack();
@@ -359,7 +386,7 @@ export default function QuickResetScreen({
   }, [activeMantra, embedded, goBack, isChantingActive, navigation]);
 
   const handleCloseToHome = useCallback(() => {
-    rootNavigate("Home");
+    rootNavigate("InnerPath");
   }, []);
 
   // ── Secondary actions handler ──────────────────────────────────────────────
@@ -423,8 +450,14 @@ export default function QuickResetScreen({
                   },
                 ]}
               >
-                <RudrakshBead width={28} height={28} style={styles.previewBead} />
-                {i === progressInCycle && <View style={styles.previewBeadPointer} />}
+                <RudrakshBead
+                  width={28}
+                  height={28}
+                  style={styles.previewBead}
+                />
+                {i === progressInCycle && (
+                  <View style={styles.previewBeadPointer} />
+                )}
               </View>
             ))}
           </Animated.View>
@@ -536,17 +569,6 @@ export default function QuickResetScreen({
       </Text>
     ));
 
-  const handleBack = useCallback(() => {
-    if (navigation.canGoBack()) {
-      navigation.goBack();
-      return;
-    }
-    if (embedded) {
-      goBack();
-      return;
-    }
-  }, [embedded, goBack, navigation]);
-
   // ── Phases ─────────────────────────────────────────────────────────────────
 
   if (phase === "loading") {
@@ -566,7 +588,7 @@ export default function QuickResetScreen({
             visible={mantraUpdatedToastVisible}
             title={highlightedToastTitle}
             message={highlightedToastMessage}
-            onClose={() => setMantraUpdatedToastVisible(false)}
+            onClose={handleHighlightedToastClose}
           />
         </ImageBackground>
       </SafeAreaView>
@@ -598,7 +620,7 @@ export default function QuickResetScreen({
             visible={mantraUpdatedToastVisible}
             title={highlightedToastTitle}
             message={highlightedToastMessage}
-            onClose={() => setMantraUpdatedToastVisible(false)}
+            onClose={handleHighlightedToastClose}
           />
         </ImageBackground>
       </SafeAreaView>
@@ -630,7 +652,7 @@ export default function QuickResetScreen({
             visible={mantraUpdatedToastVisible}
             title={highlightedToastTitle}
             message={highlightedToastMessage}
-            onClose={() => setMantraUpdatedToastVisible(false)}
+            onClose={handleHighlightedToastClose}
           />
         </ImageBackground>
       </SafeAreaView>
@@ -661,7 +683,7 @@ export default function QuickResetScreen({
             visible={mantraUpdatedToastVisible}
             title={highlightedToastTitle}
             message={highlightedToastMessage}
-            onClose={() => setMantraUpdatedToastVisible(false)}
+            onClose={handleHighlightedToastClose}
           />
         </ImageBackground>
       </SafeAreaView>
@@ -717,7 +739,7 @@ export default function QuickResetScreen({
             visible={mantraUpdatedToastVisible}
             title={highlightedToastTitle}
             message={highlightedToastMessage}
-            onClose={() => setMantraUpdatedToastVisible(false)}
+            onClose={handleHighlightedToastClose}
           />
         </ImageBackground>
       </SafeAreaView>
@@ -741,7 +763,7 @@ export default function QuickResetScreen({
           visible={mantraUpdatedToastVisible}
           title={highlightedToastTitle}
           message={highlightedToastMessage}
-          onClose={() => setMantraUpdatedToastVisible(false)}
+          onClose={handleHighlightedToastClose}
         />
       </ImageBackground>
     </SafeAreaView>
@@ -855,7 +877,7 @@ const styles = StyleSheet.create({
     color: "#432104",
     textAlign: "center",
     lineHeight: 36,
-    marginTop: -30,
+    // marginTop: -30,
   },
   openingSubhead: {
     fontSize: 12,

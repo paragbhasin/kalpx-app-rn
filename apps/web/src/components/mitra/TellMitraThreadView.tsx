@@ -22,7 +22,7 @@ const RETURN_CARD_CHIPS: TellMitraFollowupOption[] = [
   { label: "Tell Mitra more",      value: "tell_mitra_more" },
 ];
 
-const ROBOTIC_PATTERNS = /scattered|agitated|drained|energized|balanced|state_tag/i;
+const ROBOTIC_PATTERNS = /scattered|agitated|drained|energized|balanced|state_tag|spl_pattern/i;
 
 function shouldShowPriorContext(summary: string | null | undefined): boolean {
   if (!summary) return false;

@@ -114,21 +114,27 @@ export default function TellMitraContainer() {
 
   useEffect(() => {
     if (!THREAD_UI_ENABLED) return;
-    // Prana entry: typewriter effect then auto-submit, so message appears as if user typed it.
+    // Prana entry: wait for navigation animation to finish, then typewriter, then auto-submit.
     if (initialMessage) {
-      let i = 0;
-      const interval = setInterval(() => {
-        i += 1;
-        setThreadDraft(initialMessage.slice(0, i));
-        if (i >= initialMessage.length) {
-          clearInterval(interval);
-          setTimeout(() => {
-            void submitThread(initialMessage, 'tell_mitra_prana_entry');
-            setThreadDraft('');
-          }, 400);
-        }
-      }, 60);
-      return () => clearInterval(interval);
+      let interval: ReturnType<typeof setInterval> | null = null;
+      const startDelay = setTimeout(() => {
+        let i = 0;
+        interval = setInterval(() => {
+          i += 1;
+          setThreadDraft(initialMessage.slice(0, i));
+          if (i >= initialMessage.length) {
+            clearInterval(interval!);
+            setTimeout(() => {
+              void submitThread(initialMessage, 'tell_mitra_prana_entry');
+              setThreadDraft('');
+            }, 400);
+          }
+        }, 60);
+      }, 500);
+      return () => {
+        clearTimeout(startDelay);
+        if (interval) clearInterval(interval);
+      };
     }
     let cancelled = false;
     (async () => {

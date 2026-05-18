@@ -135,16 +135,16 @@ describe('sanitizeBackendMeta', () => {
   });
 });
 
-// ── firePixel consent gate ────────────────────────────────────────────────────
+// ── firePixel — marketing consent gate ───────────────────────────────────────
+// Meta Pixel is gated on kalpx_marketing_consent, NOT analytics consent.
 
-describe('firePixel consent gate (via webAnalytics.track)', () => {
-  const originalLocalStorage = global.localStorage;
+describe('firePixel marketing consent gate (via webAnalytics.track)', () => {
   const originalFbq = (global.window as any).fbq;
 
   beforeEach(() => {
     (global.window as any).fbq = vi.fn();
     localStorage.clear();
-    // Reset module so _consentGranted re-reads localStorage
+    // Reset module so consent state re-reads from localStorage
     vi.resetModules();
   });
 
@@ -152,17 +152,50 @@ describe('firePixel consent gate (via webAnalytics.track)', () => {
     (global.window as any).fbq = originalFbq;
   });
 
-  it('does not call window.fbq when consent is absent', async () => {
+  it('does not call window.fbq when kalpx_marketing_consent is absent', async () => {
     const { webAnalytics } = await import('../lib/webAnalytics');
-    localStorage.removeItem('kalpx_analytics_consent');
+    localStorage.removeItem('kalpx_marketing_consent');
     webAnalytics.track('test_event', { event_category: 'home' });
     expect((global.window as any).fbq).not.toHaveBeenCalled();
   });
 
-  it('does not call window.fbq when consent is denied', async () => {
-    localStorage.setItem('kalpx_analytics_consent', 'denied');
+  it('does not call window.fbq when kalpx_marketing_consent is denied', async () => {
+    localStorage.setItem('kalpx_marketing_consent', 'denied');
     const { webAnalytics } = await import('../lib/webAnalytics');
     webAnalytics.track('test_event', { event_category: 'home' });
     expect((global.window as any).fbq).not.toHaveBeenCalled();
+  });
+
+  it('does not call window.fbq when analytics consent is granted but marketing is absent', async () => {
+    localStorage.setItem('kalpx_analytics_consent', 'granted');
+    localStorage.removeItem('kalpx_marketing_consent');
+    const { webAnalytics } = await import('../lib/webAnalytics');
+    webAnalytics.track('test_event', { event_category: 'home' });
+    expect((global.window as any).fbq).not.toHaveBeenCalled();
+  });
+});
+
+// ── fireGA4 — analytics consent gate ─────────────────────────────────────────
+// fireGA4 is gated on kalpx_analytics_consent. Stub does not call gtag yet.
+
+describe('fireGA4 analytics consent gate', () => {
+  it('fireGA4 is a no-op when kalpx_analytics_consent is absent', async () => {
+    localStorage.clear();
+    const { fireGA4 } = await import('../lib/webAnalytics');
+    // No error thrown; stub silently returns.
+    expect(() => fireGA4('test_event', { event_category: 'home' })).not.toThrow();
+  });
+
+  it('fireGA4 is a no-op when kalpx_analytics_consent is denied', async () => {
+    localStorage.setItem('kalpx_analytics_consent', 'denied');
+    const { fireGA4 } = await import('../lib/webAnalytics');
+    expect(() => fireGA4('test_event', { event_category: 'home' })).not.toThrow();
+  });
+
+  it('fireGA4 is a no-op (stub) even when kalpx_analytics_consent is granted', async () => {
+    localStorage.setItem('kalpx_analytics_consent', 'granted');
+    const { fireGA4 } = await import('../lib/webAnalytics');
+    // Stub — does not call gtag yet; no error, no side effects.
+    expect(() => fireGA4('test_event', { event_category: 'home' })).not.toThrow();
   });
 });

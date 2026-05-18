@@ -95,22 +95,43 @@ export function sanitizeBackendMeta(
   return out;
 }
 
+// ── Consent keys ────────────────────────────────────────────────────────────
+// All four are written together whenever the user saves preferences.
+export const ANALYTICS_CONSENT_KEY = 'kalpx_analytics_consent';
+export const MARKETING_CONSENT_KEY = 'kalpx_marketing_consent';
+export const CONSENT_VERSION_KEY = 'kalpx_consent_version';
+export const CONSENT_UPDATED_AT_KEY = 'kalpx_consent_updated_at';
+
 // ── Consent state ───────────────────────────────────────────────────────────
-// Mirrors the ConsentBanner's localStorage key. Updated without reload via custom event.
-let _consentGranted = (typeof localStorage !== 'undefined')
-  && localStorage.getItem('kalpx_analytics_consent') === 'granted';
+// Analytics consent: gates GA4 / Firebase Analytics (product analytics).
+// Marketing consent: gates Meta Pixel / retargeting (advertising).
+// Both default to denied if key is absent.
+let _analyticsConsentGranted = (typeof localStorage !== 'undefined')
+  && localStorage.getItem(ANALYTICS_CONSENT_KEY) === 'granted';
+
+let _marketingConsentGranted = (typeof localStorage !== 'undefined')
+  && localStorage.getItem(MARKETING_CONSENT_KEY) === 'granted';
 
 if (typeof window !== 'undefined') {
   window.addEventListener('consent_updated', () => {
-    _consentGranted = localStorage.getItem('kalpx_analytics_consent') === 'granted';
+    _analyticsConsentGranted = localStorage.getItem(ANALYTICS_CONSENT_KEY) === 'granted';
+    _marketingConsentGranted = localStorage.getItem(MARKETING_CONSENT_KEY) === 'granted';
   });
 }
 
+// Meta Pixel — gated on marketing consent (advertising).
 function firePixel(eventName: string, properties?: Record<string, any>) {
-  if (!_consentGranted) return;
+  if (!_marketingConsentGranted) return;
   if (!WEB_ENV.metaPixelId || !window.fbq) return;
   const safeProps = filterPixelProperties(properties ?? {});
   window.fbq('track', eventName, safeProps);
+}
+
+// GA4 stub — gated on analytics consent. Wire gtag() here when GA4 is activated.
+// Do NOT activate GA4 in this session: no SDK calls until consent gate is prod-verified.
+export function fireGA4(_eventName: string, _properties?: Record<string, any>): void {
+  if (!_analyticsConsentGranted) return;
+  // TODO: gtag('event', _eventName, filterPixelProperties(_properties ?? {}));
 }
 
 async function _postEvent(path: string, eventName: string, properties?: Record<string, any>) {

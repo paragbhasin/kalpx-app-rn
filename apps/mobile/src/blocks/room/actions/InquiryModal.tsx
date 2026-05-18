@@ -87,16 +87,6 @@ const InquiryModal: React.FC<Props> = ({
     }
   }, [visible, openedFired, onOpened]);
 
-  // Room-guided: skip category list when only one option exists.
-  useEffect(() => {
-    if (isRoomGuided && visible && !selected) {
-      const cats = inquiryPayload?.categories ?? [];
-      if (cats.length === 1) {
-        setSelected(cats[0]);
-        onCategorySelected?.(cats[0]);
-      }
-    }
-  }, [isRoomGuided, visible, inquiryPayload, selected, onCategorySelected]);
 
   const categories = inquiryPayload?.categories ?? [];
 

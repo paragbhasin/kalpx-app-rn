@@ -166,6 +166,7 @@ export function RoomGuidedSection({
   const [activeAction, setActiveAction] = useState<any | null>(null);
   const [activeStepPayload, setActiveStepPayload] = useState<any>(null);
   const [interstitialLine, setInterstitialLine] = useState<string | null>(null);
+  const [pendingNextAction, setPendingNextAction] = useState<any | null>(null);
   const interstitialIndexRef = useRef(0);
   const [mantrasOpeningCardAction, setMantrasOpeningCardAction] = useState<any | null>(null);
   const [exitConfirmVisible, setExitConfirmVisible] = useState(false);
@@ -197,10 +198,7 @@ export function RoomGuidedSection({
     const lineIndex = interstitialIndexRef.current % BETWEEN_STEP_LINES.length;
     interstitialIndexRef.current += 1;
     setInterstitialLine(BETWEEN_STEP_LINES[lineIndex]);
-    setTimeout(() => {
-      setInterstitialLine(null);
-      openAction(nextAction);
-    }, 1800);
+    setPendingNextAction(nextAction);
   }
 
   function openAction(
@@ -1048,15 +1046,32 @@ export function RoomGuidedSection({
 
       {interstitialLine && (
         <div
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            const action = pendingNextAction;
+            setInterstitialLine(null);
+            setPendingNextAction(null);
+            if (action) openAction(action);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              const action = pendingNextAction;
+              setInterstitialLine(null);
+              setPendingNextAction(null);
+              if (action) openAction(action);
+            }
+          }}
           style={{
             position: "fixed",
             inset: 0,
             background: "rgba(251, 246, 239, 0.93)",
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
             zIndex: 200,
-            pointerEvents: "none",
+            cursor: "pointer",
           }}
         >
           <p
@@ -1072,6 +1087,17 @@ export function RoomGuidedSection({
             }}
           >
             {interstitialLine}
+          </p>
+          <p
+            style={{
+              fontFamily: "var(--kalpx-font-sans, system-ui, sans-serif)",
+              fontSize: 13,
+              color: "#A08060",
+              marginTop: 24,
+              letterSpacing: "0.5px",
+            }}
+          >
+            Tap when ready
           </p>
         </div>
       )}

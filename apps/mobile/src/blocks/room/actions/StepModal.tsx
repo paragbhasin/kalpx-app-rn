@@ -621,18 +621,13 @@ const TimerBody: React.FC<TimerBodyProps> = ({
     if (atZero) setRunning(false);
   }, [atZero]);
 
-  // Auto-advance with completion line at zero (room-guided only).
   const [completionLineText, setCompletionLineText] = useState<string | null>(null);
   useEffect(() => {
     if (!atZero || !isRoomGuided || hasCompletedRef.current) return;
     hasCompletedRef.current = true;
     const line = TIMER_COMPLETION_LINES[kind] ?? null;
     if (line) setCompletionLineText(line);
-    const t = setTimeout(() => {
-      onDone({});
-    }, 1500);
-    return () => clearTimeout(t);
-  }, [atZero, isRoomGuided, kind, onDone]);
+  }, [atZero, isRoomGuided, kind]);
 
   const mm = Math.floor(remaining / 60);
   const ss = remaining % 60;
@@ -649,8 +644,11 @@ const TimerBody: React.FC<TimerBodyProps> = ({
     <View style={[styles.timerRoot, isScreen ? styles.screenTimerRoot : null]}>
       {/* Completion line overlay (room-guided) */}
       {completionLineText ? (
-        <View style={styles.timerCompletionOverlay} pointerEvents="none">
+        <View style={styles.timerCompletionOverlay}>
           <Text style={styles.timerCompletionLine}>{completionLineText}</Text>
+          <TouchableOpacity style={styles.timerContinueBtn} onPress={() => onDone({})}>
+            <Text style={styles.timerContinueBtnText}>Continue</Text>
+          </TouchableOpacity>
         </View>
       ) : null}
 
@@ -1000,10 +998,7 @@ const GroundingBody: React.FC<{
     if (isLast) {
       if (isRoomGuided && !hasCompletedRef.current) {
         hasCompletedRef.current = true;
-        setClosingText("The world is present around you.");
-        setTimeout(() => {
-          onDone({ grounding: answers.map((a) => a.trim()) });
-        }, 1500);
+        setClosingText("Good. You are here.");
       } else if (!isRoomGuided) {
         onDone({ grounding: answers.map((a) => a.trim()) });
       }
@@ -1014,8 +1009,14 @@ const GroundingBody: React.FC<{
 
   if (closingText) {
     return (
-      <View style={styles.timerRoot}>
+      <View style={[styles.timerRoot, { alignItems: "center", justifyContent: "center" }]}>
         <Text style={styles.timerCompletionLine}>{closingText}</Text>
+        <TouchableOpacity
+          style={styles.timerContinueBtn}
+          onPress={() => onDone({ grounding: answers.map((a) => a.trim()) })}
+        >
+          <Text style={styles.timerContinueBtnText}>Continue</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -1693,6 +1694,19 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingHorizontal: 32,
     lineHeight: 30,
+  },
+  timerContinueBtn: {
+    marginTop: 28,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+    backgroundColor: "#6B4A1E",
+  },
+  timerContinueBtnText: {
+    fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
+    fontSize: 16,
+    color: "#FBF6EF",
+    letterSpacing: 0.5,
   },
   sitIconWrap: {
     alignItems: "center",

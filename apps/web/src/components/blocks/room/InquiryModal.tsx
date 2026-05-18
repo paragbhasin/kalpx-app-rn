@@ -67,16 +67,6 @@ export function InquiryModal({
     }
   }, [visible, openedFired, onOpened]);
 
-  // Auto-select single category in room context.
-  useEffect(() => {
-    if (isRoomGuided && visible && !selected) {
-      const cats = inquiryPayload?.categories ?? [];
-      if (cats.length === 1) {
-        setSelected(cats[0]);
-        onCategorySelected?.(cats[0]);
-      }
-    }
-  }, [isRoomGuided, visible, inquiryPayload, selected, onCategorySelected]);
 
   useEffect(() => {
     if (!visible) return;

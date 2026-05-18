@@ -598,9 +598,7 @@ function TimerBody({ kind, stepPayload, onDone, isRoomGuided = false, contextLin
     hasCompletedRef.current = true;
     const line = TIMER_COMPLETION_LINES[kind] ?? null;
     if (line) setCompletionLineText(line);
-    const t = setTimeout(() => { onDone({}); }, 1500);
-    return () => clearTimeout(t);
-  }, [atZero, isRoomGuided, kind, onDone]);
+  }, [atZero, isRoomGuided, kind]);
 
   const mm = Math.floor(remaining / 60);
   const ss = remaining % 60;
@@ -622,16 +620,34 @@ function TimerBody({ kind, stepPayload, onDone, isRoomGuided = false, contextLin
       {/* Completion line overlay */}
       {completionLineText && (
         <div style={{
-          position: "absolute", inset: 0, display: "flex",
+          position: "absolute", inset: 0, display: "flex", flexDirection: "column",
           alignItems: "center", justifyContent: "center", zIndex: 10,
+          background: "transparent",
         }}>
           <p style={{
             fontFamily: "var(--kalpx-font-serif, Georgia, serif)",
             fontSize: 22, fontStyle: "italic", color: "#432104",
-            textAlign: "center", maxWidth: 340, lineHeight: 1.5,
+            textAlign: "center", maxWidth: 340, lineHeight: 1.5, margin: 0,
           }}>
             {completionLineText}
           </p>
+          <button
+            onClick={() => onDone({})}
+            style={{
+              marginTop: 28,
+              padding: "12px 32px",
+              borderRadius: 8,
+              border: "none",
+              background: "#6B4A1E",
+              color: "#FBF6EF",
+              fontFamily: "var(--kalpx-font-serif, Georgia, serif)",
+              fontSize: 16,
+              letterSpacing: "0.5px",
+              cursor: "pointer",
+            }}
+          >
+            Continue
+          </button>
         </div>
       )}
 
@@ -931,10 +947,7 @@ function GroundingBody({
     if (isLast) {
       if (isRoomGuided && !hasCompletedRef.current) {
         hasCompletedRef.current = true;
-        setClosingText("The world is present around you.");
-        setTimeout(() => {
-          onDone({ grounding: answers.map((a) => a.trim()) });
-        }, 1500);
+        setClosingText("Good. You are here.");
       } else if (!isRoomGuided) {
         onDone({ grounding: answers.map((a) => a.trim()) });
       }
@@ -945,13 +958,30 @@ function GroundingBody({
 
   if (closingText) {
     return (
-      <div style={{ textAlign: "center", paddingTop: 40 }}>
+      <div style={{ textAlign: "center", paddingTop: 40, display: "flex", flexDirection: "column", alignItems: "center" }}>
         <p style={{
           fontFamily: "var(--kalpx-font-serif, Georgia, serif)",
-          fontSize: 22, fontStyle: "italic", color: "#432104", lineHeight: 1.5,
+          fontSize: 22, fontStyle: "italic", color: "#432104", lineHeight: 1.5, margin: 0,
         }}>
           {closingText}
         </p>
+        <button
+          onClick={() => onDone({ grounding: answers.map((a) => a.trim()) })}
+          style={{
+            marginTop: 28,
+            padding: "12px 32px",
+            borderRadius: 8,
+            border: "none",
+            background: "#6B4A1E",
+            color: "#FBF6EF",
+            fontFamily: "var(--kalpx-font-serif, Georgia, serif)",
+            fontSize: 16,
+            letterSpacing: "0.5px",
+            cursor: "pointer",
+          }}
+        >
+          Continue
+        </button>
       </div>
     );
   }

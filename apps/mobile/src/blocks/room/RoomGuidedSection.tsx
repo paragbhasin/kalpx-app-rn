@@ -264,6 +264,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   const [pendingCategory, setPendingCategory] =
     useState<InquiryCategory | null>(null);
   const [interstitialLine, setInterstitialLine] = useState<string | null>(null);
+  const [pendingNextAction, setPendingNextAction] = useState<any | null>(null);
   const interstitialIndexRef = useRef(0);
   const launchActionRef = useRef<((action: any, options?: { forceSequenceActive?: boolean; skipOpeningCard?: boolean }) => void) | null>(null);
   const handledResumeActionIdRef = useRef<string | null>(null);
@@ -302,10 +303,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     const lineIndex = interstitialIndexRef.current % BETWEEN_STEP_LINES.length;
     interstitialIndexRef.current += 1;
     setInterstitialLine(BETWEEN_STEP_LINES[lineIndex]);
-    setTimeout(() => {
-      setInterstitialLine(null);
-      launchAction(nextAction);
-    }, 1800);
+    setPendingNextAction(nextAction);
   }
 
   function handleExitRequest() {
@@ -974,9 +972,19 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
       />
 
       {interstitialLine ? (
-        <View style={styles.interstitialOverlay} pointerEvents="none">
+        <TouchableOpacity
+          style={styles.interstitialOverlay}
+          activeOpacity={0.85}
+          onPress={() => {
+            const action = pendingNextAction;
+            setInterstitialLine(null);
+            setPendingNextAction(null);
+            if (action) launchAction(action);
+          }}
+        >
           <Text style={styles.interstitialText}>{interstitialLine}</Text>
-        </View>
+          <Text style={styles.interstitialTapHint}>Tap when ready</Text>
+        </TouchableOpacity>
       ) : null}
 
       {/* Mantra opening card — room-context framing before bead counter launches */}
@@ -1371,6 +1379,13 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     textAlign: "center",
     paddingHorizontal: 40,
+  },
+  interstitialTapHint: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    color: "#A08060",
+    marginTop: 24,
+    letterSpacing: 0.5,
   },
   mantrasOpeningCard: {
     ...StyleSheet.absoluteFillObject,

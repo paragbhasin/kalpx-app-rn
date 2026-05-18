@@ -48,27 +48,7 @@ const Profile = () => {
 
   const handleLogout = async () => {
     await performLogout();
-    const tabNav = navigation.getParent();
-    const drawerNav = tabNav?.getParent?.();
-
-    if (drawerNav) {
-      drawerNav.navigate("HomePage", {
-        screen: "HomePage",
-        params: {
-          screen: "Home",
-        },
-      });
-      return;
-    }
-
-    if (tabNav) {
-      tabNav.navigate("HomePage", {
-        screen: "Home",
-      });
-      return;
-    }
-
-    navigation.navigate("Home");
+    navigation.navigate("HomePage", { screen: "Home" } as any);
   };
 
   const handleDelete = () => {

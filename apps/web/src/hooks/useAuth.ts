@@ -138,7 +138,7 @@ export function useAuth() {
     invalidateJourneyEntryViewCache();
     store.dispatch(clearDoorState());
     store.dispatch(resetStore());
-    navigate('/login');
+    navigate('/en');
   }, [navigate]);
 
   const socialLoginGoogle = useCallback(

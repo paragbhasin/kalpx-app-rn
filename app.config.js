@@ -3,7 +3,7 @@
 // For local dev, use apps/mobile/app.config.js (via `cd apps/mobile && expo run:*`).
 module.exports = {
   expo: {
-    name: "kalpx",
+    name: "KalpX",
     slug: "kalpx",
     version: "1.1.34",
     orientation: "portrait",
@@ -21,7 +21,8 @@ module.exports = {
       usesAppleSignIn: true,
       appleTeamId: "9G5NZ5LBRU",
       googleServicesFile:
-        process.env.GOOGLE_SERVICES_PLIST || "./apps/mobile/GoogleService-Info.plist",
+        process.env.GOOGLE_SERVICES_PLIST ||
+        "./apps/mobile/GoogleService-Info.plist",
       buildNumber: "42",
       entitlements: {
         "aps-environment": "production",
@@ -49,7 +50,8 @@ module.exports = {
       },
       edgeToEdgeEnabled: true,
       googleServicesFile:
-        process.env.GOOGLE_SERVICES_JSON || "./apps/mobile/google-services.json",
+        process.env.GOOGLE_SERVICES_JSON ||
+        "./apps/mobile/google-services.json",
     },
     web: {
       bundler: "metro",

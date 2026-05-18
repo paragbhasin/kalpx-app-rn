@@ -10,7 +10,7 @@
  */
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useIsFocused, useNavigation } from "@react-navigation/native";
 
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
@@ -70,6 +70,7 @@ export const collapseControl = { avoidCollapse: false };
 
 export default function Home() {
   const navigation: any = useNavigation();
+  const isFocused = useIsFocused();
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector(
     (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
@@ -81,6 +82,7 @@ export default function Home() {
   );
 
   const updateBackground = useScreenStore((state) => state.updateBackground);
+  const currentBackground = useScreenStore((state) => state.currentBackground);
   const updateHeaderHidden = useScreenStore(
     (state) => state.updateHeaderHidden,
   );
@@ -106,17 +108,40 @@ export default function Home() {
 
   const HOME_BACKGROUND = require("../../../assets/new_home.png");
   const CONTINUE_BG = require("../../../assets/beige_bg.png");
+  const isLandingHome =
+    !hasPartialState && !(isLoggedIn && checkingJourney) && !mitraJourneyId;
 
   useFocusEffect(
     React.useCallback(() => {
-      updateBackground(HOME_BACKGROUND);
+      updateBackground(isLandingHome ? HOME_BACKGROUND : CONTINUE_BG);
       updateHeaderHidden(false);
       return () => {
         updateBackground(null);
         updateHeaderHidden(false);
       };
-    }, [updateBackground, updateHeaderHidden, mitraJourneyId, HOME_BACKGROUND]),
+    }, [
+      updateBackground,
+      updateHeaderHidden,
+      isLandingHome,
+      HOME_BACKGROUND,
+      CONTINUE_BG,
+    ]),
   );
+
+  useEffect(() => {
+    if (!isFocused) return;
+    const expectedBackground = isLandingHome ? HOME_BACKGROUND : CONTINUE_BG;
+    if (currentBackground !== expectedBackground) {
+      updateBackground(expectedBackground);
+    }
+  }, [
+    isFocused,
+    isLandingHome,
+    currentBackground,
+    updateBackground,
+    HOME_BACKGROUND,
+    CONTINUE_BG,
+  ]);
 
   const seedJourneyStatus = React.useCallback((status: any) => {
     if (!status) return;

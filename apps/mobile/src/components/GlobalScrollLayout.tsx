@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigationState } from "@react-navigation/native";
 import React from "react";
 import {
   Animated,
@@ -8,13 +9,12 @@ import {
   StatusBar,
   StyleSheet,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
-import { useNavigationState } from "@react-navigation/native";
 import { useScrollContext } from "../context/ScrollContext";
 import { useScreenStore } from "../engine/useScreenBridge";
-import { navigationRef } from "../Shared/Routes/NavigationService";
 import { isMitraRouteName } from "../Shared/Routes/mitraRouteNames";
+import { navigationRef } from "../Shared/Routes/NavigationService";
 import { store } from "../store";
 import Header from "./Header";
 
@@ -70,25 +70,35 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
   // find the innermost stack and its currently focused leaf screen.
   // Fixed-depth selectors broke because the app has 3+ navigator levels:
   // reading index at the wrong level gave tab-selection (0/1/2) not stack depth.
-  const { canGoBackInStack, isOnDynamicEngine, leafRouteName } = useNavigationState((state) => {
-    if (!state) return { canGoBackInStack: false, isOnDynamicEngine: false, leafRouteName: null as string | null };
-    let s: any = state;
-    while (s?.routes?.length) {
-      const idx: number = s.index ?? 0;
-      const focused = s.routes[idx];
-      if (!focused?.state?.routes?.length) {
-        // Leaf screen — s is the navigator that directly contains it.
-        // canGoBackInStack: only meaningful when s is a stack (not a tab or drawer).
+  const { canGoBackInStack, isOnDynamicEngine, leafRouteName } =
+    useNavigationState((state) => {
+      if (!state)
         return {
-          canGoBackInStack: s.type === "stack" && idx > 0,
-          isOnDynamicEngine: focused?.name === "DynamicEngine",
-          leafRouteName: (focused?.name ?? null) as string | null,
+          canGoBackInStack: false,
+          isOnDynamicEngine: false,
+          leafRouteName: null as string | null,
         };
+      let s: any = state;
+      while (s?.routes?.length) {
+        const idx: number = s.index ?? 0;
+        const focused = s.routes[idx];
+        if (!focused?.state?.routes?.length) {
+          // Leaf screen — s is the navigator that directly contains it.
+          // canGoBackInStack: only meaningful when s is a stack (not a tab or drawer).
+          return {
+            canGoBackInStack: s.type === "stack" && idx > 0,
+            isOnDynamicEngine: focused?.name === "DynamicEngine",
+            leafRouteName: (focused?.name ?? null) as string | null,
+          };
+        }
+        s = focused.state;
       }
-      s = focused.state;
-    }
-    return { canGoBackInStack: false, isOnDynamicEngine: false, leafRouteName: null as string | null };
-  });
+      return {
+        canGoBackInStack: false,
+        isOnDynamicEngine: false,
+        leafRouteName: null as string | null,
+      };
+    });
 
   // Routes that are stable home bases — back button never shows even if the RN
   // stack has depth (e.g. navigate("Home") pushes a new entry on an existing stack).
@@ -212,7 +222,17 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
 
     // Last resort: return to Four Door Home — the product root for logged-in users.
     (navigationRef as any).navigate("Home");
-  }, [isOnDynamicEngine, isInSupportFlow, currentContainerId, screenData?.runner_source, screenData?.practice_launch_surface, canGoBackInStack, history.length, goBack, loadScreen]);
+  }, [
+    isOnDynamicEngine,
+    isInSupportFlow,
+    currentContainerId,
+    screenData?.runner_source,
+    screenData?.practice_launch_surface,
+    canGoBackInStack,
+    history.length,
+    goBack,
+    loadScreen,
+  ]);
 
   // Android hardware back — delegate to the same handleBack logic so
   // hardware back honors support-flow jumps, debounce, and root guards.
@@ -233,11 +253,14 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
   const hasBg = !!currentBackground;
   const shouldUseDefaultSurface =
     !hasBg && isMitraRouteName(leafRouteName ?? "");
-  const backArrowColor = hasBg ? "#C99317" : "#432104";
+  const backArrowColor = hasBg ? "#a36e2e" : "#432104";
 
   return (
     <View
-      style={[styles.container, shouldUseDefaultSurface && styles.defaultSurface]}
+      style={[
+        styles.container,
+        shouldUseDefaultSurface && styles.defaultSurface,
+      ]}
     >
       {currentBackground && (
         <ImageBackground
@@ -252,7 +275,9 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
             styles.headerContainer,
             { transform: [{ translateY: headerY }] },
             !hasBg &&
-              (shouldUseDefaultSurface ? styles.defaultSurface : styles.headerSolid),
+              (shouldUseDefaultSurface
+                ? styles.defaultSurface
+                : styles.headerSolid),
           ]}
         >
           {/* Back button + Header in one row. */}
@@ -263,7 +288,11 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
                 onPress={handleBack}
                 activeOpacity={0.7}
               >
-                <Ionicons name="chevron-back" size={24} color={backArrowColor} />
+                <Ionicons
+                  name="chevron-back"
+                  size={24}
+                  color={backArrowColor}
+                />
               </TouchableOpacity>
             ) : null}
             <View style={styles.headerFlex}>

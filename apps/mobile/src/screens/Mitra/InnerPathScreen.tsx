@@ -22,10 +22,18 @@
  */
 
 import { Ionicons } from "@expo/vector-icons";
+import type {
+  JourneyTriadReminders,
+  JourneyTriadRemindersPatch,
+} from "@kalpx/types";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { JourneyTriadReminders, JourneyTriadRemindersPatch } from "@kalpx/types";
-import { TimePickerModal } from "../../components/TimePickerModal";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ActivityIndicator,
   LayoutAnimation,
@@ -42,13 +50,14 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import In1Icon from "../../../../web/public/in1.svg";
 import CycleProgressBlock from "../../blocks/dashboard/CycleProgressBlock";
+import { TimePickerModal } from "../../components/TimePickerModal";
 import { executeAction } from "../../engine/actionExecutor";
 import {
   apiGetJourneyReminders,
   apiPatchJourneyReminders,
   mitraJourneyDailyView,
-  mitraJourneyDay7View,
   mitraJourneyDay14View,
+  mitraJourneyDay7View,
   mitraJourneyEntryView,
 } from "../../engine/mitraApi";
 import { useScreenStore } from "../../engine/useScreenBridge";
@@ -94,9 +103,13 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     "mantra" | "sankalp" | "practice"
   >("mantra");
   const [remindersOpen, setRemindersOpen] = useState(false);
-  const [reminders, setReminders] = useState<JourneyTriadReminders | null>(null);
+  const [reminders, setReminders] = useState<JourneyTriadReminders | null>(
+    null,
+  );
   const [reminderSaving, setReminderSaving] = useState(false);
-  const [reminderPickerKey, setReminderPickerKey] = useState<"mantra" | "sankalp" | "practice" | null>(null);
+  const [reminderPickerKey, setReminderPickerKey] = useState<
+    "mantra" | "sankalp" | "practice" | null
+  >(null);
 
   // After daily-view data is loaded, watch for runner container transitions.
   const watchRunnerRef = useRef(false);
@@ -115,7 +128,11 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
   useEffect(() => {
     let cancelled = false;
     const routeRunId = Date.now();
-    if (__DEV__) console.log("[InnerPathScreen] checkpoint fix e0aedef loaded — effect run", routeRunId);
+    if (__DEV__)
+      console.log(
+        "[InnerPathScreen] checkpoint fix e0aedef loaded — effect run",
+        routeRunId,
+      );
 
     const writeAll = (flat: Record<string, any>) => {
       for (const [k, v] of Object.entries(flat)) {
@@ -127,18 +144,40 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
 
     (async () => {
       try {
-        if (__DEV__) console.log("[InnerPathScreen]", routeRunId, "calling entry-view");
+        if (__DEV__)
+          console.log("[InnerPathScreen]", routeRunId, "calling entry-view");
         const entryResult = await mitraJourneyEntryView();
-        if (__DEV__) console.log("[InnerPathScreen]", routeRunId, "entry-view returned, cancelled:", cancelled);
+        if (__DEV__)
+          console.log(
+            "[InnerPathScreen]",
+            routeRunId,
+            "entry-view returned, cancelled:",
+            cancelled,
+          );
         if (cancelled) return;
 
         const target = entryResult.envelope?.target;
         const viewKey = target?.view_key;
         const payload = target?.payload ?? {};
         if (__DEV__) {
-          console.log("[InnerPathScreen]", routeRunId, "entry-view view_key:", viewKey);
-          console.log("[InnerPathScreen]", routeRunId, "viewKey raw JSON:", JSON.stringify(viewKey));
-          console.log("[InnerPathScreen]", routeRunId, "day14 equality:", viewKey === "day_14_view");
+          console.log(
+            "[InnerPathScreen]",
+            routeRunId,
+            "entry-view view_key:",
+            viewKey,
+          );
+          console.log(
+            "[InnerPathScreen]",
+            routeRunId,
+            "viewKey raw JSON:",
+            JSON.stringify(viewKey),
+          );
+          console.log(
+            "[InnerPathScreen]",
+            routeRunId,
+            "day14 equality:",
+            viewKey === "day_14_view",
+          );
           console.log("[InnerPathScreen]", routeRunId, "embedded:", embedded);
         }
 
@@ -153,12 +192,22 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
             const env7 = await mitraJourneyDay7View();
             if (cancelled) return;
             if (__DEV__) {
-              console.log("[InnerPathScreen] day_7_view API wrapper keys:", env7 ? Object.keys(env7) : "null");
-              console.log("[InnerPathScreen] day_7_view envelope keys:", env7?.envelope ? Object.keys(env7.envelope) : "null");
+              console.log(
+                "[InnerPathScreen] day_7_view API wrapper keys:",
+                env7 ? Object.keys(env7) : "null",
+              );
+              console.log(
+                "[InnerPathScreen] day_7_view envelope keys:",
+                env7?.envelope ? Object.keys(env7.envelope) : "null",
+              );
             }
             if (env7?.envelope) {
               const flat = ingestDay7View(env7.envelope as any);
-              if (__DEV__) console.log("[InnerPathScreen] day_7_view ingest keys:", Object.keys(flat).slice(0, 10));
+              if (__DEV__)
+                console.log(
+                  "[InnerPathScreen] day_7_view ingest keys:",
+                  Object.keys(flat).slice(0, 10),
+                );
               writeAll(flat);
               await dispatch(
                 loadScreenWithData({
@@ -166,41 +215,84 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                   stateId: "checkpoint_day_7",
                 }) as any,
               );
-              if (__DEV__) console.log("[InnerPathScreen] day_7_view schema loaded, embedded:", embedded);
+              if (__DEV__)
+                console.log(
+                  "[InnerPathScreen] day_7_view schema loaded, embedded:",
+                  embedded,
+                );
               if (!embedded) {
                 navigation.replace("DynamicEngine" as any);
               }
             } else {
-              if (__DEV__) console.warn("[InnerPathScreen] day_7_view: checkpoint not ready (null envelope)");
+              if (__DEV__)
+                console.warn(
+                  "[InnerPathScreen] day_7_view: checkpoint not ready (null envelope)",
+                );
               if (!embedded) setLoading(false);
             }
           } catch (e) {
-            if (__DEV__) console.warn("[InnerPathScreen] day_7_view checkpoint error:", e);
+            if (__DEV__)
+              console.warn("[InnerPathScreen] day_7_view checkpoint error:", e);
           }
           return;
         }
 
         if (viewKey === "day_14_view") {
-          if (__DEV__) console.log("[InnerPathScreen]", routeRunId, "ENTERING day_14_view branch, embedded:", embedded);
+          if (__DEV__)
+            console.log(
+              "[InnerPathScreen]",
+              routeRunId,
+              "ENTERING day_14_view branch, embedded:",
+              embedded,
+            );
           dispatch(
             screenActions.setScreenValue({ key: "checkpoint_day", value: 14 }),
           );
           // Checkpoint fetch runs regardless of embedded.
           // Embedded: DynamicEngine (already on screen) re-renders when schema switches.
           // Standalone: navigation.replace opens DynamicEngine.
-          if (__DEV__) console.log("[InnerPathScreen]", routeRunId, "cancelled before day14 call:", cancelled);
+          if (__DEV__)
+            console.log(
+              "[InnerPathScreen]",
+              routeRunId,
+              "cancelled before day14 call:",
+              cancelled,
+            );
           try {
-            if (__DEV__) console.log("[InnerPathScreen]", routeRunId, "BEFORE mitraJourneyDay14View");
+            if (__DEV__)
+              console.log(
+                "[InnerPathScreen]",
+                routeRunId,
+                "BEFORE mitraJourneyDay14View",
+              );
             const env14 = await mitraJourneyDay14View();
-            if (__DEV__) console.log("[InnerPathScreen]", routeRunId, "AFTER mitraJourneyDay14View, cancelled:", cancelled, "env14 keys:", env14 ? Object.keys(env14) : null);
+            if (__DEV__)
+              console.log(
+                "[InnerPathScreen]",
+                routeRunId,
+                "AFTER mitraJourneyDay14View, cancelled:",
+                cancelled,
+                "env14 keys:",
+                env14 ? Object.keys(env14) : null,
+              );
             if (cancelled) return;
             if (__DEV__) {
-              console.log("[InnerPathScreen] day_14_view API wrapper keys:", env14 ? Object.keys(env14) : "null");
-              console.log("[InnerPathScreen] day_14_view envelope keys:", env14?.envelope ? Object.keys(env14.envelope) : "null");
+              console.log(
+                "[InnerPathScreen] day_14_view API wrapper keys:",
+                env14 ? Object.keys(env14) : "null",
+              );
+              console.log(
+                "[InnerPathScreen] day_14_view envelope keys:",
+                env14?.envelope ? Object.keys(env14.envelope) : "null",
+              );
             }
             if (env14?.envelope) {
               const flat = ingestDay14View(env14.envelope as any);
-              if (__DEV__) console.log("[InnerPathScreen] day_14_view ingest keys:", Object.keys(flat).slice(0, 10));
+              if (__DEV__)
+                console.log(
+                  "[InnerPathScreen] day_14_view ingest keys:",
+                  Object.keys(flat).slice(0, 10),
+                );
               writeAll(flat);
               await dispatch(
                 loadScreenWithData({
@@ -208,16 +300,27 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                   stateId: "checkpoint_day_14",
                 }) as any,
               );
-              if (__DEV__) console.log("[InnerPathScreen] day_14_view schema loaded, embedded:", embedded);
+              if (__DEV__)
+                console.log(
+                  "[InnerPathScreen] day_14_view schema loaded, embedded:",
+                  embedded,
+                );
               if (!embedded) {
                 navigation.replace("DynamicEngine" as any);
               }
             } else {
-              if (__DEV__) console.warn("[InnerPathScreen] day_14_view: checkpoint not ready (null envelope)");
+              if (__DEV__)
+                console.warn(
+                  "[InnerPathScreen] day_14_view: checkpoint not ready (null envelope)",
+                );
               if (!embedded) setLoading(false);
             }
           } catch (e) {
-            if (__DEV__) console.warn("[InnerPathScreen] day_14_view checkpoint error:", e);
+            if (__DEV__)
+              console.warn(
+                "[InnerPathScreen] day_14_view checkpoint error:",
+                e,
+              );
           }
           return;
         }
@@ -424,7 +527,10 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     item: any,
   ) => {
     store.dispatch(
-      screenActions.setScreenValue({ key: "practice_launch_surface", value: "inner_path" }),
+      screenActions.setScreenValue({
+        key: "practice_launch_surface",
+        value: "inner_path",
+      }),
     );
     executeAction(
       {
@@ -484,7 +590,10 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     setRemindersOpen((value) => !value);
   };
 
-  const TRIAD_REMINDER_DEFAULTS: Record<"mantra" | "sankalp" | "practice", string> = {
+  const TRIAD_REMINDER_DEFAULTS: Record<
+    "mantra" | "sankalp" | "practice",
+    string
+  > = {
     mantra: "07:00",
     sankalp: "08:00",
     practice: "18:00",
@@ -512,11 +621,16 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     }
   }
 
-  async function handleReminderTime(key: "mantra" | "sankalp" | "practice", timeStr: string) {
+  async function handleReminderTime(
+    key: "mantra" | "sankalp" | "practice",
+    timeStr: string,
+  ) {
     setReminderPickerKey(null);
     setReminderSaving(true);
     try {
-      const updated = await apiPatchJourneyReminders({ [`${key}_reminder_time`]: timeStr } as JourneyTriadRemindersPatch);
+      const updated = await apiPatchJourneyReminders({
+        [`${key}_reminder_time`]: timeStr,
+      } as JourneyTriadRemindersPatch);
       setReminders(updated);
     } catch {
       // non-fatal
@@ -804,7 +918,9 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                       reminders.mantra_reminder_enabled && "Mantra",
                       reminders.sankalp_reminder_enabled && "Sankalp",
                       reminders.practice_reminder_enabled && "Practice",
-                    ].filter(Boolean).join(", ") || "None set"}
+                    ]
+                      .filter(Boolean)
+                      .join(", ") || "None set"}
                   </Text>
                 )}
               </View>
@@ -818,8 +934,12 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
             {remindersOpen && (
               <View style={{ paddingTop: 8 }}>
                 {(["mantra", "sankalp", "practice"] as const).map((key) => {
-                  const enabled = reminders[`${key}_reminder_enabled`] as boolean;
-                  const time = reminders[`${key}_reminder_time`] as string | null;
+                  const enabled = reminders[
+                    `${key}_reminder_enabled`
+                  ] as boolean;
+                  const time = reminders[`${key}_reminder_time`] as
+                    | string
+                    | null;
                   const label = key.charAt(0).toUpperCase() + key.slice(1);
                   const displayTime = time
                     ? (() => {
@@ -832,8 +952,16 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                     : null;
 
                   return (
-                    <View key={key} style={[styles.reminderRow, enabled && styles.reminderRowEnabled]}>
-                      <Text style={styles.reminderRowLabel}>Remind me for {label.toLowerCase()}</Text>
+                    <View
+                      key={key}
+                      style={[
+                        styles.reminderRow,
+                        enabled && styles.reminderRowEnabled,
+                      ]}
+                    >
+                      <Text style={styles.reminderRowLabel}>
+                        Remind me for {label.toLowerCase()}
+                      </Text>
                       <View style={styles.reminderRowRight}>
                         {enabled && displayTime && (
                           <TouchableOpacity
@@ -841,14 +969,19 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                             style={styles.reminderTimePill}
                             activeOpacity={0.7}
                           >
-                            <Text style={styles.reminderTimePillText}>{displayTime}</Text>
+                            <Text style={styles.reminderTimePillText}>
+                              {displayTime}
+                            </Text>
                           </TouchableOpacity>
                         )}
                         <Switch
                           value={enabled}
                           onValueChange={() => void handleReminderToggle(key)}
                           disabled={reminderSaving}
-                          trackColor={{ false: "rgba(0,0,0,0.12)", true: "#C99317" }}
+                          trackColor={{
+                            false: "rgba(0,0,0,0.12)",
+                            true: "#C99317",
+                          }}
                           thumbColor="#fff"
                         />
                       </View>
@@ -860,17 +993,28 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                   visible={!!reminderPickerKey}
                   initialTime={
                     reminderPickerKey
-                      ? ((reminders?.[`${reminderPickerKey}_reminder_time`] as string | null) ?? (TRIAD_REMINDER_DEFAULTS[reminderPickerKey] + ":00"))
+                      ? ((reminders?.[`${reminderPickerKey}_reminder_time`] as
+                          | string
+                          | null) ??
+                        TRIAD_REMINDER_DEFAULTS[reminderPickerKey] + ":00")
                       : null
                   }
                   onConfirm={(timeStr) => {
-                    if (reminderPickerKey) void handleReminderTime(reminderPickerKey, timeStr);
+                    if (reminderPickerKey)
+                      void handleReminderTime(reminderPickerKey, timeStr);
                   }}
                   onCancel={() => setReminderPickerKey(null)}
                 />
 
                 {reminderSaving && (
-                  <Text style={{ fontSize: 12, color: "#8B7864", textAlign: "center", marginTop: 4 }}>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: "#8B7864",
+                      textAlign: "center",
+                      marginTop: 4,
+                    }}
+                  >
                     Saving…
                   </Text>
                 )}
@@ -901,7 +1045,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 26,
     paddingHorizontal: 12,
-    marginTop: -50,
+    // marginTop: -50,
   },
   sparkle: {
     fontSize: 28,

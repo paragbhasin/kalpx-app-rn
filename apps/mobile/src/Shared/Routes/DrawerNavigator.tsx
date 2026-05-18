@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { createDrawerNavigator } from "@react-navigation/drawer";
+import { CommonActions } from "@react-navigation/native";
 import { AnyAction } from "@reduxjs/toolkit";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -90,14 +91,30 @@ const CustomDrawerContent = (props) => {
       console.log("Google Sign-In Logout Error:", error);
     }
 
-    // Close the drawer first, then navigate to Home tab as a logged-out guest.
-    // Previously used parentNav?.reset({ routes: [{ name: "Login" }] }) which
-    // silently failed when parentNav resolved to the wrong navigator — leaving
-    // the user on a blank DynamicEngine screen.
     props.navigation.closeDrawer();
-    props.navigation.navigate("HomePage", {
-      screen: "Home",
-    });
+    const rootNav = props.navigation.getParent?.() || props.navigation;
+    rootNav.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          {
+            name: "AppDrawer",
+            state: {
+              index: 0,
+              routes: [
+                {
+                  name: "HomePage",
+                  state: {
+                    index: 0,
+                    routes: [{ name: "Home" }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      }),
+    );
   };
 
   const handleLogin = () => {

@@ -2185,7 +2185,7 @@ export async function postQuickChantComplete(
 ): Promise<QuickChantCompleteResponse | null> {
   try {
     const resp = await api.post<QuickChantCompleteResponse>(
-      '/api/mitra/v3/quick_chant/complete/', payload,
+      'mitra/v3/quick_chant/complete/', payload,
     );
     return resp.data;
   } catch (err: any) {

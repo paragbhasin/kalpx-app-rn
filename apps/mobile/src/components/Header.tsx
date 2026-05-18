@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Image, StyleSheet, View } from "react-native";
 import Colors from "./Colors";
-
 interface HeaderProps {
   isTransparent?: boolean;
   backgroundColor?: string;

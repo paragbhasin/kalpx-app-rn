@@ -8,11 +8,12 @@ import {
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
-import Icon from "react-native-vector-icons/Ionicons";
+import { Ionicons as Icon } from "@expo/vector-icons";
 
 import FontSize from "../../components/FontSize";
 import GlobalScrollLayout from "../../components/GlobalScrollLayout";
 import { ScrollProvider, useScrollContext } from "../../context/ScrollContext";
+import { useScreenStore } from "../../engine/useScreenBridge";
 import {
   HomeStackNavigator,
   NotificationStackNavigator,
@@ -21,8 +22,8 @@ import {
 import { isMitraRouteName } from "./mitraRouteNames";
 
 const Tab = createBottomTabNavigator();
-import { useScreenStore } from "../../engine/useScreenBridge";
 
+const DEFAULT_SURFACE = "#FAF7F2";
 const NullComponent = () => null;
 const TabBarButton = (props) => <TouchableOpacity {...props} activeOpacity={0.7} />;
 
@@ -43,12 +44,18 @@ const BottomMenuContent = () => {
               : route.name;
           const shouldUseTransparentTabBar =
             !!currentBackground && isMitraRouteName(nestedRouteName);
+          const shouldUseDefaultSurface =
+            !currentBackground && isMitraRouteName(nestedRouteName);
 
           return {
             headerShown: false,
             tabBarStyle: {
               display: isVisible ? "flex" : "none",
-              backgroundColor: shouldUseTransparentTabBar ? "transparent" : "#FFF",
+              backgroundColor: shouldUseTransparentTabBar
+                ? "transparent"
+                : shouldUseDefaultSurface
+                  ? DEFAULT_SURFACE
+                  : "#FFF",
               borderTopWidth: shouldUseTransparentTabBar ? 0 : 0.5,
               borderTopColor: shouldUseTransparentTabBar ? "transparent" : "#d1d1d1",
               elevation: 0,

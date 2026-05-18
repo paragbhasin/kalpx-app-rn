@@ -110,7 +110,7 @@ export default function Home() {
   useFocusEffect(
     React.useCallback(() => {
       updateBackground(mitraJourneyId ? CONTINUE_BG : HOME_BACKGROUND);
-      updateHeaderHidden(!!mitraJourneyId);
+      updateHeaderHidden(false);
       return () => {
         updateBackground(null);
         updateHeaderHidden(false);
@@ -864,7 +864,7 @@ export default function Home() {
           {/* ── Hero Section ── */}
           <View style={styles.heroSection}>
             <Text style={styles.heroQuote}>
-              "In this path, no effort is ever lost."
+              &quot;In this path, no effort is ever lost.&quot;
             </Text>
             <Text style={styles.heroSource}>— Bhagavad Gita 2.40</Text>
             <View style={styles.turnOneHeadlineDivider}>

@@ -105,13 +105,24 @@ function SnackBarContainer() {
 }
 
 function isMitraRouteName(routeName) {
-  return (
-    routeName === "Home" ||
-    routeName === "DynamicEngine" ||
-    routeName === "MitraEngine" ||
-    routeName === "GuidedGrowth" ||
-    routeName === "MitraPhilosophy"
-  );
+  return [
+    "Home",
+    "DynamicEngine",
+    "MitraEngine",
+    "GuidedGrowth",
+    "MitraPhilosophy",
+    "MitraStart",
+    "MitraIntention",
+    "NewMitraHome",
+    "QuickCheckin",
+    "BrowseRooms",
+    "RhythmHome",
+    "RhythmSetup",
+    "RhythmEdit",
+    "InnerPath",
+    "QuickReset",
+    "TellMitra",
+  ].includes(routeName);
 }
 
 // Inner component that has access to Redux Provider
@@ -170,12 +181,18 @@ function AppInner({ initialRoute, navigationRef }) {
 
   const shouldShowMitraBackground =
     !!currentBackground && isMitraRouteName(activeRouteName);
+  const shouldUseMitraFallback =
+    !currentBackground && isMitraRouteName(activeRouteName);
 
   return (
     <View
       style={{
         flex: 1,
-        backgroundColor: shouldShowMitraBackground ? "transparent" : "#FFF",
+        backgroundColor: shouldShowMitraBackground
+          ? "transparent"
+          : shouldUseMitraFallback
+            ? "#FAF7F2"
+            : "#FFF",
       }}
     >
       <StatusBar

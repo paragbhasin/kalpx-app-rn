@@ -11,6 +11,7 @@ export default defineConfig({
       ['src/**/__tests__/**/*.test.tsx', 'jsdom'],
       ['src/**/__tests__/useClassBookingController.test.ts', 'jsdom'],
       ['src/**/__tests__/useCommunityFeedController.test.ts', 'jsdom'],
+      ['src/**/__tests__/webAnalytics.test.ts', 'jsdom'],
     ],
     include: ['src/**/__tests__/**/*.test.{ts,tsx}'],
   },

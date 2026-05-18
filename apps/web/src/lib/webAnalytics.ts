@@ -10,7 +10,12 @@ declare global {
 
 // ── External analytics denylist ─────────────────────────────────────────────
 // These keys must NEVER reach window.fbq, gtag, or any external analytics SDK.
+// Defence-in-depth: these are also excluded by the whitelist below, but explicit
+// denylist entries make the privacy intent unambiguous to future maintainers.
 export const PIXEL_PROPERTY_DENYLIST: readonly string[] = [
+  // ── User identity — blocked until legal approves an analytics identity strategy
+  'email', 'user_id', 'guest_uuid', 'user_email', 'username',
+  // ── Companion/emotional state fields
   'prana_type', 'feeling', 'energy_state', 'mood', 'klesha', 'kosha', 'vritti',
   'trigger_history', 'active_dissonance', 'volatility_index',
   'financial_hardship', 'relationship_pain',
@@ -19,6 +24,7 @@ export const PIXEL_PROPERTY_DENYLIST: readonly string[] = [
   'agitated', 'drained', 'overwhelmed', 'balanced', 'energized',
   'noticed', 'named', 'settled', 'carry_label', 'label',
   'age_group', 'age_group_id', 'minor_status', 'user_age',
+  // ── Raw text / AI payloads
   'text_encrypted', 'voice_text', 's3_key', 'transcript_text',
   'lm_output', 'bedrock_response', 'prompt_text', 'ai_response',
   'route_type', 'suppression_reason', 'evidence_snapshot',

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { filterPixelProperties, sanitizeBackendMeta, PIXEL_PROPERTY_DENYLIST, PIXEL_PROPERTY_WHITELIST } from '../lib/webAnalytics';
 
 // ── filterPixelProperties ────────────────────────────────────────────────────
@@ -71,6 +71,31 @@ describe('filterPixelProperties', () => {
     expect(result).not.toHaveProperty('companion_state');
     expect(result).not.toHaveProperty('carry_label');
     expect(result).toHaveProperty('source', 'home');
+  });
+
+  // E1/E2 — user identity must never reach external analytics
+  it('blocks email from external analytics', () => {
+    const result = filterPixelProperties({ email: 'user@example.com', event_category: 'auth' });
+    expect(result).not.toHaveProperty('email');
+    expect(result).toHaveProperty('event_category', 'auth');
+  });
+
+  it('blocks user_id from external analytics', () => {
+    const result = filterPixelProperties({ user_id: 42, source: 'home' });
+    expect(result).not.toHaveProperty('user_id');
+    expect(result).toHaveProperty('source', 'home');
+  });
+
+  it('blocks guest_uuid from external analytics', () => {
+    const result = filterPixelProperties({ guest_uuid: 'abc-123', source: 'home' });
+    expect(result).not.toHaveProperty('guest_uuid');
+    expect(result).toHaveProperty('source', 'home');
+  });
+
+  it('blocks user_email and username from external analytics', () => {
+    const result = filterPixelProperties({ user_email: 'x@y.com', username: 'parag', event_category: 'auth' });
+    expect(result).not.toHaveProperty('user_email');
+    expect(result).not.toHaveProperty('username');
   });
 });
 

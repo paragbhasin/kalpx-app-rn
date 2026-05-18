@@ -1,9 +1,15 @@
 /**
  * RoomGuidedSection — mobile guided room surface aligned to the web layout.
  */
-import { ROOM_GUIDED_COPY, ROOM_LABELS } from "@kalpx/contracts";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ROOM_GUIDED_COPY, ROOM_LABELS } from "@kalpx/contracts";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Image,
   Modal,
@@ -44,7 +50,8 @@ const CARRY_MEMORY_MODAL: Record<
 > = {
   connection_named: {
     title: "Name someone who matters",
-    sanatan_context: "Sambandha reminds us that even one true bond can hold us.",
+    sanatan_context:
+      "Sambandha reminds us that even one true bond can hold us.",
     why_we_ask:
       "Naming someone helps you return from feeling alone to one thread of care.",
     prompt: "Who is close to your heart right now?",
@@ -156,15 +163,39 @@ function extractBecauseYouSharedLabel(
   return parts.length ? parts.join(" · ") : null;
 }
 
-const ROOM_COMPLETION_LINES: Record<string, { message: string; subtext: string }> = {
-  room_stillness:  { message: "You made space.",                  subtext: "Let this quiet stay with you for a little while." },
-  room_release:    { message: "You set something down.",          subtext: "You do not have to carry it in the same way now." },
-  room_clarity:    { message: "You sat with the question.",       subtext: "One clear seeing is enough for now." },
-  room_growth:     { message: "You moved toward what matters.",   subtext: "Small sincere action is still action." },
-  room_connection: { message: "You softened toward connection.",  subtext: "Let the heart stay open, gently." },
-  room_joy:        { message: "You noticed what is good.",        subtext: "Let this become part of your day." },
+const ROOM_COMPLETION_LINES: Record<
+  string,
+  { message: string; subtext: string }
+> = {
+  room_stillness: {
+    message: "You made space.",
+    subtext: "Let this quiet stay with you for a little while.",
+  },
+  room_release: {
+    message: "You set something down.",
+    subtext: "You do not have to carry it in the same way now.",
+  },
+  room_clarity: {
+    message: "You sat with the question.",
+    subtext: "One clear seeing is enough for now.",
+  },
+  room_growth: {
+    message: "You moved toward what matters.",
+    subtext: "Small sincere action is still action.",
+  },
+  room_connection: {
+    message: "You softened toward connection.",
+    subtext: "Let the heart stay open, gently.",
+  },
+  room_joy: {
+    message: "You noticed what is good.",
+    subtext: "Let this become part of your day.",
+  },
 };
-const COMPLETION_FALLBACK = { message: "You stayed with it.", subtext: "You can return to this room anytime." };
+const COMPLETION_FALLBACK = {
+  message: "You stayed with it.",
+  subtext: "You can return to this room anytime.",
+};
 
 const BETWEEN_STEP_LINES = [
   "Good. Take one breath.",
@@ -192,7 +223,8 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   const roomSteps = (envelope as any).room_steps;
   const sequenceActiveFlag = (screenData as any)?.room_sequence_active;
   const resumeActionId = (screenData as any)?.room_sequence_resume_action_id;
-  const pendingResumeActionId = (screenData as any)?.room_pending_resume_action_id as string | null;
+  const pendingResumeActionId = (screenData as any)
+    ?.room_pending_resume_action_id as string | null;
 
   const recAction = recId
     ? (envelope.actions.find((a: any) => a.action_id === recId) ?? null)
@@ -245,9 +277,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   const memoryEchoLine = envelope.memory_echo_line ?? null;
   const completionCopy = ROOM_COMPLETION_LINES[roomId] ?? COMPLETION_FALLBACK;
   const completionWisdom =
-    roomCtx.bridge_line ||
-    roomCtx.sanatan_insight_line ||
-    "";
+    roomCtx.bridge_line || roomCtx.sanatan_insight_line || "";
 
   const [whyExpanded, setWhyExpanded] = useState(false);
   const [recommendedExpanded, setRecommendedExpanded] = useState(false);
@@ -266,10 +296,18 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   const [interstitialLine, setInterstitialLine] = useState<string | null>(null);
   const [pendingNextAction, setPendingNextAction] = useState<any | null>(null);
   const interstitialIndexRef = useRef(0);
-  const launchActionRef = useRef<((action: any, options?: { forceSequenceActive?: boolean; skipOpeningCard?: boolean }) => void) | null>(null);
+  const launchActionRef = useRef<
+    | ((
+        action: any,
+        options?: { forceSequenceActive?: boolean; skipOpeningCard?: boolean },
+      ) => void)
+    | null
+  >(null);
   const handledResumeActionIdRef = useRef<string | null>(null);
   const pendingOpenedForRef = useRef<string | null>(null);
-  const [mantrasOpeningCardAction, setMantrasOpeningCardAction] = useState<any | null>(null);
+  const [mantrasOpeningCardAction, setMantrasOpeningCardAction] = useState<
+    any | null
+  >(null);
   const [exitConfirmVisible, setExitConfirmVisible] = useState(false);
 
   function maybeAdvanceToNextAction(completedActionId?: string | null) {
@@ -377,112 +415,123 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     );
   }
 
-  const launchAction = useCallback((
-    action: any,
-    options?: { forceSequenceActive?: boolean; skipOpeningCard?: boolean },
-  ) => {
-    const actionType: string = action?.action_type ?? "";
-    const isSequenceActive =
-      options?.forceSequenceActive ?? sequenceActive;
-    setStepsOpen(false);
+  const launchAction = useCallback(
+    (
+      action: any,
+      options?: { forceSequenceActive?: boolean; skipOpeningCard?: boolean },
+    ) => {
+      const actionType: string = action?.action_type ?? "";
+      const isSequenceActive = options?.forceSequenceActive ?? sequenceActive;
+      setStepsOpen(false);
 
-    if (
-      actionType === "inquiry" &&
-      action?.inquiry_payload?.categories?.length
-    ) {
-      setInquiryAction(action);
-      return;
-    }
+      if (
+        actionType === "inquiry" &&
+        action?.inquiry_payload?.categories?.length
+      ) {
+        setInquiryAction(action);
+        return;
+      }
 
-    if (actionType === "in_room_step" && action?.step_payload) {
-      setStepAction(action);
-      setStepPayload(action.step_payload);
-      setStepLabel(action.label || "Step");
-      return;
-    }
+      if (actionType === "in_room_step" && action?.step_payload) {
+        setStepAction(action);
+        setStepPayload(action.step_payload);
+        setStepLabel(action.label || "Step");
+        return;
+      }
 
-    if (actionType === "in_room_carry") {
-      const writesEvent =
-        action?.carry_payload?.writes_event ??
-        action?.carry_payload?.persistence?.writes_event ??
-        action?.persistence?.writes_event ??
-        null;
-      const templateId = writesEvent ? CARRY_INPUT_TEMPLATE[writesEvent] : null;
-      if (templateId) {
-        setCarryAction(action);
-        setCarryPayload({
-          template_id: templateId,
-          step_config: {},
-          input_slots: [],
-          memory_modal: writesEvent ? CARRY_MEMORY_MODAL[writesEvent] ?? null : null,
-        });
-      } else {
+      if (actionType === "in_room_carry") {
+        const writesEvent =
+          action?.carry_payload?.writes_event ??
+          action?.carry_payload?.persistence?.writes_event ??
+          action?.persistence?.writes_event ??
+          null;
+        const templateId = writesEvent
+          ? CARRY_INPUT_TEMPLATE[writesEvent]
+          : null;
+        if (templateId) {
+          setCarryAction(action);
+          setCarryPayload({
+            template_id: templateId,
+            step_config: {},
+            input_slots: [],
+            memory_modal: writesEvent
+              ? (CARRY_MEMORY_MODAL[writesEvent] ?? null)
+              : null,
+          });
+        } else {
+          void executeAction(
+            {
+              type: "room_carry_captured",
+              payload: {
+                room_id: envelope?.room_id ?? null,
+                action_id: action.action_id,
+                analytics_key: action.analytics_key,
+                label: action.label,
+                writes_event:
+                  action.carry_payload?.writes_event ??
+                  action.persistence?.writes_event ??
+                  null,
+              },
+            } as any,
+            actionCtx,
+          );
+          maybeAdvanceToNextAction(action.action_id);
+        }
+        return;
+      }
+
+      // Room mantra opening card: show contextual card before launching bead counter.
+      // Strict guard: only runner_mantra from a room (envelope.room_id present).
+      // skipOpeningCard=true is passed by the "Begin →" handler so the second
+      // call (from the card) bypasses the check and actually dispatches start_runner.
+      if (
+        actionType === "runner_mantra" &&
+        envelope?.room_id &&
+        !options?.skipOpeningCard
+      ) {
+        setMantrasOpeningCardAction(action);
+        return;
+      }
+
+      if (actionType.startsWith("runner_")) {
+        const rp = action?.runner_payload;
+        if (!rp) return;
+        const currentIndex = orderedActions.findIndex(
+          (candidate: any) => candidate?.action_id === action.action_id,
+        );
+        if (envelope.room_id) {
+          actionCtx.setScreenValue(envelope.room_id, "room_id");
+        }
         void executeAction(
           {
-            type: "room_carry_captured",
+            type: "start_runner",
             payload: {
-              room_id: envelope?.room_id ?? null,
+              source: rp.runner_source ?? "support_room",
+              variant:
+                (rp.runner_kind ?? actionType.replace("runner_", "")) ||
+                "mantra",
+              item: rp,
               action_id: action.action_id,
-              analytics_key: action.analytics_key,
-              label: action.label,
-              writes_event:
-                action.carry_payload?.writes_event ??
-                action.persistence?.writes_event ??
-                null,
+              room_sequence_active: isSequenceActive,
+              room_sequence_action_ids: orderedActions.map(
+                (candidate: any) => candidate.action_id,
+              ),
+              room_sequence_index: currentIndex,
             },
           } as any,
           actionCtx,
         );
-        maybeAdvanceToNextAction(action.action_id);
       }
-      return;
-    }
-
-    // Room mantra opening card: show contextual card before launching bead counter.
-    // Strict guard: only runner_mantra from a room (envelope.room_id present).
-    // skipOpeningCard=true is passed by the "Begin →" handler so the second
-    // call (from the card) bypasses the check and actually dispatches start_runner.
-    if (actionType === "runner_mantra" && envelope?.room_id && !options?.skipOpeningCard) {
-      setMantrasOpeningCardAction(action);
-      return;
-    }
-
-    if (actionType.startsWith("runner_")) {
-      const rp = action?.runner_payload;
-      if (!rp) return;
-      const currentIndex = orderedActions.findIndex(
-        (candidate: any) => candidate?.action_id === action.action_id,
-      );
-      if (envelope.room_id) {
-        actionCtx.setScreenValue(envelope.room_id, "room_id");
-      }
-      void executeAction(
-        {
-          type: "start_runner",
-          payload: {
-            source: rp.runner_source ?? "support_room",
-            variant:
-              (rp.runner_kind ?? actionType.replace("runner_", "")) || "mantra",
-            item: rp,
-            action_id: action.action_id,
-            room_sequence_active: isSequenceActive,
-            room_sequence_action_ids: orderedActions.map(
-              (candidate: any) => candidate.action_id,
-            ),
-            room_sequence_index: currentIndex,
-          },
-        } as any,
-        actionCtx,
-      );
-    }
-  }, [
-    actionCtx,
-    completionCopy,
-    completionWisdom,
-    envelope?.room_id,
-    orderedActions,
-    sequenceActive,
-  ]);
+    },
+    [
+      actionCtx,
+      completionCopy,
+      completionWisdom,
+      envelope?.room_id,
+      orderedActions,
+      sequenceActive,
+    ],
+  );
 
   function handleBegin() {
     if (!recAction) return;
@@ -504,7 +553,10 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
       action_id: recAction.action_id,
       surface: "room",
     });
-    launchAction(recAction, { forceSequenceActive: true });
+    launchAction(recAction, {
+      forceSequenceActive: true,
+      skipOpeningCard: true,
+    });
   }
 
   function handleLaunchPractice(category: InquiryCategory, templateId: string) {
@@ -631,11 +683,20 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   useEffect(() => {
     if (!pendingResumeActionId || !orderedActions.length) return;
     if (pendingOpenedForRef.current === pendingResumeActionId) return;
-    const action = orderedActions.find((a: any) => a?.action_id === pendingResumeActionId);
+    const action = orderedActions.find(
+      (a: any) => a?.action_id === pendingResumeActionId,
+    );
     if (!action) return;
 
     const actionType: string = action?.action_type ?? "";
-    console.log("[room-seq] pending effect: actionType=", actionType, "id=", pendingResumeActionId, "ref=", pendingOpenedForRef.current);
+    console.log(
+      "[room-seq] pending effect: actionType=",
+      actionType,
+      "id=",
+      pendingResumeActionId,
+      "ref=",
+      pendingOpenedForRef.current,
+    );
 
     if (actionType === "in_room_carry") {
       const writesEvent =
@@ -651,10 +712,18 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
           template_id: templateId,
           step_config: {},
           input_slots: [],
-          memory_modal: writesEvent ? CARRY_MEMORY_MODAL[writesEvent] ?? null : null,
+          memory_modal: writesEvent
+            ? (CARRY_MEMORY_MODAL[writesEvent] ?? null)
+            : null,
         });
       } else {
-        console.warn("[room-seq] carry templateId missing for writes_event:", writesEvent, "action_id:", action.action_id, "— falling back to launchAction");
+        console.warn(
+          "[room-seq] carry templateId missing for writes_event:",
+          writesEvent,
+          "action_id:",
+          action.action_id,
+          "— falling back to launchAction",
+        );
         actionCtx.setScreenValue(null, "room_pending_resume_action_id");
         actionCtx.setScreenValue(null, "room_pending_carry_action_id");
         pendingOpenedForRef.current = null;
@@ -671,14 +740,20 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
       return;
     }
 
-    if (actionType === "inquiry" && action?.inquiry_payload?.categories?.length) {
+    if (
+      actionType === "inquiry" &&
+      action?.inquiry_payload?.categories?.length
+    ) {
       pendingOpenedForRef.current = pendingResumeActionId;
       setInquiryAction(action);
       return;
     }
 
     // Runner/teaching/exit types — route through launchAction directly.
-    console.log("[room-seq] pending effect: non-local-state action, routing via launchAction:", actionType);
+    console.log(
+      "[room-seq] pending effect: non-local-state action, routing via launchAction:",
+      actionType,
+    );
     actionCtx.setScreenValue(null, "room_pending_resume_action_id");
     actionCtx.setScreenValue(null, "room_pending_carry_action_id");
     pendingOpenedForRef.current = null;
@@ -687,12 +762,17 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
 
   // Keep launchActionRef current so the resume effect can call the latest
   // launchAction without re-triggering the effect on every render.
-  useEffect(() => { launchActionRef.current = launchAction; });
+  useEffect(() => {
+    launchActionRef.current = launchAction;
+  });
 
   useEffect(() => {
     if (!resumeActionId) return;
     if (handledResumeActionIdRef.current === resumeActionId) {
-      console.log("[room-seq] resumeActionId already handled, skipping:", resumeActionId);
+      console.log(
+        "[room-seq] resumeActionId already handled, skipping:",
+        resumeActionId,
+      );
       return;
     }
     const action = orderedActions.find(
@@ -705,8 +785,15 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     actionCtx.setScreenValue(null, "room_sequence_resume_action_id");
     // Persist action ID in Redux so it survives room re-mounts (local state resets on remount).
     // Applies to all action types that open a modal via local state.
-    console.log("[room-seq] resumeActionId routing: action_type=", action.action_type, "id=", resumeActionId);
-    if (["in_room_carry", "in_room_step", "inquiry"].includes(action.action_type)) {
+    console.log(
+      "[room-seq] resumeActionId routing: action_type=",
+      action.action_type,
+      "id=",
+      resumeActionId,
+    );
+    if (
+      ["in_room_carry", "in_room_step", "inquiry"].includes(action.action_type)
+    ) {
       actionCtx.setScreenValue(resumeActionId, "room_pending_resume_action_id");
     } else {
       launchActionRef.current?.(action);
@@ -748,17 +835,37 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
 
         {recAction ? (
           <View style={styles.recommendedPreviewCard}>
-            <Text style={styles.recommendedPreviewLabel}>
-              Mitra suggests beginning with
-            </Text>
-            <Text style={styles.recommendedPreviewTitle}>
-              {(recAction as any).label}
-            </Text>
-            {(recAction as any).helper_line ? (
-              <Text style={styles.recommendedPreviewHelper}>
-                {(recAction as any).helper_line}
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "flex-start",
+              }}
+            >
+              <Text
+                style={[
+                  styles.recommendedPreviewIcon,
+                  { marginRight: 8, marginTop: 2 },
+                ]}
+              >
+                ✦
               </Text>
-            ) : null}
+
+              <View style={{ flex: 1 }}>
+                <Text style={styles.recommendedPreviewLabel}>
+                  Mitra suggests beginning with
+                </Text>
+
+                <Text style={styles.recommendedPreviewTitle}>
+                  {(recAction as any).label}
+                </Text>
+
+                {(recAction as any).helper_line ? (
+                  <Text style={styles.recommendedPreviewHelper}>
+                    {(recAction as any).helper_line}
+                  </Text>
+                ) : null}
+              </View>
+            </View>
           </View>
         ) : null}
 
@@ -872,7 +979,10 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={handleExitRequest} testID="room_guided_exit">
+          <TouchableOpacity
+            onPress={handleExitRequest}
+            testID="room_guided_exit"
+          >
             <Text style={styles.exitText}>{ROOM_GUIDED_COPY.exitLabel}</Text>
           </TouchableOpacity>
         </View>
@@ -941,7 +1051,11 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
         presentation="screen"
         stepPayload={stepPayload}
         label={stepLabel}
-        helperLine={(stepAction as any)?.helper_line ?? (roomCtx as any)?.sanatan_insight_line ?? null}
+        helperLine={
+          (stepAction as any)?.helper_line ??
+          (roomCtx as any)?.sanatan_insight_line ??
+          null
+        }
         onCancel={() => {
           actionCtx.setScreenValue(null, "room_pending_resume_action_id");
           actionCtx.setScreenValue(null, "room_pending_carry_action_id");
@@ -982,19 +1096,37 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
             if (action) launchAction(action);
           }}
         >
-          <Text style={styles.interstitialText}>{interstitialLine}</Text>
-          <Text style={styles.interstitialTapHint}>Tap when ready</Text>
+          <View style={styles.interstitialCard}>
+            <View style={styles.interstitialIconWrap}>
+              <Ionicons name="leaf-outline" size={24} color="#B6862F" />
+            </View>
+            <Text style={styles.interstitialText}>{interstitialLine}</Text>
+            <View style={styles.interstitialCta}>
+              <Text style={styles.interstitialTapHint}>Tap when ready</Text>
+            </View>
+          </View>
         </TouchableOpacity>
       ) : null}
 
       {/* Mantra opening card — room-context framing before bead counter launches */}
       {mantrasOpeningCardAction ? (
         <View style={styles.mantrasOpeningCard}>
-          <Ionicons name="flower-outline" size={32} color="#A68246" style={{ marginBottom: 16 }} />
-          <Text style={styles.mantrasOpeningEyebrow}>MITRA INVITES YOU TO BEGIN WITH</Text>
-          <Text style={styles.mantrasOpeningLabel}>{mantrasOpeningCardAction.label}</Text>
+          <Ionicons
+            name="flower-outline"
+            size={32}
+            color="#A68246"
+            style={{ marginBottom: 16 }}
+          />
+          <Text style={styles.mantrasOpeningEyebrow}>
+            MITRA INVITES YOU TO BEGIN WITH
+          </Text>
+          <Text style={styles.mantrasOpeningLabel}>
+            {mantrasOpeningCardAction.label}
+          </Text>
           {mantrasOpeningCardAction.helper_line ? (
-            <Text style={styles.mantrasOpeningHelper}>{mantrasOpeningCardAction.helper_line}</Text>
+            <Text style={styles.mantrasOpeningHelper}>
+              {mantrasOpeningCardAction.helper_line}
+            </Text>
           ) : null}
           <TouchableOpacity
             style={styles.mantrasOpeningBeginBtn}
@@ -1020,8 +1152,9 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
         <View style={styles.exitConfirmOverlay}>
           <View style={styles.exitConfirmSheet}>
             <Text style={styles.exitConfirmText}>
-              {ROOM_LABELS[envelope?.room_id as keyof typeof ROOM_LABELS] ?? "This room"} will close.{" "}
-              You can return anytime.
+              {ROOM_LABELS[envelope?.room_id as keyof typeof ROOM_LABELS] ??
+                "This room"}{" "}
+              will close. You can return anytime.
             </Text>
             <TouchableOpacity
               style={styles.exitConfirmYes}
@@ -1113,8 +1246,8 @@ const styles = StyleSheet.create({
     width: "60%",
     maxWidth: 330,
     alignSelf: "center",
-    marginBottom: 10,
-    paddingVertical: 10,
+    marginBottom: 15,
+    paddingVertical: 6,
     borderRadius: 999,
     backgroundColor: "#5A2C00",
     flexDirection: "row",
@@ -1125,16 +1258,17 @@ const styles = StyleSheet.create({
     shadowRadius: 18,
     shadowOffset: { width: 0, height: 10 },
     elevation: 4,
+    marginTop: 10,
   },
   beginBtnText: {
     fontFamily: Fonts.sans.bold,
-    fontSize: 20,
+    fontSize: 16,
     lineHeight: 24,
     color: "#FFF8EF",
   },
   beginArrow: {
     marginLeft: 16,
-    fontSize: 28,
+    fontSize: 20,
     lineHeight: 28,
     color: "#FFF8EF",
   },
@@ -1265,36 +1399,67 @@ const styles = StyleSheet.create({
     color: "#3E2A15",
   },
   recommendedPreviewCard: {
-    backgroundColor: "#FAF5EE",
+    width: "100%",
+    backgroundColor: "rgba(255, 250, 243, 0.94)",
     borderWidth: 1,
-    borderColor: "rgba(200, 180, 154, 0.5)",
-    borderRadius: 10,
-    padding: 14,
-    marginHorizontal: 20,
-    marginVertical: 12,
+    borderColor: "rgba(210, 180, 119, 0.52)",
+    borderRadius: 22,
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    marginHorizontal: 18,
+    marginTop: 8,
+    marginBottom: 14,
+    shadowColor: "#8A5B1F",
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 3,
+    justifyContent: "center",
+    alignSelf: "center",
+  },
+  recommendedPreviewTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 14,
+  },
+  recommendedPreviewIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#FFF3DE",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  recommendedPreviewIcon: {
+    width: 25,
+    height: 25,
+    color: "#d4a017",
+  },
+  recommendedPreviewBody: {
+    paddingLeft: 4,
   },
   recommendedPreviewLabel: {
-    fontFamily: Fonts.sans.regular,
+    flex: 1,
+    fontFamily: Fonts.sans.semiBold,
     fontSize: 11,
     lineHeight: 16,
-    color: "#B0936B",
-    letterSpacing: 0.5,
+    color: "#B0894D",
+    letterSpacing: 1.1,
     textTransform: "uppercase",
-    marginBottom: 6,
   },
   recommendedPreviewTitle: {
-    fontFamily: Fonts.serif.regular,
-    fontSize: 17,
-    lineHeight: 24,
+    fontFamily: Fonts.serif.bold,
+    fontSize: 16,
+    lineHeight: 28,
     color: "#432104",
-    marginBottom: 4,
+    marginBottom: 6,
   },
   recommendedPreviewHelper: {
-    fontFamily: Fonts.sans.regular,
-    fontSize: 13,
-    lineHeight: 19,
-    color: "#8A7968",
-    fontStyle: "italic",
+    fontFamily: Fonts.sans.medium,
+    fontSize: 14,
+    lineHeight: 22,
+    color: "#74685C",
   },
   viewStepsLink: {
     fontFamily: Fonts.sans.regular,
@@ -1366,26 +1531,59 @@ const styles = StyleSheet.create({
   },
   interstitialOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(251, 246, 239, 0.93)",
+    backgroundColor: "rgba(50, 28, 10, 0.26)",
     alignItems: "center",
     justifyContent: "center",
+    paddingHorizontal: 28,
     zIndex: 100,
   },
+  interstitialCard: {
+    width: "100%",
+    maxWidth: 320,
+    backgroundColor: "rgba(255, 249, 240, 0.96)",
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: "rgba(205, 168, 96, 0.45)",
+    paddingHorizontal: 26,
+    paddingTop: 26,
+    paddingBottom: 22,
+    alignItems: "center",
+    shadowColor: "#5C3A12",
+    shadowOpacity: 0.16,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+  },
+  interstitialIconWrap: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFF4DE",
+    marginBottom: 18,
+  },
   interstitialText: {
-    fontFamily: Fonts.serif.regular,
-    fontSize: 20,
-    lineHeight: 32,
+    fontFamily: Fonts.serif.bold,
+    fontSize: 24,
+    lineHeight: 34,
     color: "#5C3A12",
-    fontStyle: "italic",
     textAlign: "center",
-    paddingHorizontal: 40,
+    paddingHorizontal: 6,
+  },
+  interstitialCta: {
+    marginTop: 20,
+    minWidth: 168,
+    borderRadius: 999,
+    backgroundColor: "#EFE2CF",
+    paddingHorizontal: 22,
+    paddingVertical: 12,
+    alignItems: "center",
   },
   interstitialTapHint: {
-    fontFamily: Fonts.sans.regular,
-    fontSize: 13,
-    color: "#A08060",
-    marginTop: 24,
-    letterSpacing: 0.5,
+    fontFamily: Fonts.sans.medium,
+    fontSize: 14,
+    color: "#76522B",
   },
   mantrasOpeningCard: {
     ...StyleSheet.absoluteFillObject,

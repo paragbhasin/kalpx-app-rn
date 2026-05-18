@@ -49,7 +49,7 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
   const [results, setResults] = useState<LibraryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [addingId, setAddingId] = useState<string | null>(null);
-  const [selectedType, setSelectedType] = useState<string>("mantra");
+  const [selectedType, setSelectedType] = useState<string>("all");
   const inputRef = useRef<TextInput | null>(null);
 
   const performSearch = useCallback(
@@ -61,20 +61,33 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
 
       setLoading(true);
       try {
-        const effectiveType = ["mantra", "sankalp", "practice"].includes(
-          selectedType,
-        )
-          ? selectedType
-          : "practice";
-        const res = await mitraLibrarySearch(query, effectiveType);
-        const normalizedResults: LibraryItem[] = (res?.results || []).map(
-          (item: any) => ({
-            ...item,
-            _type: effectiveType,
-          }),
-        );
-
-        setResults(normalizedResults);
+        if (selectedType === "all") {
+          const [mantras, sankalps, practices] = await Promise.allSettled([
+            mitraLibrarySearch(query, "mantra"),
+            mitraLibrarySearch(query, "sankalp"),
+            mitraLibrarySearch(query, "practice"),
+          ]);
+          const merged: LibraryItem[] = [
+            ...(mantras.status === "fulfilled"
+              ? (mantras.value?.results || []).map((i: any) => ({ ...i, _type: "mantra" }))
+              : []),
+            ...(sankalps.status === "fulfilled"
+              ? (sankalps.value?.results || []).map((i: any) => ({ ...i, _type: "sankalp" }))
+              : []),
+            ...(practices.status === "fulfilled"
+              ? (practices.value?.results || []).map((i: any) => ({ ...i, _type: "practice" }))
+              : []),
+          ];
+          setResults(merged);
+        } else {
+          const effectiveType = ["mantra", "sankalp", "practice"].includes(selectedType)
+            ? selectedType
+            : "practice";
+          const res = await mitraLibrarySearch(query, effectiveType);
+          setResults(
+            (res?.results || []).map((item: any) => ({ ...item, _type: effectiveType })),
+          );
+        }
       } catch (err) {
         console.error("[LibrarySearch] Failed:", err);
       } finally {
@@ -96,7 +109,7 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
     if (!isVisible) return;
     setSearchQuery("");
     setResults([]);
-    setSelectedType("mantra");
+    setSelectedType("all");
     const timer = setTimeout(() => {
       inputRef.current?.focus();
     }, 250);
@@ -187,11 +200,10 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
 
             <View style={styles.typeWrap}>
               {[
+                { label: "All", value: "all" },
                 { label: "Mantra", value: "mantra" },
                 { label: "Sankalp", value: "sankalp" },
                 { label: "Practice", value: "practice" },
-                { label: "Reflection", value: "reflection" },
-                { label: "Library", value: "library" },
               ].map((type) => {
                 const active = selectedType === type.value;
                 return (

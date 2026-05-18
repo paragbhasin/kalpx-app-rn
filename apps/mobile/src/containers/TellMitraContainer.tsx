@@ -114,10 +114,21 @@ export default function TellMitraContainer() {
 
   useEffect(() => {
     if (!THREAD_UI_ENABLED) return;
-    // Prana entry: auto-submit "I am agitated/drained" and skip prior conversation restoration.
+    // Prana entry: typewriter effect then auto-submit, so message appears as if user typed it.
     if (initialMessage) {
-      void submitThread(initialMessage, 'tell_mitra_prana_entry');
-      return;
+      let i = 0;
+      const interval = setInterval(() => {
+        i += 1;
+        setThreadDraft(initialMessage.slice(0, i));
+        if (i >= initialMessage.length) {
+          clearInterval(interval);
+          setTimeout(() => {
+            void submitThread(initialMessage, 'tell_mitra_prana_entry');
+            setThreadDraft('');
+          }, 400);
+        }
+      }, 60);
+      return () => clearInterval(interval);
     }
     let cancelled = false;
     (async () => {

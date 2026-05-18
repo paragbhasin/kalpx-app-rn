@@ -91,6 +91,7 @@ export function MitraHomePage() {
   >(null);
   const [feelingLoading, setFeelingLoading] = useState(false);
   const [dismissingCheckin, setDismissingCheckin] = useState(false);
+  const [pendingPranaMessage, setPendingPranaMessage] = useState<string | null>(null);
   const { loading, error, hasActiveJourney, rawStatus, refetch } =
     useJourneyStatus();
   const {
@@ -170,8 +171,9 @@ export function MitraHomePage() {
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
       });
       if (pranaType === "agitated" || pranaType === "drained") {
-        const initialMessage = pranaType === "agitated" ? "I am agitated" : "I am drained";
-        navigate(`/en/mitra/tell-mitra?initialMessage=${encodeURIComponent(initialMessage)}`);
+        const msg = pranaType === "agitated" ? "I am agitated" : "I am drained";
+        setPendingPranaMessage(msg);
+        await refetchHome();
       } else {
         await refetchHome();
       }
@@ -185,6 +187,7 @@ export function MitraHomePage() {
   }
 
   async function handleCheckinDismiss() {
+    setPendingPranaMessage(null);
     setDismissingCheckin(true);
     try {
       await postPranaAcknowledgeDismiss();
@@ -770,6 +773,32 @@ export function MitraHomePage() {
                           >
                             {acw!.acknowledgment}
                           </div>
+                          {pendingPranaMessage && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigate(`/en/mitra/tell-mitra?initialMessage=${encodeURIComponent(pendingPranaMessage)}`);
+                                setPendingPranaMessage(null);
+                              }}
+                              style={{
+                                width: "100%",
+                                border: "1px solid rgba(201,168,76,0.38)",
+                                background: "linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,250,243,0.96))",
+                                color: "#432104",
+                                borderRadius: 18,
+                                padding: "14px 18px",
+                                textAlign: "left",
+                                cursor: "pointer",
+                                boxShadow: "0 8px 18px rgba(201,168,76,0.12)",
+                                fontSize: 15,
+                                fontFamily: "var(--kalpx-font-serif)",
+                                fontWeight: 600,
+                                marginTop: 12,
+                              }}
+                            >
+                              Tell Mitra →
+                            </button>
+                          )}
                           {acw!.suggestion && (
                             <>
                               <div

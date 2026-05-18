@@ -157,6 +157,7 @@ export default function FourDoorHomeContainer({
   const [reminderTimes, setReminderTimes] = useState<Record<"mantra" | "sankalp" | "practice", string>>({ mantra: "07:00", sankalp: "08:00", practice: "18:00" });
   const [reminderPickerKey, setReminderPickerKey] = useState<"mantra" | "sankalp" | "practice" | null>(null);
   const [reminderSaving, setReminderSaving] = useState(false);
+  const [pendingPranaMessage, setPendingPranaMessage] = useState<string | null>(null);
 
   useEffect(() => {
     homeDataRef.current = homeData;
@@ -228,8 +229,9 @@ export default function FourDoorHomeContainer({
             Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
         });
         if (pranaType === "agitated" || pranaType === "drained") {
-          const initialMessage = pranaType === "agitated" ? "I am agitated" : "I am drained";
-          navigation.navigate("TellMitra" as any, { initialMessage });
+          const msg = pranaType === "agitated" ? "I am agitated" : "I am drained";
+          setPendingPranaMessage(msg);
+          await loadHome(true, true);
         } else {
           await loadHome(true, true);
         }
@@ -237,10 +239,11 @@ export default function FourDoorHomeContainer({
         setFeelingLoading(false);
       }
     },
-    [loadHome, navigation, screenData],
+    [loadHome, navigation, screenData, setPendingPranaMessage],
   );
 
   const handleDismissCheckin = useCallback(async () => {
+    setPendingPranaMessage(null);
     await postPranaAcknowledgeDismiss();
     await loadHome(true, true);
   }, [loadHome]);
@@ -523,6 +526,19 @@ export default function FourDoorHomeContainer({
                   <Text style={styles.checkinAcknowledgment}>
                     {acw.acknowledgment}
                   </Text>
+                )}
+
+                {pendingPranaMessage && (
+                  <TouchableOpacity
+                    style={styles.suggestionButton}
+                    activeOpacity={0.82}
+                    onPress={() => {
+                      navigation.navigate("TellMitra" as any, { initialMessage: pendingPranaMessage });
+                      setPendingPranaMessage(null);
+                    }}
+                  >
+                    <Text style={styles.suggestionButtonText}>Tell Mitra →</Text>
+                  </TouchableOpacity>
                 )}
 
                 {!!acw?.suggestion && (

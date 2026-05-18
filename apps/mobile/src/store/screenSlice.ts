@@ -206,7 +206,11 @@ export const restoreState = createAsyncThunk(
 export const loadScreenWithData = createAsyncThunk(
   'screen/loadScreenWithData',
   async (
-    { containerId, stateId }: { containerId: string; stateId: string },
+    {
+      containerId,
+      stateId,
+      replace = false,
+    }: { containerId: string; stateId: string; replace?: boolean },
     { dispatch },
   ) => {
     // Resolve the schema first, then atomically update nav + schema in one
@@ -215,11 +219,11 @@ export const loadScreenWithData = createAsyncThunk(
     if (screenSchema) {
       dispatch({
         type: 'screen/loadScreenWithSchema',
-        payload: { containerId, stateId, schema: screenSchema },
+        payload: { containerId, stateId, schema: screenSchema, replace },
       });
     } else {
       // Schema unavailable — fall back to the old clear-then-navigate path.
-      dispatch({ type: 'screen/loadScreen', payload: { containerId, stateId } });
+      dispatch({ type: 'screen/loadScreen', payload: { containerId, stateId, replace } });
       console.warn(
         `[SCREEN_SLICE] No schema found for ${containerId}/${stateId}`,
       );
@@ -263,9 +267,9 @@ const screenSlice = createSlice({
   name: 'screen',
   initialState,
   reducers: {
-    loadScreen(state, action: PayloadAction<{ containerId: string; stateId: string }>) {
-      const { containerId, stateId } = action.payload;
-      if (state.currentContainerId && state.currentStateId) {
+    loadScreen(state, action: PayloadAction<{ containerId: string; stateId: string; replace?: boolean }>) {
+      const { containerId, stateId, replace = false } = action.payload;
+      if (!replace && state.currentContainerId && state.currentStateId) {
         state.history.push({
           containerId: state.currentContainerId,
           stateId: state.currentStateId,
@@ -283,10 +287,10 @@ const screenSlice = createSlice({
     // in one dispatch so ScreenRenderer never sees a null gap.
     loadScreenWithSchema(
       state,
-      action: PayloadAction<{ containerId: string; stateId: string; schema: any }>,
+      action: PayloadAction<{ containerId: string; stateId: string; schema: any; replace?: boolean }>,
     ) {
-      const { containerId, stateId, schema } = action.payload;
-      if (state.currentContainerId && state.currentStateId) {
+      const { containerId, stateId, schema, replace = false } = action.payload;
+      if (!replace && state.currentContainerId && state.currentStateId) {
         state.history.push({
           containerId: state.currentContainerId,
           stateId: state.currentStateId,

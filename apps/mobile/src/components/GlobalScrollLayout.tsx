@@ -15,6 +15,7 @@ import { useScrollContext } from "../context/ScrollContext";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { navigationRef } from "../Shared/Routes/NavigationService";
 import { isMitraRouteName } from "../Shared/Routes/mitraRouteNames";
+import { store } from "../store";
 import Header from "./Header";
 
 // Total header height including status bar safe area on Android
@@ -33,6 +34,7 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
     currentScreen,
     currentContainerId,
     currentStateId,
+    screenData,
     goBack,
     loadScreen,
   } = useScreenStore();
@@ -158,6 +160,23 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
+    const isRhythmSurface =
+      screenData?.runner_source === "rhythm_daily" ||
+      screenData?.practice_launch_surface === "rhythm";
+    const hasActiveInnerPath =
+      (store.getState() as any)?.door?.homeData?.inner_path_summary
+        ?.has_active_path === true;
+
+    if (
+      isRhythmSurface &&
+      !hasActiveInnerPath &&
+      (currentContainerId === "cycle_transitions" ||
+        currentContainerId === "practice_runner")
+    ) {
+      (navigationRef as any).navigate("Home");
+      return;
+    }
+
     // Runner launched from a direct-route screen (InnerPath, RhythmHome).
     // Engine history may have stale entries from prior sessions — pop the RN stack
     // directly so one back press returns to the launching screen, not into old history.
@@ -184,7 +203,7 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
 
     // Last resort: return to Four Door Home — the product root for logged-in users.
     (navigationRef as any).navigate("Home");
-  }, [isOnDynamicEngine, isInSupportFlow, currentContainerId, canGoBackInStack, history.length, goBack, loadScreen]);
+  }, [isOnDynamicEngine, isInSupportFlow, currentContainerId, screenData?.runner_source, screenData?.practice_launch_surface, canGoBackInStack, history.length, goBack, loadScreen]);
 
   // Android hardware back — delegate to the same handleBack logic so
   // hardware back honors support-flow jumps, debounce, and root guards.

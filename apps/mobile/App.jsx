@@ -122,6 +122,7 @@ function isMitraRouteName(routeName) {
     "InnerPath",
     "QuickReset",
     "TellMitra",
+    'MitraStart'
   ].includes(routeName);
 }
 

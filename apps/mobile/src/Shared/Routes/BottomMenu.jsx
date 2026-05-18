@@ -42,10 +42,10 @@ const BottomMenuContent = () => {
             route.name === "HomePage"
               ? getFocusedRouteNameFromRoute(route) || "Home"
               : route.name;
-          const shouldUseTransparentTabBar =
-            !!currentBackground && isMitraRouteName(nestedRouteName);
+          const isMitraSurface = isMitraRouteName(nestedRouteName);
+          const shouldUseTransparentTabBar = isMitraSurface;
           const shouldUseDefaultSurface =
-            !currentBackground && isMitraRouteName(nestedRouteName);
+            !shouldUseTransparentTabBar && !currentBackground;
 
           return {
             headerShown: false,

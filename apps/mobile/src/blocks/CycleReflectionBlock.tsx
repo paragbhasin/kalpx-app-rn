@@ -558,9 +558,24 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           store.dispatch(screenActions.setScreenValue({ key: k, value: null }));
         }
         store.dispatch(
+          screenActions.setScreenValue({
+            key: "onboarding_turn",
+            value: "turn_2",
+          }),
+        );
+        store.dispatch(
+          screenActions.setScreenValue({
+            key: "onboarding_draft_state",
+            value: {
+              started_at: Date.now(),
+              entry_intention: "change_focus",
+            },
+          }),
+        );
+        store.dispatch(
           loadScreenWithData({
             containerId: "welcome_onboarding",
-            stateId: "turn_1",
+            stateId: "turn_2",
           }) as any,
         );
         navigation.navigate("DynamicEngine");

@@ -4,15 +4,10 @@
  * Standalone screen for "I want to tell Mitra" CTA paths (e.g. from QuickReset).
  */
 
-import React from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import TellMitraContainer from '../../containers/TellMitraContainer';
-import { Fonts } from '../../theme/fonts';
+import React from "react";
+import { SafeAreaView, StyleSheet, Text, View } from "react-native";
+import TellMitraContainer from "../../containers/TellMitraContainer";
+import { Fonts } from "../../theme/fonts";
 
 export default function TellMitraScreen() {
   return (
@@ -30,27 +25,27 @@ export default function TellMitraScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FAF7F2',
+    // backgroundColor: '#FAF7F2',
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 12,
     borderBottomWidth: 0.5,
-    borderBottomColor: '#DAC28E',
+    borderBottomColor: "#DAC28E",
   },
   headerTitle: {
     fontSize: 22,
     fontFamily: Fonts.serif.bold,
-    color: '#432104',
-    fontWeight: '700',
+    color: "#432104",
+    fontWeight: "700",
   },
   body: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#FAF7F2',
+    backgroundColor: "#FAF7F2",
   },
 });

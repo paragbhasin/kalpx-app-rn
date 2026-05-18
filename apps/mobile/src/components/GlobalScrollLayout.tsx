@@ -160,6 +160,15 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
+    // Onboarding surfaces can be launched from direct-route screens
+    // (Four Door Home, Rhythm setup, Inner Path). In that case, the RN stack
+    // owns the origin, so pop back to the actual launching screen instead of
+    // stepping through stale engine history.
+    if (currentContainerId === "welcome_onboarding" && canGoBackInStack) {
+      navigationRef.goBack();
+      return;
+    }
+
     const isRhythmSurface =
       screenData?.runner_source === "rhythm_daily" ||
       screenData?.practice_launch_surface === "rhythm";

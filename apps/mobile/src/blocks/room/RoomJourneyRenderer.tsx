@@ -522,8 +522,10 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
     // Navigate back to the surface that launched this room (same logic as room_exit).
     if (navigationRef.isReady() && navigationRef.canGoBack()) {
       navigationRef.goBack();
+    } else if (navigationRef.isReady()) {
+      (navigationRef as any).navigate('Home');
     } else {
-      actionCtx.loadScreen({ container_id: 'portal', state_id: 'portal' } as any);
+      actionCtx.loadScreen({ container_id: 'companion_dashboard_v3', state_id: 'day_active' } as any);
     }
   }
 

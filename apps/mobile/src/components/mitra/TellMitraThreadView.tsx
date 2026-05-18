@@ -4,7 +4,13 @@
  * Contains all conversation item renderers, empty state, and composer layout.
  */
 
-import React from 'react';
+import { getRoomLabel, isValidRoomId } from "@kalpx/contracts";
+import type {
+  TellMitraConversationItem,
+  TellMitraFollowupOption,
+  TellMitraNextOption,
+} from "@kalpx/types";
+import React from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -14,33 +20,28 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Fonts } from '../../theme/fonts';
-import type {
-  TellMitraConversationItem,
-  TellMitraFollowupOption,
-  TellMitraNextOption,
-} from '@kalpx/types';
-import { getRoomLabel, isValidRoomId } from '@kalpx/contracts';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Fonts } from "../../theme/fonts";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
 const QUICK_START_CHIPS = [
-  { label: 'I feel overwhelmed',     value: 'overwhelmed'  },
-  { label: 'I need clarity',         value: 'need_clarity' },
-  { label: 'I feel disconnected',    value: 'disconnected' },
-  { label: 'Just help me calm down', value: 'calm_now'     },
+  { label: "I feel overwhelmed", value: "overwhelmed" },
+  { label: "I need clarity", value: "need_clarity" },
+  { label: "I feel disconnected", value: "disconnected" },
+  { label: "Just help me calm down", value: "calm_now" },
 ] as const;
 
 const RETURN_CARD_CHIPS: TellMitraFollowupOption[] = [
-  { label: 'More steady',       value: 'more_steady'     },
-  { label: 'Still heavy',       value: 'still_heavy'     },
-  { label: 'I need clarity',    value: 'need_clarity'    },
-  { label: 'Tell Mitra more',   value: 'tell_mitra_more' },
+  { label: "More steady", value: "more_steady" },
+  { label: "Still heavy", value: "still_heavy" },
+  { label: "I need clarity", value: "need_clarity" },
+  { label: "Tell Mitra more", value: "tell_mitra_more" },
 ];
 
-const ROBOTIC_PATTERNS = /scattered|agitated|drained|energized|balanced|state_tag|spl_pattern/i;
+const ROBOTIC_PATTERNS =
+  /scattered|agitated|drained|energized|balanced|state_tag|spl_pattern/i;
 
 function shouldShowPriorContext(summary: string | null | undefined): boolean {
   if (!summary) return false;
@@ -61,7 +62,9 @@ export interface TellMitraThreadViewProps {
   onDraftChange: (t: string) => void;
   onSubmit: (text: string) => void;
   onChipClick: (opt: TellMitraFollowupOption, chipGroupId: string) => void;
-  onEnterRoom: (item: Extract<TellMitraConversationItem, { type: 'room_recommendation' }>) => void;
+  onEnterRoom: (
+    item: Extract<TellMitraConversationItem, { type: "room_recommendation" }>,
+  ) => void;
   onTellMitraMore: () => void;
   onStartFresh: () => void;
   onQuickStartChip: (value: string, label: string) => void;
@@ -94,7 +97,7 @@ export default function TellMitraThreadView({
 
   function renderItem(item: TellMitraConversationItem) {
     // ── user_message ─────────────────────────────────────────────────────────
-    if (item.type === 'user_message') {
+    if (item.type === "user_message") {
       return (
         <View key={item.id} style={s.userRow}>
           <View style={s.userBubble}>
@@ -105,7 +108,7 @@ export default function TellMitraThreadView({
     }
 
     // ── user_chip ────────────────────────────────────────────────────────────
-    if (item.type === 'user_chip') {
+    if (item.type === "user_chip") {
       return (
         <View key={item.id} style={s.userRow}>
           <View style={s.userChipBubble}>
@@ -116,7 +119,7 @@ export default function TellMitraThreadView({
     }
 
     // ── mitra_response ───────────────────────────────────────────────────────
-    if (item.type === 'mitra_response') {
+    if (item.type === "mitra_response") {
       return (
         <View key={item.id} style={s.mitraBlock}>
           <Text style={s.mitraLabel}>MITRA</Text>
@@ -129,21 +132,31 @@ export default function TellMitraThreadView({
     }
 
     // ── followup_chips ───────────────────────────────────────────────────────
-    if (item.type === 'followup_chips') {
+    if (item.type === "followup_chips") {
       if (item.disabled) return null;
       return (
         <View key={item.id} style={s.chipsBlock}>
           <Text style={s.chipsPrompt}>{item.prompt}</Text>
           <View style={s.chipsWrap}>
-            {item.options.map(opt => (
+            {item.options.map((opt) => (
               <TouchableOpacity
                 key={opt.value}
-                onPress={() => { if (!item.disabled && !submitting) onChipClick(opt, item.id); }}
+                onPress={() => {
+                  if (!item.disabled && !submitting) onChipClick(opt, item.id);
+                }}
                 disabled={item.disabled || submitting}
-                style={[s.chip, (item.disabled || submitting) && s.chipDisabled]}
+                style={[
+                  s.chip,
+                  (item.disabled || submitting) && s.chipDisabled,
+                ]}
                 activeOpacity={0.7}
               >
-                <Text style={[s.chipText, item.disabled ? s.chipTextDisabled : undefined]}>
+                <Text
+                  style={[
+                    s.chipText,
+                    item.disabled ? s.chipTextDisabled : undefined,
+                  ]}
+                >
                   {opt.label}
                 </Text>
               </TouchableOpacity>
@@ -154,7 +167,7 @@ export default function TellMitraThreadView({
     }
 
     // ── room_recommendation ──────────────────────────────────────────────────
-    if (item.type === 'room_recommendation') {
+    if (item.type === "room_recommendation") {
       return (
         <View key={item.id} style={s.roomCard}>
           <Text style={s.roomCardLabel}>RECOMMENDED NEXT</Text>
@@ -169,16 +182,27 @@ export default function TellMitraThreadView({
           >
             <Text style={s.goldBtnText}>Enter {item.room_label}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={s.ghostLink} onPress={onTellMitraMore} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={s.ghostLink}
+            onPress={onTellMitraMore}
+            activeOpacity={0.7}
+          >
             <Text style={s.ghostLinkText}>Tell Mitra more</Text>
           </TouchableOpacity>
-          {item.secondary_room_id && isValidRoomId(item.secondary_room_id) && item.secondary_room_id !== item.room_id ? (
+          {item.secondary_room_id &&
+          isValidRoomId(item.secondary_room_id) &&
+          item.secondary_room_id !== item.room_id ? (
             <TouchableOpacity
               style={[s.ghostLink, { marginTop: 2 }]}
-              onPress={() => onChipClick(
-                { label: `Or try ${getRoomLabel(item.secondary_room_id as any)}`, value: `secondary_room_${item.secondary_room_id}` },
-                item.id
-              )}
+              onPress={() =>
+                onChipClick(
+                  {
+                    label: `Or try ${getRoomLabel(item.secondary_room_id as any)}`,
+                    value: `secondary_room_${item.secondary_room_id}`,
+                  },
+                  item.id,
+                )
+              }
               activeOpacity={0.7}
             >
               <Text style={[s.ghostLinkText, { fontSize: 12 }]}>
@@ -191,17 +215,22 @@ export default function TellMitraThreadView({
     }
 
     // ── return_card ──────────────────────────────────────────────────────────
-    if (item.type === 'return_card') {
+    if (item.type === "return_card") {
       return (
         <View key={item.id} style={s.returnCard}>
-          <Text style={s.returnCardTitle}>You're back from {item.room_label}.</Text>
+          <Text style={s.returnCardTitle}>
+            You're back from {item.room_label}.
+          </Text>
           <Text style={s.returnCardSubtitle}>What feels different now?</Text>
           <View style={s.chipsWrap}>
-            {RETURN_CARD_CHIPS.map(opt => (
+            {RETURN_CARD_CHIPS.map((opt) => (
               <TouchableOpacity
                 key={opt.value}
                 onPress={() => {
-                  if (opt.value === 'tell_mitra_more') { onTellMitraMore(); return; }
+                  if (opt.value === "tell_mitra_more") {
+                    onTellMitraMore();
+                    return;
+                  }
                   onChipClick(opt, `return_card_${item.id}`);
                 }}
                 disabled={submitting}
@@ -217,7 +246,7 @@ export default function TellMitraThreadView({
     }
 
     // ── wisdom_options ───────────────────────────────────────────────────────
-    if (item.type === 'wisdom_options') {
+    if (item.type === "wisdom_options") {
       return (
         <View key={item.id} style={s.wisdomBlock}>
           <Text style={s.wisdomLabel}>OR TRY</Text>
@@ -228,7 +257,9 @@ export default function TellMitraThreadView({
               onPress={() => onWisdomOptionPress(opt)}
               activeOpacity={0.7}
             >
-              <Text style={s.ghostBtnText}>{opt.label} — {opt.description}</Text>
+              <Text style={s.ghostBtnText}>
+                {opt.label} — {opt.description}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -236,7 +267,7 @@ export default function TellMitraThreadView({
     }
 
     // ── safety ───────────────────────────────────────────────────────────────
-    if (item.type === 'safety') {
+    if (item.type === "safety") {
       return (
         <View key={item.id} style={s.safetyCard}>
           <Text style={s.safetyTitle}>Mitra hears you.</Text>
@@ -246,7 +277,7 @@ export default function TellMitraThreadView({
     }
 
     // ── loading ───────────────────────────────────────────────────────────────
-    if (item.type === 'loading') {
+    if (item.type === "loading") {
       return (
         <View key={item.id} style={s.mitraBlock}>
           <Text style={s.mitraLabel}>MITRA</Text>
@@ -256,7 +287,7 @@ export default function TellMitraThreadView({
     }
 
     // ── error ─────────────────────────────────────────────────────────────────
-    if (item.type === 'error') {
+    if (item.type === "error") {
       return (
         <View key={item.id} style={s.errorCard}>
           <Text style={s.errorCardText}>{item.message}</Text>
@@ -293,10 +324,14 @@ export default function TellMitraThreadView({
         {conversation.length === 0 && (
           <View style={s.emptyState}>
             <Text style={s.emptyTitle}>Tell Mitra</Text>
-            <Text style={s.emptySubtext}>What would you like Mitra to understand today?</Text>
-            <Text style={s.emptyHint}>You can write freely — one line is enough.</Text>
+            <Text style={s.emptySubtext}>
+              What would you like Mitra to understand today?
+            </Text>
+            <Text style={s.emptyHint}>
+              You can write freely — one line is enough.
+            </Text>
             <View style={[s.chipsWrap, { marginTop: 20 }]}>
-              {QUICK_START_CHIPS.map(chip => (
+              {QUICK_START_CHIPS.map((chip) => (
                 <TouchableOpacity
                   key={chip.value}
                   onPress={() => onQuickStartChip(chip.value, chip.label)}
@@ -312,10 +347,12 @@ export default function TellMitraThreadView({
         )}
 
         {/* Conversation items */}
-        {conversation.map(item => renderItem(item))}
+        {conversation.map((item) => renderItem(item))}
       </ScrollView>
 
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         {!!errorMsg && <Text style={s.errorText}>{errorMsg}</Text>}
         <View style={[s.composerRow, { paddingBottom: footerClearance }]}>
           <TextInput
@@ -329,7 +366,10 @@ export default function TellMitraThreadView({
             maxLength={1000}
           />
           <TouchableOpacity
-            style={[s.sendBtn, (submitting || !draft.trim()) && s.sendBtnDisabled]}
+            style={[
+              s.sendBtn,
+              (submitting || !draft.trim()) && s.sendBtnDisabled,
+            ]}
             onPress={() => {
               if (submitting || !draft.trim()) return;
               onSubmit(draft.trim());
@@ -337,7 +377,7 @@ export default function TellMitraThreadView({
             disabled={submitting || !draft.trim()}
             activeOpacity={0.8}
           >
-            <Text style={s.sendBtnText}>{submitting ? '…' : 'Send'}</Text>
+            <Text style={s.sendBtnText}>{submitting ? "…" : "Send"}</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -348,118 +388,280 @@ export default function TellMitraThreadView({
 // ── Styles ───────────────────────────────────────────────────────────────────
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#FAF7F2' },
-  startFreshRow: { paddingHorizontal: 16, paddingTop: 10, alignItems: 'flex-end' },
-  startFreshText: { fontSize: 12, color: '#A08060', fontFamily: Fonts.sans.regular },
+  root: { flex: 1 },
+  startFreshRow: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    alignItems: "flex-end",
+  },
+  startFreshText: {
+    fontSize: 12,
+    color: "#A08060",
+    fontFamily: Fonts.sans.regular,
+  },
   scrollArea: { flex: 1 },
   scrollContent: { padding: 16, paddingBottom: 12 },
   scrollContentEmpty: { paddingTop: 28 },
 
   // Empty state
   emptyState: { paddingBottom: 24 },
-  emptyTitle: { fontFamily: Fonts.serif.regular, fontSize: 24, fontWeight: '700', color: '#3B2A1A', marginBottom: 6 },
-  emptySubtext: { fontSize: 15, color: '#7B6550', lineHeight: 22, marginBottom: 4 },
-  emptyHint: { fontSize: 13, color: '#9B8B77', lineHeight: 20 },
+  emptyTitle: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#3B2A1A",
+    marginBottom: 6,
+  },
+  emptySubtext: {
+    fontSize: 15,
+    color: "#7B6550",
+    lineHeight: 22,
+    marginBottom: 4,
+  },
+  emptyHint: { fontSize: 13, color: "#9B8B77", lineHeight: 20 },
 
   // User bubbles
-  userRow: { alignItems: 'flex-end', marginBottom: 12 },
-  userBubble: { backgroundColor: '#F5E9C8', borderRadius: 18, borderBottomRightRadius: 4, paddingVertical: 10, paddingHorizontal: 16, maxWidth: '78%' },
-  userBubbleText: { fontSize: 16, color: '#3B2A1A', lineHeight: 24 },
-  userChipBubble: { backgroundColor: 'rgba(201,168,76,0.12)', borderWidth: 1, borderColor: 'rgba(201,168,76,0.4)', borderRadius: 16, borderBottomRightRadius: 4, paddingVertical: 6, paddingHorizontal: 12, maxWidth: '65%' },
-  userChipText: { fontSize: 14, color: '#7B6550', fontStyle: 'italic', fontFamily: Fonts.sans.regular },
+  userRow: { alignItems: "flex-end", marginBottom: 12 },
+  userBubble: {
+    backgroundColor: "#F5E9C8",
+    borderRadius: 18,
+    borderBottomRightRadius: 4,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    maxWidth: "78%",
+  },
+  userBubbleText: { fontSize: 16, color: "#3B2A1A", lineHeight: 24 },
+  userChipBubble: {
+    backgroundColor: "rgba(201,168,76,0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(201,168,76,0.4)",
+    borderRadius: 16,
+    borderBottomRightRadius: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    maxWidth: "65%",
+  },
+  userChipText: {
+    fontSize: 14,
+    color: "#7B6550",
+    fontStyle: "italic",
+    fontFamily: Fonts.sans.regular,
+  },
 
   // Mitra response
   mitraBlock: { marginBottom: 18 },
-  mitraLabel: { fontSize: 10, color: '#B8963E', fontWeight: '700', letterSpacing: 0.8, marginBottom: 6, fontFamily: Fonts.sans.regular },
-  priorContextText: { fontSize: 12, color: '#9B8B77', fontStyle: 'italic', marginBottom: 8, paddingHorizontal: 8, paddingVertical: 4, backgroundColor: 'rgba(201,168,76,0.04)', borderRadius: 6 },
-  mitraResponseText: { fontFamily: Fonts.serif.regular, fontSize: 18, lineHeight: 30, color: '#3B2A1A' },
-  loadingDots: { fontSize: 20, color: '#C9A84C', letterSpacing: 6 },
+  mitraLabel: {
+    fontSize: 10,
+    color: "#B8963E",
+    fontWeight: "700",
+    letterSpacing: 0.8,
+    marginBottom: 6,
+    fontFamily: Fonts.sans.regular,
+  },
+  priorContextText: {
+    fontSize: 12,
+    color: "#9B8B77",
+    fontStyle: "italic",
+    marginBottom: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: "rgba(201,168,76,0.04)",
+    borderRadius: 6,
+  },
+  mitraResponseText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
+    lineHeight: 30,
+    color: "#3B2A1A",
+  },
+  loadingDots: { fontSize: 20, color: "#C9A84C", letterSpacing: 6 },
 
   // Chips
   chipsBlock: { marginBottom: 18 },
-  chipsPrompt: { fontSize: 13, color: '#7B6550', marginBottom: 8, fontFamily: Fonts.sans.regular },
-  chipsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { borderWidth: 1, borderColor: 'rgba(201,168,76,0.5)', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14, backgroundColor: 'rgba(255,250,243,0.95)' },
+  chipsPrompt: {
+    fontSize: 13,
+    color: "#7B6550",
+    marginBottom: 8,
+    fontFamily: Fonts.sans.regular,
+  },
+  chipsWrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  chip: {
+    borderWidth: 1,
+    borderColor: "rgba(201,168,76,0.5)",
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    backgroundColor: "rgba(255,250,243,0.95)",
+  },
   chipDisabled: { opacity: 0.4 },
-  chipText: { fontSize: 14, color: '#5C4B35', fontFamily: Fonts.sans.regular },
-  chipTextDisabled: { color: '#BBAA99' },
+  chipText: { fontSize: 14, color: "#5C4B35", fontFamily: Fonts.sans.regular },
+  chipTextDisabled: { color: "#BBAA99" },
 
   // Room recommendation card
   roomCard: {
     borderWidth: 1,
-    borderColor: 'rgba(201,168,76,0.25)',
+    borderColor: "rgba(201,168,76,0.25)",
     borderRadius: 20,
-    backgroundColor: '#FFFDF9',
+    backgroundColor: "#FFFDF9",
     padding: 20,
     marginBottom: 18,
-    shadowColor: '#432104',
+    shadowColor: "#432104",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.07,
     shadowRadius: 8,
     elevation: 3,
   },
-  roomCardLabel: { fontSize: 10, color: '#B8963E', fontWeight: '700', letterSpacing: 0.9, marginBottom: 10, fontFamily: Fonts.sans.regular },
-  roomCardTitle: { fontFamily: Fonts.serif.regular, fontSize: 20, fontWeight: '700', color: '#3B2A1A', marginBottom: 6 },
-  roomCardDesc: { fontSize: 14, color: '#7B6550', marginBottom: 16, lineHeight: 22 },
-  goldBtn: { backgroundColor: '#C99317', borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginBottom: 10 },
-  goldBtnText: { color: '#ffffff', fontSize: 15, fontWeight: '700', letterSpacing: 0.2 },
-  ghostLink: { paddingVertical: 8, alignItems: 'center' },
-  ghostLinkText: { fontSize: 13, color: '#9b8b77', fontFamily: Fonts.sans.regular, textDecorationLine: 'underline' },
+  roomCardLabel: {
+    fontSize: 10,
+    color: "#B8963E",
+    fontWeight: "700",
+    letterSpacing: 0.9,
+    marginBottom: 10,
+    fontFamily: Fonts.sans.regular,
+  },
+  roomCardTitle: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#3B2A1A",
+    marginBottom: 6,
+  },
+  roomCardDesc: {
+    fontSize: 14,
+    color: "#7B6550",
+    marginBottom: 16,
+    lineHeight: 22,
+  },
+  goldBtn: {
+    backgroundColor: "#C99317",
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  goldBtnText: {
+    color: "#ffffff",
+    fontSize: 15,
+    fontWeight: "700",
+    letterSpacing: 0.2,
+  },
+  ghostLink: { paddingVertical: 8, alignItems: "center" },
+  ghostLinkText: {
+    fontSize: 13,
+    color: "#9b8b77",
+    fontFamily: Fonts.sans.regular,
+    textDecorationLine: "underline",
+  },
 
   // Return card
   returnCard: {
-    backgroundColor: 'rgba(245,240,233,0.85)',
+    backgroundColor: "rgba(245,240,233,0.85)",
     borderWidth: 1,
-    borderColor: 'rgba(201,168,76,0.2)',
+    borderColor: "rgba(201,168,76,0.2)",
     borderRadius: 16,
     padding: 18,
     marginBottom: 18,
   },
-  returnCardTitle: { fontFamily: Fonts.serif.regular, fontSize: 16, fontWeight: '600', color: '#3B2A1A', marginBottom: 4 },
-  returnCardSubtitle: { fontSize: 13, color: '#7B6550', marginBottom: 14 },
+  returnCardTitle: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#3B2A1A",
+    marginBottom: 4,
+  },
+  returnCardSubtitle: { fontSize: 13, color: "#7B6550", marginBottom: 14 },
 
   // Wisdom options
   wisdomBlock: { marginBottom: 18 },
-  wisdomLabel: { fontSize: 10, color: '#B8963E', fontWeight: '700', letterSpacing: 0.8, marginBottom: 8, fontFamily: Fonts.sans.regular },
-  ghostBtn: { borderWidth: 1, borderColor: 'rgba(201,168,76,0.3)', borderRadius: 10, padding: 12, marginBottom: 6 },
-  ghostBtnText: { fontSize: 14, color: '#7B6550', fontFamily: Fonts.sans.regular },
+  wisdomLabel: {
+    fontSize: 10,
+    color: "#B8963E",
+    fontWeight: "700",
+    letterSpacing: 0.8,
+    marginBottom: 8,
+    fontFamily: Fonts.sans.regular,
+  },
+  ghostBtn: {
+    borderWidth: 1,
+    borderColor: "rgba(201,168,76,0.3)",
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 6,
+  },
+  ghostBtnText: {
+    fontSize: 14,
+    color: "#7B6550",
+    fontFamily: Fonts.sans.regular,
+  },
 
   // Safety
-  safetyCard: { backgroundColor: 'rgba(240,236,230,0.9)', borderWidth: 1, borderColor: 'rgba(201,168,76,0.2)', borderRadius: 12, padding: 16, marginBottom: 18 },
-  safetyTitle: { fontFamily: Fonts.serif.regular, fontSize: 17, fontWeight: '700', color: '#3B2A1A', marginBottom: 8 },
-  safetyText: { fontSize: 16, lineHeight: 28, color: '#3B2A1A' },
+  safetyCard: {
+    backgroundColor: "rgba(240,236,230,0.9)",
+    borderWidth: 1,
+    borderColor: "rgba(201,168,76,0.2)",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 18,
+  },
+  safetyTitle: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#3B2A1A",
+    marginBottom: 8,
+  },
+  safetyText: { fontSize: 16, lineHeight: 28, color: "#3B2A1A" },
 
   // Error
-  errorCard: { backgroundColor: 'rgba(220,50,50,0.04)', borderWidth: 1, borderColor: 'rgba(220,50,50,0.15)', borderRadius: 8, padding: 10, marginBottom: 10 },
-  errorCardText: { fontSize: 13, color: '#c0392b' },
-  errorText: { fontSize: 13, color: '#c0392b', paddingHorizontal: 12, paddingBottom: 4 },
+  errorCard: {
+    backgroundColor: "rgba(220,50,50,0.04)",
+    borderWidth: 1,
+    borderColor: "rgba(220,50,50,0.15)",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+  },
+  errorCardText: { fontSize: 13, color: "#c0392b" },
+  errorText: {
+    fontSize: 13,
+    color: "#c0392b",
+    paddingHorizontal: 12,
+    paddingBottom: 4,
+  },
 
   // Composer
   composerRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
+    flexDirection: "row",
+    alignItems: "flex-end",
     gap: 8,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(201,168,76,0.18)',
-    backgroundColor: '#FAF7F2',
+    borderTopColor: "rgba(201,168,76,0.18)",
+    backgroundColor: "#FAF7F2",
     paddingTop: 10,
-    paddingBottom: Platform.OS === 'ios' ? 16 : 10,
+    paddingBottom: Platform.OS === "ios" ? 16 : 10,
     paddingHorizontal: 12,
   },
   composerInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: 'rgba(201,168,76,0.35)',
+    borderColor: "rgba(201,168,76,0.35)",
     borderRadius: 14,
     padding: 10,
     fontSize: 15,
-    color: '#3B2A1A',
+    color: "#3B2A1A",
     minHeight: 44,
     maxHeight: 120,
-    backgroundColor: 'rgba(255,253,249,0.98)',
-    textAlignVertical: 'top',
+    backgroundColor: "rgba(255,253,249,0.98)",
+    textAlignVertical: "top",
   },
-  sendBtn: { backgroundColor: '#C99317', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center' },
+  sendBtn: {
+    backgroundColor: "#C99317",
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   sendBtnDisabled: { opacity: 0.5 },
-  sendBtnText: { color: '#ffffff', fontSize: 15, fontWeight: '700' },
+  sendBtnText: { color: "#ffffff", fontSize: 15, fontWeight: "700" },
 });

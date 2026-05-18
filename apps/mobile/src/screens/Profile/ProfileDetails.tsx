@@ -7,18 +7,14 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   TextInput,
   View
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
-import Ionicons from "react-native-vector-icons/Ionicons";
 import { useDispatch, useSelector } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
 import * as Yup from "yup";
-import Colors from "../../components/Colors";
-import FontSize from "../../components/FontSize";
 import LoadingButton from "../../components/LoadingButton";
 import TextComponent from "../../components/TextComponent";
 import { RootState } from "../../store";
@@ -55,47 +51,23 @@ const ProfileDetails = () => {
   const categories = profileOptions?.categories || [];
   const languages = profileOptions?.languages || [];
 
-  const timezones = [
-    { label: "India Standard Time (IST)", value: "Asia/Kolkata" },
-    { label: "Gulf Standard Time (GST)", value: "Asia/Dubai" },
-    { label: "Sri Lanka Standard Time (SLST)", value: "Asia/Colombo" },
-    { label: "British Time (GMT/BST)", value: "Europe/London" },
-    { label: "Central European Time (CET/CEST)", value: "Europe/Berlin" },
-    { label: "Eastern Time (US & Canada)", value: "America/New_York" },
-    { label: "Central Time (US & Canada)", value: "America/Chicago" },
-    { label: "Mountain Time (US & Canada)", value: "America/Denver" },
-    { label: "Pacific Time (US & Canada)", value: "America/Los_Angeles" },
-    { label: "Australian Eastern Time (AEST/AEDT)", value: "Australia/Sydney" },
-    { label: "Australian Western Time (AWST)", value: "Australia/Perth" },
-    { label: "Singapore Time (SGT)", value: "Asia/Singapore" },
-    { label: "Hong Kong Time (HKT)", value: "Asia/Hong_Kong" },
-    { label: "South Africa Standard Time (SAST)", value: "Africa/Johannesburg" },
-  ];
-
   const formik: any = useFormik({
     enableReinitialize: true,
     initialValues: {
       profileName: userProfile?.profile_name ?? "",
       ageGroup: userProfile?.age_group?.id?.toString() ?? "",
       language: userProfile?.languages?.[0]?.id?.toString() ?? "",
-      timezone: userProfile?.timezone ?? "Asia/Kolkata",
-      emails: userProfile?.emails ?? true,
-      push_notification: userProfile?.push_notification ?? true,
     },
     validationSchema: Yup.object({
       profileName: Yup.string().trim().required("Profile name is required"),
       // ageGroup: Yup.string().required("Please select an age group"),
       language: Yup.string().required("Please Select language"),
-      timezone: Yup.string().required("Select your timezone"),
     }),
     onSubmit: async (values) => {
       const payload = {
         profile_name: values.profileName,
-   age_group_id: values.ageGroup ? Number(values.ageGroup) : null,
+        age_group_id: values.ageGroup ? Number(values.ageGroup) : null,
         language_ids: [Number(values.language)],
-        timezone: values.timezone,
-        emails: values.emails,
-        push_notification: values.push_notification,
       };
 
       setLoading(true);
@@ -215,94 +187,6 @@ const ProfileDetails = () => {
             {t("profileScreen.languageInstruction")}
           </TextComponent>
 
-          {/* Timezone */}
-          <TextComponent type="semiBoldText" style={styles.label}>
-            {t("profileScreen.chooseTZ")} *
-          </TextComponent>
-          <Dropdown
-            selectedTextProps={{ allowFontScaling: false }}
-            data={timezones}
-            labelField="label"
-            valueField="value"
-            placeholder={t("timezone.selectTimezone")}
-            value={formik.values.timezone}
-            onChange={(item) => formik.setFieldValue("timezone", item.value)}
-            style={styles.setupdropdown}
-            placeholderStyle={styles.dropdownText}
-            selectedTextStyle={styles.dropdownText}
-            itemTextStyle={styles.dropdownItemText}
-            containerStyle={styles.dropdownContainer}
-          />
-          {formik.touched.timezone && formik.errors.timezone && (
-            <TextComponent type="mediumText" style={styles.errorText}>
-              {formik.errors.timezone}
-            </TextComponent>
-          )}
-
-          {/* Notifications */}
-          <TextComponent
-            type="semiBoldText"
-            style={[styles.label, { marginTop: 20 }]}
-          >
-            {t("profileScreen.Reminders")}
-          </TextComponent>
-
-          <View style={{ flexDirection: "column", gap: 10 }}>
-            <Pressable
-              style={{ flexDirection: "row", alignItems: "center" }}
-              onPress={() =>
-                formik.setFieldValue("emails", !formik.values.emails)
-              }
-            >
-              <Ionicons
-                name={
-                  formik.values.emails ? "checkbox-outline" : "square-outline"
-                }
-                size={22}
-                color="#a67c52"
-              />
-              <TextComponent
-                type="mediumText"
-                style={{
-                  marginLeft: 10,
-                  color: Colors.Colors.Light_black,
-                  fontSize: FontSize.CONSTS.FS_16,
-                }}
-              >
-                {t("profileScreen.emailNotifications")}
-              </TextComponent>
-            </Pressable>
-
-            <Pressable
-              style={{ flexDirection: "row", alignItems: "center" }}
-              onPress={() =>
-                formik.setFieldValue(
-                  "push_notification",
-                  !formik.values.push_notification
-                )
-              }
-            >
-              <Ionicons
-                name={
-                  formik.values.push_notification
-                    ? "checkbox-outline"
-                    : "square-outline"
-                }
-                size={22}
-                color="#a67c52"
-              />
-              <TextComponent
-                type="mediumText"
-                style={{
-                  marginLeft: 10,
-                  color: Colors.Colors.Light_black,
-                  fontSize: FontSize.CONSTS.FS_16,
-                }}
-              >
-                {t("profileScreen.pushNotifications")}
-              </TextComponent>
-            </Pressable>
-          </View>
         </View>
       </ScrollView>
 
@@ -323,7 +207,6 @@ const ProfileDetails = () => {
                 profileName: true,
                 ageGroup: true,
                 language: true,
-                timezone: true,
               },
               true
             );

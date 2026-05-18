@@ -49,6 +49,13 @@ import type {
 import { normalizeRoomWhyThisState, getRoomRenderParamsFromEntryContext } from "@kalpx/contracts";
 import { executeAction } from "../engine/actionExecutor";
 import { mitraTrackEvent, trackRoomTelemetry } from "../engine/mitraApi";
+import {
+  markIntentionalLeave,
+  isIntentionalLeave,
+  hasRoomExitedFired,
+  markRoomExitedFired,
+  resetRoomSession,
+} from "../engine/roomSession";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { useToast } from "../context/ToastContext";
 import store from "../store";
@@ -183,6 +190,28 @@ const RoomContainer: React.FC<Props> = () => {
     ((screenData as any)?.life_context_allowed as LifeContext[] | null) || null;
   const roomEntryContext: TellMitraRoomEntryContext | null =
     ((screenData as any)?.room_entry_context as TellMitraRoomEntryContext | null) ?? null;
+
+  // Passive exit telemetry — ref so cleanup closure always has current roomId.
+  const roomIdRef = useRef<string>("");
+  useEffect(() => {
+    roomIdRef.current = roomId || "";
+  }, [roomId]);
+
+  // Passive exit effect — fires room_exited when the container unmounts
+  // without an intentional leave (back gesture, OS navigation, etc.).
+  // Empty deps = mount/unmount only. roomIdRef is a ref so the cleanup
+  // closure always reads the latest value without needing it in deps.
+  useEffect(() => {
+    resetRoomSession();
+    return () => {
+      if (!isIntentionalLeave() && !hasRoomExitedFired() && roomIdRef.current) {
+        markRoomExitedFired();
+        void trackRoomTelemetry({ event_type: 'room_exited', room_id: roomIdRef.current, surface: 'room' });
+      }
+      resetRoomSession();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // empty deps — mount/unmount only
 
   const stopAndUnloadCalmAudio = useCallback(async () => {
     roomAmbientRunId += 1;
@@ -558,6 +587,7 @@ const RoomRenderBranch: React.FC<RenderBranchProps> = ({
   }
 
   function returnHome() {
+    markIntentionalLeave();
     closeReflection();
     const dashContainer =
       process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"

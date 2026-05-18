@@ -1,10 +1,32 @@
 import messaging from '@react-native-firebase/messaging';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
+import api from '../Networks/axios';
 import { handleMitraDeepLink } from '../utils/deeplink';
 import { markNotificationsRead } from '../screens/Notifications/actions';
 import { mitraTrackEvent } from '../engine/mitraApi';
 import store from '../store';
+
+/**
+ * Fire a best-effort receipt to the backend notification receipt endpoint.
+ * Uses the app's authenticated axios instance so auth/refresh is handled
+ * automatically. Never throws — receipt failures are non-critical.
+ *
+ * @param {string} category  - notification category (e.g. "morning_presence")
+ * @param {string} threadId  - collapse_key / thread_id from notification data
+ * @param {string} state     - "shown" | "tapped" | "dismissed" | "action_tapped"
+ * @param {string} [deviceTime] - ISO timestamp (only for "shown")
+ */
+async function callNotificationReceipt(category, threadId, state, deviceTime) {
+  if (!category) return; // backend requires category; skip if absent
+  try {
+    const body = { category, thread_id: threadId || '', state };
+    if (deviceTime) body.device_time = deviceTime;
+    await api.post('mitra/notifications/receipt/', body);
+  } catch {
+    // best-effort — never propagate
+  }
+}
 
 // Ask for permission + get FCM token
 export async function requestPushPermission() {
@@ -67,6 +89,15 @@ export function foregroundNotificationListener() {
       },
       trigger: null,
     });
+
+    // Gate 1: best-effort receipt for foreground "shown" state
+    const data = remoteMessage.data || {};
+    void callNotificationReceipt(
+      data.category || null,
+      data.thread_id || null,
+      'shown',
+      new Date().toISOString(),
+    );
   });
 }
 
@@ -78,6 +109,7 @@ function _handleTappedNotification(remoteMessage, source) {
   const deepLink = data.deep_link || data.url || null;
   const notificationId = data.notification_id ? Number(data.notification_id) : null;
   const category = data.category || null;
+  const threadId = data.thread_id || null;
 
   if (deepLink) {
     handleMitraDeepLink(deepLink);
@@ -86,6 +118,9 @@ function _handleTappedNotification(remoteMessage, source) {
   if (notificationId) {
     store.dispatch(markNotificationsRead([notificationId]));
   }
+
+  // Gate 1: best-effort receipt for tapped state
+  void callNotificationReceipt(category, threadId, 'tapped');
 
   mitraTrackEvent('notification_tapped', {
     meta: {

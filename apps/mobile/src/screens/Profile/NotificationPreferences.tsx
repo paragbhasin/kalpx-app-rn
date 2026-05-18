@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -8,7 +9,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Dropdown } from 'react-native-element-dropdown';
 import { useDispatch, useSelector } from 'react-redux';
+import api from '../../Networks/axios';
 import TextComponent from '../../components/TextComponent';
 import { AppDispatch, RootState } from '../../store';
 import {
@@ -27,6 +30,25 @@ const BORDER = 'rgba(184, 134, 75, 0.22)';
 const BG = '#fffaf5';
 const SECTION_BG = '#fff8f0';
 const TEXT_SECONDARY = '#7a6a58';
+
+const TZ_DISMISS_KEY = 'kalpx:tz_prompt_dismissed_at';
+
+const TIMEZONES = [
+  { label: 'India Standard Time (IST)', value: 'Asia/Kolkata' },
+  { label: 'Gulf Standard Time (GST)', value: 'Asia/Dubai' },
+  { label: 'Sri Lanka Standard Time (SLST)', value: 'Asia/Colombo' },
+  { label: 'British Time (GMT/BST)', value: 'Europe/London' },
+  { label: 'Central European Time (CET/CEST)', value: 'Europe/Berlin' },
+  { label: 'Eastern Time (US & Canada)', value: 'America/New_York' },
+  { label: 'Central Time (US & Canada)', value: 'America/Chicago' },
+  { label: 'Mountain Time (US & Canada)', value: 'America/Denver' },
+  { label: 'Pacific Time (US & Canada)', value: 'America/Los_Angeles' },
+  { label: 'Australian Eastern Time (AEST/AEDT)', value: 'Australia/Sydney' },
+  { label: 'Australian Western Time (AWST)', value: 'Australia/Perth' },
+  { label: 'Singapore Time (SGT)', value: 'Asia/Singapore' },
+  { label: 'Hong Kong Time (HKT)', value: 'Asia/Hong_Kong' },
+  { label: 'South Africa Standard Time (SAST)', value: 'Africa/Johannesburg' },
+];
 
 type CategoryConfig = {
   key: keyof NotificationPrefs;
@@ -116,6 +138,27 @@ const SENSITIVE_CATEGORIES: CategoryConfig[] = [
   },
 ];
 
+const RHYTHM_AND_CHECKIN_CATEGORIES: CategoryConfig[] = [
+  {
+    key: 'notif_rhythm_reminders',
+    label: 'Daily Rhythm Reminders',
+    description: 'A soft call to your rhythm at the time you set.',
+    defaultOn: true,
+  },
+  {
+    key: 'notif_checkin_companion_nudge',
+    label: 'Check-in Companion',
+    description: 'A quiet follow-up when Mitra can offer a gentle anchor.',
+    defaultOn: true,
+  },
+  {
+    key: 'notif_quick_chant_reminders',
+    label: 'Mantra Reminders',
+    description: 'An occasional return to your chosen sound. Off by default — you choose.',
+    defaultOn: false,
+  },
+];
+
 const FREQUENCY_OPTIONS: { label: string; value: string; description: string }[] = [
   { label: 'Normal', value: 'normal', description: 'Full companion rhythm' },
   { label: 'Reduced', value: 'reduced', description: 'Fewer, more spaced' },
@@ -140,6 +183,15 @@ const NotificationPreferences = () => {
   const [savingQuiet, setSavingQuiet] = useState(false);
   const [quietSaved, setQuietSaved] = useState(false);
 
+  // Timezone state
+  const [selectedTimezone, setSelectedTimezone] = useState('Asia/Kolkata');
+  const [savingTz, setSavingTz] = useState(false);
+  const [tzSaved, setTzSaved] = useState(false);
+  const [showTzPicker, setShowTzPicker] = useState(false);
+  // Device timezone detection prompt: 'device' | 'readiness' | null
+  const [tzPrompt, setTzPrompt] = useState<'device' | 'readiness' | null>(null);
+  const [detectedTz, setDetectedTz] = useState<string | null>(null);
+
   useEffect(() => {
     dispatch(fetchPreferences());
     dispatch(fetchNotificationPrefs());
@@ -150,6 +202,54 @@ const NotificationPreferences = () => {
     setQuietStart(quietHours.start);
     setQuietEnd(quietHours.end);
   }, [quietHours.start, quietHours.end]);
+
+  // Device timezone detection on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const dismissed = await AsyncStorage.getItem(TZ_DISMISS_KEY);
+        if (dismissed) {
+          const ts = Number(dismissed);
+          if (Date.now() - ts < 24 * 60 * 60 * 1000) return; // dismissed within 24h
+        }
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (tz && tz !== 'UTC') {
+          setDetectedTz(tz);
+          setTzPrompt('device');
+        } else {
+          setTzPrompt('readiness');
+        }
+      } catch {
+        // best-effort
+      }
+    })();
+  }, []);
+
+  const handleSaveTimezone = useCallback(async (tz: string, fromDevice?: boolean) => {
+    setSavingTz(true);
+    try {
+      const payload: Record<string, any> = { timezone: tz };
+      if (fromDevice) payload.timezone_confirmed_from_device = true;
+      await api.patch('users/profile/update_profile/', payload);
+      setSelectedTimezone(tz);
+      setTzSaved(true);
+      setTzPrompt(null);
+      setTimeout(() => setTzSaved(false), 2000);
+    } catch {
+      // best-effort
+    } finally {
+      setSavingTz(false);
+    }
+  }, []);
+
+  const handleDismissTzPrompt = useCallback(async () => {
+    try {
+      await AsyncStorage.setItem(TZ_DISMISS_KEY, String(Date.now()));
+    } catch {
+      // best-effort
+    }
+    setTzPrompt(null);
+  }, []);
 
   const handleGlobalConsentToggle = useCallback(
     (key: keyof GlobalConsent, value: boolean) => {
@@ -231,6 +331,85 @@ const NotificationPreferences = () => {
           />
         </Section>
 
+        {/* Timezone */}
+        <Section title="Timezone" subtitle="Mitra uses your timezone to remind you at the right time.">
+          {tzPrompt === 'device' && detectedTz ? (
+            <View style={styles.tzPromptBox}>
+              <TextComponent style={styles.tzPromptText}>
+                We detected your timezone as {detectedTz}.
+              </TextComponent>
+              <View style={styles.tzPromptActions}>
+                <TouchableOpacity
+                  style={[styles.saveBtn, savingTz && styles.saveBtnDisabled]}
+                  onPress={() => handleSaveTimezone(detectedTz, true)}
+                  disabled={savingTz}
+                >
+                  {savingTz ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <TextComponent style={styles.saveBtnText}>Use this timezone</TextComponent>
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.tzSecondaryBtn}
+                  onPress={() => { setTzPrompt(null); setShowTzPicker(true); }}
+                >
+                  <TextComponent style={styles.tzSecondaryText}>Choose manually</TextComponent>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tzDismissBtn} onPress={handleDismissTzPrompt}>
+                  <TextComponent style={styles.tzDismissText}>Not now</TextComponent>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : tzPrompt === 'readiness' ? (
+            <View style={styles.tzPromptBox}>
+              <TextComponent style={styles.tzPromptText}>
+                To remind you at the right time, Mitra needs your timezone.
+              </TextComponent>
+              <View style={styles.tzPromptActions}>
+                <TouchableOpacity
+                  style={styles.saveBtn}
+                  onPress={() => { setTzPrompt(null); setShowTzPicker(true); }}
+                >
+                  <TextComponent style={styles.saveBtnText}>Set timezone</TextComponent>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tzDismissBtn} onPress={handleDismissTzPrompt}>
+                  <TextComponent style={styles.tzDismissText}>Not now</TextComponent>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : null}
+          <View style={styles.tzPickerRow}>
+            <Dropdown
+              style={styles.tzDropdown}
+              placeholderStyle={styles.tzDropdownText}
+              selectedTextStyle={styles.tzDropdownText}
+              itemTextStyle={styles.tzDropdownItem}
+              containerStyle={styles.tzDropdownContainer}
+              data={TIMEZONES}
+              labelField="label"
+              valueField="value"
+              placeholder="Select timezone"
+              value={selectedTimezone}
+              onChange={(item) => {
+                setSelectedTimezone(item.value);
+                setShowTzPicker(false);
+              }}
+            />
+            <TouchableOpacity
+              style={[styles.saveBtn, (savingTz || tzSaved) && styles.saveBtnDisabled]}
+              onPress={() => handleSaveTimezone(selectedTimezone)}
+              disabled={savingTz || tzSaved}
+            >
+              {savingTz ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <TextComponent style={styles.saveBtnText}>{tzSaved ? 'Saved' : 'Save'}</TextComponent>
+              )}
+            </TouchableOpacity>
+          </View>
+        </Section>
+
         {/* Core companion rhythm */}
         <Section title="Companion Rhythm" subtitle="Core companion notifications.">
           {COMPANION_CATEGORIES.map((cat) => (
@@ -272,6 +451,22 @@ const NotificationPreferences = () => {
               description={cat.description}
               value={notifications[cat.key] ?? cat.defaultOn}
               onToggle={(v) => handleToggle(cat.key, v)}
+            />
+          ))}
+        </Section>
+
+        {/* Rhythm, Check-in & Mantra */}
+        <Section
+          title="Rhythm & Practice"
+          subtitle="Gentle nudges tied to your daily rhythm and chosen practices."
+        >
+          {RHYTHM_AND_CHECKIN_CATEGORIES.map((cat) => (
+            <CategoryRow
+              key={cat.key}
+              label={cat.label}
+              description={cat.description}
+              value={(notifications as any)[cat.key] ?? cat.defaultOn}
+              onToggle={(v) => handleToggle(cat.key as keyof NotificationPrefs, v)}
             />
           ))}
         </Section>
@@ -470,6 +665,42 @@ const styles = StyleSheet.create({
   freqDesc: { fontSize: 11, color: TEXT_SECONDARY, textAlign: 'center' },
   footer: { marginHorizontal: 16, marginTop: 24 },
   footerNote: { fontSize: 12, color: TEXT_SECONDARY, textAlign: 'center' },
+  // Timezone
+  tzPromptBox: {
+    backgroundColor: '#fff5e8',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: BORDER,
+  },
+  tzPromptText: { fontSize: 13, color: '#3a2e24', marginBottom: 10 },
+  tzPromptActions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  tzSecondaryBtn: {
+    borderWidth: 1,
+    borderColor: GOLD,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tzSecondaryText: { color: GOLD, fontSize: 13 },
+  tzDismissBtn: { paddingHorizontal: 8, paddingVertical: 8, alignItems: 'center', justifyContent: 'center' },
+  tzDismissText: { color: TEXT_SECONDARY, fontSize: 12 },
+  tzPickerRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
+  tzDropdown: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: BORDER,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    backgroundColor: '#fff',
+  },
+  tzDropdownText: { fontSize: 13, color: '#3a2e24' },
+  tzDropdownItem: { fontSize: 13, color: '#3a2e24' },
+  tzDropdownContainer: { borderRadius: 8, borderColor: BORDER },
 });
 
 export default NotificationPreferences;

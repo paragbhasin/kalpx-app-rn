@@ -2067,7 +2067,7 @@ export async function mitraPickWisdom(
 // No session content, life_context, transcript, or user data.
 // ---------------------------------------------------------------------------
 export async function trackRoomTelemetry(payload: {
-  event_type: 'room_entered' | 'exit_tapped';
+  event_type: 'room_entered' | 'exit_tapped' | 'room_exited';
   room_id: string;
   surface: 'room';
 }): Promise<void> {

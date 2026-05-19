@@ -1,18 +1,21 @@
 import { useNavigation, useRoute } from "@react-navigation/native";
 import React, { useEffect, useRef, useState } from "react";
 import { ImageBackground, SafeAreaView, StyleSheet } from "react-native";
+import { useDispatch } from "react-redux";
 import RunnerCompletionView from "../../../components/RunnerCompletionView";
 import { RHYTHM_SANKALP_COMPLETION_COPY as COPY } from "../../../constants/completionCopy";
 import {
   mitraRhythmComplete,
   mitraTrackCompletion,
 } from "../../../engine/mitraApi";
+import { markRhythmItemCompleted } from "../../../store/doorSlice";
 
 const BEIGE_BG = require("../../../../assets/beige_bg.png");
 
 export default function RhythmSankalpCompletion() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
+  const dispatch = useDispatch();
   const { item_id, item_title, slot, journeyId, dayNumber } = route.params;
   const completedRef = useRef(false);
   const [badge, setBadge] = useState<string>(COPY.pending);
@@ -25,7 +28,10 @@ export default function RhythmSankalpCompletion() {
       mitraRhythmComplete(slot, item_id),
       mitraTrackCompletion({ itemType: "sankalp", itemId: item_id, source: "rhythm_daily", journeyId, dayNumber }),
     ])
-      .then(([result]) => setBadge(result ? COPY.badgeSuccess : COPY.failure))
+      .then(([result]) => {
+        if (result) dispatch(markRhythmItemCompleted({ slot, item_id }));
+        setBadge(result ? COPY.badgeSuccess : COPY.failure);
+      })
       .catch(() => setBadge(COPY.failure));
   }, []);
 

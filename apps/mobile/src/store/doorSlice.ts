@@ -49,6 +49,17 @@ const doorSlice = createSlice({
       state.tellMitra.lastResult = action.payload;
       state.tellMitra.inputDraft = "";
     },
+    markRhythmItemCompleted(
+      state,
+      action: PayloadAction<{ slot: string; item_id: string }>,
+    ) {
+      const { slot, item_id } = action.payload;
+      const cr = state.homeData?.companion_rhythm as Record<string, any> | undefined;
+      const items: Array<any> | undefined = cr?.[slot]?.items;
+      if (!items) return;
+      const item = items.find((i: any) => i.item_id === item_id);
+      if (item) item.completed_today = true;
+    },
     clearDoorState() {
       return initialState;
     },
@@ -57,6 +68,6 @@ const doorSlice = createSlice({
 
 export const {
   setHomeData, setActiveDoor,
-  setTellMitraDraft, setTellMitraResult, clearDoorState,
+  setTellMitraDraft, setTellMitraResult, markRhythmItemCompleted, clearDoorState,
 } = doorSlice.actions;
 export default doorSlice.reducer;

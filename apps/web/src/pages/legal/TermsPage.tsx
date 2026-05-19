@@ -115,10 +115,11 @@ const SECTIONS: ToSSection[] = [
     id: 'subscriptions',
     title: '13. Subscriptions and Payments',
     paragraphs: [
-      'Subscriptions, paid features, pricing, cancellation, and refund terms will be described before any purchase when paid plans become available. This section is a placeholder and must be fully updated before enabling payments.',
-      'If purchases are made through the Apple App Store or Google Play, they are also subject to that platform\'s payment, cancellation, and refund policies.',
+      'KalpX may offer paid subscriptions, premium features, one-time purchases, classes, sessions, or other paid services in the future. Any applicable pricing, billing cycle, renewal terms, cancellation process, refund eligibility, trial terms, and other payment conditions will be clearly presented to you before you complete a purchase.',
+      'No paid feature or subscription will be enabled unless the applicable payment, cancellation, renewal, refund, and consumer-disclosure terms have been fully updated in these Terms and/or shown at the point of purchase.',
+      'If you purchase through the Apple App Store or Google Play, your purchase will also be governed by the applicable app store\'s payment, cancellation, refund, and subscription policies. KalpX does not control app store billing decisions, refund approvals, or subscription management rules for purchases made through those platforms.',
+      'If KalpX later enables direct payments outside the app stores, those payments may be processed by third-party payment providers. Additional payment-provider terms may apply and will be disclosed before purchase.',
     ],
-    note: 'Placeholder — update before payments go live.',
   },
   {
     id: 'availability',
@@ -152,7 +153,9 @@ const SECTIONS: ToSSection[] = [
     id: 'governing-law',
     title: '18. Governing Law',
     paragraphs: [
-      'California, USA is the starting point. Governing law, jurisdiction, dispute resolution, arbitration, class action, and India-specific provisions must be confirmed by qualified legal counsel before publication.',
+      'KalpX is organized as a Delaware corporation. Delaware, USA is the current starting point for governing-law analysis. However, the final governing law, jurisdiction, venue, dispute-resolution process, arbitration terms, class-action waiver, consumer-protection language, and any India-specific or other country-specific provisions must be reviewed and confirmed by qualified legal counsel before these Terms are published.',
+      'Until this section is finalized, KalpX should not rely on this provision to limit user rights, require arbitration, restrict class actions, or determine the exclusive forum for disputes.',
+      'For users outside the United States, including users in India, certain local consumer-protection, data-protection, payment, platform, or mandatory legal rights may apply regardless of the governing law stated in these Terms. Nothing in these Terms is intended to limit rights that cannot be waived under applicable law.',
     ],
     note: 'Placeholder — requires legal review before production.',
   },

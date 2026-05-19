@@ -34,6 +34,8 @@ export interface RhythmItem {
   sort_order: number;
   reminder_enabled: boolean;
   reminder_time: string | null;
+  /** True when this exact item was completed today (item-level truth, blank item_ref rows excluded). */
+  completed_today?: boolean;
 }
 
 export interface RhythmItemMutationResponse {

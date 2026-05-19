@@ -354,10 +354,7 @@ export default function TellMitraThreadView({
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         {!!errorMsg && <Text style={s.errorText}>{errorMsg}</Text>}
-        <Text style={s.disclaimerText}>
-          Mitra is here for reflection and Sanatan-rooted guidance. It is not a substitute for medical, legal, financial, therapy, crisis, or emergency support. Share only what you feel comfortable sharing.
-        </Text>
-        <View style={[s.composerRow, { paddingBottom: footerClearance }]}>
+        <View style={s.composerRow}>
           <TextInput
             ref={inputRef}
             style={s.composerInput}
@@ -383,6 +380,9 @@ export default function TellMitraThreadView({
             <Text style={s.sendBtnText}>{submitting ? "…" : "Send"}</Text>
           </TouchableOpacity>
         </View>
+        <Text style={[s.disclaimerText, { paddingBottom: footerClearance }]}>
+          Mitra is here for reflection and Sanatan-rooted guidance. It is not a substitute for medical, legal, financial, therapy, crisis, or emergency support. Share only what you feel comfortable sharing.
+        </Text>
       </KeyboardAvoidingView>
     </View>
   );

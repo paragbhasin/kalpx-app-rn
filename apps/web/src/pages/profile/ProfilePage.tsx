@@ -403,13 +403,13 @@ export function ProfilePage() {
                 {
                   key: ANALYTICS_CONSENT_KEY,
                   label: "Product analytics",
-                  description: "Help us understand how people use Mitra.",
+                  description: "Allow product analytics so we can understand what feels helpful, where people get stuck, and how to make Mitra easier to use.",
                   value: analyticsConsent,
                 },
                 {
                   key: MARKETING_CONSENT_KEY,
                   label: "Marketing & advertising",
-                  description: "Allow personalized ads on platforms like Meta.",
+                  description: "Allow marketing cookies so we can measure campaigns and reach people who may benefit from KalpX.",
                   value: marketingConsent,
                 },
               ] as const

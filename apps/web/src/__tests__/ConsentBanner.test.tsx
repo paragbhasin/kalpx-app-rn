@@ -47,36 +47,65 @@ describe('ConsentBanner', () => {
 
   // ── Two rows ─────────────────────────────────────────────────────────────
 
-  it('shows product analytics row', () => {
+  it('shows product analytics row title', () => {
     render(<ConsentBanner />);
-    expect(screen.getByText(/product analytics/i)).toBeTruthy();
+    expect(screen.getByText(/help us improve mitra/i)).toBeTruthy();
   });
 
-  it('shows marketing & ads row', () => {
+  it('shows marketing & ads row title', () => {
     render(<ConsentBanner />);
-    expect(screen.getByText(/marketing & ads/i)).toBeTruthy();
+    expect(screen.getByText(/personalized ads/i)).toBeTruthy();
   });
 
-  // ── Defaults ─────────────────────────────────────────────────────────────
+  // ── Defaults: both visually pre-selected to Allow ─────────────────────
 
-  it('both rows default to declined (Decline buttons are active)', () => {
+  it('Allow analytics button is active (aria-pressed=true) by default', () => {
     render(<ConsentBanner />);
-    const declineButtons = screen.getAllByRole('button', { name: /decline/i });
-    expect(declineButtons).toHaveLength(2);
+    const btn = screen.getByRole('button', { name: /allow analytics/i });
+    expect(btn.getAttribute('aria-pressed')).toBe('true');
   });
 
-  // ── Save writes all four localStorage keys ────────────────────────────────
+  it('Allow marketing button is active (aria-pressed=true) by default', () => {
+    render(<ConsentBanner />);
+    const btn = screen.getByRole('button', { name: /allow marketing/i });
+    expect(btn.getAttribute('aria-pressed')).toBe('true');
+  });
 
-  it('save writes kalpx_analytics_consent', () => {
+  it('Not now buttons are visible and inactive (aria-pressed=false) by default', () => {
+    render(<ConsentBanner />);
+    const notNowBtns = screen.getAllByRole('button', { name: /not now/i });
+    expect(notNowBtns).toHaveLength(2);
+    expect(notNowBtns[0].getAttribute('aria-pressed')).toBe('false');
+    expect(notNowBtns[1].getAttribute('aria-pressed')).toBe('false');
+  });
+
+  // ── No localStorage written before Save ──────────────────────────────────
+
+  it('does not write to localStorage before Save is clicked', () => {
+    render(<ConsentBanner />);
+    expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBeNull();
+    expect(localStorage.getItem(MARKETING_CONSENT_KEY)).toBeNull();
+  });
+
+  it('clicking Not now does not write to localStorage until Save', () => {
+    render(<ConsentBanner />);
+    const notNowBtns = screen.getAllByRole('button', { name: /not now/i });
+    fireEvent.click(notNowBtns[0]);
+    expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBeNull();
+  });
+
+  // ── Save with defaults writes both as granted ─────────────────────────────
+
+  it('save with defaults writes analytics=granted', () => {
     render(<ConsentBanner />);
     fireEvent.click(screen.getByRole('button', { name: /save preferences/i }));
-    expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBe('denied');
+    expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBe('granted');
   });
 
-  it('save writes kalpx_marketing_consent', () => {
+  it('save with defaults writes marketing=granted', () => {
     render(<ConsentBanner />);
     fireEvent.click(screen.getByRole('button', { name: /save preferences/i }));
-    expect(localStorage.getItem(MARKETING_CONSENT_KEY)).toBe('denied');
+    expect(localStorage.getItem(MARKETING_CONSENT_KEY)).toBe('granted');
   });
 
   it('save writes kalpx_consent_version', () => {
@@ -95,6 +124,46 @@ describe('ConsentBanner', () => {
     expect(ts).toBeGreaterThanOrEqual(before);
   });
 
+  // ── Mixed choices ─────────────────────────────────────────────────────────
+
+  it('declining analytics then saving writes analytics=denied, marketing=granted', () => {
+    render(<ConsentBanner />);
+    const notNowBtns = screen.getAllByRole('button', { name: /not now/i });
+    fireEvent.click(notNowBtns[0]);
+    fireEvent.click(screen.getByRole('button', { name: /save preferences/i }));
+    expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBe('denied');
+    expect(localStorage.getItem(MARKETING_CONSENT_KEY)).toBe('granted');
+  });
+
+  it('declining marketing then saving writes analytics=granted, marketing=denied', () => {
+    render(<ConsentBanner />);
+    const notNowBtns = screen.getAllByRole('button', { name: /not now/i });
+    fireEvent.click(notNowBtns[1]);
+    fireEvent.click(screen.getByRole('button', { name: /save preferences/i }));
+    expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBe('granted');
+    expect(localStorage.getItem(MARKETING_CONSENT_KEY)).toBe('denied');
+  });
+
+  it('declining both then saving writes both=denied', () => {
+    render(<ConsentBanner />);
+    const notNowBtns = screen.getAllByRole('button', { name: /not now/i });
+    fireEvent.click(notNowBtns[0]);
+    fireEvent.click(notNowBtns[1]);
+    fireEvent.click(screen.getByRole('button', { name: /save preferences/i }));
+    expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBe('denied');
+    expect(localStorage.getItem(MARKETING_CONSENT_KEY)).toBe('denied');
+  });
+
+  it('re-selecting Allow after Not now restores granted on save', () => {
+    render(<ConsentBanner />);
+    const notNowBtns = screen.getAllByRole('button', { name: /not now/i });
+    fireEvent.click(notNowBtns[0]); // decline analytics
+    fireEvent.click(screen.getByRole('button', { name: /allow analytics/i })); // re-allow
+    fireEvent.click(screen.getByRole('button', { name: /save preferences/i }));
+    expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBe('granted');
+    expect(localStorage.getItem(MARKETING_CONSENT_KEY)).toBe('granted');
+  });
+
   // ── consent_updated event ─────────────────────────────────────────────────
 
   it('dispatches consent_updated on save', () => {
@@ -111,28 +180,5 @@ describe('ConsentBanner', () => {
     render(<ConsentBanner />);
     fireEvent.click(screen.getByRole('button', { name: /save preferences/i }));
     expect(screen.queryByRole('region', { name: /privacy preferences/i })).toBeNull();
-  });
-
-  // ── Accepting analytics row ───────────────────────────────────────────────
-
-  it('accepting analytics row writes granted for analytics key', () => {
-    render(<ConsentBanner />);
-    // Accept buttons: first Accept = analytics, second Accept = marketing
-    const acceptButtons = screen.getAllByRole('button', { name: /^accept$/i });
-    fireEvent.click(acceptButtons[0]);
-    fireEvent.click(screen.getByRole('button', { name: /save preferences/i }));
-    expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBe('granted');
-    expect(localStorage.getItem(MARKETING_CONSENT_KEY)).toBe('denied');
-  });
-
-  // ── Accepting marketing row ───────────────────────────────────────────────
-
-  it('accepting marketing row writes granted for marketing key', () => {
-    render(<ConsentBanner />);
-    const acceptButtons = screen.getAllByRole('button', { name: /^accept$/i });
-    fireEvent.click(acceptButtons[1]);
-    fireEvent.click(screen.getByRole('button', { name: /save preferences/i }));
-    expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBe('denied');
-    expect(localStorage.getItem(MARKETING_CONSENT_KEY)).toBe('granted');
   });
 });

@@ -12,8 +12,9 @@ type ConsentChoice = 'granted' | 'denied';
 
 export function ConsentBanner() {
   const [visible, setVisible] = useState(false);
-  const [analyticsChoice, setAnalyticsChoice] = useState<ConsentChoice>('denied');
-  const [marketingChoice, setMarketingChoice] = useState<ConsentChoice>('denied');
+  // Both default visually to "Allow" — nothing is written to localStorage until Save.
+  const [analyticsChoice, setAnalyticsChoice] = useState<ConsentChoice>('granted');
+  const [marketingChoice, setMarketingChoice] = useState<ConsentChoice>('granted');
 
   useEffect(() => {
     const analyticsMissing = localStorage.getItem(ANALYTICS_CONSENT_KEY) === null;
@@ -44,40 +45,26 @@ export function ConsentBanner() {
         right: 0,
         zIndex: 9999,
         background: '#fffaf5',
-        borderTop: '1px solid rgba(184, 134, 75, 0.2)',
-        padding: '16px 20px',
-        boxShadow: '0 -2px 12px rgba(0,0,0,0.06)',
+        borderTop: '1px solid rgba(184, 134, 75, 0.22)',
+        padding: '20px 20px 20px',
+        boxShadow: '0 -4px 20px rgba(67, 33, 4, 0.08)',
       }}
     >
       {/* COPY PENDING LEGAL APPROVAL — DO NOT SHIP TO PROD AS-IS */}
-      <p style={{ margin: '0 0 14px', fontSize: 13, fontWeight: 600, color: '#373737', fontFamily: 'var(--kalpx-font-sans)' }}>
-        Privacy preferences
-      </p>
-
-      <ConsentRow
-        label="Product analytics"
-        description="Help us understand how people use Mitra."
-        value={analyticsChoice}
-        onChange={setAnalyticsChoice}
-      />
-
-      <ConsentRow
-        label="Marketing & ads"
-        description="Allow personalized ads on platforms like Meta."
-        value={marketingChoice}
-        onChange={setMarketingChoice}
-      />
-
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 3 }}>
+        <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#2d1f0f', fontFamily: 'var(--kalpx-font-sans)', letterSpacing: '-0.01em' }}>
+          Privacy preferences
+        </p>
         <button
           type="button"
           onClick={handleSave}
           style={{
+            flexShrink: 0,
             background: '#b8864b',
             color: '#fff',
             border: 'none',
             borderRadius: 6,
-            padding: '8px 20px',
+            padding: '9px 22px',
             fontSize: 13,
             fontWeight: 600,
             cursor: 'pointer',
@@ -87,67 +74,103 @@ export function ConsentBanner() {
           Save preferences
         </button>
       </div>
+      <p style={{ margin: '0 0 16px', fontSize: 13, color: '#7d6b5d', fontFamily: 'var(--kalpx-font-sans)', lineHeight: 1.5 }}>
+        Choose how KalpX can use data to improve Mitra and reach people who may benefit from it.
+      </p>
+
+      <ConsentRow
+        title="Help us improve Mitra"
+        description="Allow product analytics so we can understand what feels helpful, where people get stuck, and how to make Mitra easier to use."
+        choice={analyticsChoice}
+        allowLabel="Allow analytics"
+        onAllow={() => setAnalyticsChoice('granted')}
+        onDecline={() => setAnalyticsChoice('denied')}
+      />
+
+      <ConsentRow
+        title="Personalized ads"
+        description="Allow marketing cookies so we can measure campaigns and reach people who may benefit from KalpX."
+        choice={marketingChoice}
+        allowLabel="Allow marketing"
+        onAllow={() => setMarketingChoice('granted')}
+        onDecline={() => setMarketingChoice('denied')}
+      />
+
+      <p style={{ margin: '12px 0 0', fontSize: 11, color: '#a89880', textAlign: 'right', fontFamily: 'var(--kalpx-font-sans)' }}>
+        You can change this anytime in Privacy preferences.
+      </p>
     </div>
   );
 }
 
 function ConsentRow({
-  label,
+  title,
   description,
-  value,
-  onChange,
+  choice,
+  allowLabel,
+  onAllow,
+  onDecline,
 }: {
-  label: string;
+  title: string;
   description: string;
-  value: ConsentChoice;
-  onChange: (v: ConsentChoice) => void;
+  choice: ConsentChoice;
+  allowLabel: string;
+  onAllow: () => void;
+  onDecline: () => void;
 }) {
+  const isGranted = choice === 'granted';
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-      <div style={{ flex: 1, paddingRight: 12 }}>
-        <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#373737', fontFamily: 'var(--kalpx-font-sans)' }}>
-          {label}
-        </p>
-        <p style={{ margin: 0, fontSize: 12, color: '#888', fontFamily: 'var(--kalpx-font-sans)' }}>
-          {description}
-        </p>
-      </div>
-      <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+    <div
+      style={{
+        marginBottom: 14,
+        paddingBottom: 14,
+        borderBottom: '1px solid rgba(184, 134, 75, 0.1)',
+      }}
+    >
+      <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 600, color: '#2d1f0f', fontFamily: 'var(--kalpx-font-sans)' }}>
+        {title}
+      </p>
+      <p style={{ margin: '0 0 10px', fontSize: 12, color: '#9b8b77', fontFamily: 'var(--kalpx-font-sans)', lineHeight: 1.45 }}>
+        {description}
+      </p>
+      <div style={{ display: 'flex', gap: 8 }}>
         <button
           type="button"
-          aria-pressed={value === 'denied'}
-          onClick={() => onChange('denied')}
+          aria-pressed={!isGranted}
+          onClick={onDecline}
           style={{
-            background: value === 'denied' ? '#f0e6d3' : 'transparent',
-            color: value === 'denied' ? '#b8864b' : '#888',
-            border: '1px solid rgba(0,0,0,0.12)',
+            background: !isGranted ? '#f5ece0' : 'transparent',
+            color: !isGranted ? '#7d5a2f' : '#9b8b77',
+            border: `1px solid ${!isGranted ? 'rgba(184, 134, 75, 0.4)' : 'rgba(0,0,0,0.13)'}`,
             borderRadius: 5,
-            padding: '5px 12px',
+            padding: '6px 14px',
             fontSize: 12,
-            fontWeight: value === 'denied' ? 600 : 400,
+            fontWeight: !isGranted ? 600 : 400,
             cursor: 'pointer',
             fontFamily: 'var(--kalpx-font-sans)',
+            transition: 'background 0.15s, color 0.15s',
           }}
         >
-          Decline
+          Not now
         </button>
         <button
           type="button"
-          aria-pressed={value === 'granted'}
-          onClick={() => onChange('granted')}
+          aria-pressed={isGranted}
+          onClick={onAllow}
           style={{
-            background: value === 'granted' ? '#b8864b' : 'transparent',
-            color: value === 'granted' ? '#fff' : '#888',
-            border: '1px solid rgba(0,0,0,0.12)',
+            background: isGranted ? '#b8864b' : 'transparent',
+            color: isGranted ? '#fff' : '#9b8b77',
+            border: `1px solid ${isGranted ? '#b8864b' : 'rgba(0,0,0,0.13)'}`,
             borderRadius: 5,
-            padding: '5px 12px',
+            padding: '6px 14px',
             fontSize: 12,
-            fontWeight: value === 'granted' ? 600 : 400,
+            fontWeight: isGranted ? 600 : 400,
             cursor: 'pointer',
             fontFamily: 'var(--kalpx-font-sans)',
+            transition: 'background 0.15s, color 0.15s',
           }}
         >
-          Accept
+          {allowLabel}
         </button>
       </div>
     </div>

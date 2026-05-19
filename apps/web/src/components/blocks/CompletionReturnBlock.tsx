@@ -106,11 +106,14 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
 
   /* ── Return action (G17 / G27 parity) ── */
   const SUPPORT_SOURCES = new Set(["support_room", "support_trigger"]);
+  const _isInnerPathLaunch = screenData?.practice_launch_surface === "inner_path";
   const returnAction = _isRhythmCompletion
     ? "return_to_rhythm_home"
-    : SUPPORT_SOURCES.has(returnSource)
-      ? "return_to_source"
-      : "return_to_dashboard";
+    : _isInnerPathLaunch
+      ? "return_to_inner_path"
+      : SUPPORT_SOURCES.has(returnSource)
+        ? "return_to_source"
+        : "return_to_dashboard";
 
   /* ── Reflection chips ── */
   const [showWriteInput, setShowWriteInput] = useState(false);

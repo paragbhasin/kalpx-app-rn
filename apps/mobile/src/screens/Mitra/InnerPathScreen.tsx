@@ -539,6 +539,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
           source: "core",
           variant: slot,
           item,
+          practice_launch_surface: "inner_path",
         },
       },
       {

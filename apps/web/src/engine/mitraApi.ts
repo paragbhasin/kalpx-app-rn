@@ -838,6 +838,23 @@ export async function postRhythmComplete(slot: string, itemId?: string): Promise
   }
 }
 
+/** POST mitra/v3/journey/inner-path/complete/ — record Inner Path triad item completion. null on error. */
+export async function postInnerPathComplete(
+  itemType: string,
+  itemRef: string,
+): Promise<{ item_type: string; completed: boolean } | null> {
+  try {
+    const resp = await api.post<{ item_type: string; completed: boolean }>(
+      'mitra/v3/journey/inner-path/complete/',
+      { item_type: itemType, item_ref: itemRef },
+    );
+    return resp.data;
+  } catch (err: any) {
+    console.warn('[InnerPath] postInnerPathComplete failed:', err?.message);
+    return null;
+  }
+}
+
 /** POST mitra/v3/rhythm/resolve-item/ — fetch full master content before launching a rhythm runner. null on error or flag off. */
 export async function postRhythmResolveItem(
   slot: string,

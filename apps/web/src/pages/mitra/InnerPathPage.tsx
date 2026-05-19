@@ -595,6 +595,7 @@ export function InnerPathPage() {
                       source: "core",
                       variant: item.slot,
                       item: item.master,
+                      practice_launch_surface: "inner_path",
                     },
                   })
                 }

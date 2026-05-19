@@ -49,6 +49,7 @@ import {
   mitraPranaAcknowledge,
   mitraStartJourney,
   mitraRhythmComplete,
+  mitraInnerPathComplete,
   mitraTrackCompletion,
   mitraTrackEvent,
   mitraTriggerMantras,
@@ -2963,6 +2964,7 @@ export async function executeAction(
         setScreenValue(0, "runner_reps_completed");
         setScreenValue(0, "runner_step_index");
         setScreenValue(0, "runner_duration_actual_sec");
+        setScreenValue((sp.practice_launch_surface as string | null) ?? null, "practice_launch_surface");
         // Canonical rich runner routing (LOCKED 2026-04-19): the rich
         // surface (`cycle_transitions/offering_reveal`) reads `info` with
         // `runner_active_item` as fallback. If `screenData.info` is stale
@@ -5414,6 +5416,25 @@ export async function executeAction(
         const runnerClearKeysRhythm = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz', 'completion_return_screen', 'runner_rhythm_slot', 'rhythm_complete_result', 'dashboard_entry_surface'];
         runnerClearKeysRhythm.forEach(k => setScreenValue(null, k));
         rootNavigate('Home');
+        break;
+      }
+
+      case "return_to_inner_path": {
+        const ipType = String(payload?.item_type || screenState.runner_variant || '');
+        const ipRef = String(
+          payload?.item_ref || (screenState.runner_active_item as any)?.item_id || '',
+        );
+        if (ipType && ipRef) {
+          mitraInnerPathComplete(ipType, ipRef).catch(() => {});
+        }
+        const runnerClearKeysIP = [
+          'runner_active_item', 'runner_source', 'runner_variant',
+          'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec',
+          'runner_start_time', 'runner_tz', 'completion_return_screen',
+          'practice_launch_surface', 'dashboard_entry_surface',
+        ];
+        runnerClearKeysIP.forEach(k => setScreenValue(null, k));
+        rootNavigate('InnerPath');
         break;
       }
 

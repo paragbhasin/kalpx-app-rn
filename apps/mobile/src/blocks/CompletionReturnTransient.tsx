@@ -264,6 +264,22 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
       }).catch(() => {});
       return;
     }
+    if (String(screenData.practice_launch_surface || '') === 'inner_path') {
+      executeAction({
+        type: 'return_to_inner_path',
+        payload: {
+          item_type: String(screenData.runner_variant || ''),
+          item_ref: String((screenData.runner_active_item as any)?.item_id || ''),
+        },
+        currentScreen,
+      } as any, {
+        loadScreen,
+        goBack,
+        setScreenValue: (value: any, key: string) => setScreenValue(key, value),
+        screenState: { ...screenData },
+      }).catch(() => {});
+      return;
+    }
     const returnAction = slot("return_action");
     if (returnAction === "return_to_mitra_home") {
       navigation.navigate("Home");

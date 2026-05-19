@@ -29,6 +29,7 @@ import {
   mitraJourneyDay7Decision,
   mitraJourneyDay14Decision,
   postRhythmComplete,
+  postInnerPathComplete,
 } from './mitraApi';
 import { ingestDailyView, ingestDay7View, ingestDay14View } from './v3Ingest';
 import { ensureRoomAmbientPlaying } from '../lib/audio/calmMusic';
@@ -471,6 +472,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
           reps_total: item.reps_total || screenData.reps_total || 108,
           practice_duration_seconds: variant === 'practice' ? (item.duration_seconds || screenData.practice_duration_seconds || 300) : screenData.practice_duration_seconds,
           practice_steps: variant === 'practice' ? (item.steps || screenData.practice_steps || []) : screenData.practice_steps,
+          practice_launch_surface: (p.practice_launch_surface as string | null) ?? null,
         }));
 
         void apiTrackEvent('runner_started', {
@@ -678,6 +680,24 @@ export async function executeAction(action: any, context: ActionContext): Promis
       const runnerClearKeysRhythm = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz', 'runner_rhythm_slot', 'rhythm_complete_result'];
       runnerClearKeysRhythm.forEach(k => dispatch(setScreenValue({ key: k, value: null })));
       webNavigate('/en/mitra/rhythm');
+      break;
+    }
+
+    case 'return_to_inner_path': {
+      const ipItem = screenData.runner_active_item as any;
+      const ipType = (screenData.runner_variant as string) || '';
+      const ipRef = (ipItem?.item_id as string) || '';
+      if (ipType && ipRef) {
+        postInnerPathComplete(ipType, ipRef).catch(() => {});
+      }
+      const innerPathClearKeys = [
+        'runner_active_item', 'runner_source', 'runner_variant',
+        'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec',
+        'runner_start_time', 'runner_tz', 'completion_return_screen',
+        'practice_launch_surface',
+      ];
+      innerPathClearKeys.forEach(k => dispatch(setScreenValue({ key: k, value: null })));
+      webNavigate('/en/mitra/inner-path');
       break;
     }
 
@@ -2079,19 +2099,12 @@ export async function executeAction(action: any, context: ActionContext): Promis
           dispatch(updateScreenData(flat));
         }
 
-        // Mobile parity: day 14 continue_same/deepen both hydrate next cycle payload
-        // and return directly to dashboard. change_focus already routed above.
-        if (day === 14) {
-          invalidateJourneyStatusCache();
-          invalidateJourneyEntryViewCache();
-          _setCheckpointRedirectBypass();
-          webNavigate('/en/mitra/dashboard');
-        } else {
-          invalidateJourneyStatusCache();
-          invalidateJourneyEntryViewCache();
-          _setCheckpointRedirectBypass();
-          webNavigate('/en/mitra/dashboard');
-        }
+        // Day 14 continue_same/deepen and Day 7 continue: return to Inner Path.
+        // change_focus is already routed above (→ onboarding).
+        invalidateJourneyStatusCache();
+        invalidateJourneyEntryViewCache();
+        _setCheckpointRedirectBypass();
+        webNavigate('/en/mitra/inner-path');
       } catch (err) {
         if (WEB_ENV.isDev) console.error('[actionExecutor] submit_checkpoint_decision failed:', err);
         // Keep user on checkpoint page — error handled by block

@@ -163,7 +163,8 @@ export function InnerPathPage() {
         sd.card_mantra_title ||
         "",
       subtitle: "Return through sound",
-
+      completedToday:
+        triadArr.find((t: any) => t?.slot === "mantra")?.completed_today === true,
       master:
         sd.master_mantra ||
         triadArr.find((t: any) => t?.slot === "mantra") ||
@@ -180,7 +181,8 @@ export function InnerPathPage() {
         sd.card_sankalpa_title ||
         "",
       subtitle: "Hold today's intention",
-
+      completedToday:
+        triadArr.find((t: any) => t?.slot === "sankalp")?.completed_today === true,
       master:
         sd.master_sankalp ||
         triadArr.find((t: any) => t?.slot === "sankalp") ||
@@ -197,7 +199,8 @@ export function InnerPathPage() {
         sd.card_ritual_title ||
         "",
       subtitle: "Move through the body",
-
+      completedToday:
+        triadArr.find((t: any) => t?.slot === "practice")?.completed_today === true,
       master:
         sd.master_practice ||
         triadArr.find((t: any) => t?.slot === "practice") ||
@@ -678,6 +681,19 @@ export function InnerPathPage() {
                       }}
                     >
                       {item.subtitle}
+                    </p>
+                  )}
+                  {item.completedToday && (
+                    <p
+                      style={{
+                        margin: "6px 0 0",
+                        fontSize: 12,
+                        fontWeight: 600,
+                        letterSpacing: 0.4,
+                        color: "#7A9E7E",
+                      }}
+                    >
+                      ✓ Done today
                     </p>
                   )}
                 </div>

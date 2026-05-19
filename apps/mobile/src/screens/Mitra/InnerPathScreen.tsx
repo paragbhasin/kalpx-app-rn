@@ -96,13 +96,13 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [progressOpen, setProgressOpen] = useState(false);
   const [guidanceOpen, setGuidanceOpen] = useState(false);
   const [whyChosenOpen, setWhyChosenOpen] = useState(false);
   const [activeWhyTab, setActiveWhyTab] = useState<
     "mantra" | "sankalp" | "practice"
   >("mantra");
   const [remindersOpen, setRemindersOpen] = useState(false);
+  const [progressOpen, setProgressOpen] = useState(false);
   const [reminders, setReminders] = useState<JourneyTriadReminders | null>(
     null,
   );
@@ -113,6 +113,27 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
 
   // After daily-view data is loaded, watch for runner container transitions.
   const watchRunnerRef = useRef(false);
+  // Tracks whether the initial load has completed; subsequent focuses trigger a silent refetch.
+  const hasFocusedOnce = useRef(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!hasFocusedOnce.current) {
+        hasFocusedOnce.current = true;
+        return;
+      }
+      // P0-B: re-fetch daily view after returning from runner so completed_today renders correctly
+      mitraJourneyDailyView(null).then((result) => {
+        if (!result?.envelope) return;
+        const flat = ingestDailyView(result.envelope);
+        for (const [k, v] of Object.entries(flat)) {
+          if (v !== undefined) {
+            dispatch(screenActions.setScreenValue({ key: k, value: v }));
+          }
+        }
+      }).catch(() => {});
+    }, [dispatch]),
+  );
   const currentContainerId = useSelector(
     (state: RootState) => state.screen.currentContainerId,
   );
@@ -479,6 +500,8 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
           subtitle:
             triadArr.find((t: any) => t?.slot === "mantra")?.subtitle ||
             "Return through sound",
+          completedToday:
+            triadArr.find((t: any) => t?.slot === "mantra")?.completed_today === true,
           iconName: "musical-notes-outline" as const,
           master:
             sd.master_mantra ||
@@ -495,6 +518,8 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
           subtitle:
             triadArr.find((t: any) => t?.slot === "sankalp")?.subtitle ||
             "Hold today's intention",
+          completedToday:
+            triadArr.find((t: any) => t?.slot === "sankalp")?.completed_today === true,
           iconName: "leaf-outline" as const,
           master:
             sd.master_sankalp ||
@@ -511,6 +536,8 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
           subtitle:
             triadArr.find((t: any) => t?.slot === "practice")?.subtitle ||
             "Move through the body",
+          completedToday:
+            triadArr.find((t: any) => t?.slot === "practice")?.completed_today === true,
           iconName: "flower-outline" as const,
           IconComponent: In1Icon,
           master:
@@ -565,12 +592,6 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     }
     navigation.goBack();
   };
-  const toggleProgress = () => {
-    LayoutAnimation.configureNext(
-      LayoutAnimation.create(220, "easeInEaseOut", "opacity"),
-    );
-    setProgressOpen((value) => !value);
-  };
   const toggleGuidance = () => {
     LayoutAnimation.configureNext(
       LayoutAnimation.create(220, "easeInEaseOut", "opacity"),
@@ -589,6 +610,13 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
       LayoutAnimation.create(220, "easeInEaseOut", "opacity"),
     );
     setRemindersOpen((value) => !value);
+  };
+
+  const toggleProgress = () => {
+    LayoutAnimation.configureNext(
+      LayoutAnimation.create(220, "easeInEaseOut", "opacity"),
+    );
+    setProgressOpen((v) => !v);
   };
 
   const TRIAD_REMINDER_DEFAULTS: Record<
@@ -733,6 +761,9 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                   <Text style={styles.triadTitle}>{item.title}</Text>
                   {!!item.subtitle && (
                     <Text style={styles.triadSubtitle}>{item.subtitle}</Text>
+                  )}
+                  {item.completedToday && (
+                    <Text style={styles.triadDoneLabel}>✓ Done today</Text>
                   )}
                 </View>
               </View>
@@ -1147,6 +1178,12 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     fontStyle: "italic",
     color: "rgb(165, 122, 43)",
+  },
+  triadDoneLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#7A9E7E",
+    marginTop: 4,
   },
   dividerWrap: {
     flexDirection: "row",

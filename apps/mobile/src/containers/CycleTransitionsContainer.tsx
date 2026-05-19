@@ -314,6 +314,15 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
 
   const isCompletingRef = useRef(false);
 
+  // Reset the completion guard whenever start_runner fires a new session
+  // (runner_start_time is set to Date.now() on each start_runner dispatch).
+  // Without this, isCompletingRef stays true from a prior completion and
+  // triggerCompletion() silently no-ops on sankalp/practice after mantra.
+  const runnerStartTime = screenData?.runner_start_time;
+  React.useEffect(() => {
+    isCompletingRef.current = false;
+  }, [runnerStartTime]);
+
   const clampPracticeMinutes = (value: number) =>
     Math.max(1, Math.min(10, Math.round(value)));
 

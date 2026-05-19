@@ -86,8 +86,6 @@ export function CycleProgressBlock({ sd, expanded: expandedProp, onToggle, hideH
     typeof metrics.days_fully_completed === "number"
       ? metrics.days_fully_completed
       : 0;
-  const triggerSessions: number =
-    typeof metrics.trigger_sessions === "number" ? metrics.trigger_sessions : 0;
   const rhythm: DayDot[] = Array.isArray(metrics.daily_rhythm)
     ? metrics.daily_rhythm
     : [];
@@ -183,15 +181,11 @@ export function CycleProgressBlock({ sd, expanded: expandedProp, onToggle, hideH
           >
             <Metric
               value={daysEngaged}
-              label={metrics.days_engaged_label || "Days engaged"}
+              label={metrics.days_engaged_label || "Days you showed up"}
             />
             <Metric
               value={daysComplete}
-              label={metrics.days_complete_label || "Fully completed"}
-            />
-            <Metric
-              value={triggerSessions}
-              label={metrics.trigger_sessions_label || "Trigger sessions"}
+              label={metrics.days_complete_label || "Days fully held"}
             />
           </div>
 

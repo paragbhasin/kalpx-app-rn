@@ -30,7 +30,9 @@ import {
   mitraJourneyDay14Decision,
   postRhythmComplete,
   postInnerPathComplete,
+  getMitraHomeV3,
 } from './mitraApi';
+import { setHomeData } from '../store/doorSlice';
 import { ingestDailyView, ingestDay7View, ingestDay14View } from './v3Ingest';
 import { ensureRoomAmbientPlaying } from '../lib/audio/calmMusic';
 import { webNavigate } from '../lib/webRouter';
@@ -679,6 +681,11 @@ export async function executeAction(action: any, context: ActionContext): Promis
     case 'return_to_rhythm_home': {
       const runnerClearKeysRhythm = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz', 'runner_rhythm_slot', 'rhythm_complete_result'];
       runnerClearKeysRhythm.forEach(k => dispatch(setScreenValue({ key: k, value: null })));
+      // P0-D: refresh home data so rhythm slot completion state is current
+      try {
+        const fresh = await getMitraHomeV3({ forceFresh: true });
+        if (fresh) dispatch(setHomeData(fresh));
+      } catch { /* non-blocking */ }
       webNavigate('/en/mitra/rhythm');
       break;
     }
@@ -687,8 +694,9 @@ export async function executeAction(action: any, context: ActionContext): Promis
       const ipItem = screenData.runner_active_item as any;
       const ipType = (screenData.runner_variant as string) || '';
       const ipRef = (ipItem?.item_id as string) || '';
+      // P0-B: await completion write before fetching refreshed daily view
       if (ipType && ipRef) {
-        postInnerPathComplete(ipType, ipRef).catch(() => {});
+        await postInnerPathComplete(ipType, ipRef).catch(() => {});
       }
       const innerPathClearKeys = [
         'runner_active_item', 'runner_source', 'runner_variant',
@@ -697,6 +705,13 @@ export async function executeAction(action: any, context: ActionContext): Promis
         'practice_launch_surface',
       ];
       innerPathClearKeys.forEach(k => dispatch(setScreenValue({ key: k, value: null })));
+      // P0-B: fetch fresh daily view so completed_today renders correctly
+      try {
+        const envelope = await getDashboardView();
+        if (envelope) {
+          dispatch(updateScreenData(ingestDailyView(envelope)));
+        }
+      } catch { /* non-blocking — navigate regardless */ }
       webNavigate('/en/mitra/inner-path');
       break;
     }

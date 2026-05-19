@@ -75,6 +75,18 @@ import TellMitraScreen from "../screens/Mitra/TellMitraScreen";
 import MitraIntentionScreen from "../screens/Mitra/MitraIntentionScreen";
 import MitraStartScreen from "../screens/Mitra/MitraStartScreen";
 import NewMitraShell from "../screens/Mitra/NewMitraShell";
+import InnerPathMantraRunner from "../screens/Mitra/runners/InnerPathMantraRunner";
+import InnerPathSankalpRunner from "../screens/Mitra/runners/InnerPathSankalpRunner";
+import InnerPathPracticeRunner from "../screens/Mitra/runners/InnerPathPracticeRunner";
+import RhythmMantraRunner from "../screens/Mitra/runners/RhythmMantraRunner";
+import RhythmSankalpRunner from "../screens/Mitra/runners/RhythmSankalpRunner";
+import RhythmPracticeRunner from "../screens/Mitra/runners/RhythmPracticeRunner";
+import InnerPathMantraCompletion from "../screens/Mitra/completions/InnerPathMantraCompletion";
+import InnerPathSankalpCompletion from "../screens/Mitra/completions/InnerPathSankalpCompletion";
+import InnerPathPracticeCompletion from "../screens/Mitra/completions/InnerPathPracticeCompletion";
+import RhythmMantraCompletion from "../screens/Mitra/completions/RhythmMantraCompletion";
+import RhythmSankalpCompletion from "../screens/Mitra/completions/RhythmSankalpCompletion";
+import RhythmPracticeCompletion from "../screens/Mitra/completions/RhythmPracticeCompletion";
 
 const Stack: any = createNativeStackNavigator();
 
@@ -373,6 +385,18 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen name="MitraIntention" component={MitraIntentionScreen} options={{ headerShown: false }} />
     <Stack.Screen name="MitraStart" component={MitraStartScreen} options={{ headerShown: false, gestureEnabled: false }} />
     <Stack.Screen name="NewMitraHome" component={NewMitraShell} options={{ headerShown: false }} />
+    <Stack.Screen name="InnerPathMantraRunner" component={InnerPathMantraRunner} options={{ headerShown: false }} />
+    <Stack.Screen name="InnerPathSankalpRunner" component={InnerPathSankalpRunner} options={{ headerShown: false }} />
+    <Stack.Screen name="InnerPathPracticeRunner" component={InnerPathPracticeRunner} options={{ headerShown: false }} />
+    <Stack.Screen name="RhythmMantraRunner" component={RhythmMantraRunner} options={{ headerShown: false }} />
+    <Stack.Screen name="RhythmSankalpRunner" component={RhythmSankalpRunner} options={{ headerShown: false }} />
+    <Stack.Screen name="RhythmPracticeRunner" component={RhythmPracticeRunner} options={{ headerShown: false }} />
+    <Stack.Screen name="InnerPathMantraCompletion" component={InnerPathMantraCompletion} options={{ headerShown: false }} />
+    <Stack.Screen name="InnerPathSankalpCompletion" component={InnerPathSankalpCompletion} options={{ headerShown: false }} />
+    <Stack.Screen name="InnerPathPracticeCompletion" component={InnerPathPracticeCompletion} options={{ headerShown: false }} />
+    <Stack.Screen name="RhythmMantraCompletion" component={RhythmMantraCompletion} options={{ headerShown: false }} />
+    <Stack.Screen name="RhythmSankalpCompletion" component={RhythmSankalpCompletion} options={{ headerShown: false }} />
+    <Stack.Screen name="RhythmPracticeCompletion" component={RhythmPracticeCompletion} options={{ headerShown: false }} />
   </Stack.Navigator>
 );
 

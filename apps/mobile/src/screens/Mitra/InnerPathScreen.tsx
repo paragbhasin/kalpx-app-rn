@@ -51,7 +51,6 @@ import { useDispatch, useSelector } from "react-redux";
 import In1Icon from "../../../../web/public/in1.svg";
 import CycleProgressBlock from "../../blocks/dashboard/CycleProgressBlock";
 import { TimePickerModal } from "../../components/TimePickerModal";
-import { executeAction } from "../../engine/actionExecutor";
 import {
   apiGetJourneyReminders,
   apiPatchJourneyReminders,
@@ -568,33 +567,16 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     slot: "mantra" | "sankalp" | "practice",
     item: any,
   ) => {
-    store.dispatch(
-      screenActions.setScreenValue({
-        key: "practice_launch_surface",
-        value: "inner_path",
-      }),
-    );
-    executeAction(
-      {
-        type: "start_runner",
-        payload: {
-          source: "core",
-          variant: slot,
-          item,
-          practice_launch_surface: "inner_path",
-        },
-      },
-      {
-        loadScreen,
-        goBack,
-        setScreenValue: (value: any, key: string) =>
-          store.dispatch(screenActions.setScreenValue({ key, value })),
-        screenState: store.getState().screen.screenData,
-      },
-    ).catch(() => {});
-    // Always navigate explicitly — watcher is silent when currentContainerId is
-    // already "cycle_transitions" from a prior session (dep unchanged → no fire).
-    navigation.navigate("DynamicEngine" as any);
+    if (!item) return;
+    const journeyId = String((sd as any)?.journey_id ?? "");
+    const dayNumber = Number((sd as any)?.day_number) || 0;
+    if (slot === "mantra") {
+      navigation.navigate("InnerPathMantraRunner" as any, { item, journeyId, dayNumber });
+    } else if (slot === "sankalp") {
+      navigation.navigate("InnerPathSankalpRunner" as any, { item, journeyId, dayNumber });
+    } else {
+      navigation.navigate("InnerPathPracticeRunner" as any, { item, journeyId, dayNumber });
+    }
   };
   const handleBack = () => {
     if (embedded) {

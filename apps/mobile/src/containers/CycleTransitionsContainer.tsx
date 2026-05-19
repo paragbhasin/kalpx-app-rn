@@ -46,6 +46,9 @@ import { store } from "../store";
 import { showSnackBar } from "../store/snackBarSlice";
 import { Fonts } from "../theme/fonts";
 import { stopRoomAmbientAudio } from "../engine/roomAmbientAudio";
+import MantraRunnerView from "../blocks/runners/MantraRunnerView";
+import SankalpRunnerView from "../blocks/runners/SankalpRunnerView";
+import PracticeRunnerView from "../blocks/runners/PracticeRunnerView";
 
 // SVGs / Assets
 import { SvgUri } from "react-native-svg";
@@ -937,6 +940,25 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     );
   }
 
+  const handleRunnerComplete = (repsCompleted: number, durationSec: number) => {
+    updateScreenData("runner_reps_completed", repsCompleted);
+    updateScreenData("runner_duration_actual_sec", durationSec);
+    updateScreenData("reps_done", repsCompleted);
+    updateScreenData("chant_duration", durationSec);
+    executeAction(
+      {
+        type: "complete_runner",
+        target: { container_id: "practice_runner", state_id: "completion_return" },
+      },
+      {
+        loadScreen,
+        goBack,
+        setScreenValue: (val: any, k: string) => updateScreenData(k, val),
+        screenState: { ...screenData },
+      },
+    );
+  };
+
   const handleBack = () => {
     const target = screenData.info_back_target;
     if (target) {
@@ -963,752 +985,61 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
       });
     }
   };
-  // Dev-only test hook (LOCKED 2026-04-19): Maestro flows 16/19–22 tap
-  // `test_runner_force_complete` to trigger the REAL completion path for
-  // the current runner variant — same `complete_runner` dispatch the
-  // natural 108-tap / 3s-hold / timer-expiry paths use. Not a mock; the
-  // backend tracking fires, completion_return renders, source-room
-  // routing resolves identically. Guarded on `__DEV__` so production
-  // builds strip the affordance entirely. 1×1 invisible pressable
-  // positioned off-touchable-flow; real users never see or hit it.
-  const handleTestForceComplete = () => {
-    if (isCompletingRef.current) return;
-    isCompletingRef.current = true;
-
-    const durationSeconds = Math.round(
-      (Date.now() - (sessionStartTime || Date.now())) / 1000,
-    );
-
-    if (currentType === "mantra") {
-      setChantCount(selectedTarget);
-      updateScreenData("runner_reps_completed", selectedTarget);
-      updateScreenData("reps_done", selectedTarget);
-    } else if (currentType === "practice") {
-      stopPracticeTimer().catch(() => {});
-      updateScreenData("runner_reps_completed", 1);
-    } else if (currentType === "sankalp") {
-      updateScreenData("runner_reps_completed", 1);
-    }
-    updateScreenData("runner_duration_actual_sec", durationSeconds);
-    updateScreenData("chant_duration", durationSeconds);
-
-    executeAction(
-      {
-        type: "complete_runner",
-        target: {
-          container_id: "practice_runner",
-          state_id: "completion_return",
-        },
-      },
-      {
-        loadScreen,
-        goBack,
-        setScreenValue: (val: any, k: string) => updateScreenData(k, val),
-        screenState: { ...screenData },
-      },
-    );
-  };
+  // handleTestForceComplete removed — Phase 2/3 moved IP+Rhythm to dedicated runner
+  // screens (each block carries its own dev hook). Support/community flows (19–22)
+  // still use the test_runner_force_complete testID inside MantraRunnerView /
+  // SankalpRunnerView / PracticeRunnerView blocks, which call onComplete → handleRunnerComplete.
 
   if (isInfoScreen) {
     return (
       <View style={styles.container}>
-        {__DEV__ && (
-          <TouchableOpacity
-            testID="test_runner_force_complete"
-            accessibilityLabel="test_runner_force_complete"
-            accessible={true}
-            accessibilityRole="button"
-            onPress={handleTestForceComplete}
-            style={{
-              position: "absolute",
-              top: 60,
-              right: 4,
-              width: 24,
-              height: 24,
-              opacity: 0.01,
-              zIndex: 9999,
-            }}
-          >
-            <View style={{ width: 24, height: 24 }} />
-          </TouchableOpacity>
+        {currentType === "mantra" && (
+          <MantraRunnerView
+            item={info}
+            isViewOnly={isViewOnlyInfo}
+            initialReps={Number(screenData.reps_total) || 27}
+            runnerStartTimeKey={screenData.runner_start_time}
+            onComplete={handleRunnerComplete}
+            onBack={handleBack}
+            isDevMode={__DEV__}
+            isCommunityRunner={isCommunityRunner}
+            addLoading={communityAddLoading}
+            onAddToPractice={() => void handleCommunityAdd()}
+          />
         )}
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.infoScrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Package for Mantra combined flow */}
-          {currentType === "mantra" && (
-            <View style={styles.combinedMantraFlow}>
-              {/* Top Mantra Cards */}
-              <Text style={[styles.mantraTitle, { marginBottom: 12 }]}>
-                {info.title}
-              </Text>
-
-              {/* Tradition eyebrow (founder adjustment #2, 2026-04-19):
-                  render when deity OR source is present. Combine with an
-                  en-dash when both are present. Single-value renders the
-                  lone field. Keeps elegant + data-truthful — no padded
-                  wording when only one side is seeded. */}
-              {(!!info.deity || !!info.source) && (
-                <Text style={styles.mantraTraditionLine}>
-                  {info.deity && info.source
-                    ? `${info.deity} \u2014 ${info.source}`
-                    : info.deity || info.source}
-                </Text>
-              )}
-
-              {!isViewOnlyInfo && (
-                <>
-                  <View style={styles.progressCounter}>
-                    <Text style={styles.currentCountText}>{chantCount}</Text>
-                    <Text style={styles.totalCountText}> / {selectedTarget}</Text>
-                  </View>
-
-                  <View style={styles.interactionArea}>
-                    <View style={styles.glowOuter}>
-                      <View style={styles.glowMiddle}>
-                        <View style={styles.glowInner} />
-                      </View>
-                    </View>
-
-                    <Animated.View style={[styles.beadsRing, animatedRingStyle]}>
-                      <View style={styles.ringCircle} />
-
-                      {beads.map((bead) => {
-                        const tapped = isBeadTapped(bead.index);
-                        const active = isBeadActive(bead.index);
-                        return (
-                          <View
-                            key={bead.index}
-                            style={[
-                              styles.beadWrapper,
-                              {
-                                transform: [
-                                  { translateX: bead.x },
-                                  { translateY: bead.y },
-                                  { scale: tapped ? 0.6 : 1 },
-                                ],
-                                opacity: tapped ? 0.2 : 1,
-                              },
-                            ]}
-                          >
-                            <TouchableOpacity
-                              onPress={handleIncrement}
-                              disabled={tapped}
-                              style={styles.beadInner}
-                              activeOpacity={1}
-                            >
-                              <RudrakshSvg width={30} height={30} />
-                              {active && <View style={styles.beadPointer} />}
-                            </TouchableOpacity>
-                          </View>
-                        );
-                      })}
-                    </Animated.View>
-
-                    <Animated.View
-                      style={[styles.centerTapTarget, animatedCenterStyle]}
-                    >
-                      <TouchableOpacity
-                        style={styles.tapTouchable}
-                        onPress={handleIncrement}
-                        activeOpacity={0.8}
-                      >
-                        <View style={styles.tapContent}>
-                          <Text style={styles.tapText}>TAP</Text>
-                          <Text style={styles.subTap}>HERE</Text>
-                          <View style={styles.tapCheck}>
-                            <Svg
-                              width={24}
-                              height={24}
-                              viewBox="0 0 24 24"
-                              fill="none"
-                            >
-                              <Circle
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="#B89450"
-                                strokeWidth="1"
-                              />
-                              <Path
-                                d="M8 12L11 15L16 9"
-                                stroke="#B89450"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </Svg>
-                          </View>
-                        </View>
-                      </TouchableOpacity>
-                    </Animated.View>
-                  </View>
-                </>
-              )}
-              <View style={styles.topCardsRow}>
-                {info.iast && (
-                  <MantraTextCard
-                    text={info.iast}
-                    expanded={iastExpanded}
-                    onToggle={() => setIastExpanded(!iastExpanded)}
-                  />
-                )}
-                {info.devanagari && (
-                  <MantraTextCard
-                    text={info.devanagari}
-                    isDevanagari
-                    expanded={devanagariExpanded}
-                    onToggle={() => setDevanagariExpanded(!devanagariExpanded)}
-                  />
-                )}
-              </View>
-              {/* <Text style={styles.combinedHelpText}>
-                Choose your chant count and tap the bead after each mantra.
-              </Text> */}
-              {/* Rep Selection Pills */}
-              {!isViewOnlyInfo && (
-                <View style={styles.repPillsContainer}>
-                  {[1, 9, 27, 54, 108].map((option) => {
-                    const isSelected = option === selectedTarget;
-                    return (
-                      <TouchableOpacity
-                        key={option}
-                        style={[
-                          styles.repPill,
-                          isSelected && styles.repPillSelected,
-                        ]}
-                        onPress={() => {
-                          setSelectedTarget(option);
-                          setChantCount(0);
-                        }}
-                      >
-                        <Text
-                          style={[
-                            styles.repPillText,
-                            isSelected && styles.repPillTextSelected,
-                          ]}
-                        >
-                          {option} {isSelected && " \u2713"}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-              )}
-
-              {/* Audio Player — source-independent, item-specific.
-                  Derives URL from info.audio_url (set by view_info from
-                  manualData) or runner_active_item.audio_url. Never falls
-                  back to master_mantra or mantra_audio_url — those can
-                  belong to a different (core) item and would play the
-                  wrong audio for additional/custom/community items. */}
-              {(() => {
-                const audioUrl =
-                  (typeof info?.audio_url === "string" && info.audio_url.trim().length > 0
-                    ? info.audio_url.trim()
-                    : null) ??
-                  (typeof screenData?.runner_active_item?.audio_url === "string" &&
-                   screenData.runner_active_item.audio_url.trim().length > 0
-                    ? screenData.runner_active_item.audio_url.trim()
-                    : "");
-                if (!audioUrl) return null;
-                return (
-                  <View
-                    style={{
-                      width: "100%",
-                      marginBottom: 30,
-                      paddingHorizontal: 10,
-                    }}
-                  >
-                    <AudioPlayerBlock
-                      block={{
-                        audio_url: audioUrl,
-                        label: info?.title || "Mantra Audio",
-                      }}
-                    />
-                  </View>
-                );
-              })()}
-
-              {/* Consolidated Meaning/Essence Section */}
-              <View style={styles.collapsibleSectionsCombined}>
-                {hasContent(info.meaning) || hasContent(info.summary) ? (
-                  <CollapsibleCard
-                    label="Meaning"
-                    expanded={meaningExpanded}
-                    onToggle={() => setMeaningExpanded(!meaningExpanded)}
-                  >
-                    <Text style={styles.cardText}>
-                      {info.meaning || info.summary}
-                    </Text>
-                  </CollapsibleCard>
-                ) : null}
-
-                <View style={{ height: 12 }} />
-
-                {hasContent(info.essence) || hasContent(info.insight) ? (
-                  <CollapsibleCard
-                    label="Essence"
-                    expanded={essenceExpanded}
-                    onToggle={() => setEssenceExpanded(!essenceExpanded)}
-                  >
-                    <Text style={styles.cardText}>{info.essence}</Text>
-                  </CollapsibleCard>
-                ) : null}
-              </View>
-
-              {isCommunityRunner && (
-                <CommunityRunnerActionBar
-                  addLoading={communityAddLoading}
-                  onAdd={() => {
-                    void handleCommunityAdd();
-                  }}
-                />
-              )}
-
-              <TouchableOpacity onPress={handleBack} style={styles.backLink}>
-                <Text style={styles.backLinkText}>Back</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {/* Sankalp Integrated Flow */}
-          {currentType === "sankalp" && (
-            <View style={styles.combinedSankalpFlow}>
-              <View style={styles.mantraInfoCard}>
-                <Text style={styles.sankalpTitle}>
-                  {info.title || "Intention"}
-                </Text>
-                {shouldShowSankalpBody && (
-                  <Text style={styles.sankalpMainTextInline}>
-                    {sankalpBodyText}
-                  </Text>
-                )}
-              </View>
-
-              {/* How To Live — stays visible as a MAIN section (founder
-                  adjustment #2, 2026-04-19; not a collapsible). Gated on
-                  content presence — English fallback removed per
-                  sovereignty law. 46% of sankalps have no how_to_live
-                  today; those render without this card rather than fake
-                  wisdom. */}
-              {hasContent(info.how_to_live) && (
-                <View style={[styles.mainCard]}>
-                  <SectionHeader label="How To Live" />
-                  <View style={{ marginTop: 12 }}>
-                    {Array.isArray(info.how_to_live) ? (
-                      <View style={styles.howToLiveList}>
-                        {info.how_to_live.map((line: string, index: number) => (
-                          <Text
-                            key={`${line}-${index}`}
-                            style={styles.howToLiveText}
-                          >
-                            {line}
-                          </Text>
-                        ))}
-                      </View>
-                    ) : (
-                      <Text style={styles.howToLiveText}>
-                        {info.how_to_live}
-                      </Text>
-                    )}
-                  </View>
-                </View>
-              )}
-
-              {!isViewOnlyInfo && (
-                <View style={styles.embodySection}>
-                  <Text style={styles.embodyInstr}>
-                    {isSankalpActivating
-                      ? "Let the vibration settle within..."
-                      : "Tap to embody your intention"}
-                  </Text>
-
-                  <TouchableOpacity
-                    activeOpacity={0.9}
-                    onPress={runSankalpActivation}
-                    disabled={isSankalpActivating}
-                    style={styles.holdTarget}
-                  >
-                    <RNAnimated.View
-                      style={{
-                        transform: [
-                          { perspective: 1000 },
-                          {
-                            rotateY: sankalpSpin.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: ["0deg", "360deg"],
-                            }),
-                          },
-                          {
-                            scaleX: sankalpSpin.interpolate({
-                              inputRange: [0, 0.25, 0.5, 0.75, 1],
-                              outputRange: [1, 0.18, 1, 0.18, 1],
-                            }),
-                          },
-                        ],
-                      }}
-                    >
-                      <Image source={NamasteIcon} style={styles.embodyImg} />
-                    </RNAnimated.View>
-                  </TouchableOpacity>
-                </View>
-              )}
-
-              {/* Collapsible Sections for Sankalp.
-                  - "Essence" (relabeled from "Meaning" per founder plan,
-                    2026-04-19): MasterSankalp has no `meaning` column;
-                    body reads info.insight (100% populated). Label now
-                    matches the field it renders.
-                  - "Benefits" gated on hasContent — 46% of sankalps ship
-                    with empty benefits; those render nothing rather than
-                    an empty collapsible. */}
-              <View
-                style={[
-                  styles.collapsibleSectionsCombined,
-                  !isViewOnlyInfo && { marginTop: -70 },
-                ]}
-              >
-                {hasContent(info.insight) && (
-                  <CollapsibleCard
-                    label="Essence"
-                    expanded={essenceExpanded}
-                    onToggle={() => setEssenceExpanded(!essenceExpanded)}
-                  >
-                    <Text style={styles.cardText}>{info.insight}</Text>
-                  </CollapsibleCard>
-                )}
-                {hasContent(info.insight) && hasContent(info.benefits) && (
-                  <View style={{ height: 12 }} />
-                )}
-                {hasContent(info.benefits) && (
-                  <CollapsibleCard
-                    label="Benefits"
-                    expanded={benefitsExpanded}
-                    onToggle={() => setBenefitsExpanded(!benefitsExpanded)}
-                  >
-                    {Array.isArray(info.benefits) ? (
-                      <View style={styles.benefitList}>
-                        {info.benefits.map((b: string, idx: number) => (
-                          <Text key={idx} style={styles.benefitItem}>
-                            {"\u2022"} {b}
-                          </Text>
-                        ))}
-                      </View>
-                    ) : (
-                      <Text style={styles.cardText}>{info.benefits}</Text>
-                    )}
-                  </CollapsibleCard>
-                )}
-              </View>
-
-              {isCommunityRunner && (
-                <CommunityRunnerActionBar
-                  addLoading={communityAddLoading}
-                  onAdd={() => {
-                    void handleCommunityAdd();
-                  }}
-                />
-              )}
-            </View>
-          )}
-
-          {/* Practice Flow (Legacy for non-sankalp/non-mantra) */}
-          {currentType === "practice" && (
-            <View style={styles.visualContainer}>
-              {/* {typeof MantraLotus3d === "number" ? (
-                <SvgUri
-                  uri={Image.resolveAssetSource(MantraLotus3d)?.uri ?? null}
-                  width={180}
-                  height={180}
-                />
-              ) : (
-                <MantraLotus3d width={180} height={180} /> */}
-              {/* )
-              } */}
-              <View style={styles.mantraMainContainer}>
-                <Text style={[styles.deityTitle, { textAlign: "center" }]}>
-                  {info.title}
-                </Text>
-                {/* Subtitle — MasterPractice ships `summary` on 99.7% of
-                    items; legacy subtitle/line fields are effectively
-                    dead. Prefer summary; fall through to legacy fields
-                    for defensive compatibility. (PR4 tightening, 2026-04-19) */}
-                {(info.summary || info.subtitle || info.line) && (
-                  <Text
-                    style={[
-                      styles.sankalpMainText,
-                      { fontSize: 18, marginTop: 8, textAlign: "center" },
-                    ]}
-                  >
-                    {interpolate(info.summary || info.subtitle || info.line, {
-                      ...screenData,
-                      ...info,
-                    })}
-                  </Text>
-                )}
-                {/* Duration eyebrow (PR4 tightening, 2026-04-19): rendered
-                    when MasterPractice.duration is seeded (~42%). Kept
-                    elegant — no tradition/deity (too sparse at 10%/4%). */}
-                {!!info.duration && (
-                  <Text style={styles.practiceDurationLine}>
-                    {info.duration}
-                  </Text>
-                )}
-              </View>
-
-              <View style={styles.mainCard}>
-                {info.steps && info.steps.length > 0 && (
-                  <>
-                    <SectionHeader label="What this practice asks of you" />
-                    <View style={styles.practiceStepsList}>
-                      {info.steps.map((step: string, i: number) => (
-                        <View key={i} style={styles.practiceStep}>
-                          <Text style={styles.stepNum}>{i + 1}.</Text>
-                          <Text style={styles.stepText}>{step}</Text>
-                        </View>
-                      ))}
-                    </View>
-                  </>
-                )}
-              </View>
-              {!isViewOnlyInfo && (
-                <View
-                  style={[
-                    styles.practiceTimerCard,
-                    info.steps && info.steps.length > 0 && { marginTop: 24 },
-                  ]}
-                >
-                {!isPracticeTimerRunning ? (
-                  <>
-                    <Text style={styles.practiceTimerHeading}>
-                      How long will you pause?
-                    </Text>
-                    <Text style={styles.practiceTimerValue}>
-                      {selectedPracticeMinutes} min
-                    </Text>
-                    <View style={styles.practiceSliderRow}>
-                      <TouchableOpacity
-                        style={styles.practiceAdjustButton}
-                        onPress={() =>
-                          updatePracticeMinutes(selectedPracticeMinutes - 1)
-                        }
-                        activeOpacity={0.8}
-                      >
-                        <Minus size={18} color="#8A5A12" />
-                      </TouchableOpacity>
-                      <View style={styles.practiceSliderWrap}>
-                        <Slider
-                          style={styles.practiceSlider}
-                          minimumValue={1}
-                          maximumValue={10}
-                          step={1}
-                          value={selectedPracticeMinutes}
-                          onValueChange={updatePracticeMinutes}
-                          minimumTrackTintColor="#D4A017"
-                          maximumTrackTintColor="#E8D8B5"
-                          thumbTintColor="#D4A017"
-                        />
-                      </View>
-                      <TouchableOpacity
-                        style={styles.practiceAdjustButton}
-                        onPress={() =>
-                          updatePracticeMinutes(selectedPracticeMinutes + 1)
-                        }
-                        activeOpacity={0.8}
-                      >
-                        <Plus size={18} color="#8A5A12" />
-                      </TouchableOpacity>
-                    </View>
-                    <View style={styles.practiceTimerScale}>
-                      <Text style={styles.practiceTimerScaleLabel}>1 min</Text>
-                      <Text style={styles.practiceTimerScaleHint}>
-                        Drag to adjust
-                      </Text>
-                      <Text style={styles.practiceTimerScaleLabel}>10 min</Text>
-                    </View>
-                    <TouchableOpacity
-                      style={styles.practicePrimaryButton}
-                      onPress={startPracticeTimer}
-                      activeOpacity={0.85}
-                    >
-                      <Text style={styles.practicePrimaryButtonText}>
-                        Begin
-                      </Text>
-                    </TouchableOpacity>
-                  </>
-                ) : (
-                  <>
-                    <View style={styles.practiceTimerVisual}>
-                      <Svg
-                        width={PRACTICE_TIMER_SIZE}
-                        height={PRACTICE_TIMER_SIZE}
-                        viewBox={`0 0 ${PRACTICE_TIMER_SIZE} ${PRACTICE_TIMER_SIZE}`}
-                      >
-                        <Circle
-                          cx={PRACTICE_TIMER_CENTER}
-                          cy={PRACTICE_TIMER_CENTER}
-                          r={PRACTICE_TIMER_RADIUS}
-                          stroke="rgba(212,160,23,0.2)"
-                          strokeWidth={PRACTICE_TIMER_STROKE}
-                          fill="none"
-                        />
-                        <Circle
-                          cx={PRACTICE_TIMER_CENTER}
-                          cy={PRACTICE_TIMER_CENTER}
-                          r={PRACTICE_TIMER_RADIUS}
-                          stroke="#D4A017"
-                          strokeWidth={PRACTICE_TIMER_STROKE}
-                          fill="none"
-                          strokeDasharray={`${2 * Math.PI * PRACTICE_TIMER_RADIUS}`}
-                          strokeDashoffset={
-                            2 *
-                            Math.PI *
-                            PRACTICE_TIMER_RADIUS *
-                            (1 - practiceTimeLeft / practiceInitialSeconds)
-                          }
-                          strokeLinecap="round"
-                          transform={`rotate(-90 ${PRACTICE_TIMER_CENTER} ${PRACTICE_TIMER_CENTER})`}
-                        />
-                      </Svg>
-                      <View style={styles.practiceTimerCenter}>
-                        <Text style={styles.practiceTimerClock}>
-                          {formatTimer(practiceTimeLeft)}
-                        </Text>
-                        <Text style={styles.practiceTimerSubtext}>
-                          Return to the moment
-                        </Text>
-                        <TouchableOpacity
-                          style={styles.practiceResetIconButton}
-                          onPress={() => resetPracticeTimer().catch(() => {})}
-                          activeOpacity={0.75}
-                        >
-                          <RefreshCw size={18} color="#8A7A5A" />
-                        </TouchableOpacity>
-                        {typeof MantraLotus3d === "number" ? (
-                          <SvgUri
-                            uri={
-                              Image.resolveAssetSource(MantraLotus3d)?.uri ??
-                              null
-                            }
-                            width={110}
-                            height={80}
-                          />
-                        ) : (
-                          <MantraLotus3d
-                            width={110}
-                            height={80}
-                            style={{
-                              marginBottom:
-                                Platform.OS === "android" ? -30 : -60,
-                            }}
-                          />
-                        )}
-                      </View>
-                    </View>
-                    <TouchableOpacity
-                      style={styles.practicePrimaryButton}
-                      onPress={() => {
-                        stopPracticeTimer().catch(() => {});
-                        handleBack();
-                      }}
-                      activeOpacity={0.85}
-                    >
-                      <Text style={styles.practicePrimaryButtonText}>
-                        End Practice
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.practiceResetButton}
-                      onPress={() => resetPracticeTimer().catch(() => {})}
-                      activeOpacity={0.75}
-                    >
-                      {/* <Text style={styles.practiceResetButtonText}>
-                          Reset Timer
-                        </Text> */}
-                    </TouchableOpacity>
-                  </>
-                )}
-                </View>
-              )}
-              {/* Benefits collapsible — gated on hasContent (48% of
-                  practices populated). */}
-              {hasContent(info.benefits) && (
-                <>
-                  {info.steps && info.steps.length > 0 && (
-                    <View style={{ height: 18 }} />
-                  )}
-                  <CollapsibleCard
-                    label="Benefits"
-                    expanded={benefitsExpanded}
-                    onToggle={() => setBenefitsExpanded(!benefitsExpanded)}
-                  >
-                    {Array.isArray(info.benefits) ? (
-                      <View style={styles.benefitList}>
-                        {info.benefits.map((b: string, idx: number) => (
-                          <Text key={idx} style={styles.benefitItem}>
-                            {"\u2022"} {b}
-                          </Text>
-                        ))}
-                      </View>
-                    ) : (
-                      <Text style={styles.cardText}>{info.benefits}</Text>
-                    )}
-                  </CollapsibleCard>
-                </>
-              )}
-
-              {/* Essence (relabeled from "Why this works" per PR4, 2026-
-                  04-19 — unifies labeling with mantra + sankalp). Body
-                  reads info.insight (99.95% populated on MasterPractice);
-                  essence fallback preserved for defensive compat even
-                  though the field doesn't exist on the practice model. */}
-              {hasContent(info.essence || info.insight) && (
-                <>
-                  {(hasContent(info.steps) || hasContent(info.benefits)) && (
-                    <View style={{ height: 18 }} />
-                  )}
-                  <CollapsibleCard
-                    label="Essence"
-                    expanded={essenceExpanded}
-                    onToggle={() => setEssenceExpanded(!essenceExpanded)}
-                  >
-                    <Text style={styles.cardText}>
-                      {info.essence || info.insight}
-                    </Text>
-                  </CollapsibleCard>
-                </>
-              )}
-
-              {isCommunityRunner && (
-                <CommunityRunnerActionBar
-                  addLoading={communityAddLoading}
-                  onAdd={() => {
-                    void handleCommunityAdd();
-                  }}
-                />
-              )}
-
-              <TouchableOpacity
-                onPress={handleBack}
-                style={[styles.backLink, { marginTop: 20 }]}
-              >
-                <Text style={styles.backLinkText}>Return to Mitra Home</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {currentType !== "mantra" && currentType !== "practice" && (
-            <TouchableOpacity onPress={handleBack} style={styles.backLink}>
-              <Text style={styles.backLinkText}>Return to Mitra Home</Text>
-            </TouchableOpacity>
-          )}
-        </ScrollView>
+        {currentType === "sankalp" && (
+          <SankalpRunnerView
+            item={info}
+            isViewOnly={isViewOnlyInfo}
+            runnerStartTimeKey={screenData.runner_start_time}
+            onComplete={(dur) => handleRunnerComplete(1, dur)}
+            onBack={handleBack}
+            isDevMode={__DEV__}
+            isCommunityRunner={isCommunityRunner}
+            addLoading={communityAddLoading}
+            onAddToPractice={() => void handleCommunityAdd()}
+          />
+        )}
+        {currentType === "practice" && (
+          <PracticeRunnerView
+            item={info}
+            isViewOnly={isViewOnlyInfo}
+            runnerStartTimeKey={screenData.runner_start_time}
+            onComplete={(dur) => handleRunnerComplete(1, dur)}
+            onBack={handleBack}
+            isDevMode={__DEV__}
+            isCommunityRunner={isCommunityRunner}
+            addLoading={communityAddLoading}
+            onAddToPractice={() => void handleCommunityAdd()}
+          />
+        )}
       </View>
     );
   }
+
+  // Phase 1 dead code (original inlined JSX) removed in Phase 2/3. The MantraRunnerView /
+  // SankalpRunnerView / PracticeRunnerView blocks now own all runner UI. IP+Rhythm entry
+  // points navigate directly to named runner screens; CTC handles community/support only.
 
   if (isAckScreen) {
     return (

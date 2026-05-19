@@ -23,7 +23,6 @@ import { useDispatch, useSelector } from "react-redux";
 import LibrarySearchModal, {
   type LibrarySearchItem,
 } from "../../components/LibrarySearchModal";
-import { executeAction } from "../../engine/actionExecutor";
 import {
   mitraJourneyHomeV3,
   mitraRhythmResolveItem,
@@ -32,8 +31,6 @@ import {
 import { useScreenStore } from "../../engine/useScreenBridge";
 import { setHomeData } from "../../store/doorSlice";
 import {
-  goBackWithData,
-  loadScreenWithData,
   screenActions,
 } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
@@ -184,30 +181,6 @@ export default function RhythmHomeScreen({
     screenBridgeRef.current = screenBridge;
   });
 
-  const buildActionContext = useCallback(() => {
-    return {
-      screenState: screenBridgeRef.current.screenData || {},
-      setScreenValue: (value: any, key: string) => {
-        dispatch(screenActions.setScreenValue({ key, value }));
-      },
-      loadScreen: (target: any) => {
-        const containerId =
-          typeof target === "string"
-            ? "generic"
-            : target?.container_id || target?.containerId || "generic";
-        const stateId =
-          typeof target === "string"
-            ? target
-            : target?.state_id || target?.stateId || "";
-        dispatch(loadScreenWithData({ containerId, stateId }) as any);
-        navigation.navigate("DynamicEngine");
-      },
-      goBack: () => {
-        dispatch(goBackWithData() as any);
-      },
-      currentScreen: screenBridgeRef.current.currentScreen,
-    };
-  }, [dispatch, navigation]);
 
   useFocusEffect(
     useCallback(() => {
@@ -308,21 +281,15 @@ export default function RhythmHomeScreen({
     } finally {
       setResolvingItemId(null);
     }
-    dispatch(
-      screenActions.setScreenValue({ key: "practice_launch_surface", value: "rhythm" }),
-    );
-    void executeAction(
-      {
-        type: "start_runner",
-        payload: {
-          source: "rhythm_daily",
-          variant: item.item_type,
-          rhythm_slot: band,
-          item: enrichedItem,
-        },
-      } as any,
-      buildActionContext() as any,
-    );
+    const journeyId = String((homeData as any)?.inner_path_summary?.journey_id ?? "");
+    const dayNumber = Number((homeData as any)?.day_number) || 0;
+    if (item.item_type === "mantra") {
+      navigation.navigate("RhythmMantraRunner" as any, { item: enrichedItem, slot: band, journeyId, dayNumber });
+    } else if (item.item_type === "sankalp") {
+      navigation.navigate("RhythmSankalpRunner" as any, { item: enrichedItem, slot: band, journeyId, dayNumber });
+    } else {
+      navigation.navigate("RhythmPracticeRunner" as any, { item: enrichedItem, slot: band, journeyId, dayNumber });
+    }
   }
 
   return (

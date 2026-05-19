@@ -5420,14 +5420,50 @@ export async function executeAction(
       }
 
       case "return_to_inner_path": {
-        const ipType = String(payload?.item_type || screenState.runner_variant || '');
+        const runnerItem = _normalizeRunnerItem(
+          screenState.runner_active_item || {},
+        );
+        const infoItem = _normalizeRunnerItem(screenState.info || {});
+        const ipType = String(
+          payload?.item_type ||
+            runnerItem?.item_type ||
+            infoItem?.item_type ||
+            screenState.runner_variant ||
+            "",
+        );
         const ipRef = String(
-          payload?.item_ref || (screenState.runner_active_item as any)?.item_id || '',
+          payload?.item_ref ||
+            runnerItem?.item_id ||
+            runnerItem?.itemId ||
+            runnerItem?.id ||
+            runnerItem?.item_ref ||
+            infoItem?.item_id ||
+            infoItem?.itemId ||
+            infoItem?.id ||
+            infoItem?.item_ref ||
+            "",
         );
         let triadAllComplete = false;
-        if (ipType && ipRef) {
+        if (ipType) {
           const result = await mitraInnerPathComplete(ipType, ipRef).catch(() => null);
           triadAllComplete = result?.all_complete === true;
+          const completedToday = Array.isArray(screenState.completed_today)
+            ? Array.from(new Set([...screenState.completed_today, ipType]))
+            : [ipType];
+          setScreenValue(completedToday, "completed_today");
+          if (Array.isArray(screenState.today?.triad)) {
+            setScreenValue(
+              {
+                ...screenState.today,
+                triad: screenState.today.triad.map((item: any) =>
+                  item?.slot === ipType
+                    ? { ...item, completed_today: true }
+                    : item,
+                ),
+              },
+              "today",
+            );
+          }
         }
         const runnerClearKeysIP = [
           'runner_active_item', 'runner_source', 'runner_variant',

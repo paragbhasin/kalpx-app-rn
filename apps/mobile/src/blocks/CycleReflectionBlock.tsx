@@ -446,7 +446,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
         }),
       );
       const nv = env?.next_view ?? { view_key: "", payload: {} };
-      if (nv.view_key === "onboarding_start") {
+      if (decision === "reset" || nv.view_key === "onboarding_start") {
         for (const k of [
           "journey_id",
           "day_number",
@@ -457,9 +457,24 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           store.dispatch(screenActions.setScreenValue({ key: k, value: null }));
         }
         store.dispatch(
+          screenActions.setScreenValue({
+            key: "onboarding_turn",
+            value: "turn_2",
+          }),
+        );
+        store.dispatch(
+          screenActions.setScreenValue({
+            key: "onboarding_draft_state",
+            value: {
+              started_at: Date.now(),
+              entry_intention: "reset",
+            },
+          }),
+        );
+        store.dispatch(
           loadScreenWithData({
             containerId: "welcome_onboarding",
-            stateId: "turn_1",
+            stateId: "turn_2",
           }) as any,
         );
         // Branch A: user chose full restart — show onboarding immediately
@@ -708,11 +723,11 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   if (showLightenConfirm) {
     return (
       <View style={styles.introContainer}>
-        <View style={[styles.introOverlay, { padding: 32, justifyContent: "center", alignItems: "center" }]}>
-          <Text style={[styles.overlayTitleDark, { color: "#432104", textAlign: "center", marginBottom: 16, fontSize: 24 }]}>
+        <View style={styles.lightenConfirmOverlay}>
+          <Text style={styles.lightenConfirmTitle}>
             Your path is now lighter.
           </Text>
-          <Text style={[styles.introSubtitle, { textAlign: "center", marginBottom: 36 }]}>
+          <Text style={styles.lightenConfirmBody}>
             Mitra will keep the essence, but make the daily step gentler.
           </Text>
           <TouchableOpacity
@@ -818,7 +833,13 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     (is7DayCycle || is14DayCycle)
   ) {
     return (
-      <ScrollView showsVerticalScrollIndicator={false} style={{ padding: 10 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={{ padding: 10 }}
+        contentContainerStyle={
+          is7DayCycle ? styles.day7ReflectionContent : undefined
+        }
+      >
         {is7DayCycle && (
           <View style={styles.mirrorHeader}>
             <Text style={styles.microLabel}>DAY 7 • MIDPOINT</Text>
@@ -987,7 +1008,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
 
         {/* Day 7 — decision buttons inline, driven by BE decisions_available */}
         {is7DayCycle && (
-          <View style={{ marginTop: 16, gap: 10 }}>
+          <View style={styles.day7DecisionButtons}>
             <TouchableOpacity
               style={styles.primaryBtn}
               onPress={() => handleDecision("continue")}
@@ -1556,6 +1577,29 @@ const styles = StyleSheet.create({
     // paddingBottom: 48,
     justifyContent: "space-between",
   },
+  lightenConfirmOverlay: {
+    flex: 1,
+    paddingHorizontal: 32,
+    paddingTop: 120,
+    alignItems: "center",
+  },
+  lightenConfirmTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 24,
+    lineHeight: 32,
+    color: "#432104",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  lightenConfirmBody: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 16,
+    lineHeight: 24,
+    color: "#5e4533",
+    textAlign: "center",
+    marginBottom: 36,
+    paddingHorizontal: 8,
+  },
   introOverlay14Day: {
     flex: 1,
     paddingHorizontal: 28,
@@ -1664,6 +1708,14 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.medium,
     fontSize: 16,
     color: "#fff",
+  },
+  day7ReflectionContent: {
+    paddingBottom: 96,
+  },
+  day7DecisionButtons: {
+    gap: 10,
+    marginTop: 4,
+    marginBottom: 18,
   },
   bottomGroup: { marginBottom: 40 },
 

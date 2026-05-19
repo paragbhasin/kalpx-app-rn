@@ -19,7 +19,7 @@ import { ThunkDispatch } from "redux-thunk";
 import Colors from "../../components/Colors";
 import TextComponent from "../../components/TextComponent";
 // Old tracker import removed — Mitra engine manages journey state
-import store, { RootState } from "../../store";
+import { RootState } from "../../store";
 import { performLogout } from "../../utils/logout";
 import BottomMenu from "./BottomMenu";
 

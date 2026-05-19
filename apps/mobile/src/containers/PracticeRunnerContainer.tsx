@@ -400,6 +400,8 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
   const [isTimerStarted, setIsTimerStarted] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState(1);
   const pauseTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pauseTimerEndsAtRef = useRef<number | null>(null);
+  const pauseTimerCompletedRef = useRef(false);
   const calmMusicRef = useRef<Audio.Sound | null>(null);
 
   // Sankalp Embody State
@@ -1420,27 +1422,45 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
   }, [isMantraPrep]);
 
   // ── Sacred Pause Logic ──
+  const clearPauseTimer = () => {
+    if (pauseTimerRef.current) {
+      clearInterval(pauseTimerRef.current);
+      pauseTimerRef.current = null;
+    }
+  };
+
   const startPauseTimer = (seconds: number) => {
-    setTimeLeft(seconds);
-    setInitialSeconds(seconds);
+    clearPauseTimer();
+    const durationSeconds = Math.max(1, Math.round(seconds));
+    const endsAt = Date.now() + durationSeconds * 1000;
+    pauseTimerEndsAtRef.current = endsAt;
+    pauseTimerCompletedRef.current = false;
+    setTimeLeft(durationSeconds);
+    setInitialSeconds(durationSeconds);
     setIsTimerStarted(true);
 
+    const tick = () => {
+      const remaining = Math.max(
+        0,
+        Math.ceil(((pauseTimerEndsAtRef.current ?? endsAt) - Date.now()) / 1000),
+      );
+      setTimeLeft(remaining);
+      if (remaining > 0 || pauseTimerCompletedRef.current) return;
+
+      pauseTimerCompletedRef.current = true;
+      clearPauseTimer();
+      pauseTimerEndsAtRef.current = null;
+      setIsTimerStarted(false);
+      const action = schema.on_complete || schema.complete_action;
+      if (action) executeAction(action, buildActionContext());
+    };
+
     pauseTimerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(pauseTimerRef.current!);
-          setIsTimerStarted(false);
-          const action = schema.on_complete || schema.complete_action;
-          if (action) executeAction(action, buildActionContext());
-          return 0;
-        }
-        return prev - 1;
-      });
+      tick();
     }, 1000);
   };
 
   const resetPauseTimer = () => {
-    if (pauseTimerRef.current) clearInterval(pauseTimerRef.current);
     startPauseTimer(initialSeconds);
   };
 
@@ -1563,6 +1583,8 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
 
   useEffect(() => {
     return () => {
+      clearPauseTimer();
+      pauseTimerEndsAtRef.current = null;
       if (holdTimerRef.current) clearInterval(holdTimerRef.current);
       sankalpSpinLoopRef.current?.stop();
       if (sankalpOmRef.current) {
@@ -2110,7 +2132,12 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
         <View style={styles.pauseActions}>
           <TouchableOpacity
             style={styles.endPracticeBtn}
-            onPress={() => goBack()}
+            onPress={() => {
+              clearPauseTimer();
+              pauseTimerEndsAtRef.current = null;
+              setIsTimerStarted(false);
+              goBack();
+            }}
           >
             <Text style={styles.endPracticeBtnText}>End Practice</Text>
           </TouchableOpacity>

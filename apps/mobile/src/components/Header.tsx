@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 100,
-    height: 36,
+    height: 38,
   },
   dropdownContainer: {
     width: 120,

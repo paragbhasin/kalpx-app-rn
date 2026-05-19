@@ -136,8 +136,10 @@ function DoorCard({
 
 export default function FourDoorHomeContainer({
   userName = "friend",
+  forceInnerPathReentry = false,
 }: {
   userName?: string;
+  forceInnerPathReentry?: boolean;
 }) {
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch();
@@ -430,7 +432,12 @@ export default function FourDoorHomeContainer({
     .getState?.()
     ?.routes?.slice(-1)?.[0]?.name;
   const openInnerPathSurface = () => {
-    if (homeData?.inner_path_summary?.has_active_path !== true) {
+    const hasExistingInnerPath =
+      forceInnerPathReentry ||
+      homeData?.inner_path_summary?.has_active_path === true ||
+      homeData?.user_surface_state?.has_inner_path === true;
+
+    if (!hasExistingInnerPath) {
       updateScreenData("onboarding_turn", "turn_2");
       updateScreenData("onboarding_draft_state", {
         started_at: Date.now(),

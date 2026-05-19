@@ -21,6 +21,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
+  Image,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -30,6 +31,7 @@ import {
 } from "react-native";
 import uuidv4 from "react-native-uuid";
 import { useDispatch } from "react-redux";
+import FourDoorHomeContainer from "../../containers/FourDoorHomeContainer";
 import { useToast } from "../../context/ToastContext";
 import {
   mitraJourneyEntryView,
@@ -39,7 +41,6 @@ import {
 import { ingestDailyView } from "../../engine/v3Ingest";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
-import FourDoorHomeContainer from "../../containers/FourDoorHomeContainer";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -337,11 +338,26 @@ export default function ContinueJourney({
           for (const k of clearKeys) {
             dispatch(screenActions.setScreenValue({ key: k, value: null }));
           }
+          dispatch(
+            screenActions.setScreenValue({
+              key: "onboarding_turn",
+              value: "turn_2",
+            }),
+          );
+          dispatch(
+            screenActions.setScreenValue({
+              key: "onboarding_draft_state",
+              value: {
+                started_at: Date.now(),
+                entry_intention: "reentry_fresh",
+              },
+            }),
+          );
           routedRef.current = true;
           dispatch(
             loadScreenWithData({
               containerId: "welcome_onboarding",
-              stateId: "turn_1",
+              stateId: "turn_2",
             }) as any,
           );
           navigation.navigate("DynamicEngine");
@@ -454,13 +470,13 @@ export default function ContinueJourney({
           </View>
         </ScrollView>
 
-        <View style={styles.lotusContainer} pointerEvents="none">
+        {/* <View style={styles.lotusContainer} pointerEvents="none">
           <Image
             source={require("../../../assets/new_home_lotus.png")}
             style={styles.lotusImage}
             resizeMode="contain"
           />
-        </View>
+        </View> */}
       </SafeAreaView>
     );
   }

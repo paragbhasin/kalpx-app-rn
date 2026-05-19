@@ -13,6 +13,36 @@ interface AudioPlayerBlockProps {
   };
 }
 
+let activeAudioPlayerSession = 0;
+const activeAudioSounds = new Set<Audio.Sound>();
+
+async function stopAndUnloadAudioSound(sound: Audio.Sound) {
+  try {
+    await sound.stopAsync();
+  } catch {}
+  try {
+    await sound.unloadAsync();
+  } catch {}
+}
+
+async function stopOtherAudioSounds(keep?: Audio.Sound | null) {
+  const sounds = Array.from(activeAudioSounds);
+  await Promise.all(
+    sounds.map(async (sound) => {
+      if (sound === keep) return;
+      activeAudioSounds.delete(sound);
+      await stopAndUnloadAudioSound(sound);
+    }),
+  );
+}
+
+export async function stopAllAudioPlayerSounds() {
+  activeAudioPlayerSession += 1;
+  const sounds = Array.from(activeAudioSounds);
+  activeAudioSounds.clear();
+  await Promise.all(sounds.map(stopAndUnloadAudioSound));
+}
+
 const AudioWave = () => (
   <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
     <Rect
@@ -75,6 +105,8 @@ const AudioPlayerBlock: React.FC<AudioPlayerBlockProps> = ({ block }) => {
     if (!audioUrl) return;
 
     let isMounted = true;
+    const sessionId = ++activeAudioPlayerSession;
+    let autoplayTimer: ReturnType<typeof setTimeout> | null = null;
     // Capture the previous sound ref (if any) and stop+unload it
     // BEFORE loading the new one. Without this, a rapid remount
     // (React StrictMode / parent re-render before unload completes)
@@ -84,13 +116,9 @@ const AudioPlayerBlock: React.FC<AudioPlayerBlockProps> = ({ block }) => {
     soundRef.current = null;
 
     const loadAudio = async () => {
+      await stopOtherAudioSounds(priorSound);
       if (priorSound) {
-        try {
-          await priorSound.stopAsync();
-        } catch {}
-        try {
-          await priorSound.unloadAsync();
-        } catch {}
+        await stopAndUnloadAudioSound(priorSound);
       }
       if (!isMounted) return;
       try {
@@ -110,16 +138,23 @@ const AudioPlayerBlock: React.FC<AudioPlayerBlockProps> = ({ block }) => {
             }
           },
         );
-        if (!isMounted) {
+        if (!isMounted || activeAudioPlayerSession !== sessionId) {
           await sound.unloadAsync().catch(() => {});
           return;
         }
+        await stopOtherAudioSounds(sound);
+        activeAudioSounds.add(sound);
         soundRef.current = sound;
 
         // Auto-play after 2 seconds
-        setTimeout(async () => {
-          if (isMounted && soundRef.current === sound) {
-            await soundRef.current.playAsync();
+        autoplayTimer = setTimeout(async () => {
+          if (
+            isMounted &&
+            activeAudioPlayerSession === sessionId &&
+            soundRef.current === sound
+          ) {
+            await stopOtherAudioSounds(sound);
+            await sound.playAsync();
             setIsPlaying(true);
           }
         }, 2000);
@@ -132,16 +167,16 @@ const AudioPlayerBlock: React.FC<AudioPlayerBlockProps> = ({ block }) => {
 
     return () => {
       isMounted = false;
+      if (autoplayTimer) {
+        clearTimeout(autoplayTimer);
+        autoplayTimer = null;
+      }
       const current = soundRef.current;
       soundRef.current = null;
       if (current) {
+        activeAudioSounds.delete(current);
         (async () => {
-          try {
-            await current.stopAsync();
-          } catch {}
-          try {
-            await current.unloadAsync();
-          } catch {}
+          await stopAndUnloadAudioSound(current);
         })();
       }
     };
@@ -154,6 +189,9 @@ const AudioPlayerBlock: React.FC<AudioPlayerBlockProps> = ({ block }) => {
     if (isPlaying) {
       await soundRef.current.pauseAsync();
     } else {
+      activeAudioPlayerSession += 1;
+      await stopOtherAudioSounds(soundRef.current);
+      activeAudioSounds.add(soundRef.current);
       await soundRef.current.playAsync();
     }
     setIsPlaying(!isPlaying);

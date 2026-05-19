@@ -386,7 +386,7 @@ export default function QuickResetScreen({
   }, [activeMantra, embedded, goBack, isChantingActive, navigation]);
 
   const handleCloseToHome = useCallback(() => {
-    rootNavigate("InnerPath");
+    rootNavigate("Home");
   }, []);
 
   // ── Secondary actions handler ──────────────────────────────────────────────

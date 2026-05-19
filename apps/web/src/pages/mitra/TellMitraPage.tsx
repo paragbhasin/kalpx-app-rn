@@ -12,7 +12,7 @@ import type {
   TellMitraRoomEntryContext,
   TellMitraV3Response,
 } from "@kalpx/types";
-import { ArrowLeft, LockKeyhole, Sparkles } from "lucide-react";
+import { ArrowLeft, Sparkles } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -662,16 +662,6 @@ export function TellMitraPage() {
     outline: "none",
   };
 
-  const PRIVACY_NOTE: React.CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-    color: "#8B6A43",
-    fontSize: 13,
-    textAlign: "center",
-    margin: "0 10px",
-  };
 
   const PRIOR_CONTEXT_CARD: React.CSSProperties = {
     background: "rgba(201,168,76,0.06)",
@@ -1101,30 +1091,23 @@ export function TellMitraPage() {
             </div>
             <div
               style={{
-                position: "relative",
-                padding: "8px 0 0",
+                padding: "10px 0 0",
+                textAlign: "center",
               }}
             >
-              <div style={PRIVACY_NOTE}>
-                <div
-                  style={{
-                    width: 52,
-                    height: 1,
-                    background: "rgba(217,168,58,0.45)",
-                    flexShrink: 0,
-                  }}
-                />
-                <LockKeyhole size={16} strokeWidth={2} color="#C99317" />
-                <span>Your thoughts are private and safe with us.</span>
-                <div
-                  style={{
-                    width: 52,
-                    height: 1,
-                    background: "rgba(217,168,58,0.45)",
-                    flexShrink: 0,
-                  }}
-                />
-              </div>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 12,
+                  color: "#8B6A43",
+                  lineHeight: 1.6,
+                  fontFamily: "var(--kalpx-font-sans)",
+                }}
+              >
+                Mitra is here for reflection and Sanatan-rooted guidance. It is not a substitute
+                for medical, legal, financial, therapy, crisis, or emergency support. Share only
+                what you feel comfortable sharing.
+              </p>
             </div>
             </>
           )}

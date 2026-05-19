@@ -712,6 +712,9 @@ export default function TellMitraContainer() {
           {isSubmitting ? 'Sending...' : 'Share with Mitra'}
         </Text>
       </TouchableOpacity>
+      <Text style={styles.disclaimerText}>
+        Mitra is here for reflection and Sanatan-rooted guidance. It is not a substitute for medical, legal, financial, therapy, crisis, or emergency support. Share only what you feel comfortable sharing.
+      </Text>
     </View>
   );
 }
@@ -814,5 +817,12 @@ const styles = StyleSheet.create({
     color: '#9b8b77',
     fontFamily: Fonts.sans.regular,
     textDecorationLine: 'underline',
+  },
+  disclaimerText: {
+    fontSize: 11,
+    color: '#9b8b77',
+    textAlign: 'center',
+    lineHeight: 16,
+    paddingHorizontal: 4,
   },
 });

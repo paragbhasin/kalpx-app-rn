@@ -123,17 +123,22 @@ function RhythmBand({
   onItemAction,
   resolvingItemId,
   onAddItem,
+  slotDone,
 }: {
   band: RhythmTimeBand;
   items: RhythmItem[];
   onItemAction: (item: RhythmItem) => void;
   resolvingItemId?: string | null;
   onAddItem: (band: RhythmTimeBand) => void;
+  slotDone?: boolean;
 }) {
   if (items.length === 0) return null;
   return (
     <View style={styles.band}>
-      <Text style={styles.bandLabel}>{RHYTHM_BAND_LABELS[band]} Practice</Text>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
+        <Text style={styles.bandLabel}>{RHYTHM_BAND_LABELS[band]} Practice</Text>
+        {slotDone && <Text style={styles.bandDoneLabel}>✓ Done today</Text>}
+      </View>
       <View style={styles.bandDivider}>
         <View style={styles.bandDividerLine} />
         <Text style={styles.bandDividerDiamond}>◇</Text>
@@ -207,7 +212,11 @@ export default function RhythmHomeScreen({
   useFocusEffect(
     useCallback(() => {
       screenBridgeRef.current.updateBackground(RHYTHM_BG);
-    }, []),
+      // P0-D: refresh home data on focus so slot completion state is current after runner return
+      mitraJourneyHomeV3({ forceFresh: true })
+        .then((fresh) => { if (fresh) dispatch(setHomeData(fresh)); })
+        .catch(() => {});
+    }, [dispatch]),
   );
 
   const openRhythmSetup = useCallback(() => {
@@ -351,6 +360,7 @@ export default function RhythmHomeScreen({
                     key={band}
                     band={band}
                     items={rhythm?.[band]?.items ?? []}
+                    slotDone={(rhythm as any)?.[`${band}_done`] === true}
                     onItemAction={(item) => void handleItemAction(item, band)}
                     resolvingItemId={resolvingItemId}
                     onAddItem={setHomeBand}
@@ -444,7 +454,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Fonts.serif.regular,
     color: "#432104",
-    marginBottom: 8,
+  },
+  bandDoneLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#7A9E7E",
+    marginBottom: 2,
   },
   bandDivider: {
     flexDirection: "row",

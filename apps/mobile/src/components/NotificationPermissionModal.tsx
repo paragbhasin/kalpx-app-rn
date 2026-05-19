@@ -54,7 +54,7 @@ const NotificationPermissionModal = ({ visible, onClose }) => {
               marginBottom: 20,
             }}
           >
-           Stay connected with Mantras, Sankalps, and Daily Routine reminders.
+           Allow Mitra to send gentle reminders for your rhythm, mantra, and inner path practice. You can adjust or turn off notifications any time in Settings.
           </TextComponent>
 
           {/* Open Settings Button */}
@@ -72,7 +72,7 @@ const NotificationPermissionModal = ({ visible, onClose }) => {
             }}
           >
             <TextComponent type="boldText" style={{ color: "white" }}>
-              Open Settings
+              Enable Notifications
             </TextComponent>
           </TouchableOpacity>
 
@@ -82,7 +82,7 @@ const NotificationPermissionModal = ({ visible, onClose }) => {
               type="mediumText"
               style={{ color: Colors.Colors.Light_black }}
             >
-              Maybe Later
+              Not Now
             </TextComponent>
           </TouchableOpacity>
         </View>

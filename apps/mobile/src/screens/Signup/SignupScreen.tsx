@@ -6,9 +6,11 @@ import { useTranslation } from "react-i18next";
 import {
   Dimensions,
   ImageBackground,
+  Linking,
   SafeAreaView,
   ScrollView,
   StatusBar,
+  Text,
   TextInput,
   TouchableOpacity,
   View
@@ -563,6 +565,33 @@ export default function SignupScreen({ navigation }) {
                       textStyle={styles.buttonText}
                       width={"100%"}
                     />
+
+                    {/* Consent text */}
+                    <Text
+                      style={{
+                        fontSize: 11,
+                        color: '#888',
+                        textAlign: 'center',
+                        lineHeight: 16,
+                        marginTop: 8,
+                      }}
+                    >
+                      {'By continuing, you agree to our '}
+                      <Text
+                        style={{ color: '#b8864b', fontWeight: '600' }}
+                        onPress={() => Linking.openURL('https://kalpx.com/en/terms')}
+                      >
+                        Terms
+                      </Text>
+                      {' and acknowledge our '}
+                      <Text
+                        style={{ color: '#b8864b', fontWeight: '600' }}
+                        onPress={() => Linking.openURL('https://kalpx.com/en/privacy')}
+                      >
+                        Privacy Policy
+                      </Text>
+                      .
+                    </Text>
 
                     {/* Footer */}
                     <View style={styles.footerContainer}>

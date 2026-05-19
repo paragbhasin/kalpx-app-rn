@@ -484,9 +484,9 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
             stateId: "day_active",
           }) as any,
         );
-        // Branch B: checkpoint completed — return to Home for fresh ContinueJourney state
+        // Branch B: checkpoint completed — return to Inner Path (journey continues).
         clearContinueJourneyHomeCache();
-        navigation.navigate("Home");
+        navigation.navigate("InnerPath" as any);
       }
     } catch (err: any) {
       console.warn(`[CycleReflectionBlock] day7 submit failed:`, err.message);
@@ -621,7 +621,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           }) as any,
         );
         clearContinueJourneyHomeCache();
-        navigation.navigate("Home");
+        navigation.navigate("InnerPath" as any);
       }
     } catch (err: any) {
       console.warn(`[CycleReflectionBlock] day14 submit failed:`, err.message);

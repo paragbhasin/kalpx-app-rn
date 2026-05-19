@@ -218,27 +218,42 @@ function BandSection({
   onItemAction,
   resolvingItemId,
   onAddItem,
+  slotDone,
 }: {
   band: RhythmTimeBand;
   slot: RhythmSlot | null;
   onItemAction: (item: RhythmItem) => void;
   resolvingItemId?: string | null;
   onAddItem: (band: RhythmTimeBand) => void;
+  slotDone?: boolean;
 }) {
   const hasItems = slot && slot.items.length > 0;
   if (!hasItems) return null;
   return (
     <div style={{ marginBottom: 28 }}>
-      <div
-        style={{
-          fontFamily: "var(--kalpx-font-serif)",
-          fontWeight: 700,
-          fontSize: 16,
-          color: "#432104",
-          marginBottom: 8,
-        }}
-      >
-        {RHYTHM_BAND_LABELS[band]} Practice
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+        <div
+          style={{
+            fontFamily: "var(--kalpx-font-serif)",
+            fontWeight: 700,
+            fontSize: 16,
+            color: "#432104",
+          }}
+        >
+          {RHYTHM_BAND_LABELS[band]} Practice
+        </div>
+        {slotDone && (
+          <span
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              color: "#7A9E7E",
+              letterSpacing: 0.4,
+            }}
+          >
+            ✓ Done today
+          </span>
+        )}
       </div>
       <div
         style={{
@@ -490,6 +505,7 @@ export function RhythmHomePage() {
                 <BandSection
                   band="morning"
                   slot={rhythm.morning}
+                  slotDone={(rhythm as any).morning_done === true}
                   onItemAction={(item) =>
                     void handleItemAction(item, "morning")
                   }
@@ -499,6 +515,7 @@ export function RhythmHomePage() {
                 <BandSection
                   band="afternoon"
                   slot={rhythm.afternoon}
+                  slotDone={(rhythm as any).afternoon_done === true}
                   onItemAction={(item) =>
                     void handleItemAction(item, "afternoon")
                   }
@@ -508,6 +525,7 @@ export function RhythmHomePage() {
                 <BandSection
                   band="night"
                   slot={rhythm.night}
+                  slotDone={(rhythm as any).night_done === true}
                   onItemAction={(item) => void handleItemAction(item, "night")}
                   resolvingItemId={resolvingItemId}
                   onAddItem={setHomePickerBand}

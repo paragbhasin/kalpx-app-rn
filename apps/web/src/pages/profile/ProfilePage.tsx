@@ -11,7 +11,13 @@ import {
   Trash2,
   UserRound
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  ANALYTICS_CONSENT_KEY,
+  MARKETING_CONSENT_KEY,
+  CONSENT_VERSION_KEY,
+  CONSENT_UPDATED_AT_KEY,
+} from "../../lib/webAnalytics";
 import { useNavigate } from "react-router-dom";
 import { AppShell, KalpXButton, ModalSheet } from "../../components/ui";
 import { useAuth } from "../../hooks/useAuth";
@@ -134,6 +140,12 @@ export function ProfilePage() {
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [form, setForm] = useState<ProfileFormState>(getInitialForm(null));
+  const [analyticsConsent, setAnalyticsConsent] = useState<'granted' | 'denied'>(
+    () => (localStorage.getItem(ANALYTICS_CONSENT_KEY) === 'granted' ? 'granted' : 'denied'),
+  );
+  const [marketingConsent, setMarketingConsent] = useState<'granted' | 'denied'>(
+    () => (localStorage.getItem(MARKETING_CONSENT_KEY) === 'granted' ? 'granted' : 'denied'),
+  );
 
   useEffect(() => {
     async function load() {
@@ -340,6 +352,14 @@ export function ProfilePage() {
       },
     ];
 
+    const updateConsent = (key: string, value: 'granted' | 'denied') => {
+      localStorage.setItem(key, value);
+      localStorage.setItem(CONSENT_UPDATED_AT_KEY, new Date().toISOString());
+      window.dispatchEvent(new CustomEvent('consent_updated'));
+      if (key === ANALYTICS_CONSENT_KEY) setAnalyticsConsent(value);
+      if (key === MARKETING_CONSENT_KEY) setMarketingConsent(value);
+    };
+
     return (
       <>
         {renderTopBar("Profile")}
@@ -367,6 +387,67 @@ export function ProfilePage() {
               <ChevronRight size={24} strokeWidth={2.1} color="#9c9c9c" />
             </button>
           ))}
+
+          {/* Privacy preferences — consent toggles */}
+          <div
+            style={{
+              borderTop: BORDER_SOFT,
+              padding: "18px 20px 12px",
+            }}
+          >
+            <p style={{ margin: "0 0 12px", fontSize: 13, fontWeight: 700, color: "#373737", fontFamily: "var(--kalpx-font-sans)" }}>
+              Privacy preferences
+            </p>
+            {(
+              [
+                {
+                  key: ANALYTICS_CONSENT_KEY,
+                  label: "Product analytics",
+                  description: "Allow product analytics so we can understand what feels helpful, where people get stuck, and how to make Mitra easier to use.",
+                  value: analyticsConsent,
+                },
+                {
+                  key: MARKETING_CONSENT_KEY,
+                  label: "Marketing & advertising",
+                  description: "Allow marketing cookies so we can measure campaigns and reach people who may benefit from KalpX.",
+                  value: marketingConsent,
+                },
+              ] as const
+            ).map(({ key: consentKey, label, description, value }) => (
+              <div
+                key={consentKey}
+                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}
+              >
+                <div style={{ flex: 1, paddingRight: 12 }}>
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#373737", fontFamily: "var(--kalpx-font-sans)" }}>
+                    {label}
+                  </p>
+                  <p style={{ margin: 0, fontSize: 12, color: "#888", fontFamily: "var(--kalpx-font-sans)" }}>
+                    {description}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  aria-label={`${value === 'granted' ? 'Disable' : 'Enable'} ${label}`}
+                  onClick={() => updateConsent(consentKey, value === 'granted' ? 'denied' : 'granted')}
+                  style={{
+                    background: value === 'granted' ? '#b8864b' : '#e0d6c8',
+                    color: value === 'granted' ? '#fff' : '#888',
+                    border: 'none',
+                    borderRadius: 14,
+                    padding: '5px 14px',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    fontFamily: 'var(--kalpx-font-sans)',
+                    minWidth: 44,
+                  }}
+                >
+                  {value === 'granted' ? 'On' : 'Off'}
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       </>
     );

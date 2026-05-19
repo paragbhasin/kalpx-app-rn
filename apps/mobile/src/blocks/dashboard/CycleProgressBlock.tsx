@@ -7,13 +7,11 @@
  *   {
  *     days_engaged: number,
  *     days_fully_completed: number,
- *     trigger_sessions: number,
  *     daily_rhythm: Array<{ day_number, state }>,
  *     summary_label?: string,       // localized summary line
  *     expand_label?: string,        // localized "Tap to expand"
  *     days_engaged_label?: string,
  *     days_complete_label?: string,
- *     trigger_sessions_label?: string,
  *     rhythm_header_label?: string,
  *   }
  *
@@ -77,9 +75,6 @@ const CycleProgressBlock: React.FC<Props> = ({
     typeof metrics.days_fully_completed === "number"
       ? metrics.days_fully_completed
       : 0;
-  const triggerSessions: number =
-    typeof metrics.trigger_sessions === "number" ? metrics.trigger_sessions : 0;
-
   const fallbackDay = Number(sd.day_number) || Number(sd.cycle_day) || 1;
   const fallbackTotal = Number(sd.total_days) || 14;
   const summaryLabel: string =
@@ -117,24 +112,14 @@ const CycleProgressBlock: React.FC<Props> = ({
 
       {expanded && (
         <View style={[styles.body, hideHeader && styles.bodyNoHeader]}>
-          {/* SOV-3 (2026-04-20): sovereignty-strict. Prior English fallbacks
-              ("Days engaged" / "Fully completed" / "Trigger sessions" /
-              "Daily rhythm") retired. Labels now read directly from
-              cycle_metrics payload. Missing label = empty Metric label
-              (value still shown); missing rhythm_header_label = no heading
-              rendered above the rhythm strip. */}
           <View style={styles.metricsRow}>
             <Metric
               value={daysEngaged}
-              label={metrics.days_engaged_label || "Days engaged"}
+              label={metrics.days_engaged_label || "Days you showed up"}
             />
             <Metric
               value={daysComplete}
-              label={metrics.days_complete_label || "Fully completed"}
-            />
-            <Metric
-              value={triggerSessions}
-              label={metrics.trigger_sessions_label || "Trigger sessions"}
+              label={metrics.days_complete_label || "Days fully held"}
             />
           </View>
           {!!metrics.rhythm_header_label && (

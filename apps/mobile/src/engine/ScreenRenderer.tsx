@@ -43,7 +43,7 @@ import CheckpointReflectionContainer from "../containers/CheckpointReflectionCon
 // Phase 5 Stage 2 — Canonical v3.1 room renderer (flag-gated at RoomRenderer).
 // Fetches GET /api/mitra/rooms/{room_id}/render/ and mounts <RoomRenderer />.
 import RoomContainer from "../containers/RoomContainer";
-import { stopRoomAmbientAudio } from "../containers/RoomContainer";
+import { stopRoomAmbientAudio } from "./roomAmbientAudio";
 // S04 Phase 2 — FourDoor home surface.
 import FourDoorHomeContainer from "../containers/FourDoorHomeContainer";
 import QuickResetContainer from "../containers/QuickResetContainer";

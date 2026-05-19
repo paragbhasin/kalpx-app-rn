@@ -109,6 +109,10 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
 
   const _rhythmResult = ss.rhythm_complete_result as import('@kalpx/types').RhythmCompleteResponse | null | undefined;
   const _isRhythmCompletion = String(ss.runner_source || '') === 'rhythm_daily' && !!_rhythmResult;
+  // Source-based flags used for CTA label — independent of rhythm_complete_result
+  // so label is correct even when stacked-instance timing prevents result from being set.
+  const isRhythmSource = String(ss.runner_source || '') === 'rhythm_daily';
+  const isInnerPathSource = String(ss.practice_launch_surface || '') === 'inner_path';
 
   // For rhythm_daily completions, use frozen F-C copy from backend instead of registry.
   const isRoomSequenceCompletion = slot("completion_source") === "room_sequence";
@@ -556,7 +560,11 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
               activeOpacity={0.8}
             >
               <Text style={styles.primaryCtaText}>
-                {_isRhythmCompletion ? "Return to My Rhythm" : slot("return_home_cta")}
+                {isRhythmSource
+                  ? "Return to My Rhythm"
+                  : isInnerPathSource
+                    ? "Return to Inner Path"
+                    : slot("return_home_cta") || "Return to Mitra Home"}
               </Text>
             </TouchableOpacity>
 

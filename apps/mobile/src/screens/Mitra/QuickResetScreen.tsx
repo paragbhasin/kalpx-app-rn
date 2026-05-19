@@ -29,7 +29,9 @@ import {
   View,
 } from "react-native";
 import RudrakshBead from "../../../assets/rudraksh.svg";
-import AudioPlayerBlock from "../../blocks/AudioPlayerBlock";
+import AudioPlayerBlock, {
+  stopAllAudioPlayerSounds,
+} from "../../blocks/AudioPlayerBlock";
 import type { MantraTextCardProps } from "../../containers/CycleTransitionsContainer";
 import {
   getQuickResetOpening,
@@ -199,6 +201,16 @@ export default function QuickResetScreen({
         };
       }
     }, [updateBackground, updateHeaderHidden, embedded]),
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        stopAllAudioPlayerSounds().catch((err) => {
+          console.warn("[QuickResetScreen] failed to stop audio:", err);
+        });
+      };
+    }, []),
   );
 
   const [phase, setPhase] = useState<Phase>("loading");

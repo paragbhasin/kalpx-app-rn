@@ -122,7 +122,18 @@ function isMitraRouteName(routeName) {
     "InnerPath",
     "QuickReset",
     "TellMitra",
-    'MitraStart'
+    "InnerPathMantraRunner",
+    "InnerPathSankalpRunner",
+    "InnerPathPracticeRunner",
+    "InnerPathMantraCompletion",
+    "InnerPathSankalpCompletion",
+    "InnerPathPracticeCompletion",
+    "RhythmMantraRunner",
+    "RhythmSankalpRunner",
+    "RhythmPracticeRunner",
+    "RhythmMantraCompletion",
+    "RhythmSankalpCompletion",
+    "RhythmPracticeCompletion",
   ].includes(routeName);
 }
 

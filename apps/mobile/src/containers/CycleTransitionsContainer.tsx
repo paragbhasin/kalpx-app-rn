@@ -867,16 +867,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     (stateId === "quick_checkin" || stateId === "quick_checkin_ack");
   const isCheckpointReflectionState =
     stateId === "checkpoint_day_7" || stateId === "checkpoint_day_14";
-
-  if (isCheckpointReflectionState) {
-    return (
-      <View style={styles.container}>
-        <CycleReflectionBlock />
-      </View>
-    );
-  }
-
-  const blocks = schema?.blocks || [];
+  const blocks = useMemo(() => schema?.blocks || [], [schema?.blocks]);
   const footerBlocks = useMemo(
     () =>
       blocks.filter(
@@ -937,6 +928,14 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
       }),
     [footerBlocks, screenData],
   );
+
+  if (isCheckpointReflectionState) {
+    return (
+      <View style={styles.container}>
+        <CycleReflectionBlock />
+      </View>
+    );
+  }
 
   const handleBack = () => {
     const target = screenData.info_back_target;

@@ -50,6 +50,13 @@ if (
 }
 
 // ---------------------------------------------------------------------------
+// Module-level telemetry dedup guards (Fix C — DynamicEngine stack leak)
+// Keyed by runner_source|item_id|stateId so each distinct runner session fires
+// once. No persistent suppression — new sessions always produce a new key.
+let _legacyRenderedKey = "";
+let _sessionStartedKey = "";
+
+// ---------------------------------------------------------------------------
 // Collapsible Card for Runner Footer
 // ---------------------------------------------------------------------------
 
@@ -292,15 +299,23 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
       );
     }
     const ss = screenState as Record<string, any>;
-    mitraTrackEvent("legacy_runner_rendered", {
-      journeyId: ss.journey_id,
-      dayNumber: ss.day_number || 1,
-      meta: {
-        component: "PracticeRunnerContainer",
-        state_id: "practice_runner/practice_step_runner",
-        source: ss.runner_source,
-      },
-    }).catch(() => {});
+    const _lrKey = [
+      String(ss.runner_source || ""),
+      String(ss.runner_active_item?.item_id || ss.runner_active_item?.id || ""),
+      currentStateId || "",
+    ].join("|");
+    if (_legacyRenderedKey !== _lrKey) {
+      _legacyRenderedKey = _lrKey;
+      mitraTrackEvent("legacy_runner_rendered", {
+        journeyId: ss.journey_id,
+        dayNumber: ss.day_number || 1,
+        meta: {
+          component: "PracticeRunnerContainer",
+          state_id: "practice_runner/practice_step_runner",
+          source: ss.runner_source,
+        },
+      }).catch(() => {});
+    }
   }, []);
 
   const [count, setCount] = useState(0);
@@ -363,16 +378,20 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
             : currentVariant?.includes("sankalp")
               ? "sankalp"
               : "practice");
-        mitraTrackEvent("session_started", {
-          journeyId: screenState?.journey_id,
-          dayNumber: screenState?.day_number || 1,
-          meta: {
-            itemType: sessionItemType,
-            itemId: sessionItemId,
-            source: runnerItem?.source || "core",
-            runnerType: currentVariant || currentStateId,
-          },
-        });
+        const _ssKey = `${activeItemKey}|${currentStateId}`;
+        if (_sessionStartedKey !== _ssKey) {
+          _sessionStartedKey = _ssKey;
+          mitraTrackEvent("session_started", {
+            journeyId: screenState?.journey_id,
+            dayNumber: screenState?.day_number || 1,
+            meta: {
+              itemType: sessionItemType,
+              itemId: sessionItemId,
+              source: runnerItem?.source || "core",
+              runnerType: currentVariant || currentStateId,
+            },
+          });
+        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

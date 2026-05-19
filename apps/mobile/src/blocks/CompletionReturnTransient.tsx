@@ -45,6 +45,12 @@ import { Fonts } from "../theme/fonts";
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
+// Prevents completion_return_shown from firing N times when multiple stale
+// CompletionReturnTransient instances render from the same Redux state.
+// Keyed by runner_source|runner_variant|item_id — so each distinct completion
+// session fires once. Reset in clearRunnerState so the next session can track.
+let _completionReturnShownKey = "";
+
 interface CompletionReturnTransientProps {
   block: {
     variant?: "mantra" | "sankalp" | "practice";
@@ -150,6 +156,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
   };
 
   const clearRunnerState = () => {
+    _completionReturnShownKey = "";
     setScreenValue("runner_active_item", null);
     setScreenValue("runner_source", null);
     setScreenValue("runner_start_time", null);
@@ -208,13 +215,21 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
     updateBackground(require("../../assets/beige_bg.png"));
     updateHeaderHidden(false);
 
-    mitraTrackEvent("completion_return_shown", {
-      meta: {
-        item_type: resolvedVariant,
-        item_id: screenData.runner_active_item?.item_id,
-        source: screenData.runner_source,
-      },
-    }).catch(() => {});
+    const _sessionKey = [
+      String(screenData.runner_source || ""),
+      String(screenData.runner_variant || ""),
+      String((screenData.runner_active_item as any)?.item_id || ""),
+    ].join("|");
+    if (_completionReturnShownKey !== _sessionKey) {
+      _completionReturnShownKey = _sessionKey;
+      mitraTrackEvent("completion_return_shown", {
+        meta: {
+          item_type: resolvedVariant,
+          item_id: screenData.runner_active_item?.item_id,
+          source: screenData.runner_source,
+        },
+      }).catch(() => {});
+    }
 
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});

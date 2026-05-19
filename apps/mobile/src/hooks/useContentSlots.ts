@@ -67,6 +67,12 @@ export interface UseContentSlotsArgs {
   requestId?: string;
 }
 
+// Prevents N concurrent duplicate resolves when multiple stale ScreenRenderer
+// instances share the same Redux store (DynamicEngine navigation stack leak).
+// Key is screenDataKey — unique per logical content slot. The set is cleared
+// in the async finally block so future legitimate runner sessions resolve freely.
+const _inFlight = new Set<string>();
+
 export function useContentSlots({
   momentId,
   screenDataKey,
@@ -84,23 +90,35 @@ export function useContentSlots({
       firedRef.current = true;
       return;
     }
+    // A stacked instance racing the same resolve: mark fired so it won't retry,
+    // but do not add to _inFlight (the winning instance owns the cleanup).
+    if (_inFlight.has(screenDataKey)) {
+      firedRef.current = true;
+      return;
+    }
     firedRef.current = true;
+    _inFlight.add(screenDataKey);
 
     let cancelled = false;
     (async () => {
-      const ctx = buildCtx(ss);
-      const payload = await mitraResolveMoment(momentId, ctx, requestId);
-      if (cancelled || !payload) return;
-      store.dispatch(
-        screenActions.setScreenValue({
-          key: screenDataKey,
-          value: payload.slots,
-        }),
-      );
+      try {
+        const ctx = buildCtx(ss);
+        const payload = await mitraResolveMoment(momentId, ctx, requestId);
+        if (cancelled || !payload) return;
+        store.dispatch(
+          screenActions.setScreenValue({
+            key: screenDataKey,
+            value: payload.slots,
+          }),
+        );
+      } finally {
+        _inFlight.delete(screenDataKey);
+      }
     })();
 
     return () => {
       cancelled = true;
+      _inFlight.delete(screenDataKey);
     };
     // deliberately empty deps — fire-once per block mount
     // eslint-disable-next-line react-hooks/exhaustive-deps

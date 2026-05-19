@@ -91,7 +91,16 @@ const Profile = () => {
       route: "Reminders",
     },
     { key: "language", icon: "globe-outline", route: "Language" },
-    { key: "privacy", icon: "key-outline", route: "Privacy" },
+    {
+      key: "privacy",
+      icon: "key-outline",
+      action: () => Linking.openURL("https://kalpx.com/en/privacy"),
+    },
+    {
+      key: "indiaPrivacy",
+      icon: "flag-outline",
+      action: () => Linking.openURL("https://kalpx.com/en/privacy/india"),
+    },
     {
       key: "terms",
       icon: "document-text-outline",
@@ -121,7 +130,16 @@ const Profile = () => {
       route: "Login",
     },
     { key: "language", icon: "globe-outline", route: "Language" },
-    { key: "privacy", icon: "key-outline", route: "Privacy" },
+    {
+      key: "privacy",
+      icon: "key-outline",
+      action: () => Linking.openURL("https://kalpx.com/en/privacy"),
+    },
+    {
+      key: "indiaPrivacy",
+      icon: "flag-outline",
+      action: () => Linking.openURL("https://kalpx.com/en/privacy/india"),
+    },
     {
       key: "terms",
       icon: "document-text-outline",
@@ -144,6 +162,7 @@ const Profile = () => {
     }
     if (key === "reminders") return "Reminders";
     if (key === "terms") return "Terms of Service";
+    if (key === "indiaPrivacy") return "India Privacy Notice";
     if (key === "dataDeletion") return "Data Deletion";
     return t(`profile.menu.${key}`);
   };

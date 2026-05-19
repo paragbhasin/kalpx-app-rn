@@ -4,9 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { AppShell } from "../../components/ui";
 
 // ── Legal notice ─────────────────────────────────────────────────────────────
-// Founder-review draft. Qualified legal review required before production.
-// Do not publish without legal sign-off.
-// Governing law section is a placeholder — requires legal counsel before publication.
+// Counsel-reviewed and approved. Round 2 sign-off received 2026-05-18.
+// Governing law section remains a placeholder — requires counsel before publication.
 // Subscriptions section is a placeholder — must be updated before billing goes live.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -32,7 +31,7 @@ const SECTIONS: ToSSection[] = [
     id: 'eligibility',
     title: '2. Eligibility',
     paragraphs: [
-      'You must be at least 13 years old to use KalpX. Users between 13 and 18 represent that a parent or guardian has reviewed and agreed to these Terms. Users in regions where a higher age threshold applies should comply with local requirements. By using KalpX, you represent that you meet these requirements.',
+      'You must be at least 13 years old to use KalpX. KalpX is currently available in India only for users 18 and older. Users between 13 and 18 outside India represent that a parent or guardian has reviewed and agreed to these Terms. By using KalpX, you represent that you meet these requirements.',
     ],
   },
   {
@@ -81,7 +80,7 @@ const SECTIONS: ToSSection[] = [
     id: 'ai',
     title: '8. AI-Assisted Features',
     paragraphs: [
-      'Some features use AI assistance to understand your messages and generate personalized guidance. AI responses support reflection and conscious living — they are not definitive advice of any kind. When AI-assisted features are enabled, limited text or structured signals may be processed by our AI service providers subject to our privacy controls.',
+      'Some features use AI assistance — including via Amazon Web Services Bedrock — to understand your messages and generate personalized guidance. Before message text is sent to AWS Bedrock, we apply automated filters that remove common direct identifiers. AI responses support reflection and conscious living — they are not definitive advice of any kind. See our Privacy Policy for full details.',
     ],
   },
   {
@@ -260,10 +259,10 @@ export function TermsPage() {
           }}
         >
           <p style={{ marginBottom: '8px', color: '#b8864b', fontWeight: 600 }}>
-            Effective Date: [date — update at publication]
+            Effective Date: May 18, 2026
           </p>
           <p style={{ marginBottom: '32px', fontSize: 13, color: '#888' }}>
-            KalpX, Inc. [confirm legal entity name], California, USA
+            KalpX, Inc., a Delaware C Corporation
           </p>
 
           <p style={{ fontSize: '17px', marginBottom: '32px' }}>

@@ -4,8 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { AppShell } from "../../components/ui";
 
 // ── Legal notice ─────────────────────────────────────────────────────────────
-// Founder-review draft. Qualified legal review required before production.
-// Do not publish without legal sign-off.
+// Counsel-reviewed and approved. Round 2 sign-off received 2026-05-18.
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface PolicySection {
@@ -32,7 +31,7 @@ const SECTIONS: PolicySection[] = [
       { type: 'p', text: 'Notification preferences: We store your per-category notification settings, quiet hours, frequency preferences, and whether you have consented to push and email communications.' },
       { type: 'p', text: 'Companion memory and personalization (CompanionState): Mitra maintains a curated record of your journey: your active inner path and sankalp, recent practice patterns, and signals about your progress and engagement. This is a structured summary — not a conversation transcript. It is used to reduce repeated questions and deepen the relevance of guidance over time. Memory supports continuity; it is not used to monitor, profile, or manipulate you. CompanionState content is not shared with advertising platforms.' },
       { type: 'p', text: 'Tell Mitra messages: When you share a thought with Mitra, your message is stored in encrypted form on our servers. The encrypted message is used to understand your context and route you to the most aligned support. A structured record of intent and context signals is also retained to support companion continuity. When AI-assisted features are enabled, limited text or structured signals may be processed by our AI service providers to provide the feature, subject to our privacy controls. Raw Tell Mitra messages are not sent to advertising platforms or used to train our own AI models. Encrypted messages are retained while your account is active and deleted with your account.' },
-      { type: 'p', text: 'AI-assisted processing: Some features use AI assistance (via AWS Bedrock, hosted by Amazon) to classify message intent and generate personalized guidance. Before text is sent to an AI provider, we apply anonymization measures where possible. Typed AI outputs (intent classification, structured signals) may be retained; we do not use your personal Tell Mitra messages to train our own AI models. AI features are flag-controlled and may not be active for all users.' },
+      { type: 'p', text: 'AI-assisted processing: Some features use AI assistance — including via Amazon Web Services Bedrock — to classify message intent and generate personalized guidance. Before message text is sent to AWS Bedrock, we apply automated filters that remove common direct identifiers such as email addresses, phone numbers, and detected names. These filters reduce direct identifiers in the text, but do not make the text anonymous. Account identifiers such as email address, user ID, and device identifiers are not sent to AWS Bedrock. AWS Bedrock processes message content under AWS data processing terms. We do not use your personal Tell Mitra messages to train our own AI models. AI features are flag-controlled and may not be active for all users.' },
       { type: 'p', text: 'Voice notes (when feature is enabled): If you choose to submit a voice note, your audio is uploaded to secure cloud storage and transcribed to extract meaning. Raw audio is automatically deleted within 24 hours of upload. Your transcribed text is retained while your account is active to support companion continuity. Voice notes require explicit consent in the app; consent can be withdrawn at any time. Raw audio is not sent to advertising platforms.' },
       { type: 'p', text: 'Daily Rhythm, Inner Path, Rooms, Quick Chant, Quick Reset, and check-in activity: We record which features you use, when, and whether you completed them. This activity data supports personalized guidance and practice continuity.' },
       { type: 'p', text: 'Device and technical data: We collect device type, operating system version, and app version for technical support and stability. IP address is processed as part of standard server operations.' },
@@ -83,15 +82,11 @@ const SECTIONS: PolicySection[] = [
     id: 'not-use',
     title: '5. How We Do NOT Use Your Information',
     content: [
-      {
-        type: 'ul', items: [
-          'We do not sell your personal data',
-          'We may use advertising and attribution partners to measure campaigns and build or measure audiences where permitted by law and platform rules. We do not send raw Tell Mitra messages, voice transcripts, private reflections, CompanionState memory content, or sensitive Mitra state signals to advertising platforms.',
-          'We do not use your personal Tell Mitra messages to train our own AI models',
-          'Emotional state signals, voice transcripts, private reflections, CompanionState content, crisis signals, health distress, financial hardship, or relationship pain are not sent as properties to advertising platforms',
-          'Mitra\'s companion memory is designed to reduce repetition and deepen support — not to create dependency, monitor behavior, or manipulate engagement',
-        ],
-      },
+      { type: 'p', text: 'We do not sell your personal information for monetary consideration. Some uses of analytics and advertising technologies may constitute \'sharing\' or \'selling\' under certain state privacy laws; where required, we provide opt-out controls.' },
+      { type: 'p', text: 'If we begin sharing personal information for cross-context behavioral advertising, we will update this notice and provide the opt-out mechanisms required by applicable law before doing so.' },
+      { type: 'p', text: 'We do not use your personal Tell Mitra messages to train our own AI models.' },
+      { type: 'p', text: 'Emotional state signals, voice transcripts, private reflections, CompanionState content, crisis signals, health distress, financial hardship, or relationship pain are not sent as properties to advertising platforms.' },
+      { type: 'p', text: 'Mitra\'s companion memory is designed to reduce repetition and deepen support — not to create dependency, monitor behavior, or manipulate engagement.' },
     ],
   },
   {
@@ -119,6 +114,7 @@ const SECTIONS: PolicySection[] = [
           ['Notification delivery receipts', 'Approximately 12 months, then deleted or aggregated'],
           ['Analytics events', 'Approximately 24 months, then deleted or aggregated'],
           ['Server and security logs', 'Approximately 90 days, unless needed for security, fraud prevention, legal compliance, or debugging'],
+          ['Security and audit logs (post-account deletion, identifiers redacted)', 'Up to 24 months, then deleted or aggregated'],
           ['Backups', 'May persist for 30–90 days through normal backup rotation'],
         ],
       },
@@ -175,7 +171,8 @@ const SECTIONS: PolicySection[] = [
           'By email: privacy@kalpx.com with subject "Delete My KalpX Account"',
         ],
       },
-      { type: 'p', text: 'Deletion removes your account credentials, profile, journey data, companion memory, encrypted Tell Mitra messages, notification tokens, and activity history. We generally process verified deletion requests within 30 days, subject to backup rotation, security, legal, and operational requirements. Some data may remain in anonymized or aggregated form.' },
+      { type: 'p', text: 'When you delete your account, your account credentials, profile, journey data, companion memory, encrypted Tell Mitra messages, notification tokens, voice transcripts, and activity history are deleted. We generally process verified deletion requests within 30 days, subject to backup rotation, security, legal, and operational requirements. Backup copies may persist for 30–90 days through normal backup rotation.' },
+      { type: 'p', text: 'After account deletion, certain security and technical audit log records may be retained with account identifiers removed and direct identifiers such as email, IP address, and user agent redacted. These records may retain event type and timestamp for fraud prevention, security investigation, debugging, audit integrity, and legal compliance. Scrubbed audit and security logs are retained for up to 24 months, then deleted or aggregated.' },
     ],
   },
   {
@@ -183,7 +180,7 @@ const SECTIONS: PolicySection[] = [
     title: '11. Children and Minors',
     content: [
       { type: 'p', text: 'KalpX Mitra is not intended for children under 13. We do not knowingly collect personal data from anyone under 13. If we learn that we have collected such data without appropriate consent, we will delete it. Contact privacy@kalpx.com if you believe this has occurred.' },
-      { type: 'p', text: 'Users between 13 and 18 should use KalpX only with parent or guardian involvement. In regions where a higher age threshold applies — including India, where data protection rules may apply to users under 18 — parental or guardian consent may be required.' },
+      { type: 'p', text: 'Users between 13 and 18 outside India should use KalpX only with parent or guardian awareness. KalpX is currently available in India only for users 18 and older. We are working on a verified parental consent process for younger users. If you are under 18 and located in India, please do not create an account at this time.' },
       { type: 'p', text: 'We do not use targeted advertising, behavioral monitoring, or tracking for known child or minor users where prohibited by applicable law. We do not send data from known minor users to advertising platforms.' },
     ],
   },
@@ -192,9 +189,11 @@ const SECTIONS: PolicySection[] = [
     title: '12. Regional Privacy Rights',
     content: [
       { type: 'p', text: 'Depending on where you live, you may have rights to access, correct, delete, or receive a portable copy of your personal information, and to object to or restrict certain processing. To exercise these rights, contact privacy@kalpx.com.' },
-      { type: 'p', text: 'California residents: California residents may have additional rights under California privacy law, including the right to know what personal information we collect, to request deletion, and to opt out of the sale of personal information. We do not sell personal information. Contact privacy@kalpx.com to exercise California privacy rights.' },
-      { type: 'p', text: 'Users in India: We provide clear notice of what we collect, how it is used, and how to request deletion or correction. For privacy requests or grievance redressal, contact privacy@kalpx.com.' },
-      { type: 'p', text: 'All international users: If you access KalpX from outside the United States, your information may be processed in the United States and other countries where our service providers operate. By using KalpX, you acknowledge that your data may be processed in locations with different data protection standards than your home country.' },
+      { type: 'p', text: 'California residents: California residents may have rights under California privacy law to know what personal information we collect, to request deletion, and to opt out of the sale or sharing of personal information. We do not sell your personal information for monetary consideration. For information about opt-out rights for sharing or targeted advertising under California law, or to exercise California privacy rights, contact privacy@kalpx.com.' },
+      { type: 'p', text: 'Global Privacy Control: We recognize the Global Privacy Control (GPC) signal. Where required by applicable law, a GPC signal from your browser will be honored as an opt-out of sharing personal information for targeted advertising purposes.' },
+      { type: 'p', text: 'European Economic Area and United Kingdom: KalpX is not currently offered to residents of the European Economic Area (EEA) or the United Kingdom. If you are located in the EEA or UK, please do not create an account at this time.' },
+      { type: 'p', text: 'Users in India: We are committed to your rights under India\'s Digital Personal Data Protection Act, 2023. Please see our India Privacy Notice at kalpx.com/privacy/india for your full rights, grievance officer contact, and how to file a complaint with the Data Protection Board of India.' },
+      { type: 'p', text: 'All other international users: If you access KalpX from outside the United States, your information may be processed in the United States and other countries where our service providers operate.' },
     ],
   },
   {
@@ -209,7 +208,8 @@ const SECTIONS: PolicySection[] = [
     id: 'security',
     title: '14. Security',
     content: [
-      { type: 'p', text: 'We store sensitive data (including Tell Mitra messages) encrypted at rest. We use HTTPS/TLS for data in transit, hashed password storage, and access controls. No system is completely secure; we cannot guarantee protection against every unauthorized access.' },
+      { type: 'p', text: 'Sensitive content, including Tell Mitra messages, is encrypted in our database. Today, encryption keys are managed through our server environment. We are working toward dedicated key-management infrastructure to provide additional protection against server-level compromise. We use HTTPS/TLS for data in transit, hashed password storage, and access controls. No system is completely secure; we cannot guarantee protection against every unauthorized access.' },
+      { type: 'p', text: 'In the event of a personal data breach, we will notify affected individuals and relevant regulatory authorities as required by applicable law.' },
     ],
   },
   {
@@ -393,13 +393,13 @@ export function PrivacyPage() {
           }}
         >
           <p style={{ marginBottom: '8px', color: '#b8864b', fontWeight: 600 }}>
-            Effective Date: [date — update at publication]
+            Effective Date: May 18, 2026
           </p>
           <p style={{ marginBottom: '8px', fontSize: 13, color: '#888' }}>
             Privacy contact: privacy@kalpx.com
           </p>
           <p style={{ marginBottom: '32px', fontSize: 13, color: '#888' }}>
-            KalpX, Inc. [confirm legal entity name], California, USA
+            KalpX, Inc., a Delaware C Corporation
           </p>
 
           <p style={{ fontSize: '17px', marginBottom: '32px' }}>

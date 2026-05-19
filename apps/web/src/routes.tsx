@@ -54,6 +54,7 @@ import { ProfilePage } from "./pages/profile/ProfilePage";
 import { PrivacyPage } from "./pages/legal/PrivacyPage";
 import { TermsPage } from "./pages/legal/TermsPage";
 import { DataDeletionPage } from "./pages/legal/DataDeletionPage";
+import { IndiaPrivacyPage } from "./pages/legal/IndiaPrivacyPage";
 import { KalpxHaatAddressFormPage } from "./pages/haat/KalpxHaatAddressFormPage";
 import { KalpxHaatAddressListPage } from "./pages/haat/KalpxHaatAddressListPage";
 import { KalpxHaatBrowsePage } from "./pages/haat/KalpxHaatBrowsePage";
@@ -300,6 +301,7 @@ export function AppRoutes() {
         }
       />
       <Route path="/en/privacy" element={<PrivacyPage />} />
+      <Route path="/en/privacy/india" element={<IndiaPrivacyPage />} />
       <Route path="/en/terms" element={<TermsPage />} />
       <Route path="/en/data-deletion" element={<DataDeletionPage />} />
 

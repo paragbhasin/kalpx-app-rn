@@ -40,6 +40,19 @@ export function InnerPathPage() {
     null,
   );
   const [reminderSaving, setReminderSaving] = useState(false);
+  const [showAllCompleteMessage, setShowAllCompleteMessage] = useState(false);
+
+  // P1-4: show calm acknowledgment when all 3 triad items were just completed.
+  // The flag is set by return_to_inner_path and cleared here after display.
+  useEffect(() => {
+    const sd = screenState.screenData;
+    if (sd.triad_all_complete) {
+      setShowAllCompleteMessage(true);
+      dispatch(updateScreenData({ triad_all_complete: false }));
+      const t = window.setTimeout(() => setShowAllCompleteMessage(false), 5000);
+      return () => window.clearTimeout(t);
+    }
+  }, [screenState.screenData.triad_all_complete, dispatch]);
 
   useEffect(() => {
     let cancelled = false;
@@ -467,6 +480,25 @@ export function InnerPathPage() {
   return (
     <MitraMobileShell>
       <div style={{ maxWidth: 480, margin: "0 auto", padding: "15px" }}>
+        {showAllCompleteMessage && (
+          <div
+            style={{
+              background: "rgba(29, 186, 122, 0.10)",
+              border: "1px solid rgba(29, 186, 122, 0.35)",
+              borderRadius: 10,
+              padding: "14px 18px",
+              marginBottom: 16,
+              textAlign: "center",
+            }}
+          >
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#1DBA7A", marginBottom: 4 }}>
+              All three held today
+            </div>
+            <div style={{ fontSize: 13, color: "#5A6B5A", lineHeight: 1.5 }}>
+              Mantra, Sankalp, Practice — the cycle is complete.
+            </div>
+          </div>
+        )}
         {/* <button
           onClick={() => navigate("/en/mitra")}
           style={{

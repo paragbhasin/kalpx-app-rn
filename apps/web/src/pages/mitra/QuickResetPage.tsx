@@ -10,6 +10,7 @@ import type {
 } from "@kalpx/types";
 import { RotateCw, SlidersHorizontal } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { AudioPlayerBlock } from "../../components/blocks/AudioPlayerBlock";
 import {
@@ -19,11 +20,13 @@ import {
 import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
 import { HighlightedToast } from "../../components/ui/HighlightedToast";
 import {
+  getMitraHomeV3,
   getQuickResetOpening,
   postBrowseMantras,
   postQuickChantComplete,
   postQuickResetSetDefault,
 } from "../../engine/mitraApi";
+import { setHomeData } from "../../store/doorSlice";
 
 type Phase = "loading" | "opening" | "preview" | "running" | "done" | "error";
 
@@ -294,6 +297,7 @@ const S = {
 
 export function QuickResetPage() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [phase, setPhase] = useState<Phase>("loading");
   const [openingState, setOpeningState] =
@@ -470,6 +474,15 @@ export function QuickResetPage() {
     },
     [handleShowAnother, handleSetDefault, openPicker, activeMantra],
   );
+
+  // ── Return from done: refresh home so completed_today is current ──────────
+  const handleReturn = useCallback(async () => {
+    try {
+      const fresh = await getMitraHomeV3({ forceFresh: true });
+      if (fresh) dispatch(setHomeData(fresh));
+    } catch { /* non-blocking */ }
+    navigate(-1);
+  }, [dispatch, navigate]);
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   const renderOpeningMantraSurface = (
@@ -881,7 +894,7 @@ export function QuickResetPage() {
             {defaultSetConfirmed && (
               <p style={S.subtleText}>Set as your Quick Reset mantra.</p>
             )}
-            <button style={S.primaryBtn} onClick={() => navigate(-1)}>
+            <button style={S.primaryBtn} onClick={handleReturn}>
               Close
             </button>
           </div>

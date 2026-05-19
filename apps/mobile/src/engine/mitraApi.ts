@@ -205,9 +205,9 @@ export async function mitraRhythmComplete(slot: string, itemId?: string): Promis
 export async function mitraInnerPathComplete(
   itemType: string,
   itemRef: string,
-): Promise<{ item_type: string; completed: boolean } | null> {
+): Promise<{ item_type: string; completed: boolean; all_complete: boolean } | null> {
   try {
-    const res = await api.post<{ item_type: string; completed: boolean }>(
+    const res = await api.post<{ item_type: string; completed: boolean; all_complete: boolean }>(
       'mitra/v3/journey/inner-path/complete/',
       { item_type: itemType, item_ref: itemRef },
     );

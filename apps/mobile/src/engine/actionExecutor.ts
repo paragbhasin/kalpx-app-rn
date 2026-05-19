@@ -5424,8 +5424,10 @@ export async function executeAction(
         const ipRef = String(
           payload?.item_ref || (screenState.runner_active_item as any)?.item_id || '',
         );
+        let triadAllComplete = false;
         if (ipType && ipRef) {
-          mitraInnerPathComplete(ipType, ipRef).catch(() => {});
+          const result = await mitraInnerPathComplete(ipType, ipRef).catch(() => null);
+          triadAllComplete = result?.all_complete === true;
         }
         const runnerClearKeysIP = [
           'runner_active_item', 'runner_source', 'runner_variant',
@@ -5434,6 +5436,10 @@ export async function executeAction(
           'practice_launch_surface', 'dashboard_entry_surface',
         ];
         runnerClearKeysIP.forEach(k => setScreenValue(null, k));
+        // P1-4: signal InnerPathScreen to show calm all-complete acknowledgment
+        if (triadAllComplete) {
+          setScreenValue(true, 'triad_all_complete');
+        }
         rootNavigate('InnerPath');
         break;
       }

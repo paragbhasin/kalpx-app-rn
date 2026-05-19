@@ -110,6 +110,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
   const [reminderPickerKey, setReminderPickerKey] = useState<
     "mantra" | "sankalp" | "practice" | null
   >(null);
+  const [showAllCompleteMessage, setShowAllCompleteMessage] = useState(false);
 
   // After daily-view data is loaded, watch for runner container transitions.
   const watchRunnerRef = useRef(false);
@@ -425,6 +426,17 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
   }, []);
 
   const sd = useSelector((state: any) => state.screen?.screenData ?? {});
+
+  // P1-4: show calm acknowledgment when all 3 triad items were just completed.
+  useEffect(() => {
+    if (sd.triad_all_complete) {
+      setShowAllCompleteMessage(true);
+      dispatch(screenActions.setScreenValue({ key: 'triad_all_complete', value: false }));
+      const t = setTimeout(() => setShowAllCompleteMessage(false), 5000);
+      return () => clearTimeout(t);
+    }
+  }, [sd.triad_all_complete, dispatch]);
+
   const triadArr = Array.isArray(sd.today?.triad) ? sd.today.triad : [];
   const sankalpRow = triadArr.find((t: any) => t?.slot === "sankalp");
   const guidanceItems = useMemo(() => {
@@ -698,6 +710,14 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        {showAllCompleteMessage && (
+          <View style={styles.allCompleteBlock}>
+            <Text style={styles.allCompleteTitle}>All three held today</Text>
+            <Text style={styles.allCompleteBody}>
+              Mantra, Sankalp, Practice — the cycle is complete.
+            </Text>
+          </View>
+        )}
         <View style={styles.heroBlock}>
           <Text style={styles.sparkle}>✧</Text>
           <Text style={styles.heroTitle}>
@@ -1072,6 +1092,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 18,
     paddingBottom: 80,
+  },
+  allCompleteBlock: {
+    backgroundColor: "rgba(29, 186, 122, 0.10)",
+    borderWidth: 1,
+    borderColor: "rgba(29, 186, 122, 0.35)",
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 16,
+    alignItems: "center",
+  },
+  allCompleteTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#1DBA7A",
+    marginBottom: 4,
+  },
+  allCompleteBody: {
+    fontSize: 13,
+    color: "#5A6B5A",
+    lineHeight: 20,
+    textAlign: "center",
   },
   heroBlock: {
     alignItems: "center",

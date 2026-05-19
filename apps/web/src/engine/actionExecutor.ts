@@ -695,8 +695,10 @@ export async function executeAction(action: any, context: ActionContext): Promis
       const ipType = (screenData.runner_variant as string) || '';
       const ipRef = (ipItem?.item_id as string) || '';
       // P0-B: await completion write before fetching refreshed daily view
+      let triadAllComplete = false;
       if (ipType && ipRef) {
-        await postInnerPathComplete(ipType, ipRef).catch(() => {});
+        const result = await postInnerPathComplete(ipType, ipRef).catch(() => null);
+        triadAllComplete = result?.all_complete === true;
       }
       const innerPathClearKeys = [
         'runner_active_item', 'runner_source', 'runner_variant',
@@ -705,6 +707,10 @@ export async function executeAction(action: any, context: ActionContext): Promis
         'practice_launch_surface',
       ];
       innerPathClearKeys.forEach(k => dispatch(setScreenValue({ key: k, value: null })));
+      // P1-4: set all_complete flag so InnerPathPage can show calm acknowledgment
+      if (triadAllComplete) {
+        dispatch(updateScreenData({ triad_all_complete: true }));
+      }
       // P0-B: fetch fresh daily view so completed_today renders correctly
       try {
         const envelope = await getDashboardView();

@@ -24,9 +24,7 @@
  */
 
 import { useFocusEffect } from "@react-navigation/native";
-import { REMOTE_AUDIO_SOURCES } from "../config/audioAssets";
-import { Audio } from "expo-av";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   AppState,
@@ -56,6 +54,10 @@ import {
   markRoomExitedFired,
   resetRoomSession,
 } from "../engine/roomSession";
+import {
+  ensureRoomAmbientAudioPlaying,
+  stopRoomAmbientAudio,
+} from "../engine/roomAmbientAudio";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { useToast } from "../context/ToastContext";
 import store from "../store";
@@ -155,22 +157,8 @@ function buildExitOnlyFallback(roomId: RoomId): RoomRenderV1 {
   };
 }
 
-const ROOM_AMBIENT_TRACK = REMOTE_AUDIO_SOURCES.CALM_MUSIC;
-let roomAmbientSound: Audio.Sound | null = null;
-let roomAmbientIsPlaying = false;
-let roomAmbientRunId = 0;
 let roomContainerLiveCount = 0;
 let pendingRoomAmbientStopTimer: ReturnType<typeof setTimeout> | null = null;
-
-export async function stopRoomAmbientAudio() {
-  roomAmbientRunId += 1;
-  const s = roomAmbientSound;
-  roomAmbientSound = null;
-  roomAmbientIsPlaying = false;
-  if (!s) return;
-  await s.stopAsync().catch(() => {});
-  await s.unloadAsync().catch(() => {});
-}
 
 const RoomContainer: React.FC<Props> = () => {
   const screenData = useScreenStore(
@@ -210,18 +198,7 @@ const RoomContainer: React.FC<Props> = () => {
       }
       resetRoomSession();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // empty deps — mount/unmount only
-
-  const stopAndUnloadCalmAudio = useCallback(async () => {
-    roomAmbientRunId += 1;
-    const s = roomAmbientSound;
-    roomAmbientSound = null;
-    roomAmbientIsPlaying = false;
-    if (!s) return;
-    await s.stopAsync().catch(() => {});
-    await s.unloadAsync().catch(() => {});
-  }, []);
 
   // Handle quick remounts (context_picker -> render) without cutting audio.
   // We stop only when no RoomContainer instance survives the short grace window.
@@ -235,61 +212,11 @@ const RoomContainer: React.FC<Props> = () => {
       roomContainerLiveCount = Math.max(0, roomContainerLiveCount - 1);
       pendingRoomAmbientStopTimer = setTimeout(() => {
         if (roomContainerLiveCount === 0) {
-          stopAndUnloadCalmAudio();
+          stopRoomAmbientAudio();
         }
       }, 180);
     };
-  }, [stopAndUnloadCalmAudio]);
-
-  const ensureCalmAudioPlaying = useCallback(async () => {
-    const runId = roomAmbientRunId;
-    const isStale = () => runId !== roomAmbientRunId;
-
-    const playWithRecovery = async (sound: Audio.Sound) => {
-      try {
-        if (roomAmbientIsPlaying) return true;
-        await sound.playAsync();
-        if (isStale()) {
-          await sound.stopAsync().catch(() => {});
-          await sound.unloadAsync().catch(() => {});
-          return false;
-        }
-        roomAmbientIsPlaying = true;
-        return true;
-      } catch {
-        return false;
-      }
-    };
-
-    const existing = roomAmbientSound;
-    if (existing) {
-      const ok = await playWithRecovery(existing);
-      if (ok) return;
-      await stopAndUnloadCalmAudio();
-    }
-
-    await Audio.setIsEnabledAsync(true).catch(() => {});
-    if (isStale()) return;
-    await Audio.setAudioModeAsync({
-      playsInSilentModeIOS: true,
-      staysActiveInBackground: false,
-      shouldDuckAndroid: true,
-    }).catch(() => {});
-    if (isStale()) return;
-    const created = await Audio.Sound.createAsync(ROOM_AMBIENT_TRACK, {
-      isLooping: true,
-      volume: 0.5,
-    }).catch(() => null);
-    if (!created) return;
-    const fresh = created.sound;
-    if (isStale()) {
-      await fresh.unloadAsync().catch(() => {});
-      return;
-    }
-    roomAmbientSound = fresh;
-    roomAmbientIsPlaying = false;
-    await playWithRecovery(fresh);
-  }, [stopAndUnloadCalmAudio]);
+  }, []);
 
   // 1. Handle Background Image (Focus-linked)
   useFocusEffect(
@@ -305,19 +232,19 @@ const RoomContainer: React.FC<Props> = () => {
   useFocusEffect(
     React.useCallback(() => {
       return () => {
-        stopAndUnloadCalmAudio();
+        stopRoomAmbientAudio();
       };
-    }, [stopAndUnloadCalmAudio]),
+    }, []),
   );
 
   useEffect(() => {
     const sub = AppState.addEventListener("change", (nextState) => {
       if (nextState !== "active") {
-        stopAndUnloadCalmAudio();
+        stopRoomAmbientAudio();
       }
     });
     return () => sub.remove();
-  }, [stopAndUnloadCalmAudio]);
+  }, []);
 
   // 2. Audio ownership:
   // Keep room ambient alive only while app container is `room`.
@@ -327,11 +254,11 @@ const RoomContainer: React.FC<Props> = () => {
     const run = async () => {
       if (cancelled) return;
       if (currentContainerId !== "room") {
-        await stopAndUnloadCalmAudio();
+        await stopRoomAmbientAudio();
         return;
       }
       try {
-        await ensureCalmAudioPlaying();
+        await ensureRoomAmbientAudioPlaying();
       } catch (err) {
         if (__DEV__) {
           console.debug("[RoomContainer] ensure play failed:", err);
@@ -342,7 +269,7 @@ const RoomContainer: React.FC<Props> = () => {
     return () => {
       cancelled = true;
     };
-  }, [currentContainerId, ensureCalmAudioPlaying, stopAndUnloadCalmAudio]);
+  }, [currentContainerId]);
 
   const { loadScreen, goBack } = useScreenStore();
 
@@ -589,6 +516,7 @@ const RoomRenderBranch: React.FC<RenderBranchProps> = ({
   function returnHome() {
     markIntentionalLeave();
     closeReflection();
+    void stopRoomAmbientAudio();
     const dashContainer =
       process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
         ? "companion_dashboard_v3"

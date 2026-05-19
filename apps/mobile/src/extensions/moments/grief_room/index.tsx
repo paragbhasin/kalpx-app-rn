@@ -40,7 +40,8 @@ import { Audio } from "expo-av";
 import { LinearGradient } from "expo-linear-gradient";
 import { REMOTE_AUDIO_SOURCES } from "../../../config/audioAssets";
 import { Volume2, VolumeX } from "lucide-react-native";
-import React, { useEffect, useRef, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   Easing,
@@ -100,11 +101,45 @@ const GriefRoomContainer: React.FC<Props> = () => {
   const [actionsUsed, setActionsUsed] = useState<string[]>([]);
   const [isMuted, setIsMuted] = useState(false);
   const soundRef = useRef<Audio.Sound | null>(null);
+  const soundLoadTokenRef = useRef(0);
+  const ssRef = useRef(ss);
+  const isMutedRef = useRef(isMuted);
 
   const fade1 = useRef(new Animated.Value(0)).current;
   const fade2 = useRef(new Animated.Value(0)).current;
   const dotScale = useRef(new Animated.Value(1)).current;
   const resolveFiredRef = useRef(false);
+
+  useEffect(() => {
+    ssRef.current = ss;
+  }, [ss]);
+
+  useEffect(() => {
+    isMutedRef.current = isMuted;
+  }, [isMuted]);
+
+  const stopCurrentSound = useCallback(async () => {
+    const current = soundRef.current;
+    soundRef.current = null;
+    if (!current) return;
+    await current.stopAsync().catch(() => {});
+    await current.unloadAsync().catch(() => {});
+  }, []);
+
+  const stopStayAudio = useCallback(async () => {
+    soundLoadTokenRef.current += 1;
+    await stopCurrentSound();
+  }, [stopCurrentSound]);
+
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        stopStayAudio().catch((err) => {
+          console.warn("[grief_room] failed to stop stay audio:", err);
+        });
+      };
+    }, [stopStayAudio]),
+  );
 
   // --- Pavani: background image setup ---
   useEffect(() => {
@@ -258,38 +293,44 @@ const GriefRoomContainer: React.FC<Props> = () => {
   // --- Pavani: Audio for "Just Sit" ---
   useEffect(() => {
     if (step === "stay") {
+      let cancelled = false;
+      const loadToken = ++soundLoadTokenRef.current;
       const playSound = async () => {
         try {
+          await stopCurrentSound();
           // Prefer slot-resolved audio URL; fall back to local Om asset
-          const audioSource = (ss as any).grief_mantra?.audio_url
-            ? { uri: (ss as any).grief_mantra.audio_url }
+          const griefMantra = (ssRef.current as any).grief_mantra;
+          const audioSource = griefMantra?.audio_url
+            ? { uri: griefMantra.audio_url }
             : REMOTE_AUDIO_SOURCES.OM;
           const { sound } = await Audio.Sound.createAsync(audioSource, {
             isLooping: true,
             shouldPlay: true,
-            isMuted: isMuted,
+            isMuted: isMutedRef.current,
           });
+          if (cancelled || soundLoadTokenRef.current !== loadToken) {
+            await sound.stopAsync().catch(() => {});
+            await sound.unloadAsync().catch(() => {});
+            return;
+          }
           soundRef.current = sound;
         } catch (err) {
           console.warn("[GriefRoom] Failed to load audio:", err);
         }
       };
       playSound();
+      return () => {
+        cancelled = true;
+        stopStayAudio().catch(() => {});
+      };
     } else {
-      if (soundRef.current) {
-        soundRef.current.stopAsync();
-        soundRef.current.unloadAsync();
-        soundRef.current = null;
-      }
+      stopStayAudio().catch(() => {});
     }
 
     return () => {
-      if (soundRef.current) {
-        soundRef.current.stopAsync();
-        soundRef.current.unloadAsync();
-      }
+      stopStayAudio().catch(() => {});
     };
-  }, [step]);
+  }, [step, stopCurrentSound, stopStayAudio]);
 
   // --- Pavani: Mute toggle ---
   useEffect(() => {

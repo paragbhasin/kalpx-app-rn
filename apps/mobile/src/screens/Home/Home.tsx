@@ -34,6 +34,7 @@ import {
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import FourDoorHomeContainer from "../../containers/FourDoorHomeContainer";
+import { stopRoomAmbientAudio } from "../../engine/roomAmbientAudio";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import api from "../../Networks/axios";
 import store, { AppDispatch, RootState } from "../../store";
@@ -111,6 +112,7 @@ export default function Home() {
 
   useFocusEffect(
     React.useCallback(() => {
+      stopRoomAmbientAudio().catch(() => {});
       updateBackground(isLandingHome ? HOME_BACKGROUND : CONTINUE_BG);
       updateHeaderHidden(false);
       return () => {

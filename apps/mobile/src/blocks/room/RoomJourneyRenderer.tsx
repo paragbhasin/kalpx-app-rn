@@ -32,6 +32,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { executeAction } from '../../engine/actionExecutor';
 import { trackRoomTelemetry } from '../../engine/mitraApi';
+import { stopRoomAmbientAudio } from '../../engine/roomAmbientAudio';
 import { navigationRef } from '../../Shared/Routes/NavigationService';
 import { useScreenStore } from '../../engine/useScreenBridge';
 import { Colors } from '../../theme/colors';
@@ -518,6 +519,7 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
     actionCtx.setScreenValue(null, 'room_sequence_action_ids');
     actionCtx.setScreenValue(null, 'room_sequence_index');
     actionCtx.setScreenValue(null, 'room_id');
+    void stopRoomAmbientAudio();
 
     // Navigate back to the surface that launched this room (same logic as room_exit).
     if (navigationRef.isReady() && navigationRef.canGoBack()) {

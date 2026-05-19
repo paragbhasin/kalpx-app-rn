@@ -45,7 +45,7 @@ import { navigationRef } from "../Shared/Routes/NavigationService";
 import { store } from "../store";
 import { showSnackBar } from "../store/snackBarSlice";
 import { Fonts } from "../theme/fonts";
-import { stopRoomAmbientAudio } from "./RoomContainer";
+import { stopRoomAmbientAudio } from "../engine/roomAmbientAudio";
 
 // SVGs / Assets
 import { SvgUri } from "react-native-svg";

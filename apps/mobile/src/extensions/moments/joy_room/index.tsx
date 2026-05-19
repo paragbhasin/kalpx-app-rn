@@ -34,7 +34,8 @@
 import { Audio } from "expo-av";
 import { Volume2, VolumeX } from "lucide-react-native";
 import { REMOTE_AUDIO_SOURCES } from "../../../config/audioAssets";
-import React, { useEffect, useRef, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   Image,
@@ -107,10 +108,44 @@ const JoyRoomContainer: React.FC<Props> = () => {
   const [actionsUsed, setActionsUsed] = useState<string[]>([]);
   const [isMuted, setIsMuted] = useState(false);
   const soundRef = useRef<Audio.Sound | null>(null);
+  const soundLoadTokenRef = useRef(0);
+  const ssRef = useRef(ss);
+  const isMutedRef = useRef(isMuted);
 
   const fade1 = useRef(new Animated.Value(0)).current;
   const fade2 = useRef(new Animated.Value(0)).current;
   const resolveFiredRef = useRef(false);
+
+  useEffect(() => {
+    ssRef.current = ss;
+  }, [ss]);
+
+  useEffect(() => {
+    isMutedRef.current = isMuted;
+  }, [isMuted]);
+
+  const stopCurrentSound = useCallback(async () => {
+    const current = soundRef.current;
+    soundRef.current = null;
+    if (!current) return;
+    await current.stopAsync().catch(() => {});
+    await current.unloadAsync().catch(() => {});
+  }, []);
+
+  const stopSitAudio = useCallback(async () => {
+    soundLoadTokenRef.current += 1;
+    await stopCurrentSound();
+  }, [stopCurrentSound]);
+
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        stopSitAudio().catch((err) => {
+          console.warn("[joy_room] failed to stop sit audio:", err);
+        });
+      };
+    }, [stopSitAudio]),
+  );
 
   // Background setup (mirrors grief/loneliness)
   useEffect(() => {
@@ -213,24 +248,29 @@ const JoyRoomContainer: React.FC<Props> = () => {
 
   useEffect(() => {
     if (step !== "sit") {
-      if (soundRef.current) {
-        soundRef.current.stopAsync();
-        soundRef.current.unloadAsync();
-        soundRef.current = null;
-      }
+      stopSitAudio().catch(() => {});
       return;
     }
 
+    let cancelled = false;
+    const loadToken = ++soundLoadTokenRef.current;
     const playSound = async () => {
       try {
-        const audioSource = readSlot(ss, "joy_sit_audio_url")
-          ? { uri: readSlot(ss, "joy_sit_audio_url") }
+        await stopCurrentSound();
+        const audioUrl = readSlot(ssRef.current, "joy_sit_audio_url");
+        const audioSource = audioUrl
+          ? { uri: audioUrl }
           : REMOTE_AUDIO_SOURCES.OM;
         const { sound } = await Audio.Sound.createAsync(audioSource, {
           isLooping: true,
           shouldPlay: true,
-          isMuted,
+          isMuted: isMutedRef.current,
         });
+        if (cancelled || soundLoadTokenRef.current !== loadToken) {
+          await sound.stopAsync().catch(() => {});
+          await sound.unloadAsync().catch(() => {});
+          return;
+        }
         soundRef.current = sound;
       } catch (err) {
         console.warn("[joy_room] failed to load sit audio:", err);
@@ -240,13 +280,10 @@ const JoyRoomContainer: React.FC<Props> = () => {
     playSound();
 
     return () => {
-      if (soundRef.current) {
-        soundRef.current.stopAsync();
-        soundRef.current.unloadAsync();
-        soundRef.current = null;
-      }
+      cancelled = true;
+      stopSitAudio().catch(() => {});
     };
-  }, [step]);
+  }, [step, stopCurrentSound, stopSitAudio]);
 
   useEffect(() => {
     if (soundRef.current) {

@@ -380,6 +380,9 @@ export default function TellMitraThreadView({
             <Text style={s.sendBtnText}>{submitting ? "…" : "Send"}</Text>
           </TouchableOpacity>
         </View>
+        <Text style={s.disclaimerText}>
+          Mitra is here for reflection and Sanatan-rooted guidance. It is not a substitute for medical, legal, financial, therapy, crisis, or emergency support. Share only what you feel comfortable sharing.
+        </Text>
       </KeyboardAvoidingView>
     </View>
   );
@@ -664,4 +667,14 @@ const s = StyleSheet.create({
   },
   sendBtnDisabled: { opacity: 0.5 },
   sendBtnText: { color: "#ffffff", fontSize: 15, fontWeight: "700" },
+  disclaimerText: {
+    fontSize: 11,
+    color: "#A08060",
+    textAlign: "center",
+    lineHeight: 16,
+    paddingHorizontal: 20,
+    paddingTop: 6,
+    paddingBottom: 4,
+    fontFamily: Fonts.sans.regular,
+  },
 });

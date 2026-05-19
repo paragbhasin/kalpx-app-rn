@@ -338,11 +338,26 @@ export default function ContinueJourney({
           for (const k of clearKeys) {
             dispatch(screenActions.setScreenValue({ key: k, value: null }));
           }
+          dispatch(
+            screenActions.setScreenValue({
+              key: "onboarding_turn",
+              value: "turn_2",
+            }),
+          );
+          dispatch(
+            screenActions.setScreenValue({
+              key: "onboarding_draft_state",
+              value: {
+                started_at: Date.now(),
+                entry_intention: "reentry_fresh",
+              },
+            }),
+          );
           routedRef.current = true;
           dispatch(
             loadScreenWithData({
               containerId: "welcome_onboarding",
-              stateId: "turn_1",
+              stateId: "turn_2",
             }) as any,
           );
           navigation.navigate("DynamicEngine");

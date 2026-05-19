@@ -40,11 +40,6 @@ import store, { AppDispatch, RootState } from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
 import { fetchProfileDetails } from "../Profile/actions";
-import ContinueJourney from "./ContinueJourney";
-// Legacy WelcomeBack screen removed 2026-04-18 — all returning users
-// (3d+, including 30+d) now flow through ContinueJourney →
-// GET /api/mitra/journey/home/ which resolves to M12 (short-gap or
-// long-absence variant). See M12_LONG_ABSENCE_DRAFT.md.
 
 const FEATURE_ITEMS = [
   {
@@ -92,9 +87,8 @@ export default function Home() {
   );
 
   const [mitraJourneyId, setMitraJourneyId] = useState<string | null>(null);
-  const [hasActiveJourney, setHasActiveJourney] = useState(false);
   const [hasPartialState, setHasPartialState] = useState(false);
-  const [journeyDay, setJourneyDay] = useState<number>(1);
+  const [showInnerPathReentry, setShowInnerPathReentry] = useState(false);
   const [checkingJourney, setCheckingJourney] = useState(false);
   // Mitra v3 — guard auto-route so we don't re-navigate on every Home focus.
   const v3AutoRoutedRef = useRef(false);
@@ -187,6 +181,7 @@ export default function Home() {
       const checkJourney = async () => {
         if (!isLoggedIn) {
           setMitraJourneyId(null);
+          setShowInnerPathReentry(false);
           return;
         }
         if (journeyStatusRef.current) return;
@@ -195,25 +190,19 @@ export default function Home() {
         try {
           const res = await api.get("mitra/journey/status/");
           const data = res.data;
-          // Unified returning-user flow (2026-04-18). Any user with an
-          // existing journey row — active, expired (welcomeBack), or
-          // completed recently — routes to ContinueJourney, which
-          // fetches /api/mitra/journey/home/ and lets the backend
-          // resolve the right M12 variant (short-gap vs long-absence
-          // vs momentum). Legacy 30+d WelcomeBack path deleted.
+          // Any user with an existing journey row lands on Four Door Home.
+          // Inner Path owns the reentry decision surface for gap/welcome-back
+          // cases so Home stays stable.
           if (data?.journeyId) {
             // Returning-user case (active or inactive journey).
-            // ContinueJourney handles both: hasActiveJourney=true → journey/home/,
-            // hasActiveJourney=false → entry-view → welcome_back_surface chips.
             setMitraJourneyId(data.journeyId);
-            setHasActiveJourney(!!data.hasActiveJourney);
-            setJourneyDay(data.dayNumber || 1);
+            setShowInnerPathReentry(!data?.hasActiveJourney);
             if (data?.hasActiveJourney) {
               seedJourneyStatus(data);
             }
           } else {
             setMitraJourneyId(null);
-            setHasActiveJourney(false);
+            setShowInnerPathReentry(false);
             // Authed user with no journey — check for partial companion state (Stream O).
             if (!v3AutoRoutedRef.current) {
               v3AutoRoutedRef.current = true;
@@ -856,6 +845,7 @@ export default function Home() {
       {hasPartialState ? (
         // Stream O: partial-state user (has companion data but no active journey) → FourDoor home
         <FourDoorHomeContainer
+          forceInnerPathReentry={showInnerPathReentry}
           userName={
             profileNameFromRedux ||
             profileNameFromStorage ||
@@ -866,14 +856,10 @@ export default function Home() {
           }
         />
       ) : isLoggedIn && checkingJourney ? null : mitraJourneyId ? ( // welcome page never flashes for users Mitra already knows. // Authenticated user while segment check is in progress — show nothing so the
-        // ContinueJourney v2 — backend-driven via GET /journey/home/.
-        // All chip copy + navigation (including 30+d welcome-back)
-        // comes from the backend response; the parent only provides
-        // userName for {userName} interpolation. Legacy WelcomeBack
-        // screen deleted 2026-04-18. See JOURNEY_HOME_CONTRACT_V1.md
-        // + M12_LONG_ABSENCE_DRAFT.md.
-        <ContinueJourney
-          hasActiveJourney={hasActiveJourney}
+        // Returning users land on the Four Door home. If Inner Path needs a
+        // reentry decision after a gap, InnerPathScreen owns that surface.
+        <FourDoorHomeContainer
+          forceInnerPathReentry={showInnerPathReentry}
           userName={
             profileNameFromRedux ||
             profileNameFromStorage ||

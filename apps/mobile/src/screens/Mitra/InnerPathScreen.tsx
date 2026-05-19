@@ -70,6 +70,7 @@ import store, { type RootState } from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
+import ContinueJourney from "../Home/ContinueJourney";
 
 // Runner containers that require DynamicEngine to render.
 // When TriadCardsRow fires start_runner → loadScreen({ container_id: "cycle_transitions" }),
@@ -96,6 +97,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showReentrySurface, setShowReentrySurface] = useState(false);
   const [guidanceOpen, setGuidanceOpen] = useState(false);
   const [whyChosenOpen, setWhyChosenOpen] = useState(false);
   const [activeWhyTab, setActiveWhyTab] = useState<
@@ -362,7 +364,8 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
 
         if (viewKey === "welcome_back_surface") {
           if (!embedded) {
-            navigation.replace("DynamicEngine" as any);
+            setShowReentrySurface(true);
+            setLoading(false);
           }
           return;
         }
@@ -678,6 +681,10 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     );
   }
 
+  if (showReentrySurface && !embedded) {
+    return <ContinueJourney hasActiveJourney={false} />;
+  }
+
   if (error) {
     return (
       <SafeAreaView style={styles.safe}>
@@ -793,7 +800,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
             >
               <View style={styles.accordionLead}>
                 <Text style={styles.accordionIcon}>✦</Text>
-                <Text style={styles.accordionTitle}>Today's guidance</Text>
+                <Text style={styles.accordionTitle}>Today&apos;s guidance</Text>
               </View>
               <Ionicons
                 name={guidanceOpen ? "chevron-up" : "chevron-down"}

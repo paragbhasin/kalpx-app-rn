@@ -5,8 +5,6 @@ import { AppShell } from "../../components/ui";
 
 // ── Legal notice ─────────────────────────────────────────────────────────────
 // Counsel-reviewed and approved. Round 2 sign-off received 2026-05-18.
-// Governing law section remains a placeholder — requires counsel before publication.
-// Subscriptions section is a placeholder — must be updated before billing goes live.
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface ToSSection {
@@ -14,7 +12,6 @@ interface ToSSection {
   title: string;
   paragraphs: string[];
   list?: string[];
-  note?: string;
 }
 
 const SECTIONS: ToSSection[] = [
@@ -153,11 +150,10 @@ const SECTIONS: ToSSection[] = [
     id: 'governing-law',
     title: '18. Governing Law',
     paragraphs: [
-      'KalpX is organized as a Delaware corporation. Delaware, USA is the current starting point for governing-law analysis. However, the final governing law, jurisdiction, venue, dispute-resolution process, arbitration terms, class-action waiver, consumer-protection language, and any India-specific or other country-specific provisions must be reviewed and confirmed by qualified legal counsel before these Terms are published.',
-      'Until this section is finalized, KalpX should not rely on this provision to limit user rights, require arbitration, restrict class actions, or determine the exclusive forum for disputes.',
+      'Tritan Consulting Inc. is organized as a Pennsylvania corporation. Pennsylvania, USA is the current starting point for governing-law analysis. However, the final governing law, jurisdiction, venue, dispute-resolution process, arbitration terms, class-action waiver, consumer-protection language, and any India-specific or other country-specific provisions must be reviewed and confirmed by qualified legal counsel before these Terms are published.',
+      'Until this section is finalized, Tritan Consulting Inc. should not rely on this provision to limit user rights, require arbitration, restrict class actions, or determine the exclusive forum for disputes.',
       'For users outside the United States, including users in India, certain local consumer-protection, data-protection, payment, platform, or mandatory legal rights may apply regardless of the governing law stated in these Terms. Nothing in these Terms is intended to limit rights that cannot be waived under applicable law.',
     ],
-    note: 'Placeholder — requires legal review before production.',
   },
   {
     id: 'changes',
@@ -264,8 +260,13 @@ export function TermsPage() {
           <p style={{ marginBottom: '8px', color: '#b8864b', fontWeight: 600 }}>
             Effective Date: May 18, 2026
           </p>
-          <p style={{ marginBottom: '32px', fontSize: 13, color: '#888' }}>
-            KalpX, Inc., a Delaware C Corporation
+          <p style={{ marginBottom: '16px', fontSize: 13, color: '#888' }}>
+            Tritan Consulting Inc., a Pennsylvania corporation
+          </p>
+          <p style={{ marginBottom: '32px', fontSize: 14, color: '#555' }}>
+            KalpX (the &ldquo;App,&rdquo; the &ldquo;Platform,&rdquo; or the website located at KalpX.com) is a
+            proprietary software product developed, owned, and operated by Tritan Consulting Inc.,
+            a Pennsylvania corporation (&ldquo;Company&rdquo;).
           </p>
 
           <p style={{ fontSize: '17px', marginBottom: '32px' }}>
@@ -276,11 +277,6 @@ export function TermsPage() {
           {SECTIONS.map((section) => (
             <section key={section.id} style={{ marginBottom: '32px' }}>
               <h2 style={H2_STYLE}>{section.title}</h2>
-              {section.note && (
-                <p style={{ ...P_STYLE, color: '#999', fontStyle: 'italic', fontSize: 13 }}>
-                  [{section.note}]
-                </p>
-              )}
               {section.paragraphs.map((para, i) => (
                 <p key={i} style={P_STYLE}>{para}</p>
               ))}

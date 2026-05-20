@@ -309,34 +309,62 @@ export default function FourDoorHomeContainer({
   const hasGreetingCopy = !!(greetingHeadline || greetingSubtext);
 
   const rhythmSubtitle = useMemo(() => {
-    const rhythmSlot = homeData?.companion_rhythm?.[rhythmBand];
-    const hasRhythmState = homeData?.companion_rhythm?.has_rhythm === true;
+    const cr = homeData?.companion_rhythm;
     const segVal = (homeData?.user_surface_state?.segment ??
       "new") as MitraHomeSegment;
-    if (!hasRhythmState) {
+    if (!cr?.has_rhythm) {
       return (
         SEGMENT_RHYTHM_NO_STATE_SUBTITLE[segVal] ||
-        "Build a gentle daily rhythm."
+        "Build a gentle daily rhythm"
       );
+    }
+    const hasMorning = (cr.morning?.items?.length ?? 0) > 0;
+    const hasAfternoon = (cr.afternoon?.items?.length ?? 0) > 0;
+    const hasNight = (cr.night?.items?.length ?? 0) > 0;
+    const morningDone = cr.morning_done ?? false;
+    const afternoonDone = cr.afternoon_done ?? false;
+    const nightDone = cr.night_done ?? false;
+    const allDone =
+      (!hasMorning || morningDone) &&
+      (!hasAfternoon || afternoonDone) &&
+      (!hasNight || nightDone);
+    if (allDone && (hasMorning || hasAfternoon || hasNight)) {
+      return "Your rhythm has been held today";
+    }
+    if (hasMorning && !morningDone) return "Begin with your morning rhythm";
+    if (hasAfternoon && !afternoonDone) {
+      return hasMorning && morningDone
+        ? "Morning held · return at midday"
+        : "Return with your afternoon rhythm";
+    }
+    if (hasNight && !nightDone) {
+      return hasAfternoon
+        ? "Afternoon held · close gently tonight"
+        : "Close the day with your night rhythm";
     }
     return (
       homeData?.my_rhythm_summary?.next_practice_label ??
-      rhythmSlot?.items?.[0]?.title_snapshot ??
       doorStates?.my_rhythm?.subtitle ??
-      doorStates?.my_rhythm?.cta ??
       ""
     );
-  }, [doorStates, homeData, rhythmBand]);
+  }, [doorStates, homeData]);
 
   const innerPathSubtitle = useMemo(() => {
     const ips = homeData?.inner_path_summary;
     const segVal = (homeData?.user_surface_state?.segment ??
       "new") as MitraHomeSegment;
-    return ips?.has_active_path
-      ? `Day ${ips.day_number} of ${ips.total_days}`
-      : (ips?.path_title ??
-          doorStates?.inner_path?.subtitle ??
-          SEGMENT_INNER_PATH_NO_STATE_SUBTITLE[segVal]);
+    if (!ips?.has_active_path) {
+      return (
+        ips?.path_title ??
+        doorStates?.inner_path?.subtitle ??
+        SEGMENT_INNER_PATH_NO_STATE_SUBTITLE[segVal]
+      );
+    }
+    const dayLine = `Day ${ips.day_number} of ${ips.total_days}`;
+    const heldCount = ips.today_held_count ?? 0;
+    if (ips.today_practice_held || heldCount >= 3) return `${dayLine} · today's practice is held`;
+    if (heldCount > 0) return `${dayLine} · today's step has begun`;
+    return dayLine;
   }, [doorStates, homeData]);
   const hasMantra =
     homeData?.user_surface_state?.has_quick_chant_mantra === true;

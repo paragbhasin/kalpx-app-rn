@@ -201,6 +201,8 @@ export interface MitraHomeV3InnerPathSummary {
   path_title: string | null;
   checkpoint_due: "day_7" | "day_14" | null;
   cta: string;
+  today_held_count?: number;
+  today_practice_held?: boolean;
 }
 
 export interface MitraHomeV3CompanionRhythm {
@@ -209,6 +211,9 @@ export interface MitraHomeV3CompanionRhythm {
   morning: RhythmSlot | null;
   afternoon: RhythmSlot | null;
   night: RhythmSlot | null;
+  morning_done?: boolean;
+  afternoon_done?: boolean;
+  night_done?: boolean;
 }
 
 export interface MitraHomeV3QuickResetSummary {

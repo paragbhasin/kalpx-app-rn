@@ -51,7 +51,7 @@ function beginLabel(itemType: string): string {
 
 function itemHeldLabel(itemType: string): string {
   if (itemType === "mantra") return "Mantra held today · return anytime";
-  if (itemType === "sankalp") return "Sankalp held today · return anytime";
+  if (itemType === "sankalp") return "Sankalp carried today · return anytime";
   if (itemType === "practice") return "Practice held today · return anytime";
   if (itemType === "reflection") return "Reflection held today · return anytime";
   return "Held today · return anytime";

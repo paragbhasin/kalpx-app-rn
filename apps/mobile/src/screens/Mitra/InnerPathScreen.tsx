@@ -83,6 +83,13 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
+function innerPathHeldLabel(slot: string): string {
+  if (slot === "mantra") return "Mantra held today · return anytime";
+  if (slot === "sankalp") return "Sankalp carried today · return anytime";
+  if (slot === "practice") return "Practice held today · return anytime";
+  return "Held today · return anytime";
+}
+
 export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
   const navigation = useNavigation<any>();
   const dispatch = useDispatch<any>();
@@ -772,7 +779,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                     <Text style={styles.triadSubtitle}>{item.subtitle}</Text>
                   )}
                   {item.completedToday && (
-                    <Text style={styles.triadDoneLabel}>✓ Done today</Text>
+                    <Text style={styles.triadDoneLabel}>{innerPathHeldLabel(item.slot)}</Text>
                   )}
                 </View>
               </View>
@@ -1210,10 +1217,11 @@ const styles = StyleSheet.create({
     color: "rgb(165, 122, 43)",
   },
   triadDoneLabel: {
-    fontSize: 11,
-    fontWeight: "600",
+    fontFamily: "Cormorant Garamond",
+    fontSize: 12,
     color: "#7A9E7E",
-    marginTop: 4,
+    marginTop: 2,
+    letterSpacing: 0.2,
   },
   dividerWrap: {
     flexDirection: "row",

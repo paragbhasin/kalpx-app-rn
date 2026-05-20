@@ -23,6 +23,13 @@ import { ingestDailyView } from "../../engine/v3Ingest";
 import type { AppDispatch } from "../../store";
 import { updateScreenData, useScreenState } from "../../store/screenSlice";
 
+function innerPathHeldLabel(slot: string): string {
+  if (slot === "mantra") return "Mantra held today · return anytime";
+  if (slot === "sankalp") return "Sankalp carried today · return anytime";
+  if (slot === "practice") return "Practice held today · return anytime";
+  return "Held today · return anytime";
+}
+
 export function InnerPathPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
@@ -719,13 +726,13 @@ export function InnerPathPage() {
                     <p
                       style={{
                         margin: "6px 0 0",
+                        fontFamily: "var(--kalpx-font-serif)",
                         fontSize: 12,
-                        fontWeight: 600,
                         letterSpacing: 0.4,
                         color: "#7A9E7E",
                       }}
                     >
-                      ✓ Done today
+                      {innerPathHeldLabel(item.slot)}
                     </p>
                   )}
                 </div>

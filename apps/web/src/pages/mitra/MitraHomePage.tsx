@@ -271,23 +271,60 @@ export function MitraHomePage() {
     const greetingTextColor = isNightGreeting ? "#FFFFFF" : "#432104";
     const rhythmSlot = homeData?.companion_rhythm?.[rhythmBand];
 
-    // State-aware My Rhythm subtitle
-    const rhythmSubtitle = hasRhythm
-      ? (homeData?.my_rhythm_summary?.next_practice_label ??
-        rhythmSlot?.items?.[0]?.title_snapshot ??
-        doorStates?.my_rhythm?.subtitle ??
-        doorStates?.my_rhythm?.cta ??
-        "")
-      : segment
+    // State-aware My Rhythm subtitle — time + completion aware
+    const cr = homeData?.companion_rhythm;
+    const hasMorning = (cr?.morning?.items?.length ?? 0) > 0;
+    const hasAfternoon = (cr?.afternoon?.items?.length ?? 0) > 0;
+    const hasNight = (cr?.night?.items?.length ?? 0) > 0;
+    const morningDone = (cr as any)?.morning_done ?? false;
+    const afternoonDone = (cr as any)?.afternoon_done ?? false;
+    const nightDone = (cr as any)?.night_done ?? false;
+    const allRhythmDone =
+      (!hasMorning || morningDone) &&
+      (!hasAfternoon || afternoonDone) &&
+      (!hasNight || nightDone);
+    let rhythmSubtitle: string;
+    if (!hasRhythm) {
+      rhythmSubtitle = segment
         ? SEGMENT_RHYTHM_NO_STATE_SUBTITLE[segment]
-        : "Build a gentle daily rhythm.";
+        : "Build a gentle daily rhythm";
+    } else if (allRhythmDone && (hasMorning || hasAfternoon || hasNight)) {
+      rhythmSubtitle = "Your rhythm has been held today";
+    } else if (hasMorning && !morningDone) {
+      rhythmSubtitle = "Begin with your morning rhythm";
+    } else if (hasAfternoon && !afternoonDone) {
+      rhythmSubtitle = hasMorning && morningDone
+        ? "Morning held · return at midday"
+        : "Return with your afternoon rhythm";
+    } else if (hasNight && !nightDone) {
+      rhythmSubtitle = hasAfternoon
+        ? "Afternoon held · close gently tonight"
+        : "Close the day with your night rhythm";
+    } else {
+      rhythmSubtitle =
+        homeData?.my_rhythm_summary?.next_practice_label ??
+        doorStates?.my_rhythm?.subtitle ??
+        "";
+    }
 
-    // Inner Path: prefer Day X of Y when path is active, fallback to segment-aware no-path copy
-    const innerPathSubtitle = innerPathSummary?.has_active_path
-      ? `Day ${innerPathSummary.day_number} of ${innerPathSummary.total_days}`
-      : segment
+    // Inner Path: day progress + triad held count
+    let innerPathSubtitle: string;
+    if (innerPathSummary?.has_active_path) {
+      const dayLine = `Day ${innerPathSummary.day_number} of ${innerPathSummary.total_days}`;
+      const heldCount = (innerPathSummary as any).today_held_count ?? 0;
+      const practiceHeld = (innerPathSummary as any).today_practice_held ?? false;
+      if (practiceHeld || heldCount >= 3) {
+        innerPathSubtitle = `${dayLine} · today's practice is held`;
+      } else if (heldCount > 0) {
+        innerPathSubtitle = `${dayLine} · today's step has begun`;
+      } else {
+        innerPathSubtitle = dayLine;
+      }
+    } else {
+      innerPathSubtitle = segment
         ? SEGMENT_INNER_PATH_NO_STATE_SUBTITLE[segment]
         : "Begin a 14-day path for what you are moving through.";
+    }
 
     // Quick Chant subtitle — 3-way conditional (CRITICAL: only show "chosen mantra" if has_quick_chant_mantra)
     const quickChantSubtitle = hasMantra

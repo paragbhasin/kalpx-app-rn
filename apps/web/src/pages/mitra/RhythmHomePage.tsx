@@ -49,6 +49,14 @@ function itemDuration(item: RhythmItem): string | null {
   return null;
 }
 
+function heldLabel(itemType: string): string {
+  if (itemType === "mantra") return "Mantra held today · return anytime";
+  if (itemType === "sankalp") return "Sankalp carried today · return anytime";
+  if (itemType === "practice") return "Practice held today · return anytime";
+  if (itemType === "reflection") return "Reflection held today · return anytime";
+  return "Held today · return anytime";
+}
+
 function RhythmItemCard({
   item,
   onAction,
@@ -179,6 +187,20 @@ function RhythmItemCard({
           </p>
         </div>
       )}
+      {(item as any).completed_today === true && (
+        <p
+          style={{
+            fontFamily: "var(--kalpx-font-serif)",
+            fontSize: 12,
+            color: "#7A9E7E",
+            textAlign: "center",
+            margin: "0 0 14px",
+            letterSpacing: "0.02em",
+          }}
+        >
+          {heldLabel(item.item_type)}
+        </p>
+      )}
       <div style={{ display: "flex", justifyContent: "center" }}>
         <button
           onClick={onAction}
@@ -245,13 +267,17 @@ function BandSection({
         {slotDone && (
           <span
             style={{
+              fontFamily: "var(--kalpx-font-serif)",
               fontSize: 12,
-              fontWeight: 600,
               color: "#7A9E7E",
               letterSpacing: 0.4,
             }}
           >
-            ✓ Done today
+            {band === "morning"
+              ? "Morning rhythm held"
+              : band === "afternoon"
+                ? "Afternoon rhythm held"
+                : "Night rhythm held"}
           </span>
         )}
       </div>

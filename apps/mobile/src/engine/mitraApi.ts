@@ -192,6 +192,7 @@ export async function mitraRhythmComplete(slot: string, itemId?: string): Promis
   try {
     const res = await api.post<RhythmCompleteResponse>('mitra/v3/rhythm/complete/', {
       slot,
+      tz: getTz(),
       ...(itemId ? { item_id: itemId } : {}),
     });
     return res.data;

@@ -47,6 +47,15 @@ function beginLabel(itemType: string): string {
   return "Begin Practice";
 }
 
+function itemHeldLabel(itemType: string): string {
+  if (itemType === "mantra") return "Mantra held today · return anytime";
+  if (itemType === "sankalp") return "Sankalp held today · return anytime";
+  if (itemType === "practice") return "Practice held today · return anytime";
+  if (itemType === "reflection")
+    return "Reflection held today · return anytime";
+  return "Held today · return anytime";
+}
+
 function cardLabel(itemType: string): string {
   if (itemType === "mantra") return "MANTRA";
   if (itemType === "sankalp") return "SANKALP";
@@ -66,10 +75,12 @@ function RhythmItemCard({
   item,
   onAction,
   resolving,
+  held,
 }: {
   item: RhythmItem;
   onAction: () => void;
   resolving?: boolean;
+  held?: boolean;
 }) {
   return (
     <View style={styles.itemCard}>
@@ -98,6 +109,11 @@ function RhythmItemCard({
       {item.description_snapshot ? (
         <Text style={styles.itemDescription}>{item.description_snapshot}</Text>
       ) : null}
+      {!!held && (
+        <Text style={styles.itemHeldLabel}>
+          {itemHeldLabel(item.item_type)}
+        </Text>
+      )}
       <TouchableOpacity
         style={[styles.actionBtn, resolving && styles.actionBtnResolving]}
         onPress={resolving ? undefined : onAction}
@@ -112,22 +128,28 @@ function RhythmItemCard({
   );
 }
 
+function slotHeldLabel(band: RhythmTimeBand): string {
+  if (band === "morning") return "Morning rhythm held";
+  if (band === "afternoon") return "Afternoon rhythm held";
+  return "Night rhythm held";
+}
+
 function RhythmBand({
   band,
   items,
   onItemAction,
   resolvingItemId,
   onAddItem,
-  slotDone,
 }: {
   band: RhythmTimeBand;
   items: RhythmItem[];
   onItemAction: (item: RhythmItem) => void;
   resolvingItemId?: string | null;
   onAddItem: (band: RhythmTimeBand) => void;
-  slotDone?: boolean;
 }) {
   if (items.length === 0) return null;
+  const slotHeld =
+    items.length > 0 && items.every((i) => i.completed_today === true);
   return (
     <View style={styles.band}>
       <View
@@ -141,7 +163,9 @@ function RhythmBand({
         <Text style={styles.bandLabel}>
           {RHYTHM_BAND_LABELS[band]} Practice
         </Text>
-        {slotDone && <Text style={styles.bandDoneLabel}>✓ Done today</Text>}
+        {slotHeld && (
+          <Text style={styles.bandHeldLabel}>{slotHeldLabel(band)}</Text>
+        )}
       </View>
       <View style={styles.bandDivider}>
         <View style={styles.bandDividerLine} />
@@ -154,6 +178,7 @@ function RhythmBand({
           item={item}
           onAction={() => onItemAction(item)}
           resolving={resolvingItemId === item.item_id}
+          held={item.completed_today === true}
         />
       ))}
       <TouchableOpacity
@@ -352,7 +377,6 @@ export default function RhythmHomeScreen({
                     key={band}
                     band={band}
                     items={rhythm?.[band]?.items ?? []}
-                    slotDone={(rhythm as any)?.[`${band}_done`] === true}
                     onItemAction={(item) => void handleItemAction(item, band)}
                     resolvingItemId={resolvingItemId}
                     onAddItem={setHomeBand}
@@ -447,9 +471,9 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif.regular,
     color: "#432104",
   },
-  bandDoneLabel: {
+  bandHeldLabel: {
     fontSize: 11,
-    fontWeight: "600",
+    fontFamily: Fonts.serif.bold,
     color: "#7A9E7E",
     marginBottom: 2,
     backgroundColor: "#EAF7EE",
@@ -464,6 +488,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     marginBottom: 28,
+  },
+  itemHeldLabel: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 13,
+    color: "#7A9E7E",
+    textAlign: "center",
+    marginTop: 4,
+    marginBottom: 10,
+    letterSpacing: 0.2,
   },
   bandDividerLine: {
     width: 35,

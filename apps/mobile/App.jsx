@@ -5,11 +5,9 @@ import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import {
   AccessibilityInfo,
-  Animated,
-  Image,
   ImageBackground,
   LogBox,
   StatusBar,
@@ -18,47 +16,47 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { useScreenStore } from "./src/engine/useScreenBridge";
 import "react-native-get-random-values";
 import { MenuProvider } from "react-native-popup-menu";
 import { Provider, useDispatch, useSelector } from "react-redux";
+import { useScreenStore } from "./src/engine/useScreenBridge";
 
 import SnackBar from "./src/components/SnackBar";
+import ToastHost from "./src/components/ToastHost";
 import "./src/config/i18n";
 import { CartProvider } from "./src/context/CartContext";
 import { ToastProvider } from "./src/context/ToastContext";
-import ToastHost from "./src/components/ToastHost";
 import { navigationRef } from "./src/Shared/Routes/NavigationService";
 import Routes from "./src/Shared/Routes/Routes";
 import { store } from "./src/store";
-import { hideSnackBar } from "./src/store/snackBarSlice";
 import {
-  setPreference,
-  restorePreferences,
-  fetchPreferences,
   fetchNotificationPrefs,
+  fetchPreferences,
+  restorePreferences,
+  setPreference,
 } from "./src/store/preferencesSlice";
+import { hideSnackBar } from "./src/store/snackBarSlice";
 // Audit fix F6 (2026-04-13): companion-state boot
 import {
-  restoreCompanionState,
   fetchCompanionState,
+  restoreCompanionState,
 } from "./src/store/companionStateSlice";
 
 // 📌 Push Notification Service
+import { initScreenResolver } from "./src/engine/screenResolver";
 import {
   foregroundNotificationListener,
   notificationOpenListener,
   requestPushPermission,
 } from "./src/service/pushNotifications";
-import { registerDeviceToBackend } from "./src/utils/registerDevice";
-import { initScreenResolver } from "./src/engine/screenResolver";
 import { attachDeepLinkListeners } from "./src/utils/deeplink";
+import { registerDeviceToBackend } from "./src/utils/registerDevice";
 
 const TransparentTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    background: 'transparent',
+    background: "transparent",
   },
 };
 
@@ -68,10 +66,7 @@ const TransparentTheme = {
 // event enum); harmless in prod where the event is gated.
 // 2026-04-19 Wave 3 — Maestro unblock.
 if (__DEV__) {
-  LogBox.ignoreLogs([
-    /FB CAPI Error/i,
-    /Param event must be one of/i,
-  ]);
+  LogBox.ignoreLogs([/FB CAPI Error/i, /Param event must be one of/i]);
 }
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -122,19 +117,19 @@ function isMitraRouteName(routeName) {
     "InnerPath",
     "QuickReset",
     "TellMitra",
-    'MitraStart',
-      "InnerPathMantraRunner",
-  "InnerPathSankalpRunner",
-  "InnerPathPracticeRunner",
-  "RhythmMantraRunner",
-  "RhythmSankalpRunner",
-  "RhythmPracticeRunner",
-  "InnerPathMantraCompletion",
-  "InnerPathSankalpCompletion",
-  "InnerPathPracticeCompletion",
-  "RhythmMantraCompletion",
-  "RhythmSankalpCompletion",
-  "RhythmPracticeCompletion",
+    "MitraStart",
+    "InnerPathMantraRunner",
+    "InnerPathSankalpRunner",
+    "InnerPathPracticeRunner",
+    "RhythmMantraRunner",
+    "RhythmSankalpRunner",
+    "RhythmPracticeRunner",
+    "InnerPathMantraCompletion",
+    "InnerPathSankalpCompletion",
+    "InnerPathPracticeCompletion",
+    "RhythmMantraCompletion",
+    "RhythmSankalpCompletion",
+    "RhythmPracticeCompletion",
   ].includes(routeName);
 }
 
@@ -143,7 +138,6 @@ function AppInner({ initialRoute, navigationRef }) {
   const currentBackground = useScreenStore((state) => state.currentBackground);
   const dispatch = useDispatch();
   const [activeRouteName, setActiveRouteName] = useState(null);
-
 
   // Hydrate the login user from AsyncStorage on app boot.
   // The login flow already persists access_token + refresh_token + user_id to
@@ -242,7 +236,7 @@ function AppInner({ initialRoute, navigationRef }) {
           setActiveRouteName(navigationRef?.getCurrentRoute?.()?.name || null);
         }}
       >
-        <View style={{ flex: 1, backgroundColor: 'transparent' }}>
+        <View style={{ flex: 1, backgroundColor: "transparent" }}>
           <Routes initialRouteName={initialRoute} />
           <SnackBarContainer />
         </View>
@@ -314,13 +308,17 @@ export default function App() {
     let subscription;
     AccessibilityInfo.isReduceMotionEnabled()
       .then((enabled) => {
-        store.dispatch(setPreference({ key: "reduced_motion", value: !!enabled }));
+        store.dispatch(
+          setPreference({ key: "reduced_motion", value: !!enabled }),
+        );
       })
       .catch(() => {});
     subscription = AccessibilityInfo.addEventListener(
       "reduceMotionChanged",
       (enabled) => {
-        store.dispatch(setPreference({ key: "reduced_motion", value: !!enabled }));
+        store.dispatch(
+          setPreference({ key: "reduced_motion", value: !!enabled }),
+        );
       },
     );
     return () => {
@@ -332,10 +330,13 @@ export default function App() {
   useEffect(() => {
     const init = async () => {
       if (!fontsLoaded && !error) return;
-      
+
       // Preload screen definitions from API (falls back to local)
       initScreenResolver().catch((err) =>
-        console.warn("Screen resolver init failed (using local fallback):", err)
+        console.warn(
+          "Screen resolver init failed (using local fallback):",
+          err,
+        ),
       );
 
       // Set route and hide splash immediately to speed up launch
@@ -359,7 +360,10 @@ export default function App() {
       <Provider store={store}>
         <ToastProvider>
           <CartProvider>
-            <AppInner initialRoute={initialRoute} navigationRef={navigationRef} />
+            <AppInner
+              initialRoute={initialRoute}
+              navigationRef={navigationRef}
+            />
           </CartProvider>
         </ToastProvider>
       </Provider>

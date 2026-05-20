@@ -3,14 +3,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-
-const TransparentTheme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    background: 'transparent',
-  },
-};
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState, useRef } from "react";
@@ -26,18 +18,6 @@ import {
   TextInput,
   View,
 } from "react-native";
-
-// Silence benign dev-only noise that triggers LogBox overlay and blocks
-// Maestro automation. FB CAPI "Param event must be one of ..." error
-// fires on every login in dev (Simulator doesn't meet Meta's allowed
-// event enum); harmless in prod where the event is gated.
-// 2026-04-19 Wave 3 — Maestro unblock.
-if (__DEV__) {
-  LogBox.ignoreLogs([
-    /FB CAPI Error/i,
-    /Param event must be one of/i,
-  ]);
-}
 import { useScreenStore } from "./src/engine/useScreenBridge";
 import "react-native-get-random-values";
 import { MenuProvider } from "react-native-popup-menu";
@@ -73,6 +53,26 @@ import {
 import { registerDeviceToBackend } from "./src/utils/registerDevice";
 import { initScreenResolver } from "./src/engine/screenResolver";
 import { attachDeepLinkListeners } from "./src/utils/deeplink";
+
+const TransparentTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: 'transparent',
+  },
+};
+
+// Silence benign dev-only noise that triggers LogBox overlay and blocks
+// Maestro automation. FB CAPI "Param event must be one of ..." error
+// fires on every login in dev (Simulator doesn't meet Meta's allowed
+// event enum); harmless in prod where the event is gated.
+// 2026-04-19 Wave 3 — Maestro unblock.
+if (__DEV__) {
+  LogBox.ignoreLogs([
+    /FB CAPI Error/i,
+    /Param event must be one of/i,
+  ]);
+}
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -122,7 +122,19 @@ function isMitraRouteName(routeName) {
     "InnerPath",
     "QuickReset",
     "TellMitra",
-    'MitraStart'
+    'MitraStart',
+      "InnerPathMantraRunner",
+  "InnerPathSankalpRunner",
+  "InnerPathPracticeRunner",
+  "RhythmMantraRunner",
+  "RhythmSankalpRunner",
+  "RhythmPracticeRunner",
+  "InnerPathMantraCompletion",
+  "InnerPathSankalpCompletion",
+  "InnerPathPracticeCompletion",
+  "RhythmMantraCompletion",
+  "RhythmSankalpCompletion",
+  "RhythmPracticeCompletion",
   ].includes(routeName);
 }
 

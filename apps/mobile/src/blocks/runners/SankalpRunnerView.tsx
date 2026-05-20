@@ -1,11 +1,11 @@
 import { Audio } from "expo-av";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Animated as RNAnimated,
-  Easing as RNEasing,
   Image,
   LayoutAnimation,
   Platform,
+  Animated as RNAnimated,
+  Easing as RNEasing,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,7 +16,10 @@ import {
 import { REMOTE_AUDIO_SOURCES } from "../../config/audioAssets";
 import { Fonts } from "../../theme/fonts";
 
-if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
@@ -56,7 +59,10 @@ const hasContent = (val: any): boolean => {
 };
 
 const normalizeComparableText = (val: any): string =>
-  String(val || "").replace(/\s+/g, " ").trim().toLowerCase();
+  String(val || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
 
 // --- Sub-components ---
 
@@ -94,16 +100,19 @@ const CollapsibleCard: React.FC<{
   </TouchableOpacity>
 );
 
-const CommunityActionBar: React.FC<{ addLoading?: boolean; onAdd?: () => void }> = ({
-  addLoading,
-  onAdd,
-}) => (
+const CommunityActionBar: React.FC<{
+  addLoading?: boolean;
+  onAdd?: () => void;
+}> = ({ addLoading, onAdd }) => (
   <View style={styles.communityActionBar}>
     <TouchableOpacity
       onPress={onAdd}
       disabled={addLoading}
       activeOpacity={0.85}
-      style={[styles.communityAddButton, addLoading && styles.communityAddButtonDisabled]}
+      style={[
+        styles.communityAddButton,
+        addLoading && styles.communityAddButtonDisabled,
+      ]}
     >
       <Text style={styles.communityAddButtonText}>
         {addLoading ? "Adding..." : "Add to My Practice"}
@@ -152,10 +161,16 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
   }, [sankalpSpin]);
 
   const bodyText =
-    item.line || item.subtitle || item.iast || item.meaning || item.summary || "";
+    item.line ||
+    item.subtitle ||
+    item.iast ||
+    item.meaning ||
+    item.summary ||
+    "";
   const showBodyText =
     hasContent(bodyText) &&
-    normalizeComparableText(bodyText) !== normalizeComparableText(item.title || "Intention");
+    normalizeComparableText(bodyText) !==
+      normalizeComparableText(item.title || "Intention");
 
   const runSankalpActivation = async () => {
     if (isSankalpActivating) return;
@@ -206,7 +221,9 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
           setIsSankalpActivating(false);
           if (!isCompletingRef.current) {
             isCompletingRef.current = true;
-            const durationSec = Math.round((Date.now() - sessionStartTimeRef.current) / 1000);
+            const durationSec = Math.round(
+              (Date.now() - sessionStartTimeRef.current) / 1000,
+            );
             onComplete(durationSec);
           }
         }
@@ -220,7 +237,9 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
         setIsSankalpActivating(false);
         if (!isCompletingRef.current) {
           isCompletingRef.current = true;
-          const durationSec = Math.round((Date.now() - sessionStartTimeRef.current) / 1000);
+          const durationSec = Math.round(
+            (Date.now() - sessionStartTimeRef.current) / 1000,
+          );
           onComplete(durationSec);
         }
       }, 4200);
@@ -249,7 +268,9 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
               sankalpOmRef.current = null;
             }
             setIsSankalpActivating(false);
-            const durationSec = Math.round((Date.now() - sessionStartTimeRef.current) / 1000);
+            const durationSec = Math.round(
+              (Date.now() - sessionStartTimeRef.current) / 1000,
+            );
             onComplete(durationSec);
           }}
           style={{
@@ -280,11 +301,16 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
             <View style={{ marginTop: 12 }}>
               {Array.isArray(item.how_to_live) ? (
                 <View style={styles.howToLiveList}>
-                  {(item.how_to_live as string[]).map((line: string, index: number) => (
-                    <Text key={`${line}-${index}`} style={styles.howToLiveText}>
-                      {line}
-                    </Text>
-                  ))}
+                  {(item.how_to_live as string[]).map(
+                    (line: string, index: number) => (
+                      <Text
+                        key={`${line}-${index}`}
+                        style={styles.howToLiveText}
+                      >
+                        {line}
+                      </Text>
+                    ),
+                  )}
                 </View>
               ) : (
                 <Text style={styles.howToLiveText}>{item.how_to_live}</Text>
@@ -376,7 +402,7 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
         )}
 
         <TouchableOpacity onPress={onBack} style={styles.backLink}>
-          <Text style={styles.backLinkText}>Return to Mitra Home</Text>
+          <Text style={styles.backLinkText}>Back</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

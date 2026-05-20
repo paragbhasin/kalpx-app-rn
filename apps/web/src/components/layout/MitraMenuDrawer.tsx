@@ -3,8 +3,6 @@ import { clearTokens } from "@kalpx/auth";
 import {
   BookOpen,
   LayoutDashboard,
-  Mountain,
-  ShoppingBag,
   User,
   Users,
   X,
@@ -19,8 +17,6 @@ interface Props {
 
 const NAV_ITEMS = [
   { label: "Mitra", Icon: LayoutDashboard, to: "/en/mitra" },
-  { label: "Kalpx Haat", Icon: ShoppingBag, to: "/en/haat" },
-  { label: "Retreats", Icon: Mountain, to: "/en/retreats" },
   { label: "Community", Icon: Users, to: "/en/community" },
   { label: "Classes", Icon: BookOpen, to: "/en/classes" },
   { label: "Profile", Icon: User, to: "/en/profile" },

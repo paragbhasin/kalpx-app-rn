@@ -30,9 +30,7 @@ import {
 } from "../../engine/mitraApi";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import { setHomeData } from "../../store/doorSlice";
-import {
-  screenActions,
-} from "../../store/screenSlice";
+import { screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
 
 const RHYTHM_BG = require("../../../assets/beige_bg.png");
@@ -132,8 +130,17 @@ function RhythmBand({
   if (items.length === 0) return null;
   return (
     <View style={styles.band}>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
-        <Text style={styles.bandLabel}>{RHYTHM_BAND_LABELS[band]} Practice</Text>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 8,
+        }}
+      >
+        <Text style={styles.bandLabel}>
+          {RHYTHM_BAND_LABELS[band]} Practice
+        </Text>
         {slotDone && <Text style={styles.bandDoneLabel}>✓ Done today</Text>}
       </View>
       <View style={styles.bandDivider}>
@@ -181,13 +188,14 @@ export default function RhythmHomeScreen({
     screenBridgeRef.current = screenBridge;
   });
 
-
   useFocusEffect(
     useCallback(() => {
       screenBridgeRef.current.updateBackground(RHYTHM_BG);
       // P0-D: refresh home data on focus so slot completion state is current after runner return
       mitraJourneyHomeV3({ forceFresh: true })
-        .then((fresh) => { if (fresh) dispatch(setHomeData(fresh)); })
+        .then((fresh) => {
+          if (fresh) dispatch(setHomeData(fresh));
+        })
         .catch(() => {});
     }, [dispatch]),
   );
@@ -281,14 +289,31 @@ export default function RhythmHomeScreen({
     } finally {
       setResolvingItemId(null);
     }
-    const journeyId = String((homeData as any)?.inner_path_summary?.journey_id ?? "");
+    const journeyId = String(
+      (homeData as any)?.inner_path_summary?.journey_id ?? "",
+    );
     const dayNumber = Number((homeData as any)?.day_number) || 0;
     if (item.item_type === "mantra") {
-      navigation.navigate("RhythmMantraRunner" as any, { item: enrichedItem, slot: band, journeyId, dayNumber });
+      navigation.navigate("RhythmMantraRunner" as any, {
+        item: enrichedItem,
+        slot: band,
+        journeyId,
+        dayNumber,
+      });
     } else if (item.item_type === "sankalp") {
-      navigation.navigate("RhythmSankalpRunner" as any, { item: enrichedItem, slot: band, journeyId, dayNumber });
+      navigation.navigate("RhythmSankalpRunner" as any, {
+        item: enrichedItem,
+        slot: band,
+        journeyId,
+        dayNumber,
+      });
     } else {
-      navigation.navigate("RhythmPracticeRunner" as any, { item: enrichedItem, slot: band, journeyId, dayNumber });
+      navigation.navigate("RhythmPracticeRunner" as any, {
+        item: enrichedItem,
+        slot: band,
+        journeyId,
+        dayNumber,
+      });
     }
   }
 
@@ -427,6 +452,12 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#7A9E7E",
     marginBottom: 2,
+    backgroundColor: "#EAF7EE",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 11,
+    borderWidth: 1,
+    borderColor: "#7A9E7E",
   },
   bandDivider: {
     flexDirection: "row",

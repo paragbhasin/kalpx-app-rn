@@ -23,7 +23,7 @@
  * handler (actionExecutor.ts) before the container is even mounted.
  */
 
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -161,6 +161,7 @@ let roomContainerLiveCount = 0;
 let pendingRoomAmbientStopTimer: ReturnType<typeof setTimeout> | null = null;
 
 const RoomContainer: React.FC<Props> = () => {
+  const isFocused = useIsFocused();
   const screenData = useScreenStore(
     (s: any) => s.screen?.screenData ?? s.screenData ?? {},
   );
@@ -231,10 +232,13 @@ const RoomContainer: React.FC<Props> = () => {
   // immediately even if this container stays mounted in navigation state.
   useFocusEffect(
     React.useCallback(() => {
+      if (currentContainerId !== "room") {
+        stopRoomAmbientAudio();
+      }
       return () => {
         stopRoomAmbientAudio();
       };
-    }, []),
+    }, [currentContainerId]),
   );
 
   useEffect(() => {
@@ -253,7 +257,7 @@ const RoomContainer: React.FC<Props> = () => {
     let cancelled = false;
     const run = async () => {
       if (cancelled) return;
-      if (currentContainerId !== "room") {
+      if (!isFocused || currentContainerId !== "room") {
         await stopRoomAmbientAudio();
         return;
       }
@@ -269,7 +273,7 @@ const RoomContainer: React.FC<Props> = () => {
     return () => {
       cancelled = true;
     };
-  }, [currentContainerId]);
+  }, [currentContainerId, isFocused]);
 
   const { loadScreen, goBack } = useScreenStore();
 

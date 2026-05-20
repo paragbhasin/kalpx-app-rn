@@ -17,6 +17,7 @@ import {
 import Svg, { Circle , SvgUri } from "react-native-svg";
 import MantraLotus3d from "../../../assets/mantra-lotus-3d.svg";
 import { REMOTE_AUDIO_SOURCES } from "../../config/audioAssets";
+import { stopRoomAmbientAudio } from "../../engine/roomAmbientAudio";
 import { Fonts } from "../../theme/fonts";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -185,6 +186,10 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
   const timerCompletionQueuedRef = useRef(false);
   const sessionStartTimeRef = useRef<number>(Date.now());
   const isCompletingRef = useRef(false);
+
+  useEffect(() => {
+    stopRoomAmbientAudio().catch(() => {});
+  }, []);
 
   useEffect(() => {
     isCompletingRef.current = false;

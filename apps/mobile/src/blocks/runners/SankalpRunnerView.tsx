@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 import { REMOTE_AUDIO_SOURCES } from "../../config/audioAssets";
+import { stopRoomAmbientAudio } from "../../engine/roomAmbientAudio";
 import { Fonts } from "../../theme/fonts";
 
 if (
@@ -142,6 +143,10 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
   const sankalpSpinLoopRef = useRef<RNAnimated.CompositeAnimation | null>(null);
   const sessionStartTimeRef = useRef(Date.now());
   const isCompletingRef = useRef(false);
+
+  useEffect(() => {
+    stopRoomAmbientAudio().catch(() => {});
+  }, []);
 
   useEffect(() => {
     isCompletingRef.current = false;

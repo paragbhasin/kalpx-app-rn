@@ -20,6 +20,7 @@ import { ChevronDown, ChevronUp } from "lucide-react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 import RudrakshSvg from "../../../assets/rudraksh.svg";
 import AudioPlayerBlock from "../AudioPlayerBlock";
+import { stopRoomAmbientAudio } from "../../engine/roomAmbientAudio";
 import { Fonts } from "../../theme/fonts";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -180,6 +181,10 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   const [devanagariExpanded, setDevanagariExpanded] = useState(false);
   const sessionStartTimeRef = useRef(Date.now());
   const isCompletingRef = useRef(false);
+
+  useEffect(() => {
+    stopRoomAmbientAudio().catch(() => {});
+  }, []);
 
   useEffect(() => {
     isCompletingRef.current = false;

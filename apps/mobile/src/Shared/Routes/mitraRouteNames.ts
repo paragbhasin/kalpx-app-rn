@@ -14,6 +14,18 @@ export const MITRA_ROUTE_NAMES = [
   "InnerPath",
   "QuickReset",
   "TellMitra",
+  "InnerPathMantraRunner",
+  "InnerPathSankalpRunner",
+  "InnerPathPracticeRunner",
+  "RhythmMantraRunner",
+  "RhythmSankalpRunner",
+  "RhythmPracticeRunner",
+  "InnerPathMantraCompletion",
+  "InnerPathSankalpCompletion",
+  "InnerPathPracticeCompletion",
+  "RhythmMantraCompletion",
+  "RhythmSankalpCompletion",
+  "RhythmPracticeCompletion",
 ] as const;
 
 export const isMitraRouteName = (name: string): boolean =>

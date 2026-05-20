@@ -406,15 +406,8 @@ const fetchMyBookings = async (page = 1) => {
   // =============================
   const renderHeader = () => (
     <View style={{ backgroundColor: Colors.Colors.white }}>
-      <View style={{ height: 60 }} />
       {/* Tabs */}
-      <View style={{ marginTop: 10, marginHorizontal: 16, flexDirection: "row", alignItems: "center" }}>
-        <TouchableOpacity onPress={() => navigation.navigate('HomePage', { screen: 'Home' })}>
-          <View style={{ backgroundColor: "#D9D9D9", padding: 10, borderRadius: 25 }}>
-            <Image source={require("../../../assets/C_Arrow_back.png")} style={{ width: 20, height: 20 }} />
-          </View>
-        </TouchableOpacity>
-
+      <View style={{ marginTop: 16, marginHorizontal: 24, flexDirection: "row", alignItems: "center" }}>
         <View style={{
           flex: 1,
           backgroundColor: "#EBEBEB",
@@ -423,7 +416,6 @@ const fetchMyBookings = async (page = 1) => {
           alignItems: "center",
           padding: 8,
           borderRadius: 4,
-          marginLeft: 15,
         }}>
           <TouchableOpacity
             onPress={() => {
@@ -470,7 +462,7 @@ const fetchMyBookings = async (page = 1) => {
       </View>
 
       {/* Search */}
-      <View style={{ flexDirection: "row", alignItems: "center", marginTop: 20, marginHorizontal: 16 }}>
+      <View style={{ flexDirection: "row", alignItems: "center", marginTop: 20, marginHorizontal: 24 }}>
         <View style={{
           flex: 1,
           backgroundColor: Colors.Colors.grey,
@@ -742,7 +734,7 @@ const displayedData =
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={renderHeader}
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingBottom: 170 }}
       />
 
       {/* MODALS */}

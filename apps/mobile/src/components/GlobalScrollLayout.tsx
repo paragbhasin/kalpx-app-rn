@@ -103,7 +103,13 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
 
   // Routes that are stable home bases — back button never shows even if the RN
   // stack has depth (e.g. navigate("Home") pushes a new entry on an existing stack).
-  const DIRECT_ROOT_ROUTES = new Set(["Home"]);
+  const DIRECT_ROOT_ROUTES = new Set([
+    "Home",
+    "Classes",
+    "ClassesScreen",
+    "SocialExplore",
+    "CommunityLanding",
+  ]);
 
   // Engine owner: show when depth > 0 beyond the root engine screen.
   // Also show when engine history is fully exhausted but DynamicEngine is still

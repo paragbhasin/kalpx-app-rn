@@ -30,9 +30,7 @@ import {
 } from "../../engine/mitraApi";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import { setHomeData } from "../../store/doorSlice";
-import {
-  screenActions,
-} from "../../store/screenSlice";
+import { screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
 
 const RHYTHM_BG = require("../../../assets/beige_bg.png");
@@ -53,7 +51,8 @@ function itemHeldLabel(itemType: string): string {
   if (itemType === "mantra") return "Mantra held today · return anytime";
   if (itemType === "sankalp") return "Sankalp carried today · return anytime";
   if (itemType === "practice") return "Practice held today · return anytime";
-  if (itemType === "reflection") return "Reflection held today · return anytime";
+  if (itemType === "reflection")
+    return "Reflection held today · return anytime";
   return "Held today · return anytime";
 }
 
@@ -111,7 +110,9 @@ function RhythmItemCard({
         <Text style={styles.itemDescription}>{item.description_snapshot}</Text>
       ) : null}
       {!!held && (
-        <Text style={styles.itemHeldLabel}>{itemHeldLabel(item.item_type)}</Text>
+        <Text style={styles.itemHeldLabel}>
+          {itemHeldLabel(item.item_type)}
+        </Text>
       )}
       <TouchableOpacity
         style={[styles.actionBtn, resolving && styles.actionBtnResolving]}
@@ -147,12 +148,24 @@ function RhythmBand({
   onAddItem: (band: RhythmTimeBand) => void;
 }) {
   if (items.length === 0) return null;
-  const slotHeld = items.length > 0 && items.every((i) => i.completed_today === true);
+  const slotHeld =
+    items.length > 0 && items.every((i) => i.completed_today === true);
   return (
     <View style={styles.band}>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
-        <Text style={styles.bandLabel}>{RHYTHM_BAND_LABELS[band]} Practice</Text>
-        {slotHeld && <Text style={styles.bandHeldLabel}>{slotHeldLabel(band)}</Text>}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 8,
+        }}
+      >
+        <Text style={styles.bandLabel}>
+          {RHYTHM_BAND_LABELS[band]} Practice
+        </Text>
+        {slotHeld && (
+          <Text style={styles.bandHeldLabel}>{slotHeldLabel(band)}</Text>
+        )}
       </View>
       <View style={styles.bandDivider}>
         <View style={styles.bandDividerLine} />
@@ -200,13 +213,14 @@ export default function RhythmHomeScreen({
     screenBridgeRef.current = screenBridge;
   });
 
-
   useFocusEffect(
     useCallback(() => {
       screenBridgeRef.current.updateBackground(RHYTHM_BG);
       // P0-D: refresh home data on focus so slot completion state is current after runner return
       mitraJourneyHomeV3({ forceFresh: true })
-        .then((fresh) => { if (fresh) dispatch(setHomeData(fresh)); })
+        .then((fresh) => {
+          if (fresh) dispatch(setHomeData(fresh));
+        })
         .catch(() => {});
     }, [dispatch]),
   );
@@ -300,14 +314,31 @@ export default function RhythmHomeScreen({
     } finally {
       setResolvingItemId(null);
     }
-    const journeyId = String((homeData as any)?.inner_path_summary?.journey_id ?? "");
+    const journeyId = String(
+      (homeData as any)?.inner_path_summary?.journey_id ?? "",
+    );
     const dayNumber = Number((homeData as any)?.day_number) || 0;
     if (item.item_type === "mantra") {
-      navigation.navigate("RhythmMantraRunner" as any, { item: enrichedItem, slot: band, journeyId, dayNumber });
+      navigation.navigate("RhythmMantraRunner" as any, {
+        item: enrichedItem,
+        slot: band,
+        journeyId,
+        dayNumber,
+      });
     } else if (item.item_type === "sankalp") {
-      navigation.navigate("RhythmSankalpRunner" as any, { item: enrichedItem, slot: band, journeyId, dayNumber });
+      navigation.navigate("RhythmSankalpRunner" as any, {
+        item: enrichedItem,
+        slot: band,
+        journeyId,
+        dayNumber,
+      });
     } else {
-      navigation.navigate("RhythmPracticeRunner" as any, { item: enrichedItem, slot: band, journeyId, dayNumber });
+      navigation.navigate("RhythmPracticeRunner" as any, {
+        item: enrichedItem,
+        slot: band,
+        journeyId,
+        dayNumber,
+      });
     }
   }
 
@@ -442,25 +473,30 @@ const styles = StyleSheet.create({
   },
   bandHeldLabel: {
     fontSize: 11,
-    fontFamily: Fonts.serif.regular,
+    fontFamily: Fonts.serif.bold,
     color: "#7A9E7E",
     marginBottom: 2,
-    letterSpacing: 0.2,
-  },
-  itemHeldLabel: {
-    fontFamily: Fonts.serif.regular,
-    fontSize: 12,
-    color: "#7A9E7E",
-    textAlign: "center",
-    marginTop: 4,
-    marginBottom: 10,
-    letterSpacing: 0.2,
+    backgroundColor: "#EAF7EE",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 11,
+    borderWidth: 1,
+    borderColor: "#7A9E7E",
   },
   bandDivider: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
     marginBottom: 28,
+  },
+  itemHeldLabel: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 13,
+    color: "#7A9E7E",
+    textAlign: "center",
+    marginTop: 4,
+    marginBottom: 10,
+    letterSpacing: 0.2,
   },
   bandDividerLine: {
     width: 35,

@@ -1,6 +1,7 @@
+import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Image, StyleSheet, View } from "react-native";
+import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import Colors from "./Colors";
 interface HeaderProps {
   isTransparent?: boolean;
@@ -8,6 +9,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ isTransparent, backgroundColor }) => {
+  const navigation = useNavigation<any>();
   const { i18n } = useTranslation();
   const [selectedLang, setSelectedLang] = useState(i18n.language);
 
@@ -33,6 +35,18 @@ const Header: React.FC<HeaderProps> = ({ isTransparent, backgroundColor }) => {
     setSelectedLang(i18n.language);
   }, [i18n.language]);
 
+  const goHome = () => {
+    navigation.navigate("AppDrawer", {
+      screen: "HomePage",
+      params: {
+        screen: "HomePage",
+        params: {
+          screen: "Home",
+        },
+      },
+    });
+  };
+
   return (
     <View
       style={[
@@ -42,11 +56,18 @@ const Header: React.FC<HeaderProps> = ({ isTransparent, backgroundColor }) => {
       ]}
     >
       {/* Left logo */}
-      <Image
-        source={require("../../assets/KalpXlogo.png")}
-        resizeMode="contain"
-        style={styles.logo}
-      />
+      <TouchableOpacity
+        onPress={goHome}
+        activeOpacity={0.75}
+        accessibilityRole="button"
+        accessibilityLabel="Go to Home"
+      >
+        <Image
+          source={require("../../assets/KalpXlogo.png")}
+          resizeMode="contain"
+          style={styles.logo}
+        />
+      </TouchableOpacity>
 
       {/* Language Dropdown */}
       {/* <View style={styles.dropdownContainer}>

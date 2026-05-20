@@ -14,10 +14,10 @@ import {
   UIManager,
   View,
 } from "react-native";
-import Svg, { Circle } from "react-native-svg";
-import { SvgUri } from "react-native-svg";
+import Svg, { Circle , SvgUri } from "react-native-svg";
 import MantraLotus3d from "../../../assets/mantra-lotus-3d.svg";
 import { REMOTE_AUDIO_SOURCES } from "../../config/audioAssets";
+import { stopRoomAmbientAudio } from "../../engine/roomAmbientAudio";
 import { Fonts } from "../../theme/fonts";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -183,8 +183,13 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
 
   const calmMusicRef = useRef<Audio.Sound | null>(null);
   const practiceTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerCompletionQueuedRef = useRef(false);
   const sessionStartTimeRef = useRef<number>(Date.now());
   const isCompletingRef = useRef(false);
+
+  useEffect(() => {
+    stopRoomAmbientAudio().catch(() => {});
+  }, []);
 
   useEffect(() => {
     isCompletingRef.current = false;
@@ -242,8 +247,25 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
       clearInterval(practiceTimerRef.current);
       practiceTimerRef.current = null;
     }
+    timerCompletionQueuedRef.current = false;
     setIsPracticeTimerRunning(false);
     await stopCalmMusic();
+  };
+
+  const completePracticeTimer = () => {
+    if (practiceTimerRef.current) {
+      clearInterval(practiceTimerRef.current);
+      practiceTimerRef.current = null;
+    }
+    setIsPracticeTimerRunning(false);
+    stopCalmMusic().catch(() => {});
+    if (!isCompletingRef.current) {
+      isCompletingRef.current = true;
+      const durationSec = Math.round(
+        (Date.now() - sessionStartTimeRef.current) / 1000,
+      );
+      onComplete(durationSec);
+    }
   };
 
   const startPracticeTimer = async () => {
@@ -252,6 +274,7 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
     setPracticeInitialSeconds(totalSeconds);
     setPracticeTimeLeft(totalSeconds);
     sessionStartTimeRef.current = Date.now();
+    timerCompletionQueuedRef.current = false;
     setIsPracticeTimerRunning(true);
 
     await Audio.setAudioModeAsync({
@@ -264,18 +287,9 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
     practiceTimerRef.current = setInterval(() => {
       setPracticeTimeLeft((prev) => {
         if (prev <= 1) {
-          if (practiceTimerRef.current) {
-            clearInterval(practiceTimerRef.current);
-            practiceTimerRef.current = null;
-          }
-          setIsPracticeTimerRunning(false);
-          stopCalmMusic().catch(() => {});
-          if (!isCompletingRef.current) {
-            isCompletingRef.current = true;
-            const durationSec = Math.round(
-              (Date.now() - sessionStartTimeRef.current) / 1000,
-            );
-            onComplete(durationSec);
+          if (!timerCompletionQueuedRef.current) {
+            timerCompletionQueuedRef.current = true;
+            setTimeout(completePracticeTimer, 0);
           }
           return 0;
         }
@@ -287,6 +301,7 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
   const resetPracticeTimer = async () => {
     await stopPracticeTimer();
     const totalSeconds = Math.max(60, Math.round(selectedPracticeMinutes * 60));
+    timerCompletionQueuedRef.current = false;
     setPracticeInitialSeconds(totalSeconds);
     setPracticeTimeLeft(totalSeconds);
   };
@@ -551,7 +566,7 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
           onPress={handleBack}
           style={[styles.backLink, { marginTop: 20 }]}
         >
-          <Text style={styles.backLinkText}>Return to Mitra Home</Text>
+          <Text style={styles.backLinkText}>Back</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

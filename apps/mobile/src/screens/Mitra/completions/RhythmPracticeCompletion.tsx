@@ -1,14 +1,15 @@
 import { useNavigation, useRoute } from "@react-navigation/native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ImageBackground, SafeAreaView, StyleSheet } from "react-native";
 import { useDispatch } from "react-redux";
 import RunnerCompletionView from "../../../components/RunnerCompletionView";
 import { RHYTHM_PRACTICE_COMPLETION_COPY as COPY } from "../../../constants/completionCopy";
 import {
+  mitraJourneyHomeV3,
   mitraRhythmComplete,
   mitraTrackCompletion,
 } from "../../../engine/mitraApi";
-import { markRhythmItemCompleted } from "../../../store/doorSlice";
+import { setHomeData } from "../../../store/doorSlice";
 
 const BEIGE_BG = require("../../../../assets/beige_bg.png");
 
@@ -28,14 +29,17 @@ export default function RhythmPracticeCompletion() {
       mitraRhythmComplete(slot, item_id),
       mitraTrackCompletion({ itemType: "practice", itemId: item_id, source: "rhythm_daily", journeyId, dayNumber }),
     ])
-      .then(([result]) => {
-        if (result) dispatch(markRhythmItemCompleted({ slot, item_id }));
-        setBadge(result ? COPY.badgeSuccess : COPY.failure);
-      })
+      .then(([result]) => setBadge(result ? COPY.badgeSuccess : COPY.failure))
       .catch(() => setBadge(COPY.failure));
   }, []);
 
-  const handleReturn = () => navigation.navigate("RhythmHome" as any);
+  const handleReturn = useCallback(async () => {
+    try {
+      const fresh = await mitraJourneyHomeV3({ forceFresh: true });
+      if (fresh) dispatch(setHomeData(fresh));
+    } catch (_) {}
+    navigation.navigate("RhythmHome" as any);
+  }, [dispatch, navigation]);
 
   return (
     <SafeAreaView style={styles.safeArea}>

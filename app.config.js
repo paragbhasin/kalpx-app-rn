@@ -96,7 +96,7 @@ module.exports = {
         },
       ],
       ["expo-apple-authentication"],
-      "@react-native-community/datetimepicker",
+      "./apps/mobile/node_modules/@react-native-community/datetimepicker",
       [
         "expo-image-picker",
         {

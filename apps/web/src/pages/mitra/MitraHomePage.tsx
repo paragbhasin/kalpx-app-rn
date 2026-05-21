@@ -382,7 +382,11 @@ export function MitraHomePage() {
               }}
             >
               <img
-                className="mitra-home-hero-img"
+                className={`mitra-home-hero-img ${
+                  isNightGreeting
+                    ? "mitra-home-hero-img--night"
+                    : "mitra-home-hero-img--day"
+                }`}
                 src={greetingImageSrc}
                 alt=""
                 style={{

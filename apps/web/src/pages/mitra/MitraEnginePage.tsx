@@ -1142,7 +1142,7 @@ export function MitraEnginePage() {
 
   if (isMantraRunnerState) {
     return (
-      <MitraMobileShell backgroundImage="/beige_bg.png">
+      <MitraMobileShell backgroundImage="/beige_bg.png" wideDesktop>
         {resolving ? (
           <div style={{ textAlign: "center", padding: 80 }}>
             <div
@@ -1245,7 +1245,7 @@ export function MitraEnginePage() {
 
   if (isSankalpState) {
     return (
-      <MitraMobileShell backgroundImage="/beige_bg.png">
+      <MitraMobileShell backgroundImage="/beige_bg.png" wideDesktop>
         {resolving ? (
           <div style={{ textAlign: "center", padding: 80 }}>
             <div
@@ -1289,7 +1289,7 @@ export function MitraEnginePage() {
 
   if (isPracticeState) {
     return (
-      <MitraMobileShell backgroundImage="/guided_bg.png">
+      <MitraMobileShell backgroundImage="/guided_bg.png" wideDesktop>
         {resolving ? (
           <div style={{ textAlign: "center", padding: 80 }}>
             <div

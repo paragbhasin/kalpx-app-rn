@@ -184,6 +184,10 @@ button {
     max-width: 700px;
   }
 
+  .kalpx-mitra-shell-frame--wide {
+    max-width: min(1440px, calc(100vw - 48px));
+  }
+
   .kalpx-mitra-shell-main {
     overflow-y: visible;
   }
@@ -291,10 +295,12 @@ button {
   }
 
   .mitra-home-hero-img {
-    content: url("/webimgsun.png");
     height: 100% !important;
     object-fit: cover !important;
+  }
 
+  .mitra-home-hero-img--day {
+    content: url("/webimgsun.png");
   }
 
   .mitra-home-hero-content {

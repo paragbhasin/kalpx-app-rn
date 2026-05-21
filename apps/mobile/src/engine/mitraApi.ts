@@ -19,6 +19,19 @@ import { normalizeTellMitraResult, normalizeRhythmSuggestResponse } from '@kalpx
 // the smallest-possible shapes that satisfy the readers across the 30 blocks.
 // ---------------------------------------------------------------------------
 
+function isQuickResetOpeningState(value: unknown): value is QuickResetOpeningState {
+  if (!value || typeof value !== 'object') return false;
+  const state = value as Partial<QuickResetOpeningState>;
+  return (
+    typeof state.screen_state === 'string' &&
+    !!state.mantra &&
+    typeof state.mantra === 'object' &&
+    typeof state.mantra.item_id === 'string' &&
+    typeof state.mantra.title === 'string' &&
+    Array.isArray(state.secondary_actions)
+  );
+}
+
 function generateHelpMeChooseResponse(input: any): any {
   const text = (input?.text || "").toLowerCase();
   // Simple keyword → focus mapping (mirrors web fallback pattern)
@@ -2188,7 +2201,11 @@ export async function postQuickCheckin(energy_state: QuickCheckinEnergyState): P
 /** GET /api/mitra/v3/quick_reset/ — 3-state opening (E-D-10). null = flag off or error. */
 export async function getQuickResetOpening(): Promise<QuickResetOpeningState | null> {
   try {
-    const resp = await api.get<QuickResetOpeningState>('mitra/v3/quick_reset/');
+    const resp = await api.get<unknown>('mitra/v3/quick_reset/');
+    if (!isQuickResetOpeningState(resp.data)) {
+      console.warn('[QuickReset] invalid opening response:', typeof resp.data);
+      return null;
+    }
     return resp.data;
   } catch (err: any) {
     if (err?.response?.status === 404) return null;

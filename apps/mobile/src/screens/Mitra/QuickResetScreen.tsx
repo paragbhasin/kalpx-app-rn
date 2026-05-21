@@ -639,8 +639,8 @@ export default function QuickResetScreen({
     );
   }
 
-  if (phase === "opening" && openingState) {
-    const displayMantra = activeMantra!;
+  if (phase === "opening" && openingState && activeMantra) {
+    const displayMantra = activeMantra;
     return (
       <SafeAreaView
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}

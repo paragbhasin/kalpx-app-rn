@@ -29,6 +29,7 @@ import TextComponent from "../../components/TextComponent";
 import { RootState } from "../../store";
 import { trackPixelEvent } from "../../utils/facebookEvents";
 import { registerDeviceToBackend } from "../../utils/registerDevice";
+import { ENV } from "../../Networks/baseURL";
 import { loginUser, socialLoginUser } from "./actions";
 import ReCaptchaRuntime from "./ReCaptchaRuntime";
 import styles from "./styles";
@@ -515,10 +516,8 @@ if (key === "pending_classes_data") {
                 validationSchema={LoginSchema}
                 onSubmit={(values) => {
                   formikValuesRef.current = values;
-                  // Dev bypass: skip ReCaptcha widget and pass dummy token.
-                  // The backend has RECAPTCHA_SKIP_ON_DEV=1 which accepts
-                  // any token value. Production builds use the real widget.
-                  if (__DEV__) {
+                  // Dev API accepts bypass tokens; production API requires a real token.
+                  if (ENV === "dev") {
                     handleRecaptchaToken("dev-bypass-token");
                   } else {
                     recaptchaRef.current?.requestNewToken();

@@ -17,7 +17,7 @@ import {
   View,
 } from "react-native";
 import { useSelector } from "react-redux";
-const M3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../../web/public/m3.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const M3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/m3.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import Mp2Icon from "../../../../web/public/mp2.svg";
 import Mp3Icon from "../../../../web/public/mp3.svg";
 import Mp4Icon from "../../../../web/public/mp4.svg";

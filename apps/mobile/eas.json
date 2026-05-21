@@ -11,7 +11,11 @@
         "EXPO_UPDATES_DISABLED": "1",
         "EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD": "1",
         "EXPO_PUBLIC_MITRA_V3_ROOMS": "1",
-        "EXPO_PUBLIC_MITRA_V3_RECOGNITION_BACKEND": "1"
+        "EXPO_PUBLIC_MITRA_V3_RECOGNITION_BACKEND": "1",
+        "EXPO_PUBLIC_MITRA_TELL_MITRA_THREAD_UI": "1",
+        "EXPO_PUBLIC_MITRA_ROOM_JOURNEY_V1": "0",
+        "EXPO_PUBLIC_ENABLE_ANALYTICS": "false",
+        "EXPO_PUBLIC_ENABLE_META_PIXEL": "false"
       },
       "android": {
         "buildType": "app-bundle"

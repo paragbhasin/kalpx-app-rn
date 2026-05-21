@@ -11,7 +11,7 @@
 
 import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef, useState } from "react";
-import {
+import {Image, 
   Animated,
   Dimensions,
   ImageBackground,
@@ -25,7 +25,7 @@ import {
 } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import MantraLotus3d from "./assets/mantra-lotus-3d.svg";
+const MantraLotus3d = ({ width, height, opacity, style }: { width?: number; height?: number; opacity?: number; style?: any }) => <Image source={require("./assets/mantra-lotus-3d.webp")} style={[{ width, height, opacity, resizeMode: 'contain' }, style]} />;
 import { executeAction } from "../../../engine/actionExecutor";
 import {
   mitraAddAdditionalItem,

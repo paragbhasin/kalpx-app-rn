@@ -28,7 +28,7 @@ import {
   UIManager,
   View,
 } from "react-native";
-import RudrakshBead from "../../../assets/rudraksh.svg";
+const RudrakshBead = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/rudraksh.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import AudioPlayerBlock, {
   stopAllAudioPlayerSounds,
 } from "../../blocks/AudioPlayerBlock";
@@ -796,7 +796,7 @@ export default function QuickResetScreen({
             imageStyle={styles.backgroundImage}
           >
             <Image
-              source={require("../../../assets/leaves-bird.png")}
+              source={require("../../../assets/leaves-bird.webp")}
               resizeMode="contain"
               style={styles.pickerLeaves}
             />

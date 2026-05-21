@@ -25,9 +25,9 @@ import {
   View,
 } from "react-native";
 import Svg, { Circle } from "react-native-svg";
-import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
-import SankalpCenteredIcon from "../../assets/sankalp_centered.svg";
-import SankalpInnerPeaceIcon from "../../assets/sankalp_inner_peace.svg";
+const MantraLotus3d = ({ width, height, opacity, style }: { width?: number; height?: number; opacity?: number; style?: any }) => <Image source={require("../../assets/mantra-lotus-3d.webp")} style={[{ width, height, opacity, resizeMode: 'contain' }, style]} />;
+const SankalpCenteredIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/sankalp_centered.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const SankalpInnerPeaceIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/sankalp_inner_peace.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import AudioPlayerBlock from "../blocks/AudioPlayerBlock";
 import MicroCompletion from "../components/HabitLoop/MicroCompletion";
 import MalaMantraCounter from "../components/MalaMantraCounter";
@@ -1330,7 +1330,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
 
   // ── Background Handling ──
   useEffect(() => {
-    let bg = require("../../assets/mantra3.png");
+    let bg = require("../../assets/mantra3.webp");
     if (currentVariant === "mantra_prep")
       bg = require("../../assets/mantra_relaxing.png");
     if (currentVariant === "mantra_rep_selection")

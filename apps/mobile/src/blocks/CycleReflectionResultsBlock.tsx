@@ -13,7 +13,7 @@
  * checkpoint flow-local state (Rule 4) and navigates to the appropriate target.
  */
 import React from "react";
-import {
+import {Image, 
   ScrollView,
   StyleSheet,
   Text,
@@ -27,8 +27,8 @@ import store from "../store";
 import { loadScreenWithData, screenActions } from "../store/screenSlice";
 import { Fonts } from "../theme/fonts";
 
-import LotusDay14 from "../../assets/14_day_lotus.svg";
-import LotusDay7 from "../../assets/7days_lotus.svg";
+const LotusDay14 = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/14_day_lotus.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const LotusDay7 = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/7days_lotus.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 
 interface ResultAction {
   id: string;

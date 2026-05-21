@@ -190,7 +190,7 @@ const WisdomCard = () => {
                   contentContainerStyle={{ paddingBottom: 10 }}
                 > */}
                 <ImageBackground
-                  source={require("../../assets/CardBG.png")}
+                  source={require("../../assets/CardBG.webp")}
                   style={styles.partialBgContainer}
                   imageStyle={styles.partialBgImage}
                 >

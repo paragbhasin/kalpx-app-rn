@@ -85,7 +85,7 @@ const resolveBlockImage = (url?: string) => {
     return require("../../assets/new_home_lotus.png");
   }
   if (assetPath === "lotus.png" || assetPath === "lotus") {
-    return require("../../assets/lotus.png");
+    return require("../../assets/lotus.webp");
   }
 
   return { uri: url };

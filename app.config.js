@@ -5,7 +5,7 @@ module.exports = {
   expo: {
     name: "KalpX",
     slug: "kalpx",
-    version: "1.1.34",
+    version: "1.1.35",
     orientation: "portrait",
     icon: "./apps/mobile/assets/new_logo.png",
     scheme: "kalpx",
@@ -96,6 +96,7 @@ module.exports = {
         },
       ],
       ["expo-apple-authentication"],
+      "@react-native-community/datetimepicker",
       [
         "expo-image-picker",
         {

@@ -255,7 +255,7 @@ const MantraCard = ({
             >
               <View style={{ position: "relative" }}>
                 <ImageBackground
-                  source={require("../../assets/CardBG.png")}
+                  source={require("../../assets/CardBG.webp")}
                   imageStyle={styles.partialBgImage}
                 >
                   <View

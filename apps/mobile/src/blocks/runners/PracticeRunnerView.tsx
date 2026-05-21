@@ -15,7 +15,7 @@ import {
   View,
 } from "react-native";
 import Svg, { Circle , SvgUri } from "react-native-svg";
-import MantraLotus3d from "../../../assets/mantra-lotus-3d.svg";
+const MantraLotus3d = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/mantra-lotus-3d.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import { REMOTE_AUDIO_SOURCES } from "../../config/audioAssets";
 import { stopRoomAmbientAudio } from "../../engine/roomAmbientAudio";
 import { Fonts } from "../../theme/fonts";

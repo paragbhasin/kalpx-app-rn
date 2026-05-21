@@ -3,7 +3,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useRef, useState } from "react";
-import {
+import {Image, 
   ActivityIndicator,
   Dimensions,
   FlatList,
@@ -22,8 +22,8 @@ import { loadScreenWithData, screenActions } from "../store/screenSlice";
 import { Fonts } from "../theme/fonts";
 
 // SVGs
-import CheckInIcon from "../../assets/1_min_checkin.svg";
-import GuidedMobileIcon from "../../assets/guided_mobile.svg";
+const CheckInIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/1_min_checkin.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const GuidedMobileIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/guided_mobile.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import MantraIcon from "../../assets/mantra.svg";
 import SankalpIcon from "../../assets/sankalp.svg";
 import WisdomIcon from "../../assets/wisdom.svg";

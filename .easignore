@@ -34,6 +34,8 @@ build.ipa
 apps/mobile/.expo/
 .expo-shared/
 .metro-cache/
+dist-*/
+expo-export-test/
 
 # IDE
 .vscode/

@@ -19,7 +19,7 @@ const ImageBlock: React.FC<ImageBlockProps> = ({ block }) => {
   if (block.url.startsWith('/assets/')) {
     const assetPath = block.url.replace('/assets/', '');
     if (assetPath === 'lotus_glow.png' || assetPath === 'lotus_glow') source = require('../../assets/lotus_glow.png');
-    else if (assetPath === 'lotus.png' || assetPath === 'lotus') source = require('../../assets/lotus.png');
+    else if (assetPath === 'lotus.png' || assetPath === 'lotus') source = require('../../assets/lotus.webp');
     else if (assetPath === 'mitra.png' || assetPath === 'mitra') source = require('../../assets/mitra.png');
     else if (assetPath === 'mitra_lotus.png') source = require('../../assets/mitra_lotus.png');
     else if (assetPath === 'KalpXlogo.png') source = require('../../assets/KalpXlogo.png');

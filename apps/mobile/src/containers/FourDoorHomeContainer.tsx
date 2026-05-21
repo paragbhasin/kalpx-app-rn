@@ -61,7 +61,7 @@ const FEELING_OPTIONS: FeelingOption[] = [
 ];
 
 const HERO_DAY = require("../../assets/imgsun.png");
-const HERO_NIGHT = require("../../assets/night-home.png");
+const HERO_NIGHT = require("../../assets/night-home.webp");
 const SHELL_HEADER_HEIGHT =
   Platform.OS === "android" ? 45 + (StatusBar.currentHeight || 0) : 45;
 

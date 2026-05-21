@@ -1,5 +1,5 @@
 import React from "react";
-import {
+import {Image, 
   Modal,
   StyleSheet,
   Text,
@@ -9,7 +9,7 @@ import {
   Animated,
 } from "react-native";
 import { Fonts } from "../theme/fonts";
-import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
+const MantraLotus3d = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/mantra-lotus-3d.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 
 const { width } = Dimensions.get("window");
 

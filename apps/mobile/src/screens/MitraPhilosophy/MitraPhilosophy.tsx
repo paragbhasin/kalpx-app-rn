@@ -11,13 +11,13 @@ import {
   View,
 } from "react-native";
 import { SvgUri } from "react-native-svg";
-import MitraScreen1 from "../../../assets/mitra_screen_1.svg";
-import MitraScreen3 from "../../../assets/mitra_screen_3.svg";
+const MitraScreen1 = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/mitra_screen_1.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const MitraScreen3 = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/mitra_screen_3.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 
-import MitraScreen2 from "../../../assets/mitra_screen_2.svg";
-import MitraScreen4 from "../../../assets/mitra_screen_4.svg";
+const MitraScreen2 = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/mitra_screen_2.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const MitraScreen4 = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/mitra_screen_4.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 
-import MitraScreen5 from "../../../assets/mitra_screen_5.svg";
+const MitraScreen5 = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/mitra_screen_5.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import { useScreenStore } from "../../engine/useScreenBridge";
 import store from "../../store";
 import { screenActions } from "../../store/screenSlice";

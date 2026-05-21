@@ -37,27 +37,27 @@ import {
   View,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import A1Icon from "../../../assets/a1.svg";
-import A2Icon from "../../../assets/a2.svg";
-import A3Icon from "../../../assets/a3.svg";
-import A4Icon from "../../../assets/a4.svg";
-import A5Icon from "../../../assets/a5.svg";
-import A6Icon from "../../../assets/a6.svg";
-import AfternoonIcon from "../../../assets/aft.svg";
-import M1Icon from "../../../assets/m1.svg";
-import M2Icon from "../../../assets/m2.svg";
-import M3Icon from "../../../assets/m3.svg";
-import M4Icon from "../../../assets/m4.svg";
-import M5Icon from "../../../assets/m5.svg";
-import M6Icon from "../../../assets/m6.svg";
-import MorningIcon from "../../../assets/morning.svg";
-import N1Icon from "../../../assets/n1.svg";
-import N2Icon from "../../../assets/n2.svg";
-import N3Icon from "../../../assets/n3.svg";
-import N4Icon from "../../../assets/n4.svg";
-import N5Icon from "../../../assets/n5.svg";
-import N6Icon from "../../../assets/n6.svg";
-import NightIcon from "../../../assets/night1.svg";
+const A1Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/a1.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const A2Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/a2.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const A3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/a3.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const A4Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/a4.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const A5Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/a5.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const A6Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/a6.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const AfternoonIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/aft.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const M1Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/m1.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const M2Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/m2.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const M3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/m3.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const M4Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/m4.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const M5Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/m5.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const M6Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/m6.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const MorningIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/morning.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const N1Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/n1.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const N2Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/n2.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const N3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/n3.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const N4Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/n4.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const N5Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/n5.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const N6Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/n6.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const NightIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/night1.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import LibrarySearchModal, {
   LibrarySearchItem,
 } from "../../components/LibrarySearchModal";
@@ -114,7 +114,7 @@ const BAND_ART: Record<RhythmTimeBand, React.ComponentType<any>> = {
   night: NightIcon,
 };
 const RHYTHM_BG = require("../../../assets/beige_bg.png");
-const RHYTHM_LEAF_ART = require("../../../assets/leaves-bird.png");
+const RHYTHM_LEAF_ART = require("../../../assets/leaves-bird.webp");
 
 const MOMENT_COPY: Record<RhythmTimeBand, { label: string; desc: string }> = {
   morning: {

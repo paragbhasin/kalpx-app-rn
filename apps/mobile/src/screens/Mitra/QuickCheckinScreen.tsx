@@ -24,7 +24,7 @@ import { useScreenStore } from '../../engine/useScreenBridge';
 import { Fonts } from '../../theme/fonts';
 
 const BEIGE_BG = require('../../../assets/beige_bg.png');
-const LEAF_ART = require('../../../assets/leaves-bird.png');
+const LEAF_ART = require('../../../assets/leaves-bird.webp');
 
 const DOOR_ROUTES: Record<string, string> = {
   my_rhythm: 'RhythmHome',

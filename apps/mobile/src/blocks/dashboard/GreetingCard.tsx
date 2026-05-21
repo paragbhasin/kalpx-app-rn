@@ -16,8 +16,8 @@
  */
 
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
-import MantraLotus3d from "../../../assets/mantra-lotus-3d.svg";
+import {Image,  StyleSheet, Text, View } from "react-native";
+const MantraLotus3d = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/mantra-lotus-3d.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 

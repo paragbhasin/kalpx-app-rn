@@ -221,7 +221,7 @@ const FestivalCard = () => {
               <View>
                 <View>
                   <ImageBackground
-                    source={require("../../assets/CardBG.png")}
+                    source={require("../../assets/CardBG.webp")}
                     // resizeMode="center"
                     style={styles.partialBgContainer}
                     imageStyle={styles.partialBgImage}

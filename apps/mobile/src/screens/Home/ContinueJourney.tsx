@@ -635,7 +635,7 @@ export default function ContinueJourney({
             >
               <View style={styles.btnContent}>
                 <View style={styles.btnContentInner}>
-                  {ioniconFor(chip.id === "reentry_continue" ? "heart" : null)}
+                  {chip.id === "reentry_continue" && <Ionicons name="heart-outline" size={20} color="#C79A2B" />}
                   <Text style={styles.btnText}>{chip.label}</Text>
                 </View>
               </View>

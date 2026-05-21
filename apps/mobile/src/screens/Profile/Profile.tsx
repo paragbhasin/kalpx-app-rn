@@ -240,7 +240,7 @@ const Profile = () => {
           onClose={() => setShowDeletePopup(false)}
         />
 
-        {showPrivacy && <Privacy onClose={() => setShowPrivacy(false)} />}
+        {showPrivacy && <Privacy />}
       </ScrollView>
       {/* Follow Us Section */}
       <View

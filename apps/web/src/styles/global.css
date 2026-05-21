@@ -5,11 +5,18 @@
 }
 
 /* reCAPTCHA badge: hidden globally, shown only on auth pages via body class */
-.grecaptcha-badge { visibility: hidden !important; }
-.recaptcha-active .grecaptcha-badge { visibility: visible !important; }
+.grecaptcha-badge {
+  visibility: hidden !important;
+}
+
+.recaptcha-active .grecaptcha-badge {
+  visibility: visible !important;
+}
 
 /* Hide browser clock/calendar picker icon from time inputs */
-input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
+input[type="time"]::-webkit-calendar-picker-indicator {
+  display: none;
+}
 
 /* ── KalpX Design Tokens as CSS Custom Properties ── */
 :root {
@@ -232,6 +239,7 @@ button {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   [data-testid="app-header"],
   [data-testid="mobile-bottom-nav"] {
     transition-duration: 0.01ms !important;
@@ -247,6 +255,196 @@ button {
 /* Mitra shell body lock (when sidebar open) */
 .kalpx-scroll-lock {
   overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  .mitra-home-surface {
+    background-image: none !important;
+    background-color: #fffaf3 !important;
+  }
+
+  .mitra-home-surface>[data-testid="app-header"] {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 86px !important;
+    padding: 0 56px !important;
+    background: transparent !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    transform: translate3d(0, 0, 0) !important;
+    z-index: 10;
+  }
+
+  .mitra-home-main {
+    align-items: stretch !important;
+    padding-bottom: 72px !important;
+    position: relative;
+  }
+
+  .mitra-home-hero {
+    /* min-height: 482px; */
+    margin-bottom: 42px !important;
+  }
+
+  .mitra-home-hero-img {
+    content: url("/webimgsun.png");
+    height: 100% !important;
+    object-fit: cover !important;
+
+  }
+
+  .mitra-home-hero-content {
+    min-height: 50px !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    padding: 150px 56px 0 !important;
+  }
+
+  .mitra-home-hero-copy {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  .mitra-home-title {
+    font-size: 30px !important;
+    line-height: 1.05 !important;
+    margin: 0 0 12px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .mitra-home-subtitle {
+    font-size: 22px !important;
+    line-height: 1.2 !important;
+  }
+
+  .mitra-home-divider {
+    max-width: 300px !important;
+    margin-top: 20px !important;
+    margin-bottom: 20px;
+  }
+
+  .mitra-home-content {
+    max-width: none !important;
+    width: 100% !important;
+    padding: 0 56px !important;
+  }
+
+  .mitra-home-door-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px !important;
+    margin-bottom: 0 !important;
+  }
+
+  .mitra-home-door-card {
+    flex-direction: column !important;
+    min-height: 170px;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    padding: 15px 20px !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.76) !important;
+    box-shadow: 0 12px 30px rgba(67, 33, 4, 0.07) !important;
+  }
+
+  .mitra-home-door-card>div:first-child {
+    align-self: center;
+  }
+
+  .mitra-home-door-card>div:nth-child(2) {
+    width: 100%;
+    padding-right: 56px;
+    text-align: left;
+  }
+
+  .mitra-home-door-card img {
+    width: 72px !important;
+    height: 72px !important;
+  }
+
+  .mitra-home-door-card>div:nth-child(2)>div:first-child {
+    font-size: 24px !important;
+    line-height: 1.15 !important;
+    margin-bottom: 16px !important;
+  }
+
+  .mitra-home-door-card>div:nth-child(2)>div:nth-child(2) {
+    font-size: 18px !important;
+    line-height: 1.5 !important;
+  }
+
+  .mitra-home-door-card>div:last-child {
+    position: absolute;
+    top: 56%;
+    right: 32px;
+    transform: translateY(-50%);
+    margin-left: 0;
+    font-size: 28px !important;
+  }
+
+  .mitra-home-checkin {
+    grid-column: 1 / -1;
+    min-height: 168px;
+    padding: 36px 40px !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.74) !important;
+  }
+
+  .mitra-home-checkin:has(.mitra-home-feeling-grid) {
+    display: grid;
+    grid-template-columns: minmax(320px, 1fr) minmax(560px, 0.95fr);
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 64px;
+    row-gap: 16px;
+    min-height: 142px;
+    padding: 32px 40px !important;
+  }
+
+  .mitra-home-checkin:has(.mitra-home-feeling-grid)>div:first-of-type {
+    grid-column: 1;
+    grid-row: 1;
+    font-size: 24px !important;
+    margin-bottom: 0 !important;
+  }
+
+  .mitra-home-checkin:has(.mitra-home-feeling-grid)>div:nth-of-type(2) {
+    grid-column: 1;
+    grid-row: 2;
+    font-size: 18px !important;
+    margin-bottom: 0 !important;
+  }
+
+  .mitra-home-feeling-grid {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 20px !important;
+  }
+
+  .mitra-home-feeling-grid button {
+    min-height: 56px;
+    border-radius: 16px !important;
+    font-size: 18px !important;
+    background: rgba(255, 255, 255, 0.55) !important;
+  }
+}
+
+@media (min-width: 1440px) {
+
+  .mitra-home-hero-content,
+  .mitra-home-content {
+    padding-left: 64px !important;
+    padding-right: 64px !important;
+  }
+
+  .mitra-home-door-grid {
+    gap: 28px !important;
+  }
 }
 
 

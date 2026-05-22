@@ -36,10 +36,10 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
-const M3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/m3.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
-const Mp2Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/mp2.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
-const Mp3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/mp3.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
-const Mp4Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/mp4.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const M3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/door_rhythm.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const Mp2Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/door_chant.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const Mp3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/door_path.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const Mp4Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/door_mitra.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   apiPatchJourneyReminders,

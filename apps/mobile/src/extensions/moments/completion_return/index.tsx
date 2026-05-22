@@ -36,6 +36,7 @@ import { showSnackBar } from "../../../store/snackBarSlice";
 import { store } from "../../../store";
 import { screenActions } from "../../../store/screenSlice";
 import { Fonts } from "../../../theme/fonts";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const VARIANT_MESSAGES: Record<string, string> = {
   mantra: "108 in. Kept.",
@@ -68,6 +69,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
 
   const [inputText, setInputText] = useState("");
   const [communityAddLoading, setCommunityAddLoading] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const contentFade = useRef(new Animated.Value(0)).current;
   const checkProgress = useRef(new Animated.Value(0)).current;
@@ -265,7 +267,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={styles.overlay}
+      style={[styles.overlay, { paddingBottom: Math.max(insets.bottom + 32, 48) }]}
     >
       <Animated.View style={[styles.content, { opacity: contentFade }]}>
         <View style={styles.checkWrap}>

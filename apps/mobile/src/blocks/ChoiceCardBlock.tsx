@@ -539,7 +539,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: "#FFFDF9", // Explicit background for that premium look
     position: "relative",
-    overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,

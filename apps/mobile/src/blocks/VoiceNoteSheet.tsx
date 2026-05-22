@@ -22,12 +22,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Fonts } from '../theme/fonts';
 import { useScreenStore } from '../engine/useScreenBridge';
 import { executeAction } from '../engine/actionExecutor';
@@ -61,6 +64,7 @@ const VoiceNoteSheet: React.FC<{ block?: any }> = ({ block }) => {
   const [reflection, setReflection] = useState<string | null>(null);
   // showNameHint removed 2026-04-13 (backend B6 PII fix shipped).
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const insets = useSafeAreaInsets();
 
   useContentSlots({
     momentId: 'M31_voice_note_sheet',
@@ -168,7 +172,11 @@ const VoiceNoteSheet: React.FC<{ block?: any }> = ({ block }) => {
   };
 
   return (
-    <View style={styles.root}>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+    <View style={[styles.root, { paddingBottom: Math.max(insets.bottom + 32, 48) }]}>
       <View style={styles.handle} />
       <TouchableOpacity
         style={styles.closeBtn}
@@ -273,6 +281,7 @@ const VoiceNoteSheet: React.FC<{ block?: any }> = ({ block }) => {
         </>
       )}
     </View>
+    </KeyboardAvoidingView>
   );
 };
 

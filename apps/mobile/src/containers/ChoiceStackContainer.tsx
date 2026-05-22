@@ -204,6 +204,7 @@ const ChoiceStackContainer: React.FC<ChoiceStackContainerProps> = ({
         isDisciplineSelect && styles.disciplineScrollContent,
       ]}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
     >
       {/* Header Section */}
       <View

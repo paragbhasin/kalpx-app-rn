@@ -1289,7 +1289,6 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "rgba(233, 186, 88, 0.9)",
     backgroundColor: "rgba(255,250,241,0.96)",
-    overflow: "hidden",
     ...platformShadow("#D4A017", 12, 0.28, 28, 10),
   },
   toastGlow: {

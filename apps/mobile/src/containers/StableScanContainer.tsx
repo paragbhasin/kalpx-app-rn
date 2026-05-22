@@ -155,6 +155,7 @@ const StableScanContainer: React.FC<StableScanContainerProps> = ({
       style={styles.container}
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
     >
       <View style={styles.headerSection}>
         {decoratedHeaderBlocks.map((block: any, i: number) => (

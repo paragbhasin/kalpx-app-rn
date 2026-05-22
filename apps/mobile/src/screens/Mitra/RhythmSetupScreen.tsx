@@ -43,21 +43,21 @@ const A3Icon = ({ width, height, style }: { width?: number; height?: number; sty
 const A4Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/a4.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const A5Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/a5.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const A6Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/a6.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
-const AfternoonIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/aft.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const AfternoonIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/icon_afternoon.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const M1Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/m1.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const M2Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/m2.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const M3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/m3.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const M4Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/m4.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const M5Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/m5.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const M6Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/m6.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
-const MorningIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/morning.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const MorningIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/icon_morning.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const N1Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/n1.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const N2Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/n2.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const N3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/n3.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const N4Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/n4.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const N5Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/n5.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const N6Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/n6.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
-const NightIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/night1.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const NightIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/icon_night.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import LibrarySearchModal, {
   LibrarySearchItem,
 } from "../../components/LibrarySearchModal";

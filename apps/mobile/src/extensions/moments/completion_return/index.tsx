@@ -148,7 +148,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
 
   useEffect(() => {
     // Apply global background from header to footer via bridge
-    updateBackground(require("../../assets/beige_bg.png"));
+    updateBackground(require("../../assets/beige_bg.webp"));
     updateHeaderHidden(isCommunityRunner);
 
     mitraTrackEvent("completion_return_shown", {

@@ -428,11 +428,11 @@ function DesktopInfoSection({
     <div
       style={{
         width: "100%",
-        borderRadius: 28,
+        borderRadius: 11,
         border: "1px solid rgba(184,148,80,0.22)",
         background: "rgba(255,253,249,0.7)",
         boxShadow: "0 18px 48px rgba(184,148,80,0.08)",
-        padding: expanded ? "32px 38px 34px" : "26px 38px",
+        padding: expanded ? "32px 38px 34px" : "15px",
         boxSizing: "border-box",
         backdropFilter: "blur(10px)",
         WebkitBackdropFilter: "blur(10px)",
@@ -585,7 +585,7 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
           width: "100%",
           maxWidth: 1360,
           margin: "0 auto",
-          padding: "44px 20px 84px",
+          padding: "30px 10px 10px",
           boxSizing: "border-box",
         }}
       >
@@ -605,7 +605,7 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
               background:
                 "radial-gradient(circle at 50% 38%, rgba(255,255,255,0.95) 0%, rgba(255,253,249,0.92) 36%, rgba(251,246,238,0.84) 100%)",
               boxShadow: "0 24px 60px rgba(184,148,80,0.1)",
-              padding: "34px 34px 30px",
+              padding: "15px",
               backdropFilter: "blur(10px)",
               WebkitBackdropFilter: "blur(10px)",
               overflow: "hidden",
@@ -787,23 +787,8 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
               display: "flex",
               flexDirection: "column",
               gap: 34,
-              paddingTop: 124,
             }}
           >
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                right: -36,
-                width: 220,
-                height: 280,
-                opacity: 0.22,
-                pointerEvents: "none",
-                background:
-                  "radial-gradient(circle at 30% 24%, rgba(201,168,76,0.75) 0 7px, transparent 8px), radial-gradient(circle at 52% 10%, rgba(201,168,76,0.72) 0 8px, transparent 9px), radial-gradient(circle at 58% 38%, rgba(201,168,76,0.7) 0 7px, transparent 8px), radial-gradient(circle at 76% 24%, rgba(201,168,76,0.72) 0 8px, transparent 9px), radial-gradient(circle at 84% 50%, rgba(201,168,76,0.68) 0 7px, transparent 8px)",
-              }}
-            />
-
             {audioUrl && (
               <div style={{ width: "100%" }}>
                 <AudioPlayerBlock

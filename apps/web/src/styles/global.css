@@ -188,6 +188,11 @@ button {
     max-width: min(1440px, calc(100vw - 48px));
   }
 
+  .kalpx-mitra-shell--plain-desktop {
+    background-image: none !important;
+    background: #fff8ef;
+  }
+
   .kalpx-mitra-shell-main {
     overflow-y: visible;
   }

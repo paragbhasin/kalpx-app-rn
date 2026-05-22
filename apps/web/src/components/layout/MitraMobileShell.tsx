@@ -15,6 +15,7 @@ interface Props {
   backTo?: string;
   onBack?: () => void;
   wideDesktop?: boolean;
+  plainDesktopBackground?: boolean;
 }
 
 export function MitraMobileShell({
@@ -26,6 +27,7 @@ export function MitraMobileShell({
   backTo = "/en/mitra",
   onBack,
   wideDesktop = false,
+  plainDesktopBackground = false,
 }: Props) {
   // This shell always paints a background image, even when callers omit one
   // and we fall back to /beige_bg.png. Keep chrome transparent so the
@@ -51,7 +53,7 @@ export function MitraMobileShell({
 
   return (
     <div
-      className="kalpx-mitra-shell"
+      className={`kalpx-mitra-shell${plainDesktopBackground ? " kalpx-mitra-shell--plain-desktop" : ""}`}
       style={shellStyle}
     >
       <div

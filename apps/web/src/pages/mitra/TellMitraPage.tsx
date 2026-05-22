@@ -52,6 +52,9 @@ function _id() {
 export function TellMitraPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  const [isDesktop, setIsDesktop] = useState(
+    typeof window === "undefined" ? true : window.innerWidth >= 1024,
+  );
   const [searchParams] = useSearchParams();
   const initialMessage = searchParams.get("initialMessage") ?? undefined;
   const screenState = useScreenState();
@@ -92,6 +95,13 @@ export function TellMitraPage() {
   });
 
   // ── Session restore + return-from-room detection (flag-on only, single call) ─
+  useEffect(() => {
+    const onResize = () => setIsDesktop(window.innerWidth >= 1024);
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   useEffect(() => {
     if (!THREAD_UI_ENABLED) return;
     // Prana entry: wait for route transition, then typewriter, then auto-submit.
@@ -807,7 +817,10 @@ export function TellMitraPage() {
   // ── Flag-on: thread UI ────────────────────────────────────────────────────
   if (THREAD_UI_ENABLED) {
     return (
-      <MitraMobileShell backgroundImage="/beige_bg.png">
+      <MitraMobileShell
+        backgroundImage="/beige_bg.png"
+        wideDesktop={isDesktop}
+      >
         <div style={PAGE_SHELL}>
           <main
             style={{
@@ -815,10 +828,10 @@ export function TellMitraPage() {
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              padding: "24px 16px 0",
+              padding: isDesktop ? "28px 20px 0" : "24px 16px 0",
             }}
           >
-            <div style={{ width: "100%", maxWidth: 740, position: "relative" }}>
+            <div style={{ width: "100%", maxWidth: isDesktop ? 1180 : 740, position: "relative" }}>
               <button
                 onClick={() => navigate("/en/mitra")}
                 style={BACK_BTN}
@@ -830,20 +843,23 @@ export function TellMitraPage() {
             <div
               style={{
                 width: "100%",
-                maxWidth: 740,
+                maxWidth: isDesktop ? 1180 : 740,
                 flex: 1,
                 display: "flex",
                 flexDirection: "column",
                 background: "#FAF7F2",
-                borderRadius: "20px 20px 0 0",
+                borderRadius: isDesktop ? 28 : "20px 20px 0 0",
                 border: "1px solid rgba(201,168,76,0.15)",
-                borderBottom: "none",
-                boxShadow: "0 -4px 24px rgba(67,33,4,0.06)",
+                borderBottom: isDesktop ? "1px solid rgba(201,168,76,0.15)" : "none",
+                boxShadow: isDesktop
+                  ? "0 18px 48px rgba(67,33,4,0.08)"
+                  : "0 -4px 24px rgba(67,33,4,0.06)",
                 overflow: "hidden",
-                minHeight: "calc(100dvh - 100px)",
+                minHeight: isDesktop ? "calc(100dvh - 132px)" : "calc(100dvh - 100px)",
               }}
             >
               <TellMitraThreadView
+                isDesktop={isDesktop}
                 conversation={conversation}
                 submitting={submitting}
                 composerValue={text}

@@ -132,11 +132,11 @@ function DesktopInfoSection({
     <div
       style={{
         width: "100%",
-        borderRadius: 28,
+        borderRadius: 11,
         border: "1px solid rgba(184,148,80,0.22)",
         background: "rgba(255,253,249,0.7)",
         boxShadow: "0 18px 48px rgba(184,148,80,0.08)",
-        padding: expanded ? "32px 38px 34px" : "26px 38px",
+        padding: expanded ? "32px 38px 34px" : "20px",
         boxSizing: "border-box",
         backdropFilter: "blur(10px)",
         WebkitBackdropFilter: "blur(10px)",
@@ -392,7 +392,7 @@ export function PracticeTimerBlock({
           width: "100%",
           maxWidth: 1360,
           margin: "0 auto",
-          padding: "44px 20px 84px",
+          padding: "25px 15px 15px",
           boxSizing: "border-box",
         }}
         data-testid="practice-timer-block"
@@ -408,7 +408,7 @@ export function PracticeTimerBlock({
           <div
             style={{
               position: "relative",
-              borderRadius: 30,
+              borderRadius: 11,
               border: "1px solid rgba(184,148,80,0.22)",
               background:
                 "radial-gradient(circle at 50% 38%, rgba(255,255,255,0.95) 0%, rgba(255,253,249,0.92) 36%, rgba(251,246,238,0.84) 100%)",
@@ -529,11 +529,21 @@ export function PracticeTimerBlock({
                       }}
                     />
                   </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 14,
+                    }}
+                  >
                     {steps.map((step, i) => (
                       <div
                         key={i}
-                        style={{ display: "flex", gap: 12, alignItems: "flex-start" }}
+                        style={{
+                          display: "flex",
+                          gap: 12,
+                          alignItems: "flex-start",
+                        }}
                       >
                         <span
                           style={{
@@ -637,7 +647,9 @@ export function PracticeTimerBlock({
                           max={MAX_MINUTES}
                           step={1}
                           value={selectedMinutes}
-                          onChange={(e) => updateMinutes(Number(e.target.value))}
+                          onChange={(e) =>
+                            updateMinutes(Number(e.target.value))
+                          }
                           style={{
                             flex: 1,
                             accentColor: GOLD,
@@ -837,7 +849,6 @@ export function PracticeTimerBlock({
               display: "flex",
               flexDirection: "column",
               gap: 34,
-              paddingTop: 148,
             }}
           >
             {hasContent(benefits) && (
@@ -1054,268 +1065,268 @@ export function PracticeTimerBlock({
           }}
         >
           {!running && !done ? (
-          /* PRE-START */
-          <>
-            <p
-              style={{
-                fontFamily: "var(--kalpx-font-serif)",
-                fontSize: 18,
-                color: BROWN,
-                fontWeight: 700,
-                margin: "0 0 8px",
-              }}
-            >
-              How long will you pause?
-            </p>
-            <p
-              style={{
-                fontSize: 42,
-                fontWeight: 300,
-                color: BROWN,
-                fontFamily: "var(--kalpx-font-serif)",
-                margin: "0 0 16px",
-              }}
-            >
-              {selectedMinutes}{" "}
-              <span style={{ fontSize: 20, color: MUTED }}>min</span>
-            </p>
+            /* PRE-START */
+            <>
+              <p
+                style={{
+                  fontFamily: "var(--kalpx-font-serif)",
+                  fontSize: 18,
+                  color: BROWN,
+                  fontWeight: 700,
+                  margin: "0 0 8px",
+                }}
+              >
+                How long will you pause?
+              </p>
+              <p
+                style={{
+                  fontSize: 42,
+                  fontWeight: 300,
+                  color: BROWN,
+                  fontFamily: "var(--kalpx-font-serif)",
+                  margin: "0 0 16px",
+                }}
+              >
+                {selectedMinutes}{" "}
+                <span style={{ fontSize: 20, color: MUTED }}>min</span>
+              </p>
 
-            {/* ─ [−] slider [+] row ─ */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                marginBottom: 8,
-              }}
-            >
-              <button
-                onClick={() => updateMinutes(selectedMinutes - 1)}
-                disabled={selectedMinutes <= MIN_MINUTES}
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: "50%",
-                  border: `1px solid ${CARD_BORDER}`,
-                  background: "rgba(255,255,255,0.6)",
-                  cursor: "pointer",
-                  fontSize: 20,
-                  color: "#8A5A12",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                  opacity: selectedMinutes <= MIN_MINUTES ? 0.4 : 1,
-                }}
-                aria-label="Decrease minutes"
-              >
-                −
-              </button>
-              <input
-                type="range"
-                min={MIN_MINUTES}
-                max={MAX_MINUTES}
-                step={1}
-                value={selectedMinutes}
-                onChange={(e) => updateMinutes(Number(e.target.value))}
-                style={{
-                  flex: 1,
-                  accentColor: GOLD,
-                  height: 4,
-                  cursor: "pointer",
-                }}
-              />
-              <button
-                onClick={() => updateMinutes(selectedMinutes + 1)}
-                disabled={selectedMinutes >= MAX_MINUTES}
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: "50%",
-                  border: `1px solid ${CARD_BORDER}`,
-                  background: "rgba(255,255,255,0.6)",
-                  cursor: "pointer",
-                  fontSize: 20,
-                  color: "#8A5A12",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                  opacity: selectedMinutes >= MAX_MINUTES ? 0.4 : 1,
-                }}
-                aria-label="Increase minutes"
-              >
-                +
-              </button>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                fontSize: 12,
-                color: MUTED,
-                marginBottom: 20,
-              }}
-            >
-              <span>1 min</span>
-              <span>Drag to adjust</span>
-              <span>10 min</span>
-            </div>
-
-            {/* Begin CTA */}
-            <button
-              onClick={handleBegin}
-              data-testid="practice-begin-btn"
-              style={{
-                width: "100%",
-                maxWidth: 200,
-                padding: "14px 0",
-                borderRadius: 32,
-                border: " 0.3px solid #432104",
-                background: "#FBF5F5",
-                color: "  #432104",
-                fontSize: 16,
-                fontFamily: "var(--kalpx-font-sans, sans-serif)",
-                letterSpacing: 0.3,
-                cursor: "pointer",
-              }}
-              className="shadow-2xl"
-            >
-              Begin
-            </button>
-          </>
-        ) : (
-          /* RUNNING / DONE */
-          <>
-            {/* Gold arc ring — 260px matches mobile */}
-            <div
-              style={{
-                position: "relative",
-                width: RING_SIZE,
-                height: RING_SIZE,
-                margin: "0 auto 16px",
-              }}
-            >
-              <svg
-                width={RING_SIZE}
-                height={RING_SIZE}
-                style={{ position: "absolute", inset: 0 }}
-              >
-                {/* Track */}
-                <circle
-                  cx={RING_CX}
-                  cy={RING_CX}
-                  r={RING_R}
-                  stroke="rgba(212,160,23,0.2)"
-                  strokeWidth={12}
-                  fill="none"
-                />
-                {/* Progress arc */}
-                <circle
-                  cx={RING_CX}
-                  cy={RING_CX}
-                  r={RING_R}
-                  stroke={GOLD}
-                  strokeWidth={12}
-                  fill="none"
-                  strokeDasharray={CIRCUMF}
-                  strokeDashoffset={dashOffset}
-                  strokeLinecap="round"
-                  transform={`rotate(-90 ${RING_CX} ${RING_CX})`}
-                  style={{
-                    transition: "stroke-dashoffset 1s linear",
-                    animation: isFinal10
-                      ? "kalpx-practice-glow 1s ease-in-out infinite alternate"
-                      : "none",
-                  }}
-                />
-              </svg>
-              {/* Center content */}
+              {/* ─ [−] slider [+] row ─ */}
               <div
                 style={{
-                  position: "absolute",
-                  inset: 0,
                   display: "flex",
-                  flexDirection: "column",
                   alignItems: "center",
-                  justifyContent: "center",
-                  gap: 4,
+                  gap: 12,
+                  marginBottom: 8,
                 }}
               >
-                <span
-                  style={{
-                    fontSize: 38,
-                    fontWeight: 300,
-                    color: isFinal10 ? GOLD : BROWN,
-                    transition: "color 0.5s",
-                    fontFamily: "var(--kalpx-font-serif)",
-                  }}
-                >
-                  {fmt(timeLeft)}
-                </span>
-                <span
-                  style={{
-                    fontSize: 14,
-                    color: MUTED,
-                    letterSpacing: 0.5,
-                    textAlign: "center",
-                  }}
-                >
-                  Return to the moment
-                </span>
-                {/* Reset ↺ icon */}
                 <button
-                  onClick={handleReset}
-                  title="Reset timer"
+                  onClick={() => updateMinutes(selectedMinutes - 1)}
+                  disabled={selectedMinutes <= MIN_MINUTES}
                   style={{
-                    marginTop: 6,
-                    background: "none",
-                    border: "none",
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    border: `1px solid ${CARD_BORDER}`,
+                    background: "rgba(255,255,255,0.6)",
                     cursor: "pointer",
                     fontSize: 20,
-                    color: MUTED,
-                    padding: 4,
+                    color: "#8A5A12",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    opacity: selectedMinutes <= MIN_MINUTES ? 0.4 : 1,
                   }}
-                  aria-label="Reset timer"
+                  aria-label="Decrease minutes"
                 >
-                  ↺
+                  −
                 </button>
-                {/* Glowing lotus */}
-                <img
-                  src="/mantra-lotus-3d.svg"
-                  alt=""
-                  aria-hidden="true"
-                  width={110}
-                  height={80}
-                  style={{ marginBottom: -60 }}
+                <input
+                  type="range"
+                  min={MIN_MINUTES}
+                  max={MAX_MINUTES}
+                  step={1}
+                  value={selectedMinutes}
+                  onChange={(e) => updateMinutes(Number(e.target.value))}
+                  style={{
+                    flex: 1,
+                    accentColor: GOLD,
+                    height: 4,
+                    cursor: "pointer",
+                  }}
                 />
+                <button
+                  onClick={() => updateMinutes(selectedMinutes + 1)}
+                  disabled={selectedMinutes >= MAX_MINUTES}
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    border: `1px solid ${CARD_BORDER}`,
+                    background: "rgba(255,255,255,0.6)",
+                    cursor: "pointer",
+                    fontSize: 20,
+                    color: "#8A5A12",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    opacity: selectedMinutes >= MAX_MINUTES ? 0.4 : 1,
+                  }}
+                  aria-label="Increase minutes"
+                >
+                  +
+                </button>
               </div>
-            </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontSize: 12,
+                  color: MUTED,
+                  marginBottom: 20,
+                }}
+              >
+                <span>1 min</span>
+                <span>Drag to adjust</span>
+                <span>10 min</span>
+              </div>
 
-            {/* End Practice CTA */}
-            <button
-              onClick={handleComplete}
-              data-testid="end-practice-btn"
-              style={{
-                width: "100%",
-                maxWidth: 200,
-                padding: "14px 0",
-                borderRadius: 32,
-                border: " 0.3px solid #432104",
-                background: "#FBF5F5",
-                color: "  #432104",
-                fontSize: 16,
-                fontFamily: "var(--kalpx-font-sans, sans-serif)",
-                letterSpacing: 0.3,
-                cursor: "pointer",
-                marginTop: 16,
-              }}
-              className="shadow-2xl"
-            >
-              End Practice
-            </button>
-          </>
-        )}
+              {/* Begin CTA */}
+              <button
+                onClick={handleBegin}
+                data-testid="practice-begin-btn"
+                style={{
+                  width: "100%",
+                  maxWidth: 200,
+                  padding: "14px 0",
+                  borderRadius: 32,
+                  border: " 0.3px solid #432104",
+                  background: "#FBF5F5",
+                  color: "  #432104",
+                  fontSize: 16,
+                  fontFamily: "var(--kalpx-font-sans, sans-serif)",
+                  letterSpacing: 0.3,
+                  cursor: "pointer",
+                }}
+                className="shadow-2xl"
+              >
+                Begin
+              </button>
+            </>
+          ) : (
+            /* RUNNING / DONE */
+            <>
+              {/* Gold arc ring — 260px matches mobile */}
+              <div
+                style={{
+                  position: "relative",
+                  width: RING_SIZE,
+                  height: RING_SIZE,
+                  margin: "0 auto 16px",
+                }}
+              >
+                <svg
+                  width={RING_SIZE}
+                  height={RING_SIZE}
+                  style={{ position: "absolute", inset: 0 }}
+                >
+                  {/* Track */}
+                  <circle
+                    cx={RING_CX}
+                    cy={RING_CX}
+                    r={RING_R}
+                    stroke="rgba(212,160,23,0.2)"
+                    strokeWidth={12}
+                    fill="none"
+                  />
+                  {/* Progress arc */}
+                  <circle
+                    cx={RING_CX}
+                    cy={RING_CX}
+                    r={RING_R}
+                    stroke={GOLD}
+                    strokeWidth={12}
+                    fill="none"
+                    strokeDasharray={CIRCUMF}
+                    strokeDashoffset={dashOffset}
+                    strokeLinecap="round"
+                    transform={`rotate(-90 ${RING_CX} ${RING_CX})`}
+                    style={{
+                      transition: "stroke-dashoffset 1s linear",
+                      animation: isFinal10
+                        ? "kalpx-practice-glow 1s ease-in-out infinite alternate"
+                        : "none",
+                    }}
+                  />
+                </svg>
+                {/* Center content */}
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 4,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 38,
+                      fontWeight: 300,
+                      color: isFinal10 ? GOLD : BROWN,
+                      transition: "color 0.5s",
+                      fontFamily: "var(--kalpx-font-serif)",
+                    }}
+                  >
+                    {fmt(timeLeft)}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 14,
+                      color: MUTED,
+                      letterSpacing: 0.5,
+                      textAlign: "center",
+                    }}
+                  >
+                    Return to the moment
+                  </span>
+                  {/* Reset ↺ icon */}
+                  <button
+                    onClick={handleReset}
+                    title="Reset timer"
+                    style={{
+                      marginTop: 6,
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: 20,
+                      color: MUTED,
+                      padding: 4,
+                    }}
+                    aria-label="Reset timer"
+                  >
+                    ↺
+                  </button>
+                  {/* Glowing lotus */}
+                  <img
+                    src="/mantra-lotus-3d.svg"
+                    alt=""
+                    aria-hidden="true"
+                    width={110}
+                    height={80}
+                    style={{ marginBottom: -60 }}
+                  />
+                </div>
+              </div>
+
+              {/* End Practice CTA */}
+              <button
+                onClick={handleComplete}
+                data-testid="end-practice-btn"
+                style={{
+                  width: "100%",
+                  maxWidth: 200,
+                  padding: "14px 0",
+                  borderRadius: 32,
+                  border: " 0.3px solid #432104",
+                  background: "#FBF5F5",
+                  color: "  #432104",
+                  fontSize: 16,
+                  fontFamily: "var(--kalpx-font-sans, sans-serif)",
+                  letterSpacing: 0.3,
+                  cursor: "pointer",
+                  marginTop: 16,
+                }}
+                className="shadow-2xl"
+              >
+                End Practice
+              </button>
+            </>
+          )}
         </div>
       )}
 

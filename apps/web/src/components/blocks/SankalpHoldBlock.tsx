@@ -133,11 +133,11 @@ function DesktopInfoSection({
     <div
       style={{
         width: "100%",
-        borderRadius: 28,
+        borderRadius: 11,
         border: "1px solid rgba(184,148,80,0.22)",
         background: "rgba(255,253,249,0.7)",
         boxShadow: "0 18px 48px rgba(184,148,80,0.08)",
-        padding: expanded ? "32px 38px 34px" : "26px 38px",
+        padding: expanded ? "20px 30px" : "26px 38px",
         boxSizing: "border-box",
         backdropFilter: "blur(10px)",
         WebkitBackdropFilter: "blur(10px)",
@@ -318,12 +318,12 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
           <div
             style={{
               position: "relative",
-              borderRadius: 30,
+              borderRadius: 11,
               border: "1px solid rgba(184,148,80,0.22)",
               background:
                 "radial-gradient(circle at 50% 38%, rgba(255,255,255,0.95) 0%, rgba(255,253,249,0.92) 36%, rgba(251,246,238,0.84) 100%)",
               boxShadow: "0 24px 60px rgba(184,148,80,0.1)",
-              padding: "34px 34px 30px",
+              padding: "20px 10px 10px",
               backdropFilter: "blur(10px)",
               WebkitBackdropFilter: "blur(10px)",
               overflow: "hidden",
@@ -428,7 +428,11 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
                   </div>
                   {Array.isArray(howToLive) ? (
                     <div
-                      style={{ display: "flex", flexDirection: "column", gap: 12 }}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 12,
+                      }}
                     >
                       {howToLive.map((line: string, i: number) => (
                         <p
@@ -522,7 +526,6 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
               display: "flex",
               flexDirection: "column",
               gap: 34,
-              paddingTop: 148,
             }}
           >
             {hasContent(insight) && (
@@ -767,7 +770,13 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
 
       {/* ── 4. Essence collapsible (info.insight) ── */}
       {hasContent(insight) && (
-        <div style={{ width: "100%", marginBottom: 12, marginTop: infoViewOnly ? 0 : -80 }}>
+        <div
+          style={{
+            width: "100%",
+            marginBottom: 12,
+            marginTop: infoViewOnly ? 0 : -80,
+          }}
+        >
           <CollapsibleCard
             label="Essence"
             expanded={essenceExpanded}

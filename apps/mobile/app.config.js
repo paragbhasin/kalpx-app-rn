@@ -2,7 +2,7 @@ module.exports = {
   expo: {
     name: "kalpx",
     slug: "kalpx",
-    version: "1.1.35",
+    version: "1.1.36",
     orientation: "portrait",
     icon: "./assets/new_logo.png",
     scheme: "kalpx",

@@ -1,10 +1,10 @@
-import { BlurView } from "expo-blur";
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
   Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -26,9 +26,9 @@ import {
   ingestDay14View,
   ingestDay7View,
 } from "../engine/v3Ingest";
+import { clearContinueJourneyHomeCache } from "../screens/Home/ContinueJourney";
 import store from "../store";
 import { loadScreenWithData, screenActions } from "../store/screenSlice";
-import { clearContinueJourneyHomeCache } from "../screens/Home/ContinueJourney";
 import { Fonts } from "../theme/fonts";
 
 // Assets (imported as components via react-native-svg-transformer)
@@ -936,14 +936,24 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
 
         {is14DayCycle && (
           <View style={[styles.mirrorCard, { paddingVertical: 18 }]}>
-            <Text style={[styles.mirrorCardTitle, { fontSize: 20, color: "#432104" }]}>
-              {(ss.ceremony_engaged_days as number) ?? engagedTotal} of {milestoneDayCount} days held.
+            <Text
+              style={[
+                styles.mirrorCardTitle,
+                { fontSize: 20, color: "#432104" },
+              ]}
+            >
+              {(ss.ceremony_engaged_days as number) ?? engagedTotal} of{" "}
+              {milestoneDayCount} days held.
             </Text>
-            {completedTotal > 0 && completedTotal !== ((ss.ceremony_engaged_days as number) ?? engagedTotal) && (
-              <Text style={[styles.mirrorCardSubtitle, { marginTop: 6 }]}>
-                {completedTotal} {completedTotal === 1 ? "day was" : "days were"} fully complete.
-              </Text>
-            )}
+            {completedTotal > 0 &&
+              completedTotal !==
+                ((ss.ceremony_engaged_days as number) ?? engagedTotal) && (
+                <Text style={[styles.mirrorCardSubtitle, { marginTop: 6 }]}>
+                  {completedTotal}{" "}
+                  {completedTotal === 1 ? "day was" : "days were"} fully
+                  complete.
+                </Text>
+              )}
           </View>
         )}
 
@@ -1254,7 +1264,12 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     const finaleNarrative =
       typeof m25.narrative_template === "string" && m25.narrative_template
         ? m25.narrative_template
-            .replace("{completed_count}", String((ceremony as any).engaged_days ?? ceremony.completed_days ?? ""))
+            .replace(
+              "{completed_count}",
+              String(
+                (ceremony as any).engaged_days ?? ceremony.completed_days ?? "",
+              ),
+            )
             .replace("{total_days}", String(ceremony.total_days ?? 14))
         : "";
     const finaleSovereignty = ceremony.sovereignty_line || "";
@@ -1377,12 +1392,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
                 return [1, 2].map(
                   (w) =>
                     (w === 1 || milestoneDayCount === 14) && (
-                      <BlurView
-                        key={w}
-                        intensity={60}
-                        tint="light"
-                        style={styles.weekCard}
-                      >
+                      <View key={w} style={styles.weekCard}>
                         <Text style={styles.weekLabel}>Week {w}</Text>
                         <View style={styles.daysGrid}>
                           {[1, 2, 3, 4, 5, 6, 7].map((d) => {
@@ -1427,7 +1437,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
                             );
                           })}
                         </View>
-                      </BlurView>
+                      </View>
                     ),
                 );
               })()}
@@ -1745,24 +1755,16 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     padding: 16,
     borderRadius: 24,
-
-    // VERY IMPORTANT for glass effect
     overflow: "hidden",
-
-    // Fallback for Android
-    backgroundColor: "rgba(255,255,255,0.18)",
-
-    // Glass border
+    backgroundColor:
+      Platform.OS === "android" ? "#FFFCF7" : "rgba(255,255,255,0.18)",
     borderWidth: 1,
-    borderColor: "#D9A557",
-
-    // Shadow (depth)
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 10 },
-
-    elevation: 8, // Android
+    borderColor: "rgba(217, 165, 87, 0.55)",
+    shadowColor: "#C9A84C",
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
   weeksWrapper: {
     position: "relative",
@@ -1787,6 +1789,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "flex-start",
+    backgroundColor: "transparent",
   },
   dayItem: { width: "22%", alignItems: "center", marginBottom: 15 },
   dayCircle: {

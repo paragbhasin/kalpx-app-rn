@@ -47,9 +47,9 @@ const MOMENT_COPY: Record<RhythmTimeBand, { label: string; desc: string }> = {
 };
 
 const MOMENT_ART: Record<RhythmTimeBand, string> = {
-  morning: "/morning.svg",
-  afternoon: "/aft.svg",
-  night: "/night1.svg",
+  morning: "/morning.png",
+  afternoon: "/aft.png",
+  night: "/night.png",
 };
 
 const PURPOSE_ART: Record<RhythmTimeBand, string[]> = {

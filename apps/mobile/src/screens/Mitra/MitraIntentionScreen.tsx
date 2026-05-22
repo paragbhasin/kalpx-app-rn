@@ -8,7 +8,6 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, { useCallback } from "react";
 import {
   Image,
-  ImageBackground,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -34,24 +33,24 @@ const PENDING_KEY = "mitra_intention_pending";
 const OPTION_ACCENTS = {
   daily_rhythm: {
     icon: M3Icon,
-    iconBg: "rgba(248, 238, 209, 0.72)",
+    iconBg: "#FBF3DE",
     chipBg: "rgba(245, 222, 166, 0.34)",
     chipColor: "#C18B12",
   },
   inner_path: {
     icon: Mp3Icon,
-    iconBg: "rgba(248, 238, 209, 0.72)",
+    iconBg: "#FBF3DE",
     chipBg: "rgba(222, 200, 232, 0.48)",
     chipColor: "#C18B12",
   },
   quick_chant: {
     icon: Mp2Icon,
-    iconBg: "rgba(248, 238, 209, 0.72)",
+    iconBg: "#FBF3DE",
     chipColor: "#C18B12",
   },
   tell_mitra: {
     icon: Mp4Icon,
-    iconBg: "rgba(248, 238, 209, 0.72)",
+    iconBg: "#FBF3DE",
     chipBg: "rgba(247, 213, 179, 0.48)",
     chipColor: "#C18B12",
   },
@@ -137,10 +136,7 @@ export default function MitraIntentionScreen() {
   }
 
   return (
-    <ImageBackground
-      source={require("../../../assets/beige_bg.webp")}
-      style={styles.container}
-    >
+    <View style={styles.container}>
       <SafeAreaView style={styles.safe}>
         <ScrollView
           contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 56 }]}
@@ -210,13 +206,14 @@ export default function MitraIntentionScreen() {
           </View>
         </ScrollView>
       </SafeAreaView>
-    </ImageBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "transparent",
   },
   safe: {
     flex: 1,
@@ -263,20 +260,20 @@ const styles = StyleSheet.create({
     gap: 18,
   },
   card: {
-    backgroundColor: "rgba(255, 252, 247, 0.92)",
+    backgroundColor: "#FFFCF7",
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(226, 199, 144, 0.48)",
+    borderColor: "rgba(214, 166, 58, 0.24)",
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
-    ...platformShadow("#C9A84C", 16, 0.1, 40, 4),
+    ...platformShadow("#C9A84C", 8, 0.05, 14, 1),
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 25,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,

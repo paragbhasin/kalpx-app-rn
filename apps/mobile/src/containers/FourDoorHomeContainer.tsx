@@ -217,7 +217,7 @@ export default function FourDoorHomeContainer({
 
   useEffect(() => {
     setLoading(true);
-    void loadHome();
+    void loadHome(false, true);
   }, [loadHome]);
 
   useFocusEffect(
@@ -227,7 +227,7 @@ export default function FourDoorHomeContainer({
         return;
       }
       if (homeDataRef.current) {
-        void loadHome(true);
+        void loadHome(true, true);
       }
     }, [loadHome]),
   );
@@ -292,11 +292,32 @@ export default function FourDoorHomeContainer({
     navigation.navigate("TellMitra" as any);
   }, [navigation]);
 
-  const openMyRhythmSurface = useCallback(() => {
-    const hasRhythm = homeData?.companion_rhythm?.has_rhythm === true;
-    const target = hasRhythm ? "RhythmHome" : "RhythmSetup";
-    navigation.navigate(target as any);
-  }, [homeData?.companion_rhythm?.has_rhythm, navigation]);
+  const openMyRhythmSurface = useCallback(async () => {
+    const hasRhythmInState =
+      homeData?.companion_rhythm?.has_rhythm === true ||
+      homeData?.my_rhythm_summary?.has_rhythm === true ||
+      homeData?.user_surface_state?.has_rhythm === true ||
+      homeData?.door_states?.my_rhythm?.state === "active";
+
+    if (hasRhythmInState) {
+      navigation.navigate("RhythmHome" as any);
+      return;
+    }
+
+    try {
+      const fresh = await mitraJourneyHomeV3({ forceFresh: true });
+      dispatch(setHomeData(fresh));
+      const hasRhythmFresh =
+        fresh?.companion_rhythm?.has_rhythm === true ||
+        fresh?.my_rhythm_summary?.has_rhythm === true ||
+        fresh?.user_surface_state?.has_rhythm === true ||
+        fresh?.door_states?.my_rhythm?.state === "active";
+
+      navigation.navigate((hasRhythmFresh ? "RhythmHome" : "RhythmSetup") as any);
+    } catch {
+      navigation.navigate("RhythmSetup" as any);
+    }
+  }, [dispatch, homeData, navigation]);
 
   const rhythmBand = getRhythmTimeBand();
   const seg = (homeData?.user_surface_state?.segment ??

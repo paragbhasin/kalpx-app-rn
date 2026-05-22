@@ -10,6 +10,7 @@
  */
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import {
   useFocusEffect,
   useIsFocused,
@@ -71,6 +72,7 @@ export const collapseControl = { avoidCollapse: false };
 export default function Home() {
   const navigation: any = useNavigation();
   const isFocused = useIsFocused();
+  const tabBarHeight = useBottomTabBarHeight();
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector(
     (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
@@ -205,22 +207,37 @@ export default function Home() {
           } else {
             setMitraJourneyId(null);
             setShowInnerPathReentry(false);
-            // Authed user with no journey — check for partial companion state (Stream O).
-            if (!v3AutoRoutedRef.current) {
-              v3AutoRoutedRef.current = true;
-              try {
-                const { mitraJourneyHomeV3 } = require("../../engine/mitraApi");
-                const homeResp = await mitraJourneyHomeV3();
-                const segment = homeResp?.user_surface_state?.segment;
-                if (segment && segment !== "new") {
-                  // Has companion state (rhythm/chant/TM/checkin) → FourDoor home
-                  setHasPartialState(true);
-                } else {
-                  // True zero state → entry intention screen
+            // Authed user with no journey — always refresh companion state.
+            // The guard should prevent repeat onboarding redirects, not skip
+            // the companion-state check after the user creates a rhythm/path.
+            try {
+              const { mitraJourneyHomeV3 } = require("../../engine/mitraApi");
+              const homeResp = await mitraJourneyHomeV3({ forceFresh: true });
+              const surfaceState = homeResp?.user_surface_state;
+              const hasCompanionState =
+                surfaceState?.has_rhythm === true ||
+                surfaceState?.has_inner_path === true ||
+                surfaceState?.has_quick_chant_mantra === true ||
+                surfaceState?.has_quick_chant_history === true ||
+                surfaceState?.has_tell_mitra_history === true ||
+                surfaceState?.has_quick_checkin_history === true ||
+                homeResp?.companion_rhythm?.has_rhythm === true ||
+                homeResp?.inner_path_summary?.has_active_path === true;
+
+              if (hasCompanionState) {
+                // Has companion state (rhythm/path/chant/checkin/TM) → FourDoor home
+                setHasPartialState(true);
+              } else {
+                setHasPartialState(false);
+                if (!v3AutoRoutedRef.current) {
+                  v3AutoRoutedRef.current = true;
                   navigation.navigate("MitraStart" as any);
                 }
-              } catch {
-                // Fallback to intention screen on API error
+              }
+            } catch {
+              setHasPartialState(false);
+              if (!v3AutoRoutedRef.current) {
+                v3AutoRoutedRef.current = true;
                 navigation.navigate("MitraStart" as any);
               }
             }
@@ -873,7 +890,10 @@ export default function Home() {
         />
       ) : (
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingBottom: tabBarHeight + 24 },
+          ]}
           showsVerticalScrollIndicator={false}
         >
           {/* ── Hero Section ── */}

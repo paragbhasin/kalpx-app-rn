@@ -28,7 +28,6 @@ import React, {
 import {
   ActivityIndicator,
   Image,
-  ImageBackground,
   Platform,
   SafeAreaView,
   ScrollView,
@@ -997,11 +996,7 @@ export default function RhythmSetupScreen({
     <SafeAreaView
       style={[wStyles.safe, embedded && styles.embeddedTransparent]}
     >
-      <ImageBackground
-        source={RHYTHM_BG}
-        style={wStyles.background}
-        imageStyle={wStyles.backgroundImage}
-      >
+     
         <ScrollView
           contentContainerStyle={wStyles.scroll}
           showsVerticalScrollIndicator={false}
@@ -1088,7 +1083,7 @@ export default function RhythmSetupScreen({
             <Text style={wStyles.secondaryLink}>Set up myself</Text>
           </TouchableOpacity>
         </ScrollView>
-      </ImageBackground>
+
     </SafeAreaView>
   );
 
@@ -1096,11 +1091,6 @@ export default function RhythmSetupScreen({
     <SafeAreaView
       style={[wStyles.safe, embedded && styles.embeddedTransparent]}
     >
-      <ImageBackground
-        source={RHYTHM_BG}
-        style={wStyles.background}
-        imageStyle={wStyles.backgroundImage}
-      >
         <ScrollView
           contentContainerStyle={wStyles.scroll}
           showsVerticalScrollIndicator={false}
@@ -1189,7 +1179,6 @@ export default function RhythmSetupScreen({
             </Text>
           </TouchableOpacity>
         </ScrollView>
-      </ImageBackground>
     </SafeAreaView>
   );
 
@@ -1203,11 +1192,6 @@ export default function RhythmSetupScreen({
       <SafeAreaView
         style={[wStyles.safe, embedded && styles.embeddedTransparent]}
       >
-        <ImageBackground
-          source={RHYTHM_BG}
-          style={wStyles.background}
-          imageStyle={wStyles.backgroundImage}
-        >
           <ScrollView
             contentContainerStyle={wStyles.scroll}
             showsVerticalScrollIndicator={false}
@@ -1365,7 +1349,6 @@ export default function RhythmSetupScreen({
             mode="select_for_rhythm"
             onItemSelected={handleWizardPickerSelect}
           />
-        </ImageBackground>
       </SafeAreaView>
     );
   };
@@ -1463,11 +1446,6 @@ export default function RhythmSetupScreen({
     <SafeAreaView
       style={[wStyles.safe, embedded && styles.embeddedTransparent]}
     >
-      <ImageBackground
-        source={RHYTHM_BG}
-        style={wStyles.background}
-        imageStyle={wStyles.backgroundImage}
-      >
         <ScrollView
           contentContainerStyle={wStyles.scroll}
           showsVerticalScrollIndicator={false}
@@ -1546,7 +1524,6 @@ export default function RhythmSetupScreen({
             </Text>
           </TouchableOpacity>
         </ScrollView>
-      </ImageBackground>
     </SafeAreaView>
   );
 
@@ -1563,11 +1540,6 @@ export default function RhythmSetupScreen({
     <SafeAreaView
       style={[styles.safeArea, embedded && styles.embeddedTransparent]}
     >
-      <ImageBackground
-        source={RHYTHM_BG}
-        style={styles.background}
-        imageStyle={styles.backgroundImage}
-      >
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
@@ -1820,7 +1792,6 @@ export default function RhythmSetupScreen({
           mode="select_for_rhythm"
           onItemSelected={handleItemSelected}
         />
-      </ImageBackground>
     </SafeAreaView>
   );
 }
@@ -1828,7 +1799,7 @@ export default function RhythmSetupScreen({
 // ─── Wizard styles ─────────────────────────────────────────────────────────────
 
 const wStyles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#FFF8EF" },
+  safe: { flex: 1 },
   background: { flex: 1 },
   backgroundImage: { opacity: 0.98 },
   scroll: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 48 },
@@ -2323,7 +2294,7 @@ const wStyles = StyleSheet.create({
 // ─── Accordion styles ──────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#FFF8EF" },
+  safeArea: { flex: 1, backgroundColor: "transparent" },
   embeddedTransparent: { backgroundColor: "transparent" },
   background: { flex: 1 },
   backgroundImage: { opacity: 0.98 },
@@ -2350,29 +2321,36 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginBottom: 8,
   },
-  bandBlock: { marginBottom: 20 },
+  bandBlock: { marginBottom: 20, backgroundColor: "transparent" },
   bandHeaderCard: {
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingVertical: 12,
+    minHeight: 86,
     borderWidth: 1,
     borderColor: "rgba(226, 201, 151, 0.72)",
     borderRadius: 15,
-    backgroundColor: "rgba(255, 250, 242, 0.96",
-    ...platformShadow("#8A6837", 10, 0.08, 18, 1),
+    backgroundColor:
+      Platform.OS === "android" ? "#FFFCF7" : "rgba(255, 250, 242, 0.96)",
+    ...(Platform.OS === "android"
+      ? { elevation: 0 }
+      : platformShadow("#C9A84C", 6, 0.05, 12, 1)),
   },
   bandHeaderCardExpanded: {
-    backgroundColor: "rgba(248, 242, 230, 0.96)",
+    backgroundColor:
+      Platform.OS === "android" ? "#FBF6EB" : "rgba(248, 242, 230, 0.96)",
   },
   bandIconWrap: {
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: "rgba(248, 236, 210, 0.68)",
+    backgroundColor: Platform.OS === "android" ? "#FBF3DE" : "rgba(248, 236, 210, 0.68)",
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
+    flexShrink: 0,
   },
   bandCopy: { flex: 1, paddingRight: 10 },
   bandLabel: {
@@ -2388,7 +2366,14 @@ const styles = StyleSheet.create({
     color: "#7B6550",
     lineHeight: 19,
   },
-  chevron: { fontSize: 26, lineHeight: 26, color: "#C99317" },
+  chevron: {
+    width: 24,
+    textAlign: "center",
+    fontSize: 26,
+    lineHeight: 26,
+    color: "#C99317",
+    flexShrink: 0,
+  },
   bandBody: { paddingTop: 16, gap: 12 },
   addedItem: {
     flexDirection: "column",

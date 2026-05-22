@@ -29,6 +29,7 @@ import {
 import { clearContinueJourneyHomeCache } from "../screens/Home/ContinueJourney";
 import store from "../store";
 import { loadScreenWithData, screenActions } from "../store/screenSlice";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Fonts } from "../theme/fonts";
 
 // Assets (imported as components via react-native-svg-transformer)
@@ -57,6 +58,7 @@ const METRIC_ALLOWLIST: Record<string, string> = {
 };
 
 const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
+  const insets = useSafeAreaInsets();
   const { screenData, currentStateId } = useScreenStore();
   const { showToast } = useToast();
   const navigation = useNavigation<any>();
@@ -837,8 +839,11 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
         showsVerticalScrollIndicator={false}
         style={{ padding: 10 }}
         contentContainerStyle={
-          is7DayCycle ? styles.day7ReflectionContent : undefined
+          is7DayCycle
+            ? [styles.day7ReflectionContent, { paddingBottom: Math.max(insets.bottom + 40, 64) }]
+            : { paddingBottom: Math.max(insets.bottom + 40, 64) }
         }
+        keyboardShouldPersistTaps="handled"
       >
         {is7DayCycle && (
           <View style={styles.mirrorHeader}>
@@ -1099,7 +1104,8 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     return (
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 20, paddingBottom: 60 }}
+        contentContainerStyle={{ padding: 20, paddingBottom: Math.max(insets.bottom + 40, 64) }}
+        keyboardShouldPersistTaps="handled"
       >
         {/* Classification verdict card */}
         {!!classifHeadline && (
@@ -1374,7 +1380,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   if (showJourneyInvite) {
     return (
       <View style={{ marginTop: 30 }}>
-        <ScrollView>
+        <ScrollView keyboardShouldPersistTaps="handled">
           <View style={styles.journeyHeader}>
             <Text style={styles.journeyTitle}>
               Your {milestoneDayCount}-Day Journey
@@ -1476,7 +1482,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
                   <Text style={styles.closeBtnText}>✕</Text>
                 </TouchableOpacity>
               </View>
-              <ScrollView>
+              <ScrollView keyboardShouldPersistTaps="handled">
                 {activeTab === "day" ? (
                   <View>
                     <ActivityList activity={journeyData.activity} />
@@ -1720,7 +1726,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   day7ReflectionContent: {
-    paddingBottom: 96,
+    paddingBottom: 40,
   },
   day7DecisionButtons: {
     gap: 10,
@@ -1942,7 +1948,7 @@ const styles = StyleSheet.create({
   activityCount: { fontFamily: Fonts.sans.bold, fontSize: 14 },
 
   reflectionRoot: { flex: 1 },
-  reflectionContent: { padding: 20, paddingTop: 40, paddingBottom: 80 },
+  reflectionContent: { padding: 20, paddingTop: 40, paddingBottom: 40 },
   lotusHeaderCard: { alignItems: "center", marginBottom: 20 },
   reflectionCard: {
     backgroundColor: "#fff",

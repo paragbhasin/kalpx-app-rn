@@ -251,7 +251,7 @@ const StepModal: React.FC<Props> = ({
                 presentation === "screen"
                   ? {
                       paddingTop: insets.top + 8,
-                      paddingBottom: Math.max(insets.bottom, 16),
+                      paddingBottom: Math.max(insets.bottom + 32, 48),
                     }
                   : null,
               ]}

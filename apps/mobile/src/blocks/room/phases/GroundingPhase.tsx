@@ -79,7 +79,7 @@ const GroundingPhase: React.FC<Props> = ({ stepPayload, companionLine, onComplet
   return (
     <KeyboardAvoidingView
       style={styles.root}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         {companionLine ? (

@@ -36,6 +36,7 @@ import React, {
 } from "react";
 import {
   ActivityIndicator,
+  Image,
   LayoutAnimation,
   Platform,
   SafeAreaView,
@@ -48,7 +49,7 @@ import {
   View,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import In1Icon from "../../../../web/public/in1.svg";
+const In1Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/in1.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import CycleProgressBlock from "../../blocks/dashboard/CycleProgressBlock";
 import { TimePickerModal } from "../../components/TimePickerModal";
 import {

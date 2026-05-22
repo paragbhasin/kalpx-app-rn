@@ -22,6 +22,7 @@ import React, {
 } from "react";
 import {
   ActivityIndicator,
+  Image,
   ImageBackground,
   Modal,
   Platform,
@@ -35,10 +36,10 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
-import M3Icon from "../../../web/public/mitra1.svg";
-import Mp2Icon from "../../../web/public/mitra2.svg";
-import Mp3Icon from "../../../web/public/mitra3.svg";
-import Mp4Icon from "../../../web/public/mitra4.svg";
+const M3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/mitra1.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const Mp2Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/mitra2.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const Mp3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/mitra3.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const Mp4Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/mitra4.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   apiPatchJourneyReminders,

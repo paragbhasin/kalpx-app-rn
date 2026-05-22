@@ -18,9 +18,9 @@ import {
 } from "react-native";
 import { useSelector } from "react-redux";
 const M3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/m3.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
-import Mp2Icon from "../../../../web/public/mp2.svg";
-import Mp3Icon from "../../../../web/public/mp3.svg";
-import Mp4Icon from "../../../../web/public/mp4.svg";
+const Mp2Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/mp2.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const Mp3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/mp3.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const Mp4Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/mp4.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import FontSize from "../../components/FontSize";
 import { useScrollContext } from "../../context/ScrollContext";
 import { useScreenStore } from "../../engine/useScreenBridge";
@@ -140,7 +140,7 @@ export default function MitraIntentionScreen() {
       style={styles.container}
     >
       <Image
-        source={require("../../../../web/public/leaves-bird.png")}
+        source={require("../../../assets/leaves-bird.webp")}
         style={styles.topRightLeaves}
       />
       <SafeAreaView style={styles.safe}>

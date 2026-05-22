@@ -350,7 +350,7 @@ export default function RhythmHomeScreen({
       >
         <View style={styles.shell}>
           <Image
-            source={require("../../../../web/public/leaves-bird.png")}
+            source={require("../../../assets/leaves-bird.webp")}
             style={styles.heroLeaves}
           />
 

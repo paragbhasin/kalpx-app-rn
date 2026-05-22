@@ -18,6 +18,7 @@ interface Props {
   lifeContextLabel?: string | null;
   screenData?: Record<string, any>;
   onAction?: (action: any) => void;
+  isDesktop?: boolean;
 }
 
 function normalizeWhyThisRoomLine(
@@ -61,15 +62,39 @@ function extractBecauseYouSharedLabel(
   return parts.length ? parts.join(" · ") : null;
 }
 
-const ROOM_COMPLETION_LINES: Record<string, { message: string; subtext: string }> = {
-  room_stillness:  { message: "You made space.",                  subtext: "Let this quiet stay with you for a little while." },
-  room_release:    { message: "You set something down.",          subtext: "You do not have to carry it in the same way now." },
-  room_clarity:    { message: "You sat with the question.",       subtext: "One clear seeing is enough for now." },
-  room_growth:     { message: "You moved toward what matters.",   subtext: "Small sincere action is still action." },
-  room_connection: { message: "You softened toward connection.",  subtext: "Let the heart stay open, gently." },
-  room_joy:        { message: "You noticed what is good.",        subtext: "Let this become part of your day." },
+const ROOM_COMPLETION_LINES: Record<
+  string,
+  { message: string; subtext: string }
+> = {
+  room_stillness: {
+    message: "You made space.",
+    subtext: "Let this quiet stay with you for a little while.",
+  },
+  room_release: {
+    message: "You set something down.",
+    subtext: "You do not have to carry it in the same way now.",
+  },
+  room_clarity: {
+    message: "You sat with the question.",
+    subtext: "One clear seeing is enough for now.",
+  },
+  room_growth: {
+    message: "You moved toward what matters.",
+    subtext: "Small sincere action is still action.",
+  },
+  room_connection: {
+    message: "You softened toward connection.",
+    subtext: "Let the heart stay open, gently.",
+  },
+  room_joy: {
+    message: "You noticed what is good.",
+    subtext: "Let this become part of your day.",
+  },
 };
-const COMPLETION_FALLBACK = { message: "You stayed with it.", subtext: "You can return to this room anytime." };
+const COMPLETION_FALLBACK = {
+  message: "You stayed with it.",
+  subtext: "You can return to this room anytime.",
+};
 
 const BETWEEN_STEP_LINES = [
   "Good. Take one breath.",
@@ -85,6 +110,7 @@ export function RoomGuidedSection({
   lifeContextLabel,
   screenData,
   onAction,
+  isDesktop = false,
 }: Props) {
   const ctx = envelope.room_context?.entry_context ?? {};
   const roomCtx = envelope.room_context ?? {};
@@ -150,9 +176,7 @@ export function RoomGuidedSection({
   const memoryEchoLine = envelope.memory_echo_line ?? null;
   const completionCopy = ROOM_COMPLETION_LINES[roomId] ?? COMPLETION_FALLBACK;
   const completionWisdom =
-    roomCtx.bridge_line ||
-    roomCtx.sanatan_insight_line ||
-    "";
+    roomCtx.bridge_line || roomCtx.sanatan_insight_line || "";
 
   const [whyExpanded, setWhyExpanded] = useState(false);
   const [recommendedExpanded, setRecommendedExpanded] = useState(false);
@@ -168,8 +192,11 @@ export function RoomGuidedSection({
   const [interstitialLine, setInterstitialLine] = useState<string | null>(null);
   const [pendingNextAction, setPendingNextAction] = useState<any | null>(null);
   const interstitialIndexRef = useRef(0);
-  const [mantrasOpeningCardAction, setMantrasOpeningCardAction] = useState<any | null>(null);
+  const [mantrasOpeningCardAction, setMantrasOpeningCardAction] = useState<
+    any | null
+  >(null);
   const [exitConfirmVisible, setExitConfirmVisible] = useState(false);
+  const showWhyExpanded = isDesktop || whyExpanded;
 
   function maybeAdvanceToNextAction(completedActionId?: string | null) {
     if (!sequenceActive || !completedActionId) return;
@@ -244,7 +271,11 @@ export function RoomGuidedSection({
 
     // Strict guard — only intercept runner_mantra, not other runner types.
     // skipOpeningCard=true is passed by the "Begin →" handler so the runner actually launches.
-    if (action.action_type === "runner_mantra" && roomId && !options?.skipOpeningCard) {
+    if (
+      action.action_type === "runner_mantra" &&
+      roomId &&
+      !options?.skipOpeningCard
+    ) {
       setMantrasOpeningCardAction(action);
       return;
     }
@@ -573,6 +604,712 @@ export function RoomGuidedSection({
           maybeAdvanceToNextAction(action.action_id);
         }}
       />
+    );
+  }
+
+  const heroName = roomName || envelope.room_display_name || "";
+  const wisdomTitle = principleBanner?.source_line || "Sanatan wisdom says";
+
+  if (isDesktop) {
+    return (
+      <div
+        style={{
+          padding: "40px 24px 96px",
+          minHeight: "calc(100dvh - 120px)",
+          boxSizing: "border-box",
+        }}
+        data-testid="room-guided-section"
+      >
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 0.92fr) minmax(420px, 0.82fr)",
+            gap: 54,
+            alignItems: "start",
+          }}
+        >
+          <div
+            style={{
+              padding: "20px 0",
+              textAlign: "center",
+            }}
+          >
+            <img
+              src="/lotus_icon.png"
+              alt=""
+              aria-hidden="true"
+              style={{
+                width: 54,
+                height: 42,
+                opacity: 0.9,
+                margin: "0 auto 18px",
+                display: "block",
+              }}
+            />
+            <h1
+              style={{
+                fontFamily: "var(--kalpx-font-serif)",
+                fontWeight: 700,
+                fontSize: 32,
+                lineHeight: 1.02,
+                color: "#432104",
+                margin: "0 0 20px",
+                textWrap: "balance",
+              }}
+            >
+              {heroName}
+            </h1>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 16,
+                marginBottom: 26,
+                color: "#D4A64A",
+              }}
+            >
+              <div
+                style={{
+                  width: 154,
+                  height: 1,
+                  background: "rgba(212,166,74,0.42)",
+                }}
+              />
+              <span style={{ fontSize: 18, lineHeight: 1 }}>◇</span>
+              <div
+                style={{
+                  width: 154,
+                  height: 1,
+                  background: "rgba(212,166,74,0.42)",
+                }}
+              />
+            </div>
+            {situationAck && (
+              <p
+                style={{
+                  fontSize: 15,
+                  fontStyle: "italic",
+                  color: "#7A6A58",
+                  lineHeight: 1.45,
+                  margin: "0 0 34px",
+                  textWrap: "balance",
+                }}
+              >
+                {situationAck}
+              </p>
+            )}
+
+            {recAction && (
+              <div
+                style={{
+                  background: "rgba(255,252,247,0.88)",
+                  border: "1px solid rgba(214,183,130,0.34)",
+                  borderRadius: 24,
+                  padding: "10px",
+                  margin: "0 auto 28px",
+                  maxWidth: 640,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 20,
+                  textAlign: "left",
+                  boxShadow: "0 18px 42px rgba(67,33,4,0.08)",
+                }}
+              >
+                <div
+                  style={{
+                    width: 80,
+                    height: 80,
+                    borderRadius: "50%",
+                    background: "rgba(247, 238, 225, 0.92)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <img
+                    src="/lotus_icon.png"
+                    alt=""
+                    aria-hidden="true"
+                    style={{ width: 40, height: 40, opacity: 0.88 }}
+                  />
+                </div>
+                <div style={{ paddingLeft: 50 }}>
+                  <p
+                    style={{
+                      fontSize: 14,
+                      color: "#C89B39",
+                      letterSpacing: 1.1,
+                      textTransform: "uppercase",
+                      fontWeight: 700,
+                      marginBottom: 10,
+                    }}
+                  >
+                    Mitra suggests beginning with
+                  </p>
+                  <p
+                    style={{
+                      fontSize: 18,
+                      color: "#432104",
+                      fontFamily: "var(--kalpx-font-serif)",
+                      margin: "0 0 8px",
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {(recAction as any).label}
+                  </p>
+                  {(recAction as any).helper_line && (
+                    <p
+                      style={{
+                        fontSize: 16,
+                        fontStyle: "italic",
+                        color: "#8A7968",
+                        lineHeight: 1.5,
+                        margin: 0,
+                      }}
+                    >
+                      {(recAction as any).helper_line}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={handleBegin}
+              data-testid="room-guided-begin"
+              style={{
+                width: "100%",
+                maxWidth: 420,
+                margin: "0 auto 24px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 18,
+                padding: "15px",
+                borderRadius: 999,
+                border: "none",
+                background: "#5B2D00",
+                color: "#FFF8EF",
+                fontSize: 28,
+                fontWeight: 600,
+                cursor: "pointer",
+                letterSpacing: 0.2,
+                boxShadow: "0 18px 34px rgba(82,44,10,0.22)",
+              }}
+            >
+              <span>{ROOM_GUIDED_COPY.begin}</span>
+              <span style={{ fontSize: 36, lineHeight: 1, marginTop: -2 }}>
+                →
+              </span>
+            </button>
+
+            {(recDesc || memoryEchoLine) && (
+              <div style={{ textAlign: "center", marginBottom: 22 }}>
+                <img
+                  src="/lotus_icon.png"
+                  alt=""
+                  aria-hidden="true"
+                  style={{
+                    width: 30,
+                    height: 24,
+                    opacity: 0.72,
+                    margin: "0 auto 10px",
+                    display: "block",
+                  }}
+                />
+                <p
+                  style={{
+                    fontSize: 18,
+                    fontStyle: "italic",
+                    color: "#6E6357",
+                    lineHeight: 1.75,
+                    margin: 0,
+                    textWrap: "balance",
+                    maxWidth: 680,
+                  }}
+                >
+                  {memoryEchoLine || recDesc}
+                </p>
+              </div>
+            )}
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 16,
+                marginTop: 18,
+              }}
+            >
+              {derivedLifeContextLabel && (
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexWrap: "wrap",
+                    gap: 6,
+                    padding: "12px 18px",
+                    borderRadius: 999,
+                    background: "rgba(255,250,245,0.88)",
+                    border: "1px solid rgba(214,183,130,0.22)",
+                    color: "#5E5449",
+                    boxShadow: "0 10px 24px rgba(67,33,4,0.06)",
+                    fontSize: 14,
+                    lineHeight: 1.45,
+                    textAlign: "center",
+                  }}
+                >
+                  <span style={{ whiteSpace: "nowrap" }}>
+                    Because you shared ·
+                  </span>
+                  <strong style={{ color: "#3E2A15", fontWeight: 600 }}>
+                    {derivedLifeContextLabel}
+                  </strong>
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setStepsOpen(true)}
+                data-testid="room-guided-view-all-steps"
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: 14,
+                  color: "#8A7968",
+                  textDecoration: "underline",
+                }}
+              >
+                {ROOM_GUIDED_COPY.viewAllSteps}
+              </button>
+
+              <button
+                onClick={handleExitRequest}
+                data-testid="room-guided-exit"
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: 14,
+                  color: "#b0a090",
+                }}
+              >
+                {ROOM_GUIDED_COPY.exitLabel}
+              </button>
+            </div>
+          </div>
+
+          {(principleBanner || sanatanInsightLine || roomPurposeLine) && (
+            <div
+              style={{
+                background: "rgba(255, 251, 244, 0.9)",
+                border: "1px solid rgba(214,183,130,0.28)",
+                borderRadius: 24,
+                padding: "18px 20px 26px",
+                boxShadow: "0 18px 42px rgba(67,33,4,0.08)",
+                backdropFilter: "blur(4px)",
+                overflow: "hidden",
+              }}
+            >
+              <button
+                onClick={() => {
+                  if (isDesktop) return;
+                  if (whyThisRoomLine) {
+                    void postRoomTelemetry({
+                      room_id: roomId,
+                      event_type: "why_this_viewed",
+                      render_id: renderId,
+                    } as any);
+                  }
+                  setWhyExpanded((v) => !v);
+                }}
+                data-testid="room-guided-why-this"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 18,
+                  width: "100%",
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  cursor: isDesktop ? "default" : "pointer",
+                  textAlign: "left",
+                  color: "#432104",
+                }}
+              >
+                <div
+                  style={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: "50%",
+                    background: "rgba(247, 238, 225, 0.9)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <img
+                    src="/lotus_icon.png"
+                    alt=""
+                    aria-hidden="true"
+                    style={{ width: 34, height: 28, opacity: 0.8 }}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div
+                    style={{
+                      fontSize: 26,
+                      fontWeight: 700,
+                      color: "#432104",
+                      lineHeight: 1.25,
+                      marginBottom: showWhyExpanded ? 16 : 0,
+                      fontFamily: "var(--kalpx-font-serif)",
+                    }}
+                  >
+                    {wisdomTitle}
+                  </div>
+                  <div
+                    style={{
+                      width: 76,
+                      height: 2,
+                      background: "rgba(200,155,57,0.7)",
+                    }}
+                  />
+                </div>
+                <span style={{ fontSize: 15, lineHeight: 1, color: "#C89B39" }}>
+                  {showWhyExpanded ? (
+                    <ChevronUp size={24} color="#C89B39" strokeWidth={2.5} />
+                  ) : (
+                    <ChevronDown size={24} color="#C89B39" strokeWidth={2.5} />
+                  )}
+                </span>
+              </button>
+
+              {showWhyExpanded && (
+                <div
+                  data-testid="room-why-this-expanded"
+                  style={{
+                    marginTop: 34,
+                    padding: "0 14px 4px 74px",
+                    fontSize: 18,
+                    color: "#3F352B",
+                    lineHeight: 1.95,
+                  }}
+                >
+                  {sanatanInsightLine && (
+                    <p style={{ margin: "0 0 28px" }}>{sanatanInsightLine}</p>
+                  )}
+                  {roomPurposeLine && (
+                    <p style={{ margin: 0 }}>{roomPurposeLine}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {interstitialLine && (
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => {
+              const action = pendingNextAction;
+              setInterstitialLine(null);
+              setPendingNextAction(null);
+              if (action) openAction(action);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                const action = pendingNextAction;
+                setInterstitialLine(null);
+                setPendingNextAction(null);
+                if (action) openAction(action);
+              }
+            }}
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(251, 246, 239, 0.93)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 200,
+              cursor: "pointer",
+            }}
+          >
+            <p
+              style={{
+                fontFamily: "var(--kalpx-font-serif)",
+                fontSize: 20,
+                lineHeight: "32px",
+                color: "#5C3A12",
+                fontStyle: "italic",
+                textAlign: "center",
+                padding: "0 40px",
+                margin: 0,
+              }}
+            >
+              {interstitialLine}
+            </p>
+            <p
+              style={{
+                fontFamily: "var(--kalpx-font-sans, system-ui, sans-serif)",
+                fontSize: 13,
+                color: "#A08060",
+                marginTop: 24,
+                letterSpacing: "0.5px",
+              }}
+            >
+              Tap when ready
+            </p>
+          </div>
+        )}
+
+        {mantrasOpeningCardAction && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "#FAF4E8",
+              zIndex: 50,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "0 32px",
+              textAlign: "center",
+            }}
+          >
+            <img
+              src="/lotus_icon.png"
+              alt=""
+              style={{ width: 48, height: 38, opacity: 0.88, marginBottom: 24 }}
+            />
+            <p
+              style={{
+                fontSize: 10,
+                fontWeight: 600,
+                letterSpacing: 1.6,
+                color: "#8b7a55",
+                textTransform: "uppercase" as const,
+                marginBottom: 14,
+              }}
+            >
+              MITRA INVITES YOU TO BEGIN WITH
+            </p>
+            <p
+              style={{
+                fontFamily: "var(--kalpx-font-serif)",
+                fontSize: 28,
+                color: "#432104",
+                fontWeight: 700,
+                lineHeight: 1.3,
+                marginBottom: 12,
+              }}
+            >
+              {mantrasOpeningCardAction.label}
+            </p>
+            {mantrasOpeningCardAction.helper_line && (
+              <p
+                style={{
+                  fontSize: 15,
+                  color: "#6b5a45",
+                  lineHeight: 1.5,
+                  marginBottom: 32,
+                }}
+              >
+                {mantrasOpeningCardAction.helper_line}
+              </p>
+            )}
+            <button
+              onClick={() => {
+                const act = mantrasOpeningCardAction;
+                setMantrasOpeningCardAction(null);
+                openAction(act, { skipOpeningCard: true });
+              }}
+              style={{
+                fontSize: 16,
+                fontWeight: 600,
+                color: "#432104",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                letterSpacing: 0.5,
+              }}
+            >
+              Begin →
+            </button>
+          </div>
+        )}
+
+        {exitConfirmVisible && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.45)",
+              zIndex: 400,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            onClick={() => setExitConfirmVisible(false)}
+          >
+            <div
+              style={{
+                background: "#FFF8EF",
+                borderRadius: 20,
+                width: "100%",
+                maxWidth: 440,
+                padding: "28px 28px 32px",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <p
+                style={{
+                  fontSize: 16,
+                  color: "#432104",
+                  textAlign: "center",
+                  lineHeight: 1.6,
+                  marginBottom: 24,
+                }}
+              >
+                This room will close. You can return anytime.
+              </p>
+              <button
+                onClick={handleConfirmExit}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  padding: "14px",
+                  borderRadius: 999,
+                  border: "1.5px solid #1C1C1E",
+                  background: "rgba(255,255,255,0.28)",
+                  fontSize: 15,
+                  color: "#432104",
+                  cursor: "pointer",
+                  marginBottom: 12,
+                }}
+              >
+                Yes, go now
+              </button>
+              <button
+                onClick={() => setExitConfirmVisible(false)}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  padding: "14px",
+                  borderRadius: 999,
+                  border: "1.5px solid #D8D8D8",
+                  background: "#F6F1EE",
+                  fontSize: 15,
+                  fontWeight: 600,
+                  color: "#432104",
+                  cursor: "pointer",
+                }}
+              >
+                Stay in room
+              </button>
+            </div>
+          </div>
+        )}
+
+        {stepsOpen && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(30,20,10,0.45)",
+              zIndex: 999,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            onClick={() => setStepsOpen(false)}
+          >
+            <div
+              style={{
+                background: "#FFF8EF",
+                borderRadius: 22,
+                width: "100%",
+                maxWidth: 620,
+                padding: "24px 0 28px",
+                maxHeight: "72dvh",
+                overflowY: "auto",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <p
+                style={{
+                  fontSize: 15,
+                  fontWeight: 600,
+                  color: "#432104",
+                  textAlign: "center",
+                  margin: "0 0 16px",
+                }}
+              >
+                Steps in this space
+              </p>
+              {nonExitActions.map((a: any, i: number) => (
+                <button
+                  key={a.action_id}
+                  data-testid={`room-step-${a.action_id}`}
+                  onClick={() => openAction(a)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    width: "100%",
+                    padding: "12px 20px",
+                    borderBottom: "1px solid rgba(200,180,154,0.2)",
+                    background:
+                      a.action_id === recId
+                        ? "rgba(201,168,76,0.08)"
+                        : "transparent",
+                    borderLeft: "none",
+                    borderRight: "none",
+                    borderTop: "none",
+                    cursor: "pointer",
+                    textAlign: "left",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 13,
+                      color: "#9f9f9f",
+                      minWidth: 20,
+                      textAlign: "right",
+                    }}
+                  >
+                    {i + 1}
+                  </span>
+                  <span style={{ flex: 1, fontSize: 14, color: "#432104" }}>
+                    {a.label}
+                  </span>
+                  {a.action_id === recId && (
+                    <span
+                      style={{
+                        fontSize: 11,
+                        color: "#8B6914",
+                        fontStyle: "italic",
+                      }}
+                    >
+                      suggested
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     );
   }
 
@@ -1123,23 +1860,39 @@ export function RoomGuidedSection({
             alt=""
             style={{ width: 48, height: 38, opacity: 0.88, marginBottom: 24 }}
           />
-          <p style={{
-            fontSize: 10, fontWeight: 600, letterSpacing: 1.6, color: "#8b7a55",
-            textTransform: "uppercase" as const, marginBottom: 14,
-          }}>
+          <p
+            style={{
+              fontSize: 10,
+              fontWeight: 600,
+              letterSpacing: 1.6,
+              color: "#8b7a55",
+              textTransform: "uppercase" as const,
+              marginBottom: 14,
+            }}
+          >
             MITRA INVITES YOU TO BEGIN WITH
           </p>
-          <p style={{
-            fontFamily: "var(--kalpx-font-serif)",
-            fontSize: 28, color: "#432104", fontWeight: 700,
-            lineHeight: 1.3, marginBottom: 12,
-          }}>
+          <p
+            style={{
+              fontFamily: "var(--kalpx-font-serif)",
+              fontSize: 28,
+              color: "#432104",
+              fontWeight: 700,
+              lineHeight: 1.3,
+              marginBottom: 12,
+            }}
+          >
             {mantrasOpeningCardAction.label}
           </p>
           {mantrasOpeningCardAction.helper_line && (
-            <p style={{
-              fontSize: 15, color: "#6b5a45", lineHeight: 1.5, marginBottom: 32,
-            }}>
+            <p
+              style={{
+                fontSize: 15,
+                color: "#6b5a45",
+                lineHeight: 1.5,
+                marginBottom: 32,
+              }}
+            >
               {mantrasOpeningCardAction.helper_line}
             </p>
           )}
@@ -1150,8 +1903,12 @@ export function RoomGuidedSection({
               openAction(act, { skipOpeningCard: true });
             }}
             style={{
-              fontSize: 16, fontWeight: 600, color: "#432104",
-              background: "none", border: "none", cursor: "pointer",
+              fontSize: 16,
+              fontWeight: 600,
+              color: "#432104",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
               letterSpacing: 0.5,
             }}
           >
@@ -1164,32 +1921,50 @@ export function RoomGuidedSection({
       {exitConfirmVisible && (
         <div
           style={{
-            position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)",
-            zIndex: 400, display: "flex", alignItems: "flex-end", justifyContent: "center",
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.45)",
+            zIndex: 400,
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "center",
           }}
           onClick={() => setExitConfirmVisible(false)}
         >
           <div
             style={{
-              background: "#FFF8EF", borderRadius: "18px 18px 0 0",
-              width: "100%", maxWidth: 480,
+              background: "#FFF8EF",
+              borderRadius: "18px 18px 0 0",
+              width: "100%",
+              maxWidth: 480,
               padding: "24px 28px calc(32px + env(safe-area-inset-bottom))",
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <p style={{
-              fontSize: 16, color: "#432104", textAlign: "center",
-              lineHeight: 1.6, marginBottom: 24,
-            }}>
+            <p
+              style={{
+                fontSize: 16,
+                color: "#432104",
+                textAlign: "center",
+                lineHeight: 1.6,
+                marginBottom: 24,
+              }}
+            >
               This room will close. You can return anytime.
             </p>
             <button
               onClick={handleConfirmExit}
               style={{
-                display: "block", width: "100%", padding: "14px",
-                borderRadius: 999, border: "1.5px solid #1C1C1E",
-                background: "rgba(255,255,255,0.28)", fontSize: 15,
-                color: "#432104", cursor: "pointer", marginBottom: 12,
+                display: "block",
+                width: "100%",
+                padding: "14px",
+                borderRadius: 999,
+                border: "1.5px solid #1C1C1E",
+                background: "rgba(255,255,255,0.28)",
+                fontSize: 15,
+                color: "#432104",
+                cursor: "pointer",
+                marginBottom: 12,
               }}
             >
               Yes, go now
@@ -1197,10 +1972,16 @@ export function RoomGuidedSection({
             <button
               onClick={() => setExitConfirmVisible(false)}
               style={{
-                display: "block", width: "100%", padding: "14px",
-                borderRadius: 999, border: "1.5px solid #D8D8D8",
-                background: "#F6F1EE", fontSize: 15, fontWeight: 600,
-                color: "#432104", cursor: "pointer",
+                display: "block",
+                width: "100%",
+                padding: "14px",
+                borderRadius: 999,
+                border: "1.5px solid #D8D8D8",
+                background: "#F6F1EE",
+                fontSize: 15,
+                fontWeight: 600,
+                color: "#432104",
+                cursor: "pointer",
               }}
             >
               Stay in room
@@ -1297,7 +2078,6 @@ export function RoomGuidedSection({
           </div>
         </div>
       )}
-
     </div>
   );
 }

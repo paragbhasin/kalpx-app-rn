@@ -801,6 +801,7 @@ export default function FourDoorHomeContainer({
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    backgroundColor: Platform.OS === "android" ? "#FBF4EF" : "transparent",
   },
   screenBackground: {
     opacity: 1,
@@ -902,7 +903,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     borderWidth: 1,
     borderColor: "rgba(201,168,76,0.28)",
-    backgroundColor: "rgba(255,255,255,0.72)",
+    backgroundColor: Platform.OS === "android" ? "#FEFAF4" : "rgba(255,255,255,0.72)",
     paddingHorizontal: 16,
     paddingVertical: 14,
 
@@ -955,7 +956,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     borderWidth: 1,
     borderColor: "rgba(201,168,76,0.28)",
-    backgroundColor: "rgba(255,251,245,0.9)",
+    backgroundColor: Platform.OS === "android" ? "#FFF9F2" : "rgba(255,251,245,0.9)",
     paddingHorizontal: 16,
     paddingVertical: 18,
     ...platformShadow("#432104", 8, 0.08, 18, 4),
@@ -1003,7 +1004,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     borderColor: "rgba(201,168,76,0.38)",
-    backgroundColor: "rgba(255,255,255,0.82)",
+    backgroundColor: Platform.OS === "android" ? "#FEFAF4" : "rgba(255,255,255,0.82)",
     paddingHorizontal: 16,
     paddingVertical: 14,
     ...platformShadow("#C9A84C", 6, 0.12, 14, 2),
@@ -1050,7 +1051,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 1,
     borderColor: "rgba(201,168,76,0.38)",
-    backgroundColor: "rgba(255,255,255,0.78)",
+    backgroundColor: Platform.OS === "android" ? "#FEFAF4" : "rgba(255,255,255,0.78)",
     paddingVertical: 8,
     paddingHorizontal: 8,
     alignItems: "center",

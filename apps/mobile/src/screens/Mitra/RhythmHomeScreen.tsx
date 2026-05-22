@@ -349,11 +349,6 @@ export default function RhythmHomeScreen({
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.shell}>
-          <Image
-            source={require("../../../assets/leaves-bird.webp")}
-            style={styles.heroLeaves}
-          />
-
           <Text style={styles.headerTitle}>My Rhythm</Text>
 
           {!hasRhythm ? (
@@ -426,15 +421,6 @@ const styles = StyleSheet.create({
     maxWidth: 420,
     alignSelf: "center",
     position: "relative",
-  },
-  heroLeaves: {
-    position: "absolute",
-    top: -140,
-    right: -60,
-    width: 300,
-    height: 300,
-
-    resizeMode: "contain",
   },
   emptyStateCard: {
     backgroundColor: "rgba(250,245,240,0.95)",

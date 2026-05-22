@@ -24,7 +24,6 @@ import { useScreenStore } from '../../engine/useScreenBridge';
 import { Fonts } from '../../theme/fonts';
 
 const BEIGE_BG = require('../../../assets/beige_bg.webp');
-const LEAF_ART = require('../../../assets/leaves-bird.webp');
 
 const DOOR_ROUTES: Record<string, string> = {
   my_rhythm: 'RhythmHome',
@@ -200,12 +199,6 @@ export default function QuickCheckinScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.shell}>
-            <Image
-              source={LEAF_ART}
-              style={styles.leafArt}
-              resizeMode="contain"
-            />
-
             {!result ? (
               <>
                 <View style={styles.introBlock}>
@@ -367,14 +360,6 @@ const styles = StyleSheet.create({
     maxWidth: 420,
     alignSelf: 'center',
     position: 'relative',
-  },
-  leafArt: {
-    position: 'absolute',
-    top: -118,
-    right: -30,
-    width: 245,
-    height: 245,
-    opacity: 0.36,
   },
   introBlock: {
     alignItems: 'center',

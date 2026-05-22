@@ -139,10 +139,6 @@ export default function MitraIntentionScreen() {
       source={require("../../../assets/beige_bg.webp")}
       style={styles.container}
     >
-      <Image
-        source={require("../../../assets/leaves-bird.webp")}
-        style={styles.topRightLeaves}
-      />
       <SafeAreaView style={styles.safe}>
         <ScrollView
           contentContainerStyle={styles.scroll}
@@ -224,15 +220,6 @@ const styles = StyleSheet.create({
   },
   safe: {
     flex: 1,
-  },
-  topRightLeaves: {
-    position: "absolute",
-    top: -110,
-    right: 0,
-    width: 200,
-    height: 300,
-    resizeMode: "contain",
-    opacity: 0.75,
   },
   scroll: {
     paddingHorizontal: 20,

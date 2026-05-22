@@ -114,7 +114,6 @@ const BAND_ART: Record<RhythmTimeBand, React.ComponentType<any>> = {
   night: NightIcon,
 };
 const RHYTHM_BG = require("../../../assets/beige_bg.webp");
-const RHYTHM_LEAF_ART = require("../../../assets/leaves-bird.webp");
 
 const MOMENT_COPY: Record<RhythmTimeBand, { label: string; desc: string }> = {
   morning: {
@@ -1006,11 +1005,6 @@ export default function RhythmSetupScreen({
           showsVerticalScrollIndicator={false}
         >
           <View style={wStyles.hero}>
-            <Image
-              source={RHYTHM_LEAF_ART}
-              style={wStyles.leafArt}
-              resizeMode="contain"
-            />
 
             {/* {renderStepDots("moments")} */}
             <Text style={wStyles.buildheading}>Build Your Daily Rhythm</Text>
@@ -1110,11 +1104,6 @@ export default function RhythmSetupScreen({
           showsVerticalScrollIndicator={false}
         >
           <View style={wStyles.hero}>
-            <Image
-              source={RHYTHM_LEAF_ART}
-              style={wStyles.leafArt}
-              resizeMode="contain"
-            />
 
             <Text style={wStyles.heading}>
               What should each{"\n"}moment give you?
@@ -1222,11 +1211,6 @@ export default function RhythmSetupScreen({
             showsVerticalScrollIndicator={false}
           >
             <View style={wStyles.hero}>
-              <Image
-                source={RHYTHM_LEAF_ART}
-                style={wStyles.leafArt}
-                resizeMode="contain"
-              />
               <Text style={[wStyles.heading, wStyles.suggestionHeading]}>
                 Mitra suggests this for you.
               </Text>
@@ -1487,11 +1471,6 @@ export default function RhythmSetupScreen({
           showsVerticalScrollIndicator={false}
         >
           <View style={wStyles.hero}>
-            <Image
-              source={RHYTHM_LEAF_ART}
-              style={wStyles.leafArt}
-              resizeMode="contain"
-            />
             <View style={wStyles.confirmSparkleWrap}>
               <Text style={wStyles.confirmSparkle}>✦</Text>
             </View>
@@ -1592,11 +1571,6 @@ export default function RhythmSetupScreen({
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.hero}>
-            <Image
-              source={RHYTHM_LEAF_ART}
-              style={styles.leafArt}
-              resizeMode="contain"
-            />
 
             <Text style={styles.headerTitle}>
               {editMode ? "Edit My Rhythm" : "Set Up My Rhythm"}
@@ -1857,14 +1831,6 @@ const wStyles = StyleSheet.create({
   backgroundImage: { opacity: 0.98 },
   scroll: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 48 },
   hero: { position: "relative", paddingTop: 6 },
-  leafArt: {
-    position: "absolute",
-    right: -70,
-    top: -110,
-    width: 300,
-    height: 300,
-    opacity: 0.78,
-  },
   brandBlock: { marginLeft: 2, marginBottom: 26 },
   brandTitle: {
     fontSize: 34,
@@ -2381,14 +2347,6 @@ const styles = StyleSheet.create({
   backgroundImage: { opacity: 0.98 },
   scrollContent: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40 },
   hero: { position: "relative", paddingTop: 6, marginBottom: 18 },
-  leafArt: {
-    position: "absolute",
-    right: -70,
-    top: -110,
-    width: 300,
-    height: 300,
-    opacity: 0.78,
-  },
   brandBlock: { marginLeft: 4, marginBottom: 26 },
   brandTitle: {
     fontSize: 36,

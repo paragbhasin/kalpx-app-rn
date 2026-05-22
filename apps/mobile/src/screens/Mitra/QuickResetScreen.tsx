@@ -795,11 +795,6 @@ export default function QuickResetScreen({
             style={styles.background}
             imageStyle={styles.backgroundImage}
           >
-            <Image
-              source={require("../../../assets/leaves-bird.webp")}
-              resizeMode="contain"
-              style={styles.pickerLeaves}
-            />
             <View style={styles.pickerHeader}>
               <TouchableOpacity
                 onPress={() => setPickerVisible(false)}
@@ -1220,14 +1215,6 @@ const styles = StyleSheet.create({
     paddingTop: 18,
     paddingBottom: 12,
     position: "relative",
-  },
-  pickerLeaves: {
-    position: "absolute",
-    top: -80,
-    right: -50,
-    width: 300,
-    height: 300,
-    opacity: 0.95,
   },
   pickerBackBtn: {
     alignSelf: "flex-start",

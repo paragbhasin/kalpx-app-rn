@@ -21,7 +21,8 @@
         "buildType": "app-bundle"
       },
       "ios": {
-        "buildConfiguration": "Release"
+        "buildConfiguration": "Release",
+        "image": "latest"
       }
     },
     "preview": {
@@ -62,7 +63,7 @@
         "track": "production"
       },
       "ios": {
-        "appleId": "paragbhasin@gmail.com",
+        "appleId": "parag.bhasin@trritan.com",
         "ascAppId": "6755144623",
         "appleTeamId": "9G5NZ5LBRU"
       }

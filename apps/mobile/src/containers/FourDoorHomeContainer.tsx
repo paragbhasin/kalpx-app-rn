@@ -64,8 +64,7 @@ const FEELING_OPTIONS: FeelingOption[] = [
 
 const HERO_DAY = require("../../assets/imgsun.webp");
 const HERO_NIGHT = require("../../assets/night-home.webp");
-const SHELL_HEADER_HEIGHT =
-  Platform.OS === "android" ? 45 + (StatusBar.currentHeight || 0) : 45;
+const SHELL_HEADER_HEIGHT = 45;
 
 function getRhythmTimeBand(): "morning" | "afternoon" | "night" {
   const hour = new Date().getHours();
@@ -491,7 +490,7 @@ export default function FourDoorHomeContainer({
     <View style={styles.screen}>
       <ScrollView
         style={styles.root}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
         showsVerticalScrollIndicator={false}
       >
         <View
@@ -810,7 +809,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 160,
   },
   centeredWrap: {
     flex: 1,

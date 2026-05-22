@@ -138,8 +138,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   logo: {
-    width: 118,
-    height: 48,
+    height: 40,
+    aspectRatio: 118 / 48,
+    maxWidth: 118,
     marginLeft: 6,
     marginBottom: 24,
   },

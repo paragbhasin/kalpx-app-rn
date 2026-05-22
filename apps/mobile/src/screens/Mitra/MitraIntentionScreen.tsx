@@ -21,9 +21,9 @@ const M3Icon = ({ width, height, style }: { width?: number; height?: number; sty
 const Mp2Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/door_chant.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const Mp3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/door_path.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const Mp4Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/door_mitra.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
-import FontSize from "../../components/FontSize";
 import { useScrollContext } from "../../context/ScrollContext";
 import { useScreenStore } from "../../engine/useScreenBridge";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import store from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
@@ -59,6 +59,7 @@ const OPTION_ACCENTS = {
 
 export default function MitraIntentionScreen() {
   const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
   const { handleScroll } = useScrollContext();
   const isLoggedIn = useSelector(
     (state: any) => !!(state.login?.user || state.socialLoginReducer?.user),
@@ -142,7 +143,7 @@ export default function MitraIntentionScreen() {
     >
       <SafeAreaView style={styles.safe}>
         <ScrollView
-          contentContainerStyle={styles.scroll}
+          contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 56 }]}
           onScroll={handleScroll}
           scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
@@ -213,8 +214,6 @@ export default function MitraIntentionScreen() {
   );
 }
 
-const TAB_BAR_HEIGHT = FontSize.CONSTS.DEVICE_HEIGHT * 0.07;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -225,7 +224,6 @@ const styles = StyleSheet.create({
   scroll: {
     paddingHorizontal: 20,
     paddingTop: 36,
-    paddingBottom: TAB_BAR_HEIGHT + 96,
   },
   header: {
     alignItems: "stretch",
@@ -245,7 +243,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   line: {
-    width: 120,
+    flex: 1,
     height: 1,
     backgroundColor: "rgba(214, 166, 58, 0.28)",
   },

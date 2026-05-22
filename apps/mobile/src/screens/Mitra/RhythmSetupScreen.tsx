@@ -1923,7 +1923,7 @@ const wStyles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 22,
-
+    flexShrink: 0,
     backgroundColor: "#FCF8EC",
     alignItems: "center",
     justifyContent: "center",
@@ -1962,7 +1962,6 @@ const wStyles = StyleSheet.create({
     color: "#7B6550",
     fontFamily: Fonts.sans.regular,
     lineHeight: 22,
-    maxWidth: 220,
   },
   check: {
     width: 20,
@@ -2389,7 +2388,7 @@ const styles = StyleSheet.create({
     color: "#7B6550",
     lineHeight: 19,
   },
-  chevron: { fontSize: 26, color: "#C99317", marginTop: -4 },
+  chevron: { fontSize: 26, lineHeight: 26, color: "#C99317" },
   bandBody: { paddingTop: 16, gap: 12 },
   addedItem: {
     flexDirection: "column",

@@ -401,12 +401,12 @@ const styles = StyleSheet.create({
   optionGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    rowGap: 16,
+    gap: 12,
     marginBottom: 22,
   },
   optionCard: {
-    width: '48%',
+    flex: 1,
+    minWidth: 130,
     padding: 18,
     borderRadius: 28,
     borderWidth: 1,

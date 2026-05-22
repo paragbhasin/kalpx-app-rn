@@ -41,6 +41,7 @@ import {
 } from "../../engine/mitraApi";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import { navigate as rootNavigate } from "../../Shared/Routes/NavigationService";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Fonts } from "../../theme/fonts";
 import { platformShadow } from "../../theme/shadows";
 
@@ -189,6 +190,7 @@ export default function QuickResetScreen({
   embedded?: boolean;
 }) {
   const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
   const { goBack, updateBackground, updateHeaderHidden } = useScreenStore();
 
   useFocusEffect(
@@ -652,7 +654,7 @@ export default function QuickResetScreen({
           imageStyle={styles.backgroundImage}
         >
           <ScrollView
-            contentContainerStyle={styles.scrollContent}
+            contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
             showsVerticalScrollIndicator={false}
           >
             {renderOpeningSurface(
@@ -683,7 +685,7 @@ export default function QuickResetScreen({
           imageStyle={styles.backgroundImage}
         >
           <ScrollView
-            contentContainerStyle={styles.scrollContent}
+            contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
             showsVerticalScrollIndicator={false}
           >
             {renderOpeningSurface(selectedMantra, [
@@ -865,7 +867,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 24,
     paddingTop: 22,
-    paddingBottom: 64,
     alignItems: "center",
     gap: 20,
   },

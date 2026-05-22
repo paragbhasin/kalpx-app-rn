@@ -58,6 +58,7 @@ import { useScreenStore } from "../../../engine/useScreenBridge";
 import store from "../../../store";
 import { screenActions } from "../../../store/screenSlice";
 import { Fonts } from "../../../theme/fonts";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 /**
  * Read a slot from screenData.joy_room with null-safe "" fallback.
@@ -107,6 +108,7 @@ const JoyRoomContainer: React.FC<Props> = () => {
   const [inputValue, setInputValue] = useState("");
   const [actionsUsed, setActionsUsed] = useState<string[]>([]);
   const [isMuted, setIsMuted] = useState(false);
+  const insets = useSafeAreaInsets();
   const soundRef = useRef<Audio.Sound | null>(null);
   const soundLoadTokenRef = useRef(0);
   const ssRef = useRef(ss);
@@ -496,7 +498,7 @@ You’re exactly where you need to be right now.`;
 
   const renderInput = () => (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.inputWrap}
     >
       {!!inputNamingPrompt && (
@@ -532,7 +534,7 @@ You’re exactly where you need to be right now.`;
     const seconds = timerSeconds % 60;
     const timeStr = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
     return (
-      <View style={styles.walkContainer}>
+      <View style={[styles.walkContainer, { paddingBottom: Math.max(insets.bottom + 40, 64) }]}>
         <View style={styles.walkHeader}>
           <TouchableOpacity
             style={styles.endReturnBtn}
@@ -559,7 +561,7 @@ You’re exactly where you need to be right now.`;
   };
 
   const renderSit = () => (
-    <View style={styles.sitContainer}>
+    <View style={[styles.sitContainer, { paddingBottom: Math.max(insets.bottom + 40, 64) }]}>
       <View style={styles.stayTopRow}>
         <TouchableOpacity
           style={styles.floatingMuteBtn}
@@ -634,7 +636,7 @@ You’re exactly where you need to be right now.`;
           </TouchableOpacity>
         </View>
       )}
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(insets.bottom + 40, 64) }]}>
         {step !== "walk" && step !== "sit" && (
           <Animated.View style={{ opacity: fade1, marginBottom: 40 }}>
             {!!openingLine && (

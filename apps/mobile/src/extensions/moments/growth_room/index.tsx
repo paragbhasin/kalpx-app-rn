@@ -66,6 +66,7 @@ import { useScreenStore } from "../../../engine/useScreenBridge";
 import store from "../../../store";
 import { screenActions } from "../../../store/screenSlice";
 import { Fonts } from "../../../theme/fonts";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 /**
  * Read a slot from screenData.growth_room with null-safe "" fallback.
@@ -133,6 +134,7 @@ const GrowthRoomContainer: React.FC<Props> = () => {
     useState<InquiryCategory | null>(null);
   const [inputValue, setInputValue] = useState("");
   const [actionsUsed, setActionsUsed] = useState<string[]>([]);
+  const insets = useSafeAreaInsets();
 
   const fade1 = useRef(new Animated.Value(0)).current;
   const fade2 = useRef(new Animated.Value(0)).current;
@@ -586,7 +588,7 @@ const GrowthRoomContainer: React.FC<Props> = () => {
 
   const renderJournal = () => (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.inputWrap}
     >
       {!!inputInquiryPrompt && (
@@ -644,7 +646,7 @@ const GrowthRoomContainer: React.FC<Props> = () => {
           </TouchableOpacity>
         </View>
       )}
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(insets.bottom + 40, 64) }]}>
         {(step === "opening" || step === "options") && (
           <Animated.View style={{ opacity: fade1, marginBottom: 40 }}>
             {!!openingLine && (

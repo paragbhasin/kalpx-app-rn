@@ -1012,7 +1012,7 @@ const styles = StyleSheet.create({
   },
   verseTextGroup: {
     width: "100%",
-    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    backgroundColor: Platform.OS === "android" ? "#FEFCF9" : "rgba(255, 255, 255, 0.4)",
     borderRadius: 12,
     borderWidth: 1,
     borderColor: "rgba(184, 148, 80, 0.1)",
@@ -1029,7 +1029,7 @@ const styles = StyleSheet.create({
     right: 5,
   },
   expandedSection: {
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    backgroundColor: Platform.OS === "android" ? "#FEFCF9" : "rgba(255, 255, 255, 0.8)",
   },
   verseIast: {
     fontSize: 13,
@@ -1069,7 +1069,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(218,194,142,0.65)",
     borderRadius: 11,
-    backgroundColor: "rgba(255,255,255,0.72)",
+    backgroundColor: Platform.OS === "android" ? "#FEFCF9" : "rgba(255,255,255,0.72)",
     paddingHorizontal: 8,
     paddingVertical: 10,
   },
@@ -1141,7 +1141,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(212,160,23,0.38)",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.42)",
+    backgroundColor: Platform.OS === "android" ? "#FEFCF9" : "rgba(255,255,255,0.42)",
   },
   secondaryActionIcon: {
     fontSize: 22,
@@ -1244,7 +1244,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     borderWidth: 1,
     borderColor: "rgba(218,194,142,0.55)",
-    backgroundColor: "rgba(255,255,255,0.82)",
+    backgroundColor: Platform.OS === "android" ? "#FEFCF9" : "rgba(255,255,255,0.82)",
     ...platformShadow("#C9A84C", 6, 0.06, 14, 2),
     gap: 10,
     marginBottom: 18,

@@ -18,6 +18,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Platform,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import LibrarySearchModal, {
@@ -498,7 +499,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(201,168,76,0.35)",
     borderRadius: 28,
-    backgroundColor: "rgba(255,252,247,0.9)",
+    backgroundColor: Platform.OS === "android" ? "#FDF9F3" : "rgba(255,252,247,0.9)",
     padding: 15,
     marginBottom: 18,
     ...platformShadow("#C9A84C", 18, 0.08, 24, 4),
@@ -590,7 +591,7 @@ const styles = StyleSheet.create({
     borderRadius: 11,
     borderWidth: 1,
     borderColor: "rgba(201,168,76,0.55)",
-    backgroundColor: "rgba(255,252,247,0.6)",
+    backgroundColor: Platform.OS === "android" ? "#FDF9F3" : "rgba(255,252,247,0.6)",
     alignItems: "center",
     justifyContent: "center",
     marginTop: 8,

@@ -11,6 +11,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Platform,
 } from "react-native";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import type { RootState } from "../../store";
@@ -143,7 +144,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   card: {
-    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    backgroundColor: Platform.OS === "android" ? "#FEFCF9" : "rgba(255, 255, 255, 0.4)",
     borderRadius: 26,
     padding: 24,
     borderWidth: 1,

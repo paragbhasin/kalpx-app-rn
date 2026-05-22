@@ -51,6 +51,7 @@ import { useScreenStore } from "../engine/useScreenBridge";
 import { setHomeData } from "../store/doorSlice";
 import { Fonts } from "../theme/fonts";
 import { TimePickerModal } from "../components/TimePickerModal";
+import { platformShadow } from "../theme/shadows";
 
 type FeelingOption = "Agitated" | "Drained" | "Steady" | "Open";
 
@@ -905,11 +906,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
 
-    shadowColor: "#432104",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    elevation: 4,
+    ...platformShadow("#432104", 8, 0.08, 18, 4),
   },
   doorIconWrap: {
     width: 48,
@@ -937,8 +934,7 @@ const styles = StyleSheet.create({
   },
   doorCardHighlighted: {
     borderColor: "rgba(201,168,76,0.55)",
-    shadowColor: "#C9A84C",
-    shadowOpacity: 0.16,
+    ...platformShadow("#C9A84C", 6, 0.16, 12, 2),
   },
   doorOrientationLine: {
     color: "rgba(67,33,4,0.38)",
@@ -962,11 +958,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,251,245,0.9)",
     paddingHorizontal: 16,
     paddingVertical: 18,
-    shadowColor: "#432104",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    elevation: 4,
+    ...platformShadow("#432104", 8, 0.08, 18, 4),
     marginTop: 4,
   },
   checkinHeaderRow: {
@@ -1014,11 +1006,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.82)",
     paddingHorizontal: 16,
     paddingVertical: 14,
-    shadowColor: "#C9A84C",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 14,
-    elevation: 2,
+    ...platformShadow("#C9A84C", 6, 0.12, 14, 2),
   },
   suggestionButtonText: {
     color: "#432104",
@@ -1076,11 +1064,7 @@ const styles = StyleSheet.create({
   feelingChipSelected: {
     borderColor: "rgba(201,168,76,0.85)",
     backgroundColor: "rgba(243,220,168,0.95)",
-    shadowColor: "#C9A84C",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.16,
-    shadowRadius: 12,
-    elevation: 2,
+    ...platformShadow("#C9A84C", 6, 0.16, 12, 2),
   },
   feelingChipDisabled: {
     opacity: 0.7,

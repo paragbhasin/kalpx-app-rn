@@ -27,6 +27,7 @@ import { useScreenStore } from "../../engine/useScreenBridge";
 import store from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
+import { platformShadow } from "../../theme/shadows";
 
 const PENDING_KEY = "mitra_intention_pending";
 
@@ -272,11 +273,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
-    shadowColor: "#C9A84C",
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.1,
-    shadowRadius: 40,
-    elevation: 4,
+    ...platformShadow("#C9A84C", 16, 0.1, 40, 4),
   },
   iconContainer: {
     width: 40,

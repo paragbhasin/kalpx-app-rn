@@ -22,6 +22,7 @@ import { executeAction } from '../../engine/actionExecutor';
 import { postQuickCheckin } from '../../engine/mitraApi';
 import { useScreenStore } from '../../engine/useScreenBridge';
 import { Fonts } from '../../theme/fonts';
+import { platformShadow } from "../../theme/shadows";
 
 const BEIGE_BG = require('../../../assets/beige_bg.webp');
 
@@ -411,19 +412,13 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(212,160,23,0.35)',
     backgroundColor: 'rgba(255,255,255,0.86)',
     alignItems: 'center',
-    shadowColor: '#C9A84C',
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 2,
+    ...platformShadow("#C9A84C", 8, 0.08, 18, 2),
   },
   optionCardActive: {
     borderWidth: 1.6,
     borderColor: '#D4A017',
     backgroundColor: 'rgba(255,250,241,0.96)',
-    shadowOpacity: 0.12,
-    shadowRadius: 22,
-    elevation: 3,
+    ...platformShadow("#432104", 6, 0.12, 22, 3),
   },
   optionIconWrap: {
     width: 50,
@@ -471,11 +466,7 @@ const styles = StyleSheet.create({
     borderRadius: 11,
     backgroundColor: '#C99317',
     alignItems: 'center',
-    shadowColor: '#C99317',
-    shadowOpacity: 0.2,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 3,
+    ...platformShadow("#C99317", 10, 0.2, 20, 3),
   },
   goldBtnDisabled: {
     opacity: 0.45,
@@ -500,11 +491,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 26,
     paddingBottom: 20,
-    shadowColor: '#C9A84C',
-    shadowOpacity: 0.12,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 3,
+    ...platformShadow("#C9A84C", 12, 0.12, 24, 3),
   },
   resultTitle: {
     fontFamily: Fonts.serif.bold,

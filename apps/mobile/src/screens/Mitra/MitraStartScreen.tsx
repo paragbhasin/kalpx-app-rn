@@ -15,6 +15,7 @@ import {
 import { useScreenStore } from "../../engine/useScreenBridge";
 import type { RootState } from "../../store";
 import { Fonts } from "../../theme/fonts";
+import { platformShadow } from "../../theme/shadows";
 
 const INTRO_LINES = [
   "Hi. I am Mitra.",
@@ -147,11 +148,7 @@ const styles = StyleSheet.create({
     padding: 24,
     borderWidth: 1,
     borderColor: "rgba(217, 190, 137, 0.65)",
-    shadowColor: "#432104",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 5,
+    ...platformShadow("#432104", 10, 0.1, 20, 5),
   },
   title: {
     fontFamily: Fonts.serif.bold,
@@ -212,11 +209,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     overflow: "hidden",
     marginBottom: 12,
-    shadowColor: "#845B0A",
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.22,
-    shadowRadius: 24,
-    elevation: 8,
+    ...platformShadow("#845B0A", 12, 0.22, 24, 8),
   },
   gradient: {
     paddingVertical: 16,
@@ -237,11 +230,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 1,
     borderColor: "rgba(201, 168, 76, 0.55)",
-    shadowColor: "#432104",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.08,
-    shadowRadius: 24,
-    elevation: 4,
+    ...platformShadow("#432104", 10, 0.08, 24, 4),
   },
   returningText: {
     color: "#432104",

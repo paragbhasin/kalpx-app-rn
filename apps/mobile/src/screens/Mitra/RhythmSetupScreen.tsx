@@ -81,6 +81,7 @@ import {
   screenActions,
 } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
+import { platformShadow } from "../../theme/shadows";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -1911,11 +1912,7 @@ const wStyles = StyleSheet.create({
     borderColor: "rgba(201,168,76,0.26)",
     backgroundColor: "rgba(245,245,240,0.45)",
     marginBottom: 16,
-    shadowColor: "#432104",
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 1,
+    ...platformShadow("#432104", 10, 0.08, 18, 1),
   },
   momentCardSelected: {
     borderColor: "#C99317",
@@ -2018,19 +2015,12 @@ const wStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 10,
-    shadowColor: "#432104",
-    shadowOpacity: 0.05,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 1,
+    ...platformShadow("#432104", 6, 0.05, 14, 1),
   },
   purposeChipActive: {
     borderColor: "#C99317",
     backgroundColor: "rgba(255,251,244,0.98)",
-    shadowColor: "#DEB861",
-    shadowOpacity: 0.14,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 12 },
+    ...platformShadow("#DEB861", 12, 0.14, 24, 2),
   },
   purposeChipIconWrap: {
     alignItems: "center",
@@ -2071,11 +2061,7 @@ const wStyles = StyleSheet.create({
     backgroundColor: "rgba(255,251,244,0.95)",
     padding: 15,
     marginBottom: 18,
-    shadowColor: "#432104",
-    shadowOpacity: 0.06,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 1,
+    ...platformShadow("#432104", 10, 0.06, 18, 1),
   },
   suggestionMetaRow: {
     flexDirection: "row",
@@ -2254,11 +2240,7 @@ const wStyles = StyleSheet.create({
     backgroundColor: "rgba(255,251,244,0.95)",
     paddingHorizontal: 16,
     paddingVertical: 18,
-    shadowColor: "#432104",
-    shadowOpacity: 0.05,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 1,
+    ...platformShadow("#432104", 6, 0.05, 14, 1),
   },
   confirmCardHeader: {
     flexDirection: "row",
@@ -2379,11 +2361,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(226, 201, 151, 0.72)",
     borderRadius: 15,
     backgroundColor: "rgba(255, 250, 242, 0.96",
-    shadowColor: "#8A6837",
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 1,
+    ...platformShadow("#8A6837", 10, 0.08, 18, 1),
   },
   bandHeaderCardExpanded: {
     backgroundColor: "rgba(248, 242, 230, 0.96)",

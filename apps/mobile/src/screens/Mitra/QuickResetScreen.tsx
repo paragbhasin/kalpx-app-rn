@@ -42,6 +42,7 @@ import {
 import { useScreenStore } from "../../engine/useScreenBridge";
 import { navigate as rootNavigate } from "../../Shared/Routes/NavigationService";
 import { Fonts } from "../../theme/fonts";
+import { platformShadow } from "../../theme/shadows";
 
 type Phase = "loading" | "opening" | "preview" | "done" | "error";
 const VISUAL_BEAD_COUNT = 18;
@@ -923,10 +924,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   previewBead: {
-    shadowColor: "#6B431A",
-    shadowOpacity: 0.22,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
+    ...platformShadow("#6B431A", 2, 0.22, 4, 2),
   },
   previewBeadPointer: {
     position: "absolute",
@@ -951,11 +949,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 2,
-    shadowColor: "#B89450",
-    shadowOpacity: 0.16,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    ...platformShadow("#B89450", 2, 0.16, 10, 2),
   },
   previewTapText: {
     fontSize: 20,
@@ -1251,11 +1245,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(218,194,142,0.55)",
     backgroundColor: "rgba(255,255,255,0.82)",
-    shadowColor: "#C9A84C",
-    shadowOpacity: 0.06,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 2,
+    ...platformShadow("#C9A84C", 6, 0.06, 14, 2),
     gap: 10,
     marginBottom: 18,
   },
@@ -1299,11 +1289,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(233, 186, 88, 0.9)",
     backgroundColor: "rgba(255,250,241,0.96)",
     overflow: "hidden",
-    shadowColor: "#D4A017",
-    shadowOpacity: 0.28,
-    shadowRadius: 28,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 10,
+    ...platformShadow("#D4A017", 12, 0.28, 28, 10),
   },
   toastGlow: {
     ...StyleSheet.absoluteFillObject,

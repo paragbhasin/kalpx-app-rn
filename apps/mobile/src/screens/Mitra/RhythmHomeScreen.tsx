@@ -32,6 +32,7 @@ import { useScreenStore } from "../../engine/useScreenBridge";
 import { setHomeData } from "../../store/doorSlice";
 import { screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
+import { platformShadow } from "../../theme/shadows";
 
 const RHYTHM_BG = require("../../../assets/beige_bg.webp");
 
@@ -500,11 +501,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,252,247,0.9)",
     padding: 15,
     marginBottom: 18,
-    shadowColor: "#C9A84C",
-    shadowOpacity: 0.08,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 18 },
-    elevation: 4,
+    ...platformShadow("#C9A84C", 18, 0.08, 24, 4),
   },
   cardTopRow: {
     flexDirection: "row",
@@ -572,11 +569,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 14,
-    shadowColor: "#C99317",
-    shadowOpacity: 0.24,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 18 },
-    elevation: 4,
+    ...platformShadow("#C99317", 18, 0.24, 20, 4),
   },
   actionBtnSparkle: {
     fontSize: 20,

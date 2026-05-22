@@ -21,6 +21,7 @@ import { executeAction } from '../../engine/actionExecutor';
 import { useScreenStore } from '../../engine/useScreenBridge';
 import { screenActions, loadScreenWithData, goBackWithData } from '../../store/screenSlice';
 import { Fonts } from '../../theme/fonts';
+import { platformShadow } from "../../theme/shadows";
 
 interface RoomGroup {
   label: string;
@@ -174,11 +175,7 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: '#DAC28E',
     elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    gap: 4,
+    ...platformShadow("#000", 1, 0.08, 3, 2),gap: 4,
   },
   roomLabel: {
     fontSize: 18,

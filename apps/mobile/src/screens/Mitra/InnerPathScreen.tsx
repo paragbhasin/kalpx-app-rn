@@ -26,6 +26,7 @@ import type {
   JourneyTriadReminders,
   JourneyTriadRemindersPatch,
 } from "@kalpx/types";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, {
   useCallback,
@@ -70,6 +71,7 @@ import store, { type RootState } from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ContinueJourney from "../Home/ContinueJourney";
 
 // Runner containers that require DynamicEngine to render.
@@ -94,6 +96,8 @@ function innerPathHeldLabel(slot: string): string {
 export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
   const navigation = useNavigation<any>();
   const dispatch = useDispatch<any>();
+  const tabBarHeight = useBottomTabBarHeight();
+  const insets = useSafeAreaInsets();
   const { loadScreen, goBack, updateBackground } = useScreenStore();
 
   useFocusEffect(
@@ -704,7 +708,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     <SafeAreaView style={styles.safe}>
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + insets.bottom + 16 }]}
         showsVerticalScrollIndicator={false}
       >
         {showAllCompleteMessage && (

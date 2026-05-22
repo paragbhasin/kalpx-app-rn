@@ -14,6 +14,7 @@ import {
   View,
 } from 'react-native';
 import { useDispatch } from 'react-redux';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { ROOM_LABELS, ROOM_DESCRIPTIONS } from '@kalpx/contracts';
 import type { VerifiedRoomId } from '@kalpx/types';
@@ -22,6 +23,7 @@ import { useScreenStore } from '../../engine/useScreenBridge';
 import { screenActions, loadScreenWithData, goBackWithData } from '../../store/screenSlice';
 import { Fonts } from '../../theme/fonts';
 import { platformShadow } from "../../theme/shadows";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface RoomGroup {
   label: string;
@@ -46,6 +48,8 @@ const ROOM_GROUPS: RoomGroup[] = [
 export default function BrowseRoomsScreen() {
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
+  const tabBarHeight = useBottomTabBarHeight();
+  const insets = useSafeAreaInsets();
 
   const screenBridge = useScreenStore();
   const screenBridgeRef = React.useRef(screenBridge);
@@ -109,7 +113,7 @@ export default function BrowseRoomsScreen() {
         <Text style={styles.headerTitle}>Browse Rooms</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: tabBarHeight + insets.bottom + 16 }]} showsVerticalScrollIndicator={false}>
         {ROOM_GROUPS.map((group) => (
           <View key={group.label} style={styles.group}>
             <Text style={styles.groupLabel}>{group.label}</Text>

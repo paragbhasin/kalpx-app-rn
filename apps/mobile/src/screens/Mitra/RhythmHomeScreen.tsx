@@ -8,6 +8,7 @@
 
 import { RHYTHM_BAND_LABELS } from "@kalpx/contracts";
 import type { RhythmItem, RhythmTimeBand } from "@kalpx/types";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -34,6 +35,7 @@ import { setHomeData } from "../../store/doorSlice";
 import { screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
 import { platformShadow } from "../../theme/shadows";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const RHYTHM_BG = require("../../../assets/beige_bg.webp");
 
@@ -201,6 +203,8 @@ export default function RhythmHomeScreen({
 }) {
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
+  const tabBarHeight = useBottomTabBarHeight();
+  const insets = useSafeAreaInsets();
   const homeData = useSelector((state: any) => state.door?.homeData);
   const rhythm = homeData?.companion_rhythm;
 
@@ -347,7 +351,7 @@ export default function RhythmHomeScreen({
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: tabBarHeight + insets.bottom + 16 }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.shell}>

@@ -203,7 +203,13 @@ export async function getJourneyHome(params: {
 // ─── Telemetry — camelCase to match mobile wire format ────────────────────────
 
 function getTz(): string {
-  try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return 'UTC'; }
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (!tz) return 'UTC';
+    return tz === 'Asia/Calcutta' ? 'Asia/Kolkata' : tz;
+  } catch {
+    return 'UTC';
+  }
 }
 
 /**
@@ -821,6 +827,7 @@ export async function postTellMitraV3(payload: TellMitraV3Payload): Promise<Tell
 
 export async function postRhythmSetup(payload: RhythmSetupPayload): Promise<{ status: string; reminder_preference: string; slots_set: string[]; item_count: number }> {
   const resp = await api.post<{ status: string; reminder_preference: string; slots_set: string[]; item_count: number }>('mitra/v3/rhythm/setup/', payload);
+  invalidateMitraHomeV3Cache();
   return resp.data;
 }
 

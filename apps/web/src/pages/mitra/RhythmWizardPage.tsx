@@ -169,6 +169,12 @@ function itemTypeLabel(t: string): string {
   return "Library";
 }
 
+function beginLabel(itemType: string): string {
+  if (itemType === "mantra") return "Begin Chanting";
+  if (itemType === "sankalp") return "Begin Embodying";
+  return "Begin Practice";
+}
+
 function sortBands(bands: RhythmTimeBand[]): RhythmTimeBand[] {
   return BANDS.filter((band) => bands.includes(band));
 }
@@ -392,7 +398,7 @@ export function RhythmWizardPage() {
         items: itemsArr as any[],
         reminder_preference: reminderPref,
       });
-      const newHome = await getMitraHomeV3();
+      const newHome = await getMitraHomeV3({ forceFresh: true });
       dispatch(setHomeData(newHome));
       setStep("confirmation");
     } catch {
@@ -402,12 +408,18 @@ export function RhythmWizardPage() {
     }
   }
 
-  function beginTodaysPractice() {
-    const band = getRhythmTimeBand();
-    const cr = homeData?.companion_rhythm;
-    const slotItem =
-      cr?.[band]?.items?.[0] ?? cr?.[selectedMoments[0]]?.items?.[0];
-    const runItem = slotItem ?? items[band] ?? items[selectedMoments[0]];
+  function beginRhythmItem(
+    band: RhythmTimeBand,
+    runItem:
+      | {
+          item_id: string;
+          item_type: string;
+          title_snapshot?: string | null;
+          description_snapshot?: string | null;
+        }
+      | undefined
+      | null,
+  ) {
     if (!runItem) {
       navigate("/en/mitra/rhythm");
       return;
@@ -1445,8 +1457,9 @@ export function RhythmWizardPage() {
                     key={band}
                     style={{
                       display: "flex",
-                      alignItems: "center",
-                      gap: 14,
+                      flexDirection: "column",
+                      alignItems: "stretch",
+                      gap: 16,
                       padding: "14px 18px",
                       borderRadius: 14,
                       marginBottom: 10,
@@ -1454,53 +1467,80 @@ export function RhythmWizardPage() {
                       background: CARD_BG,
                     }}
                   >
-                    <div style={{ flex: 1 }}>
-                      <div
-                        style={{
-                          fontSize: 12,
-                          color: "#D4A017",
-                          marginBottom: 2,
-                          textTransform: "uppercase",
-                          fontWeight: 700,
-                        }}
-                      >
-                        {MOMENT_COPY[band].label}
-                      </div>
-                      <div
-                        style={{
-                          fontFamily: SERIF,
-                          fontWeight: 700,
-                          fontSize: 15,
-                          color: DARK,
-                        }}
-                      >
-                        {item.title_snapshot}
-                      </div>
-                    </div>
-                    <span
+                    <div
                       style={{
-                        fontSize: 10,
-                        fontWeight: 700,
-                        letterSpacing: 1.2,
-                        color: "#8B6914",
-                        textTransform: "uppercase",
-                        background: "#F5F0E0",
-                        borderRadius: 6,
-                        padding: "8px 8px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 14,
                       }}
                     >
-                      {itemTypeLabel(item.item_type)}
-                    </span>
+                      <div style={{ flex: 1 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            color: "#D4A017",
+                            marginBottom: 2,
+                            textTransform: "uppercase",
+                            fontWeight: 700,
+                          }}
+                        >
+                          {MOMENT_COPY[band].label}
+                        </div>
+                        <div
+                          style={{
+                            fontFamily: SERIF,
+                            fontWeight: 700,
+                            fontSize: 15,
+                            color: DARK,
+                            lineHeight: 1.45,
+                          }}
+                        >
+                          {item.title_snapshot}
+                        </div>
+                      </div>
+                      <span
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          letterSpacing: 1.2,
+                          color: "#8B6914",
+                          textTransform: "uppercase",
+                          background: "#F5F0E0",
+                          borderRadius: 6,
+                          padding: "8px 8px",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {itemTypeLabel(item.item_type)}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() =>
+                        beginRhythmItem(band, {
+                          item_id: item.item_id,
+                          item_type: item.item_type,
+                          title_snapshot: item.title_snapshot,
+                          description_snapshot: item.description_snapshot,
+                        })
+                      }
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        borderRadius: 11,
+                        border: "none",
+                        background: GOLD_BTN,
+                        color: "#fff",
+                        fontFamily: SERIF,
+                        fontSize: 18,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {beginLabel(item.item_type)}
+                    </button>
                   </div>
                 );
               })}
-
-              <button
-                onClick={beginTodaysPractice}
-                style={{ ...goldBtn, marginTop: 20 }}
-              >
-                Begin today's practice
-              </button>
               <button onClick={() => navigate("/en/mitra")} style={ghostBtn}>
                 Return Home
               </button>

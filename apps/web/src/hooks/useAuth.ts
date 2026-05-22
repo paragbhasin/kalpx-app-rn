@@ -13,7 +13,11 @@ import { clearDoorState } from '../store/doorSlice';
 import { invalidateJourneyStatusCache } from './useJourneyStatus';
 import { invalidateJourneyEntryViewCache } from './useJourneyEntryView';
 import type { LoginRequest, LoginResponse, SignupRegisterRequest, SignupStep1Request, SignupOtpVerifyRequest, ResetPasswordRequest } from '../types/auth';
-import { claimGuestJourney, invalidateDashboardViewCache } from '../engine/mitraApi';
+import {
+  claimGuestJourney,
+  invalidateDashboardViewCache,
+  invalidateMitraHomeV3Cache,
+} from '../engine/mitraApi';
 import { getRecaptchaToken } from '../lib/recaptcha';
 
 const AUTH_SNAPSHOT_KEY = 'kalpx_auth_snapshot';
@@ -88,6 +92,8 @@ export function useAuth() {
 
         await storeTokens(webStorage, { accessToken, refreshToken });
         persistAuthSnapshot(data);
+        invalidateMitraHomeV3Cache();
+        store.dispatch(clearDoorState());
         invalidateJourneyStatusCache();
         invalidateJourneyEntryViewCache();
         // Attempt guest journey claim (best-effort — failure must not break login)
@@ -135,6 +141,7 @@ export function useAuth() {
     // Keep guestUUID — guest identity survives logout
     invalidateJourneyStatusCache();
     invalidateDashboardViewCache();
+    invalidateMitraHomeV3Cache();
     invalidateJourneyEntryViewCache();
     store.dispatch(clearDoorState());
     store.dispatch(resetStore());
@@ -158,6 +165,8 @@ export function useAuth() {
 
         await storeTokens(webStorage, { accessToken: at, refreshToken: rt });
         persistAuthSnapshot(data);
+        invalidateMitraHomeV3Cache();
+        store.dispatch(clearDoorState());
         invalidateJourneyStatusCache();
         invalidateJourneyEntryViewCache();
         if (shouldAttemptGuestJourneyClaim()) {

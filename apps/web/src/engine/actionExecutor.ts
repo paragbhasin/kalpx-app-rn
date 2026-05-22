@@ -40,6 +40,8 @@ import { invalidateJourneyStatusCache } from '../hooks/useJourneyStatus';
 import { invalidateJourneyEntryViewCache } from '../hooks/useJourneyEntryView';
 import { WEB_ENV } from '../lib/env';
 const CHECKPOINT_BYPASS_KEY = 'kalpx_checkpoint_redirect_bypass_until';
+const RUNNER_COMPLETION_GUARD_MS = 8000;
+const _recentRunnerCompletionKeys = new Map<string, number>();
 
 export interface ActionContext {
   dispatch: AppDispatch;
@@ -117,6 +119,44 @@ function _triggerNegativeLabel(feeling: string, step: number): string {
 function _resolveMitraTz(): string {
   const raw = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
   return raw === 'Asia/Calcutta' ? 'Asia/Kolkata' : raw;
+}
+
+function _deriveRunnerReturnPath(args: {
+  source?: string | null;
+  practiceLaunchSurface?: string | null;
+  explicitReturnPath?: string | null;
+}): string | null {
+  const explicitReturnPath = typeof args.explicitReturnPath === 'string'
+    ? args.explicitReturnPath.trim()
+    : '';
+  if (explicitReturnPath) return explicitReturnPath;
+
+  if (args.source === 'rhythm_daily') return '/en/mitra/rhythm';
+  if (args.practiceLaunchSurface === 'inner_path') return '/en/mitra/inner-path';
+  return null;
+}
+
+function _runnerCompletionKey(screenData: Record<string, any>): string {
+  const item = (screenData.runner_active_item || {}) as Record<string, any>;
+  const itemId = String(item.item_id || item.id || '');
+  const source = String(screenData.runner_source || '');
+  const variant = String(screenData.runner_variant || '');
+  const startTime = String(screenData.runner_start_time || '');
+  const rhythmSlot = String(screenData.runner_rhythm_slot || '');
+  const launchSurface = String(screenData.practice_launch_surface || '');
+  return [source, variant, itemId, startTime, rhythmSlot, launchSurface].join('::');
+}
+
+function _markRunnerCompletionStarted(key: string): boolean {
+  const now = Date.now();
+  for (const [existingKey, ts] of _recentRunnerCompletionKeys.entries()) {
+    if (now - ts > RUNNER_COMPLETION_GUARD_MS) {
+      _recentRunnerCompletionKeys.delete(existingKey);
+    }
+  }
+  if (_recentRunnerCompletionKeys.has(key)) return false;
+  _recentRunnerCompletionKeys.set(key, now);
+  return true;
 }
 
 function _setCheckpointRedirectBypass(msFromNow = 30_000): void {
@@ -433,6 +473,18 @@ export async function executeAction(action: any, context: ActionContext): Promis
       const variant: string = p.variant || p.item_type || 'mantra';
       const source: string = p.source || 'core';
       const item = p.item || {};
+      const practiceLaunchSurface =
+        (p.practice_launch_surface as string | null) ??
+        (p.practiceLaunchSurface as string | null) ??
+        null;
+      const runnerReturnPath = _deriveRunnerReturnPath({
+        source,
+        practiceLaunchSurface,
+        explicitReturnPath:
+          (p.return_path as string | null) ??
+          (p.returnPath as string | null) ??
+          null,
+      });
 
       if (WEB_ENV.isDev) console.log('[S17-D4B] start_runner', {
         variant,
@@ -474,7 +526,8 @@ export async function executeAction(action: any, context: ActionContext): Promis
           reps_total: item.reps_total || screenData.reps_total || 108,
           practice_duration_seconds: variant === 'practice' ? (item.duration_seconds || screenData.practice_duration_seconds || 300) : screenData.practice_duration_seconds,
           practice_steps: variant === 'practice' ? (item.steps || screenData.practice_steps || []) : screenData.practice_steps,
-          practice_launch_surface: (p.practice_launch_surface as string | null) ?? null,
+          practice_launch_surface: practiceLaunchSurface,
+          runner_return_path: runnerReturnPath,
         }));
 
         void apiTrackEvent('runner_started', {
@@ -502,6 +555,13 @@ export async function executeAction(action: any, context: ActionContext): Promis
     // COMPLETE_RUNNER — track completion, navigate to completion_return.
     // ----------------------------------------------------------------
     case 'complete_runner': {
+      const completionKey = _runnerCompletionKey(screenData);
+      if (!_markRunnerCompletionStarted(completionKey)) {
+        if (WEB_ENV.isDev) {
+          console.warn('[actionExecutor] duplicate complete_runner ignored', completionKey);
+        }
+        break;
+      }
       dispatch(setSubmitting(true));
       try {
         const item = (screenData.runner_active_item || {}) as Record<string, any>;
@@ -514,9 +574,28 @@ export async function executeAction(action: any, context: ActionContext): Promis
         const actualSeconds = Math.round((Date.now() - startTime) / 1000);
         const repsCompleted: number = (screenData.runner_reps_completed as number) || 0;
         const tz: string = (screenData.runner_tz as string) || Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
+        let innerPathAllComplete = false;
 
-        // rhythm_daily is not a JourneyActivity completion path — postRhythmComplete handles it.
-        if (itemId && rawRunnerSource !== 'rhythm_daily') {
+        if (rawRunnerSource === 'rhythm_daily') {
+          const rhythmSlot = (screenData.runner_rhythm_slot as string) || '';
+          if (rhythmSlot) {
+            try {
+              const activeItem = screenData.runner_active_item as { item_id?: string } | null;
+              const itemId = typeof activeItem?.item_id === 'string' ? activeItem.item_id : '';
+              const rhythmResult = await postRhythmComplete(rhythmSlot, itemId);
+              if (rhythmResult) {
+                dispatch(updateScreenData({ rhythm_complete_result: rhythmResult }));
+              }
+            } catch (_) {}
+          }
+        }
+
+        if (screenData.practice_launch_surface === 'inner_path' && variant && itemId) {
+          const result = await postInnerPathComplete(variant, itemId).catch(() => null);
+          innerPathAllComplete = result?.all_complete === true;
+        }
+
+        if (itemId) {
           const meta: Record<string, any> = { variant, actual_seconds: actualSeconds };
           if (variant === 'mantra') meta.reps_completed = repsCompleted;
 
@@ -529,20 +608,6 @@ export async function executeAction(action: any, context: ActionContext): Promis
             tz,
             meta,
           });
-        }
-
-        if (source === 'rhythm_daily') {
-          const rhythmSlot = (screenData.runner_rhythm_slot as string) || '';
-          if (rhythmSlot) {
-            try {
-              const activeItem = screenData.runner_active_item as { item_id?: string } | null;
-              const itemId = typeof activeItem?.item_id === 'string' ? activeItem.item_id : '';
-              const rhythmResult = await postRhythmComplete(rhythmSlot, itemId);
-              if (rhythmResult) {
-                dispatch(updateScreenData({ rhythm_complete_result: rhythmResult }));
-              }
-            } catch (_) {}
-          }
         }
 
         const roomId = (screenData.room_id as string | null) ?? null;
@@ -594,6 +659,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
             dispatch(updateScreenData({
               runner_duration_actual_sec: actualSeconds,
               completion_return_path: completionReturnPath,
+              triad_all_complete_pending: innerPathAllComplete,
               room_sequence_active: false,
               room_sequence_action_ids: null,
               room_sequence_index: null,
@@ -654,7 +720,12 @@ export async function executeAction(action: any, context: ActionContext): Promis
       const exitRoomId = screenData.room_id as string | null;
       const infoViewOnly = screenData.info_view_only === true;
       const backTarget = screenData.info_back_target;
-      const runnerKeys = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz', 'info_view_only', 'info_back_target'];
+      const runnerReturnPath =
+        typeof screenData.runner_return_path === 'string' &&
+        screenData.runner_return_path.trim().length > 0
+          ? screenData.runner_return_path.trim()
+          : null;
+      const runnerKeys = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz', 'info_view_only', 'info_back_target', 'runner_return_path'];
       runnerKeys.forEach(k => dispatch(setScreenValue({ key: k, value: null })));
       if (infoViewOnly && backTarget) {
         const dest = _resolveTarget(backTarget);
@@ -669,6 +740,8 @@ export async function executeAction(action: any, context: ActionContext): Promis
         webNavigate(`/en/mitra/room/${exitRoomId.replace(/^room_/, '')}`);
       } else if (exitSource === 'support_trigger') {
         webNavigate('/en/mitra/trigger');
+      } else if (runnerReturnPath) {
+        webNavigate(runnerReturnPath);
       } else {
         webNavigate('/en/mitra/dashboard');
       }
@@ -691,20 +764,12 @@ export async function executeAction(action: any, context: ActionContext): Promis
     }
 
     case 'return_to_inner_path': {
-      const ipItem = screenData.runner_active_item as any;
-      const ipType = (screenData.runner_variant as string) || '';
-      const ipRef = (ipItem?.item_id as string) || '';
-      // P0-B: await completion write before fetching refreshed daily view
-      let triadAllComplete = false;
-      if (ipType && ipRef) {
-        const result = await postInnerPathComplete(ipType, ipRef).catch(() => null);
-        triadAllComplete = result?.all_complete === true;
-      }
+      const triadAllComplete = screenData.triad_all_complete_pending === true;
       const innerPathClearKeys = [
         'runner_active_item', 'runner_source', 'runner_variant',
         'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec',
         'runner_start_time', 'runner_tz', 'completion_return_screen',
-        'practice_launch_surface',
+        'practice_launch_surface', 'triad_all_complete_pending',
       ];
       innerPathClearKeys.forEach(k => dispatch(setScreenValue({ key: k, value: null })));
       // P1-4: set all_complete flag so InnerPathPage can show calm acknowledgment
@@ -748,13 +813,20 @@ export async function executeAction(action: any, context: ActionContext): Promis
     case 'return_to_source': {
       const roomId = (screenData.room_id as string | null) || null;
       const returnSrc = (screenData.runner_source as string | null) || null;
-      const runnerClearKeys = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz'];
+      const runnerReturnPath =
+        typeof screenData.runner_return_path === 'string' &&
+        screenData.runner_return_path.trim().length > 0
+          ? screenData.runner_return_path.trim()
+          : null;
+      const runnerClearKeys = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz', 'runner_return_path'];
       runnerClearKeys.forEach(k => dispatch(setScreenValue({ key: k, value: null })));
       if (returnSrc === 'support_room' && roomId) {
         ensureRoomAmbientPlaying();
         webNavigate(`/en/mitra/room/${roomId.replace(/^room_/, '')}`);
       } else if (returnSrc === 'support_trigger') {
         webNavigate('/en/mitra/trigger');
+      } else if (runnerReturnPath) {
+        webNavigate(runnerReturnPath);
       } else {
         webNavigate('/en/mitra/dashboard');
       }

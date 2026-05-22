@@ -53,8 +53,15 @@ function heldLabel(itemType: string): string {
   if (itemType === "mantra") return "Mantra held today · return anytime";
   if (itemType === "sankalp") return "Sankalp carried today · return anytime";
   if (itemType === "practice") return "Practice held today · return anytime";
-  if (itemType === "reflection") return "Reflection held today · return anytime";
+  if (itemType === "reflection")
+    return "Reflection held today · return anytime";
   return "Held today · return anytime";
+}
+
+function slotHeldLabel(band: RhythmTimeBand): string {
+  if (band === "morning") return "Morning rhythm held";
+  if (band === "afternoon") return "Afternoon rhythm held";
+  return "Night rhythm held";
 }
 
 function RhythmItemCard({
@@ -150,7 +157,10 @@ function RhythmItemCard({
             background: "rgba(210,166,61,0.45)",
           }}
         />
-        <span className="rhythm-item-card-divider-lotus" style={{ fontSize: 28, lineHeight: 1 }}>
+        <span
+          className="rhythm-item-card-divider-lotus"
+          style={{ fontSize: 28, lineHeight: 1 }}
+        >
           <img src="/lotus_icon.png" alt="" height={20} width={20} />
         </span>
         <div
@@ -176,7 +186,10 @@ function RhythmItemCard({
         </p>
       )}
       {item.description_snapshot && (
-        <div className="rhythm-item-card-description" style={{ marginBottom: 28 }}>
+        <div
+          className="rhythm-item-card-description"
+          style={{ marginBottom: 28 }}
+        >
           <p
             style={{
               fontFamily: "var(--kalpx-font-serif)",
@@ -195,17 +208,21 @@ function RhythmItemCard({
         <p
           style={{
             fontFamily: "var(--kalpx-font-serif)",
-            fontSize: 12,
+            fontSize: 14,
             color: "#7A9E7E",
             textAlign: "center",
             margin: "0 0 14px",
             letterSpacing: "0.02em",
+            fontWeight: 700,
           }}
         >
           {heldLabel(item.item_type)}
         </p>
       )}
-      <div className="rhythm-item-card-action" style={{ display: "flex", justifyContent: "center" }}>
+      <div
+        className="rhythm-item-card-action"
+        style={{ display: "flex", justifyContent: "center" }}
+      >
         <button
           onClick={onAction}
           disabled={resolving}
@@ -257,9 +274,20 @@ function BandSection({
 }) {
   const hasItems = slot && slot.items.length > 0;
   if (!hasItems) return null;
+  const slotHeld =
+    slotDone === true ||
+    ((slot?.items?.length ?? 0) > 0 &&
+      slot!.items.every((item) => item.completed_today === true));
   return (
     <div className="rhythm-band-section" style={{ marginBottom: 28 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          marginBottom: 8,
+        }}
+      >
         <div
           style={{
             fontFamily: "var(--kalpx-font-serif)",
@@ -270,7 +298,7 @@ function BandSection({
         >
           {RHYTHM_BAND_LABELS[band]} Practice
         </div>
-        {slotDone && (
+        {slotHeld && (
           <span
             style={{
               fontFamily: "var(--kalpx-font-serif)",
@@ -279,11 +307,7 @@ function BandSection({
               letterSpacing: 0.4,
             }}
           >
-            {band === "morning"
-              ? "Morning rhythm held"
-              : band === "afternoon"
-                ? "Afternoon rhythm held"
-                : "Night rhythm held"}
+            {slotHeldLabel(band)}
           </span>
         )}
       </div>
@@ -520,7 +544,10 @@ export function RhythmHomePage() {
             padding: "24px 16px calc(92px + env(safe-area-inset-bottom))",
           }}
         >
-          <div className="rhythm-home-content" style={{ width: "100%", maxWidth: 420, position: "relative" }}>
+          <div
+            className="rhythm-home-content"
+            style={{ width: "100%", maxWidth: 420, position: "relative" }}
+          >
             <img
               src="/leaves-bird.png"
               alt=""

@@ -440,7 +440,7 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({
         <View style={styles.step2Divider}>
           <View style={styles.step2DividerLine} />
           <Image
-            source={require("../../assets/lotus-3d.png")}
+            source={require("../../assets/lotus-3d.webp")}
             style={styles.step2DividerLotus}
           />
           <View style={styles.step2DividerLine} />

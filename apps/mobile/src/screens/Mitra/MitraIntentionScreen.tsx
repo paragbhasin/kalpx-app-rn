@@ -66,7 +66,7 @@ export default function MitraIntentionScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      updateBackground(require("../../../assets/beige_bg.png"));
+      updateBackground(require("../../../assets/beige_bg.webp"));
       return () => updateBackground(null);
     }, [updateBackground]),
   );
@@ -90,7 +90,7 @@ export default function MitraIntentionScreen() {
         break;
       case "inner_path":
         if (process.env.EXPO_PUBLIC_MITRA_NEW_SHELL === "1") {
-          store.dispatch(screenActions.setBackground(require("../../../assets/beige_bg.png")));
+          store.dispatch(screenActions.setBackground(require("../../../assets/beige_bg.webp")));
           navigation.navigate("NewMitraHome");
           break;
         }
@@ -136,7 +136,7 @@ export default function MitraIntentionScreen() {
 
   return (
     <ImageBackground
-      source={require("../../../assets/beige_bg.png")}
+      source={require("../../../assets/beige_bg.webp")}
       style={styles.container}
     >
       <Image

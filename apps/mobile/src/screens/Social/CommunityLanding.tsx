@@ -520,7 +520,7 @@ const CommunityLanding = () => {
         </Text>
         <View style={styles.imageContainer}>
           <Image
-            source={require("../../../assets/about-kalpx2.png")}
+            source={require("../../../assets/about-kalpx2.webp")}
             style={styles.sectionImage}
             contentFit="contain"
           />
@@ -539,7 +539,7 @@ const CommunityLanding = () => {
           <View style={styles.phoneWrapper}>
             {/* Placeholder for about-phone.svg since it's missing */}
             <Image
-              source={require("../../../assets/about-kalpx4.png")}
+              source={require("../../../assets/about-kalpx4.webp")}
               style={styles.sectionImage}
               contentFit="contain"
             />
@@ -570,7 +570,7 @@ const CommunityLanding = () => {
         </Text>
         <View style={styles.voteContainer}>
           <Image
-            source={require("../../../assets/about-kalpx2.png")}
+            source={require("../../../assets/about-kalpx2.webp")}
             style={styles.sectionImage}
             contentFit="contain"
           />

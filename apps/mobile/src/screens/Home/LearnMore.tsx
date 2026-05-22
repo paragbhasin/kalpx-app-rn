@@ -40,43 +40,43 @@ const LearnMore = ({ route }) => {
       name: t("learnMore.subjects.yoga.name"),
       caption: t("learnMore.subjects.yoga.caption"),
       key: "yoga",
-      image: require("../../../assets/yoga1.jpg"),
+      image: require("../../../assets/yoga1.webp"),
     },
     {
       name: t("learnMore.subjects.music.name"),
       caption: t("learnMore.subjects.music.caption"),
       key: "music",
-      image: require("../../../assets/music.jpg"),
+      image: require("../../../assets/music.webp"),
     },
     {
       name: t("learnMore.subjects.dance.name"),
       caption: t("learnMore.subjects.dance.caption"),
       key: "dance",
-      image: require("../../../assets/dance.jpg"),
+      image: require("../../../assets/dance.webp"),
     },
     {
       name: t("learnMore.subjects.chanting.name"),
       caption: t("learnMore.subjects.chanting.caption"),
       key: "chanting",
-      image: require("../../../assets/chanting.jpg"),
+      image: require("../../../assets/chanting.webp"),
     },
     {
       name: t("learnMore.subjects.vedas.name"),
       caption: t("learnMore.subjects.vedas.caption"),
       key: "vedas",
-      image: require("../../../assets/vedas.jpg"),
+      image: require("../../../assets/vedas.webp"),
     },
     {
       name: t("learnMore.subjects.sanatan.name"),
       caption: t("learnMore.subjects.sanatan.caption"),
       key: "sanatan",
-      image: require("../../../assets/sanatan.jpg"),
+      image: require("../../../assets/sanatan.webp"),
     },
     {
       name: t("learnMore.subjects.vedanta.name"),
       caption: t("learnMore.subjects.vedanta.caption"),
       key: "vedanta",
-      image: require("../../../assets/vedanta.jpg"),
+      image: require("../../../assets/vedanta.webp"),
     },
   ];
 
@@ -221,7 +221,7 @@ const toggleHealing = (key: string) => {
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={require("../../../assets/learnMoreTopBg.png")}
+        source={require("../../../assets/learnMoreTopBg.webp")}
         style={styles.headerImage}
         imageStyle={styles.imageStyle}
       >
@@ -412,37 +412,37 @@ export default LearnMore;
 //   {
 //     name: "Yoga",
 //     caption: "Strengthen your body. Calm your mind.",
-//     image: require("../../../assets/yoga1.jpg"),
+//     image: require("../../../assets/yoga1.webp"),
 //   },
 //   {
 //     name: "Indian Classical Music",
 //     caption: "Connect through sound and devotion.",
-//     image: require("../../../assets/music.jpg"),
+//     image: require("../../../assets/music.webp"),
 //   },
 //   {
 //     name: "Indian Classical Dance",
 //     caption: "Let every step express the sacred.",
-//     image: require("../../../assets/dance.jpg"),
+//     image: require("../../../assets/dance.webp"),
 //   },
 //   {
 //     name: "Mantra Chanting",
 //     caption: "Chant. Center. Awaken.",
-//     image: require("../../../assets/chanting.jpg"),
+//     image: require("../../../assets/chanting.webp"),
 //   },
 //   {
 //     name: "Vedas & Upanishads",
 //     caption: "Decode ancient wisdom for modern life.",
-//     image: require("../../../assets/vedas.jpg"),
+//     image: require("../../../assets/vedas.webp"),
 //   },
 //   {
 //     name: "Sanatan Teachings",
 //     caption: "Timeless truths made accessible.",
-//     image: require("../../../assets/sanatan.jpg"),
+//     image: require("../../../assets/sanatan.webp"),
 //   },
 //   {
 //     name: "Everyday Vedanta",
 //     caption: "Live dharma in daily life.",
-//     image: require("../../../assets/vedanta.jpg"),
+//     image: require("../../../assets/vedanta.webp"),
 //   },
 // ];
 
@@ -595,7 +595,7 @@ export default LearnMore;
 //     <View style={styles.container}>
 //       {/* Header */}
 //       <ImageBackground
-//         source={require("../../../assets/learnMoreTopBg.png")}
+//         source={require("../../../assets/learnMoreTopBg.webp")}
 //         style={styles.headerImage}
 //         imageStyle={styles.imageStyle}
 //       >

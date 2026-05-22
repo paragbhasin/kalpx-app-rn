@@ -25,7 +25,7 @@ type Props = {
 };
 
 const lotusIcon = require("../../../assets/lotus_glow.png");
-const beigeBg = require("../../../assets/beige_bg.png");
+const beigeBg = require("../../../assets/beige_bg.webp");
 
 const SupportReturnModal: React.FC<Props> = ({ visible, payload, onClose }) => {
   const lines = Array.isArray(payload?.body)

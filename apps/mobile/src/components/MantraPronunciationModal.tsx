@@ -35,7 +35,7 @@ const MantraPronunciationModal: React.FC<Props> = ({
     >
       <View style={styles.modalContainer}>
         <ImageBackground
-          source={require("../../assets/mantraBG.png")}
+          source={require("../../assets/mantraBG.webp")}
           style={styles.bgImage}
           imageStyle={styles.bgImageStyle}
         >

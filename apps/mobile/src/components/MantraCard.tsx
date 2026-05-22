@@ -841,7 +841,7 @@ const MantraCard = ({
                   options={{ format: "png", quality: 1 }}
                 >
                   <ImageBackground
-                    source={require("../../assets/Streak_bg.png")}
+                    source={require("../../assets/Streak_bg.webp")}
                     style={{
                       width: FontSize.CONSTS.DEVICE_WIDTH,
                       // height: 500,

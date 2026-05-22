@@ -96,7 +96,7 @@ export default function GuidedGrowthContainer() {
   const isLoggedIn = !!user;
   const journeyCheckRef = useRef(false);
 
-  const GUIDED_BG = require("../../assets/guided_bg.png");
+  const GUIDED_BG = require("../../assets/guided_bg.webp");
 
   // Parity with Vue's onMounted / Home.tsx behavior
   useFocusEffect(

@@ -16,7 +16,7 @@ const UpdateModal = ({ visible, onUpdateNow, onLater }) => {
       <View style={styles.overlay}>
         <View style={styles.container}>
           <Image
-            source={require("../../assets/UpgradeApp.png")}
+            source={require("../../assets/UpgradeApp.webp")}
             style={styles.image}
             resizeMode="cover"
           />

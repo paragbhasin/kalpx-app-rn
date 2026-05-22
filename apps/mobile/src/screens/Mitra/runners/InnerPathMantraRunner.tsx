@@ -3,7 +3,7 @@ import React from "react";
 import { ImageBackground, SafeAreaView, StyleSheet } from "react-native";
 import MantraRunnerView from "../../../blocks/runners/MantraRunnerView";
 
-const BEIGE_BG = require("../../../../assets/beige_bg.png");
+const BEIGE_BG = require("../../../../assets/beige_bg.webp");
 
 export default function InnerPathMantraRunner() {
   const navigation = useNavigation<any>();

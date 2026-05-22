@@ -56,7 +56,7 @@ export default function BrowseRoomsScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      updateBackground(require('../../../assets/beige_bg.png'));
+      updateBackground(require('../../../assets/beige_bg.webp'));
       return () => updateBackground(null);
     }, [updateBackground]),
   );

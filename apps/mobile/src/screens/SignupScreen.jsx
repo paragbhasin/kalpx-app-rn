@@ -50,7 +50,7 @@ export default function SignupScreen({ navigation }) {
       />
 
       <ImageBackground
-        source={require("../../assets/hoomepagebg.jpg")}
+        source={require("../../assets/hoomepagebg.webp")}
         style={styles.background}
       >
         <ScrollView contentContainerStyle={styles.scrollContainer}>

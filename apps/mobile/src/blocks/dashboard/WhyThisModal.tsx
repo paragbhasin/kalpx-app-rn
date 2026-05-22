@@ -30,7 +30,7 @@ import { extractWhyThis } from "./whyThisUtils";
 import { normalizeDashboardWhyThisState } from "@kalpx/contracts";
 import type { DashboardWhyThis } from "@kalpx/types";
 
-const BeigeBg = require("../../../assets/beige_bg.png");
+const BeigeBg = require("../../../assets/beige_bg.webp");
 
 type Props = {
   visible: boolean;

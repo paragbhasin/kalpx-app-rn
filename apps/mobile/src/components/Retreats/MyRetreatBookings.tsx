@@ -32,8 +32,8 @@ const BOOKINGS = [
         location: "Kerala",
         dates: "26-28 Dec 2025",
         status: "Confirmed",
-        image: require('../../../assets/retreat/retreat1.jpg'),
-        facilitator: { name: "Riya Dyne", avatar: require('../../../assets/retreat/retreat2.jpg') },
+        image: require('../../../assets/retreat/retreat1.webp'),
+        facilitator: { name: "Riya Dyne", avatar: require('../../../assets/retreat/retreat2.webp') },
     },
     {
         id: 2,
@@ -42,8 +42,8 @@ const BOOKINGS = [
         location: "Kerala",
         dates: "26-28 Dec 2025",
         status: "Payment Due",
-        image: require('../../../assets/retreat/retreat1.jpg'),
-        facilitator: { name: "Riya Dyne", avatar: require('../../../assets/retreat/retreat2.jpg') },
+        image: require('../../../assets/retreat/retreat1.webp'),
+        facilitator: { name: "Riya Dyne", avatar: require('../../../assets/retreat/retreat2.webp') },
     },
     {
         id: 3,
@@ -52,8 +52,8 @@ const BOOKINGS = [
         location: "Kerala",
         dates: "26-28 Dec 2025",
         status: "Requested",
-        image: require('../../../assets/retreat/retreat1.jpg'),
-        facilitator: { name: "Riya Dyne", avatar: require('../../../assets/retreat/retreat2.jpg') },
+        image: require('../../../assets/retreat/retreat1.webp'),
+        facilitator: { name: "Riya Dyne", avatar: require('../../../assets/retreat/retreat2.webp') },
     },
     {
         id: 4,
@@ -62,8 +62,8 @@ const BOOKINGS = [
         location: "Kerala",
         dates: "26-28 Dec 2025",
         status: "Cancelled",
-        image: require('../../../assets/retreat/retreat1.jpg'),
-        facilitator: { name: "Riya Dyne", avatar: require('../../../assets/retreat/retreat2.jpg') },
+        image: require('../../../assets/retreat/retreat1.webp'),
+        facilitator: { name: "Riya Dyne", avatar: require('../../../assets/retreat/retreat2.webp') },
     },
 ];
 

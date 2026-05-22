@@ -193,7 +193,7 @@ export default function QuickResetScreen({
   useFocusEffect(
     useCallback(() => {
       if (!embedded) {
-        updateBackground(require("../../../assets/beige_bg.png"));
+        updateBackground(require("../../../assets/beige_bg.webp"));
         updateHeaderHidden(false);
         return () => {
           updateBackground(null);
@@ -589,7 +589,7 @@ export default function QuickResetScreen({
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
         <ImageBackground
-          source={require("../../../assets/beige_bg.png")}
+          source={require("../../../assets/beige_bg.webp")}
           style={styles.background}
           imageStyle={styles.backgroundImage}
         >
@@ -613,7 +613,7 @@ export default function QuickResetScreen({
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
         <ImageBackground
-          source={require("../../../assets/beige_bg.png")}
+          source={require("../../../assets/beige_bg.webp")}
           style={styles.background}
           imageStyle={styles.backgroundImage}
         >
@@ -646,7 +646,7 @@ export default function QuickResetScreen({
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
         <ImageBackground
-          source={require("../../../assets/beige_bg.png")}
+          source={require("../../../assets/beige_bg.webp")}
           style={styles.background}
           imageStyle={styles.backgroundImage}
         >
@@ -677,7 +677,7 @@ export default function QuickResetScreen({
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
         <ImageBackground
-          source={require("../../../assets/beige_bg.png")}
+          source={require("../../../assets/beige_bg.webp")}
           style={styles.background}
           imageStyle={styles.backgroundImage}
         >
@@ -710,7 +710,7 @@ export default function QuickResetScreen({
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
         <ImageBackground
-          source={require("../../../assets/beige_bg.png")}
+          source={require("../../../assets/beige_bg.webp")}
           style={styles.background}
           imageStyle={styles.backgroundImage}
         >
@@ -764,7 +764,7 @@ export default function QuickResetScreen({
       style={[styles.safeArea, embedded && styles.embeddedTransparent]}
     >
       <ImageBackground
-        source={require("../../../assets/beige_bg.png")}
+        source={require("../../../assets/beige_bg.webp")}
         style={styles.background}
         imageStyle={styles.backgroundImage}
       >
@@ -791,7 +791,7 @@ export default function QuickResetScreen({
       >
         <SafeAreaView style={styles.modalSafeArea}>
           <ImageBackground
-            source={require("../../../assets/beige_bg.png")}
+            source={require("../../../assets/beige_bg.webp")}
             style={styles.background}
             imageStyle={styles.backgroundImage}
           >

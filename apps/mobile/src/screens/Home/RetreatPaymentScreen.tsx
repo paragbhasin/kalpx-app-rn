@@ -23,7 +23,7 @@ const RetreatPaymentScreen: React.FC = () => {
 
     const retreatData = retreat || {
         title: "Rejuvenating yoga & calm Ayurvedic Retreat",
-        image: require('../../../assets/retreat/retreat1.jpg'),
+        image: require('../../../assets/retreat/retreat1.webp'),
         rating: "4.9(223)",
     };
 

@@ -22,7 +22,7 @@ export default function RetreatsScreen() {
             <ScrollView stickyHeaderIndices={[1]} showsVerticalScrollIndicator={false}>
                 {/* Hero Section */}
                 <ImageBackground
-                    source={require('../../../assets/retreat/landing1.png')}
+                    source={require('../../../assets/retreat/landing1.webp')}
                     style={styles.hero}
                 >
                     <View style={styles.heroOverlay}>

@@ -35,10 +35,10 @@ import { Fonts } from "../theme/fonts";
 
 // Raster assets
 // TODO: replace with assets/14day_updated.png once Pavani pushes the file
-const Day14Bg = require("../../assets/14day_updated.png");
+const Day14Bg = require("../../assets/14day_updated.webp");
 // TODO: replace with assets/7daybg.png once Pavani pushes the file
-const Day7Bg = require("../../assets/7daybg.png");
-const BeigeBg = require("../../assets/beige_bg.png");
+const Day7Bg = require("../../assets/7daybg.webp");
+const BeigeBg = require("../../assets/beige_bg.webp");
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -769,7 +769,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
                 "Through Sankalp • Mantra • Practice, you have taken the first step inward."}
             </Text>
           </View>
-          {/* <Image source={require("../../assets/new_home_lotus.png")} /> */}
+          {/* <Image source={require("../../assets/new_home_lotus.webp")} /> */}
           <View style={[styles.bottomGroup, { marginTop: 15 }]}>
             <TouchableOpacity
               style={styles.primaryBtn}

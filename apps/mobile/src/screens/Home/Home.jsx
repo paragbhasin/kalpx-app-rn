@@ -261,7 +261,7 @@ export default function Home() {
       name: "Classes",
       event_type: "click_classes_card",
       component: "Classes-card",
-      image: require("../../../assets/onlineclass.png"),
+      image: require("../../../assets/onlineclass.webp"),
     },
   ];
 
@@ -1055,7 +1055,7 @@ export default function Home() {
 //       name: "Classes",
 //       event_type: "click_classes_card",
 //       component: "Classes-card",
-//       image: require("../../../assets/onlineclass.png"),
+//       image: require("../../../assets/onlineclass.webp"),
 //     },
 //   ];
 
@@ -1430,7 +1430,7 @@ export default function Home() {
 //         translucent={false}
 //       />
 //       {/* <ImageBackground
-//         source={require("../../../assets/home.jpg")}
+//         source={require("../../../assets/home.webp")}
 //         style={styles.background}
 //         resizeMode="cover"
 //       > */}

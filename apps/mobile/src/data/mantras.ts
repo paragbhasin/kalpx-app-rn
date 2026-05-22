@@ -1,13 +1,4 @@
-import BN from "../config/locales/bn/mantras-bn.json";
 import EN from "../config/locales/en/mantras-en.json";
-import GU from "../config/locales/gu/mantras-gu.json";
-import HI from "../config/locales/hi/mantras-hi.json";
-import KN from "../config/locales/kn/mantras-kn.json";
-import ML from "../config/locales/ml/mantras-ml.json";
-import MR from "../config/locales/mr/matras-mr.json";
-import OR from "../config/locales/or/mantras-or.json";
-import TA from "../config/locales/ta/mantras-ta.json";
-import TE from "../config/locales/te/mantras-te.json";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export interface MantraSource {
@@ -43,15 +34,6 @@ export interface PickMantraOptions {
 
 export const CATALOGS: Record<string, MantraItem[]> = {
   en: EN as MantraItem[],
-  hi: HI as MantraItem[],
-  mr: MR as MantraItem[],
-  bn: BN as MantraItem[],
-  ta: TA as MantraItem[],
-  te: TE as MantraItem[],
-  kn: KN as MantraItem[],
-  ml: ML as MantraItem[],
-  gu: GU as MantraItem[],
-  or: OR as MantraItem[],
 };
 
 export function pickMantra({

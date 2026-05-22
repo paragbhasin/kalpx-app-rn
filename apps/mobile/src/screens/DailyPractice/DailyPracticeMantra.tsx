@@ -532,7 +532,7 @@ export default function DailyPracticeMantra() {
         translucent={false}
       />
       {/* <ImageBackground
-            source={require("../../../assets/Tracker_BG.png")}
+            source={require("../../../assets/Tracker_BG.webp")}
             style={{
               flex: 1,
               width: FontSize.CONSTS.DEVICE_WIDTH,

@@ -36,7 +36,7 @@ const ChoiceStackContainer: React.FC<ChoiceStackContainerProps> = ({
   const screenData = useScreenStore((state: any) => state.screenData);
 
   useEffect(() => {
-    updateBackground(require("../../assets/beige_bg.png"));
+    updateBackground(require("../../assets/beige_bg.webp"));
     updateHeaderHidden(false);
     return () => updateHeaderHidden(false);
   }, [updateBackground, updateHeaderHidden]);

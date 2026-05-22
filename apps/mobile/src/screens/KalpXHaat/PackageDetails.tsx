@@ -19,7 +19,7 @@ const PackageDetails = () => {
     const [selectedSlot, setSelectedSlot] = useState("10.00 PM - 12.00 PM");
 
     const packageName = "Basic Package";
-    const serviceImage = require("../../../assets/service-card.png");
+    const serviceImage = require("../../../assets/service-card.webp");
     const totalPrice = 12000;
     const deposit = 2000;
 

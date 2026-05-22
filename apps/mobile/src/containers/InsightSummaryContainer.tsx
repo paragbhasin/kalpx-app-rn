@@ -162,8 +162,8 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({
   useEffect(() => {
     updateBackground(
       step === 1
-        ? require("../../assets/14_day_bg.jpg")
-        : require("../../assets/beige_bg.png"),
+        ? require("../../assets/14_day_bg.webp")
+        : require("../../assets/beige_bg.webp"),
     );
     updateHeaderHidden(false);
     return () => {
@@ -381,7 +381,7 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({
           </View>
 
           <Image
-            source={require("../../assets/half-mandala-removebg-preview.png")}
+            source={require("../../assets/half-mandala-removebg-preview.webp")}
             style={styles.cardGlowMark}
           />
         </View>
@@ -393,7 +393,7 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({
           </View>
           <Text style={styles.explanationText}>{experienceExplanation}</Text>
           <Image
-            source={require("../../assets/half-mandala-removebg-preview.png")}
+            source={require("../../assets/half-mandala-removebg-preview.webp")}
             style={styles.experienceMandala}
           />
         </View>
@@ -479,7 +479,7 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({
                 )}
                 {i === cards.length - 1 && (
                   <Image
-                    source={require("../../assets/half-mandala-removebg-preview.png")}
+                    source={require("../../assets/half-mandala-removebg-preview.webp")}
                     style={styles.step2CardMandala}
                   />
                 )}

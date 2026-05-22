@@ -23,7 +23,7 @@ import { postQuickCheckin } from '../../engine/mitraApi';
 import { useScreenStore } from '../../engine/useScreenBridge';
 import { Fonts } from '../../theme/fonts';
 
-const BEIGE_BG = require('../../../assets/beige_bg.png');
+const BEIGE_BG = require('../../../assets/beige_bg.webp');
 const LEAF_ART = require('../../../assets/leaves-bird.webp');
 
 const DOOR_ROUTES: Record<string, string> = {

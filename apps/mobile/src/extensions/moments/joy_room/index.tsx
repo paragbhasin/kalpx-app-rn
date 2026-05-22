@@ -149,7 +149,7 @@ const JoyRoomContainer: React.FC<Props> = () => {
 
   // Background setup (mirrors grief/loneliness)
   useEffect(() => {
-    const updatedBackground = require("../../../../assets/beige_bg.png");
+    const updatedBackground = require("../../../../assets/beige_bg.webp");
     updateBackground(updatedBackground);
     updateHeaderHidden(false);
     return () => updateHeaderHidden(false);

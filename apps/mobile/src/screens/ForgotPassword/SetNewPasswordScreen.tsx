@@ -135,7 +135,7 @@ export default function SetNewPasswordScreen({ navigation, route }) {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff2dd" translucent={false} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined} keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}>
-        <ImageBackground source={require("../../../assets/hoomepagebg.jpg")} style={styles.background}>
+        <ImageBackground source={require("../../../assets/hoomepagebg.webp")} style={styles.background}>
           <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
                         <TextComponent type="headerBigText"  style={styles.brand}>{t("login.brand")}</TextComponent>
             <TextComponent type="headerIncreaseText" style={styles.heading}>{t("login.heading")}</TextComponent>

@@ -33,7 +33,7 @@ import { setHomeData } from "../../store/doorSlice";
 import { screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
 
-const RHYTHM_BG = require("../../../assets/beige_bg.png");
+const RHYTHM_BG = require("../../../assets/beige_bg.webp");
 
 function formatReminderTime(hms: string): string {
   const [h, m] = hms.split(":").map(Number);

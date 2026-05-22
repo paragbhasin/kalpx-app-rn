@@ -99,7 +99,7 @@ const BreathAnimationBlock: React.FC<BreathAnimationBlockProps> = ({ block }) =>
       <View style={styles.animationArea}>
         <Animated.View style={[styles.ballContainer, { transform: [{ scale: scaleAnim }] }]}>
           <Image 
-            source={require('../../assets/glow_ball.png')} 
+            source={require('../../assets/glow_ball.webp')} 
             style={styles.ball} 
             resizeMode="contain" 
           />

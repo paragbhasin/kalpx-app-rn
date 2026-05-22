@@ -105,8 +105,8 @@ export default function Home() {
     });
   }, []);
 
-  const HOME_BACKGROUND = require("../../../assets/new_home.png");
-  const CONTINUE_BG = require("../../../assets/beige_bg.png");
+  const HOME_BACKGROUND = require("../../../assets/new_home.webp");
+  const CONTINUE_BG = require("../../../assets/beige_bg.webp");
   const isLandingHome =
     !hasPartialState && !(isLoggedIn && checkingJourney) && !mitraJourneyId;
 
@@ -917,7 +917,7 @@ export default function Home() {
               <Text style={styles.loginText}>Sign in to save your journey</Text>
             </TouchableOpacity>
           )} */}
-          <Image source={require("../../../assets/new_home_lotus.png")} />
+          <Image source={require("../../../assets/new_home_lotus.webp")} />
           {/* <View style={{ height: 220 }} /> */}
           <TouchableOpacity
             onPress={handleBeginJourney}

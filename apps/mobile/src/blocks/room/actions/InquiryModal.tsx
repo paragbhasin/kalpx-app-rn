@@ -154,7 +154,7 @@ const InquiryModal: React.FC<Props> = ({
           ]}
         >
           <ImageBackground
-            source={require("../../../../assets/beige_bg.png")}
+            source={require("../../../../assets/beige_bg.webp")}
             style={styles.sheetBackground}
             imageStyle={[
               styles.sheetImage,

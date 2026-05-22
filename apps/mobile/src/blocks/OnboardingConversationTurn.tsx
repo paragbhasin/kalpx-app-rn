@@ -79,10 +79,10 @@ const resolveBlockImage = (url?: string) => {
 
   const assetPath = url.replace("/assets/", "");
   if (assetPath === "mitra_lotus.png") {
-    return require("../../assets/mitra_lotus.png");
+    return require("../../assets/mitra_lotus.webp");
   }
   if (assetPath === "new_home_lotus.png") {
-    return require("../../assets/new_home_lotus.png");
+    return require("../../assets/new_home_lotus.webp");
   }
   if (assetPath === "lotus.png" || assetPath === "lotus") {
     return require("../../assets/lotus.webp");

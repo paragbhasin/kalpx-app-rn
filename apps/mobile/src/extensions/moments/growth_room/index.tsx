@@ -141,7 +141,7 @@ const GrowthRoomContainer: React.FC<Props> = () => {
 
   // Background
   useEffect(() => {
-    const updatedBackground = require("../../../../assets/beige_bg.png");
+    const updatedBackground = require("../../../../assets/beige_bg.webp");
     updateBackground(updatedBackground);
     updateHeaderHidden(false);
     return () => updateHeaderHidden(false);

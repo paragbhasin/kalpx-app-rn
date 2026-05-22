@@ -23,10 +23,10 @@ import store from "../../store";
 import { screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
 
-const HOME_BACKGROUND = require("../../../assets/mitra_bg.png");
+const HOME_BACKGROUND = require("../../../assets/mitra_bg.webp");
 const TOP_MANDALA = require("../../../assets/mitra_top_mandala.png");
 const BOTTOM_MANDALA = require("../../../assets/mitra_bottom_mandala.png");
-const MITRA_LOTUS = require("../../../assets/mitra_lotus.png");
+const MITRA_LOTUS = require("../../../assets/mitra_lotus.webp");
 
 const steps = [
   {

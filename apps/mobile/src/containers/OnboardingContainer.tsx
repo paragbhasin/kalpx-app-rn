@@ -86,8 +86,8 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
     turn === 1 ||
     turn === 2);
   const backgroundSource = isIntroState
-    ? require("../../assets/new_home.png")
-    : require("../../assets/beige_bg.png");
+    ? require("../../assets/new_home.webp")
+    : require("../../assets/beige_bg.webp");
 
   useEffect(() => {
     updateBackground(backgroundSource);

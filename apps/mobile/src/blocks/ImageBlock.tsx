@@ -21,9 +21,9 @@ const ImageBlock: React.FC<ImageBlockProps> = ({ block }) => {
     if (assetPath === 'lotus_glow.png' || assetPath === 'lotus_glow') source = require('../../assets/lotus_glow.png');
     else if (assetPath === 'lotus.png' || assetPath === 'lotus') source = require('../../assets/lotus.webp');
     else if (assetPath === 'mitra.png' || assetPath === 'mitra') source = require('../../assets/mitra.png');
-    else if (assetPath === 'mitra_lotus.png') source = require('../../assets/mitra_lotus.png');
+    else if (assetPath === 'mitra_lotus.png') source = require('../../assets/mitra_lotus.webp');
     else if (assetPath === 'KalpXlogo.png') source = require('../../assets/KalpXlogo.png');
-    else if (assetPath === 'logo.png') source = require('../../assets/logo.png');
+    else if (assetPath === 'logo.png') source = require('../../assets/logo.webp');
     else if (assetPath === 'dash_mantra.png' || assetPath === 'dash_mantra') source = require('../../assets/dash_mantra.webp');
     else if (assetPath === 'dash_sankalp.png' || assetPath === 'dash_sankalp') source = require('../../assets/dash_sankalp.webp');
     else if (assetPath === 'dash_action.png' || assetPath === 'dash_action') source = require('../../assets/dash_action.webp');

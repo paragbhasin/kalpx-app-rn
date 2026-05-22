@@ -134,7 +134,7 @@ const Dharma = () => {
         </TextComponent>
 
         <Image
-          source={require("../../../assets/Daily_Darma2.png")}
+          source={require("../../../assets/Daily_Darma2.webp")}
           style={{
             width: width * 0.85,
             height: 200,
@@ -433,7 +433,7 @@ const Dharma = () => {
           </TextComponent>
 
           <Image
-            source={require("../../../assets/Daily_Darma1.png")}
+            source={require("../../../assets/Daily_Darma1.webp")}
             style={{
               width: width * 0.85,
               height: 200,
@@ -665,7 +665,7 @@ export default Dharma;
 //      Discover daily practices crafted to nurture your mind and spirit.
 //         </TextComponent>
 //    <Image
-//       source={require("../../../assets/Daily_Darma2.png")}
+//       source={require("../../../assets/Daily_Darma2.webp")}
 //       style={{width:width*0.85,height:200,alignSelf:"center",marginVertical:12,borderRadius:8}}
 //       resizeMode="cover"
 //     />
@@ -748,7 +748,7 @@ export default Dharma;
 //         >KalpX Daily Practice. Show up every day — and watch the shift begin.
 //             </TextComponent> 
 //             <Image 
-//       source={require("../../../assets/Daily_Darma1.png")}
+//       source={require("../../../assets/Daily_Darma1.webp")}
 //       style={{width:width*0.85,height:200,alignSelf:"center",marginVertical:12,borderRadius:8}}
 //       resizeMode="cover"
 //     />

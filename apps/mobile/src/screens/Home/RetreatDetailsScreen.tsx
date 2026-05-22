@@ -88,8 +88,8 @@ const REVIEWS = [
         comment: "Amazing experience! Enjoyed every day here. The teacher is very good and the atmosphere is very peaceful.",
         rating: 5,
         images: [
-            require('../../../assets/retreat/retreat1.jpg'),
-            require('../../../assets/retreat/retreat2.jpg'),
+            require('../../../assets/retreat/retreat1.webp'),
+            require('../../../assets/retreat/retreat2.webp'),
         ]
     }
 ];
@@ -103,9 +103,9 @@ const RetreatDetailsScreen: React.FC = () => {
     const sectionOffsets = useRef<{ [key: string]: number }>({});
 
     const gallery = [
-        require('../../../assets/retreat/retreat1.jpg'),
-        require('../../../assets/retreat/retreat2.jpg'),
-        require('../../../assets/retreat/landing1.png'),
+        require('../../../assets/retreat/retreat1.webp'),
+        require('../../../assets/retreat/retreat2.webp'),
+        require('../../../assets/retreat/landing1.webp'),
     ];
 
     const handleScrollTo = (id: string) => {
@@ -308,7 +308,7 @@ const RetreatDetailsScreen: React.FC = () => {
                         <Text style={styles.sectionTitle}>Address Details</Text>
                         <View style={styles.mapPlaceholder}>
                             <Image
-                                source={require('../../../assets/retreat/landing1.png')}
+                                source={require('../../../assets/retreat/landing1.webp')}
                                 style={styles.mapImage}
                             />
                             <View style={styles.mapOverlay} />

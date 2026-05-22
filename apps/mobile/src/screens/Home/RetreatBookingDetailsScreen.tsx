@@ -29,9 +29,9 @@ const RetreatBookingDetailsScreen: React.FC = () => {
     const [currentImg, setCurrentImg] = useState(0);
 
     const images = [
-        require('../../../assets/retreat/retreat1.jpg'),
-        require('../../../assets/retreat/retreat1.jpg'),
-        require('../../../assets/retreat/retreat1.jpg'),
+        require('../../../assets/retreat/retreat1.webp'),
+        require('../../../assets/retreat/retreat1.webp'),
+        require('../../../assets/retreat/retreat1.webp'),
     ];
 
     const pkgFeatures = [

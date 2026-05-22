@@ -21,7 +21,7 @@ const INTRO_LINES = [
   "I am here to help you feel more calm, steady, and clear — on hard days and good days.",
   "I notice small things, like your mood and the shape of your day.",
 ];
-const START_BACKGROUND = require("../../../assets/new_home.png");
+const START_BACKGROUND = require("../../../assets/new_home.webp");
 
 export default function MitraStartScreen() {
   const navigation = useNavigation<any>();
@@ -83,7 +83,7 @@ export default function MitraStartScreen() {
 
           <View style={styles.footer}>
             <Image
-              source={require("../../../assets/new_home_lotus.png")}
+              source={require("../../../assets/new_home_lotus.webp")}
               style={styles.lotus}
               resizeMode="contain"
             />

@@ -156,7 +156,7 @@ const LifeContextPickerSheet: React.FC<LifeContextPickerSheetProps> = ({
           testID="life_context_picker_sheet"
         >
           <ImageBackground
-            source={require("../../../assets/beige_bg.png")}
+            source={require("../../../assets/beige_bg.webp")}
             style={styles.sheetBackground}
             imageStyle={styles.sheetImage}
           >

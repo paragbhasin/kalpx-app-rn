@@ -105,7 +105,7 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
 
   // --- Pavani: background image setup ---
   useEffect(() => {
-    const updatedBackground = require("../../../../assets/beige_bg.png");
+    const updatedBackground = require("../../../../assets/beige_bg.webp");
     updateBackground(updatedBackground);
     updateHeaderHidden(false);
     return () => updateHeaderHidden(false);

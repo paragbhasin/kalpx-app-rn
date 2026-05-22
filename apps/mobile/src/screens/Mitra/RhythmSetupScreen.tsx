@@ -113,7 +113,7 @@ const BAND_ART: Record<RhythmTimeBand, React.ComponentType<any>> = {
   afternoon: AfternoonIcon,
   night: NightIcon,
 };
-const RHYTHM_BG = require("../../../assets/beige_bg.png");
+const RHYTHM_BG = require("../../../assets/beige_bg.webp");
 const RHYTHM_LEAF_ART = require("../../../assets/leaves-bird.webp");
 
 const MOMENT_COPY: Record<RhythmTimeBand, { label: string; desc: string }> = {

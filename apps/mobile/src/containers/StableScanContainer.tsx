@@ -68,7 +68,7 @@ const StableScanContainer: React.FC<StableScanContainerProps> = ({
   const updateScreenData = useScreenStore((state) => state.updateScreenData);
 
   useEffect(() => {
-    updateBackground(require("../../assets/beige_bg.png"));
+    updateBackground(require("../../assets/beige_bg.webp"));
     updateHeaderHidden(false);
     return () => updateHeaderHidden(false);
   }, [updateBackground, updateHeaderHidden]);

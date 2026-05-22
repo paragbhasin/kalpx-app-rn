@@ -1332,9 +1332,9 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
   useEffect(() => {
     let bg = require("../../assets/mantra3.webp");
     if (currentVariant === "mantra_prep")
-      bg = require("../../assets/mantra_relaxing.png");
+      bg = require("../../assets/mantra_relaxing.webp");
     if (currentVariant === "mantra_rep_selection")
-      bg = require("../../assets/beige_bg.png");
+      bg = require("../../assets/beige_bg.webp");
     // Fallback logic from Vue
     updateBackground(bg);
   }, [currentVariant]);
@@ -1648,7 +1648,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
           <View style={styles.repMandalaWrap}>
             <View style={styles.repMandalaOuter}>
               <Image
-                source={require("../../assets/rep-count.png")}
+                source={require("../../assets/rep-count.webp")}
                 style={styles.repMandalaGlow}
                 resizeMode="contain"
               />
@@ -2222,7 +2222,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
             }}
           >
             <Image
-              source={require("../../assets/namaste.png")}
+              source={require("../../assets/namaste.webp")}
               style={[
                 styles.embodyImg,
                 isHolding &&

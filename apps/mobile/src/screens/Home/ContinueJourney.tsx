@@ -472,7 +472,7 @@ export default function ContinueJourney({
 
         {/* <View style={styles.lotusContainer} pointerEvents="none">
           <Image
-            source={require("../../../assets/new_home_lotus.png")}
+            source={require("../../../assets/new_home_lotus.webp")}
             style={styles.lotusImage}
             resizeMode="contain"
           />
@@ -586,7 +586,7 @@ export default function ContinueJourney({
 
         <View style={styles.lotusContainer} pointerEvents="none">
           <Image
-            source={require("../../../assets/new_home_lotus.png")}
+            source={require("../../../assets/new_home_lotus.webp")}
             style={styles.lotusImage}
             resizeMode="contain"
           />
@@ -646,7 +646,7 @@ export default function ContinueJourney({
 
       <View style={styles.lotusContainer} pointerEvents="none">
         <Image
-          source={require("../../../assets/new_home_lotus.png")}
+          source={require("../../../assets/new_home_lotus.webp")}
           style={styles.lotusImage}
           resizeMode="contain"
         />

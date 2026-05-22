@@ -4,7 +4,7 @@ import { SafeAreaView, StyleSheet } from "react-native";
 import MantraRunnerView from "../../../blocks/runners/MantraRunnerView";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 
-const BEIGE_BG = require("../../../../assets/beige_bg.png");
+const BEIGE_BG = require("../../../../assets/beige_bg.webp");
 
 export default function RhythmMantraRunner() {
   const navigation = useNavigation<any>();

@@ -215,7 +215,12 @@
     "submit": "Submit",
     "backTo": "Back to ",
     "login": "Login",
-    "3333444": "Code Required"
+    "resetPassword": "Reset Password",
+    "passwordsMustMatch": "Passwords must match",
+    "confirmPasswordRequired": "Please confirm your password",
+    "passwordRequired": "Password is required",
+    "passwordMin": "Password must be at least 6 characters",
+    "codeRequired": "Verification code required"
   },
   "signup": {
     "getStarted": "Let's Get Started",

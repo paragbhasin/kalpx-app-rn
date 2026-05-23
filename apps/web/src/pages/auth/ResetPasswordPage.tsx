@@ -60,6 +60,7 @@ export function ResetPasswordPage() {
   return (
     <AuthLayout title="Enter reset code">
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <Link to="/forgot-password" style={{ color: 'var(--kalpx-cta)', fontSize: 14 }}>← Back</Link>
         <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14, margin: 0, lineHeight: 1.6 }}>
           Enter the code we sent to your email and choose a new password.
         </p>

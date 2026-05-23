@@ -5,7 +5,7 @@ import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   AccessibilityInfo,
   ImageBackground,
@@ -70,6 +70,9 @@ if (__DEV__) {
 }
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
+
+// Max time to wait for screen resolver API before falling back to local schemas.
+const SCREEN_RESOLVER_STARTUP_TIMEOUT_MS = 3000;
 
 // Always show notifications when app is open
 Notifications.setNotificationHandler({
@@ -251,21 +254,25 @@ export default function App() {
     // KalpX design language: Cormorant Garamond (serif) + Inter (sans)
     CormorantGaramond_400Regular: require("@expo-google-fonts/cormorant-garamond/400Regular/CormorantGaramond_400Regular.ttf"),
     CormorantGaramond_700Bold: require("@expo-google-fonts/cormorant-garamond/700Bold/CormorantGaramond_700Bold.ttf"),
+    Inter_300Light_Italic: require("@expo-google-fonts/inter/300Light_Italic/Inter_300Light_Italic.ttf"),
     Inter_400Regular: require("@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf"),
     Inter_500Medium: require("@expo-google-fonts/inter/500Medium/Inter_500Medium.ttf"),
     Inter_600SemiBold: require("@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf"),
     Inter_700Bold: require("@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf"),
+    Inter_900Black_Italic: require("@expo-google-fonts/inter/900Black_Italic/Inter_900Black_Italic.ttf"),
     // Legacy aliases — Gelica mapped to new fonts for backward compatibility
     GelicaBold: require("@expo-google-fonts/cormorant-garamond/700Bold/CormorantGaramond_700Bold.ttf"),
     GelicaRegular: require("@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf"),
     GelicaMedium: require("@expo-google-fonts/inter/500Medium/Inter_500Medium.ttf"),
     GelicaLight: require("@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf"),
-    // Week 7 — Devanagari for Why-This L3 Sanskrit sources
+    // Devanagari for Hindi/Marathi and Sanskrit sources
     NotoSansDevanagari_400Regular: require("@expo-google-fonts/noto-sans-devanagari/400Regular/NotoSansDevanagari_400Regular.ttf"),
+    NotoSansDevanagari_500Medium: require("@expo-google-fonts/noto-sans-devanagari/500Medium/NotoSansDevanagari_500Medium.ttf"),
     NotoSansDevanagari_700Bold: require("@expo-google-fonts/noto-sans-devanagari/700Bold/NotoSansDevanagari_700Bold.ttf"),
   });
 
   const [initialRoute, setInitialRoute] = useState(null);
+  const startupFinishedRef = useRef(false);
 
   // Google login setup
   GoogleSignin.configure({
@@ -326,35 +333,36 @@ export default function App() {
     };
   }, []);
 
-  // Initial Route Logic
-  // Initial Route Logic — Fixed to prevent Wi-Fi Font Race Conditions
+  // Initial Route Logic — waits for font readiness (or font error) before showing app.
+  // startupFinishedRef prevents a double-run if fontsLoaded/error both change in quick
+  // succession (e.g. late error event after initial load).
   useEffect(() => {
     const init = async () => {
-      // 1. STRICT GUARD: If fonts aren't completely loaded and there's no error, STOP here.
       if (!fontsLoaded && !error) return;
+      if (startupFinishedRef.current) return;
+      startupFinishedRef.current = true;
 
       try {
-        // Preload screen definitions from API (falls back to local)
-        await initScreenResolver().catch((err) =>
-          console.warn(
-            "Screen resolver init failed (using local fallback):",
-            err,
+        // Warm screen-definition cache from API, capped so slow networks don't hang splash.
+        // Late resolver resolution only warms a local cache — it never redirects the user.
+        await Promise.race([
+          initScreenResolver().catch((err) =>
+            console.warn("Screen resolver init failed (using local fallback):", err),
           ),
-        );
+          new Promise((resolve) =>
+            setTimeout(resolve, SCREEN_RESOLVER_STARTUP_TIMEOUT_MS),
+          ),
+        ]);
 
-        // 2. Set the initial route FIRST to prepare the view tree hierarchy
+        // Set route before hiding splash so NavigationContainer mounts with a valid route.
         setInitialRoute("AppDrawer");
+        await SplashScreen.hideAsync().catch(() => {});
 
-        // 3. ONLY hide the splash screen AFTER fonts are confirmed present in memory
-        if (fontsLoaded || error) {
-          await SplashScreen.hideAsync().catch(() => {});
-        }
-
-        // Register device in background without blocking execution
+        // Register device in background — must not block splash hide.
         registerDeviceToBackend();
       } catch (err) {
-        console.log("Initialization sequence error:", err);
-        // Fallback safety to ensure app doesn't lock up if something crashes
+        console.warn("Startup sequence error:", err);
+        // Fallback: render with system fonts if anything above throws.
         setInitialRoute("AppDrawer");
         await SplashScreen.hideAsync().catch(() => {});
       }
@@ -363,7 +371,10 @@ export default function App() {
     init();
   }, [fontsLoaded, error]);
 
-  if (!fontsLoaded || initialRoute === null) return null;
+  // TextComponent has system-font fallbacks, so the app is safe to render even when
+  // fontsLoaded=false (e.g. after a font-load error). Only block on initialRoute so
+  // NavigationContainer never mounts before the initial route is determined.
+  if (initialRoute === null) return null;
 
   return (
     <MenuProvider>

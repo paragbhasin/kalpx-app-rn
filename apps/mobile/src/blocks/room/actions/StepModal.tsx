@@ -182,6 +182,8 @@ const StepModal: React.FC<Props> = ({
     keyboardHeight > 0
       ? Math.min(Math.max(0, keyboardHeight - 18), maxKeyboardLift)
       : 0;
+  const sheetBottomOffset =
+    presentation === "screen" && Platform.OS === "android" ? 0 : keyboardLift;
 
   useEffect(() => {
     if (!visible) {
@@ -233,7 +235,7 @@ const StepModal: React.FC<Props> = ({
           style={[
             styles.sheet,
             presentation === "screen" ? styles.screenSheet : null,
-            keyboardLift > 0 && { marginBottom: keyboardLift },
+            sheetBottomOffset > 0 && { marginBottom: sheetBottomOffset },
           ]}
         >
           <ImageBackground
@@ -924,20 +926,23 @@ const ScreenTextInputExperience: React.FC<ScreenTextInputExperienceProps> = ({
       <Text style={styles.immersivePrompt}>{promptText}</Text>
 
       <View style={styles.immersiveInputWrap}>
-        <TextInput
-          value={text}
-          onChangeText={(v) => setText(v.slice(0, MAX_TEXT))}
-          multiline
-          textAlignVertical="top"
-          style={styles.immersiveTextInput}
-          placeholder={placeholderText}
-          placeholderTextColor="#9C9893"
-          testID="step_modal_text_input"
-          maxLength={MAX_TEXT}
-        />
-        <Text style={styles.immersiveCounter}>
-          {text.length} / {MAX_TEXT}
-        </Text>
+        <View style={styles.immersiveInputCard}>
+          <TextInput
+            value={text}
+            onChangeText={(v) => setText(v.slice(0, MAX_TEXT))}
+            multiline
+            textAlignVertical="top"
+            style={styles.immersiveTextInput}
+            placeholder={placeholderText}
+            placeholderTextColor="#9C9893"
+            testID="step_modal_text_input"
+            maxLength={MAX_TEXT}
+            underlineColorAndroid="transparent"
+          />
+          <Text style={styles.immersiveCounter}>
+            {text.length} / {MAX_TEXT}
+          </Text>
+        </View>
       </View>
 
       <TouchableOpacity
@@ -1477,13 +1482,14 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   immersiveContent: {
-    paddingBottom: 28,
+    flexGrow: 1,
+    paddingBottom: 44,
   },
   immersiveHeaderRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 28,
+    marginBottom: Platform.OS === "android" ? 20 : 28,
   },
   immersiveBackButton: {
     width: 30,
@@ -1507,8 +1513,8 @@ const styles = StyleSheet.create({
   },
   immersiveHero: {
     alignItems: "center",
-    marginBottom: 10,
-    marginTop: -55,
+    marginBottom: Platform.OS === "android" ? 14 : 10,
+    marginTop: Platform.OS === "android" ? -16 : -55,
   },
   immersiveLotus: {
     width: 34,
@@ -1518,7 +1524,7 @@ const styles = StyleSheet.create({
   },
   immersiveTitle: {
     fontSize: 22,
-    lineHeight: 38,
+    lineHeight: Platform.OS === "android" ? 32 : 38,
     color: "#2C1C11",
     textAlign: "center",
     fontWeight: "700",
@@ -1545,7 +1551,7 @@ const styles = StyleSheet.create({
   },
   immersiveDescription: {
     fontSize: 14,
-    lineHeight: 28,
+    lineHeight: Platform.OS === "android" ? 22 : 28,
     color: "#35302B",
     textAlign: "center",
     marginBottom: 18,
@@ -1554,7 +1560,7 @@ const styles = StyleSheet.create({
   },
   immersiveSanatan: {
     fontSize: 14,
-    lineHeight: 28,
+    lineHeight: Platform.OS === "android" ? 22 : 28,
     color: "#A97817",
     fontStyle: "italic",
     textAlign: "center",
@@ -1563,7 +1569,7 @@ const styles = StyleSheet.create({
   },
   immersivePrompt: {
     fontSize: 14,
-    lineHeight: 24,
+    lineHeight: Platform.OS === "android" ? 22 : 24,
     color: "#2E241B",
     textAlign: "center",
     fontWeight: "700",
@@ -1572,27 +1578,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   immersiveInputWrap: {
-    position: "relative",
     marginBottom: 24,
   },
-  immersiveTextInput: {
+  immersiveInputCard: {
+    position: "relative",
     width: "100%",
-    minHeight: 210,
     borderWidth: 1,
     borderColor: "rgba(196,181,161,0.92)",
     borderRadius: 28,
+    backgroundColor: "rgba(255,255,255,0.72)",
+    shadowColor: "#482E0D",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: Platform.OS === "ios" ? 0.12 : 0,
+    shadowRadius: 16,
+    elevation: Platform.OS === "android" ? 0 : 3,
+    overflow: "hidden",
+  },
+  immersiveTextInput: {
+    width: "100%",
+    minHeight: Platform.OS === "android" ? 180 : 210,
     paddingHorizontal: 28,
-    paddingTop: 5,
+    paddingTop: Platform.OS === "android" ? 18 : 5,
     paddingBottom: 54,
     fontSize: 13,
     lineHeight: 27,
     color: "#1C1C1E",
-    backgroundColor: "rgba(255,255,255,0.72)",
-    shadowColor: "#482E0D",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 3,
+    backgroundColor: "transparent",
+    borderWidth: 0,
+    includeFontPadding: false,
+    ...(Platform.OS === "android" ? { textAlignVertical: "top" } : null),
   },
   immersiveCounter: {
     position: "absolute",

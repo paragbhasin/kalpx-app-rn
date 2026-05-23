@@ -43,21 +43,21 @@ const A3Icon = ({ width, height, style }: { width?: number; height?: number; sty
 const A4Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_a_discipline.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const A5Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_a_gratitude.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const A6Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_a_clarity.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
-const AfternoonIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/icon_afternoon.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const AfternoonIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/aft.png")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const M1Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_m_calm_start.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const M2Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_m_focus.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const M3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_m_devotion.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const M4Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_m_discipline.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const M5Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_m_gratitude.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const M6Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_m_clarity.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
-const MorningIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/icon_morning.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const MorningIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/morning.png")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const N1Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_n_calm_start.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const N2Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_n_focus.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const N3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_n_devotion.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const N4Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_n_discipline.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const N5Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_n_gratitude.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const N6Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_n_clarity.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
-const NightIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/icon_night.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const NightIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/night.png")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import LibrarySearchModal, {
   LibrarySearchItem,
 } from "../../components/LibrarySearchModal";
@@ -1039,7 +1039,7 @@ export default function RhythmSetupScreen({
                 activeOpacity={0.82}
               >
                 <View style={wStyles.momentArtWrap}>
-                  <Icon width={40} height={40} />
+                  <Icon width={28} height={28} />
                 </View>
                 <View style={wStyles.momentCardInner}>
                   <Text style={wStyles.momentLabel}>
@@ -1110,7 +1110,7 @@ export default function RhythmSetupScreen({
             return (
               <View key={band} style={wStyles.purposeSection}>
                 <View style={wStyles.purposeSectionHeader}>
-                  <BandIcon width={58} height={58} />
+                  <BandIcon width={32} height={32} />
                   <Text style={wStyles.purposeBandLabel}>
                     {MOMENT_COPY[band].label}
                   </Text>
@@ -1568,7 +1568,7 @@ export default function RhythmSetupScreen({
                   activeOpacity={0.8}
                 >
                   <View style={styles.bandIconWrap}>
-                    <Icon width={38} height={38} />
+                    <Icon width={30} height={30} />
                   </View>
                   <View style={styles.bandCopy}>
                     <Text style={styles.bandLabel}>

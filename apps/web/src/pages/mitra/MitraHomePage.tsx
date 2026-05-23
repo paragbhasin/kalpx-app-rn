@@ -416,7 +416,7 @@ export function MitraHomePage() {
                       gap: 12,
                     }}
                   >
-                    {greeting.headline}
+                    {greeting?.headline || ""}
                   </h1>
 
                   {greeting.subtext && (

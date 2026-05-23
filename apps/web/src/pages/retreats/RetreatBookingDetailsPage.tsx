@@ -3,8 +3,8 @@ import type { CSSProperties } from "react";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppShell } from "../../components/ui";
-import retreatImg from "../../../../mobile/assets/retreat/retreat1.jpg";
-import hostImg from "../../../../mobile/assets/retreat/retreat2.jpg";
+import retreatImg from "../../../../mobile/assets/retreat/retreat1.webp";
+import hostImg from "../../../../mobile/assets/retreat/retreat2.webp";
 import { FacilitatorCard } from "./FacilitatorCard";
 
 const policies = [

@@ -1,7 +1,7 @@
 import { CalendarDays, LocationEdit, Star } from "lucide-react";
 import type { CSSProperties } from "react";
-import retreatImage from "../../../../mobile/assets/retreat/retreat1.jpg";
-import facilitatorImage from "../../../../mobile/assets/retreat/retreat2.jpg";
+import retreatImage from "../../../../mobile/assets/retreat/retreat1.webp";
+import facilitatorImage from "../../../../mobile/assets/retreat/retreat2.webp";
 
 type RetreatBadgeType = "offer" | "urgency" | string;
 

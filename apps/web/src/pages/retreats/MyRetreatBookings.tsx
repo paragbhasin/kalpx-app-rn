@@ -2,8 +2,8 @@ import { CalendarDays, ChevronDown, Clock3, Globe, LocationEdit, Search, Sliders
 import type { CSSProperties } from "react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import retreatImg from "../../../../mobile/assets/retreat/retreat1.jpg";
-import facImg from "../../../../mobile/assets/retreat/retreat2.jpg";
+import retreatImg from "../../../../mobile/assets/retreat/retreat1.webp";
+import facImg from "../../../../mobile/assets/retreat/retreat2.webp";
 
 const categories = [
   "All Retreats",

@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AppShell } from "../../components/ui";
-import landingHero from "../../../../mobile/assets/retreat/landing1.png";
+import landingHero from "../../../../mobile/assets/retreat/landing1.webp";
 import { ExploreRetreats } from "./ExploreRetreats";
 import { MyRetreatBookings } from "./MyRetreatBookings";
 

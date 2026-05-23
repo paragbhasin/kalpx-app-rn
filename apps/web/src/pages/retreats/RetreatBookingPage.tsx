@@ -11,7 +11,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppShell } from "../../components/ui";
-import retreatImg from "../../../../mobile/assets/retreat/retreat1.jpg";
+import retreatImg from "../../../../mobile/assets/retreat/retreat1.webp";
 
 export function RetreatBookingPage() {
   const navigate = useNavigate();

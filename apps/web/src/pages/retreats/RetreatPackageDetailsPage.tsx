@@ -19,8 +19,8 @@ import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppShell } from "../../components/ui";
 import { RetreatCard } from "./RetreatCard";
-import retreatImg from "../../../../mobile/assets/retreat/retreat1.jpg";
-import retreatImg2 from "../../../../mobile/assets/retreat/retreat2.jpg";
+import retreatImg from "../../../../mobile/assets/retreat/retreat1.webp";
+import retreatImg2 from "../../../../mobile/assets/retreat/retreat2.webp";
 
 const dummyRetreats = [
   {

@@ -23,7 +23,7 @@ const FacilitatorCard: React.FC<FacilitatorCardProps> = ({
     tags = ['Ayurveda', 'Meditation', 'Yoga'],
     languages = "English, Hindi",
     description = "Retreats are curated by certified wellness specialists....",
-    image = require('../../../assets/retreat/retreat2.jpg')
+    image = require('../../../assets/retreat/retreat2.webp')
 }) => {
     return (
         <View style={styles.container}>

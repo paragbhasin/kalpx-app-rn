@@ -27,12 +27,13 @@ const TextComponent = (props: any) => {
   const { i18n } = useTranslation();
   const userLang = i18n.language.split("-")[0]; // e.g. "hi-IN" → "hi"
 
-  if (!interLoaded || !hindiLoaded) return null;
-
   const fallbackFont = Platform.select({
     ios: "System",
     android: "sans-serif",
   });
+
+  const englishFontsReady = interLoaded;
+  const devanagariFontsReady = hindiLoaded;
 
   let textStyle: any;
   switch (props?.type) {
@@ -119,11 +120,14 @@ const TextComponent = (props: any) => {
 
   // Language-based font family mapping
   const getFontFamily = () => {
-    if (userLang === "en") return textStyle.fontFamily;
+    if (userLang === "en") {
+      return englishFontsReady ? textStyle.fontFamily : fallbackFont;
+    }
 
     switch (userLang) {
       case "hi":
       case "mr":
+        if (!devanagariFontsReady) return fallbackFont;
         if (weight >= "700") return "NotoSansDevanagari_700Bold";
         if (weight >= "500") return "NotoSansDevanagari_500Medium";
         return "NotoSansDevanagari_400Regular";

@@ -493,7 +493,7 @@ const ConfirmDailyPractices = ({ route }) => {
     <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
       <StatusBar barStyle="dark-content" />
       {/* <ImageBackground
-      source={require("../../../assets/Tracker_BG.png")}
+      source={require("../../../assets/Tracker_BG.webp")}
       style={{
         flex: 1,
         width: FontSize.CONSTS.DEVICE_WIDTH,

@@ -21,7 +21,7 @@ import Header from "./Header";
 
 // Total header height including status bar safe area on Android
 const HEADER_HEIGHT =
-  Platform.OS === "android" ? 45 + (StatusBar.currentHeight || 0) : 45;
+  Platform.OS === "android" ? 10 + (StatusBar.currentHeight || 0) : 45;
 const DEFAULT_SURFACE = "#FAF7F2";
 
 const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {

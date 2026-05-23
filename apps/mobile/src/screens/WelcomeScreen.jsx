@@ -20,7 +20,7 @@ export default function WelcomeScreen({ navigation }) {
         backgroundColor="#f1ebdf"
       />
       <ImageBackground
-        source={require("../../assets/kalpx-Recovered.png")}
+        source={require("../../assets/kalpx-Recovered.webp")}
         style={styles.image}
         resizeMode="contain"
       />

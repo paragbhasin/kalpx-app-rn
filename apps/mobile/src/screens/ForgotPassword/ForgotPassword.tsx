@@ -79,7 +79,7 @@ export default function ForgotPassword({ navigation }) {
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
       >
         <ImageBackground
-          source={require("../../../assets/hoomepagebg.jpg")}
+          source={require("../../../assets/hoomepagebg.webp")}
           style={styles.background}
         >
           <ScrollView

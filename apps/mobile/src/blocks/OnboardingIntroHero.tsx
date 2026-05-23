@@ -42,7 +42,7 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
   );
 
   useEffect(() => {
-    const updatedBackground = require("../../assets/new_home.png");
+    const updatedBackground = require("../../assets/new_home.webp");
 
     updateBackground(updatedBackground);
     updateHeaderHidden(false);
@@ -167,7 +167,7 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
       {/* Lotus image at the bottom — purely decorative, must not intercept chip taps */}
       <View style={styles.lotusWrap} pointerEvents="none">
         <Image
-          source={require("../../assets/new_home_lotus.png")}
+          source={require("../../assets/new_home_lotus.webp")}
           style={styles.lotus}
           resizeMode="contain"
         />

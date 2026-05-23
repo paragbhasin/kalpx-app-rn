@@ -23,9 +23,9 @@ interface PracticeCardBlockProps {
 }
 
 const PRACTICE_ICON_MAP: Record<string, any> = {
-  practice_chant: require("../../assets/dash_mantra.png"),
-  practice_embody: require("../../assets/dash_sankalp.png"),
-  practice_act: require("../../assets/dash_action.png"),
+  practice_chant: require("../../assets/dash_mantra.webp"),
+  practice_embody: require("../../assets/dash_sankalp.webp"),
+  practice_act: require("../../assets/dash_action.webp"),
 };
 
 const PracticeCardBlock: React.FC<PracticeCardBlockProps> = ({ block }) => {

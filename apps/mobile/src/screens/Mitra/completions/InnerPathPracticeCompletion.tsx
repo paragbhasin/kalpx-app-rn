@@ -8,7 +8,7 @@ import {
   mitraTrackCompletion,
 } from "../../../engine/mitraApi";
 
-const BEIGE_BG = require("../../../../assets/beige_bg.png");
+const BEIGE_BG = require("../../../../assets/beige_bg.webp");
 
 export default function InnerPathPracticeCompletion() {
   const navigation = useNavigation<any>();

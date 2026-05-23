@@ -33,25 +33,25 @@ const HEALING = [
     id: "spiritualSilence",
     titleKey: "retreats.healing.silence.title",
     subtitleKey: "retreats.healing.silence.subtitle",
-    image: require("../../../assets/silence.jpg"),
+    image: require("../../../assets/silence.webp"),
   },
   {
     id: "ayurvedaHealing",
     titleKey: "retreats.healing.ayurveda.title",
     subtitleKey: "retreats.healing.ayurveda.subtitle",
-    image: require("../../../assets/ayurveda.jpg"),
+    image: require("../../../assets/ayurveda.webp"),
   },
   {
     id: "yogaImmersion",
     titleKey: "retreats.healing.yoga.title",
     subtitleKey: "retreats.healing.yoga.subtitle",
-    image: require("../../../assets/meditate.jpg"),
+    image: require("../../../assets/meditate.webp"),
   },
   {
     id: "bhaktiSatsang",
     titleKey: "retreats.healing.bhakti.title",
     subtitleKey: "retreats.healing.bhakti.subtitle",
-    image: require("../../../assets/bhakti.jpg"),
+    image: require("../../../assets/bhakti.webp"),
   },
 ];
 
@@ -60,31 +60,31 @@ const LOCATIONS = [
     id: "himalayas",
     titleKey: "retreats.locations.himalayas.title",
     subtitleKey: "retreats.locations.himalayas.subtitle",
-    image: require("../../../assets/himalayas.jpg"),
+    image: require("../../../assets/himalayas.webp"),
   },
   {
     id: "kerala",
     titleKey: "retreats.locations.kerala.title",
     subtitleKey: "retreats.locations.kerala.subtitle",
-    image: require("../../../assets/kerala.jpg"),
+    image: require("../../../assets/kerala.webp"),
   },
   {
     id: "forestAshram",
     titleKey: "retreats.locations.forestAshram.title",
     subtitleKey: "retreats.locations.forestAshram.subtitle",
-    image: require("../../../assets/forest-ashram.jpg"),
+    image: require("../../../assets/forest-ashram.webp"),
   },
   {
     id: "templeTown",
     titleKey: "retreats.locations.templeTown.title",
     subtitleKey: "retreats.locations.templeTown.subtitle",
-    image: require("../../../assets/temple-town.jpg"),
+    image: require("../../../assets/temple-town.webp"),
   },
   {
     id: "riverRetreats",
     titleKey: "retreats.locations.riverRetreats.title",
     subtitleKey: "retreats.locations.riverRetreats.subtitle",
-    image: require("../../../assets/river-retreat.jpg"),
+    image: require("../../../assets/river-retreat.webp"),
   },
 ];
 
@@ -282,7 +282,7 @@ if (!canProceed) return;
     <View style={styles.container}>
       {/* Header Banner */}
       <ImageBackground
-        source={require("../../../assets/retreats.png")}
+        source={require("../../../assets/retreats.webp")}
         style={styles.headerImage}
         imageStyle={styles.imageStyle}
       >

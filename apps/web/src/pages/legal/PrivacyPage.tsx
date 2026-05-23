@@ -189,7 +189,7 @@ const SECTIONS: PolicySection[] = [
     title: '12. Regional Privacy Rights',
     content: [
       { type: 'p', text: 'Depending on where you live, you may have rights to access, correct, delete, or receive a portable copy of your personal information, and to object to or restrict certain processing. To exercise these rights, contact privacy@kalpx.com.' },
-      { type: 'p', text: 'Delaware residents and other US residents: Depending on your state of residence, you may have rights under applicable US state privacy law to know what personal information we collect, to request deletion, and to opt out of the sale or sharing of personal information. We do not sell your personal information for monetary consideration. For information about opt-out rights for sharing or targeted advertising, or to exercise applicable privacy rights, contact privacy@kalpx.com.' },
+      { type: 'p', text: 'Pennsylvania residents and other US residents: Depending on your state of residence, you may have rights under applicable US state privacy law to know what personal information we collect, to request deletion, and to opt out of the sale or sharing of personal information. We do not sell your personal information for monetary consideration. For information about opt-out rights for sharing or targeted advertising, or to exercise applicable privacy rights, contact privacy@kalpx.com.' },
       { type: 'p', text: 'Global Privacy Control: We recognize the Global Privacy Control (GPC) signal. Where required by applicable law, a GPC signal from your browser will be honored as an opt-out of sharing personal information for targeted advertising purposes.' },
       { type: 'p', text: 'European Economic Area and United Kingdom: KalpX is not currently offered to residents of the European Economic Area (EEA) or the United Kingdom. If you are located in the EEA or UK, please do not create an account at this time.' },
       { type: 'p', text: 'Users in India: We are committed to your rights under India\'s Digital Personal Data Protection Act, 2023. Please see our India Privacy Notice at kalpx.com/privacy/india for your full rights, grievance officer contact, and how to file a complaint with the Data Protection Board of India.' },
@@ -223,7 +223,7 @@ const SECTIONS: PolicySection[] = [
     id: 'contact',
     title: '16. Contact and Privacy Requests',
     content: [
-      { type: 'p', text: 'privacy@kalpx.com\nKalpX, Inc., Delaware, USA' },
+      { type: 'p', text: 'privacy@kalpx.com\nTritan Consulting Inc., Pennsylvania, USA' },
       { type: 'p', text: 'For account deletion, data access, consent withdrawal, or any privacy concern, email privacy@kalpx.com with your request in the subject line.' },
     ],
   },
@@ -399,13 +399,14 @@ export function PrivacyPage() {
             Privacy contact: privacy@kalpx.com
           </p>
           <p style={{ marginBottom: '32px', fontSize: 13, color: '#888' }}>
-            KalpX, Inc., a Delaware C Corporation
+            Tritan Consulting Inc., a Pennsylvania corporation
           </p>
 
           <p style={{ fontSize: '17px', marginBottom: '32px' }}>
-            KalpX (&ldquo;we,&rdquo; &ldquo;our,&rdquo; or &ldquo;us&rdquo;) operates the KalpX Mitra companion app and website.
-            This Privacy Policy explains what personal information we collect, how we use it,
-            and the rights you have over it.
+            KalpX (the &ldquo;App,&rdquo; the &ldquo;Platform,&rdquo; or the website located at KalpX.com) is a
+            proprietary software product developed, owned, and operated by Tritan Consulting Inc.,
+            a Pennsylvania corporation (&ldquo;we,&rdquo; &ldquo;our,&rdquo; or &ldquo;us&rdquo;). This Privacy Policy explains what
+            personal information we collect, how we use it, and the rights you have over it.
           </p>
 
           {SECTIONS.map((section) => (

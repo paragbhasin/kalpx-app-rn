@@ -156,7 +156,7 @@ const ScreenRenderer: React.FC = () => {
       currentStateId === 'checkpoint_day_7' ||
       currentStateId === 'checkpoint_day_14';
     if (isCheckpointScreen) return;
-    updateBackground(require("../../assets/beige_bg.png"));
+    updateBackground(require("../../assets/beige_bg.webp"));
   }, [currentBackground, currentScreen, currentContainerId, currentStateId, updateBackground]);
 
   // Room ambient audio belongs to the DynamicEngine screen focus, not to

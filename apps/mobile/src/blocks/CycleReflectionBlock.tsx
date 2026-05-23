@@ -1,10 +1,10 @@
-import { BlurView } from "expo-blur";
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
   Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -26,19 +26,20 @@ import {
   ingestDay14View,
   ingestDay7View,
 } from "../engine/v3Ingest";
+import { clearContinueJourneyHomeCache } from "../screens/Home/ContinueJourney";
 import store from "../store";
 import { loadScreenWithData, screenActions } from "../store/screenSlice";
-import { clearContinueJourneyHomeCache } from "../screens/Home/ContinueJourney";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Fonts } from "../theme/fonts";
 
 // Assets (imported as components via react-native-svg-transformer)
 
 // Raster assets
 // TODO: replace with assets/14day_updated.png once Pavani pushes the file
-const Day14Bg = require("../../assets/14day_updated.png");
+const Day14Bg = require("../../assets/14day_updated.webp");
 // TODO: replace with assets/7daybg.png once Pavani pushes the file
-const Day7Bg = require("../../assets/7daybg.png");
-const BeigeBg = require("../../assets/beige_bg.png");
+const Day7Bg = require("../../assets/7daybg.webp");
+const BeigeBg = require("../../assets/beige_bg.webp");
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -57,6 +58,7 @@ const METRIC_ALLOWLIST: Record<string, string> = {
 };
 
 const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
+  const insets = useSafeAreaInsets();
   const { screenData, currentStateId } = useScreenStore();
   const { showToast } = useToast();
   const navigation = useNavigation<any>();
@@ -769,7 +771,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
                 "Through Sankalp • Mantra • Practice, you have taken the first step inward."}
             </Text>
           </View>
-          {/* <Image source={require("../../assets/new_home_lotus.png")} /> */}
+          {/* <Image source={require("../../assets/new_home_lotus.webp")} /> */}
           <View style={[styles.bottomGroup, { marginTop: 15 }]}>
             <TouchableOpacity
               style={styles.primaryBtn}
@@ -837,8 +839,11 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
         showsVerticalScrollIndicator={false}
         style={{ padding: 10 }}
         contentContainerStyle={
-          is7DayCycle ? styles.day7ReflectionContent : undefined
+          is7DayCycle
+            ? [styles.day7ReflectionContent, { paddingBottom: Math.max(insets.bottom + 40, 64) }]
+            : { paddingBottom: Math.max(insets.bottom + 40, 64) }
         }
+        keyboardShouldPersistTaps="handled"
       >
         {is7DayCycle && (
           <View style={styles.mirrorHeader}>
@@ -936,14 +941,24 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
 
         {is14DayCycle && (
           <View style={[styles.mirrorCard, { paddingVertical: 18 }]}>
-            <Text style={[styles.mirrorCardTitle, { fontSize: 20, color: "#432104" }]}>
-              {(ss.ceremony_engaged_days as number) ?? engagedTotal} of {milestoneDayCount} days held.
+            <Text
+              style={[
+                styles.mirrorCardTitle,
+                { fontSize: 20, color: "#432104" },
+              ]}
+            >
+              {(ss.ceremony_engaged_days as number) ?? engagedTotal} of{" "}
+              {milestoneDayCount} days held.
             </Text>
-            {completedTotal > 0 && completedTotal !== ((ss.ceremony_engaged_days as number) ?? engagedTotal) && (
-              <Text style={[styles.mirrorCardSubtitle, { marginTop: 6 }]}>
-                {completedTotal} {completedTotal === 1 ? "day was" : "days were"} fully complete.
-              </Text>
-            )}
+            {completedTotal > 0 &&
+              completedTotal !==
+                ((ss.ceremony_engaged_days as number) ?? engagedTotal) && (
+                <Text style={[styles.mirrorCardSubtitle, { marginTop: 6 }]}>
+                  {completedTotal}{" "}
+                  {completedTotal === 1 ? "day was" : "days were"} fully
+                  complete.
+                </Text>
+              )}
           </View>
         )}
 
@@ -1089,7 +1104,8 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     return (
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 20, paddingBottom: 60 }}
+        contentContainerStyle={{ padding: 20, paddingBottom: Math.max(insets.bottom + 40, 64) }}
+        keyboardShouldPersistTaps="handled"
       >
         {/* Classification verdict card */}
         {!!classifHeadline && (
@@ -1254,7 +1270,12 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     const finaleNarrative =
       typeof m25.narrative_template === "string" && m25.narrative_template
         ? m25.narrative_template
-            .replace("{completed_count}", String((ceremony as any).engaged_days ?? ceremony.completed_days ?? ""))
+            .replace(
+              "{completed_count}",
+              String(
+                (ceremony as any).engaged_days ?? ceremony.completed_days ?? "",
+              ),
+            )
             .replace("{total_days}", String(ceremony.total_days ?? 14))
         : "";
     const finaleSovereignty = ceremony.sovereignty_line || "";
@@ -1359,7 +1380,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   if (showJourneyInvite) {
     return (
       <View style={{ marginTop: 30 }}>
-        <ScrollView>
+        <ScrollView keyboardShouldPersistTaps="handled">
           <View style={styles.journeyHeader}>
             <Text style={styles.journeyTitle}>
               Your {milestoneDayCount}-Day Journey
@@ -1377,12 +1398,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
                 return [1, 2].map(
                   (w) =>
                     (w === 1 || milestoneDayCount === 14) && (
-                      <BlurView
-                        key={w}
-                        intensity={60}
-                        tint="light"
-                        style={styles.weekCard}
-                      >
+                      <View key={w} style={styles.weekCard}>
                         <Text style={styles.weekLabel}>Week {w}</Text>
                         <View style={styles.daysGrid}>
                           {[1, 2, 3, 4, 5, 6, 7].map((d) => {
@@ -1427,7 +1443,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
                             );
                           })}
                         </View>
-                      </BlurView>
+                      </View>
                     ),
                 );
               })()}
@@ -1466,7 +1482,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
                   <Text style={styles.closeBtnText}>✕</Text>
                 </TouchableOpacity>
               </View>
-              <ScrollView>
+              <ScrollView keyboardShouldPersistTaps="handled">
                 {activeTab === "day" ? (
                   <View>
                     <ActivityList activity={journeyData.activity} />
@@ -1710,7 +1726,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   day7ReflectionContent: {
-    paddingBottom: 96,
+    paddingBottom: 40,
   },
   day7DecisionButtons: {
     gap: 10,
@@ -1745,24 +1761,16 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     padding: 16,
     borderRadius: 24,
-
-    // VERY IMPORTANT for glass effect
     overflow: "hidden",
-
-    // Fallback for Android
-    backgroundColor: "rgba(255,255,255,0.18)",
-
-    // Glass border
+    backgroundColor:
+      Platform.OS === "android" ? "#FFFCF7" : "rgba(255,255,255,0.18)",
     borderWidth: 1,
-    borderColor: "#D9A557",
-
-    // Shadow (depth)
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 10 },
-
-    elevation: 8, // Android
+    borderColor: "rgba(217, 165, 87, 0.55)",
+    shadowColor: "#C9A84C",
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
   weeksWrapper: {
     position: "relative",
@@ -1787,6 +1795,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "flex-start",
+    backgroundColor: "transparent",
   },
   dayItem: { width: "22%", alignItems: "center", marginBottom: 15 },
   dayCircle: {
@@ -1939,7 +1948,7 @@ const styles = StyleSheet.create({
   activityCount: { fontFamily: Fonts.sans.bold, fontSize: 14 },
 
   reflectionRoot: { flex: 1 },
-  reflectionContent: { padding: 20, paddingTop: 40, paddingBottom: 80 },
+  reflectionContent: { padding: 20, paddingTop: 40, paddingBottom: 40 },
   lotusHeaderCard: { alignItems: "center", marginBottom: 20 },
   reflectionCard: {
     backgroundColor: "#fff",

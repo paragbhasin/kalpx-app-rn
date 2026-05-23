@@ -4,7 +4,7 @@ import { ImageBackground, SafeAreaView, StyleSheet, Text } from "react-native";
 export default function NewMitraShell() {
   return (
     <ImageBackground
-      source={require("../../../assets/beige_bg.png")}
+      source={require("../../../assets/beige_bg.webp")}
       style={styles.fill}
     >
       <SafeAreaView style={styles.center}>

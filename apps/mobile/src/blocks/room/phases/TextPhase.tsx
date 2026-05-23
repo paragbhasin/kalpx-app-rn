@@ -46,7 +46,7 @@ const TextPhase: React.FC<Props> = ({
   return (
     <KeyboardAvoidingView
       style={styles.root}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={insets.top + 8}
     >
       <ScrollView

@@ -63,7 +63,7 @@ export default function Explore() {
       <StatusBar barStyle="dark-content" backgroundColor="#fff4dd" />
 
       {/* Header */}
-      <ImageBackground source={require("../../assets/explorebg.png")} style={styles.headerImage} imageStyle={styles.imageStyle}>
+      <ImageBackground source={require("../../assets/explorebg.webp")} style={styles.headerImage} imageStyle={styles.imageStyle}>
         <View style={styles.topButtons}>
           <View style={styles.iconButton}>
             <Ionicons name="arrow-back" size={22} color="#fff" onPress={() => navigation.goBack()} />

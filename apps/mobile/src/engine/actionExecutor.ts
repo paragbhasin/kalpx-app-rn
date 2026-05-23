@@ -3646,10 +3646,19 @@ export async function executeAction(
             const AsyncStorage = require("@react-native-async-storage/async-storage").default;
             const entryIntention = await AsyncStorage.getItem("mitra_entry_intention").catch(() => null);
             await AsyncStorage.removeItem("mitra_entry_intention").catch(() => {});
-            const postOnboardingDest = entryIntention === "inner_path" ? "InnerPath" : "Home";
+            const dashboardContainer =
+              (process as any).env?.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
+                ? "companion_dashboard_v3"
+                : "companion_dashboard";
+            const postOnboardingDest =
+              entryIntention === "inner_path" ? "InnerPath" : "DynamicEngine";
             setScreenValue(true, "onboarding_reminder_show");
             setScreenValue(postOnboardingDest, "onboarding_reminder_destination");
-            rootNavigate("Home");
+            loadScreen({
+              container_id: dashboardContainer,
+              state_id: "day_active",
+            });
+            rootNavigate("DynamicEngine");
             break;
           }
 

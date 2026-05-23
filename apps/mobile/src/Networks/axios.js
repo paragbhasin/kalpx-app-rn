@@ -67,6 +67,14 @@ const formatFullJson = (data) => {
   }
 };
 
+const getResolvedUrl = (config = {}) => {
+  try {
+    return api.getUri(config);
+  } catch (_) {
+    return `${config.baseURL || ""}${config.url || ""}`;
+  }
+};
+
 /** ✅ Ensure guest UUID exists (with fallback if crypto fails) */
 const getGuestUUID = async () => {
   try {
@@ -146,7 +154,7 @@ api.interceptors.request.use(
     const guestUUID = await AsyncStorage.getItem("guestUUID");
 
     console.log("📡 API REQUEST");
-    console.log("➡️ URL:", `${config.baseURL}${config.url}`);
+    console.log("➡️ URL:", getResolvedUrl(config));
     console.log("📝 METHOD:", config.method?.toUpperCase());
     console.log(
       "📦 PAYLOAD:",
@@ -189,7 +197,7 @@ api.interceptors.request.use(
  *  ------------------------------------------------- */
 api.interceptors.response.use(
   (response) => {
-    const fullUrl = `${response.config.baseURL}${response.config.url}`;
+    const fullUrl = getResolvedUrl(response.config);
     console.log("✅ API RESPONSE");
     console.log("➡️ URL:", fullUrl);
     if (shouldLogFullRoomRender(fullUrl)) {
@@ -201,7 +209,7 @@ api.interceptors.response.use(
   },
   async (error) => {
     console.log("❌ API RESPONSE ERROR");
-    console.log("➡️ URL:", `${error.config?.baseURL}${error.config?.url}`);
+    console.log("➡️ URL:", getResolvedUrl(error.config));
     console.log("📦 ERROR:", formatLogData(error.response?.data || error.message));
 
     const originalRequest = error.config;

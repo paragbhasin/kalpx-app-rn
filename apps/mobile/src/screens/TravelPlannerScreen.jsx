@@ -54,7 +54,7 @@ export default function TravelPlannerScreen() {
     <View style={styles.container}>
       {/* Header Banner */}
       <ImageBackground
-        source={require("../../assets/travelbg.png")}
+        source={require("../../assets/travelbg.webp")}
         style={styles.headerImage}
         imageStyle={styles.imageStyle}
       >

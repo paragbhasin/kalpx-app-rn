@@ -1,3 +1,4 @@
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -26,6 +27,7 @@ import { setHomeData } from "../../store/doorSlice";
 import { TimePickerModal } from "../../components/TimePickerModal";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
+import { useSafeAreaInsets, SafeAreaView } from "react-native-safe-area-context";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -120,6 +122,8 @@ function ReminderRow({
 export default function RemindersScreen() {
   const navigation: any = useNavigation();
   const dispatch = useDispatch<AppDispatch>();
+  const tabBarHeight = useBottomTabBarHeight();
+  const insets = useSafeAreaInsets();
   const homeData = useSelector((s: RootState) => s.door.homeData);
 
   const [reminders, setReminders] = useState<JourneyTriadReminders | null>(null);
@@ -236,9 +240,9 @@ export default function RemindersScreen() {
   const neitherSetUp = !remindersLoading && !hasJourney && !hasRhythm;
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView
-        contentContainerStyle={styles.scroll}
+        contentContainerStyle={[styles.scroll, { paddingBottom: tabBarHeight + insets.bottom + 16 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
@@ -323,7 +327,7 @@ export default function RemindersScreen() {
         }}
         onCancel={() => setPickerVisible(false)}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -334,7 +338,7 @@ const styles = StyleSheet.create({
   },
   scroll: {
     paddingHorizontal: 20,
-    paddingTop: 56,
+    paddingTop: 16,
     paddingBottom: 60,
   },
   topBar: {

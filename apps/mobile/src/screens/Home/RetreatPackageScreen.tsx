@@ -91,8 +91,8 @@ const RetreatPackageScreen: React.FC = () => {
     const [activeDay, setActiveDay] = useState<number | null>(1);
 
     const accGallery = [
-        require('../../../assets/retreat/retreat1.jpg'),
-        require('../../../assets/retreat/retreat2.jpg'),
+        require('../../../assets/retreat/retreat1.webp'),
+        require('../../../assets/retreat/retreat2.webp'),
     ];
 
     const packageData = pkg || {

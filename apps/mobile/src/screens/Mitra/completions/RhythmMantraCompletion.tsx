@@ -11,7 +11,7 @@ import {
 } from "../../../engine/mitraApi";
 import { setHomeData } from "../../../store/doorSlice";
 
-const BEIGE_BG = require("../../../../assets/beige_bg.png");
+const BEIGE_BG = require("../../../../assets/beige_bg.webp");
 
 export default function RhythmMantraCompletion() {
   const navigation = useNavigation<any>();

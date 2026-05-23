@@ -24,7 +24,7 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const NamasteIcon = require("../../../assets/namaste.png");
+const NamasteIcon = require("../../../assets/namaste.webp");
 const BROWN = "#432104";
 
 export interface SankalpItem {

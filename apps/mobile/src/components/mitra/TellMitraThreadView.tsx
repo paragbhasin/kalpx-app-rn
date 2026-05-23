@@ -323,7 +323,6 @@ export default function TellMitraThreadView({
         {/* Empty state */}
         {conversation.length === 0 && (
           <View style={s.emptyState}>
-            <Text style={s.emptyTitle}>Tell Mitra</Text>
             <Text style={s.emptySubtext}>
               What would you like Mitra to understand today?
             </Text>
@@ -351,7 +350,7 @@ export default function TellMitraThreadView({
       </ScrollView>
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         {!!errorMsg && <Text style={s.errorText}>{errorMsg}</Text>}
         <View style={s.composerRow}>

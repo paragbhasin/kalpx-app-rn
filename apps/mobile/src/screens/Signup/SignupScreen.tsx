@@ -295,7 +295,7 @@ export default function SignupScreen({ navigation }) {
         translucent={false}
       />
       <ImageBackground
-        source={require("../../../assets/hoomepagebg.jpg")}
+        source={require("../../../assets/hoomepagebg.webp")}
         style={styles.background}
       >
         <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -899,7 +899,7 @@ export default function SignupScreen({ navigation }) {
 //         translucent={false}
 //       />
 //       <ImageBackground
-//         source={require("../../../assets/hoomepagebg.jpg")}
+//         source={require("../../../assets/hoomepagebg.webp")}
 //         style={styles.background}
 //       >
 //         <ScrollView contentContainerStyle={styles.scrollContainer}>

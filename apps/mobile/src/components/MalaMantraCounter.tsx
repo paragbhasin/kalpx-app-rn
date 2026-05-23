@@ -1,6 +1,6 @@
 import { ChevronDown, ChevronUp, Volume2, VolumeX } from "lucide-react-native";
 import React, { useEffect, useMemo, useState } from "react";
-import {
+import {Image, 
   Dimensions,
   ImageBackground,
   Platform,
@@ -18,7 +18,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import Svg, { Circle, Path } from "react-native-svg";
-import RudrakshSvg from "../../assets/rudraksh.svg";
+const RudrakshSvg = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/rudraksh.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import { Fonts } from "../theme/fonts";
 
 const { width } = Dimensions.get("window");
@@ -352,7 +352,7 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
 
   return useBackgroundImage ? (
     <ImageBackground
-      source={require("../../assets/mantra3.png")}
+      source={require("../../assets/mantra3.webp")}
       style={styles.container}
       resizeMode="cover"
     >

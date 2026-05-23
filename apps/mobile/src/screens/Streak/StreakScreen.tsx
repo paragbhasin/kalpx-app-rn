@@ -577,7 +577,7 @@ const StreakScreen = ({ navigation, route }) => {
     <ViewShot ref={badgeRef} options={{ format: "png", quality: 1 }}>
             <View style={{ marginVertical: 20 }}>
               <ImageBackground
-                source={require("../../../assets/Streak_bg.png")}
+                source={require("../../../assets/Streak_bg.webp")}
                 style={{ flex: 1 }} // adjust height as needed
                               resizeMode="contain"
               >
@@ -703,7 +703,7 @@ style={{backgroundColor:Colors.Colors.App_theme,padding:12,alignItems:"center",m
                <ViewShot ref={streakRef} options={{ format: "png", quality: 1 }}>
             <View style={{ marginVertical: 20 }}>
               <ImageBackground
-                source={require("../../../assets/Streak_bg.png")}
+                source={require("../../../assets/Streak_bg.webp")}
                 style={{ flex: 1 }} // adjust height as needed
                 resizeMode="contain"
               >

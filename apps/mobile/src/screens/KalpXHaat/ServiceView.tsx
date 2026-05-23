@@ -49,7 +49,7 @@ const ServiceView = () => {
     {
       id: 6,
       name: "MA Decoration Service",
-      image: require("../../../assets/service3.png"),
+      image: require("../../../assets/service3.webp"),
       rating: "4.7",
       time: "30-40 min",
       distance: "1.2km away",

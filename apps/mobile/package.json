@@ -11,10 +11,10 @@
   },
   "scripts": {
     "eas-build-pre-install": "corepack enable && corepack prepare pnpm@10.33.2 --activate && pnpm --version",
-    "start": "expo start",
+    "start": "dotenv -e dev.env -- expo start",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
+    "android": "dotenv -e dev.env -- expo run:android",
+    "ios": "dotenv -e dev.env -- expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint"
   },
@@ -125,6 +125,7 @@
     "@babel/core": "^7.25.2",
     "@react-native-community/cli": "^20.1.1",
     "@types/react": "~19.0.10",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~9.2.0",
     "patch-package": "^8.0.1",

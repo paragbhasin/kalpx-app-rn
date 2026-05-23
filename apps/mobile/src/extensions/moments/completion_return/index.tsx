@@ -11,7 +11,7 @@
 
 import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef, useState } from "react";
-import {
+import {Image, 
   Animated,
   Dimensions,
   ImageBackground,
@@ -25,7 +25,7 @@ import {
 } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import MantraLotus3d from "./assets/mantra-lotus-3d.svg";
+const MantraLotus3d = ({ width, height, opacity, style }: { width?: number; height?: number; opacity?: number; style?: any }) => <Image source={require("./assets/mantra-lotus-3d.webp")} style={[{ width, height, opacity, resizeMode: 'contain' }, style]} />;
 import { executeAction } from "../../../engine/actionExecutor";
 import {
   mitraAddAdditionalItem,
@@ -36,6 +36,7 @@ import { showSnackBar } from "../../../store/snackBarSlice";
 import { store } from "../../../store";
 import { screenActions } from "../../../store/screenSlice";
 import { Fonts } from "../../../theme/fonts";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const VARIANT_MESSAGES: Record<string, string> = {
   mantra: "108 in. Kept.",
@@ -68,6 +69,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
 
   const [inputText, setInputText] = useState("");
   const [communityAddLoading, setCommunityAddLoading] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const contentFade = useRef(new Animated.Value(0)).current;
   const checkProgress = useRef(new Animated.Value(0)).current;
@@ -148,7 +150,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
 
   useEffect(() => {
     // Apply global background from header to footer via bridge
-    updateBackground(require("../../assets/beige_bg.png"));
+    updateBackground(require("../../assets/beige_bg.webp"));
     updateHeaderHidden(isCommunityRunner);
 
     mitraTrackEvent("completion_return_shown", {
@@ -265,7 +267,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={styles.overlay}
+      style={[styles.overlay, { paddingBottom: Math.max(insets.bottom + 32, 48) }]}
     >
       <Animated.View style={[styles.content, { opacity: contentFade }]}>
         <View style={styles.checkWrap}>

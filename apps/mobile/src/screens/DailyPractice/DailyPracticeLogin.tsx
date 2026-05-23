@@ -25,7 +25,7 @@ const DailyPracticeLogin = ({ route }) => {
     <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
       <StatusBar barStyle="dark-content" />
       {/* <ImageBackground
-      source={require("../../../assets/Tracker_BG.png")}
+      source={require("../../../assets/Tracker_BG.webp")}
       style={{
         flex: 1,
         width: FontSize.CONSTS.DEVICE_WIDTH,
@@ -43,7 +43,7 @@ const DailyPracticeLogin = ({ route }) => {
         nestedScrollEnabled={true} contentContainerStyle={{ paddingBottom: 120 }}>
         <View style={{ alignItems: "center" }}>
           <ImageBackground
-            source={require("../../../assets/setup-bg.jpg")}
+            source={require("../../../assets/setup-bg.webp")}
             style={{
               width: "100%",
               alignItems: "center",

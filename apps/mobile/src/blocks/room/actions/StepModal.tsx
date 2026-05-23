@@ -237,7 +237,7 @@ const StepModal: React.FC<Props> = ({
           ]}
         >
           <ImageBackground
-            source={require("../../../../assets/beige_bg.png")}
+            source={require("../../../../assets/beige_bg.webp")}
             style={styles.sheetBackground}
             imageStyle={[
               styles.sheetImage,
@@ -251,7 +251,7 @@ const StepModal: React.FC<Props> = ({
                 presentation === "screen"
                   ? {
                       paddingTop: insets.top + 8,
-                      paddingBottom: Math.max(insets.bottom, 16),
+                      paddingBottom: Math.max(insets.bottom + 32, 48),
                     }
                   : null,
               ]}

@@ -27,7 +27,7 @@ const RetreatBookingScreen: React.FC = () => {
 
   const retreatData = retreat || {
     title: "Rejuvenating yoga & Ayurvedic Retreat",
-    image: require("../../../assets/retreat/retreat1.jpg"),
+    image: require("../../../assets/retreat/retreat1.webp"),
   };
 
   const packageData = pkg || {

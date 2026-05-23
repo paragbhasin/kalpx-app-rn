@@ -14,6 +14,7 @@ import {
   View,
 } from 'react-native';
 import { useDispatch } from 'react-redux';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { ROOM_LABELS, ROOM_DESCRIPTIONS } from '@kalpx/contracts';
 import type { VerifiedRoomId } from '@kalpx/types';
@@ -21,6 +22,8 @@ import { executeAction } from '../../engine/actionExecutor';
 import { useScreenStore } from '../../engine/useScreenBridge';
 import { screenActions, loadScreenWithData, goBackWithData } from '../../store/screenSlice';
 import { Fonts } from '../../theme/fonts';
+import { platformShadow } from "../../theme/shadows";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface RoomGroup {
   label: string;
@@ -45,6 +48,8 @@ const ROOM_GROUPS: RoomGroup[] = [
 export default function BrowseRoomsScreen() {
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
+  const tabBarHeight = useBottomTabBarHeight();
+  const insets = useSafeAreaInsets();
 
   const screenBridge = useScreenStore();
   const screenBridgeRef = React.useRef(screenBridge);
@@ -56,7 +61,7 @@ export default function BrowseRoomsScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      updateBackground(require('../../../assets/beige_bg.png'));
+      updateBackground(require('../../../assets/beige_bg.webp'));
       return () => updateBackground(null);
     }, [updateBackground]),
   );
@@ -108,7 +113,7 @@ export default function BrowseRoomsScreen() {
         <Text style={styles.headerTitle}>Browse Rooms</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: tabBarHeight + insets.bottom + 16 }]} showsVerticalScrollIndicator={false}>
         {ROOM_GROUPS.map((group) => (
           <View key={group.label} style={styles.group}>
             <Text style={styles.groupLabel}>{group.label}</Text>
@@ -174,11 +179,7 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: '#DAC28E',
     elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    gap: 4,
+    ...platformShadow("#000", 1, 0.08, 3, 2),gap: 4,
   },
   roomLabel: {
     fontSize: 18,

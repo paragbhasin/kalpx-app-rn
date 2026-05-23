@@ -8,6 +8,7 @@
 
 import { RHYTHM_BAND_LABELS } from "@kalpx/contracts";
 import type { RhythmItem, RhythmTimeBand } from "@kalpx/types";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -18,6 +19,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Platform,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import LibrarySearchModal, {
@@ -32,8 +34,10 @@ import { useScreenStore } from "../../engine/useScreenBridge";
 import { setHomeData } from "../../store/doorSlice";
 import { screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
+import { platformShadow } from "../../theme/shadows";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const RHYTHM_BG = require("../../../assets/beige_bg.png");
+const RHYTHM_BG = require("../../../assets/beige_bg.webp");
 
 function formatReminderTime(hms: string): string {
   const [h, m] = hms.split(":").map(Number);
@@ -199,6 +203,8 @@ export default function RhythmHomeScreen({
 }) {
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
+  const tabBarHeight = useBottomTabBarHeight();
+  const insets = useSafeAreaInsets();
   const homeData = useSelector((state: any) => state.door?.homeData);
   const rhythm = homeData?.companion_rhythm;
 
@@ -345,15 +351,10 @@ export default function RhythmHomeScreen({
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: tabBarHeight + insets.bottom + 16 }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.shell}>
-          <Image
-            source={require("../../../../web/public/leaves-bird.png")}
-            style={styles.heroLeaves}
-          />
-
           <Text style={styles.headerTitle}>My Rhythm</Text>
 
           {!hasRhythm ? (
@@ -426,15 +427,6 @@ const styles = StyleSheet.create({
     maxWidth: 420,
     alignSelf: "center",
     position: "relative",
-  },
-  heroLeaves: {
-    position: "absolute",
-    top: -140,
-    right: -60,
-    width: 300,
-    height: 300,
-
-    resizeMode: "contain",
   },
   emptyStateCard: {
     backgroundColor: "rgba(250,245,240,0.95)",
@@ -511,14 +503,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(201,168,76,0.35)",
     borderRadius: 28,
-    backgroundColor: "rgba(255,252,247,0.9)",
+    backgroundColor: Platform.OS === "android" ? "#FDF9F3" : "rgba(255,252,247,0.9)",
     padding: 15,
     marginBottom: 18,
-    shadowColor: "#C9A84C",
-    shadowOpacity: 0.08,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 18 },
-    elevation: 4,
+    ...platformShadow("#C9A84C", 18, 0.08, 24, 4),
   },
   cardTopRow: {
     flexDirection: "row",
@@ -586,11 +574,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 14,
-    shadowColor: "#C99317",
-    shadowOpacity: 0.24,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 18 },
-    elevation: 4,
+    ...platformShadow("#C99317", 18, 0.24, 20, 4),
   },
   actionBtnSparkle: {
     fontSize: 20,
@@ -611,7 +595,7 @@ const styles = StyleSheet.create({
     borderRadius: 11,
     borderWidth: 1,
     borderColor: "rgba(201,168,76,0.55)",
-    backgroundColor: "rgba(255,252,247,0.6)",
+    backgroundColor: Platform.OS === "android" ? "#FDF9F3" : "rgba(255,252,247,0.6)",
     alignItems: "center",
     justifyContent: "center",
     marginTop: 8,

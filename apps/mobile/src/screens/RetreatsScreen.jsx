@@ -96,7 +96,7 @@ export default function RetreatsScreen() {
     <View style={styles.container}>
       {/* Header Banner */}
       <ImageBackground
-        source={require("../../assets/retreats.png")}
+        source={require("../../assets/retreats.webp")}
         style={styles.headerImage}
         imageStyle={styles.imageStyle}
       >

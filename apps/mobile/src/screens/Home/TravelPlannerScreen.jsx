@@ -344,7 +344,7 @@ if (!canProceed) return;
     <View style={styles.container}>
       {/* Header */}
       <ImageBackground
-        source={require("../../../assets/travelbg.png")}
+        source={require("../../../assets/travelbg.webp")}
         style={styles.headerImage}
         imageStyle={styles.imageStyle}
       >

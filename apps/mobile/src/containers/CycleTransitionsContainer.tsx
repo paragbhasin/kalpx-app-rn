@@ -31,7 +31,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import Svg, { Circle, Path } from "react-native-svg";
-import RudrakshSvg from "../../assets/rudraksh.svg";
+const RudrakshSvg = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/rudraksh.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import AudioPlayerBlock from "../blocks/AudioPlayerBlock";
 import CycleReflectionBlock from "../blocks/CycleReflectionBlock";
 import { VoiceTextInput } from "../components/VoiceTextInput";
@@ -52,8 +52,8 @@ import PracticeRunnerView from "../blocks/runners/PracticeRunnerView";
 
 // SVGs / Assets
 import { SvgUri } from "react-native-svg";
-import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
-const NamasteIcon = require("../../assets/namaste.png");
+const MantraLotus3d = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/mantra-lotus-3d.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const NamasteIcon = require("../../assets/namaste.webp");
 
 const { width } = Dimensions.get("window");
 
@@ -756,7 +756,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
       // checkpoint_decision / checkpoint_feeling), this effect re-runs but does
       // NOT wipe the BeigeBg that CycleReflectionBlock correctly set.
     } else {
-      updateBackground(require("../../assets/beige_bg.png"));
+      updateBackground(require("../../assets/beige_bg.webp"));
     }
     updateHeaderHidden(isCommunityRunner);
 

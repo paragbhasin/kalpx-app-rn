@@ -25,7 +25,7 @@ export default function TellMitraScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    // backgroundColor: '#FAF7F2',
+    backgroundColor: '#FAF7F2',
   },
   header: {
     flexDirection: "row",
@@ -36,6 +36,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     borderBottomWidth: 0.5,
     borderBottomColor: "#DAC28E",
+    backgroundColor: "#FAF7F2",
   },
   headerTitle: {
     fontSize: 22,

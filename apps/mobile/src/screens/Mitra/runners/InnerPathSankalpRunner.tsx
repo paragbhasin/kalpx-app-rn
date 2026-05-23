@@ -1,38 +1,44 @@
-import { useNavigation, useRoute } from "@react-navigation/native";
-import React from "react";
-import { ImageBackground, SafeAreaView, StyleSheet } from "react-native";
+import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
+import React, { useCallback } from "react";
+import { SafeAreaView, StyleSheet } from "react-native";
 import SankalpRunnerView from "../../../blocks/runners/SankalpRunnerView";
+import { useScreenStore } from "../../../engine/useScreenBridge";
 
-const BEIGE_BG = require("../../../../assets/beige_bg.png");
+const BEIGE_BG = require("../../../../assets/beige_bg.webp");
 
 export default function InnerPathSankalpRunner() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const { item, journeyId, dayNumber } = route.params;
+  const updateBackground = useScreenStore((state) => state.updateBackground);
+
+  useFocusEffect(
+    useCallback(() => {
+      updateBackground(BEIGE_BG);
+      return () => updateBackground(null);
+    }, [updateBackground]),
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ImageBackground source={BEIGE_BG} style={styles.bg}>
-        <SankalpRunnerView
-          item={item}
-          onComplete={(durationSec) => {
-            navigation.replace("InnerPathSankalpCompletion", {
-              item_id: item.item_id,
-              item_type: "sankalp",
-              item_title: item.title,
-              journeyId,
-              dayNumber,
-            });
-          }}
-          onBack={() => navigation.goBack()}
-          isDevMode={__DEV__}
-        />
-      </ImageBackground>
+      <SankalpRunnerView
+        item={item}
+        onComplete={(durationSec) => {
+          navigation.replace("InnerPathSankalpCompletion", {
+            item_id: item.item_id,
+            item_type: "sankalp",
+            item_title: item.title,
+            journeyId,
+            dayNumber,
+          });
+        }}
+        onBack={() => navigation.goBack()}
+        isDevMode={__DEV__}
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#FBF5F5" },
-  bg: { flex: 1 },
+  safeArea: { flex: 1, backgroundColor: "transparent" },
 });

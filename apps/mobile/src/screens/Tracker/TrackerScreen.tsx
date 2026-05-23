@@ -79,7 +79,7 @@ const TrackerScreen = () => {
         translucent={false}
       />
       {/* <ImageBackground
-                    source={require("../../../assets/Tracker_BG.png")}
+                    source={require("../../../assets/Tracker_BG.webp")}
                     style={{
                       alignSelf: "center",
                           justifyContent: "center",

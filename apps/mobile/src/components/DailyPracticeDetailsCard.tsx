@@ -524,7 +524,7 @@ const DailyPracticeDetailsCard = ({
           contentContainerStyle={{ paddingBottom: 80 }}
         >
           <ImageBackground
-            source={require("../../assets/CardBG.png")}
+            source={require("../../assets/CardBG.webp")}
             style={styles.headerImage}
             imageStyle={styles.headerImageInside}
           >

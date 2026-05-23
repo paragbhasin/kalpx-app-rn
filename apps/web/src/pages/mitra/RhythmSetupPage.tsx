@@ -44,9 +44,9 @@ const BAND_REMINDER_DEFAULTS: Record<RhythmTimeBand, string> = {
 };
 
 const BAND_ART: Record<RhythmTimeBand, string> = {
-  morning: "/morning.svg",
-  afternoon: "/aft.svg",
-  night: "/night1.svg",
+  morning: "/morning.png",
+  afternoon: "/aft.png",
+  night: "/night.png",
 };
 
 function seedBandItems(homeData: any): Record<RhythmTimeBand, LocalItem[]> {

@@ -8,7 +8,6 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, { useCallback } from "react";
 import {
   Image,
-  ImageBackground,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -17,40 +16,41 @@ import {
   View,
 } from "react-native";
 import { useSelector } from "react-redux";
-import M3Icon from "../../../../web/public/m3.svg";
-import Mp2Icon from "../../../../web/public/mp2.svg";
-import Mp3Icon from "../../../../web/public/mp3.svg";
-import Mp4Icon from "../../../../web/public/mp4.svg";
-import FontSize from "../../components/FontSize";
+const M3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/door_rhythm.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const Mp2Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/door_chant.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const Mp3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/door_path.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const Mp4Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/door_mitra.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import { useScrollContext } from "../../context/ScrollContext";
 import { useScreenStore } from "../../engine/useScreenBridge";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import store from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
+import { platformShadow } from "../../theme/shadows";
 
 const PENDING_KEY = "mitra_intention_pending";
 
 const OPTION_ACCENTS = {
   daily_rhythm: {
     icon: M3Icon,
-    iconBg: "rgba(248, 238, 209, 0.72)",
+    iconBg: "#FBF3DE",
     chipBg: "rgba(245, 222, 166, 0.34)",
     chipColor: "#C18B12",
   },
   inner_path: {
     icon: Mp3Icon,
-    iconBg: "rgba(248, 238, 209, 0.72)",
+    iconBg: "#FBF3DE",
     chipBg: "rgba(222, 200, 232, 0.48)",
     chipColor: "#C18B12",
   },
   quick_chant: {
     icon: Mp2Icon,
-    iconBg: "rgba(248, 238, 209, 0.72)",
+    iconBg: "#FBF3DE",
     chipColor: "#C18B12",
   },
   tell_mitra: {
     icon: Mp4Icon,
-    iconBg: "rgba(248, 238, 209, 0.72)",
+    iconBg: "#FBF3DE",
     chipBg: "rgba(247, 213, 179, 0.48)",
     chipColor: "#C18B12",
   },
@@ -58,6 +58,7 @@ const OPTION_ACCENTS = {
 
 export default function MitraIntentionScreen() {
   const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
   const { handleScroll } = useScrollContext();
   const isLoggedIn = useSelector(
     (state: any) => !!(state.login?.user || state.socialLoginReducer?.user),
@@ -66,7 +67,7 @@ export default function MitraIntentionScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      updateBackground(require("../../../assets/beige_bg.png"));
+      updateBackground(require("../../../assets/beige_bg.webp"));
       return () => updateBackground(null);
     }, [updateBackground]),
   );
@@ -90,7 +91,7 @@ export default function MitraIntentionScreen() {
         break;
       case "inner_path":
         if (process.env.EXPO_PUBLIC_MITRA_NEW_SHELL === "1") {
-          store.dispatch(screenActions.setBackground(require("../../../assets/beige_bg.png")));
+          store.dispatch(screenActions.setBackground(require("../../../assets/beige_bg.webp")));
           navigation.navigate("NewMitraHome");
           break;
         }
@@ -135,17 +136,10 @@ export default function MitraIntentionScreen() {
   }
 
   return (
-    <ImageBackground
-      source={require("../../../assets/beige_bg.png")}
-      style={styles.container}
-    >
-      <Image
-        source={require("../../../../web/public/leaves-bird.png")}
-        style={styles.topRightLeaves}
-      />
+    <View style={styles.container}>
       <SafeAreaView style={styles.safe}>
         <ScrollView
-          contentContainerStyle={styles.scroll}
+          contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 56 }]}
           onScroll={handleScroll}
           scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
@@ -212,32 +206,21 @@ export default function MitraIntentionScreen() {
           </View>
         </ScrollView>
       </SafeAreaView>
-    </ImageBackground>
+    </View>
   );
 }
-
-const TAB_BAR_HEIGHT = FontSize.CONSTS.DEVICE_HEIGHT * 0.07;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "transparent",
   },
   safe: {
     flex: 1,
   },
-  topRightLeaves: {
-    position: "absolute",
-    top: -110,
-    right: 0,
-    width: 200,
-    height: 300,
-    resizeMode: "contain",
-    opacity: 0.75,
-  },
   scroll: {
     paddingHorizontal: 20,
     paddingTop: 36,
-    paddingBottom: TAB_BAR_HEIGHT + 96,
   },
   header: {
     alignItems: "stretch",
@@ -257,7 +240,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   line: {
-    width: 120,
+    flex: 1,
     height: 1,
     backgroundColor: "rgba(214, 166, 58, 0.28)",
   },
@@ -277,24 +260,20 @@ const styles = StyleSheet.create({
     gap: 18,
   },
   card: {
-    backgroundColor: "rgba(255, 252, 247, 0.92)",
+    backgroundColor: "#FFFCF7",
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(226, 199, 144, 0.48)",
+    borderColor: "rgba(214, 166, 58, 0.24)",
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
-    shadowColor: "#C9A84C",
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.1,
-    shadowRadius: 40,
-    elevation: 4,
+    ...platformShadow("#C9A84C", 8, 0.05, 14, 1),
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 25,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,

@@ -22,6 +22,7 @@ import React, {
 } from "react";
 import {
   ActivityIndicator,
+  Image,
   ImageBackground,
   Modal,
   Platform,
@@ -35,10 +36,10 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
-import M3Icon from "../../../web/public/mitra1.svg";
-import Mp2Icon from "../../../web/public/mitra2.svg";
-import Mp3Icon from "../../../web/public/mitra3.svg";
-import Mp4Icon from "../../../web/public/mitra4.svg";
+const M3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/door_rhythm.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const Mp2Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/door_chant.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const Mp3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/door_path.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const Mp4Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/door_mitra.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   apiPatchJourneyReminders,
@@ -50,6 +51,7 @@ import { useScreenStore } from "../engine/useScreenBridge";
 import { setHomeData } from "../store/doorSlice";
 import { Fonts } from "../theme/fonts";
 import { TimePickerModal } from "../components/TimePickerModal";
+import { platformShadow } from "../theme/shadows";
 
 type FeelingOption = "Agitated" | "Drained" | "Steady" | "Open";
 
@@ -60,10 +62,9 @@ const FEELING_OPTIONS: FeelingOption[] = [
   "Open",
 ];
 
-const HERO_DAY = require("../../assets/imgsun.png");
-const HERO_NIGHT = require("../../assets/night-home.png");
-const SHELL_HEADER_HEIGHT =
-  Platform.OS === "android" ? 45 + (StatusBar.currentHeight || 0) : 45;
+const HERO_DAY = require("../../assets/imgsun.webp");
+const HERO_NIGHT = require("../../assets/night-home.webp");
+const SHELL_HEADER_HEIGHT = 45;
 
 function getRhythmTimeBand(): "morning" | "afternoon" | "night" {
   const hour = new Date().getHours();
@@ -216,7 +217,7 @@ export default function FourDoorHomeContainer({
 
   useEffect(() => {
     setLoading(true);
-    void loadHome();
+    void loadHome(false, true);
   }, [loadHome]);
 
   useFocusEffect(
@@ -226,14 +227,14 @@ export default function FourDoorHomeContainer({
         return;
       }
       if (homeDataRef.current) {
-        void loadHome(true);
+        void loadHome(true, true);
       }
     }, [loadHome]),
   );
 
   useFocusEffect(
     useCallback(() => {
-      updateBackground(require("../../assets/beige_bg.png"));
+      updateBackground(require("../../assets/beige_bg.webp"));
       updateHeaderHidden(false);
       return () => updateHeaderHidden(false);
     }, [updateBackground, updateHeaderHidden]),
@@ -291,11 +292,32 @@ export default function FourDoorHomeContainer({
     navigation.navigate("TellMitra" as any);
   }, [navigation]);
 
-  const openMyRhythmSurface = useCallback(() => {
-    const hasRhythm = homeData?.companion_rhythm?.has_rhythm === true;
-    const target = hasRhythm ? "RhythmHome" : "RhythmSetup";
-    navigation.navigate(target as any);
-  }, [homeData?.companion_rhythm?.has_rhythm, navigation]);
+  const openMyRhythmSurface = useCallback(async () => {
+    const hasRhythmInState =
+      homeData?.companion_rhythm?.has_rhythm === true ||
+      homeData?.my_rhythm_summary?.has_rhythm === true ||
+      homeData?.user_surface_state?.has_rhythm === true ||
+      homeData?.door_states?.my_rhythm?.state === "active";
+
+    if (hasRhythmInState) {
+      navigation.navigate("RhythmHome" as any);
+      return;
+    }
+
+    try {
+      const fresh = await mitraJourneyHomeV3({ forceFresh: true });
+      dispatch(setHomeData(fresh));
+      const hasRhythmFresh =
+        fresh?.companion_rhythm?.has_rhythm === true ||
+        fresh?.my_rhythm_summary?.has_rhythm === true ||
+        fresh?.user_surface_state?.has_rhythm === true ||
+        fresh?.door_states?.my_rhythm?.state === "active";
+
+      navigation.navigate((hasRhythmFresh ? "RhythmHome" : "RhythmSetup") as any);
+    } catch {
+      navigation.navigate("RhythmSetup" as any);
+    }
+  }, [dispatch, homeData, navigation]);
 
   const rhythmBand = getRhythmTimeBand();
   const seg = (homeData?.user_surface_state?.segment ??
@@ -489,7 +511,7 @@ export default function FourDoorHomeContainer({
     <View style={styles.screen}>
       <ScrollView
         style={styles.root}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
         showsVerticalScrollIndicator={false}
       >
         <View
@@ -799,6 +821,7 @@ export default function FourDoorHomeContainer({
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    backgroundColor: Platform.OS === "android" ? "#FBF4EF" : "transparent",
   },
   screenBackground: {
     opacity: 1,
@@ -807,7 +830,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 160,
   },
   centeredWrap: {
     flex: 1,
@@ -900,15 +922,11 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     borderWidth: 1,
     borderColor: "rgba(201,168,76,0.28)",
-    backgroundColor: "rgba(255,255,255,0.72)",
+    backgroundColor: Platform.OS === "android" ? "#FEFAF4" : "rgba(255,255,255,0.72)",
     paddingHorizontal: 16,
     paddingVertical: 14,
 
-    shadowColor: "#432104",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    elevation: 4,
+    ...platformShadow("#432104", 8, 0.08, 18, 4),
   },
   doorIconWrap: {
     width: 48,
@@ -936,8 +954,7 @@ const styles = StyleSheet.create({
   },
   doorCardHighlighted: {
     borderColor: "rgba(201,168,76,0.55)",
-    shadowColor: "#C9A84C",
-    shadowOpacity: 0.16,
+    ...platformShadow("#C9A84C", 6, 0.16, 12, 2),
   },
   doorOrientationLine: {
     color: "rgba(67,33,4,0.38)",
@@ -958,14 +975,10 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     borderWidth: 1,
     borderColor: "rgba(201,168,76,0.28)",
-    backgroundColor: "rgba(255,251,245,0.9)",
+    backgroundColor: Platform.OS === "android" ? "#FFF9F2" : "rgba(255,251,245,0.9)",
     paddingHorizontal: 16,
     paddingVertical: 18,
-    shadowColor: "#432104",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    elevation: 4,
+    ...platformShadow("#432104", 8, 0.08, 18, 4),
     marginTop: 4,
   },
   checkinHeaderRow: {
@@ -1010,14 +1023,10 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     borderColor: "rgba(201,168,76,0.38)",
-    backgroundColor: "rgba(255,255,255,0.82)",
+    backgroundColor: Platform.OS === "android" ? "#FEFAF4" : "rgba(255,255,255,0.82)",
     paddingHorizontal: 16,
     paddingVertical: 14,
-    shadowColor: "#C9A84C",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 14,
-    elevation: 2,
+    ...platformShadow("#C9A84C", 6, 0.12, 14, 2),
   },
   suggestionButtonText: {
     color: "#432104",
@@ -1061,7 +1070,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 1,
     borderColor: "rgba(201,168,76,0.38)",
-    backgroundColor: "rgba(255,255,255,0.78)",
+    backgroundColor: Platform.OS === "android" ? "#FEFAF4" : "rgba(255,255,255,0.78)",
     paddingVertical: 8,
     paddingHorizontal: 8,
     alignItems: "center",
@@ -1075,11 +1084,7 @@ const styles = StyleSheet.create({
   feelingChipSelected: {
     borderColor: "rgba(201,168,76,0.85)",
     backgroundColor: "rgba(243,220,168,0.95)",
-    shadowColor: "#C9A84C",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.16,
-    shadowRadius: 12,
-    elevation: 2,
+    ...platformShadow("#C9A84C", 6, 0.16, 12, 2),
   },
   feelingChipDisabled: {
     opacity: 0.7,

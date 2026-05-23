@@ -10,9 +10,10 @@
  */
 
 import * as Haptics from "expo-haptics";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useRef, useState } from "react";
-import {
+import {Image, 
   Animated,
   KeyboardAvoidingView,
   Platform,
@@ -23,7 +24,8 @@ import {
   View,
 } from "react-native";
 import Svg, { Path } from "react-native-svg";
-import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+const MantraLotus3d = ({ width, height, opacity, style }: { width?: number; height?: number; opacity?: number; style?: any }) => <Image source={require("../../assets/mantra-lotus-3d.webp")} style={[{ width, height, opacity, resizeMode: 'contain' }, style]} />;
 import { VoiceTextInput } from "../components/VoiceTextInput";
 import { executeAction } from "../engine/actionExecutor";
 import {
@@ -70,6 +72,8 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
     updateHeaderHidden,
   } = useScreenStore();
   const navigation = useNavigation<any>();
+  const tabBarHeight = useBottomTabBarHeight();
+  const insets = useSafeAreaInsets();
   const ss = screenData as Record<string, any>;
 
   const resolvedVariant: "mantra" | "sankalp" | "practice" =
@@ -216,7 +220,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
 
   useEffect(() => {
     // Apply global background from header to footer via bridge
-    updateBackground(require("../../assets/beige_bg.png"));
+    updateBackground(require("../../assets/beige_bg.webp"));
     updateHeaderHidden(false);
 
     const _sessionKey = [
@@ -400,7 +404,10 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
     >
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: tabBarHeight + insets.bottom + 40 },
+        ]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
@@ -530,7 +537,12 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
           </Animated.View>
         </Animated.View>
 
-        <View style={styles.bottomSection}>
+        <View
+          style={[
+            styles.bottomSection,
+            { marginBottom: tabBarHeight + insets.bottom + 24 },
+          ]}
+        >
           <View style={styles.lotusWrap}>
             <MantraLotus3d width={180} height={140} opacity={0.65} />
           </View>
@@ -707,14 +719,12 @@ const styles = StyleSheet.create({
   bottomSection: {
     width: "100%",
     alignItems: "center",
-    marginTop: -300,
-    marginBottom: 96,
+    marginTop: 36,
   },
   lotusWrap: {
-    // marginBottom: 10,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: -20,
+    marginBottom: 20,
   },
   footer: {
     width: "100%",
@@ -744,7 +754,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   primaryCta: {
-    backgroundColor: "#FBF5F5",
+    backgroundColor: "#FFFCF7",
     paddingVertical: 16,
     paddingHorizontal: 40,
     borderRadius: 32,
@@ -752,13 +762,13 @@ const styles = StyleSheet.create({
     maxWidth: 280,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 0.3,
-    borderColor: "#9f9f9f",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 6,
+    borderWidth: 1,
+    borderColor: "rgba(214, 166, 58, 0.24)",
+    shadowColor: "#C9A84C",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 1,
   },
   primaryCtaText: {
     fontFamily: Fonts.sans.regular,

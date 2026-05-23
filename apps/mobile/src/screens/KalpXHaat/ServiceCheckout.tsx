@@ -83,7 +83,7 @@ const ServiceCheckout = () => {
         {/* Service Card */}
         <View style={styles.serviceItem}>
           <Image
-            source={require("../../../assets/service-card.png")}
+            source={require("../../../assets/service-card.webp")}
             style={styles.serviceImage}
           />
           <View style={styles.serviceInfo}>

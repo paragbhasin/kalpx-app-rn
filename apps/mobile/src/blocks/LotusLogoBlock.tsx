@@ -10,7 +10,7 @@ const LotusLogoBlock: React.FC<LotusLogoBlockProps> = () => {
     <View style={styles.container}>
       {/* Replace with your actual logo asset path */}
       <Image 
-        source={require('../../assets/lotus-3d.png')} 
+        source={require('../../assets/lotus-3d.webp')} 
         style={styles.logo}
         resizeMode="contain"
       />

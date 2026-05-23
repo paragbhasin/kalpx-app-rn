@@ -1,6 +1,7 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { LinearGradient } from "expo-linear-gradient";
 import {
+  StackActions,
   DrawerActions,
   getFocusedRouteNameFromRoute,
   useNavigation,
@@ -100,14 +101,15 @@ const BottomMenuContent = () => {
           listeners={({ navigation, route }) => ({
             tabPress: (e) => {
               e.preventDefault();
-              navigation.navigate("AppDrawer", {
-                screen: "HomePage",
-                params: {
-                  screen: "HomePage",
-                  params: {
-                    screen: "Home",
-                  },
-                },
+              const homeStackKey = route.state?.key;
+              if (homeStackKey) {
+                navigation.dispatch({
+                  ...StackActions.popToTop(),
+                  target: homeStackKey,
+                });
+              }
+              navigation.navigate("HomePage", {
+                screen: "Home",
               });
             },
           })}

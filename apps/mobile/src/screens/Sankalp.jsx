@@ -46,7 +46,7 @@ export default function Sankalp() {
           <View style={{ height: 60 }} />
           {/* Top Image with curved bottom */}
           <ImageBackground
-            source={require("../../assets/Sankalpbg.png")}
+            source={require("../../assets/Sankalpbg.webp")}
             style={styles.headerImage}
             imageStyle={styles.imageStyle}
           >

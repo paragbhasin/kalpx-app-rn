@@ -68,7 +68,7 @@ const StableScanContainer: React.FC<StableScanContainerProps> = ({
   const updateScreenData = useScreenStore((state) => state.updateScreenData);
 
   useEffect(() => {
-    updateBackground(require("../../assets/beige_bg.png"));
+    updateBackground(require("../../assets/beige_bg.webp"));
     updateHeaderHidden(false);
     return () => updateHeaderHidden(false);
   }, [updateBackground, updateHeaderHidden]);
@@ -155,6 +155,7 @@ const StableScanContainer: React.FC<StableScanContainerProps> = ({
       style={styles.container}
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
     >
       <View style={styles.headerSection}>
         {decoratedHeaderBlocks.map((block: any, i: number) => (

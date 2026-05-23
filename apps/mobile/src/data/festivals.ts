@@ -27,37 +27,10 @@ export interface Festival {
   };
 }
 
-// 🕉️ Import all localized festival data
-import BN from "../config/locales/bn/festivals-bn.json";
 import EN from "../config/locales/en/festivals-en.json";
-import GU from "../config/locales/gu/festivals-gu.json";
-import HI from "../config/locales/hi/festivals-hi.json";
-import KN from "../config/locales/kn/festivals-kn.json";
-import ML from "../config/locales/ml/festivals-ml.json";
-import MR from "../config/locales/mr/festivals-mr.json";
-import OR from "../config/locales/or/festivals-or.json";
-import TA from "../config/locales/ta/festivals-ta.json";
-import TE from "../config/locales/te/festivals-te.json";
 
-/**
- * 🌍 Language mapping table
- * Ensures correct JSON is selected for current i18next.language
- */
-/**
- * 🌍 Language mapping table
- * Ensures correct JSON is selected for current i18next.language
- */
 const FESTIVAL_TRANSLATIONS: Record<string, any> = {
   en: EN,
-  hi: HI,
-  bn: BN,
-  gu: GU,
-  kn: KN,
-  ml: ML,
-  mr: MR,
-  or: OR,
-  ta: TA,
-  te: TE,
 };
 
 // Map festival synonyms/aliases to a canonical name

@@ -28,7 +28,7 @@ const TrustedStores = ({ stores, title = "Trusted store near you" }) => {
               style={styles.image}
             /> */}
             <Image
-              source={require("../../../assets/default-store.png")}
+              source={require("../../../assets/default-store.webp")}
               style={styles.image}
             />
 

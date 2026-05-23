@@ -39,7 +39,7 @@ export default function OnlineclassesScreen({ navigation }) {
     <View style={styles.container}>
       {/* Header */}
       <ImageBackground
-        source={require("../../assets/onlineclass.png")}
+        source={require("../../assets/onlineclass.webp")}
         style={styles.headerImage}
         imageStyle={styles.imageStyle}
       >

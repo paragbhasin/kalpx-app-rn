@@ -28,7 +28,7 @@ import React, {
 import {
   ActivityIndicator,
   Image,
-  ImageBackground,
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -37,27 +37,27 @@ import {
   View,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import A1Icon from "../../../assets/a1.svg";
-import A2Icon from "../../../assets/a2.svg";
-import A3Icon from "../../../assets/a3.svg";
-import A4Icon from "../../../assets/a4.svg";
-import A5Icon from "../../../assets/a5.svg";
-import A6Icon from "../../../assets/a6.svg";
-import AfternoonIcon from "../../../assets/aft.svg";
-import M1Icon from "../../../assets/m1.svg";
-import M2Icon from "../../../assets/m2.svg";
-import M3Icon from "../../../assets/m3.svg";
-import M4Icon from "../../../assets/m4.svg";
-import M5Icon from "../../../assets/m5.svg";
-import M6Icon from "../../../assets/m6.svg";
-import MorningIcon from "../../../assets/morning.svg";
-import N1Icon from "../../../assets/n1.svg";
-import N2Icon from "../../../assets/n2.svg";
-import N3Icon from "../../../assets/n3.svg";
-import N4Icon from "../../../assets/n4.svg";
-import N5Icon from "../../../assets/n5.svg";
-import N6Icon from "../../../assets/n6.svg";
-import NightIcon from "../../../assets/night1.svg";
+const A1Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_a_calm_start.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const A2Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_a_focus.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const A3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_a_devotion.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const A4Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_a_discipline.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const A5Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_a_gratitude.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const A6Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_a_clarity.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const AfternoonIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/icon_afternoon.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const M1Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_m_calm_start.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const M2Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_m_focus.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const M3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_m_devotion.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const M4Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_m_discipline.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const M5Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_m_gratitude.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const M6Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_m_clarity.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const MorningIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/icon_morning.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const N1Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_n_calm_start.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const N2Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_n_focus.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const N3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_n_devotion.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const N4Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_n_discipline.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const N5Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_n_gratitude.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const N6Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/purpose_n_clarity.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const NightIcon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/icon_night.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import LibrarySearchModal, {
   LibrarySearchItem,
 } from "../../components/LibrarySearchModal";
@@ -81,6 +81,7 @@ import {
   screenActions,
 } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
+import { platformShadow } from "../../theme/shadows";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -113,8 +114,7 @@ const BAND_ART: Record<RhythmTimeBand, React.ComponentType<any>> = {
   afternoon: AfternoonIcon,
   night: NightIcon,
 };
-const RHYTHM_BG = require("../../../assets/beige_bg.png");
-const RHYTHM_LEAF_ART = require("../../../assets/leaves-bird.png");
+const RHYTHM_BG = require("../../../assets/beige_bg.webp");
 
 const MOMENT_COPY: Record<RhythmTimeBand, { label: string; desc: string }> = {
   morning: {
@@ -996,21 +996,12 @@ export default function RhythmSetupScreen({
     <SafeAreaView
       style={[wStyles.safe, embedded && styles.embeddedTransparent]}
     >
-      <ImageBackground
-        source={RHYTHM_BG}
-        style={wStyles.background}
-        imageStyle={wStyles.backgroundImage}
-      >
+     
         <ScrollView
           contentContainerStyle={wStyles.scroll}
           showsVerticalScrollIndicator={false}
         >
           <View style={wStyles.hero}>
-            <Image
-              source={RHYTHM_LEAF_ART}
-              style={wStyles.leafArt}
-              resizeMode="contain"
-            />
 
             {/* {renderStepDots("moments")} */}
             <Text style={wStyles.buildheading}>Build Your Daily Rhythm</Text>
@@ -1092,7 +1083,7 @@ export default function RhythmSetupScreen({
             <Text style={wStyles.secondaryLink}>Set up myself</Text>
           </TouchableOpacity>
         </ScrollView>
-      </ImageBackground>
+
     </SafeAreaView>
   );
 
@@ -1100,21 +1091,11 @@ export default function RhythmSetupScreen({
     <SafeAreaView
       style={[wStyles.safe, embedded && styles.embeddedTransparent]}
     >
-      <ImageBackground
-        source={RHYTHM_BG}
-        style={wStyles.background}
-        imageStyle={wStyles.backgroundImage}
-      >
         <ScrollView
           contentContainerStyle={wStyles.scroll}
           showsVerticalScrollIndicator={false}
         >
           <View style={wStyles.hero}>
-            <Image
-              source={RHYTHM_LEAF_ART}
-              style={wStyles.leafArt}
-              resizeMode="contain"
-            />
 
             <Text style={wStyles.heading}>
               What should each{"\n"}moment give you?
@@ -1198,7 +1179,6 @@ export default function RhythmSetupScreen({
             </Text>
           </TouchableOpacity>
         </ScrollView>
-      </ImageBackground>
     </SafeAreaView>
   );
 
@@ -1212,21 +1192,11 @@ export default function RhythmSetupScreen({
       <SafeAreaView
         style={[wStyles.safe, embedded && styles.embeddedTransparent]}
       >
-        <ImageBackground
-          source={RHYTHM_BG}
-          style={wStyles.background}
-          imageStyle={wStyles.backgroundImage}
-        >
           <ScrollView
             contentContainerStyle={wStyles.scroll}
             showsVerticalScrollIndicator={false}
           >
             <View style={wStyles.hero}>
-              <Image
-                source={RHYTHM_LEAF_ART}
-                style={wStyles.leafArt}
-                resizeMode="contain"
-              />
               <Text style={[wStyles.heading, wStyles.suggestionHeading]}>
                 Mitra suggests this for you.
               </Text>
@@ -1379,7 +1349,6 @@ export default function RhythmSetupScreen({
             mode="select_for_rhythm"
             onItemSelected={handleWizardPickerSelect}
           />
-        </ImageBackground>
       </SafeAreaView>
     );
   };
@@ -1477,21 +1446,11 @@ export default function RhythmSetupScreen({
     <SafeAreaView
       style={[wStyles.safe, embedded && styles.embeddedTransparent]}
     >
-      <ImageBackground
-        source={RHYTHM_BG}
-        style={wStyles.background}
-        imageStyle={wStyles.backgroundImage}
-      >
         <ScrollView
           contentContainerStyle={wStyles.scroll}
           showsVerticalScrollIndicator={false}
         >
           <View style={wStyles.hero}>
-            <Image
-              source={RHYTHM_LEAF_ART}
-              style={wStyles.leafArt}
-              resizeMode="contain"
-            />
             <View style={wStyles.confirmSparkleWrap}>
               <Text style={wStyles.confirmSparkle}>✦</Text>
             </View>
@@ -1565,7 +1524,6 @@ export default function RhythmSetupScreen({
             </Text>
           </TouchableOpacity>
         </ScrollView>
-      </ImageBackground>
     </SafeAreaView>
   );
 
@@ -1582,21 +1540,11 @@ export default function RhythmSetupScreen({
     <SafeAreaView
       style={[styles.safeArea, embedded && styles.embeddedTransparent]}
     >
-      <ImageBackground
-        source={RHYTHM_BG}
-        style={styles.background}
-        imageStyle={styles.backgroundImage}
-      >
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.hero}>
-            <Image
-              source={RHYTHM_LEAF_ART}
-              style={styles.leafArt}
-              resizeMode="contain"
-            />
 
             <Text style={styles.headerTitle}>
               {editMode ? "Edit My Rhythm" : "Set Up My Rhythm"}
@@ -1844,7 +1792,6 @@ export default function RhythmSetupScreen({
           mode="select_for_rhythm"
           onItemSelected={handleItemSelected}
         />
-      </ImageBackground>
     </SafeAreaView>
   );
 }
@@ -1852,19 +1799,11 @@ export default function RhythmSetupScreen({
 // ─── Wizard styles ─────────────────────────────────────────────────────────────
 
 const wStyles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#FFF8EF" },
+  safe: { flex: 1 },
   background: { flex: 1 },
   backgroundImage: { opacity: 0.98 },
   scroll: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 48 },
   hero: { position: "relative", paddingTop: 6 },
-  leafArt: {
-    position: "absolute",
-    right: -70,
-    top: -110,
-    width: 300,
-    height: 300,
-    opacity: 0.78,
-  },
   brandBlock: { marginLeft: 2, marginBottom: 26 },
   brandTitle: {
     fontSize: 34,
@@ -1943,13 +1882,9 @@ const wStyles = StyleSheet.create({
     borderRadius: 28,
     borderWidth: 1.5,
     borderColor: "rgba(201,168,76,0.26)",
-    backgroundColor: "rgba(245,245,240,0.45)",
+    backgroundColor: Platform.OS === "android" ? "#F8F3E8" : "rgba(245,245,240,0.45)",
     marginBottom: 16,
-    shadowColor: "#432104",
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 1,
+    ...platformShadow("#432104", 10, 0.08, 18, 1),
   },
   momentCardSelected: {
     borderColor: "#C99317",
@@ -1959,7 +1894,7 @@ const wStyles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 22,
-
+    flexShrink: 0,
     backgroundColor: "#FCF8EC",
     alignItems: "center",
     justifyContent: "center",
@@ -1998,7 +1933,6 @@ const wStyles = StyleSheet.create({
     color: "#7B6550",
     fontFamily: Fonts.sans.regular,
     lineHeight: 22,
-    maxWidth: 220,
   },
   check: {
     width: 20,
@@ -2048,23 +1982,16 @@ const wStyles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1.5,
     borderColor: "rgba(201,168,76,0.22)",
-    backgroundColor: "rgba(245,245,240,0.45)",
+    backgroundColor: Platform.OS === "android" ? "#F8F3E8" : "rgba(245,245,240,0.45)",
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 10,
-    shadowColor: "#432104",
-    shadowOpacity: 0.05,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 1,
+    ...platformShadow("#432104", 6, 0.05, 14, 1),
   },
   purposeChipActive: {
     borderColor: "#C99317",
     backgroundColor: "rgba(255,251,244,0.98)",
-    shadowColor: "#DEB861",
-    shadowOpacity: 0.14,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 12 },
+    ...platformShadow("#DEB861", 12, 0.14, 24, 2),
   },
   purposeChipIconWrap: {
     alignItems: "center",
@@ -2105,11 +2032,7 @@ const wStyles = StyleSheet.create({
     backgroundColor: "rgba(255,251,244,0.95)",
     padding: 15,
     marginBottom: 18,
-    shadowColor: "#432104",
-    shadowOpacity: 0.06,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 1,
+    ...platformShadow("#432104", 10, 0.06, 18, 1),
   },
   suggestionMetaRow: {
     flexDirection: "row",
@@ -2288,11 +2211,7 @@ const wStyles = StyleSheet.create({
     backgroundColor: "rgba(255,251,244,0.95)",
     paddingHorizontal: 16,
     paddingVertical: 18,
-    shadowColor: "#432104",
-    shadowOpacity: 0.05,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 1,
+    ...platformShadow("#432104", 6, 0.05, 14, 1),
   },
   confirmCardHeader: {
     flexDirection: "row",
@@ -2375,20 +2294,12 @@ const wStyles = StyleSheet.create({
 // ─── Accordion styles ──────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#FFF8EF" },
+  safeArea: { flex: 1, backgroundColor: "transparent" },
   embeddedTransparent: { backgroundColor: "transparent" },
   background: { flex: 1 },
   backgroundImage: { opacity: 0.98 },
   scrollContent: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40 },
   hero: { position: "relative", paddingTop: 6, marginBottom: 18 },
-  leafArt: {
-    position: "absolute",
-    right: -70,
-    top: -110,
-    width: 300,
-    height: 300,
-    opacity: 0.78,
-  },
   brandBlock: { marginLeft: 4, marginBottom: 26 },
   brandTitle: {
     fontSize: 36,
@@ -2410,33 +2321,36 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginBottom: 8,
   },
-  bandBlock: { marginBottom: 20 },
+  bandBlock: { marginBottom: 20, backgroundColor: "transparent" },
   bandHeaderCard: {
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingVertical: 12,
+    minHeight: 86,
     borderWidth: 1,
     borderColor: "rgba(226, 201, 151, 0.72)",
     borderRadius: 15,
-    backgroundColor: "rgba(255, 250, 242, 0.96",
-    shadowColor: "#8A6837",
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 1,
+    backgroundColor:
+      Platform.OS === "android" ? "#FFFCF7" : "rgba(255, 250, 242, 0.96)",
+    ...(Platform.OS === "android"
+      ? { elevation: 0 }
+      : platformShadow("#C9A84C", 6, 0.05, 12, 1)),
   },
   bandHeaderCardExpanded: {
-    backgroundColor: "rgba(248, 242, 230, 0.96)",
+    backgroundColor:
+      Platform.OS === "android" ? "#FBF6EB" : "rgba(248, 242, 230, 0.96)",
   },
   bandIconWrap: {
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: "rgba(248, 236, 210, 0.68)",
+    backgroundColor: Platform.OS === "android" ? "#FBF3DE" : "rgba(248, 236, 210, 0.68)",
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
+    flexShrink: 0,
   },
   bandCopy: { flex: 1, paddingRight: 10 },
   bandLabel: {
@@ -2452,7 +2366,14 @@ const styles = StyleSheet.create({
     color: "#7B6550",
     lineHeight: 19,
   },
-  chevron: { fontSize: 26, color: "#C99317", marginTop: -4 },
+  chevron: {
+    width: 24,
+    textAlign: "center",
+    fontSize: 26,
+    lineHeight: 26,
+    color: "#C99317",
+    flexShrink: 0,
+  },
   bandBody: { paddingTop: 16, gap: 12 },
   addedItem: {
     flexDirection: "column",

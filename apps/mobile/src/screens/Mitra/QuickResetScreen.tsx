@@ -28,7 +28,7 @@ import {
   UIManager,
   View,
 } from "react-native";
-import RudrakshBead from "../../../assets/rudraksh.svg";
+const RudrakshBead = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/rudraksh.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import AudioPlayerBlock, {
   stopAllAudioPlayerSounds,
 } from "../../blocks/AudioPlayerBlock";
@@ -41,7 +41,9 @@ import {
 } from "../../engine/mitraApi";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import { navigate as rootNavigate } from "../../Shared/Routes/NavigationService";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Fonts } from "../../theme/fonts";
+import { platformShadow } from "../../theme/shadows";
 
 type Phase = "loading" | "opening" | "preview" | "done" | "error";
 const VISUAL_BEAD_COUNT = 18;
@@ -188,12 +190,13 @@ export default function QuickResetScreen({
   embedded?: boolean;
 }) {
   const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
   const { goBack, updateBackground, updateHeaderHidden } = useScreenStore();
 
   useFocusEffect(
     useCallback(() => {
       if (!embedded) {
-        updateBackground(require("../../../assets/beige_bg.png"));
+        updateBackground(require("../../../assets/beige_bg.webp"));
         updateHeaderHidden(false);
         return () => {
           updateBackground(null);
@@ -589,7 +592,7 @@ export default function QuickResetScreen({
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
         <ImageBackground
-          source={require("../../../assets/beige_bg.png")}
+          source={require("../../../assets/beige_bg.webp")}
           style={styles.background}
           imageStyle={styles.backgroundImage}
         >
@@ -613,7 +616,7 @@ export default function QuickResetScreen({
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
         <ImageBackground
-          source={require("../../../assets/beige_bg.png")}
+          source={require("../../../assets/beige_bg.webp")}
           style={styles.background}
           imageStyle={styles.backgroundImage}
         >
@@ -639,19 +642,19 @@ export default function QuickResetScreen({
     );
   }
 
-  if (phase === "opening" && openingState) {
-    const displayMantra = activeMantra!;
+  if (phase === "opening" && openingState && activeMantra) {
+    const displayMantra = activeMantra;
     return (
       <SafeAreaView
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
         <ImageBackground
-          source={require("../../../assets/beige_bg.png")}
+          source={require("../../../assets/beige_bg.webp")}
           style={styles.background}
           imageStyle={styles.backgroundImage}
         >
           <ScrollView
-            contentContainerStyle={styles.scrollContent}
+            contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
             showsVerticalScrollIndicator={false}
           >
             {renderOpeningSurface(
@@ -677,12 +680,12 @@ export default function QuickResetScreen({
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
         <ImageBackground
-          source={require("../../../assets/beige_bg.png")}
+          source={require("../../../assets/beige_bg.webp")}
           style={styles.background}
           imageStyle={styles.backgroundImage}
         >
           <ScrollView
-            contentContainerStyle={styles.scrollContent}
+            contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
             showsVerticalScrollIndicator={false}
           >
             {renderOpeningSurface(selectedMantra, [
@@ -710,7 +713,7 @@ export default function QuickResetScreen({
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
         <ImageBackground
-          source={require("../../../assets/beige_bg.png")}
+          source={require("../../../assets/beige_bg.webp")}
           style={styles.background}
           imageStyle={styles.backgroundImage}
         >
@@ -764,7 +767,7 @@ export default function QuickResetScreen({
       style={[styles.safeArea, embedded && styles.embeddedTransparent]}
     >
       <ImageBackground
-        source={require("../../../assets/beige_bg.png")}
+        source={require("../../../assets/beige_bg.webp")}
         style={styles.background}
         imageStyle={styles.backgroundImage}
       >
@@ -791,15 +794,10 @@ export default function QuickResetScreen({
       >
         <SafeAreaView style={styles.modalSafeArea}>
           <ImageBackground
-            source={require("../../../assets/beige_bg.png")}
+            source={require("../../../assets/beige_bg.webp")}
             style={styles.background}
             imageStyle={styles.backgroundImage}
           >
-            <Image
-              source={require("../../../assets/leaves-bird.png")}
-              resizeMode="contain"
-              style={styles.pickerLeaves}
-            />
             <View style={styles.pickerHeader}>
               <TouchableOpacity
                 onPress={() => setPickerVisible(false)}
@@ -869,7 +867,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 24,
     paddingTop: 22,
-    paddingBottom: 64,
     alignItems: "center",
     gap: 20,
   },
@@ -928,10 +925,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   previewBead: {
-    shadowColor: "#6B431A",
-    shadowOpacity: 0.22,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
+    ...platformShadow("#6B431A", 2, 0.22, 4, 2),
   },
   previewBeadPointer: {
     position: "absolute",
@@ -956,11 +950,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 2,
-    shadowColor: "#B89450",
-    shadowOpacity: 0.16,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    ...platformShadow("#B89450", 2, 0.16, 10, 2),
   },
   previewTapText: {
     fontSize: 20,
@@ -1023,7 +1013,7 @@ const styles = StyleSheet.create({
   },
   verseTextGroup: {
     width: "100%",
-    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    backgroundColor: Platform.OS === "android" ? "#FEFCF9" : "rgba(255, 255, 255, 0.4)",
     borderRadius: 12,
     borderWidth: 1,
     borderColor: "rgba(184, 148, 80, 0.1)",
@@ -1040,7 +1030,7 @@ const styles = StyleSheet.create({
     right: 5,
   },
   expandedSection: {
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    backgroundColor: Platform.OS === "android" ? "#FEFCF9" : "rgba(255, 255, 255, 0.8)",
   },
   verseIast: {
     fontSize: 13,
@@ -1080,7 +1070,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(218,194,142,0.65)",
     borderRadius: 11,
-    backgroundColor: "rgba(255,255,255,0.72)",
+    backgroundColor: Platform.OS === "android" ? "#FEFCF9" : "rgba(255,255,255,0.72)",
     paddingHorizontal: 8,
     paddingVertical: 10,
   },
@@ -1152,7 +1142,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(212,160,23,0.38)",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.42)",
+    backgroundColor: Platform.OS === "android" ? "#FEFCF9" : "rgba(255,255,255,0.42)",
   },
   secondaryActionIcon: {
     fontSize: 22,
@@ -1221,14 +1211,6 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     position: "relative",
   },
-  pickerLeaves: {
-    position: "absolute",
-    top: -80,
-    right: -50,
-    width: 300,
-    height: 300,
-    opacity: 0.95,
-  },
   pickerBackBtn: {
     alignSelf: "flex-start",
     marginBottom: 26,
@@ -1263,12 +1245,8 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     borderWidth: 1,
     borderColor: "rgba(218,194,142,0.55)",
-    backgroundColor: "rgba(255,255,255,0.82)",
-    shadowColor: "#C9A84C",
-    shadowOpacity: 0.06,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 2,
+    backgroundColor: Platform.OS === "android" ? "#FEFCF9" : "rgba(255,255,255,0.82)",
+    ...platformShadow("#C9A84C", 6, 0.06, 14, 2),
     gap: 10,
     marginBottom: 18,
   },
@@ -1311,12 +1289,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "rgba(233, 186, 88, 0.9)",
     backgroundColor: "rgba(255,250,241,0.96)",
-    overflow: "hidden",
-    shadowColor: "#D4A017",
-    shadowOpacity: 0.28,
-    shadowRadius: 28,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 10,
+    ...platformShadow("#D4A017", 12, 0.28, 28, 10),
   },
   toastGlow: {
     ...StyleSheet.absoluteFillObject,

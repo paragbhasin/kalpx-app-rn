@@ -222,7 +222,7 @@ const RoomContainer: React.FC<Props> = () => {
   // 1. Handle Background Image (Focus-linked)
   useFocusEffect(
     React.useCallback(() => {
-      updateBackground(require("../../assets/rooms_bg.jpg"));
+      updateBackground(require("../../assets/rooms_bg.webp"));
       return () => updateBackground(null);
     }, [updateBackground]),
   );

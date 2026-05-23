@@ -108,7 +108,7 @@ export const VoiceModal: React.FC<VoiceModalProps> = ({
       <BlurView intensity={50} tint="light" style={styles.modalOverlay}>
         <View style={styles.modalWrapper}>
           <ImageBackground
-            source={require("../../assets/beige_bg.png")}
+            source={require("../../assets/beige_bg.webp")}
             style={styles.modalContent}
             imageStyle={{ borderRadius: 32 }}
             resizeMode="cover"

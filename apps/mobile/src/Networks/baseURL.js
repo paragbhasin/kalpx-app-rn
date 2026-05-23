@@ -12,7 +12,7 @@ const DEV_URL = "https://dev.kalpx.com/api";
 const PROD_URL = "https://kalpx.com/api";
 
 // FINAL BASE API URL
-const BASE_URL = ENV === "dev" ? DEV_URL : PROD_URL;
+const BASE_URL = ENV === "prod" ? PROD_URL : DEV_URL;
 
 // IMAGE DOMAIN (NO /api)
 const BASE_IMAGE_URL =

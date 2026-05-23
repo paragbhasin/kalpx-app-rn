@@ -32,14 +32,14 @@ export default function LandingScreen({ navigation }) {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#f1ebdf" />
       <ImageBackground
-        source={require("../../../assets/hoomepagebg.jpg")}
+        source={require("../../../assets/hoomepagebg.webp")}
         style={{ flex: 1 }}
         resizeMode="cover"
       >
         <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
           <View>
             <Image
-              source={require("../../../assets/LandingImage.png")}
+              source={require("../../../assets/LandingImage.webp")}
               style={{ width: deviceWidth, height: 200, marginTop: -20 }}
               resizeMode="contain"
             />

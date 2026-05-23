@@ -52,7 +52,7 @@ const ServiceCard: React.FC<Props> = ({
           onPress={() => fromCart && goToDetails(1)}
         >
           <Image
-            source={require("../../../assets/service-card.png")}
+            source={require("../../../assets/service-card.webp")}
             style={styles.image}
           />
         </TouchableOpacity>

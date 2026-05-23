@@ -26,6 +26,7 @@ import type {
   JourneyTriadReminders,
   JourneyTriadRemindersPatch,
 } from "@kalpx/types";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, {
   useCallback,
@@ -36,6 +37,7 @@ import React, {
 } from "react";
 import {
   ActivityIndicator,
+  Image,
   LayoutAnimation,
   Platform,
   SafeAreaView,
@@ -48,7 +50,7 @@ import {
   View,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import In1Icon from "../../../../web/public/in1.svg";
+const In1Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/in1.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import CycleProgressBlock from "../../blocks/dashboard/CycleProgressBlock";
 import { TimePickerModal } from "../../components/TimePickerModal";
 import {
@@ -69,6 +71,7 @@ import store, { type RootState } from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ContinueJourney from "../Home/ContinueJourney";
 
 // Runner containers that require DynamicEngine to render.
@@ -93,11 +96,13 @@ function innerPathHeldLabel(slot: string): string {
 export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
   const navigation = useNavigation<any>();
   const dispatch = useDispatch<any>();
+  const tabBarHeight = useBottomTabBarHeight();
+  const insets = useSafeAreaInsets();
   const { loadScreen, goBack, updateBackground } = useScreenStore();
 
   useFocusEffect(
     useCallback(() => {
-      updateBackground(require("../../../assets/beige_bg.png"));
+      updateBackground(require("../../../assets/beige_bg.webp"));
       return () => updateBackground(null);
     }, [updateBackground]),
   );
@@ -703,7 +708,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     <SafeAreaView style={styles.safe}>
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + insets.bottom + 16 }]}
         showsVerticalScrollIndicator={false}
       >
         {showAllCompleteMessage && (

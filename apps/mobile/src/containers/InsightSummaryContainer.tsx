@@ -14,7 +14,7 @@ import {
   View,
 } from "react-native";
 import { SvgUri } from "react-native-svg";
-import SevenDaysLotus from "../../assets/7days_lotus.svg";
+const SevenDaysLotus = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/7days_lotus.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import { executeAction } from "../engine/actionExecutor";
 import { getContainerSync } from "../engine/screenResolver";
 import { useScreenStore } from "../engine/useScreenBridge";
@@ -26,25 +26,25 @@ import api from "../Networks/axios";
 const { width, height } = Dimensions.get("window");
 
 const SCHEMA_ASSET_MAP: Record<string, any> = {
-  "/assets/buddhi.svg": require("../../assets/buddhi.svg"),
-  "/assets/viveka.svg": require("../../assets/viveka.svg"),
-  "/assets/tejas.svg": require("../../assets/tejas.svg"),
-  "/assets/shakthi.svg": require("../../assets/shakthi.svg"),
-  "/assets/dharma.svg": require("../../assets/dharma.svg"),
-  "/assets/health_1.svg": require("../../assets/health_1.svg"),
-  "/assets/health_2.svg": require("../../assets/health_2.svg"),
-  "/assets/health_3.svg": require("../../assets/health_3.svg"),
-  "/assets/health_4.svg": require("../../assets/health_4.svg"),
-  "/assets/health_5.svg": require("../../assets/health_5.svg"),
-  "/assets/relation_1.svg": require("../../assets/relation_1.svg"),
-  "/assets/relation_2.svg": require("../../assets/relation_2.svg"),
-  "/assets/relation_3.svg": require("../../assets/relation_3.svg"),
-  "/assets/relation_4.svg": require("../../assets/relation_4.svg"),
-  "/assets/relation_5.svg": require("../../assets/relation_5.svg"),
-  "/assets/wealth_1.svg": require("../../assets/wealth_1.svg"),
-  "/assets/wealth_2.svg": require("../../assets/wealth_2.svg"),
-  "/assets/wealth_3.svg": require("../../assets/wealth_3.svg"),
-  "/assets/wealth_4.svg": require("../../assets/wealth_4.svg"),
+  "/assets/buddhi.svg": require("../../assets/buddhi.webp"),
+  "/assets/viveka.svg": require("../../assets/viveka.webp"),
+  "/assets/tejas.svg": require("../../assets/tejas.webp"),
+  "/assets/shakthi.svg": require("../../assets/shakthi.webp"),
+  "/assets/dharma.svg": require("../../assets/dharma.webp"),
+  "/assets/health_1.svg": require("../../assets/health_1.webp"),
+  "/assets/health_2.svg": require("../../assets/health_2.webp"),
+  "/assets/health_3.svg": require("../../assets/health_3.webp"),
+  "/assets/health_4.svg": require("../../assets/health_4.webp"),
+  "/assets/health_5.svg": require("../../assets/health_5.webp"),
+  "/assets/relation_1.svg": require("../../assets/relation_1.webp"),
+  "/assets/relation_2.svg": require("../../assets/relation_2.webp"),
+  "/assets/relation_3.svg": require("../../assets/relation_3.webp"),
+  "/assets/relation_4.svg": require("../../assets/relation_4.webp"),
+  "/assets/relation_5.svg": require("../../assets/relation_5.webp"),
+  "/assets/wealth_1.svg": require("../../assets/wealth_1.webp"),
+  "/assets/wealth_2.svg": require("../../assets/wealth_2.webp"),
+  "/assets/wealth_3.svg": require("../../assets/wealth_3.webp"),
+  "/assets/wealth_4.svg": require("../../assets/wealth_4.webp"),
   "/assets/spiritual_growth.png": require("../../assets/spiritual_growth.png"),
 };
 
@@ -162,8 +162,8 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({
   useEffect(() => {
     updateBackground(
       step === 1
-        ? require("../../assets/14_day_bg.jpg")
-        : require("../../assets/beige_bg.png"),
+        ? require("../../assets/14_day_bg.webp")
+        : require("../../assets/beige_bg.webp"),
     );
     updateHeaderHidden(false);
     return () => {
@@ -381,7 +381,7 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({
           </View>
 
           <Image
-            source={require("../../assets/half-mandala-removebg-preview.png")}
+            source={require("../../assets/half-mandala-removebg-preview.webp")}
             style={styles.cardGlowMark}
           />
         </View>
@@ -393,7 +393,7 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({
           </View>
           <Text style={styles.explanationText}>{experienceExplanation}</Text>
           <Image
-            source={require("../../assets/half-mandala-removebg-preview.png")}
+            source={require("../../assets/half-mandala-removebg-preview.webp")}
             style={styles.experienceMandala}
           />
         </View>
@@ -440,7 +440,7 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({
         <View style={styles.step2Divider}>
           <View style={styles.step2DividerLine} />
           <Image
-            source={require("../../assets/lotus-3d.png")}
+            source={require("../../assets/lotus-3d.webp")}
             style={styles.step2DividerLotus}
           />
           <View style={styles.step2DividerLine} />
@@ -479,7 +479,7 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({
                 )}
                 {i === cards.length - 1 && (
                   <Image
-                    source={require("../../assets/half-mandala-removebg-preview.png")}
+                    source={require("../../assets/half-mandala-removebg-preview.webp")}
                     style={styles.step2CardMandala}
                   />
                 )}

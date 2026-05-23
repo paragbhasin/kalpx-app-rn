@@ -127,7 +127,7 @@ function RhythmItemCard({
           textAlign: "center",
         }}
       >
-        {item.title_snapshot}
+        {item.title_snapshot || item.title || ""}
       </p>
       <div
         style={{

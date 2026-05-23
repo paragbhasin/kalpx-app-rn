@@ -3,15 +3,15 @@ import { useEffect, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 
 const heroImage = new URL(
-  "../../../../mobile/assets/about-kalpx3.png",
+  "/mobile-assets/about-kalpx3.png",
   import.meta.url,
 ).href;
 const postImage = new URL(
-  "../../../../mobile/assets/about-kalpx2.png",
+  "/mobile-assets/about-kalpx2.webp",
   import.meta.url,
 ).href;
 const commentImage = new URL(
-  "../../../../mobile/assets/about-kalpx4.png",
+  "/mobile-assets/about-kalpx4.webp",
   import.meta.url,
 ).href;
 

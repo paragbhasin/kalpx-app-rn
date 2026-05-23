@@ -1,23 +1,20 @@
 import {
   ArrowLeft,
-  CalendarDays,
   Check,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Globe,
   MapPin,
   PlaneLanding,
   Plus,
   Star,
 } from "lucide-react";
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+const retreatImg = "/mobile-assets/retreat/retreat1.webp";
+const retreatImg2 = "/mobile-assets/retreat/retreat2.webp";
 import { AppShell } from "../../components/ui";
 import { FacilitatorCard } from "./FacilitatorCard";
-import retreatImg from "../../../../mobile/assets/retreat/retreat1.jpg";
-import retreatImg2 from "../../../../mobile/assets/retreat/retreat2.jpg";
 
 type TabId =
   | "summary"
@@ -111,7 +108,14 @@ export function RetreatDetailsPage() {
     typeof window === "undefined" ? true : window.innerWidth >= 1024;
 
   const gallery = useMemo(
-    () => [retreatImg, retreatImg2, retreatImg, retreatImg2, retreatImg, retreatImg2],
+    () => [
+      retreatImg,
+      retreatImg2,
+      retreatImg,
+      retreatImg2,
+      retreatImg,
+      retreatImg2,
+    ],
     [],
   );
   const currentImage = gallery[imgIndex];
@@ -136,7 +140,9 @@ export function RetreatDetailsPage() {
 
   function goToPackageDetails(packageName: string) {
     const packageId = packageName.toLowerCase().replace(/\s+/g, "-");
-    navigate(`/en/retreats/${slug || "rejuvenating-yoga-ayurvedic-retreat"}/package/${packageId}`);
+    navigate(
+      `/en/retreats/${slug || "rejuvenating-yoga-ayurvedic-retreat"}/package/${packageId}`,
+    );
   }
 
   useEffect(() => {
@@ -167,10 +173,18 @@ export function RetreatDetailsPage() {
           </div>
           <div style={desktopRightGalleryColStyle}>
             <div style={desktopSmallImageStyle}>
-              <img src={gallery[1] || gallery[0]} style={galleryImageStyle} alt="Top Right" />
+              <img
+                src={gallery[1] || gallery[0]}
+                style={galleryImageStyle}
+                alt="Top Right"
+              />
             </div>
             <div style={{ ...desktopSmallImageStyle, marginTop: 8 }}>
-              <img src={gallery[2] || gallery[0]} style={galleryImageStyle} alt="Bottom Right" />
+              <img
+                src={gallery[2] || gallery[0]}
+                style={galleryImageStyle}
+                alt="Bottom Right"
+              />
             </div>
           </div>
         </div>
@@ -178,11 +192,21 @@ export function RetreatDetailsPage() {
         <div style={desktopBottomGalleryStyle}>
           {[gallery[3], gallery[4]].map((img, idx) => (
             <div key={idx} style={desktopBottomGalleryCellStyle}>
-              <img src={img || gallery[0]} style={galleryImageStyle} alt={`Bottom ${idx + 1}`} />
+              <img
+                src={img || gallery[0]}
+                style={galleryImageStyle}
+                alt={`Bottom ${idx + 1}`}
+              />
             </div>
           ))}
-          <div style={{ ...desktopBottomGalleryCellStyle, position: "relative" }}>
-            <img src={gallery[5] || gallery[0]} style={galleryImageStyle} alt="Bottom 3" />
+          <div
+            style={{ ...desktopBottomGalleryCellStyle, position: "relative" }}
+          >
+            <img
+              src={gallery[5] || gallery[0]}
+              style={galleryImageStyle}
+              alt="Bottom 3"
+            />
             <div style={overlayCountStyle}>10+</div>
           </div>
         </div>
@@ -250,7 +274,11 @@ export function RetreatDetailsPage() {
                 <ul style={simpleListStyle}>
                   {policies.map((p) => (
                     <li key={p} style={listItemStyle}>
-                      <Check size={14} color="#43BC6C" style={{ marginTop: 2 }} />
+                      <Check
+                        size={14}
+                        color="#43BC6C"
+                        style={{ marginTop: 2 }}
+                      />
                       <span style={listTextStyle}>{p}</span>
                     </li>
                   ))}
@@ -302,16 +330,27 @@ export function RetreatDetailsPage() {
                       </div>
                       <div style={desktopReviewStarsStyle}>
                         {Array.from({ length: 5 }).map((__, index) => (
-                          <Star key={index} size={12} color="#D4A017" fill="#D4A017" />
+                          <Star
+                            key={index}
+                            size={12}
+                            color="#D4A017"
+                            fill="#D4A017"
+                          />
                         ))}
                       </div>
                     </div>
                     <p style={desktopReviewTextStyle}>
-                      Amzing Experince enjoyed every day here. Teacher is very Good
+                      Amzing Experince enjoyed every day here. Teacher is very
+                      Good
                     </p>
                     <div style={desktopReviewImagesStyle}>
                       {[gallery[0], gallery[1]].map((img, idx) => (
-                        <img key={idx} src={img || gallery[0]} style={desktopReviewImageStyle} alt="" />
+                        <img
+                          key={idx}
+                          src={img || gallery[0]}
+                          style={desktopReviewImageStyle}
+                          alt=""
+                        />
                       ))}
                     </div>
                   </div>
@@ -326,7 +365,9 @@ export function RetreatDetailsPage() {
                 <h2 style={desktopSidebarHeadingStyle}>Packages</h2>
                 {packages.map((pkg) => (
                   <div key={pkg.name} style={desktopPackageCardStyle}>
-                    {pkg.popular ? <div style={desktopPopularBadgeStyle}>Most Popular</div> : null}
+                    {pkg.popular ? (
+                      <div style={desktopPopularBadgeStyle}>Most Popular</div>
+                    ) : null}
                     <div style={desktopPackageHeaderStyle}>
                       <h3 style={desktopPackageTitleStyle}>{pkg.name}</h3>
                       <span style={desktopPackagePriceStyle}>{pkg.price}</span>
@@ -334,7 +375,11 @@ export function RetreatDetailsPage() {
                     <ul style={desktopPackageListStyle}>
                       {pkg.inclusions.map((inc) => (
                         <li key={inc} style={desktopPackageItemStyle}>
-                          <Check size={12} color="#43BC6C" style={{ marginTop: 2 }} />
+                          <Check
+                            size={12}
+                            color="#43BC6C"
+                            style={{ marginTop: 2 }}
+                          />
                           <span style={desktopPackageTextStyle}>{inc}</span>
                         </li>
                       ))}
@@ -357,16 +402,32 @@ export function RetreatDetailsPage() {
   ) : (
     <div style={mobilePageStyle}>
       <section style={mobileHeroSectionStyle}>
-        <button type="button" onClick={() => navigate(-1)} style={heroBackButtonStyle}>
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          style={heroBackButtonStyle}
+        >
           <ArrowLeft size={18} color="#fff" />
         </button>
 
         <div style={mobileHeroImageWrapStyle}>
-          <img src={currentImage} style={mobileHeroImageStyle} alt="Retreat Hero" />
-          <button type="button" onClick={prevImage} style={{ ...heroNavButtonStyle, left: 16 }}>
+          <img
+            src={currentImage}
+            style={mobileHeroImageStyle}
+            alt="Retreat Hero"
+          />
+          <button
+            type="button"
+            onClick={prevImage}
+            style={{ ...heroNavButtonStyle, left: 16 }}
+          >
             <ChevronLeft size={12} color="#000" />
           </button>
-          <button type="button" onClick={nextImage} style={{ ...heroNavButtonStyle, right: 16 }}>
+          <button
+            type="button"
+            onClick={nextImage}
+            style={{ ...heroNavButtonStyle, right: 16 }}
+          >
             <ChevronRight size={12} color="#000" />
           </button>
           <div style={heroDotsStyle}>
@@ -400,7 +461,9 @@ export function RetreatDetailsPage() {
                 }}
               >
                 {tab.label}
-                {activeTab === tab.id ? <div style={mobileActiveLineStyle} /> : null}
+                {activeTab === tab.id ? (
+                  <div style={mobileActiveLineStyle} />
+                ) : null}
               </button>
             ))}
           </div>
@@ -420,7 +483,9 @@ export function RetreatDetailsPage() {
 
           <section id="facilitator" style={mobileSectionStyle}>
             <div style={mobileSectionHeaderRowStyle}>
-              <h2 style={mobileFacilitatorTitleStyle}>Your Guides On This Journey</h2>
+              <h2 style={mobileFacilitatorTitleStyle}>
+                Your Guides On This Journey
+              </h2>
               <button type="button" style={mobileViewAllStyle}>
                 View all
               </button>
@@ -433,7 +498,9 @@ export function RetreatDetailsPage() {
             <div style={mobilePackagesGridStyle}>
               {packages.map((pkg) => (
                 <div key={pkg.name} style={mobilePackageCardStyle}>
-                  {pkg.popular ? <div style={mobilePopularBadgeStyle}>Most Popular</div> : null}
+                  {pkg.popular ? (
+                    <div style={mobilePopularBadgeStyle}>Most Popular</div>
+                  ) : null}
                   <div style={mobilePackageHeaderStyle}>
                     <h3 style={mobilePackageTitleStyle}>{pkg.name}</h3>
                     <span style={mobilePackagePriceStyle}>{pkg.price}</span>
@@ -453,11 +520,11 @@ export function RetreatDetailsPage() {
                     style={mobileBookButtonStyle}
                     onClick={() => goToPackageDetails(pkg.name)}
                   >
-                      Book Now
-                    </button>
-                  </div>
-                ))}
-              </div>
+                    Book Now
+                  </button>
+                </div>
+              ))}
+            </div>
           </section>
 
           <section id="policies" style={mobileSectionStyle}>
@@ -523,7 +590,9 @@ export function RetreatDetailsPage() {
                 </div>
                 <div style={mobileAddressDividerStyle} />
                 <h4 style={mobileAirportHeadingStyle}>Nearest Airport</h4>
-                <p style={mobileAirportTextStyle}>Calicut International Airport (CCJ)</p>
+                <p style={mobileAirportTextStyle}>
+                  Calicut International Airport (CCJ)
+                </p>
                 <p style={mobileAirportSubStyle}>Distance: 85km</p>
               </div>
             </div>
@@ -536,7 +605,9 @@ export function RetreatDetailsPage() {
                 <div key={i} style={mobileReviewCardStyle}>
                   <div style={mobileReviewTopStyle}>
                     <div style={mobileReviewPersonStyle}>
-                      <div style={mobileReviewInitialStyle}>{review.user.charAt(0)}</div>
+                      <div style={mobileReviewInitialStyle}>
+                        {review.user.charAt(0)}
+                      </div>
                       <div>
                         <h4 style={mobileReviewNameStyle}>{review.user}</h4>
                         <p style={mobileReviewDateStyle}>{review.date}</p>
@@ -544,7 +615,12 @@ export function RetreatDetailsPage() {
                     </div>
                     <div style={mobileReviewStarsStyle}>
                       {Array.from({ length: 5 }).map((_, index) => (
-                        <Star key={index} size={11} color="#D4A017" fill="#D4A017" />
+                        <Star
+                          key={index}
+                          size={11}
+                          color="#D4A017"
+                          fill="#D4A017"
+                        />
                       ))}
                     </div>
                   </div>
@@ -552,7 +628,12 @@ export function RetreatDetailsPage() {
                   {review.images?.length ? (
                     <div style={mobileReviewImagesStyle}>
                       {review.images.map((img, idx) => (
-                        <img key={idx} src={img} style={mobileReviewImageStyle} alt="" />
+                        <img
+                          key={idx}
+                          src={img}
+                          style={mobileReviewImageStyle}
+                          alt=""
+                        />
                       ))}
                     </div>
                   ) : null}

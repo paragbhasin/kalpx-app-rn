@@ -1,31 +1,31 @@
 import {
-  ArrowLeft,
-  Bed,
-  BedDouble,
-  Check,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Map,
-  Mountain,
-  Plus,
-  Umbrella,
-  User,
-  Wifi,
-  X,
+    ArrowLeft,
+    Bed,
+    BedDouble,
+    Check,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    Map,
+    Mountain,
+    Umbrella,
+    User,
+    Wifi,
+    X,
 } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+const retreatImg = "/mobile-assets/retreat/retreat1.webp";
+const retreatImg2 = "/mobile-assets/retreat/retreat2.webp";
 import { AppShell } from "../../components/ui";
 import { RetreatCard } from "./RetreatCard";
-import retreatImg from "../../../../mobile/assets/retreat/retreat1.jpg";
-import retreatImg2 from "../../../../mobile/assets/retreat/retreat2.jpg";
 
 const dummyRetreats = [
   {
     title: "Rejuvenating yoga & Ayurvedic Retreat",
-    description: "A gentle 7-day wellness journey designed to help you pause...",
+    description:
+      "A gentle 7-day wellness journey designed to help you pause...",
     cheapest_price_minor: 1000000,
     rating_avg: 4.9,
     rating_count: 223,
@@ -72,7 +72,9 @@ const specialFeatures = [
 export function RetreatPackageDetailsPage() {
   const navigate = useNavigate();
   const { slug, packageId } = useParams();
-  const [retreat] = useState({ title: "Rejuvenating yoga & Ayurvedic Retreat" });
+  const [retreat] = useState({
+    title: "Rejuvenating yoga & Ayurvedic Retreat",
+  });
   const [activeDay, setActiveDay] = useState<number | null>(1);
   const [accImgIndex, setAccImgIndex] = useState(0);
   const isDesktop =
@@ -90,7 +92,9 @@ export function RetreatPackageDetailsPage() {
   const currentAccImg = accGallery[accImgIndex];
 
   function goToBooking() {
-    navigate(`/en/retreats/${slug || "rejuvenating-yoga-ayurvedic-retreat"}/book`);
+    navigate(
+      `/en/retreats/${slug || "rejuvenating-yoga-ayurvedic-retreat"}/book`,
+    );
   }
 
   function nextAccImg() {
@@ -119,7 +123,11 @@ export function RetreatPackageDetailsPage() {
     <div style={mobilePageStyle}>
       <header style={mobileHeaderStyle}>
         <div style={mobileHeaderTopStyle}>
-          <button type="button" onClick={() => navigate(-1)} style={mobileBackButtonStyle}>
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            style={mobileBackButtonStyle}
+          >
             <ArrowLeft size={18} color="#000" />
           </button>
           <h1 style={mobileHeaderTitleStyle}>
@@ -128,14 +136,20 @@ export function RetreatPackageDetailsPage() {
         </div>
 
         <div style={mobileStaticTabsStyle}>
-          {["Package Details", "Address Details", "Policies", "Tips and Advisory"].map((tab, idx) => (
+          {[
+            "Package Details",
+            "Address Details",
+            "Policies",
+            "Tips and Advisory",
+          ].map((tab, idx) => (
             <button
               key={tab}
               type="button"
               style={{
                 ...mobileStaticTabStyle,
                 color: idx === 0 ? "#D4A017" : "#707070",
-                borderBottom: idx === 0 ? "2px solid #D4A017" : "2px solid transparent",
+                borderBottom:
+                  idx === 0 ? "2px solid #D4A017" : "2px solid transparent",
               }}
             >
               {tab}
@@ -145,7 +159,11 @@ export function RetreatPackageDetailsPage() {
 
         <div style={mobilePackageHeaderRowStyle}>
           <h2 style={mobilePackageNameHeadingStyle}>{packageData.name}</h2>
-          <button type="button" onClick={() => navigate(-1)} style={mobileCloseButtonStyle}>
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            style={mobileCloseButtonStyle}
+          >
             <X size={14} color="#9ca3af" />
           </button>
         </div>
@@ -154,7 +172,9 @@ export function RetreatPackageDetailsPage() {
       <main>
         <section style={mobileSectionPadStyle}>
           <div style={mobilePriceCardStyle}>
-            <div style={mobileSmallMetaStyle}>From 22 Dec - 24 Dec (3 days/ 2 nights)</div>
+            <div style={mobileSmallMetaStyle}>
+              From 22 Dec - 24 Dec (3 days/ 2 nights)
+            </div>
             <div style={mobilePriceStackStyle}>
               <h2 style={mobileTotalPriceStyle}>
                 Total Price:
@@ -162,7 +182,10 @@ export function RetreatPackageDetailsPage() {
                 <span style={mobilePerPersonStyle}>per person</span>
               </h2>
               <p style={mobileDepositStyle}>
-                Deposit : <span style={mobileDepositValueStyle}>₹{packageData.deposit}</span>
+                Deposit :{" "}
+                <span style={mobileDepositValueStyle}>
+                  ₹{packageData.deposit}
+                </span>
               </p>
             </div>
           </div>
@@ -173,10 +196,18 @@ export function RetreatPackageDetailsPage() {
             <h3 style={mobileBlockTitleStyle}>Accommodation</h3>
             <div style={mobileCarouselStyle}>
               <img src={currentAccImg} style={fullImageStyle} alt="" />
-              <button type="button" onClick={prevAccImg} style={{ ...heroNavButtonStyle, left: 12 }}>
+              <button
+                type="button"
+                onClick={prevAccImg}
+                style={{ ...heroNavButtonStyle, left: 12 }}
+              >
                 <ChevronLeft size={12} color="#000" />
               </button>
-              <button type="button" onClick={nextAccImg} style={{ ...heroNavButtonStyle, right: 12 }}>
+              <button
+                type="button"
+                onClick={nextAccImg}
+                style={{ ...heroNavButtonStyle, right: 12 }}
+              >
                 <ChevronRight size={12} color="#000" />
               </button>
               <div style={heroDotsStyle}>
@@ -187,7 +218,11 @@ export function RetreatPackageDetailsPage() {
             </div>
             <div style={mobileFeaturesGridStyle}>
               {accFeatures.map((feat) => (
-                <FeatureRow key={feat.label} icon={feat.icon} label={feat.label} />
+                <FeatureRow
+                  key={feat.label}
+                  icon={feat.icon}
+                  label={feat.label}
+                />
               ))}
             </div>
           </div>
@@ -205,7 +240,9 @@ export function RetreatPackageDetailsPage() {
               </div>
               <div>
                 <h4 style={mobileLabelStyle}>Recommended For</h4>
-                <p style={mobileValueTextStyle}>Beginner, Intermediate, Advance</p>
+                <p style={mobileValueTextStyle}>
+                  Beginner, Intermediate, Advance
+                </p>
               </div>
             </div>
 
@@ -216,7 +253,9 @@ export function RetreatPackageDetailsPage() {
                 <p style={mobileValueTextStyle}>Ayurveda, Satvic</p>
               </div>
               <div>
-                <h4 style={{ ...mobileLabelStyle, marginBottom: 8 }}>Included Meal</h4>
+                <h4 style={{ ...mobileLabelStyle, marginBottom: 8 }}>
+                  Included Meal
+                </h4>
                 <ul style={mobileChecksListStyle}>
                   {["Breakfast", "Lunch", "Dinner"].map((m) => (
                     <li key={m} style={mobileCheckItemStyle}>
@@ -238,7 +277,11 @@ export function RetreatPackageDetailsPage() {
             <div>
               <h4 style={mobileMutedHeadingStyle}>What is Included</h4>
               <ul style={mobileChecksListStyle}>
-                {["Daily Yoga Session", "Airport Pickup", "Workshop Material"].map((inc) => (
+                {[
+                  "Daily Yoga Session",
+                  "Airport Pickup",
+                  "Workshop Material",
+                ].map((inc) => (
                   <li key={inc} style={mobileCheckItemStyle}>
                     <CheckBoxIcon color="#43BC6C" type="check" />
                     <span style={mobileCheckTextStyle}>{inc}</span>
@@ -266,8 +309,14 @@ export function RetreatPackageDetailsPage() {
           <div style={sectionBlockStyle}>
             <h3 style={mobileBlockTitleStyle}>Cancellation Policy</h3>
             <ul style={mobileBulletsListStyle}>
-              <li style={mobileBulletLineStyle}><span style={mobileBulletCharStyle}>•</span>Free Cancellation before start of 30 days</li>
-              <li style={mobileBulletLineStyle}><span style={mobileBulletCharStyle}>•</span>20% Deducted if cancelled after 30 days</li>
+              <li style={mobileBulletLineStyle}>
+                <span style={mobileBulletCharStyle}>•</span>Free Cancellation
+                before start of 30 days
+              </li>
+              <li style={mobileBulletLineStyle}>
+                <span style={mobileBulletCharStyle}>•</span>20% Deducted if
+                cancelled after 30 days
+              </li>
             </ul>
           </div>
         </section>
@@ -276,7 +325,9 @@ export function RetreatPackageDetailsPage() {
 
         <section style={mobileSectionPadStyle}>
           <div style={sectionBlockStyle}>
-            <h3 style={mobileBlockTitleStyle}>What Makes This Retreat Special</h3>
+            <h3 style={mobileBlockTitleStyle}>
+              What Makes This Retreat Special
+            </h3>
             <ul style={mobileSpecialListStyle}>
               {specialFeatures.map((spec, i) => (
                 <li key={i} style={mobileSpecialItemStyle}>
@@ -299,21 +350,35 @@ export function RetreatPackageDetailsPage() {
             <div style={scheduleCardsWrapStyle}>
               {[1, 2, 3].map((day) => (
                 <div key={day} style={scheduleCardStyle}>
-                  <button type="button" onClick={() => toggleDay(day)} style={scheduleToggleStyle}>
+                  <button
+                    type="button"
+                    onClick={() => toggleDay(day)}
+                    style={scheduleToggleStyle}
+                  >
                     <div>
                       <span style={scheduleDayTagStyle}>Day {day}</span>
-                      <h4 style={scheduleCardTitleStyle}>Spiritual Immersion & Cultural</h4>
+                      <h4 style={scheduleCardTitleStyle}>
+                        Spiritual Immersion & Cultural
+                      </h4>
                     </div>
                     <ChevronDown
                       size={12}
                       color="#9ca3af"
-                      style={{ transform: activeDay === day ? "rotate(180deg)" : "rotate(0deg)" }}
+                      style={{
+                        transform:
+                          activeDay === day ? "rotate(180deg)" : "rotate(0deg)",
+                      }}
                     />
                   </button>
                   {activeDay === day ? (
                     <div style={scheduleExpandedStyle}>
                       {["Morning", "Afternoon", "Evening"].map((time) => (
-                        <TimelineRow key={time} time={time} text={getScheduleText(time)} isLast={time === "Evening"} />
+                        <TimelineRow
+                          key={time}
+                          time={time}
+                          text={getScheduleText(time)}
+                          isLast={time === "Evening"}
+                        />
                       ))}
                     </div>
                   ) : null}
@@ -328,7 +393,11 @@ export function RetreatPackageDetailsPage() {
             <p style={mobileBottomLabelStyle}>Total Price</p>
             <p style={mobileBottomValueStyle}>₹12000</p>
           </div>
-          <button type="button" onClick={goToBooking} style={mobileBottomButtonStyle}>
+          <button
+            type="button"
+            onClick={goToBooking}
+            style={mobileBottomButtonStyle}
+          >
             Book Now
           </button>
         </div>
@@ -339,10 +408,16 @@ export function RetreatPackageDetailsPage() {
       <div style={desktopSubHeaderStyle}>
         <div style={desktopSubHeaderInnerStyle}>
           <div style={desktopBackRowStyle}>
-            <button type="button" onClick={() => navigate(-1)} style={desktopBackButtonStyle}>
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              style={desktopBackButtonStyle}
+            >
               <ArrowLeft size={20} color="#000" />
             </button>
-            <span style={desktopBackTitleStyle}>{packageData.name} Package</span>
+            <span style={desktopBackTitleStyle}>
+              {packageData.name} Package
+            </span>
           </div>
         </div>
       </div>
@@ -355,10 +430,19 @@ export function RetreatPackageDetailsPage() {
                 <h2 style={desktopSectionTitleStyle}>Accommodation</h2>
               </div>
               <div style={desktopHeroCardStyle}>
-                <img src={retreatImg} style={desktopHeroImageStyle} alt="Main" />
+                <img
+                  src={retreatImg}
+                  style={desktopHeroImageStyle}
+                  alt="Main"
+                />
                 <div style={desktopFeaturesGridStyle}>
                   {accFeatures.map((feat) => (
-                    <FeatureRow key={feat.label} icon={feat.icon} label={feat.label} desktop />
+                    <FeatureRow
+                      key={feat.label}
+                      icon={feat.icon}
+                      label={feat.label}
+                      desktop
+                    />
                   ))}
                 </div>
               </div>
@@ -366,7 +450,9 @@ export function RetreatPackageDetailsPage() {
 
             <div style={desktopDoubleGridStyle}>
               <div style={desktopSectionStyle}>
-                <h2 style={desktopSectionTitleStyle}>Who is these Retreats for</h2>
+                <h2 style={desktopSectionTitleStyle}>
+                  Who is these Retreats for
+                </h2>
                 <div style={desktopInfoStackStyle}>
                   <div>
                     <h4 style={desktopMutedCapsStyle}>Suitable for</h4>
@@ -374,7 +460,9 @@ export function RetreatPackageDetailsPage() {
                   </div>
                   <div>
                     <h4 style={desktopMutedCapsStyle}>Recommended For</h4>
-                    <p style={desktopStrongValueStyle}>Beginner, Intermediate, Advance</p>
+                    <p style={desktopStrongValueStyle}>
+                      Beginner, Intermediate, Advance
+                    </p>
                   </div>
                 </div>
               </div>
@@ -407,9 +495,15 @@ export function RetreatPackageDetailsPage() {
               <h2 style={desktopSectionTitleStyle}>Amenities</h2>
               <div style={desktopDoubleGridStyle}>
                 <div style={desktopInfoStackStyle}>
-                  <h4 style={{ ...desktopMutedCapsStyle, color: "#D4A017" }}>What is Included</h4>
+                  <h4 style={{ ...desktopMutedCapsStyle, color: "#D4A017" }}>
+                    What is Included
+                  </h4>
                   <ul style={desktopChecksListStyle}>
-                    {["Daily Yoga Session", "Airport Pickup", "Workshop Material"].map((inc) => (
+                    {[
+                      "Daily Yoga Session",
+                      "Airport Pickup",
+                      "Workshop Material",
+                    ].map((inc) => (
                       <li key={inc} style={desktopCheckItemStyle}>
                         <Check size={14} color="#43BC6C" />
                         <span style={desktopCheckTextStyle}>{inc}</span>
@@ -418,7 +512,9 @@ export function RetreatPackageDetailsPage() {
                   </ul>
                 </div>
                 <div style={desktopInfoStackStyle}>
-                  <h4 style={{ ...desktopMutedCapsStyle, color: "#FF4D4D" }}>What is Excluded</h4>
+                  <h4 style={{ ...desktopMutedCapsStyle, color: "#FF4D4D" }}>
+                    What is Excluded
+                  </h4>
                   <ul style={desktopChecksListStyle}>
                     {["Airfare", "Laundry", "Personal Expenses"].map((exc) => (
                       <li key={exc} style={desktopCheckItemStyle}>
@@ -434,7 +530,9 @@ export function RetreatPackageDetailsPage() {
             <hr style={desktopHrStyle} />
 
             <section style={desktopSectionStyle}>
-              <h2 style={desktopSectionTitleStyle}>What Makes This Retreat Special</h2>
+              <h2 style={desktopSectionTitleStyle}>
+                What Makes This Retreat Special
+              </h2>
               <ul style={desktopSpecialListStyle}>
                 {specialFeatures.map((spec) => (
                   <li key={spec} style={desktopSpecialItemStyle}>
@@ -455,21 +553,40 @@ export function RetreatPackageDetailsPage() {
               <div style={scheduleCardsWrapStyle}>
                 {[1, 2, 3].map((day) => (
                   <div key={day} style={desktopScheduleCardStyle}>
-                    <button type="button" onClick={() => toggleDay(day)} style={desktopScheduleToggleStyle}>
+                    <button
+                      type="button"
+                      onClick={() => toggleDay(day)}
+                      style={desktopScheduleToggleStyle}
+                    >
                       <div>
-                        <span style={scheduleDayDesktopTagStyle}>Day {day}</span>
-                        <h4 style={desktopScheduleTitleStyle}>Spiritual Immersion & Cultural</h4>
+                        <span style={scheduleDayDesktopTagStyle}>
+                          Day {day}
+                        </span>
+                        <h4 style={desktopScheduleTitleStyle}>
+                          Spiritual Immersion & Cultural
+                        </h4>
                       </div>
                       <ChevronDown
                         size={14}
                         color="#9ca3af"
-                        style={{ transform: activeDay === day ? "rotate(180deg)" : "rotate(0deg)" }}
+                        style={{
+                          transform:
+                            activeDay === day
+                              ? "rotate(180deg)"
+                              : "rotate(0deg)",
+                        }}
                       />
                     </button>
                     {activeDay === day ? (
                       <div style={desktopScheduleExpandedStyle}>
                         {["Morning", "Afternoon", "Evening"].map((time) => (
-                          <TimelineRow key={time} time={time} text={getScheduleText(time)} isLast={time === "Evening"} desktop />
+                          <TimelineRow
+                            key={time}
+                            time={time}
+                            text={getScheduleText(time)}
+                            isLast={time === "Evening"}
+                            desktop
+                          />
                         ))}
                       </div>
                     ) : null}
@@ -483,25 +600,36 @@ export function RetreatPackageDetailsPage() {
             <div style={desktopPriceCardStyle}>
               <div style={desktopPriceHeaderStyle}>
                 <h3 style={desktopPriceHeadingStyle}>Deposit</h3>
-                <span style={desktopPriceAmountStyle}>{packageData.deposit}/-</span>
+                <span style={desktopPriceAmountStyle}>
+                  {packageData.deposit}/-
+                </span>
               </div>
 
               <div style={desktopPricePolicyBlockStyle}>
-                <h4 style={desktopPriceMiniHeadingStyle}>Cancellation Policies</h4>
+                <h4 style={desktopPriceMiniHeadingStyle}>
+                  Cancellation Policies
+                </h4>
                 <div style={desktopPolicyStackStyle}>
                   <div style={desktopPolicyRowStyle}>
                     <Check size={14} color="#38d0ee" style={{ marginTop: 2 }} />
-                    <span style={desktopPolicyTextStyle}>Free Cancellation before start of 30 days</span>
+                    <span style={desktopPolicyTextStyle}>
+                      Free Cancellation before start of 30 days
+                    </span>
                   </div>
                   <div style={desktopPolicyRowStyle}>
                     <Check size={14} color="#38d0ee" style={{ marginTop: 2 }} />
-                    <span style={desktopPolicyTextStyle}>20% Deducted if cancelled after 30 days</span>
+                    <span style={desktopPolicyTextStyle}>
+                      20% Deducted if cancelled after 30 days
+                    </span>
                   </div>
                 </div>
               </div>
 
               <div style={desktopBreakupStyle}>
-                <PriceLine label="Package Price" value={`₹${packageData.price}/-`} />
+                <PriceLine
+                  label="Package Price"
+                  value={`₹${packageData.price}/-`}
+                />
                 <div style={desktopAddonBreakupWrapStyle}>
                   <span style={desktopPriceMiniHeadingStyle}>Add Ons</span>
                   <div style={desktopAddonBreakupRowStyle}>
@@ -509,14 +637,18 @@ export function RetreatPackageDetailsPage() {
                       <div style={desktopAddonCheckOnStyle}>
                         <Check size={10} color="#fff" />
                       </div>
-                      <span style={desktopAddonBreakupTextStyle}>Airport Pickup</span>
+                      <span style={desktopAddonBreakupTextStyle}>
+                        Airport Pickup
+                      </span>
                     </div>
                     <span style={desktopAddonBreakupValueStyle}>₹4,000/-</span>
                   </div>
                   <div style={desktopAddonBreakupRowStyle}>
                     <div style={desktopAddonBreakupLeftStyle}>
                       <div style={desktopAddonCheckOffStyle} />
-                      <span style={desktopAddonBreakupTextStyle}>Gluten Free Meal</span>
+                      <span style={desktopAddonBreakupTextStyle}>
+                        Gluten Free Meal
+                      </span>
                     </div>
                     <span style={desktopAddonBreakupValueStyle}>₹2,000/-</span>
                   </div>
@@ -528,7 +660,11 @@ export function RetreatPackageDetailsPage() {
                 </div>
               </div>
 
-              <button type="button" onClick={goToBooking} style={desktopPrimaryCtaStyle}>
+              <button
+                type="button"
+                onClick={goToBooking}
+                style={desktopPrimaryCtaStyle}
+              >
                 Book Now
               </button>
             </div>
@@ -558,7 +694,9 @@ export function RetreatPackageDetailsPage() {
                   },
                 ].map((pkg) => (
                   <div key={pkg.name} style={desktopOtherPkgItemStyle}>
-                    {pkg.popularity ? <div style={desktopOtherPkgBadgeStyle}>Most Popular</div> : null}
+                    {pkg.popularity ? (
+                      <div style={desktopOtherPkgBadgeStyle}>Most Popular</div>
+                    ) : null}
                     <div style={desktopOtherPkgHeaderStyle}>
                       <h4 style={desktopOtherPkgTitleStyle}>{pkg.name}</h4>
                       <span style={desktopOtherPkgPriceStyle}>{pkg.price}</span>
@@ -566,7 +704,11 @@ export function RetreatPackageDetailsPage() {
                     <ul style={desktopOtherPkgListStyle}>
                       {pkg.inclusions.map((inc) => (
                         <li key={inc} style={desktopOtherPkgListItemStyle}>
-                          <Check size={11} color="#43BC6C" style={{ marginTop: 2 }} />
+                          <Check
+                            size={11}
+                            color="#43BC6C"
+                            style={{ marginTop: 2 }}
+                          />
                           <span style={desktopOtherPkgTextStyle}>{inc}</span>
                         </li>
                       ))}
@@ -608,21 +750,21 @@ function FeatureRow({
   return (
     <div style={{ ...featureRowStyle, gap: desktop ? 12 : 12 }}>
       <div style={featureIconStyle}>{icon}</div>
-      <span style={desktop ? desktopFeatureTextStyle : featureTextStyle}>{label}</span>
+      <span style={desktop ? desktopFeatureTextStyle : featureTextStyle}>
+        {label}
+      </span>
     </div>
   );
 }
 
-function CheckBoxIcon({
-  color,
-  type,
-}: {
-  color: string;
-  type: "check" | "x";
-}) {
+function CheckBoxIcon({ color, type }: { color: string; type: "check" | "x" }) {
   return (
     <div style={{ ...smallCheckWrapStyle, borderColor: color }}>
-      {type === "check" ? <Check size={10} color={color} /> : <X size={10} color={color} />}
+      {type === "check" ? (
+        <Check size={10} color={color} />
+      ) : (
+        <X size={10} color={color} />
+      )}
     </div>
   );
 }
@@ -659,8 +801,12 @@ function TimelineRow({
           }}
         />
       ) : null}
-      <h5 style={desktop ? timelineTimeDesktopStyle : timelineTimeStyle}>{time}</h5>
-      <p style={desktop ? timelineBodyDesktopStyle : timelineBodyStyle}>{text}</p>
+      <h5 style={desktop ? timelineTimeDesktopStyle : timelineTimeStyle}>
+        {time}
+      </h5>
+      <p style={desktop ? timelineBodyDesktopStyle : timelineBodyStyle}>
+        {text}
+      </p>
     </div>
   );
 }

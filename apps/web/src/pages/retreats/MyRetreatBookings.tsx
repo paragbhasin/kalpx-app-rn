@@ -1,10 +1,17 @@
-import { CalendarDays, ChevronDown, Clock3, Globe, LocationEdit, Search, SlidersHorizontal, Star } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronDown,
+  Clock3,
+  Globe,
+  LocationEdit,
+  Search,
+  Star,
+} from "lucide-react";
 import type { CSSProperties } from "react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import retreatImg from "../../../../mobile/assets/retreat/retreat1.jpg";
-import facImg from "../../../../mobile/assets/retreat/retreat2.jpg";
-
+const retreatImg = "/mobile-assets/retreat/retreat1.webp";
+const facImg = "/mobile-assets/retreat/retreat2.webp";
 const categories = [
   "All Retreats",
   "Yoga",
@@ -121,7 +128,12 @@ export function MyRetreatBookings() {
             <div style={{ ...panelStyle, gap: 16 }}>
               <h3 style={desktopCapsHeadingStyle}>Price Range</h3>
               <div style={priceWrapStyle}>
-                <input type="range" min="0" max="40000" style={rangeInputStyle} />
+                <input
+                  type="range"
+                  min="0"
+                  max="40000"
+                  style={rangeInputStyle}
+                />
                 <div style={rangeLabelsStyle}>
                   <span>₹0</span>
                   <span>₹40,000</span>
@@ -152,7 +164,11 @@ export function MyRetreatBookings() {
               {filteredBookings.map((booking, idx) => (
                 <div key={booking.id} style={desktopCardStyle}>
                   <div style={desktopImageWrapStyle}>
-                    <img src={booking.image} style={desktopImageStyle} alt={booking.title} />
+                    <img
+                      src={booking.image}
+                      style={desktopImageStyle}
+                      alt={booking.title}
+                    />
 
                     {idx === 0 ? (
                       <div style={{ ...badgeStyle, background: "#748DCE" }}>
@@ -167,7 +183,11 @@ export function MyRetreatBookings() {
 
                     <div style={facilitatorOverlayStyle}>
                       <div style={facilitatorAvatarWrapStyle}>
-                        <img src={booking.facilitator.avatar} style={facilitatorAvatarStyle} alt="" />
+                        <img
+                          src={booking.facilitator.avatar}
+                          style={facilitatorAvatarStyle}
+                          alt=""
+                        />
                       </div>
                       <div style={{ marginLeft: 10, overflow: "hidden" }}>
                         <p style={facilitatorNameStyle}>
@@ -180,7 +200,13 @@ export function MyRetreatBookings() {
                   </div>
 
                   <div style={desktopContentStyle}>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 8,
+                      }}
+                    >
                       <h3 style={desktopTitleStyle}>{booking.title}</h3>
                       <p style={desktopBodyStyle}>
                         {booking.description}
@@ -189,22 +215,64 @@ export function MyRetreatBookings() {
                     </div>
 
                     <div style={desktopMetaGridStyle}>
-                      <MetaRow icon={<LocationEdit size={14} color="#D4A017" strokeWidth={2.1} />} text={booking.location} />
-                      <MetaRow icon={<Star size={13} color="#D4A017" fill="#D4A017" strokeWidth={1.8} />} text="4.9(223)" />
-                      <MetaRow icon={<Globe size={14} color="#D4A017" strokeWidth={2} />} text="English, Hindi" />
-                      <MetaRow icon={<CalendarDays size={14} color="#D4A017" strokeWidth={2} />} text={booking.dates} />
+                      <MetaRow
+                        icon={
+                          <LocationEdit
+                            size={14}
+                            color="#D4A017"
+                            strokeWidth={2.1}
+                          />
+                        }
+                        text={booking.location}
+                      />
+                      <MetaRow
+                        icon={
+                          <Star
+                            size={13}
+                            color="#D4A017"
+                            fill="#D4A017"
+                            strokeWidth={1.8}
+                          />
+                        }
+                        text="4.9(223)"
+                      />
+                      <MetaRow
+                        icon={
+                          <Globe size={14} color="#D4A017" strokeWidth={2} />
+                        }
+                        text="English, Hindi"
+                      />
+                      <MetaRow
+                        icon={
+                          <CalendarDays
+                            size={14}
+                            color="#D4A017"
+                            strokeWidth={2}
+                          />
+                        }
+                        text={booking.dates}
+                      />
                     </div>
 
                     <div style={desktopFooterStyle}>
                       <div style={{ display: "flex", flexDirection: "column" }}>
-                        <span style={{ ...statusTextStyle, color: getStatusColor(booking.status) }}>
+                        <span
+                          style={{
+                            ...statusTextStyle,
+                            color: getStatusColor(booking.status),
+                          }}
+                        >
                           {booking.status}
                         </span>
                         {booking.status === "Payment Due" ? (
                           <span style={dueTextStyle}>7 days left only</span>
                         ) : null}
                       </div>
-                      <button type="button" onClick={() => viewDetails(booking.id)} style={viewButtonStyle}>
+                      <button
+                        type="button"
+                        onClick={() => viewDetails(booking.id)}
+                        style={viewButtonStyle}
+                      >
                         View Details
                       </button>
                     </div>
@@ -245,11 +313,19 @@ export function MyRetreatBookings() {
         {filteredBookings.map((booking) => (
           <div key={booking.id} style={mobileCardStyle}>
             <div style={mobileImageWrapStyle}>
-              <img src={booking.image} style={mobileImageStyle} alt={booking.title} />
+              <img
+                src={booking.image}
+                style={mobileImageStyle}
+                alt={booking.title}
+              />
 
               <div style={mobileFacilitatorOverlayStyle}>
                 <div style={facilitatorAvatarWrapStyle}>
-                  <img src={booking.facilitator.avatar} style={facilitatorAvatarStyle} alt="" />
+                  <img
+                    src={booking.facilitator.avatar}
+                    style={facilitatorAvatarStyle}
+                    alt=""
+                  />
                 </div>
                 <div style={{ marginLeft: 10 }}>
                   <p style={mobileFacilitatorNameStyle}>
@@ -271,22 +347,56 @@ export function MyRetreatBookings() {
               </div>
 
               <div style={mobileMetaGridStyle}>
-                <MetaRow icon={<LocationEdit size={14} color="#D4A017" strokeWidth={2.1} />} text={booking.location} compact />
-                <MetaRow icon={<Star size={13} color="#D4A017" fill="#D4A017" strokeWidth={1.8} />} text="4.9(223)" compact />
-                <MetaRow icon={<Globe size={14} color="#D4A017" strokeWidth={2} />} text="English, Hindi" compact />
-                <MetaRow icon={<Clock3 size={14} color="#D4A017" strokeWidth={2} />} text={booking.dates} compact />
+                <MetaRow
+                  icon={
+                    <LocationEdit size={14} color="#D4A017" strokeWidth={2.1} />
+                  }
+                  text={booking.location}
+                  compact
+                />
+                <MetaRow
+                  icon={
+                    <Star
+                      size={13}
+                      color="#D4A017"
+                      fill="#D4A017"
+                      strokeWidth={1.8}
+                    />
+                  }
+                  text="4.9(223)"
+                  compact
+                />
+                <MetaRow
+                  icon={<Globe size={14} color="#D4A017" strokeWidth={2} />}
+                  text="English, Hindi"
+                  compact
+                />
+                <MetaRow
+                  icon={<Clock3 size={14} color="#D4A017" strokeWidth={2} />}
+                  text={booking.dates}
+                  compact
+                />
               </div>
 
               <div style={mobileFooterStyle}>
                 <div style={{ display: "flex", flexDirection: "column" }}>
-                  <span style={{ ...statusTextStyle, color: getStatusColor(booking.status) }}>
+                  <span
+                    style={{
+                      ...statusTextStyle,
+                      color: getStatusColor(booking.status),
+                    }}
+                  >
                     {booking.status}
                   </span>
                   {booking.status === "Payment Due" ? (
                     <span style={dueTextStyle}>7 days left only</span>
                   ) : null}
                 </div>
-                <button type="button" onClick={() => viewDetails(booking.id)} style={viewButtonStyle}>
+                <button
+                  type="button"
+                  onClick={() => viewDetails(booking.id)}
+                  style={viewButtonStyle}
+                >
                   View Details
                 </button>
               </div>

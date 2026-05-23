@@ -2,10 +2,10 @@ import { Volume2, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation, useSearchParams } from "react-router-dom";
-import Quick1Icon from "../../../../mobile/assets/quick_1.svg";
-import Quick2Icon from "../../../../mobile/assets/quick_2.svg";
-import Quick3Icon from "../../../../mobile/assets/quick_3.svg";
-import Quick4Icon from "../../../../mobile/assets/quick_4.svg";
+const Quick1Icon = "/mobile-assets/quick_1.webp";
+const Quick2Icon = "/mobile-assets/quick_2.webp";
+const Quick3Icon = "/mobile-assets/quick_3.webp";
+const Quick4Icon = "/mobile-assets/quick_4.webp";
 import { CompletionReturnBlock } from "../../components/blocks/CompletionReturnBlock";
 import { PracticeTimerBlock } from "../../components/blocks/PracticeTimerBlock";
 import {

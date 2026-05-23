@@ -327,29 +327,39 @@ export default function App() {
   }, []);
 
   // Initial Route Logic
+  // Initial Route Logic — Fixed to prevent Wi-Fi Font Race Conditions
   useEffect(() => {
     const init = async () => {
+      // 1. STRICT GUARD: If fonts aren't completely loaded and there's no error, STOP here.
       if (!fontsLoaded && !error) return;
 
-      // Preload screen definitions from API (falls back to local)
-      initScreenResolver().catch((err) =>
-        console.warn(
-          "Screen resolver init failed (using local fallback):",
-          err,
-        ),
-      );
-
-      // Set route and hide splash immediately to speed up launch
-      setInitialRoute("AppDrawer");
-      await SplashScreen.hideAsync().catch(() => {});
-
       try {
-        // Register device in background without blocking
+        // Preload screen definitions from API (falls back to local)
+        await initScreenResolver().catch((err) =>
+          console.warn(
+            "Screen resolver init failed (using local fallback):",
+            err,
+          ),
+        );
+
+        // 2. Set the initial route FIRST to prepare the view tree hierarchy
+        setInitialRoute("AppDrawer");
+
+        // 3. ONLY hide the splash screen AFTER fonts are confirmed present in memory
+        if (fontsLoaded || error) {
+          await SplashScreen.hideAsync().catch(() => {});
+        }
+
+        // Register device in background without blocking execution
         registerDeviceToBackend();
       } catch (err) {
-        console.log("Background initialization error:", err);
+        console.log("Initialization sequence error:", err);
+        // Fallback safety to ensure app doesn't lock up if something crashes
+        setInitialRoute("AppDrawer");
+        await SplashScreen.hideAsync().catch(() => {});
       }
     };
+
     init();
   }, [fontsLoaded, error]);
 

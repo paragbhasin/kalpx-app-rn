@@ -3316,7 +3316,9 @@ export async function executeAction(
             setScreenValue(null, "onboarding_turn");
             loadScreen({
               container_id: "welcome_onboarding",
-              state_id: "turn_3_life_context",
+              state_id: draft.path === "growth"
+                ? "turn_3_life_context_growth"
+                : "turn_3_life_context_support",
             });
             break;
           }
@@ -3333,9 +3335,15 @@ export async function executeAction(
             draft.stage0_choice = path;
             setScreenValue(null, "stage2_data");
             setScreenValue(null, "stage3_data");
-            nextStateId = "turn_3_life_context";
+            nextStateId = path === "growth"
+              ? "turn_3_life_context_growth"
+              : "turn_3_life_context_support";
 
-          } else if (currentStateId === "turn_3_life_context") {
+          } else if (
+            currentStateId === "turn_3_life_context" ||
+            currentStateId === "turn_3_life_context_support" ||
+            currentStateId === "turn_3_life_context_growth"
+          ) {
             // Stage1 life context — fetch stage2 chips here for 3-tap flow
             draft.stage1_choice = p.chip_id || "self";
             draft.life_context = p.chip_id || null;

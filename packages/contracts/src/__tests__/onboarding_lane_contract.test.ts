@@ -1,11 +1,12 @@
 /**
- * P0 Lane Contract — onboarding turn_3_life_context lane-aware states.
+ * P0+Coverage Lane Contract — onboarding turn_3_life_context lane-aware states.
  *
  * Verifies that:
  * - turn_3_life_context_support and turn_3_life_context_growth exist
  * - Each state has the correct chip IDs (no cross-lane contamination)
  * - Heading copy is lane-appropriate
  * - Original turn_3_life_context remains for backward compat
+ * - P0+Coverage: 9 support chips + 12 growth chips
  *
  * Run: pnpm --filter @kalpx/contracts test
  */
@@ -32,6 +33,7 @@ const REQUIRED_SUPPORT_IDS = [
   'my_path_feels_unclear',
   'exams_feel_overwhelming',
   'daily_life_feels_hard',
+  'spiritual_life_feels_distant',
 ];
 
 const REQUIRED_GROWTH_IDS = [
@@ -42,20 +44,27 @@ const REQUIRED_GROWTH_IDS = [
   'gratitude',
   'transition_growth',
   'studies_exams',
+  'strengthen_myself',
+  'care_for_my_energy',
+  'build_trust_around_money',
+  'build_daily_steadiness',
+  'return_to_devotion',
 ];
 
 const GROWTH_ONLY_IDS = [
   'inner_clarity', 'inner_steadiness', 'gratitude', 'transition_growth',
   'work_feels_better', 'things_feel_better_at_home',
+  'strengthen_myself', 'care_for_my_energy', 'build_trust_around_money',
+  'build_daily_steadiness', 'return_to_devotion',
 ];
 
 const SUPPORT_ONLY_IDS = [
   'work_feels_heavy', 'things_feel_difficult_at_home', 'something_feels_off_inside',
   'my_health_feels_off', 'money_is_stressing_me', 'my_path_feels_unclear',
-  'exams_feel_overwhelming', 'daily_life_feels_hard',
+  'exams_feel_overwhelming', 'daily_life_feels_hard', 'spiritual_life_feels_distant',
 ];
 
-describe('P0 lane-aware onboarding states', () => {
+describe('P0+Coverage lane-aware onboarding states', () => {
   it('turn_3_life_context exists for backward compat', () => {
     expect(states['turn_3_life_context']).toBeTruthy();
   });
@@ -102,11 +111,11 @@ describe('P0 lane-aware onboarding states', () => {
     expect(block.content).toBe('What do you want to strengthen?');
   });
 
-  it('support state has exactly 8 chips', () => {
-    expect(getChipIds('turn_3_life_context_support')).toHaveLength(8);
+  it('support state has exactly 9 chips', () => {
+    expect(getChipIds('turn_3_life_context_support')).toHaveLength(9);
   });
 
-  it('growth state has exactly 7 chips', () => {
-    expect(getChipIds('turn_3_life_context_growth')).toHaveLength(7);
+  it('growth state has exactly 12 chips', () => {
+    expect(getChipIds('turn_3_life_context_growth')).toHaveLength(12);
   });
 });

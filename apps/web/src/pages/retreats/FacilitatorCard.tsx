@@ -1,6 +1,7 @@
 import { Award, Briefcase, Globe, MessageCircle, Star } from "lucide-react";
 import type { CSSProperties } from "react";
-const retreatHostImage = "/mobile-assets/retreat/retreat2.webp";
+import retreatHostImage from "../../../../mobile/assets/retreat/retreat2.webp";
+
 export function FacilitatorCard() {
   return (
     <main style={mainStyle}>

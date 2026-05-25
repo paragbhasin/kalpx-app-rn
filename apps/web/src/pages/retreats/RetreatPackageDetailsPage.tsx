@@ -1,25 +1,25 @@
 import {
-    ArrowLeft,
-    Bed,
-    BedDouble,
-    Check,
-    ChevronDown,
-    ChevronLeft,
-    ChevronRight,
-    Map,
-    Mountain,
-    Umbrella,
-    User,
-    Wifi,
-    X,
+  ArrowLeft,
+  Bed,
+  BedDouble,
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Map,
+  Mountain,
+  Umbrella,
+  User,
+  Wifi,
+  X,
 } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-const retreatImg = "/mobile-assets/retreat/retreat1.webp";
-const retreatImg2 = "/mobile-assets/retreat/retreat2.webp";
 import { AppShell } from "../../components/ui";
 import { RetreatCard } from "./RetreatCard";
+const retreatImg = "/mobile-assets/retreat/retreat1.webp";
+const retreatImg2 = "/mobile-assets/retreat/retreat2.webp";
 
 const dummyRetreats = [
   {

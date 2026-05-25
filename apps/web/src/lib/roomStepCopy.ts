@@ -72,6 +72,14 @@ export const CARRY_MEMORY_MODAL: Record<string, CarryModalCopy> = {
     placeholder: 'Write one good thing…',
     primary_label: 'Save this joy',
   },
+  joy_carry: {
+    title: 'Carry a small gladness',
+    sanatan_context: 'Ananda does not need reasons. Noticing is the practice.',
+    why_we_ask: 'Naming a small gladness keeps it from passing unnoticed.',
+    prompt: 'What are you glad you noticed?',
+    placeholder: 'Write one thing, however small…',
+    primary_label: 'Carry this gladness',
+  },
   growth_journal: {
     title: 'Write what you noticed',
     sanatan_context: 'Growth ripens through one right action, not speed.',
@@ -378,4 +386,17 @@ export function getCarryPlaceholder(writesEvent: string | null | undefined): str
 
 export function getStepIntroLine(family: JourneyActionFamily): string {
   return STEP_INTRO_LINES[family];
+}
+
+interface InquiryCategoryLike {
+  reflective_prompt?: string | null;
+  prompt?: string | null;
+}
+
+export function getInquiryCategoryPrompt(category: InquiryCategoryLike): string {
+  return (
+    category.reflective_prompt ??
+    category.prompt ??
+    'What does this bring up?'
+  );
 }

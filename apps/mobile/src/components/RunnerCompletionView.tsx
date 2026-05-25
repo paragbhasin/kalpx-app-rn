@@ -2,6 +2,7 @@ import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef } from "react";
 import {Image, 
   Animated,
+  Dimensions,
   Platform,
   ScrollView,
   StyleSheet,
@@ -14,6 +15,9 @@ const MantraLotus3d = ({ width, height, opacity, style }: { width?: number; heig
 import { Fonts } from "../theme/fonts";
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
+const { width: screenWidth } = Dimensions.get("window");
+const LOTUS_WIDTH = Math.min(screenWidth * 0.92, 360);
+const LOTUS_HEIGHT = Math.min(screenWidth * 0.72, 280);
 
 interface RunnerCompletionViewProps {
   title: string;
@@ -108,7 +112,12 @@ const RunnerCompletionView: React.FC<RunnerCompletionViewProps> = ({
 
       <View style={styles.bottomSection}>
         <View style={styles.lotusWrap}>
-          <MantraLotus3d width={180} height={140} opacity={0.65} />
+          <MantraLotus3d
+            width={LOTUS_WIDTH}
+            height={LOTUS_HEIGHT}
+            opacity={0.76}
+            style={styles.lotusImage}
+          />
         </View>
 
         <View style={styles.footer}>
@@ -192,17 +201,25 @@ const styles = StyleSheet.create({
   bottomSection: {
     width: "100%",
     alignItems: "center",
-    marginTop: -300,
-    marginBottom: 96,
+    flexGrow: 1,
+    justifyContent: "flex-end",
   },
   lotusWrap: {
     alignItems: "center",
     justifyContent: "center",
-    marginTop: -20,
+    width: "100%",
+    marginTop: 8,
+    marginBottom: 12,
+    minHeight: 220,
+  },
+  lotusImage: {
+    marginTop: -8,
+    marginBottom: -28,
   },
   footer: {
     width: "100%",
     alignItems: "center",
+    paddingBottom: 92,
   },
   primaryCta: {
     backgroundColor: "#FBF5F5",
@@ -210,7 +227,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     borderRadius: 32,
     width: "100%",
-    maxWidth: 280,
+    maxWidth: 420,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 0.3,

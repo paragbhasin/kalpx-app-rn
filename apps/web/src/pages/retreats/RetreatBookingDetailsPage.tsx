@@ -1,22 +1,23 @@
 import {
-    Award,
-    Check,
-    ChevronDown,
-    ChevronLeft,
-    ChevronRight,
-    Globe,
-    MessageCircle,
-    Pencil,
-    Plus,
-    Star,
+  Award,
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Globe,
+  MessageCircle,
+  Pencil,
+  Plus,
+  Star,
 } from "lucide-react";
 import type { CSSProperties } from "react";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-const retreatImg = "/mobile-assets/retreat/retreat1.webp";
-const hostImg = "/mobile-assets/retreat/retreat2.webp";
+
 import { AppShell } from "../../components/ui";
 import { FacilitatorCard } from "./FacilitatorCard";
+const retreatImg = "/mobile-assets/retreat/retreat1.webp";
+const hostImg = "/mobile-assets/retreat/retreat2.webp";
 
 const policies = [
   "A deposit is required to confirm your booking.",

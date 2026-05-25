@@ -10,8 +10,9 @@ import {
 import type { CSSProperties } from "react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-const retreatImg = "/mobile-assets/retreat/retreat1.webp";
-const facImg = "/mobile-assets/retreat/retreat2.webp";
+import retreatImg from "../../../../mobile/assets/retreat/retreat1.webp";
+import facImg from "../../../../mobile/assets/retreat/retreat2.webp";
+
 const categories = [
   "All Retreats",
   "Yoga",

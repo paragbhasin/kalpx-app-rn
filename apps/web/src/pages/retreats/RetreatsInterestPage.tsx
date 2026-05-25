@@ -1,10 +1,10 @@
 import type { CSSProperties } from "react";
 import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-const landingHero = "/mobile-assets/retreat/landing1.webp";
 import { AppShell } from "../../components/ui";
 import { ExploreRetreats } from "./ExploreRetreats";
 import { MyRetreatBookings } from "./MyRetreatBookings";
+const landingHero = "/mobile-assets/retreat/landing1.webp";
 
 type RetreatTab = "explore" | "bookings";
 

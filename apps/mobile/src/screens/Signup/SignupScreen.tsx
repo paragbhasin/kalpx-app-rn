@@ -388,6 +388,10 @@ export default function SignupScreen({ navigation }) {
                         placeholder={t("signup.password")}
                         placeholderTextColor="#9e9b97"
                         secureTextEntry={!showPassword}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        autoComplete="off"
+                        textContentType="none"
                         value={values.password}
                         onChangeText={handleChange("password")}
                         onBlur={handleBlur("password")}
@@ -412,6 +416,10 @@ export default function SignupScreen({ navigation }) {
                         placeholder={t("signup.confirmPassword")}
                         placeholderTextColor="#9e9b97"
                         secureTextEntry={!showConfirmPassword}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        autoComplete="off"
+                        textContentType="none"
                         value={values.confirmPassword}
                         onChangeText={handleChange("confirmPassword")}
                         onBlur={handleBlur("confirmPassword")}

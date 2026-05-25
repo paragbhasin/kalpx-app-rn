@@ -20,7 +20,7 @@ import * as Yup from "yup";
 import LoadingButton from "../../components/LoadingButton";
 import TextComponent from "../../components/TextComponent";
 import ReCaptchaRuntime from "../Login/ReCaptchaRuntime";
-import { generateOtp, verifyOtp } from "../Signup/actions"; // ensure path is correct
+import { generateOtp } from "../Signup/actions"; // ensure path is correct
 import styles from "./styles";
 
 const screenWidth = Dimensions.get("window").width;
@@ -88,34 +88,6 @@ export default function SetNewPasswordScreen({ navigation, route }) {
       return;
     }
 
-    if (action === "reset") {
-      // Reset password flow
-      setLoading(true);
-      const values = formikRef.current?.values || {};
-      const payload = {
-            email: route?.params?.email,
-        otp: values.code,
-        recaptcha_token: token,
-        recaptcha_action: "verify_otp",
-      };
-
-      dispatch(verifyOtp(payload, (result) => {
-        setLoading(false);
-        if (result && result.success) {
-          // success -> reset form + go to login
-          formikRef.current?.resetForm();
-           navigation.navigate("VerificationScreen", {
-      email: route?.params?.email,
-       OTP:values.code
-    });
-        } else {
-          setLoginError(result?.error || "Reset failed");
-        }
-        pendingActionRef.current = null;
-      }) as any);
-
-      return;
-    }
   };
 
   const startResendFlow = () => {
@@ -140,16 +112,20 @@ export default function SetNewPasswordScreen({ navigation, route }) {
                         <TextComponent type="headerBigText"  style={styles.brand}>{t("login.brand")}</TextComponent>
             <TextComponent type="headerIncreaseText" style={styles.heading}>{t("login.heading")}</TextComponent>
             <View style={{...styles.card,height:"75%",}}>
+              <TouchableOpacity onPress={() => navigation.goBack()} style={{ alignSelf: "flex-start", marginBottom: 4 }}>
+                <TextComponent type="cardText" style={{ color: "#CA8A04" }}>{"← "}{t("forgotPassword.backTo")}{t("forgotPassword.forgotPassword")}</TextComponent>
+              </TouchableOpacity>
 <TextComponent type="loginHeaderText" style={styles.cardTitleLine1}>Verification</TextComponent>
               <Formik
                 innerRef={formikRef}
                 initialValues={{ code: "", password1: "", password2: "" }}
                 validationSchema={Schema}
-                onSubmit={(_values, formikHelpers) => {
-                  // Keep resetForm available via formikRef; actual submit happens after recaptcha token
+                onSubmit={(values) => {
                   setLoginError(null);
-                  pendingActionRef.current = "reset";
-                  recaptchaRef.current?.requestNewToken?.("reset");
+                  navigation.navigate("VerificationScreen", {
+                    email: route?.params?.email,
+                    OTP: values.code,
+                  });
                 }}
               >
                 {({ handleSubmit, values, setFieldValue, errors, touched, handleChange, handleBlur, isValid }) => {

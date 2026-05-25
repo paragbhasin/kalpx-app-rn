@@ -12,6 +12,7 @@ import type {
 } from "@kalpx/types";
 import React from "react";
 import {
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -93,7 +94,32 @@ export default function TellMitraThreadView({
   errorMsg,
 }: TellMitraThreadViewProps) {
   const insets = useSafeAreaInsets();
+  const [keyboardHeight, setKeyboardHeight] = React.useState(0);
+  const androidKeyboardOffset =
+    Platform.OS === "android" ? Math.max(0, keyboardHeight - insets.bottom) : 0;
   const footerClearance = Math.max(insets.bottom + 72, 88);
+
+  React.useEffect(() => {
+    const showEvent =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent =
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const onShow = Keyboard.addListener(showEvent, (event) => {
+      setKeyboardHeight(event.endCoordinates?.height || 0);
+      requestAnimationFrame(() => {
+        scrollRef.current?.scrollToEnd({ animated: true });
+      });
+    });
+    const onHide = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      onShow.remove();
+      onHide.remove();
+    };
+  }, [scrollRef]);
 
   function renderItem(item: TellMitraConversationItem) {
     // ── user_message ─────────────────────────────────────────────────────────
@@ -349,10 +375,16 @@ export default function TellMitraThreadView({
         {conversation.map((item) => renderItem(item))}
       </ScrollView>
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
         {!!errorMsg && <Text style={s.errorText}>{errorMsg}</Text>}
+        <View
+          style={[
+            s.footerWrap,
+            Platform.OS === "android" && androidKeyboardOffset > 0
+              ? { paddingBottom: androidKeyboardOffset }
+              : null,
+          ]}
+        >
         <View style={s.composerRow}>
           <TextInput
             ref={inputRef}
@@ -379,9 +411,15 @@ export default function TellMitraThreadView({
             <Text style={s.sendBtnText}>{submitting ? "…" : "Send"}</Text>
           </TouchableOpacity>
         </View>
-        <Text style={[s.disclaimerText, { paddingBottom: footerClearance }]}>
+        <Text
+          style={[
+            s.disclaimerText,
+            { paddingBottom: Math.max(insets.bottom + 6, 8) },
+          ]}
+        >
           Mitra is here for reflection and Sanatan-rooted guidance. It is not a substitute for medical, legal, financial, therapy, crisis, or emergency support. Share only what you feel comfortable sharing.
         </Text>
+        </View>
       </KeyboardAvoidingView>
     </View>
   );
@@ -629,6 +667,9 @@ const s = StyleSheet.create({
     color: "#c0392b",
     paddingHorizontal: 12,
     paddingBottom: 4,
+  },
+  footerWrap: {
+    backgroundColor: "#FAF7F2",
   },
 
   // Composer

@@ -12,6 +12,7 @@ import {
   StatusBar,
   StyleSheet,
   TextInput,
+  TouchableOpacity,
   View
 } from "react-native";
 import { useBlurOnFulfill, useClearByFocusCell } from "react-native-confirmation-code-field";
@@ -37,7 +38,7 @@ export default function VerificationScreen({ navigation, route }) {
     //   .matches(/^\d{4}$/, t("forgotPassword.codeRequired"))
     //   .required(t("forgotPassword.codeRequired")),
     password1: Yup.string()
-      .min(6, t("forgotPassword.passwordMin"))
+      .min(8, t("forgotPassword.passwordMin"))
       .required(t("forgotPassword.passwordRequired")),
     password2: Yup.string()
       .oneOf([Yup.ref("password1"), null], t("forgotPassword.passwordsMustMatch"))
@@ -143,6 +144,9 @@ export default function VerificationScreen({ navigation, route }) {
             <TextComponent type="headerBigText"  style={styles.brand}>{t("login.brand")}</TextComponent>
             <TextComponent type="headerIncreaseText" style={styles.heading}>{t("login.heading")}</TextComponent>
             <View style={{...styles.card,height:"75%",}}>
+              <TouchableOpacity onPress={() => navigation.goBack()} style={{ alignSelf: "flex-start", marginBottom: 4 }}>
+                <TextComponent type="cardText" style={{ color: "#CA8A04" }}>{"← "}{t("forgotPassword.backTo")}{t("forgotPassword.forgotPassword")}</TextComponent>
+              </TouchableOpacity>
                <TextComponent type="loginHeaderText"  style={styles.cardTitleLine1}>{t("forgotPassword.Verification")}</TextComponent>
               <Formik
                 innerRef={formikRef}
@@ -204,7 +208,7 @@ export default function VerificationScreen({ navigation, route }) {
                       {/* Submit using your LoadingButton */}
                       <LoadingButton
                         loading={loading}
-                        text={t("forgotPassword.verify")}
+                        text={t("forgotPassword.resetPassword")}
                         onPress={handleSubmit}
                         disabled={!isValid || loading}
                         style={styles.button}

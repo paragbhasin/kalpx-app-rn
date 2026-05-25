@@ -11,10 +11,10 @@ import {
 import type { CSSProperties } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-const retreatImg = "/mobile-assets/retreat/retreat1.webp";
-const retreatImg2 = "/mobile-assets/retreat/retreat2.webp";
 import { AppShell } from "../../components/ui";
 import { FacilitatorCard } from "./FacilitatorCard";
+const retreatImg = "/mobile-assets/retreat/retreat1.webp";
+const retreatImg2 = "/mobile-assets/retreat/retreat2.webp";
 
 type TabId =
   | "summary"

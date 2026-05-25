@@ -1,17 +1,17 @@
 import {
-    ArrowLeft,
-    Check,
-    ChevronDown,
-    CreditCard,
-    Percent,
-    Star,
-    X,
+  ArrowLeft,
+  Check,
+  ChevronDown,
+  CreditCard,
+  Percent,
+  Star,
+  X,
 } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-const retreatImg = "/mobile-assets/retreat/retreat1.webp";
 import { AppShell } from "../../components/ui";
+const retreatImg = "/mobile-assets/retreat/retreat1.webp";
 
 export function RetreatBookingPage() {
   const navigate = useNavigate();

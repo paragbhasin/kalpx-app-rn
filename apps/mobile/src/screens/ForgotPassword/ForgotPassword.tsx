@@ -89,6 +89,9 @@ export default function ForgotPassword({ navigation }) {
                         <TextComponent type="headerBigText"  style={styles.brand}>{t("login.brand")}</TextComponent>
             <TextComponent type="headerIncreaseText" style={styles.heading}>{t("login.heading")}</TextComponent>
             <View style={styles.card}>
+              <TouchableOpacity onPress={() => navigation.navigate("Login")} style={{ alignSelf: "flex-start", marginBottom: 4 }}>
+                <TextComponent type="cardText" style={{ color: "#CA8A04" }}>{"← "}{t("forgotPassword.backTo")}{t("forgotPassword.login")}</TextComponent>
+              </TouchableOpacity>
               <TextComponent type="loginHeaderText" style={styles.cardTitleLine1}>
                 {t("forgotPassword.forgotPassword")}
               </TextComponent>
@@ -139,16 +142,6 @@ export default function ForgotPassword({ navigation }) {
                       style={styles.button}
                       textStyle={styles.buttonText}
                     />
-                     <View style={{ flexDirection: "row", alignSelf: "center", marginTop: 10 }}>
-                         <TextComponent type="cardText" style={{ ...styles.subTitle, color: "#707070", }}>
-                            {t("forgotPassword.backTo")}
-                          </TextComponent>
-                          <TouchableOpacity   onPress={() => navigation.navigate("Login")}>
-                          <TextComponent type="cardText" style={{ ...styles.subTitle, color: "#CA8A04",textDecorationLine: "underline",}}>
-                            {t("forgotPassword.login")}
-                          </TextComponent>
-                          </TouchableOpacity>
-                        </View>
                   </>
                 )}
               </Formik>

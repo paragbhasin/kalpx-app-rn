@@ -497,7 +497,7 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
                         width={250}
                         height={250}
                         style={{
-                          marginBottom: Platform.OS === "android" ? -100 : -200,
+                          marginBottom: Platform.OS === "android" ? -200 : -200,
                         }}
                       />
                     )}

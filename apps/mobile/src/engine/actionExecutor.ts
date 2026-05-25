@@ -2081,21 +2081,33 @@ export async function executeAction(
       case "track_event": {
         if (!payload) break;
         const { eventName, meta } = payload;
-        await mitraTrackEvent(eventName, {
-          journeyId: screenState.journey_id,
-          dayNumber: screenState.day_number || 1,
-          meta,
-        });
-        // Web parity: when checkin_breath_reset_completed is tracked,
-        // also fire checkin_resolved_after_breath_reset as a secondary
-        // event so analytics can distinguish the breath_reset completion
-        // from resolution (matches actionExecutor.js:3571-3577).
-        if (eventName === "checkin_breath_reset_completed") {
-          mitraTrackEvent("checkin_resolved_after_breath_reset", {
-            journeyId: screenState.journey_id,
+        const journeyId = screenState.journey_id;
+        if (!journeyId) {
+          // No Sentry in project — structured warn for Expo/Metro log filtering.
+          // This fires when track-event is dispatched before journey creation
+          // completes (e.g. guest pre-auth). Telemetry failure must not block UX.
+          console.warn("[MITRA_WARN] track-event skipped: no journey_id", { // eslint-disable-line no-console
+            eventName,
             dayNumber: screenState.day_number || 1,
-            meta: { prana_type: screenState.current_prana_type },
+            onboarding_state: screenState.onboarding_turn,
           });
+        } else {
+          await mitraTrackEvent(eventName, {
+            journeyId,
+            dayNumber: screenState.day_number || 1,
+            meta,
+          });
+          // Web parity: when checkin_breath_reset_completed is tracked,
+          // also fire checkin_resolved_after_breath_reset as a secondary
+          // event so analytics can distinguish the breath_reset completion
+          // from resolution (matches actionExecutor.js:3571-3577).
+          if (eventName === "checkin_breath_reset_completed") {
+            mitraTrackEvent("checkin_resolved_after_breath_reset", {
+              journeyId,
+              dayNumber: screenState.day_number || 1,
+              meta: { prana_type: screenState.current_prana_type },
+            });
+          }
         }
         if (target) {
           const trackDest = _resolveDest(target);
@@ -3291,6 +3303,20 @@ export async function executeAction(
           not_sure: "avidya",
         };
 
+        // Resets lane-dependent draft fields when the user switches lane at turn_2.
+        // Extracted so mobile/web can share the pattern and future callers are explicit.
+        // Temp debug log — TODO: remove after 2 stable releases.
+        const resetLaneDependentState = (oldLane: string, newLane: string) => {
+          console.log("[MITRA] lane switch", { // eslint-disable-line no-console
+            oldLane,
+            newLane,
+            oldStage1Choice: draft.stage1_choice,
+          });
+          draft.stage1_choice = undefined;
+          draft.stage2_choice = undefined;
+          draft.stage3_choice = undefined;
+        };
+
         // Tracking (non-blocking)
         mitraTrackEvent("onboarding_turn_response", {
           meta: {
@@ -3329,22 +3355,43 @@ export async function executeAction(
           } else if (currentStateId === "turn_2") {
             // Stage 0 — path pick
             const path = p.chip_id === "growth" ? "growth" : "support";
+            const oldLane = draft.path || "";
             draft.path = path;
             draft.stage0_choice = path;
+            resetLaneDependentState(oldLane, path);
+            setScreenValue(null, "stage1_data");
             setScreenValue(null, "stage2_data");
             setScreenValue(null, "stage3_data");
             nextStateId = "turn_3_life_context";
 
           } else if (currentStateId === "turn_3_life_context") {
             // Stage1 life context — fetch stage2 chips here for 3-tap flow
-            draft.stage1_choice = p.chip_id || "self";
-            draft.life_context = p.chip_id || null;
+            if (!p.chip_id) {
+              // "self" was a silent corruption vector — fail loudly so dev/staging catch it
+              throw new Error("[MITRA] Missing chip_id in turn_3_life_context — stage1 requires a chip selection");
+            }
+            draft.stage1_choice = p.chip_id;
+            draft.life_context = p.chip_id;
             const stage2 = await mitraFetchOnboardingChips({
               stage: 2,
               lane: draft.path,
               guidance_mode: "hybrid",
               stage1_choice: draft.stage1_choice,
             });
+            if (stage2?.error === "INVALID_STAGE1_CHOICE_FOR_LANE") {
+              // Lane↔choice mismatch caught by backend — reset to stage1 chip pick
+              console.warn("[MITRA_WARN] chips contract violation, resetting to stage1", stage2.details); // eslint-disable-line no-console
+              resetLaneDependentState(draft.path || "", draft.path || "");
+              nextStateId = "turn_3_life_context";
+              break;
+            }
+            if (!stage2?.chips?.length) {
+              // Passed validation but CSV returned empty — log for investigation
+              console.warn("[MITRA_WARN] chips: [] after validation — possible CSV gap", { // eslint-disable-line no-console
+                lane: draft.path,
+                stage1_choice: draft.stage1_choice,
+              });
+            }
             setScreenValue(stage2 || null, "stage2_data");
             setScreenValue(stage2?.mitra_message || "", "stage2_mitra_message");
             setScreenValue(stage2?.sub_prompt || "", "stage2_sub_prompt");

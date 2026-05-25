@@ -367,7 +367,11 @@ export async function mitraOnboardingRecognition(
   }
 }
 
-/** GET /api/mitra/onboarding/chips/ — Fetch dynamic stage chips. */
+/** GET /api/mitra/onboarding/chips/ — Fetch dynamic stage chips.
+ *  On HTTP 400 with a structured `code` field (e.g. INVALID_STAGE1_CHOICE_FOR_LANE),
+ *  returns { error: code, details } so actionExecutor can surface or recover.
+ *  Returns null on network errors / 5xx.
+ */
 export async function mitraFetchOnboardingChips(params: {
   stage: number;
   lane: string;
@@ -376,12 +380,17 @@ export async function mitraFetchOnboardingChips(params: {
   stage2_choice?: string;
 }): Promise<any> {
   try {
-    console.log("[MITRA] Fetch Chips Payload:", params);
+    console.log("[MITRA] Fetch Chips Payload:", params); // eslint-disable-line no-console
     const res = await api.get("mitra/onboarding/chips/", { params });
-    console.log("[MITRA] Fetch Chips Response:", res.data);
+    console.log("[MITRA] Fetch Chips Response:", res.data); // eslint-disable-line no-console
     return res.data;
   } catch (err: any) {
-    console.error("[MITRA] fetch onboarding chips failed:", err.message);
+    if (err.response?.status === 400 && err.response?.data?.code) {
+      // Structured contract error from backend — propagate so actionExecutor can recover
+      console.warn("[MITRA_WARN] chips 400:", err.response.data.code, err.response.data.details); // eslint-disable-line no-console
+      return { error: err.response.data.code, details: err.response.data.details };
+    }
+    console.error("[MITRA] fetch onboarding chips failed:", err.message); // eslint-disable-line no-console
     return null;
   }
 }

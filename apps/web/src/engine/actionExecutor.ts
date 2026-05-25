@@ -275,14 +275,24 @@ export async function executeAction(action: any, context: ActionContext): Promis
       const payload = action.payload || action;
       const eventName = payload.eventName || payload.event_name;
       if (!eventName) {
-        if (WEB_ENV.isDev) console.warn('[actionExecutor] track_event: missing eventName', action);
+        if (WEB_ENV.isDev) console.warn('[actionExecutor] track_event: missing eventName', action); // eslint-disable-line no-console
         break;
       }
-      await apiTrackEvent(eventName, {
-        journey_id: screenData.journey_id,
-        day_number: screenData.day_number || 1,
-        ...sanitizeBackendMeta(payload.meta || {}),
-      });
+      const journeyId = screenData.journey_id;
+      if (!journeyId) {
+        // Structured warn — telemetry failure must not block UX flow
+        if (WEB_ENV.isDev) console.warn('[MITRA_WARN] track-event skipped: no journey_id', { // eslint-disable-line no-console
+          eventName,
+          day_number: screenData.day_number || 1,
+          onboarding_turn: screenData.onboarding_turn,
+        });
+      } else {
+        await apiTrackEvent(eventName, {
+          journey_id: journeyId,
+          day_number: screenData.day_number || 1,
+          ...sanitizeBackendMeta(payload.meta || {}),
+        });
+      }
       if (action.target) {
         const dest = _resolveTarget(action.target);
         if (dest) {
@@ -1226,6 +1236,15 @@ export async function executeAction(action: any, context: ActionContext): Promis
           break;
         }
 
+        // Resets lane-dependent draft fields when the user switches lane at turn_2.
+        // Temp debug log — TODO: remove after 2 stable releases.
+        const resetLaneDependentState = (oldLane: string, newLane: string) => {
+          if (WEB_ENV.isDev) console.log('[MITRA] lane switch', { oldLane, newLane, oldStage1Choice: draft.stage1_choice }); // eslint-disable-line no-console
+          draft.stage1_choice = undefined;
+          draft.stage2_choice = undefined;
+          draft.stage3_choice = undefined;
+        };
+
         // Fire non-blocking telemetry
         void apiTrackEvent('onboarding_turn_response', {
           meta: {
@@ -1244,20 +1263,38 @@ export async function executeAction(action: any, context: ActionContext): Promis
 
         } else if (stateId === 'turn_2') {
           const path = p.chip_id === 'growth' ? 'growth' : 'support';
+          const oldLane = draft.path || '';
           draft.path = path;
           draft.stage0_choice = path;
+          resetLaneDependentState(oldLane, path);
+          _setKey(dispatch, 'stage1_data', null);
+          _setKey(dispatch, 'stage2_data', null);
+          _setKey(dispatch, 'stage3_data', null);
           nextStateId = 'turn_3_life_context';
 
         } else if (stateId === 'turn_3_life_context') {
           // Stage1 life context — fetch stage2 chips here for 3-tap flow
-          draft.stage1_choice = p.chip_id || 'self';
-          draft.life_context = p.chip_id || null;
+          if (!p.chip_id) {
+            // "self" was a silent corruption vector — fail loudly so dev/staging catch it
+            throw new Error('[MITRA] Missing chip_id in turn_3_life_context — stage1 requires a chip selection');
+          }
+          draft.stage1_choice = p.chip_id;
+          draft.life_context = p.chip_id;
           const stage2 = await fetchOnboardingChips({
             stage: 2,
             lane: draft.path || 'support',
             guidance_mode: 'hybrid',
             stage1_choice: draft.stage1_choice,
           });
+          if ((stage2 as any)?.error === 'INVALID_STAGE1_CHOICE_FOR_LANE') {
+            if (WEB_ENV.isDev) console.warn('[MITRA_WARN] chips contract violation, resetting to stage1', (stage2 as any).details); // eslint-disable-line no-console
+            resetLaneDependentState(draft.path || '', draft.path || '');
+            nextStateId = 'turn_3_life_context';
+            break;
+          }
+          if (!(stage2 as any)?.chips?.length) {
+            if (WEB_ENV.isDev) console.warn('[MITRA_WARN] chips: [] after validation — possible CSV gap', { lane: draft.path, stage1_choice: draft.stage1_choice }); // eslint-disable-line no-console
+          }
           _setKey(dispatch, 'stage2_data', stage2 || null);
           _setKey(dispatch, 'stage2_mitra_message', stage2?.mitra_message || '');
           _setKey(dispatch, 'stage2_sub_prompt', stage2?.sub_prompt || '');

@@ -247,7 +247,9 @@ export async function trackCompletion(payload: Record<string, any>): Promise<voi
 
 /**
  * GET /api/mitra/onboarding/chips/ — Fetch dynamic stage chips.
- * Used by RN to refine chip lists; web uses static contract chips for Phase 6.
+ * On HTTP 400 with a structured `code` field (e.g. INVALID_STAGE1_CHOICE_FOR_LANE),
+ * returns { error: code, details } so actionExecutor can surface or recover.
+ * Returns null on network errors / 5xx.
  */
 export async function fetchOnboardingChips(params: {
   stage: number;
@@ -260,7 +262,12 @@ export async function fetchOnboardingChips(params: {
     const res = await api.get('mitra/onboarding/chips/', { params });
     return res.data;
   } catch (err: any) {
-    console.warn('[mitraApi] fetchOnboardingChips failed:', err?.message);
+    if (err.response?.status === 400 && err.response?.data?.code) {
+      // Structured contract error — propagate so actionExecutor can recover
+      console.warn('[MITRA_WARN] chips 400:', err.response.data.code, err.response.data.details); // eslint-disable-line no-console
+      return { error: err.response.data.code, details: err.response.data.details };
+    }
+    console.warn('[mitraApi] fetchOnboardingChips failed:', err?.message); // eslint-disable-line no-console
     return null;
   }
 }

@@ -494,10 +494,10 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
                       />
                     ) : (
                       <MantraLotus3d
-                        width={110}
-                        height={80}
+                        width={250}
+                        height={250}
                         style={{
-                          marginBottom: Platform.OS === "android" ? -30 : -60,
+                          marginBottom: Platform.OS === "android" ? -100 : -200,
                         }}
                       />
                     )}

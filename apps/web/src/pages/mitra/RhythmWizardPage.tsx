@@ -1172,8 +1172,9 @@ export function RhythmWizardPage() {
                           display: "grid",
                           gridTemplateColumns:
                             selectedMoments.length === 1
-                              ? "minmax(0, 920px)"
-                              : "repeat(auto-fit, minmax(360px, 1fr))",
+                              ? "minmax(360px, 920px)"
+                              : "repeat(auto-fit, minmax(360px, 520px))",
+                          justifyContent: "center",
                           gap: 24,
                           maxWidth: 1180,
                           margin: "0 auto",
@@ -1226,6 +1227,9 @@ export function RhythmWizardPage() {
                             <div
                               key={band}
                               style={{
+                                width: "100%",
+                                maxWidth:
+                                  selectedMoments.length === 1 ? 920 : 520,
                                 border: `1.5px solid ${BORDER}`,
                                 borderRadius: 28,
                                 background: "rgba(255,251,244,0.96)",

@@ -1,5 +1,4 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { LinearGradient } from "expo-linear-gradient";
 import {
   StackActions,
   DrawerActions,
@@ -57,24 +56,20 @@ const BottomMenuContent = () => {
                 : shouldUseDefaultSurface
                   ? DEFAULT_SURFACE
                   : "#FFF",
-              borderTopWidth: shouldUseTransparentTabBar ? 0 : 0.5,
-              borderTopColor: shouldUseTransparentTabBar ? "transparent" : "#d1d1d1",
+              borderTopWidth: shouldUseTransparentTabBar
+                ? 0
+                : 0.5,
+              borderTopColor: shouldUseTransparentTabBar
+                ? "transparent"
+                : "#d1d1d1",
               elevation: 0,
               shadowOpacity: 0,
               shadowColor: "transparent",
               height: FontSize.CONSTS.DEVICE_HEIGHT * 0.07,
               paddingBottom: Platform.OS === "ios" ? 10 : 6,
-              position: shouldUseTransparentTabBar ? "absolute" : "relative",
+              position: "relative",
             },
-            tabBarBackground: () =>
-              shouldUseTransparentTabBar ? (
-                <View style={styles.transparentTabBarBackground}>
-                  <LinearGradient
-                    colors={["rgba(249, 242, 231, 0)", "rgba(249, 242, 231, 0.92)"]}
-                    style={styles.transparentTabBarFade}
-                  />
-                </View>
-              ) : null,
+            tabBarBackground: () => null,
             tabBarActiveTintColor: "#8d5524",
             tabBarInactiveTintColor: "#000",
             tabBarAllowFontScaling: false,
@@ -163,19 +158,7 @@ const BottomMenuContent = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  transparentTabBarBackground: {
-    flex: 1,
-    backgroundColor: "transparent",
-  },
-  transparentTabBarFade: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: -56,
-    bottom: 0,
-  },
-});
+const styles = StyleSheet.create({});
 
 const BottomMenu = () => {
   return (

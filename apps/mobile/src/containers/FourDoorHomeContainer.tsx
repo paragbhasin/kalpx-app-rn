@@ -62,6 +62,7 @@ const FEELING_OPTIONS: FeelingOption[] = [
   "Open",
 ];
 
+const FOUR_DOOR_BG = "#FBF4EF";
 const HERO_DAY = require("../../assets/imgsun.webp");
 const HERO_NIGHT = require("../../assets/night-home.webp");
 const SHELL_HEADER_HEIGHT = 45;
@@ -234,7 +235,7 @@ export default function FourDoorHomeContainer({
 
   useFocusEffect(
     useCallback(() => {
-      updateBackground(require("../../assets/beige_bg.webp"));
+      updateBackground(FOUR_DOOR_BG);
       updateHeaderHidden(false);
       return () => updateHeaderHidden(false);
     }, [updateBackground, updateHeaderHidden]),
@@ -821,7 +822,7 @@ export default function FourDoorHomeContainer({
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: Platform.OS === "android" ? "#FBF4EF" : "transparent",
+    backgroundColor: FOUR_DOOR_BG,
   },
   screenBackground: {
     opacity: 1,

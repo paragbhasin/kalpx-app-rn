@@ -261,6 +261,7 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
   const shouldUseDefaultSurface =
     !hasBg && isMitraRouteName(leafRouteName ?? "");
   const backArrowColor = hasBg ? "#a36e2e" : "#432104";
+  const isColorBackground = typeof currentBackground === "string";
 
   return (
     <View
@@ -269,13 +270,21 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
         shouldUseDefaultSurface && styles.defaultSurface,
       ]}
     >
-      {currentBackground && (
-        <ImageBackground
-          source={currentBackground}
-          style={StyleSheet.absoluteFill}
-          resizeMode="cover"
-        />
-      )}
+      {currentBackground &&
+        (isColorBackground ? (
+          <View
+            style={[
+              StyleSheet.absoluteFill,
+              { backgroundColor: currentBackground },
+            ]}
+          />
+        ) : (
+          <ImageBackground
+            source={currentBackground}
+            style={StyleSheet.absoluteFill}
+            resizeMode="cover"
+          />
+        ))}
       {!isHeaderHidden && (
         <Animated.View
           style={[

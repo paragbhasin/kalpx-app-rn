@@ -1246,9 +1246,15 @@ export async function executeAction(action: any, context: ActionContext): Promis
           const path = p.chip_id === 'growth' ? 'growth' : 'support';
           draft.path = path;
           draft.stage0_choice = path;
-          nextStateId = 'turn_3_life_context';
+          nextStateId = path === 'growth'
+            ? 'turn_3_life_context_growth'
+            : 'turn_3_life_context_support';
 
-        } else if (stateId === 'turn_3_life_context') {
+        } else if (
+          stateId === 'turn_3_life_context' ||
+          stateId === 'turn_3_life_context_support' ||
+          stateId === 'turn_3_life_context_growth'
+        ) {
           // Stage1 life context — fetch stage2 chips here for 3-tap flow
           draft.stage1_choice = p.chip_id || 'self';
           draft.life_context = p.chip_id || null;

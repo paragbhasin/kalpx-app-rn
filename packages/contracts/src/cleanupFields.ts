@@ -120,4 +120,5 @@ export const GUARDED_ACTIONS = new Set([
   'info_start_click',
   'try_another_way',
   'trigger_still_feeling',
+  'onboarding_turn_response',
 ]);

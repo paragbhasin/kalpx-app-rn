@@ -6846,6 +6846,79 @@ export const WelcomeOnboardingContainer = {
       ],
     },
 
+    // P0 fix: Support lane Stage 0.5 — what feels heaviest
+    turn_3_life_context_support: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "headline",
+          content: "What part of life feels heaviest right now?",
+          style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
+        },
+        {
+          type: "subtext",
+          content: "Pick what feels closest.",
+          variant: "multi_line",
+        },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn3_life_context",
+          mitra_message: "",
+          reply_chips: [
+            { id: "work_feels_heavy",              label: "Work feels heavy",                   style: "secondary" },
+            { id: "things_feel_difficult_at_home", label: "Relationships feel heavy",            style: "secondary" },
+            { id: "something_feels_off_inside",    label: "I feel unsettled within myself",      style: "secondary" },
+            { id: "my_health_feels_off",           label: "Health or energy feels difficult",    style: "secondary" },
+            { id: "money_is_stressing_me",         label: "Money or security feels stressful",   style: "secondary" },
+            { id: "my_path_feels_unclear",         label: "I feel unclear about direction",      style: "secondary" },
+            { id: "exams_feel_overwhelming",       label: "Studies or exams feel stressful",     style: "secondary" },
+            { id: "daily_life_feels_hard",         label: "Daily life feels hard",               style: "secondary" },
+            { id: "spiritual_life_feels_distant",  label: "Spiritual life feels distant",        style: "secondary" },
+          ],
+          open_input: { enabled: false },
+          on_response: _onResp,
+        },
+      ],
+    },
+
+    // P0 fix: Growth lane Stage 0.5 — what to strengthen (current backend-supported set)
+    turn_3_life_context_growth: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "headline",
+          content: "What do you want to strengthen?",
+          style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
+        },
+        {
+          type: "subtext",
+          content: "Pick what feels most alive right now.",
+          variant: "multi_line",
+        },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn3_life_context",
+          mitra_message: "",
+          reply_chips: [
+            { id: "work_feels_better",          label: "Work with purpose",            style: "secondary" },
+            { id: "things_feel_better_at_home", label: "Deepen connection at home",    style: "secondary" },
+            { id: "inner_clarity",              label: "See more clearly",             style: "secondary" },
+            { id: "inner_steadiness",           label: "Carry steadiness outward",     style: "secondary" },
+            { id: "gratitude",                  label: "Deepen gratitude",             style: "secondary" },
+            { id: "transition_growth",          label: "Move through what's changing", style: "secondary" },
+            { id: "studies_exams",              label: "Grow through studies",         style: "secondary" },
+            { id: "strengthen_myself",          label: "Strengthen myself",            style: "secondary" },
+            { id: "care_for_my_energy",         label: "Care for my energy",           style: "secondary" },
+            { id: "build_trust_around_money",   label: "Build trust around money",     style: "secondary" },
+            { id: "build_daily_steadiness",     label: "Steadiness in daily life",     style: "secondary" },
+            { id: "return_to_devotion",         label: "Return to devotion",           style: "secondary" },
+          ],
+          open_input: { enabled: false },
+          on_response: _onResp,
+        },
+      ],
+    },
+
     // Stage 1 Support — kosha (where it lands)
     turn_3_support: {
       tone: { theme: "gold_dark", mood: "reflective" },

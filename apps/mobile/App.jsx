@@ -285,8 +285,16 @@ export default function App() {
 
   // Push Notification setup
   useEffect(() => {
-    // request push permissions
-    requestPushPermission();
+    // Request permission — if granted, immediately register device so the
+    // backend has the FCM token even before splash-hide registerDeviceToBackend runs.
+    requestPushPermission().then((token) => {
+      if (token) {
+        console.log("[NOTIF] ✅ Permission granted at boot — registering device...");
+        registerDeviceToBackend();
+      } else {
+        console.log("[NOTIF] ⚠️ Permission not granted at boot — device not registered yet");
+      }
+    });
 
     // listeners
     const unsubForeground = foregroundNotificationListener();

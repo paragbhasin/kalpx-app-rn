@@ -16,6 +16,7 @@ import {
   useIsFocused,
   useNavigation,
 } from "@react-navigation/native";
+import messaging from "@react-native-firebase/messaging";
 
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
@@ -34,6 +35,7 @@ import {
   View,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
+import NotificationPermissionModal from "../../components/NotificationPermissionModal";
 import FourDoorHomeContainer from "../../containers/FourDoorHomeContainer";
 import { stopRoomAmbientAudio } from "../../engine/roomAmbientAudio";
 import { useScreenStore } from "../../engine/useScreenBridge";
@@ -89,6 +91,7 @@ export default function Home() {
     (state) => state.updateHeaderHidden,
   );
 
+  const [showNotificationPopup, setShowNotificationPopup] = useState(false);
   const [mitraJourneyId, setMitraJourneyId] = useState<string | null>(null);
   const [hasPartialState, setHasPartialState] = useState(false);
   const [showInnerPathReentry, setShowInnerPathReentry] = useState(false);
@@ -128,6 +131,45 @@ export default function Home() {
       HOME_BACKGROUND,
       CONTINUE_BG,
     ]),
+  );
+
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log("[NOTIF] Home focused — checking permission status...");
+      messaging()
+        .hasPermission()
+        .then((authStatus) => {
+          console.log("[NOTIF] hasPermission() raw status:", authStatus);
+          const isGranted =
+            authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+            authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+          const isDenied = authStatus === messaging.AuthorizationStatus.DENIED;
+          const isNotDetermined =
+            authStatus === messaging.AuthorizationStatus.NOT_DETERMINED;
+
+          console.log(
+            `[NOTIF] isGranted=${isGranted} | isDenied=${isDenied} | isNotDetermined=${isNotDetermined}`,
+          );
+
+          setShowNotificationPopup(isDenied);
+          if (isDenied) {
+            console.log("[NOTIF] Permission DENIED → showing NotificationPermissionModal");
+          }
+
+          if (isGranted) {
+            console.log("[NOTIF] Permission GRANTED → calling registerDeviceToBackend...");
+            const { registerDeviceToBackend } = require("../../utils/registerDevice");
+            registerDeviceToBackend()
+              .then(() => console.log("[NOTIF] ✅ Device registered with backend"))
+              .catch((err: any) =>
+                console.log("[NOTIF] ❌ Device registration failed:", err?.message),
+              );
+          }
+        })
+        .catch((err: any) =>
+          console.log("[NOTIF] ❌ hasPermission() threw:", err?.message),
+        );
+    }, []),
   );
 
   useEffect(() => {
@@ -957,6 +999,11 @@ export default function Home() {
           </TouchableOpacity>
         </ScrollView>
       )}
+
+      <NotificationPermissionModal
+        visible={showNotificationPopup}
+        onClose={() => setShowNotificationPopup(false)}
+      />
     </SafeAreaView>
   );
 }

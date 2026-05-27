@@ -348,9 +348,9 @@ const styles = StyleSheet.create({
     height: HEADER_HEIGHT,
     justifyContent: "center",
   },
-  // Solid white — used when no background image is present
+  // Match KalpX logo header background so the back arrow blends in
   headerSolid: {
-    backgroundColor: "#FFF",
+    backgroundColor: "#F7F0DD",
   },
   // Back arrow + Header logo/dropdown in a single row
   headerRow: {

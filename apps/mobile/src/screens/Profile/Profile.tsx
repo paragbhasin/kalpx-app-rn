@@ -8,21 +8,26 @@ import {
   Alert,
   Linking,
   ScrollView,
+  StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
 import LogoutPopup from "../../components/LogoutPopup";
 import TextComponent from "../../components/TextComponent";
 import { useScrollContext } from "../../context/ScrollContext";
-import store, { RootState } from "../../store";
+import { RootState } from "../../store";
 import { performLogout } from "../../utils/logout";
 import unregisterDeviceFromBackend from "../../utils/unregisterDevice";
 import { deleteUserAccount } from "./actions";
 import Privacy from "./Privacy";
-import styles from "./styles";
+
+const BRAND = "#a67c52";
+const BG = "#fffaf5";
+const SECTION_LABEL = "#999";
+const DESTRUCTIVE = "#c0392b";
 
 const Profile = () => {
   const { handleScroll } = useScrollContext();
@@ -33,6 +38,12 @@ const Profile = () => {
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
+
+  const profileDetails = useSelector(
+    (state: RootState) => state.profileDetailsReducer?.data,
+  );
+  const profileName = profileDetails?.profile?.profile_name ?? "";
+  const avatarLetter = profileName?.[0]?.toUpperCase() ?? "";
 
   useEffect(() => {
     const checkLogin = async () => {
@@ -56,103 +67,135 @@ const Profile = () => {
       deleteUserAccount(
         { confirm_deletion: true, force: true },
         async (res) => {
-          console.log("res delete>>>>>>>>>>", JSON.stringify(res));
-          console.log("✅ Response full object >>>>>>>>>>>");
-          console.log("Status:", res.status);
-          console.log("Headers:", JSON.stringify(res.headers, null, 2));
-          console.log("Data:", JSON.stringify(res.data, null, 2));
           if (res.success) {
             await unregisterDeviceFromBackend();
             handleLogout();
-            Alert.alert("✅ Account deleted successfully!");
+            Alert.alert("Account deleted successfully!");
           } else {
-            Alert.alert("❌ Failed", res.error);
+            Alert.alert("Failed", res.error);
           }
         },
       ),
     );
   };
 
-  const loggedInItems = [
-    { key: "myProfile", icon: "person-outline", route: "ProfileDetails" },
-    {
-      key: "savedReflections",
-      icon: "bookmark-outline",
-      route: "RoomMemoryScreen",
-    },
-    {
-      key: "notificationPreferences",
-      icon: "notifications-outline",
-      route: "NotificationPreferences",
-    },
-    {
-      key: "reminders",
-      icon: "time-outline",
-      route: "Reminders",
-    },
-    { key: "language", icon: "globe-outline", route: "Language" },
-    {
-      key: "privacy",
-      icon: "key-outline",
-      action: () => Linking.openURL("https://kalpx.com/en/privacy"),
-    },
-    {
-      key: "indiaPrivacy",
-      icon: "flag-outline",
-      action: () => Linking.openURL("https://kalpx.com/en/privacy/india"),
-    },
-    {
-      key: "terms",
-      icon: "document-text-outline",
-      action: () => Linking.openURL("https://kalpx.com/en/terms"),
-    },
-    {
-      key: "dataDeletion",
-      icon: "trash-bin-outline",
-      action: () => Linking.openURL("https://kalpx.com/en/data-deletion"),
-    },
-    {
-      key: "logout",
-      icon: "log-out-outline",
-      action: () => setShowLogoutPopup(true),
-    },
-    {
-      key: "deleteAccount",
-      icon: "trash-outline",
-      action: () => setShowDeletePopup(true),
-    },
-  ];
-
-  const guestItems = [
-    {
-      key: "login",
-      icon: "log-in-outline",
-      route: "Login",
-    },
-    { key: "language", icon: "globe-outline", route: "Language" },
-    {
-      key: "privacy",
-      icon: "key-outline",
-      action: () => Linking.openURL("https://kalpx.com/en/privacy"),
-    },
-    {
-      key: "indiaPrivacy",
-      icon: "flag-outline",
-      action: () => Linking.openURL("https://kalpx.com/en/privacy/india"),
-    },
-    {
-      key: "terms",
-      icon: "document-text-outline",
-      action: () => Linking.openURL("https://kalpx.com/en/terms"),
-    },
-    {
-      key: "dataDeletion",
-      icon: "trash-bin-outline",
-      action: () => Linking.openURL("https://kalpx.com/en/data-deletion"),
-    },
-  ];
-
-  const menuItems = isLoggedIn ? [...loggedInItems] : [...guestItems];
+  const sections = isLoggedIn
+    ? [
+        {
+          title: "ACCOUNT",
+          items: [
+            {
+              key: "myProfile",
+              icon: "person-outline",
+              route: "ProfileDetails",
+            },
+            {
+              key: "savedReflections",
+              icon: "bookmark-outline",
+              route: "RoomMemoryScreen",
+            },
+          ],
+        },
+        {
+          title: "PREFERENCES",
+          items: [
+            {
+              key: "notificationPreferences",
+              icon: "notifications-outline",
+              route: "NotificationPreferences",
+            },
+            {
+              key: "reminders",
+              icon: "time-outline",
+              route: "Reminders",
+            },
+            { key: "language", icon: "globe-outline", route: "Language" },
+          ],
+        },
+        {
+          title: "LEGAL",
+          items: [
+            {
+              key: "privacy",
+              icon: "key-outline",
+              action: () => Linking.openURL("https://kalpx.com/en/privacy"),
+            },
+            {
+              key: "indiaPrivacy",
+              icon: "flag-outline",
+              action: () =>
+                Linking.openURL("https://kalpx.com/en/privacy/india"),
+            },
+            {
+              key: "terms",
+              icon: "document-text-outline",
+              action: () => Linking.openURL("https://kalpx.com/en/terms"),
+            },
+            {
+              key: "dataDeletion",
+              icon: "trash-bin-outline",
+              action: () =>
+                Linking.openURL("https://kalpx.com/en/data-deletion"),
+            },
+          ],
+        },
+        {
+          title: "ACCOUNT ACTIONS",
+          items: [
+            {
+              key: "logout",
+              icon: "log-out-outline",
+              action: () => setShowLogoutPopup(true),
+              destructive: true,
+            },
+            {
+              key: "deleteAccount",
+              icon: "trash-outline",
+              action: () => setShowDeletePopup(true),
+              destructive: true,
+            },
+          ],
+        },
+      ]
+    : [
+        {
+          title: "ACCESS",
+          items: [{ key: "login", icon: "log-in-outline", route: "Login" }],
+        },
+        {
+          title: "PREFERENCES",
+          items: [
+            { key: "language", icon: "globe-outline", route: "Language" },
+          ],
+        },
+        {
+          title: "LEGAL",
+          items: [
+            {
+              key: "privacy",
+              icon: "key-outline",
+              action: () => Linking.openURL("https://kalpx.com/en/privacy"),
+            },
+            {
+              key: "indiaPrivacy",
+              icon: "flag-outline",
+              action: () =>
+                Linking.openURL("https://kalpx.com/en/privacy/india"),
+            },
+            {
+              key: "terms",
+              icon: "document-text-outline",
+              action: () => Linking.openURL("https://kalpx.com/en/terms"),
+            },
+            {
+              key: "dataDeletion",
+              icon: "trash-bin-outline",
+              action: () =>
+                Linking.openURL("https://kalpx.com/en/data-deletion"),
+            },
+          ],
+        },
+      ];
 
   const getMenuLabel = (key: string) => {
     if (key === "notificationPreferences") {
@@ -168,117 +211,275 @@ const Profile = () => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#fffaf5" }}>
+    <View style={styles.root}>
       <ScrollView
-        style={styles.container}
         onScroll={handleScroll}
         scrollEventThrottle={16}
-        contentContainerStyle={{ paddingTop: 50, paddingBottom: 20 }}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
       >
-        {/* Header */}
-        <View style={[styles.header, { marginTop: -50 }]}>
-          <View style={{ width: 24 }} />
-          <TextComponent type="headerText" style={styles.headerText}>
-            {t("profile.title")}
+        {/* Hero */}
+        <View style={styles.hero}>
+          <View style={styles.avatarCircle}>
+            {avatarLetter ? (
+              <TextComponent type="headerText" style={styles.avatarLetter}>
+                {avatarLetter}
+              </TextComponent>
+            ) : (
+              <Ionicons name="person" size={36} color="#888" />
+            )}
+          </View>
+          <TextComponent type="headerText" style={styles.heroName}>
+            {profileName || t("profile.title", "Profile")}
           </TextComponent>
-          <View style={{ width: 24 }} />
+          {isLoggedIn && profileName ? (
+            <TextComponent type="bodyText" style={styles.heroSub}>
+              {t("profile.member", "KalpX Member")}
+            </TextComponent>
+          ) : null}
         </View>
-        <View style={styles.menu}>
-          {menuItems.map((item: any, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.menuItem}
-              // onPress={() => navigation.navigate(item.route)}
-              onPress={() =>
-                item.action ? item.action() : navigation.navigate(item.route)
-              }
-              testID={`profile_menu_${item.key}`}
-              accessibilityLabel={`profile_menu_${item.key}`}
-            >
-              <View style={styles.menuLeft}>
-                <Ionicons name={item.icon} size={20} color="#a67c52" />
-                <TextComponent type="headerSubBoldText" style={styles.menuText}>
-                  {getMenuLabel(item.key)}
-                </TextComponent>
+
+        {/* Grouped sections */}
+        <View style={styles.sectionsWrapper}>
+          {sections.map((section) => (
+            <View key={section.title} style={styles.section}>
+              <TextComponent type="bodyText" style={styles.sectionLabel}>
+                {section.title}
+              </TextComponent>
+              <View style={styles.sectionCard}>
+                {section.items.map((item: any, idx) => {
+                  const isLast = idx === section.items.length - 1;
+                  const color = item.destructive ? DESTRUCTIVE : BRAND;
+                  return (
+                    <TouchableOpacity
+                      key={item.key}
+                      style={[styles.row, !isLast && styles.rowBorder]}
+                      onPress={() =>
+                        item.action
+                          ? item.action()
+                          : navigation.navigate(item.route)
+                      }
+                      testID={`profile_menu_${item.key}`}
+                      accessibilityLabel={`profile_menu_${item.key}`}
+                    >
+                      <View style={styles.rowLeft}>
+                        <View
+                          style={[
+                            styles.iconBadge,
+                            { backgroundColor: color + "18" },
+                          ]}
+                        >
+                          <Ionicons name={item.icon} size={18} color={color} />
+                        </View>
+                        <TextComponent
+                          type="headerSubBoldText"
+                          style={[
+                            styles.rowLabel,
+                            item.destructive && { color: DESTRUCTIVE },
+                          ]}
+                        >
+                          {getMenuLabel(item.key)}
+                        </TextComponent>
+                      </View>
+                      <Ionicons
+                        name="chevron-forward"
+                        size={16}
+                        color={item.destructive ? DESTRUCTIVE + "99" : "#ccc"}
+                      />
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#888" />
-            </TouchableOpacity>
+            </View>
           ))}
+
+          {/* Follow us */}
+          <View style={styles.section}>
+            <TextComponent type="bodyText" style={styles.sectionLabel}>
+              FOLLOW US
+            </TextComponent>
+            <View style={[styles.sectionCard, styles.followCard]}>
+              <TouchableOpacity
+                style={styles.socialBtn}
+                onPress={() =>
+                  Linking.openURL("https://www.facebook.com/KalpxOfficial/")
+                }
+              >
+                <Ionicons name="logo-facebook" size={26} color="#4267B2" />
+                <TextComponent type="bodyText" style={styles.socialLabel}>
+                  Facebook
+                </TextComponent>
+              </TouchableOpacity>
+              <View style={styles.socialDivider} />
+              <TouchableOpacity
+                style={styles.socialBtn}
+                onPress={() =>
+                  Linking.openURL("https://www.instagram.com/kalpxofficial")
+                }
+              >
+                <Ionicons name="logo-instagram" size={26} color="#C13584" />
+                <TextComponent type="bodyText" style={styles.socialLabel}>
+                  Instagram
+                </TextComponent>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-        <LogoutPopup
-          visible={showLogoutPopup}
-          headerText={t("profile.menu.logout")}
-          subText={t(
-            "profile.menu.logoutConfirm",
-            "Are you sure you want to log out of your account?",
-          )}
-          cancelText={t("common.cancel", "Cancel")}
-          confirmText={t("common.yes", "Yes")}
-          onCancel={() => setShowLogoutPopup(false)}
-          onConfirm={() => {
-            setShowLogoutPopup(false);
-            handleLogout();
-          }}
-          onClose={() => setShowLogoutPopup(false)}
-        />
-
-        <LogoutPopup
-          visible={showDeletePopup}
-          headerText={t("profile.menu.deleteAccount")}
-          subText={t(
-            "profile.menu.deleteAccountConfirm",
-            "This action is permanent. Do you really want to delete your account?",
-          )}
-          cancelText={t("common.cancel", "Cancel")}
-          confirmText={t("common.delete", "Delete")}
-          onCancel={() => setShowDeletePopup(false)}
-          onConfirm={() => {
-            setShowDeletePopup(false);
-            handleDelete();
-          }}
-          onClose={() => setShowDeletePopup(false)}
-        />
-
-        {showPrivacy && <Privacy />}
       </ScrollView>
-      {/* Follow Us Section */}
-      <View
-        style={{
-          marginBottom: 50,
-          alignItems: "center",
-          backgroundColor: "#fffaf5",
+
+      <LogoutPopup
+        visible={showLogoutPopup}
+        headerText={t("profile.menu.logout")}
+        subText={t(
+          "profile.menu.logoutConfirm",
+          "Are you sure you want to log out of your account?",
+        )}
+        cancelText={t("common.cancel", "Cancel")}
+        confirmText={t("common.yes", "Yes")}
+        onCancel={() => setShowLogoutPopup(false)}
+        onConfirm={() => {
+          setShowLogoutPopup(false);
+          handleLogout();
         }}
-      >
-        <View style={{ flexDirection: "row", gap: 25, alignItems: "center" }}>
-          <TextComponent
-            type="streakSadanaText"
-            style={{ fontSize: 18, color: "#000" }}
-          >
-            {t("profile.followUs", "Follow us")}
-          </TextComponent>
+        onClose={() => setShowLogoutPopup(false)}
+      />
 
-          {/* Facebook */}
-          <TouchableOpacity
-            onPress={() =>
-              Linking.openURL("https://www.facebook.com/KalpxOfficial/")
-            }
-          >
-            <Ionicons name="logo-facebook" size={34} color="#4267B2" />
-          </TouchableOpacity>
+      <LogoutPopup
+        visible={showDeletePopup}
+        headerText={t("profile.menu.deleteAccount")}
+        subText={t(
+          "profile.menu.deleteAccountConfirm",
+          "This action is permanent. Do you really want to delete your account?",
+        )}
+        cancelText={t("common.cancel", "Cancel")}
+        confirmText={t("common.delete", "Delete")}
+        onCancel={() => setShowDeletePopup(false)}
+        onConfirm={() => {
+          setShowDeletePopup(false);
+          handleDelete();
+        }}
+        onClose={() => setShowDeletePopup(false)}
+      />
 
-          {/* Instagram */}
-          <TouchableOpacity
-            onPress={() =>
-              Linking.openURL("https://www.instagram.com/kalpxofficial")
-            }
-          >
-            <Ionicons name="logo-instagram" size={34} color="#C13584" />
-          </TouchableOpacity>
-        </View>
-      </View>
+      {showPrivacy && <Privacy />}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: BG,
+  },
+  scrollContent: {
+    paddingBottom: 110,
+  },
+  hero: {
+    paddingTop: 40,
+    paddingBottom: 32,
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#e8e8e8",
+  },
+  avatarCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#f2f2f2",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+  },
+  avatarLetter: {
+    fontSize: 32,
+    color: "#333",
+  },
+  heroName: {
+    color: "#1a1a1a",
+    fontSize: 20,
+    letterSpacing: 0.3,
+  },
+  heroSub: {
+    color: "#888",
+    fontSize: 13,
+    marginTop: 4,
+  },
+  sectionsWrapper: {
+    paddingHorizontal: 16,
+    paddingTop: 24,
+    gap: 20,
+  },
+  section: {
+    gap: 6,
+  },
+  sectionLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: SECTION_LABEL,
+    letterSpacing: 1,
+    paddingLeft: 4,
+  },
+  sectionCard: {
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 13,
+    paddingHorizontal: 16,
+  },
+  rowBorder: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#f0ede8",
+  },
+  rowLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  iconBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: 9,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  rowLabel: {
+    fontSize: 15,
+    color: "#222",
+  },
+  followCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+    gap: 0,
+  },
+  socialBtn: {
+    flex: 1,
+    alignItems: "center",
+    gap: 6,
+  },
+  socialDivider: {
+    width: StyleSheet.hairlineWidth,
+    height: 40,
+    backgroundColor: "#e8e2da",
+  },
+  socialLabel: {
+    fontSize: 12,
+    color: "#666",
+  },
+});
 
 export default Profile;

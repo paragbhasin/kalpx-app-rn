@@ -5,7 +5,10 @@ import moment from "moment";
 
 // Supported locales at startup. To re-enable a language: add its code here,
 // restore its imports and resource block below, and filter Language.tsx list.
-const ENABLED_LOCALES = ["en"];
+const ENABLED_LOCALES = ["en", "hi"];
+
+// Hindi imports
+import hi from "./locales/hi/hi.json";
 
 // English imports
 import {
@@ -152,6 +155,7 @@ i18n.use(initReactI18next).init({
   debug: true,
   resources: {
     en: { translation: translations.en },
+    hi: { translation: hi },
   },
   interpolation: {
     escapeValue: false,

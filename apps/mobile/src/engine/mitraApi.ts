@@ -374,6 +374,7 @@ export async function mitraFetchOnboardingChips(params: {
   guidance_mode: string;
   stage1_choice?: string;
   stage2_choice?: string;
+  locale?: string;
 }): Promise<any> {
   try {
     console.log("[MITRA] Fetch Chips Payload:", params);
@@ -403,6 +404,7 @@ export async function mitraCompleteOnboarding(payload: {
   guidance_mode: string;
   life_context?: string | null;
   freeforms: Record<string, string | null>;
+  locale?: string;
 }): Promise<any> {
   try {
     console.log("[MITRA] Complete Onboarding Payload:", payload);

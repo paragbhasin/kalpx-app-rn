@@ -16,7 +16,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import { rfs, rhPad, TABLET_MAX_CARD_WIDTH, TABLET_MAX_CONTENT_WIDTH } from "../../utils/responsive";
+import { rfs, rhPad, sfs, TABLET_MAX_CARD_WIDTH, TABLET_MAX_CONTENT_WIDTH } from "../../utils/responsive";
 import { useSelector } from "react-redux";
 const M3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/door_rhythm.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const Mp2Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/door_chant.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
@@ -244,10 +244,10 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontFamily: Fonts.serif.bold,
-    fontSize: 32,
+    fontSize: sfs(32),
     color: "#432104",
     textAlign: "center",
-    lineHeight: 40,
+    lineHeight: sfs(40),
   },
   divider: {
     flexDirection: "row",
@@ -267,9 +267,9 @@ const styles = StyleSheet.create({
   },
   subtext: {
     fontFamily: Fonts.sans.regular,
-    fontSize: 14,
+    fontSize: sfs(14),
     color: "rgba(67, 33, 4, 0.72)",
-    lineHeight: 26,
+    lineHeight: sfs(26),
     textAlign: "center",
   },
   options: {
@@ -305,16 +305,16 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontFamily: Fonts.serif.bold,
-    fontSize: 18,
+    fontSize: sfs(18),
     color: "#432104",
-    lineHeight: 24,
+    lineHeight: sfs(24),
     marginBottom: 6,
   },
   cardBody: {
     fontFamily: Fonts.sans.regular,
-    fontSize: 13,
+    fontSize: sfs(13),
     color: "rgba(67, 33, 4, 0.76)",
-    lineHeight: 20,
+    lineHeight: sfs(20),
     marginBottom: 12,
   },
   ctaRow: {
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   chipText: {
-    fontSize: 12,
+    fontSize: sfs(12),
     fontWeight: "700",
   },
   ctaText: {
@@ -333,8 +333,8 @@ const styles = StyleSheet.create({
     paddingBottom: 2,
   },
   arrow: {
-    fontSize: 22,
-    lineHeight: 22,
+    fontSize: sfs(22),
+    lineHeight: sfs(22),
     fontWeight: "500",
   },
 });

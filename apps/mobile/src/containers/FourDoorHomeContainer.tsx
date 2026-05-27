@@ -53,7 +53,7 @@ import { setHomeData } from "../store/doorSlice";
 import { Fonts } from "../theme/fonts";
 import { TimePickerModal } from "../components/TimePickerModal";
 import { platformShadow } from "../theme/shadows";
-import { rfs, rhPad, rs, TABLET_MAX_CARD_WIDTH } from "../utils/responsive";
+import { rfs, rhPad, rs, sfs, TABLET_MAX_CARD_WIDTH } from "../utils/responsive";
 
 type FeelingOption = "Agitated" | "Drained" | "Steady" | "Open";
 
@@ -64,7 +64,7 @@ const FEELING_OPTIONS: FeelingOption[] = [
   "Open",
 ];
 
-const FOUR_DOOR_BG = "#FBF4EF";
+const FOUR_DOOR_BG = require("../../assets/beige_bg.webp");
 const HERO_DAY = require("../../assets/imgsun.webp");
 const HERO_NIGHT = require("../../assets/night-home.webp");
 const SHELL_HEADER_HEIGHT = 45;
@@ -125,20 +125,20 @@ function DoorCard({
       style={[
         styles.doorCard,
         highlighted && styles.doorCardHighlighted,
-        isTablet && { maxWidth: TABLET_MAX_CARD_WIDTH, alignSelf: 'center', width: '100%' },
+        isTablet && { maxWidth: TABLET_MAX_CARD_WIDTH, alignSelf: 'center', width: '100%', paddingVertical: 20, paddingHorizontal: 22 },
       ]}
     >
-      <View style={styles.doorIconWrap}>
+      <View style={[styles.doorIconWrap, isTablet && { width: 60, height: 60 }]}>
         <Icon width={iconSize} height={iconSize} />
       </View>
       <View style={styles.doorBody}>
-        <Text style={[styles.doorLabel, { fontSize: rfs(18, screenWidth) }]}>{label}</Text>
-        {!!subtitle && <Text style={[styles.doorSubtitle, { fontSize: rfs(14, screenWidth) }]}>{subtitle}</Text>}
+        <Text style={[styles.doorLabel, { fontSize: rs(18, 22, screenWidth) }]}>{label}</Text>
+        {!!subtitle && <Text style={[styles.doorSubtitle, { fontSize: rs(14, 17, screenWidth) }]}>{subtitle}</Text>}
         {!!orientationLine && (
           <Text style={styles.doorOrientationLine}>{orientationLine}</Text>
         )}
       </View>
-      <Text style={styles.doorArrow}>→</Text>
+      <Text style={[styles.doorArrow, isTablet && { fontSize: 30, lineHeight: 30 }]}>→</Text>
     </TouchableOpacity>
   );
 }
@@ -521,7 +521,7 @@ export default function FourDoorHomeContainer({
     <View style={styles.screen}>
       <ScrollView
         style={styles.root}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }, isTablet && { alignItems: 'center' }]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }, isTablet && { alignItems: 'center', paddingBottom: insets.bottom + 60 }]}
         showsVerticalScrollIndicator={false}
       >
         <View
@@ -536,7 +536,7 @@ export default function FourDoorHomeContainer({
           <ImageBackground
             source={greetingVisual.image}
             resizeMode="cover"
-            style={styles.heroImage}
+            style={[styles.heroImage, isTablet && { minHeight: 420 }]}
           >
             <View
               style={[
@@ -556,7 +556,7 @@ export default function FourDoorHomeContainer({
                     <Text
                       style={[
                         styles.heroHeadline,
-                        { color: greetingVisual.textColor, fontSize: rfs(22, width) },
+                        { color: greetingVisual.textColor, fontSize: rs(22, 32, width) },
                       ]}
                       numberOfLines={2}
                     >
@@ -566,7 +566,7 @@ export default function FourDoorHomeContainer({
                       <Text
                         style={[
                           styles.heroSubtext,
-                          { color: greetingVisual.textColor, fontSize: rfs(16, width) },
+                          { color: greetingVisual.textColor, fontSize: rs(16, 22, width) },
                         ]}
                       >
                         {greetingSubtext}
@@ -584,7 +584,7 @@ export default function FourDoorHomeContainer({
           </ImageBackground>
         </View>
 
-        <View style={[styles.content, isTablet && { paddingHorizontal: rhPad(16, width), width: '100%' }]}>
+        <View style={[styles.content, isTablet && { paddingHorizontal: rhPad(16, width), width: '100%', gap: 20, paddingTop: 16, paddingBottom: 32 }]}>
           {!!error && <Text style={styles.inlineError}>{error}</Text>}
 
           <DoorCard
@@ -621,11 +621,11 @@ export default function FourDoorHomeContainer({
             screenWidth={width}
           />
 
-          <View style={[styles.checkinCard, isTablet && { maxWidth: TABLET_MAX_CARD_WIDTH, alignSelf: 'center', width: '100%' }]}>
+          <View style={[styles.checkinCard, isTablet && { maxWidth: TABLET_MAX_CARD_WIDTH, alignSelf: 'center', width: '100%', paddingVertical: 24, paddingHorizontal: 24 }]}>
             {windowActive ? (
               <>
                 <View style={styles.checkinHeaderRow}>
-                  <Text style={[styles.checkinTitle, { fontSize: rfs(18, width) }]}>
+                  <Text style={[styles.checkinTitle, { fontSize: rs(18, 24, width) }]}>
                     {(acw?.prana_label as QuickCheckinPranaLabel) ||
                       "How are you landing?"}
                   </Text>
@@ -703,8 +703,8 @@ export default function FourDoorHomeContainer({
               </>
             ) : (
               <>
-                <Text style={[styles.checkinTitle, { fontSize: rfs(18, width) }]}>How are you landing?</Text>
-                <Text style={[styles.checkinSubtitle, { fontSize: rfs(14, width) }]}>
+                <Text style={[styles.checkinTitle, { fontSize: rs(18, 24, width) }]}>How are you landing?</Text>
+                <Text style={[styles.checkinSubtitle, { fontSize: rs(14, 18, width) }]}>
                   One tap. Mitra meets you where you are.
                 </Text>
                 <View style={styles.feelingGrid}>
@@ -721,13 +721,14 @@ export default function FourDoorHomeContainer({
                           styles.feelingChip,
                           isSelected && styles.feelingChipSelected,
                           feelingLoading && styles.feelingChipDisabled,
+                          isTablet && { paddingVertical: 14 },
                         ]}
                       >
                         <View style={styles.feelingChipContent}>
                           <Text
                             style={[
                               styles.feelingChipText,
-                              { fontSize: rfs(14, width) },
+                              { fontSize: rs(14, 18, width) },
                               isSelected && styles.feelingChipTextSelected,
                             ]}
                           >
@@ -838,7 +839,7 @@ export default function FourDoorHomeContainer({
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: FOUR_DOOR_BG,
+    backgroundColor: "transparent",
   },
   screenBackground: {
     opacity: 1,
@@ -855,7 +856,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   errorText: {
-    fontSize: 16,
+    fontSize: sfs(16),
     color: "#6b5a45",
     textAlign: "center",
     marginBottom: 16,
@@ -869,7 +870,7 @@ const styles = StyleSheet.create({
   },
   retryButtonText: {
     color: "#fff",
-    fontSize: 15,
+    fontSize: sfs(15),
     fontFamily: Fonts.sans.semiBold,
   },
   heroWrap: {
@@ -895,13 +896,11 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   heroHeadline: {
-    fontSize: 22,
-
+    fontSize: sfs(22),
     fontFamily: Fonts.serif.bold,
   },
   heroSubtext: {
-    fontSize: 16,
-
+    fontSize: sfs(16),
     fontFamily: Fonts.serif.regular,
     maxWidth: "92%",
   },
@@ -918,7 +917,7 @@ const styles = StyleSheet.create({
   },
   heroDividerIcon: {
     color: "#C9A84C",
-    fontSize: 14,
+    fontSize: sfs(14),
     marginHorizontal: 10,
   },
   content: {
@@ -928,7 +927,7 @@ const styles = StyleSheet.create({
   inlineError: {
     color: "#c0392b",
     textAlign: "center",
-    fontSize: 13,
+    fontSize: sfs(13),
     fontFamily: Fonts.sans.regular,
     marginBottom: 4,
   },
@@ -958,15 +957,15 @@ const styles = StyleSheet.create({
   },
   doorLabel: {
     color: "#432104",
-    fontSize: 18,
-    lineHeight: 22,
+    fontSize: sfs(18),
+    lineHeight: sfs(22),
     fontFamily: Fonts.serif.bold,
     marginBottom: 4,
   },
   doorSubtitle: {
     color: "rgba(67,33,4,0.62)",
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: sfs(14),
+    lineHeight: sfs(20),
     fontFamily: Fonts.sans.regular,
   },
   doorCardHighlighted: {
@@ -975,16 +974,16 @@ const styles = StyleSheet.create({
   },
   doorOrientationLine: {
     color: "rgba(67,33,4,0.38)",
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: sfs(12),
+    lineHeight: sfs(16),
     fontFamily: Fonts.sans.regular,
     fontStyle: "italic",
     marginTop: 3,
   },
   doorArrow: {
     color: "#C9A84C",
-    fontSize: 24,
-    lineHeight: 24,
+    fontSize: sfs(24),
+    lineHeight: sfs(24),
     opacity: 0.7,
     marginLeft: 8,
   },
@@ -1006,8 +1005,8 @@ const styles = StyleSheet.create({
   },
   checkinTitle: {
     color: "#432104",
-    fontSize: 18,
-    lineHeight: 24,
+    fontSize: sfs(18),
+    lineHeight: sfs(24),
     fontFamily: Fonts.serif.bold,
     flex: 1,
   },
@@ -1017,22 +1016,22 @@ const styles = StyleSheet.create({
   },
   dismissButtonText: {
     color: "rgba(67,33,4,0.45)",
-    fontSize: 24,
-    lineHeight: 24,
+    fontSize: sfs(24),
+    lineHeight: sfs(24),
     fontFamily: Fonts.sans.regular,
   },
   checkinAcknowledgment: {
     color: "rgba(67,33,4,0.8)",
-    fontSize: 15,
-    lineHeight: 24,
+    fontSize: sfs(15),
+    lineHeight: sfs(24),
     fontFamily: Fonts.serif.regular,
     fontStyle: "italic",
     marginBottom: 12,
   },
   suggestionHeader: {
     color: "rgba(67,33,4,0.5)",
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: sfs(13),
+    lineHeight: sfs(18),
     fontFamily: Fonts.sans.regular,
     marginBottom: 8,
   },
@@ -1047,14 +1046,14 @@ const styles = StyleSheet.create({
   },
   suggestionButtonText: {
     color: "#432104",
-    fontSize: 15,
-    lineHeight: 20,
+    fontSize: sfs(15),
+    lineHeight: sfs(20),
     fontFamily: Fonts.serif.bold,
   },
   boundaryText: {
     color: "rgba(67,33,4,0.5)",
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: sfs(13),
+    lineHeight: sfs(18),
     fontFamily: Fonts.sans.regular,
     textAlign: "center",
     marginTop: 10,
@@ -1064,14 +1063,14 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
   softCtaLink: {
-    fontSize: 13,
+    fontSize: sfs(13),
     color: "#8A651B",
     textDecorationLine: "underline",
   },
   checkinSubtitle: {
     color: "rgba(67,33,4,0.62)",
-    fontSize: 14,
-    lineHeight: 21,
+    fontSize: sfs(14),
+    lineHeight: sfs(21),
     fontFamily: Fonts.sans.regular,
     marginTop: 4,
     marginBottom: 14,
@@ -1108,8 +1107,8 @@ const styles = StyleSheet.create({
   },
   feelingChipText: {
     color: "#432104",
-    fontSize: 14,
-    lineHeight: 18,
+    fontSize: sfs(14),
+    lineHeight: sfs(18),
     fontFamily: Fonts.sans.medium,
   },
   feelingChipLoader: {

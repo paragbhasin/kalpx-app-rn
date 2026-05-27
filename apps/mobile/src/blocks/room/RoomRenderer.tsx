@@ -17,6 +17,7 @@ import React from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
+import { sfs } from "../../utils/responsive";
 import RoomActionList from "./RoomActionList";
 import RoomOpeningExperience from "./RoomOpeningExperience";
 import RoomPrincipleBanner from "./RoomPrincipleBanner";
@@ -123,14 +124,14 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   roomName: {
-    fontSize: 18,
+    fontSize: sfs(18),
     color: "#432104",
     fontWeight: "600",
     textAlign: "center",
     marginTop: 10,
   },
   lifeContext: {
-    fontSize: 12,
+    fontSize: sfs(12),
     color: "#9f9f9f",
     marginTop: 2,
     textAlign: "center",
@@ -150,7 +151,7 @@ const styles = StyleSheet.create({
   },
   sanatanInsight: {
     flex: 1,
-    fontSize: 12,
+    fontSize: sfs(12),
     color: "#8A7968",
     fontFamily: Fonts.sans.medium,
 
@@ -158,7 +159,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   whyThisRoom: {
-    fontSize: 12,
+    fontSize: sfs(12),
     color: "#9f9f9f",
     marginTop: 6,
     lineHeight: 17,
@@ -166,7 +167,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   situationAck: {
-    fontSize: 14,
+    fontSize: sfs(14),
     color: "#6B5E4E",
     fontStyle: "italic",
     textAlign: "center",
@@ -176,7 +177,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   roomPurpose: {
-    fontSize: 13,
+    fontSize: sfs(13),
     color: "#8A7968",
     textAlign: "center",
     marginTop: 4,
@@ -185,7 +186,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   bridgeLine: {
-    fontSize: 13,
+    fontSize: sfs(13),
     color: "#8A7968",
     fontStyle: "italic",
     textAlign: "center",

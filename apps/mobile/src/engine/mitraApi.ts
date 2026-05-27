@@ -1292,8 +1292,11 @@ export async function mitraJourneyHome(params: {
 
 export function mitraJourneyDailyView(
   etag: string | null = null,
+  locale?: string,
 ): Promise<V3GetResult<V3DailyViewEnvelope>> {
-  return v3Get<V3DailyViewEnvelope>("mitra/v3/journey/daily-view/", etag);
+  const params: Record<string, string> = { tz: getTz() };
+  if (locale) params.locale = locale;
+  return v3Get<V3DailyViewEnvelope>("mitra/v3/journey/daily-view/", etag, params);
 }
 
 export function mitraJourneyDay7View(

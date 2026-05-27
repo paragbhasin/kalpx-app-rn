@@ -18,6 +18,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { ChevronDown, ChevronUp } from "lucide-react-native";
 import Svg, { Circle, Path } from "react-native-svg";
+import { useTranslation } from "react-i18next";
 const RudrakshSvg = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/rudraksh.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import AudioPlayerBlock from "../AudioPlayerBlock";
 import { stopRoomAmbientAudio } from "../../engine/roomAmbientAudio";
@@ -173,6 +174,7 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   addLoading,
   onAddToPractice,
 }) => {
+  const { t } = useTranslation();
   const [chantCount, setChantCount] = useState(0);
   const [selectedTarget, setSelectedTarget] = useState(initialReps || 27);
   const [meaningExpanded, setMeaningExpanded] = useState(false);
@@ -429,7 +431,7 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
         <View style={styles.collapsibleSectionsCombined}>
           {hasContent(item.meaning) || hasContent(item.summary) ? (
             <CollapsibleCard
-              label="Meaning"
+              label={t("quickReset.meaning")}
               expanded={meaningExpanded}
               onToggle={() => setMeaningExpanded(!meaningExpanded)}
             >
@@ -441,7 +443,7 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
 
           {hasContent(item.essence) || hasContent(item.insight) ? (
             <CollapsibleCard
-              label="Essence"
+              label={t("quickReset.essence")}
               expanded={essenceExpanded}
               onToggle={() => setEssenceExpanded(!essenceExpanded)}
             >

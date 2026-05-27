@@ -22,6 +22,7 @@
  */
 
 import { useTranslation } from "react-i18next";
+import i18n from "../../config/i18n";
 import { Ionicons } from "@expo/vector-icons";
 import type {
   JourneyTriadReminders,
@@ -139,7 +140,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
         return;
       }
       // P0-B: re-fetch daily view after returning from runner so completed_today renders correctly
-      mitraJourneyDailyView(null).then((result) => {
+      mitraJourneyDailyView(null, i18n.language || "en").then((result) => {
         if (!result?.envelope) return;
         const flat = ingestDailyView(result.envelope);
         for (const [k, v] of Object.entries(flat)) {
@@ -406,7 +407,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
               "[InnerPathScreen] entry-view payload absent or mismatched — falling back to daily-view call",
             );
           }
-          const dailyResult = await mitraJourneyDailyView(null);
+          const dailyResult = await mitraJourneyDailyView(null, i18n.language || "en");
           if (cancelled) return;
           if (dailyResult.notModified || !dailyResult.envelope) {
             setError(t("innerPath.pathPreparing"));

@@ -35,6 +35,7 @@ import {
   View,
 } from "react-native";
 import { useTranslation } from "react-i18next";
+import i18n from "../../config/i18n";
 import { useDispatch, useSelector } from "react-redux";
 import NotificationPermissionModal from "../../components/NotificationPermissionModal";
 import FourDoorHomeContainer from "../../containers/FourDoorHomeContainer";
@@ -562,7 +563,7 @@ export default function Home() {
           try {
             const { mitraJourneyDailyView } = require("../../engine/mitraApi");
             const { ingestDailyView } = require("../../engine/v3Ingest");
-            const result = await mitraJourneyDailyView(null);
+            const result = await mitraJourneyDailyView(null, i18n.language || "en");
             if (result?.envelope) {
               for (const [k, v] of Object.entries(
                 ingestDailyView(result.envelope),

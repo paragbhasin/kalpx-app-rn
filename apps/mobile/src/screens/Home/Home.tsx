@@ -34,6 +34,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import NotificationPermissionModal from "../../components/NotificationPermissionModal";
 import FourDoorHomeContainer from "../../containers/FourDoorHomeContainer";
@@ -72,6 +73,7 @@ const FEATURE_ITEMS = [
 export const collapseControl = { avoidCollapse: false };
 
 export default function Home() {
+  const { t } = useTranslation();
   const navigation: any = useNavigation();
   const isFocused = useIsFocused();
   const tabBarHeight = useBottomTabBarHeight();
@@ -941,19 +943,19 @@ export default function Home() {
           {/* ── Hero Section ── */}
           <View style={styles.heroSection}>
             <Text style={styles.heroQuote}>
-              &quot;In this path, no effort is ever lost.&quot;
+              {t("mitraHome.heroQuote")}
             </Text>
-            <Text style={styles.heroSource}>— Bhagavad Gita 2.40</Text>
+            <Text style={styles.heroSource}>{t("mitraHome.heroSource")}</Text>
             <View style={styles.turnOneHeadlineDivider}>
               <View style={styles.turnOneDividerLine} />
               <Ionicons name="diamond" size={10} color="#c7a258" />
               <View style={styles.turnOneDividerLine} />
             </View>
             <Text style={[styles.heroTitle, { marginTop: 20 }]}>
-              KalpX Mitra
+              {t("mitraHome.heroTitle")}
             </Text>
             <Text style={[styles.companionTitle, { marginTop: 5 }]}>
-              Your daily companion for life
+              {t("mitraHome.companionTitle")}
             </Text>
           </View>
 
@@ -962,11 +964,10 @@ export default function Home() {
           {/* ── Companion Preview ── */}
           <View style={styles.companionSection}>
             <Text style={styles.companionDesc}>
-              Grounded in timeless Sanatan wisdom.
+              {t("mitraHome.companionDesc1")}
             </Text>
             <Text style={styles.companionDesc}>
-              support what you carry, strengthen what is growing, and walk one
-              day at a time
+              {t("mitraHome.companionDesc2")}
             </Text>
           </View>
 
@@ -994,7 +995,7 @@ export default function Home() {
               end={{ x: 1, y: 0 }}
               style={styles.ctaButton}
             >
-              <Text style={styles.ctaText}>Begin with Mitra →</Text>
+              <Text style={styles.ctaText}>{t("mitraHome.beginCta")}</Text>
             </LinearGradient>
           </TouchableOpacity>
         </ScrollView>

@@ -1849,5 +1849,14 @@
     "authDescription": "Create an account",
     "authBenefit1": "Save your practices",
     "authBenefit2": "Track progress"
+  },
+  "mitraHome": {
+    "heroQuote": "\"In this path, no effort is ever lost.\"",
+    "heroSource": "— Bhagavad Gita 2.40",
+    "heroTitle": "KalpX Mitra",
+    "companionTitle": "Your daily companion for life",
+    "companionDesc1": "Grounded in timeless Sanatan wisdom.",
+    "companionDesc2": "support what you carry, strengthen what is growing, and walk one day at a time",
+    "beginCta": "Begin with Mitra →"
   }
 }

@@ -33,6 +33,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
@@ -52,6 +53,7 @@ import { setHomeData } from "../store/doorSlice";
 import { Fonts } from "../theme/fonts";
 import { TimePickerModal } from "../components/TimePickerModal";
 import { platformShadow } from "../theme/shadows";
+import { rfs, rhPad, rs, TABLET_MAX_CARD_WIDTH } from "../utils/responsive";
 
 type FeelingOption = "Agitated" | "Drained" | "Steady" | "Open";
 
@@ -104,6 +106,7 @@ function DoorCard({
   orientationLine,
   highlighted,
   onPress,
+  screenWidth,
 }: {
   Icon: any;
   label: string;
@@ -111,7 +114,10 @@ function DoorCard({
   orientationLine?: string | null;
   highlighted?: boolean;
   onPress: () => void;
+  screenWidth: number;
 }) {
+  const isTablet = screenWidth >= 768;
+  const iconSize = rs(40, 48, screenWidth);
   return (
     <TouchableOpacity
       activeOpacity={0.86}
@@ -119,14 +125,15 @@ function DoorCard({
       style={[
         styles.doorCard,
         highlighted && styles.doorCardHighlighted,
+        isTablet && { maxWidth: TABLET_MAX_CARD_WIDTH, alignSelf: 'center', width: '100%' },
       ]}
     >
       <View style={styles.doorIconWrap}>
-        <Icon width={40} height={40} />
+        <Icon width={iconSize} height={iconSize} />
       </View>
       <View style={styles.doorBody}>
-        <Text style={styles.doorLabel}>{label}</Text>
-        {!!subtitle && <Text style={styles.doorSubtitle}>{subtitle}</Text>}
+        <Text style={[styles.doorLabel, { fontSize: rfs(18, screenWidth) }]}>{label}</Text>
+        {!!subtitle && <Text style={[styles.doorSubtitle, { fontSize: rfs(14, screenWidth) }]}>{subtitle}</Text>}
         {!!orientationLine && (
           <Text style={styles.doorOrientationLine}>{orientationLine}</Text>
         )}
@@ -143,6 +150,8 @@ export default function FourDoorHomeContainer({
   userName?: string;
   forceInnerPathReentry?: boolean;
 }) {
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
@@ -512,7 +521,7 @@ export default function FourDoorHomeContainer({
     <View style={styles.screen}>
       <ScrollView
         style={styles.root}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }, isTablet && { alignItems: 'center' }]}
         showsVerticalScrollIndicator={false}
       >
         <View
@@ -521,6 +530,7 @@ export default function FourDoorHomeContainer({
             {
               marginTop: -SHELL_HEADER_HEIGHT,
             },
+            isTablet && { width: '100%' },
           ]}
         >
           <ImageBackground
@@ -537,6 +547,7 @@ export default function FourDoorHomeContainer({
                     92,
                   ),
                 },
+                isTablet && { paddingHorizontal: rhPad(18, width) },
               ]}
             >
               <View style={styles.heroCopy}>
@@ -545,7 +556,7 @@ export default function FourDoorHomeContainer({
                     <Text
                       style={[
                         styles.heroHeadline,
-                        { color: greetingVisual.textColor },
+                        { color: greetingVisual.textColor, fontSize: rfs(22, width) },
                       ]}
                       numberOfLines={2}
                     >
@@ -555,7 +566,7 @@ export default function FourDoorHomeContainer({
                       <Text
                         style={[
                           styles.heroSubtext,
-                          { color: greetingVisual.textColor },
+                          { color: greetingVisual.textColor, fontSize: rfs(16, width) },
                         ]}
                       >
                         {greetingSubtext}
@@ -573,7 +584,7 @@ export default function FourDoorHomeContainer({
           </ImageBackground>
         </View>
 
-        <View style={styles.content}>
+        <View style={[styles.content, isTablet && { paddingHorizontal: rhPad(16, width), width: '100%' }]}>
           {!!error && <Text style={styles.inlineError}>{error}</Text>}
 
           <DoorCard
@@ -582,6 +593,7 @@ export default function FourDoorHomeContainer({
             subtitle={rhythmSubtitle}
             orientationLine={seg === "new" && isFirstVisit ? "Shape the day with a simple rhythm." : null}
             onPress={() => void openMyRhythmSurface()}
+            screenWidth={width}
           />
           <DoorCard
             Icon={Mp3Icon}
@@ -590,6 +602,7 @@ export default function FourDoorHomeContainer({
             orientationLine={seg === "new" && isFirstVisit ? "Walk a 14-day path with Mitra beside you." : null}
             highlighted={seg === "rhythm_only"}
             onPress={openInnerPathSurface}
+            screenWidth={width}
           />
           <DoorCard
             Icon={Mp2Icon}
@@ -597,6 +610,7 @@ export default function FourDoorHomeContainer({
             subtitle={quickResetSubtitle}
             orientationLine={seg === "new" && isFirstVisit ? "Return through mantra, in a single moment." : null}
             onPress={() => void openQuickResetSurface()}
+            screenWidth={width}
           />
           <DoorCard
             Icon={Mp4Icon}
@@ -604,13 +618,14 @@ export default function FourDoorHomeContainer({
             subtitle={tellMitraSubtitle}
             orientationLine={seg === "new" && isFirstVisit ? "Share what is moving. Mitra will listen." : null}
             onPress={() => void openTellMitraSurface()}
+            screenWidth={width}
           />
 
-          <View style={styles.checkinCard}>
+          <View style={[styles.checkinCard, isTablet && { maxWidth: TABLET_MAX_CARD_WIDTH, alignSelf: 'center', width: '100%' }]}>
             {windowActive ? (
               <>
                 <View style={styles.checkinHeaderRow}>
-                  <Text style={styles.checkinTitle}>
+                  <Text style={[styles.checkinTitle, { fontSize: rfs(18, width) }]}>
                     {(acw?.prana_label as QuickCheckinPranaLabel) ||
                       "How are you landing?"}
                   </Text>
@@ -688,8 +703,8 @@ export default function FourDoorHomeContainer({
               </>
             ) : (
               <>
-                <Text style={styles.checkinTitle}>How are you landing?</Text>
-                <Text style={styles.checkinSubtitle}>
+                <Text style={[styles.checkinTitle, { fontSize: rfs(18, width) }]}>How are you landing?</Text>
+                <Text style={[styles.checkinSubtitle, { fontSize: rfs(14, width) }]}>
                   One tap. Mitra meets you where you are.
                 </Text>
                 <View style={styles.feelingGrid}>
@@ -712,6 +727,7 @@ export default function FourDoorHomeContainer({
                           <Text
                             style={[
                               styles.feelingChipText,
+                              { fontSize: rfs(14, width) },
                               isSelected && styles.feelingChipTextSelected,
                             ]}
                           >

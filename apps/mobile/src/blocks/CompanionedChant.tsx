@@ -11,9 +11,10 @@
  */
 
 import React, { useEffect, useRef } from "react";
-import { Animated, Easing, StyleSheet, Text, View } from "react-native";
+import { Animated, Easing, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { Fonts } from "../theme/fonts";
 import { useScreenStore } from "../engine/useScreenBridge";
+import { rfs, TABLET_MAX_CARD_WIDTH } from "../utils/responsive";
 
 interface Props {
   block?: any;
@@ -23,6 +24,8 @@ interface Props {
 
 const CompanionedChant: React.FC<Props> = ({ block, mantra, transliteration }) => {
   const { screenData } = useScreenStore();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   const reducedMotion = !!(screenData as any).reduced_motion_preference;
   const userPulse = useRef(new Animated.Value(0.9)).current;
   const mitraPulse = useRef(new Animated.Value(0.8)).current;
@@ -65,11 +68,12 @@ const CompanionedChant: React.FC<Props> = ({ block, mantra, transliteration }) =
     "Om saha nāvavatu";
 
   return (
-    <View style={styles.wrap}>
-      <View style={styles.orbs}>
+    <View style={[styles.wrap, isTablet && { maxWidth: TABLET_MAX_CARD_WIDTH, alignSelf: 'center', width: '100%' }]}>
+      <View style={[styles.orbs, isTablet && { gap: 32, marginBottom: 28 }]}>
         <Animated.View
           style={[
             styles.orb,
+            isTablet && { width: 92, height: 92, borderRadius: 46 },
             styles.userOrb,
             !reducedMotion && { transform: [{ scale: userPulse }] },
           ]}
@@ -78,15 +82,16 @@ const CompanionedChant: React.FC<Props> = ({ block, mantra, transliteration }) =
         <Animated.View
           style={[
             styles.orb,
+            isTablet && { width: 92, height: 92, borderRadius: 46 },
             styles.mitraOrb,
             !reducedMotion && { transform: [{ scale: mitraPulse }] },
           ]}
           testID="companioned-chant-mitra-orb"
         />
       </View>
-      <Text style={styles.mantra}>{mantraText}</Text>
-      <Text style={styles.translit}>{translit}</Text>
-      <Text style={styles.hint}>Chant along if you'd like. Or just listen.</Text>
+      <Text style={[styles.mantra, { fontSize: rfs(24, width) }]}>{mantraText}</Text>
+      <Text style={[styles.translit, { fontSize: rfs(14, width) }]}>{translit}</Text>
+      <Text style={[styles.hint, { fontSize: rfs(13, width) }]}>Chant along if you'd like. Or just listen.</Text>
     </View>
   );
 };
@@ -95,6 +100,7 @@ const styles = StyleSheet.create({
   wrap: {
     alignItems: "center",
     paddingVertical: 18,
+    paddingHorizontal: 16,
   },
   orbs: {
     flexDirection: "row",

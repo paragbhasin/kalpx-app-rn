@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, TouchableOpacity, View, useWindowDimensions } from "react-native";
 import Colors from "./Colors";
 interface HeaderProps {
   isTransparent?: boolean;
@@ -11,6 +11,8 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ isTransparent, backgroundColor }) => {
   const navigation = useNavigation<any>();
   const { i18n } = useTranslation();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   const [selectedLang, setSelectedLang] = useState(i18n.language);
 
   const languages = [
@@ -65,7 +67,7 @@ const Header: React.FC<HeaderProps> = ({ isTransparent, backgroundColor }) => {
         <Image
           source={require("../../assets/KalpXlogo.png")}
           resizeMode="contain"
-          style={styles.logo}
+          style={[styles.logo, isTablet && { width: 148, height: 54 }]}
         />
       </TouchableOpacity>
 

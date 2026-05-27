@@ -2133,9 +2133,11 @@ export async function postRoomReflection(
 // ---------------------------------------------------------------------------
 export async function mitraJourneyHomeV3(opts?: {
   forceFresh?: boolean;
+  locale?: string;
 }): Promise<MitraHomeV3Response> {
   try {
     const params: Record<string, string | number> = { tz: getTz() };
+    if (opts?.locale) params.locale = opts.locale;
     if (opts?.forceFresh) params._t = Date.now();
     const resp = await api.get<MitraHomeV3Response>(
       "mitra/v3/journey/home/",

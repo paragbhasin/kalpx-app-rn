@@ -1867,6 +1867,108 @@
     "beginCta": "Yes, let's begin →",
     "returning": "I'm returning"
   },
+  "mitraFourDoor": {
+    "door": {
+      "myRhythm": "My Rhythm",
+      "innerPath": "Inner Path",
+      "quickChant": "Quick Chant",
+      "tellMitra": "Tell Mitra"
+    },
+    "orientation": {
+      "myRhythm": "Shape the day with a simple rhythm.",
+      "innerPath": "Walk a 14-day path with Mitra beside you.",
+      "quickChant": "Return through mantra, in a single moment.",
+      "tellMitra": "Share what is moving. Mitra will listen."
+    },
+    "greeting": {
+      "morning": "Good morning, {{name}}",
+      "afternoon": "Good afternoon, {{name}}",
+      "evening": "Good evening, {{name}}",
+      "friend": "friend"
+    },
+    "greetingSegment": {
+      "new": "Where should Mitra meet you today?",
+      "rhythm_only": "Your rhythm is active.",
+      "quick_chant_only": "Your quick chant is here when you need to return.",
+      "tell_mitra_only": "Mitra is here to continue from where you are.",
+      "inner_path_only": "Your path is active.",
+      "rhythm_and_path": "Your rhythm and path are both active.",
+      "mixed_partial": "Mitra is here with you."
+    },
+    "rhythm": {
+      "allDone": "Your rhythm has been held today",
+      "beginMorning": "Begin with your morning rhythm",
+      "morningHeldAfternoon": "Morning held · return at midday",
+      "returnAfternoon": "Return with your afternoon rhythm",
+      "afternoonHeldNight": "Afternoon held · close gently tonight",
+      "closeNight": "Close the day with your night rhythm",
+      "noStateFallback": "Build a gentle daily rhythm"
+    },
+    "rhythmSegment": {
+      "new": "Build a gentle morning, afternoon, and night rhythm.",
+      "rhythm_only": "",
+      "quick_chant_only": "Build a gentle daily rhythm.",
+      "tell_mitra_only": "Build a gentle rhythm for your day.",
+      "inner_path_only": "Add a gentle morning, afternoon, or night rhythm.",
+      "rhythm_and_path": "",
+      "mixed_partial": "Build a gentle daily rhythm."
+    },
+    "innerPath": {
+      "dayCount": "Day {{day}} of {{total}}",
+      "practiceHeld": "Day {{day}} of {{total}} · today's practice is held",
+      "stepBegun": "Day {{day}} of {{total}} · today's step has begun"
+    },
+    "innerPathSegment": {
+      "new": "Begin a 14-day path for what you are moving through.",
+      "rhythm_only": "Begin a 14-day path for what keeps returning.",
+      "quick_chant_only": "Begin a 14-day path for what keeps returning.",
+      "tell_mitra_only": "Turn a recurring pattern into a 14-day path.",
+      "inner_path_only": "",
+      "rhythm_and_path": "",
+      "mixed_partial": "Begin a 14-day path for what keeps returning."
+    },
+    "quickChant": {
+      "hasMantra": "Your chosen mantra is here.",
+      "historyOnly": "Your quick chant is here when you need to return.",
+      "noState": "Choose a mantra for quick return."
+    },
+    "tellMitra": {
+      "hasHistory": "Continue telling Mitra what is moving.",
+      "activePath": "What is on your mind right now?",
+      "default": "Share what is moving today."
+    },
+    "checkin": {
+      "heading": "How are you landing?",
+      "subtext": "One tap. Mitra meets you where you are.",
+      "tellMitraCta": "Tell Mitra →",
+      "boundaryBefore": "If this feels heavy to carry,",
+      "boundaryLink": "Tell Mitra",
+      "boundaryAfter": "is here.",
+      "ctaInnerPath": "Continue Inner Path",
+      "ctaMyRhythm": "My Rhythm"
+    },
+    "feeling": {
+      "agitated": "Agitated",
+      "drained": "Drained",
+      "steady": "Steady",
+      "open": "Open"
+    },
+    "error": {
+      "unableToLoad": "Unable to load.",
+      "loadFailed": "Unable to load. Please try again.",
+      "tryAgain": "Try again"
+    },
+    "reminders": {
+      "title": "Want gentle reminders?",
+      "subtitle": "Mitra will gently remind you at the times you choose.",
+      "rowLabel": "Remind me for {{label}}",
+      "saveBtn": "Set reminders",
+      "skipBtn": "Skip for now",
+      "mantra": "mantra",
+      "sankalp": "sankalp",
+      "practice": "practice"
+    }
+  },
   "mitraIntention": {
     "heading": "What feels needed today?",
     "subtext": "Choose what feels closest right now.",

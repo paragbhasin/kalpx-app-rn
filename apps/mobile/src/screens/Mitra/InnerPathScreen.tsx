@@ -184,7 +184,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
       try {
         if (__DEV__)
           console.log("[InnerPathScreen]", routeRunId, "calling entry-view");
-        const entryResult = await mitraJourneyEntryView();
+        const entryResult = await mitraJourneyEntryView(null, undefined, i18n.language || "en");
         if (__DEV__)
           console.log(
             "[InnerPathScreen]",

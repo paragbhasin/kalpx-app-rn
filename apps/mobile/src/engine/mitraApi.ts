@@ -1265,11 +1265,13 @@ async function v3Get<E extends V3Envelope>(
 export function mitraJourneyEntryView(
   etag: string | null = null,
   signals?: { crisis?: boolean; grief?: boolean; loneliness?: boolean },
+  locale?: string,
 ): Promise<V3GetResult<V3EntryViewEnvelope>> {
   const params: Record<string, string> = { tz: getTz() };
   if (signals?.crisis) params.crisis = "1";
   if (signals?.grief) params.grief = "1";
   if (signals?.loneliness) params.loneliness = "1";
+  if (locale) params.locale = locale;
   return v3Get<V3EntryViewEnvelope>("mitra/v3/journey/entry-view/", etag, params);
 }
 

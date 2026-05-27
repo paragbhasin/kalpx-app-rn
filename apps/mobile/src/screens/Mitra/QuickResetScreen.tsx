@@ -11,6 +11,7 @@ import type {
 } from "@kalpx/types";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Animated,
@@ -189,6 +190,7 @@ export default function QuickResetScreen({
 }: {
   embedded?: boolean;
 }) {
+  const { t } = useTranslation();
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
   const { goBack, updateBackground, updateHeaderHidden } = useScreenStore();
@@ -235,9 +237,9 @@ export default function QuickResetScreen({
   const [pickerLoading, setPickerLoading] = useState(false);
   const [defaultSetConfirmed, setDefaultSetConfirmed] = useState(false);
   const [highlightedToastTitle, setHighlightedToastTitle] =
-    useState("Mantra Updated ✦");
+    useState(t("quickReset.mantraUpdatedTitle"));
   const [highlightedToastMessage, setHighlightedToastMessage] = useState(
-    "Your rhythm has been gently realigned.",
+    t("quickReset.mantraUpdatedMessage"),
   );
   const [mantraUpdatedToastVisible, setMantraUpdatedToastVisible] =
     useState(false);
@@ -317,26 +319,26 @@ export default function QuickResetScreen({
     if (different) {
       setDefaultSetConfirmed(false);
       setSelectedMantra(different);
-      setHighlightedToastTitle("Mantra Updated ✦");
-      setHighlightedToastMessage("Your rhythm has been gently realigned.");
+      setHighlightedToastTitle(t("quickReset.mantraUpdatedTitle"));
+      setHighlightedToastMessage(t("quickReset.mantraUpdatedMessage"));
       setMantraUpdatedToastVisible(true);
     }
     // If none found, keep current — silent
-  }, [activeMantra]);
+  }, [activeMantra, t]);
 
   // ── Secondary action: "Set as my Quick Reset mantra" ──────────────────────
   const handleSetDefault = useCallback(
     async (mantra: QuickResetMantra) => {
       await postQuickResetSetDefault(mantra.item_id);
       setDefaultSetConfirmed(true);
-      setHighlightedToastTitle("Quick Reset Mantra Set ✦");
+      setHighlightedToastTitle(t("quickReset.mantraSetTitle"));
       setHighlightedToastMessage(
-        "Your mantra has been set for future Quick Reset moments.",
+        t("quickReset.mantraSetMessage"),
       );
       setMantraUpdatedToastVisible(true);
       await loadOpening();
     },
-    [loadOpening],
+    [loadOpening, t],
   );
 
   // ── Mantra picker modal ────────────────────────────────────────────────────
@@ -358,10 +360,10 @@ export default function QuickResetScreen({
     setSelectedMantra(mantra);
     setPickerVisible(false);
     setPhase("preview");
-    setHighlightedToastTitle("Mantra Updated ✦");
-    setHighlightedToastMessage("Your rhythm has been gently realigned.");
+    setHighlightedToastTitle(t("quickReset.mantraUpdatedTitle"));
+    setHighlightedToastMessage(t("quickReset.mantraUpdatedMessage"));
     setMantraUpdatedToastVisible(true);
-  }, []);
+  }, [t]);
 
   // ── Runner start ───────────────────────────────────────────────────────────
   const handleTapBead = useCallback(() => {
@@ -442,7 +444,7 @@ export default function QuickResetScreen({
     return (
       <View style={styles.openingShell}>
         <Text style={styles.openingHeading}>{mantra.title}</Text>
-        <Text style={styles.openingSubhead}>Quick Reset Mantra</Text>
+        <Text style={styles.openingSubhead}>{t("quickReset.subtitle")}</Text>
 
         <View style={styles.progressWrap}>
           <Text style={styles.progressMain}>{beadCount}</Text>
@@ -481,8 +483,8 @@ export default function QuickResetScreen({
             activeOpacity={0.85}
             style={styles.previewTapButton}
           >
-            <Text style={styles.previewTapText}>TAP</Text>
-            <Text style={styles.previewTapSubtext}>HERE</Text>
+            <Text style={styles.previewTapText}>{t("quickReset.tap")}</Text>
+            <Text style={styles.previewTapSubtext}>{t("quickReset.here")}</Text>
             <View style={styles.previewTapCheckWrap}>
               <Text style={styles.previewTapCheck}>✓</Text>
             </View>
@@ -511,7 +513,7 @@ export default function QuickResetScreen({
             <AudioPlayerBlock
               block={{
                 audio_url: mantra.audio_url,
-                label: "Guided Audio",
+                label: t("quickReset.guidedAudio"),
               }}
             />
           </View>
@@ -519,7 +521,7 @@ export default function QuickResetScreen({
 
         {!!mantra.meaning && (
           <CollapsibleCard
-            label="Meaning"
+            label={t("quickReset.meaning")}
             expanded={meaningExpanded}
             onToggle={() => setMeaningExpanded((value) => !value)}
           >
@@ -529,7 +531,7 @@ export default function QuickResetScreen({
 
         {!!mantra.essence && (
           <CollapsibleCard
-            label="Essence"
+            label={t("quickReset.essence")}
             expanded={essenceExpanded}
             onToggle={() => setEssenceExpanded((value) => !value)}
           >
@@ -542,7 +544,7 @@ export default function QuickResetScreen({
           onPress={handleDoneChanting}
           activeOpacity={0.8}
         >
-          <Text style={styles.primaryBtnText}>Done chanting</Text>
+          <Text style={styles.primaryBtnText}>{t("quickReset.doneChanting")}</Text>
         </TouchableOpacity>
 
         <View style={styles.secondaryActions}>
@@ -621,14 +623,14 @@ export default function QuickResetScreen({
           imageStyle={styles.backgroundImage}
         >
           <View style={styles.centerContent}>
-            <Text style={styles.sectionTitle}>Unable to open Quick Reset</Text>
-            <Text style={styles.subtleText}>Please try again.</Text>
+            <Text style={styles.sectionTitle}>{t("quickReset.errorTitle")}</Text>
+            <Text style={styles.subtleText}>{t("quickReset.pleaseRetry")}</Text>
             <TouchableOpacity
               style={styles.primaryBtn}
               onPress={loadOpening}
               activeOpacity={0.8}
             >
-              <Text style={styles.primaryBtnText}>Retry</Text>
+              <Text style={styles.primaryBtnText}>{t("quickReset.retry")}</Text>
             </TouchableOpacity>
           </View>
           <HighlightedToast
@@ -733,13 +735,13 @@ export default function QuickResetScreen({
                 style={styles.secondaryActionBtn}
               >
                 <Text style={styles.secondaryActionText}>
-                  Set as my Quick Reset mantra
+                  {t("quickReset.setAsMyMantra")}
                 </Text>
               </TouchableOpacity>
             )}
             {defaultSetConfirmed && (
               <Text style={styles.confirmText}>
-                Set as your Quick Reset mantra.
+                {t("quickReset.setAsYourMantra")}
               </Text>
             )}
             <TouchableOpacity
@@ -747,7 +749,7 @@ export default function QuickResetScreen({
               onPress={handleCloseToHome}
               activeOpacity={0.8}
             >
-              <Text style={styles.primaryBtnText}>Close</Text>
+              <Text style={styles.primaryBtnText}>{t("quickReset.close")}</Text>
             </TouchableOpacity>
           </View>
           <HighlightedToast
@@ -804,9 +806,9 @@ export default function QuickResetScreen({
                 activeOpacity={0.7}
                 style={styles.pickerBackBtn}
               >
-                <Text style={styles.contentBackBtnText}>Close</Text>
+                <Text style={styles.contentBackBtnText}>{t("quickReset.close")}</Text>
               </TouchableOpacity>
-              <Text style={styles.pickerTitle}>Choose a Mantra</Text>
+              <Text style={styles.pickerTitle}>{t("quickReset.chooseMantra")}</Text>
               <View style={styles.pickerDivider}>
                 <View style={styles.pickerDividerLine} />
                 <Text style={styles.pickerDividerIcon}>✦</Text>

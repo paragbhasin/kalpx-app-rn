@@ -1,6 +1,7 @@
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   LayoutAnimation,
   Platform,
@@ -51,8 +52,8 @@ const BAND_LABELS: Record<RhythmTimeBand, string> = {
   night: "Night",
 };
 
-function formatTime(hms: string | null): string {
-  if (!hms) return "Set time";
+function formatTime(hms: string | null, setTimeLabel: string): string {
+  if (!hms) return setTimeLabel;
   const [h, m] = hms.split(":").map(Number);
   const suffix = h < 12 ? "AM" : "PM";
   return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${suffix}`;
@@ -94,17 +95,18 @@ function ReminderRow({
   onToggle: () => void;
   onTimePillPress: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <View style={[styles.row, saving && styles.rowSaving]}>
       <Text style={styles.rowLabel} numberOfLines={1}>{label}</Text>
       {enabled && (
         <Pressable onPress={onTimePillPress} style={styles.timePill}>
-          <Text style={styles.timePillText}>{formatTime(time)}</Text>
+          <Text style={styles.timePillText}>{formatTime(time, t('remindersScreen.setTime'))}</Text>
         </Pressable>
       )}
       {!enabled && time && (
         <View style={[styles.timePill, styles.timePillDisabled]}>
-          <Text style={[styles.timePillText, styles.timePillTextDisabled]}>{formatTime(time)}</Text>
+          <Text style={[styles.timePillText, styles.timePillTextDisabled]}>{formatTime(time, t('remindersScreen.setTime'))}</Text>
         </View>
       )}
       <Switch
@@ -120,6 +122,7 @@ function ReminderRow({
 
 // ── Main screen ───────────────────────────────────────────────────────────────
 export default function RemindersScreen() {
+  const { t } = useTranslation();
   const navigation: any = useNavigation();
   const dispatch = useDispatch<AppDispatch>();
   const tabBarHeight = useBottomTabBarHeight();
@@ -247,19 +250,19 @@ export default function RemindersScreen() {
       >
         {/* Header */}
         <View style={styles.topBar}>
-          <Text style={styles.pageTitle}>Reminders</Text>
+          <Text style={styles.pageTitle}>{t('remindersScreen.title')}</Text>
         </View>
 
-        <Text style={styles.subtitle}>Mitra will gently remind you at your chosen times.</Text>
+        <Text style={styles.subtitle}>{t('remindersScreen.subtitle')}</Text>
 
         {/* ── Inner Path section ── */}
         {!remindersLoading && hasJourney && (
           <>
-            <SectionHeader label="Inner Path" />
+            <SectionHeader label={t('remindersScreen.innerPath')} />
             {(["mantra", "sankalp", "practice"] as const).map((key) => (
               <ReminderRow
                 key={key}
-                label={TRIAD_LABELS[key]}
+                label={t(`remindersScreen.triad.${key}`)}
                 enabled={(reminders?.[`${key}_reminder_enabled`] as boolean) ?? false}
                 time={(reminders?.[`${key}_reminder_time`] as string | null) ?? null}
                 saving={triadSavingKey === key}
@@ -273,13 +276,13 @@ export default function RemindersScreen() {
         {/* ── Daily Rhythm section ── */}
         {hasRhythm && allRhythmItems.length > 0 && (
           <>
-            <SectionHeader label="Daily Rhythm" />
+            <SectionHeader label={t('remindersScreen.dailyRhythm')} />
             {rhythmBands.map((band) => {
               const items = homeData?.companion_rhythm?.[band]?.items ?? [];
               if (items.length === 0) return null;
               return (
                 <View key={band}>
-                  <BandLabel label={BAND_LABELS[band]} />
+                  <BandLabel label={t(`remindersScreen.band.${band}`)} />
                   {items.map((item) => (
                     <ReminderRow
                       key={item.rhythm_item_id}
@@ -301,9 +304,9 @@ export default function RemindersScreen() {
         {neitherSetUp && (
           <View style={styles.emptyCard}>
             <Ionicons name="notifications-outline" size={36} color={Colors.goldBright} />
-            <Text style={styles.emptyTitle}>Your practice awaits</Text>
+            <Text style={styles.emptyTitle}>{t('remindersScreen.emptyTitle')}</Text>
             <Text style={styles.emptyBody}>
-              Set up your Inner Path or Daily Rhythm to enable gentle reminders.
+              {t('remindersScreen.emptyBody')}
             </Text>
           </View>
         )}
@@ -312,7 +315,7 @@ export default function RemindersScreen() {
         {!remindersLoading && !hasJourney && hasRhythm && (
           <View style={styles.hintCard}>
             <Text style={styles.hintText}>
-              Begin your Inner Path to also set gentle reminders for your mantra, sankalp, and practice.
+              {t('remindersScreen.hintText')}
             </Text>
           </View>
         )}

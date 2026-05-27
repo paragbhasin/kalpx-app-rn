@@ -11,6 +11,7 @@ import type {
   TellMitraNextOption,
 } from "@kalpx/types";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -93,6 +94,7 @@ export default function TellMitraThreadView({
   onWisdomOptionPress,
   errorMsg,
 }: TellMitraThreadViewProps) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [keyboardHeight, setKeyboardHeight] = React.useState(0);
   const androidKeyboardOffset =
@@ -148,7 +150,7 @@ export default function TellMitraThreadView({
     if (item.type === "mitra_response") {
       return (
         <View key={item.id} style={s.mitraBlock}>
-          <Text style={s.mitraLabel}>MITRA</Text>
+          <Text style={s.mitraLabel}>{t('tellMitraThread.mitraLabel')}</Text>
           {shouldShowPriorContext(item.prior_context_summary) ? (
             <Text style={s.priorContextText}>{item.prior_context_summary}</Text>
           ) : null}
@@ -196,7 +198,7 @@ export default function TellMitraThreadView({
     if (item.type === "room_recommendation") {
       return (
         <View key={item.id} style={s.roomCard}>
-          <Text style={s.roomCardLabel}>RECOMMENDED NEXT</Text>
+          <Text style={s.roomCardLabel}>{t('tellMitraThread.recommendedNext')}</Text>
           <Text style={s.roomCardTitle}>{item.room_label}</Text>
           {item.room_description ? (
             <Text style={s.roomCardDesc}>{item.room_description}</Text>
@@ -206,14 +208,14 @@ export default function TellMitraThreadView({
             onPress={() => onEnterRoom(item)}
             activeOpacity={0.8}
           >
-            <Text style={s.goldBtnText}>Enter {item.room_label}</Text>
+            <Text style={s.goldBtnText}>{t('tellMitraThread.enterRoom', { room_label: item.room_label })}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={s.ghostLink}
             onPress={onTellMitraMore}
             activeOpacity={0.7}
           >
-            <Text style={s.ghostLinkText}>Tell Mitra more</Text>
+            <Text style={s.ghostLinkText}>{t('tellMitraThread.tellMitraMore')}</Text>
           </TouchableOpacity>
           {item.secondary_room_id &&
           isValidRoomId(item.secondary_room_id) &&
@@ -232,7 +234,7 @@ export default function TellMitraThreadView({
               activeOpacity={0.7}
             >
               <Text style={[s.ghostLinkText, { fontSize: 12 }]}>
-                Or try {getRoomLabel(item.secondary_room_id as any)} →
+                {t('tellMitraThread.orTryRoom', { room: getRoomLabel(item.secondary_room_id as any) })}
               </Text>
             </TouchableOpacity>
           ) : null}
@@ -245,9 +247,9 @@ export default function TellMitraThreadView({
       return (
         <View key={item.id} style={s.returnCard}>
           <Text style={s.returnCardTitle}>
-            You're back from {item.room_label}.
+            {t('tellMitraThread.youreBack', { room_label: item.room_label })}
           </Text>
-          <Text style={s.returnCardSubtitle}>What feels different now?</Text>
+          <Text style={s.returnCardSubtitle}>{t('tellMitraThread.whatFeelsDifferent')}</Text>
           <View style={s.chipsWrap}>
             {RETURN_CARD_CHIPS.map((opt) => (
               <TouchableOpacity
@@ -263,7 +265,7 @@ export default function TellMitraThreadView({
                 style={[s.chip, submitting && s.chipDisabled]}
                 activeOpacity={0.7}
               >
-                <Text style={s.chipText}>{opt.label}</Text>
+                <Text style={s.chipText}>{t(`tellMitraThread.returnCard.${opt.value}`)}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -275,7 +277,7 @@ export default function TellMitraThreadView({
     if (item.type === "wisdom_options") {
       return (
         <View key={item.id} style={s.wisdomBlock}>
-          <Text style={s.wisdomLabel}>OR TRY</Text>
+          <Text style={s.wisdomLabel}>{t('tellMitraThread.orTry')}</Text>
           {item.next_options.map((opt, i) => (
             <TouchableOpacity
               key={i}
@@ -296,7 +298,7 @@ export default function TellMitraThreadView({
     if (item.type === "safety") {
       return (
         <View key={item.id} style={s.safetyCard}>
-          <Text style={s.safetyTitle}>Mitra hears you.</Text>
+          <Text style={s.safetyTitle}>{t('tellMitraThread.mitraHearsYou')}</Text>
           <Text style={s.safetyText}>{item.response_copy}</Text>
         </View>
       );
@@ -306,7 +308,7 @@ export default function TellMitraThreadView({
     if (item.type === "loading") {
       return (
         <View key={item.id} style={s.mitraBlock}>
-          <Text style={s.mitraLabel}>MITRA</Text>
+          <Text style={s.mitraLabel}>{t('tellMitraThread.mitraLabel')}</Text>
           <Text style={s.loadingDots}>· · ·</Text>
         </View>
       );
@@ -330,7 +332,7 @@ export default function TellMitraThreadView({
       {conversation.length > 0 && (
         <View style={s.startFreshRow}>
           <TouchableOpacity onPress={onStartFresh} activeOpacity={0.7}>
-            <Text style={s.startFreshText}>Start fresh</Text>
+            <Text style={s.startFreshText}>{t('tellMitraThread.startFresh')}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -350,21 +352,21 @@ export default function TellMitraThreadView({
         {conversation.length === 0 && (
           <View style={s.emptyState}>
             <Text style={s.emptySubtext}>
-              What would you like Mitra to understand today?
+              {t('tellMitraThread.emptySubtext')}
             </Text>
             <Text style={s.emptyHint}>
-              You can write freely — one line is enough.
+              {t('tellMitraThread.emptyHint')}
             </Text>
             <View style={[s.chipsWrap, { marginTop: 20 }]}>
               {QUICK_START_CHIPS.map((chip) => (
                 <TouchableOpacity
                   key={chip.value}
-                  onPress={() => onQuickStartChip(chip.value, chip.label)}
+                  onPress={() => onQuickStartChip(chip.value, t(`tellMitraThread.quickStart.${chip.value}`))}
                   disabled={submitting}
                   style={[s.chip, submitting && s.chipDisabled]}
                   activeOpacity={0.7}
                 >
-                  <Text style={s.chipText}>{chip.label}</Text>
+                  <Text style={s.chipText}>{t(`tellMitraThread.quickStart.${chip.value}`)}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -408,7 +410,7 @@ export default function TellMitraThreadView({
             disabled={submitting || !draft.trim()}
             activeOpacity={0.8}
           >
-            <Text style={s.sendBtnText}>{submitting ? "…" : "Send"}</Text>
+            <Text style={s.sendBtnText}>{submitting ? "…" : t('tellMitraThread.send')}</Text>
           </TouchableOpacity>
         </View>
         <Text
@@ -417,7 +419,7 @@ export default function TellMitraThreadView({
             { paddingBottom: Math.max(insets.bottom + 6, 8) },
           ]}
         >
-          Mitra is here for reflection and Sanatan-rooted guidance. It is not a substitute for medical, legal, financial, therapy, crisis, or emergency support. Share only what you feel comfortable sharing.
+          {t('tellMitraThread.disclaimer')}
         </Text>
         </View>
       </KeyboardAvoidingView>

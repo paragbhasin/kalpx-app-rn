@@ -1994,5 +1994,295 @@
         "cta": "Tell Mitra"
       }
     }
+  },
+  "quickCheckin": {
+    "title": "Quick Check-in",
+    "subheading": "Share how you're feeling.\nMitra will find a practice that fits.",
+    "checkingIn": "Checking in…",
+    "selectEnergy": "Select your energy to continue.",
+    "proceed": "Proceed →",
+    "errorMessage": "Something went wrong. Please try again.",
+    "mitraHeard": "Mitra heard you.",
+    "tellMitraMore": "Tell Mitra more",
+    "quickReset": "Quick Reset",
+    "returnHome": "Return Home",
+    "continue": "Continue",
+    "goToPractice": "Go to Practice",
+    "energy": {
+      "energized": {
+        "label": "Energized",
+        "desc": "Ready and moving"
+      },
+      "balanced": {
+        "label": "Balanced",
+        "desc": "Steady and clear"
+      },
+      "agitated": {
+        "label": "Agitated",
+        "desc": "Restless or tense"
+      },
+      "drained": {
+        "label": "Drained",
+        "desc": "Low or heavy"
+      }
+    },
+    "roomCta": {
+      "room_stillness": "Go to Find Calm",
+      "room_release": "Set It Down",
+      "room_joy": "Notice What's Good",
+      "room_growth": "Take the Next Step",
+      "room_clarity": "Go to Find Clarity",
+      "room_connection": "Open Connection"
+    },
+    "doorCta": {
+      "my_rhythm": "Go to My Rhythm",
+      "inner_path": "Continue Your Path",
+      "quick_reset": "Quick Reset",
+      "tell_mitra": "Tell Mitra more"
+    }
+  },
+  "quickReset": {
+    "subtitle": "Quick Reset Mantra",
+    "doneChanting": "Done chanting",
+    "errorTitle": "Unable to open Quick Reset",
+    "pleaseRetry": "Please try again.",
+    "retry": "Retry",
+    "setAsMyMantra": "Set as my Quick Reset mantra",
+    "setAsYourMantra": "Set as your Quick Reset mantra.",
+    "close": "Close",
+    "chooseMantra": "Choose a Mantra",
+    "guidedAudio": "Guided Audio",
+    "meaning": "Meaning",
+    "essence": "Essence",
+    "mantraUpdatedTitle": "Mantra Updated ✦",
+    "mantraUpdatedMessage": "Your rhythm has been gently realigned.",
+    "mantraSetTitle": "Quick Reset Mantra Set ✦",
+    "mantraSetMessage": "Your mantra has been set for future Quick Reset moments.",
+    "tap": "TAP",
+    "here": "HERE"
+  },
+  "innerPath": {
+    "heldToday": {
+      "mantra": "Mantra held today · return anytime",
+      "sankalp": "Sankalp carried today · return anytime",
+      "practice": "Practice held today · return anytime",
+      "default": "Held today · return anytime"
+    },
+    "triad": {
+      "mantraSubtitle": "Return through sound",
+      "sankalpSubtitle": "Hold today's intention",
+      "practiceSubtitle": "Move through the body"
+    },
+    "heroFallback": "Still here. That is the practice.",
+    "dayPill": "Day {{n}} of {{m}}",
+    "allComplete": {
+      "title": "All three held today",
+      "body": "Mantra, Sankalp, Practice — the cycle is complete."
+    },
+    "guidance": {
+      "title": "Today's guidance"
+    },
+    "whyChosen": {
+      "title": "Why these were chosen",
+      "subtitle": "Understand why Mitra selected this mantra, sankalp, and practice."
+    },
+    "whyPanel": {
+      "eyebrow": "Chosen with care",
+      "heading": "Why this supports today",
+      "essence": "Essence",
+      "shift": "Shift",
+      "usefulFor": "Useful for",
+      "rootedIn": "Rooted in"
+    },
+    "reminders": {
+      "title": "Reminders",
+      "noneSet": "None set",
+      "row": "Remind me for {{label}}",
+      "saving": "Saving…"
+    },
+    "goBack": "Go back",
+    "pathPreparing": "Your path is preparing — try again in a moment."
+  },
+  "rhythmHome": {
+    "title": "My Rhythm",
+    "emptyState": "You haven't set up your rhythm yet.",
+    "setupCta": "Set up My Rhythm",
+    "editCta": "Edit My Rhythm",
+    "beginChanting": "Begin Chanting",
+    "beginEmbodying": "Begin Embodying",
+    "beginPractice": "Begin Practice",
+    "opening": "Opening…",
+    "heldToday": {
+      "mantra": "Mantra held today · return anytime",
+      "sankalp": "Sankalp carried today · return anytime",
+      "practice": "Practice held today · return anytime",
+      "reflection": "Held today · return anytime",
+      "default": "Held today · return anytime"
+    },
+    "badge": {
+      "mantra": "MANTRA",
+      "sankalp": "SANKALP",
+      "reflection": "REFLECTION",
+      "practice": "PRACTICE"
+    },
+    "bandHeld": {
+      "morning": "Morning rhythm held",
+      "afternoon": "Afternoon rhythm held",
+      "night": "Night rhythm held"
+    },
+    "addToRhythm": "Add to your {{band}} rhythm",
+    "reminderLine": "Mitra will gently remind you at {{time}}"
+  },
+  "tellMitraInput": {
+    "placeholder": "What's on your mind?",
+    "errorEmpty": "Please share what's on your mind",
+    "errorTooLong": "Please keep it under 1000 characters",
+    "errorGeneric": "Something went wrong. Please try again.",
+    "chipsPrompt": "Want to help Mitra understand what feels heaviest?",
+    "sending": "Sending...",
+    "shareWithMitra": "Share with Mitra",
+    "disclaimer": "Mitra is here for reflection and Sanatan-rooted guidance. It is not a substitute for medical, legal, financial, therapy, crisis, or emergency support. Share only what you feel comfortable sharing.",
+    "quickCheckinLink": "Try Quick Check-in instead",
+    "placeholderLetMeTell": "What would you like Mitra to know?",
+    "placeholderTellMitraMore": "Add anything else Mitra should understand…",
+    "calmDown": "Just help me calm down"
+  },
+  "tellMitraThread": {
+    "mitraLabel": "MITRA",
+    "recommendedNext": "RECOMMENDED NEXT",
+    "enterRoom": "Enter {{room_label}}",
+    "tellMitraMore": "Tell Mitra more",
+    "orTryRoom": "Or try {{room}} →",
+    "youreBack": "You're back from {{room_label}}.",
+    "whatFeelsDifferent": "What feels different now?",
+    "orTry": "OR TRY",
+    "mitraHearsYou": "Mitra hears you.",
+    "emptySubtext": "What would you like Mitra to understand today?",
+    "emptyHint": "You can write freely — one line is enough.",
+    "startFresh": "Start fresh",
+    "send": "Send",
+    "disclaimer": "Mitra is here for reflection and Sanatan-rooted guidance. It is not a substitute for medical, legal, financial, therapy, crisis, or emergency support. Share only what you feel comfortable sharing.",
+    "quickStart": {
+      "overwhelmed": "I feel overwhelmed",
+      "need_clarity": "I need clarity",
+      "disconnected": "I feel disconnected",
+      "calm_now": "Just help me calm down"
+    },
+    "returnCard": {
+      "more_steady": "More steady",
+      "still_heavy": "Still heavy",
+      "need_clarity": "I need clarity",
+      "tell_mitra_more": "Tell Mitra more"
+    }
+  },
+  "rhythmSetup": {
+    "moments": {
+      "heading": "Build Your Daily Rhythm",
+      "subheading": "When would you like Mitra to support you?",
+      "helperTitle": "You can select more than one",
+      "helperBody": "Choose all moments when you'd like Mitra to walk with you."
+    },
+    "continueCta": "Continue →",
+    "setupMyself": "Set up myself",
+    "purpose": {
+      "heading": "What should each moment give you?",
+      "intro": "Mitra will choose a practice that fits.",
+      "seeSuggestion": "See Mitra's Suggestion →",
+      "morning": {
+        "calm_start": { "label": "Calm Start", "desc": "Begin without rushing inside." },
+        "focus": { "label": "Focus", "desc": "Gather the mind before action." },
+        "devotion": { "label": "Devotion", "desc": "Begin the day with reverence." },
+        "discipline": { "label": "Discipline", "desc": "Start with one sincere commitment." },
+        "gratitude": { "label": "Gratitude", "desc": "Remember what supports you." },
+        "clarity": { "label": "Clarity", "desc": "See the day with steadiness." }
+      },
+      "afternoon": {
+        "reset": { "label": "Reset", "desc": "Clear the midday weight." },
+        "patience": { "label": "Patience", "desc": "Steady the response to friction." },
+        "sankalp_reminder": { "label": "Sankalp Reminder", "desc": "Return to the quality you are practicing." },
+        "energy_check": { "label": "Energy Check", "desc": "Restore prana for the second half." },
+        "mindful_action": { "label": "Mindful Action", "desc": "Act from intention, not reaction." },
+        "emotional_balance": { "label": "Emotional Balance", "desc": "Settle what is stirred." }
+      },
+      "night": {
+        "release": { "label": "Release", "desc": "Let go of what the day placed on you." },
+        "gratitude": { "label": "Gratitude", "desc": "Close with what was given." },
+        "reflection": { "label": "Reflection", "desc": "See the day clearly before rest." },
+        "forgiveness": { "label": "Forgiveness", "desc": "Dissolve what you are still carrying." },
+        "sleep_calm": { "label": "Sleep Calm", "desc": "Steady the mind for deep rest." },
+        "self_review": { "label": "Self-Review", "desc": "Study what the day is teaching." }
+      }
+    },
+    "moment": {
+      "morning": { "label": "Morning", "desc": "Begin the day with steadiness and intention." },
+      "afternoon": { "label": "Afternoon", "desc": "Pause, reset, and return to yourself." },
+      "night": { "label": "Night", "desc": "Reflect, release, and close gently." }
+    },
+    "suggestion": {
+      "heading": "Mitra suggests this for you.",
+      "subheading": "Each practice fits the purpose you chose. You can change any of them.",
+      "accept": "Accept Rhythm →",
+      "chooseOwn": "Choose My Own"
+    },
+    "change": "Change",
+    "reminders": {
+      "heading": "Would you like gentle reminders?",
+      "subheading": "Mitra can remind you when each moment arrives.",
+      "yes": "Yes, gently remind me",
+      "no": "No, I will come myself",
+      "later": "Ask me later",
+      "save": "Save My Rhythm →"
+    },
+    "confirmation": {
+      "heading": "Your Daily Companion is ready.",
+      "subheading": "Each moment has its practice. Return to it whenever you need.",
+      "innerPath": "Inner Path →",
+      "addInnerPath": "Add Inner Path →"
+    },
+    "returnHome": "Return Home",
+    "editTitle": "Edit My Rhythm",
+    "setupTitle": "Set Up My Rhythm",
+    "addFromLibrary": "Add from library",
+    "saveRhythm": "Save My Rhythm",
+    "saveError": "Could not save. Please try again.",
+    "remindMe": "Remind me",
+    "reminderOn": "Reminder on ✓",
+    "moveTo": "Move to {{band}}",
+    "remove": "Remove",
+    "itemType": {
+      "mantra": "Mantra",
+      "sankalp": "Sankalp",
+      "practice": "Practice",
+      "reflection": "Reflection",
+      "library": "Library"
+    }
+  },
+  "browseRooms": {
+    "title": "Browse Rooms",
+    "group": {
+      "settle": "Settle",
+      "understand": "Understand",
+      "grow": "Grow"
+    }
+  },
+  "remindersScreen": {
+    "title": "Reminders",
+    "subtitle": "Mitra will gently remind you at your chosen times.",
+    "innerPath": "Inner Path",
+    "dailyRhythm": "Daily Rhythm",
+    "setTime": "Set time",
+    "emptyTitle": "Your practice awaits",
+    "emptyBody": "Set up your Inner Path or Daily Rhythm to enable gentle reminders.",
+    "hintText": "Begin your Inner Path to also set gentle reminders for your mantra, sankalp, and practice.",
+    "triad": {
+      "mantra": "Mantra",
+      "sankalp": "Sankalp",
+      "practice": "Practice"
+    },
+    "band": {
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "night": "Night"
+    }
   }
 }

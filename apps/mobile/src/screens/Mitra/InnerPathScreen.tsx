@@ -21,6 +21,7 @@
  *   - QuickSupportBlock / AdditionalItems / Room menus
  */
 
+import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 import type {
   JourneyTriadReminders,
@@ -86,14 +87,15 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-function innerPathHeldLabel(slot: string): string {
-  if (slot === "mantra") return "Mantra held today · return anytime";
-  if (slot === "sankalp") return "Sankalp carried today · return anytime";
-  if (slot === "practice") return "Practice held today · return anytime";
-  return "Held today · return anytime";
+function innerPathHeldLabel(slot: string, t: (key: string) => string): string {
+  if (slot === "mantra") return t("innerPath.heldToday.mantra");
+  if (slot === "sankalp") return t("innerPath.heldToday.sankalp");
+  if (slot === "practice") return t("innerPath.heldToday.practice");
+  return t("innerPath.heldToday.default");
 }
 
 export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
+  const { t } = useTranslation();
   const navigation = useNavigation<any>();
   const dispatch = useDispatch<any>();
   const tabBarHeight = useBottomTabBarHeight();
@@ -407,7 +409,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
           const dailyResult = await mitraJourneyDailyView(null);
           if (cancelled) return;
           if (dailyResult.notModified || !dailyResult.envelope) {
-            setError("Your path is preparing — try again in a moment.");
+            setError(t("innerPath.pathPreparing"));
             setLoading(false);
             return;
           }
@@ -446,13 +448,13 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     if (sd.triad_all_complete) {
       setShowAllCompleteMessage(true);
       dispatch(screenActions.setScreenValue({ key: 'triad_all_complete', value: false }));
-      const t = setTimeout(() => setShowAllCompleteMessage(false), 5000);
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => setShowAllCompleteMessage(false), 5000);
+      return () => clearTimeout(timer);
     }
   }, [sd.triad_all_complete, dispatch]);
 
   const triadArr = Array.isArray(sd.today?.triad) ? sd.today.triad : [];
-  const sankalpRow = triadArr.find((t: any) => t?.slot === "sankalp");
+  const sankalpRow = triadArr.find((tri: any) => tri?.slot === "sankalp");
   const guidanceItems = useMemo(() => {
     if (sankalpRow?.how_to_live && typeof sankalpRow.how_to_live === "string") {
       return [sankalpRow.how_to_live];
@@ -488,7 +490,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
         )[]
       )
         .map((slot) => {
-          const item = triadArr.find((t: any) => t?.slot === slot) || {};
+          const item = triadArr.find((tri: any) => tri?.slot === slot) || {};
           const context = item.context || {};
           return {
             slot,
@@ -520,55 +522,55 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
           slot: "mantra",
           label: "MANTRA",
           title:
-            triadArr.find((t: any) => t?.slot === "mantra")?.title ||
+            triadArr.find((tri: any) => tri?.slot === "mantra")?.title ||
             sd.card_mantra_title ||
             "",
           subtitle:
-            triadArr.find((t: any) => t?.slot === "mantra")?.subtitle ||
-            "Return through sound",
+            triadArr.find((tri: any) => tri?.slot === "mantra")?.subtitle ||
+            t("innerPath.triad.mantraSubtitle"),
           completedToday:
-            triadArr.find((t: any) => t?.slot === "mantra")?.completed_today === true,
+            triadArr.find((tri: any) => tri?.slot === "mantra")?.completed_today === true,
           iconName: "musical-notes-outline" as const,
           master:
             sd.master_mantra ||
-            triadArr.find((t: any) => t?.slot === "mantra") ||
+            triadArr.find((tri: any) => tri?.slot === "mantra") ||
             null,
         },
         {
           slot: "sankalp",
           label: "SANKALP",
           title:
-            triadArr.find((t: any) => t?.slot === "sankalp")?.title ||
+            triadArr.find((tri: any) => tri?.slot === "sankalp")?.title ||
             sd.card_sankalpa_title ||
             "",
           subtitle:
-            triadArr.find((t: any) => t?.slot === "sankalp")?.subtitle ||
-            "Hold today's intention",
+            triadArr.find((tri: any) => tri?.slot === "sankalp")?.subtitle ||
+            t("innerPath.triad.sankalpSubtitle"),
           completedToday:
-            triadArr.find((t: any) => t?.slot === "sankalp")?.completed_today === true,
+            triadArr.find((tri: any) => tri?.slot === "sankalp")?.completed_today === true,
           iconName: "leaf-outline" as const,
           master:
             sd.master_sankalp ||
-            triadArr.find((t: any) => t?.slot === "sankalp") ||
+            triadArr.find((tri: any) => tri?.slot === "sankalp") ||
             null,
         },
         {
           slot: "practice",
           label: "PRACTICE",
           title:
-            triadArr.find((t: any) => t?.slot === "practice")?.title ||
+            triadArr.find((tri: any) => tri?.slot === "practice")?.title ||
             sd.card_ritual_title ||
             "",
           subtitle:
-            triadArr.find((t: any) => t?.slot === "practice")?.subtitle ||
-            "Move through the body",
+            triadArr.find((tri: any) => tri?.slot === "practice")?.subtitle ||
+            t("innerPath.triad.practiceSubtitle"),
           completedToday:
-            triadArr.find((t: any) => t?.slot === "practice")?.completed_today === true,
+            triadArr.find((tri: any) => tri?.slot === "practice")?.completed_today === true,
           iconName: "flower-outline" as const,
           IconComponent: In1Icon,
           master:
             sd.master_practice ||
-            triadArr.find((t: any) => t?.slot === "practice") ||
+            triadArr.find((tri: any) => tri?.slot === "practice") ||
             null,
         },
       ].filter((item) => item.title),
@@ -697,7 +699,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
         <View style={styles.centered}>
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity onPress={handleBack} style={styles.retryBtn}>
-            <Text style={styles.retryBtnText}>Go back</Text>
+            <Text style={styles.retryBtnText}>{t("innerPath.goBack")}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -713,9 +715,9 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
       >
         {showAllCompleteMessage && (
           <View style={styles.allCompleteBlock}>
-            <Text style={styles.allCompleteTitle}>All three held today</Text>
+            <Text style={styles.allCompleteTitle}>{t("innerPath.allComplete.title")}</Text>
             <Text style={styles.allCompleteBody}>
-              Mantra, Sankalp, Practice — the cycle is complete.
+              {t("innerPath.allComplete.body")}
             </Text>
           </View>
         )}
@@ -725,7 +727,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
             {sd.headline_text ||
               sd.greeting?.headline ||
               sd.focus_phrase ||
-              "Still here. That is the practice."}
+              t("innerPath.heroFallback")}
           </Text>
           {!!sd.greeting_context && (
             <Text style={styles.supportingLine}>{sd.greeting_context}</Text>
@@ -737,7 +739,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
             style={styles.dayPill}
           >
             <Text style={styles.dayPillText}>
-              Day {sd.day_number || 1} of {sd.total_days || 14}
+              {t("innerPath.dayPill", { n: sd.day_number || 1, m: sd.total_days || 14 })}
             </Text>
             <Ionicons
               name={progressOpen ? "chevron-up" : "chevron-down"}
@@ -784,7 +786,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                     <Text style={styles.triadSubtitle}>{item.subtitle}</Text>
                   )}
                   {item.completedToday && (
-                    <Text style={styles.triadDoneLabel}>{innerPathHeldLabel(item.slot)}</Text>
+                    <Text style={styles.triadDoneLabel}>{innerPathHeldLabel(item.slot, t)}</Text>
                   )}
                 </View>
               </View>
@@ -814,7 +816,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
             >
               <View style={styles.accordionLead}>
                 <Text style={styles.accordionIcon}>✦</Text>
-                <Text style={styles.accordionTitle}>Today&apos;s guidance</Text>
+                <Text style={styles.accordionTitle}>{t("innerPath.guidance.title")}</Text>
               </View>
               <Ionicons
                 name={guidanceOpen ? "chevron-up" : "chevron-down"}
@@ -849,12 +851,11 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                 <Text style={styles.accordionIcon}>✿</Text>
                 <View style={styles.whyHeaderCopy}>
                   <Text style={styles.accordionTitle}>
-                    Why these were chosen
+                    {t("innerPath.whyChosen.title")}
                   </Text>
                   {!whyChosenOpen && (
                     <Text style={styles.accordionSubtitle}>
-                      Understand why Mitra selected this mantra, sankalp, and
-                      practice.
+                      {t("innerPath.whyChosen.subtitle")}
                     </Text>
                   )}
                 </View>
@@ -869,8 +870,8 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
               <View style={styles.whyPanel}>
                 {activeWhyItem && (
                   <View>
-                    <Text style={styles.whyEyebrow}>Chosen with care</Text>
-                    <Text style={styles.whyTitle}>Why this supports today</Text>
+                    <Text style={styles.whyEyebrow}>{t("innerPath.whyPanel.eyebrow")}</Text>
+                    <Text style={styles.whyTitle}>{t("innerPath.whyPanel.heading")}</Text>
 
                     <View style={styles.whyTabsRow}>
                       {whyTabs.map((item) => {
@@ -909,7 +910,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
 
                     {!!activeWhyItem.context?.mitra_frame_through && (
                       <View style={styles.whyInfoCard}>
-                        <Text style={styles.whyInfoLabel}>Essence</Text>
+                        <Text style={styles.whyInfoLabel}>{t("innerPath.whyPanel.essence")}</Text>
                         <Text style={styles.whyInfoText}>
                           {sentence(
                             activeWhyItem.slot === "sankalp"
@@ -922,7 +923,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
 
                     {!!activeWhyItem.shift && (
                       <View style={styles.whyInfoCard}>
-                        <Text style={styles.whyInfoLabel}>Shift</Text>
+                        <Text style={styles.whyInfoLabel}>{t("innerPath.whyPanel.shift")}</Text>
                         <Text style={styles.whyInfoText}>
                           {sentence(
                             `Mitra chose this to guide you from ${activeWhyItem.shift}`,
@@ -933,7 +934,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
 
                     {!!activeWhyItem.context?.mitra_use_for && (
                       <View style={styles.whyInfoCard}>
-                        <Text style={styles.whyInfoLabel}>Useful for</Text>
+                        <Text style={styles.whyInfoLabel}>{t("innerPath.whyPanel.usefulFor")}</Text>
                         <Text style={styles.whyInfoText}>
                           {sentence(activeWhyItem.context.mitra_use_for)}
                         </Text>
@@ -942,7 +943,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
 
                     {!!activeWhyItem.context?.commentary_lineage && (
                       <View style={styles.whyInfoCard}>
-                        <Text style={styles.whyInfoLabel}>Rooted in</Text>
+                        <Text style={styles.whyInfoLabel}>{t("innerPath.whyPanel.rootedIn")}</Text>
                         <Text style={styles.whyInfoText}>
                           {sentence(activeWhyItem.context.commentary_lineage)}
                         </Text>
@@ -964,7 +965,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
               style={styles.accordionHeader}
             >
               <View style={styles.accordionHeaderLeft}>
-                <Text style={styles.accordionHeaderTitle}>Reminders</Text>
+                <Text style={styles.accordionHeaderTitle}>{t("innerPath.reminders.title")}</Text>
                 {!remindersOpen && (
                   <Text style={styles.accordionHeaderSubtitle}>
                     {[
@@ -973,7 +974,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                       reminders.practice_reminder_enabled && "Practice",
                     ]
                       .filter(Boolean)
-                      .join(", ") || "None set"}
+                      .join(", ") || t("innerPath.reminders.noneSet")}
                   </Text>
                 )}
               </View>
@@ -996,8 +997,8 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                   const label = key.charAt(0).toUpperCase() + key.slice(1);
                   const displayTime = time
                     ? (() => {
-                        const t = time.slice(0, 5);
-                        const [h, m] = t.split(":").map(Number);
+                        const hms = time.slice(0, 5);
+                        const [h, m] = hms.split(":").map(Number);
                         const period = h >= 12 ? "PM" : "AM";
                         const hour = h % 12 === 0 ? 12 : h % 12;
                         return `${String(hour).padStart(2, "0")}:${String(m).padStart(2, "0")} ${period}`;
@@ -1013,7 +1014,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                       ]}
                     >
                       <Text style={styles.reminderRowLabel}>
-                        Remind me for {label.toLowerCase()}
+                        {t("innerPath.reminders.row", { label: label.toLowerCase() })}
                       </Text>
                       <View style={styles.reminderRowRight}>
                         {enabled && displayTime && (
@@ -1068,7 +1069,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                       marginTop: 4,
                     }}
                   >
-                    Saving…
+                    {t("innerPath.reminders.saving")}
                   </Text>
                 )}
               </View>

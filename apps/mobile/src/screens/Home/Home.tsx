@@ -43,6 +43,7 @@ import api from "../../Networks/axios";
 import store, { AppDispatch, RootState } from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
+import { registerDeviceToBackend } from "../../utils/registerDevice";
 import { fetchProfileDetails } from "../Profile/actions";
 
 const FEATURE_ITEMS = [
@@ -158,7 +159,6 @@ export default function Home() {
 
           if (isGranted) {
             console.log("[NOTIF] Permission GRANTED → calling registerDeviceToBackend...");
-            const { registerDeviceToBackend } = require("../../utils/registerDevice");
             registerDeviceToBackend()
               .then(() => console.log("[NOTIF] ✅ Device registered with backend"))
               .catch((err: any) =>

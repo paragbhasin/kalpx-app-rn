@@ -13,20 +13,22 @@ import {
   View,
   Platform,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import type { RootState } from "../../store";
 import { Fonts } from "../../theme/fonts";
 import { platformShadow } from "../../theme/shadows";
 
-const INTRO_LINES = [
-  "Hi. I am Mitra.",
-  "I am here to help you feel more calm, steady, and clear — on hard days and good days.",
-  "I notice small things, like your mood and the shape of your day.",
-];
 const START_BACKGROUND = require("../../../assets/new_home.webp");
 
 export default function MitraStartScreen() {
+  const { t } = useTranslation();
   const navigation = useNavigation<any>();
+  const INTRO_LINES = [
+    t("mitraStart.line1"),
+    t("mitraStart.line2"),
+    t("mitraStart.line3"),
+  ];
   const user = useSelector(
     (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
   );
@@ -65,7 +67,7 @@ export default function MitraStartScreen() {
           />
 
           <View style={styles.card}>
-            <Text style={styles.title}>I'm Mitra.{"\n"}I'm here with you.</Text>
+            <Text style={styles.title}>{t("mitraStart.title")}</Text>
 
             <View style={styles.divider}>
               <View style={styles.line} />
@@ -101,7 +103,7 @@ export default function MitraStartScreen() {
                 end={{ x: 1, y: 0 }}
                 style={styles.gradient}
               >
-                <Text style={styles.beginText}>Yes, let's begin →</Text>
+                <Text style={styles.beginText}>{t("mitraStart.beginCta")}</Text>
               </LinearGradient>
             </TouchableOpacity>
 
@@ -111,7 +113,7 @@ export default function MitraStartScreen() {
                 activeOpacity={0.8}
                 style={styles.returningButton}
               >
-                <Text style={styles.returningText}>I'm returning</Text>
+                <Text style={styles.returningText}>{t("mitraStart.returning")}</Text>
               </TouchableOpacity>
             ) : null}
           </View>

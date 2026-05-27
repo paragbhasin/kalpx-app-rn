@@ -1,11 +1,10 @@
 import {
-  ENTRY_INTENTION_HEADING,
   ENTRY_INTENTION_OPTIONS,
-  ENTRY_INTENTION_SUBTEXT,
 } from "@kalpx/contracts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Image,
   SafeAreaView,
@@ -57,6 +56,7 @@ const OPTION_ACCENTS = {
 } as const;
 
 export default function MitraIntentionScreen() {
+  const { t } = useTranslation();
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
   const { handleScroll } = useScrollContext();
@@ -145,8 +145,8 @@ export default function MitraIntentionScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
-            <Text style={styles.heading}>{ENTRY_INTENTION_HEADING}</Text>
-            <Text style={styles.subtext}>{ENTRY_INTENTION_SUBTEXT}</Text>
+            <Text style={styles.heading}>{t("mitraIntention.heading")}</Text>
+            <Text style={styles.subtext}>{t("mitraIntention.subtext")}</Text>
 
             <View style={styles.divider}>
               <View style={styles.line} />
@@ -180,8 +180,8 @@ export default function MitraIntentionScreen() {
                     <IconComponent width={45} height={45} />
                   </View>
                   <View style={styles.cardContent}>
-                    <Text style={styles.cardTitle}>{opt.title}</Text>
-                    <Text style={styles.cardBody}>{opt.body}</Text>
+                    <Text style={styles.cardTitle}>{t(`mitraIntention.options.${opt.id}.title`)}</Text>
+                    <Text style={styles.cardBody}>{t(`mitraIntention.options.${opt.id}.body`)}</Text>
                     <View style={styles.ctaRow}>
                       <Text
                         style={[
@@ -193,7 +193,7 @@ export default function MitraIntentionScreen() {
                           },
                         ]}
                       >
-                        {opt.cta}
+                        {t(`mitraIntention.options.${opt.id}.cta`)}
                       </Text>
                       <Text style={[styles.arrow, { color: accent.chipColor }]}>
                         →

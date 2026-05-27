@@ -1858,5 +1858,39 @@
     "companionDesc1": "Grounded in timeless Sanatan wisdom.",
     "companionDesc2": "support what you carry, strengthen what is growing, and walk one day at a time",
     "beginCta": "Begin with Mitra →"
+  },
+  "mitraStart": {
+    "title": "I'm Mitra.\nI'm here with you.",
+    "line1": "Hi. I am Mitra.",
+    "line2": "I am here to help you feel more calm, steady, and clear — on hard days and good days.",
+    "line3": "I notice small things, like your mood and the shape of your day.",
+    "beginCta": "Yes, let's begin →",
+    "returning": "I'm returning"
+  },
+  "mitraIntention": {
+    "heading": "What feels needed today?",
+    "subtext": "Choose what feels closest right now.",
+    "options": {
+      "daily_rhythm": {
+        "title": "Shape my day",
+        "body": "Begin with remembrance in the morning, return during the day, and release what you cannot carry at night.",
+        "cta": "Set my rhythm"
+      },
+      "inner_path": {
+        "title": "Walk a deeper path",
+        "body": "A gentle 14-day journey toward clarity, practice, and inner steadiness.",
+        "cta": "Begin my path"
+      },
+      "quick_chant": {
+        "title": "Return through mantra",
+        "body": "A short chanting practice to gather the mind and return to stillness.",
+        "cta": "Start chanting"
+      },
+      "tell_mitra": {
+        "title": "Share what is moving",
+        "body": "Speak freely about what is on your mind. Mitra will help you see clearly and take the next step.",
+        "cta": "Tell Mitra"
+      }
+    }
   }
 }

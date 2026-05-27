@@ -16,6 +16,7 @@
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert, Linking } from "react-native";
+import i18n from "../config/i18n";
 import api from "../Networks/axios";
 import { navigate as rootNavigate, navigationRef } from "../Shared/Routes/NavigationService";
 import { cleanupFlowState, GUARDED_ACTIONS, hasTellMitraRoomEntryContext } from "@kalpx/contracts";
@@ -3335,6 +3336,14 @@ export async function executeAction(
             draft.stage0_choice = path;
             setScreenValue(null, "stage2_data");
             setScreenValue(null, "stage3_data");
+            // Pre-fetch stage1 chips with locale so turn_3_life_context renders translated labels
+            const stage1 = await mitraFetchOnboardingChips({
+              stage: 1,
+              lane: path,
+              guidance_mode: "hybrid",
+              locale: i18n.language || "en",
+            });
+            setScreenValue(stage1 || null, "stage1_data");
             nextStateId = path === "growth"
               ? "turn_3_life_context_growth"
               : "turn_3_life_context_support";
@@ -3352,6 +3361,7 @@ export async function executeAction(
               lane: draft.path,
               guidance_mode: "hybrid",
               stage1_choice: draft.stage1_choice,
+              locale: i18n.language || "en",
             });
             setScreenValue(stage2 || null, "stage2_data");
             setScreenValue(stage2?.mitra_message || "", "stage2_mitra_message");
@@ -3416,6 +3426,7 @@ export async function executeAction(
                   guidance_mode: "hybrid",
                   stage1_choice: draft.stage1_choice,
                   stage2_choice: draft.stage2_choice,
+                  locale: i18n.language || "en",
                 });
                 setScreenValue(stage3 || null, "stage3_data");
                 setScreenValue(stage3?.mitra_message || "", "stage3_mitra_message");

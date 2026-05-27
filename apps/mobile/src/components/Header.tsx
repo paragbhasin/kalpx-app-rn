@@ -2,6 +2,8 @@ import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Dropdown } from "react-native-element-dropdown";
+import { ENABLED_LOCALES } from "../config/i18n";
 import Colors from "./Colors";
 interface HeaderProps {
   isTransparent?: boolean;
@@ -13,7 +15,7 @@ const Header: React.FC<HeaderProps> = ({ isTransparent, backgroundColor }) => {
   const { i18n } = useTranslation();
   const [selectedLang, setSelectedLang] = useState(i18n.language);
 
-  const languages = [
+  const ALL_LANGUAGES = [
     { label: "English", value: "en" },
     { label: "हिन्दी", value: "hi" },
     { label: "ગુજરાતી", value: "gu" },
@@ -22,9 +24,10 @@ const Header: React.FC<HeaderProps> = ({ isTransparent, backgroundColor }) => {
     { label: "ಕನ್ನಡ", value: "kn" },
     { label: "മലയാളം", value: "ml" },
     { label: "தமிழ்", value: "ta" },
-
     { label: "తెలుగు", value: "te" },
   ];
+
+  const languages = ALL_LANGUAGES.filter((l) => ENABLED_LOCALES.includes(l.value));
 
   const changeLanguage = (code: string) => {
     setSelectedLang(code);
@@ -70,7 +73,7 @@ const Header: React.FC<HeaderProps> = ({ isTransparent, backgroundColor }) => {
       </TouchableOpacity>
 
       {/* Language Dropdown */}
-      {/* <View style={styles.dropdownContainer}>
+      <View style={styles.dropdownContainer}>
         <Dropdown
           selectedTextProps={{ allowFontScaling: false }}
           data={languages}
@@ -84,10 +87,9 @@ const Header: React.FC<HeaderProps> = ({ isTransparent, backgroundColor }) => {
           placeholderStyle={styles.placeholder}
           itemTextStyle={styles.itemText}
           maxHeight={130}
-  // itemTextStyle={styles.dropdownItemText}
-  containerStyle={styles.dropdownContainer}
+          containerStyle={styles.dropdownListContainer}
         />
-      </View> */}
+      </View>
     </View>
   );
 };
@@ -108,6 +110,10 @@ const styles = StyleSheet.create({
   dropdownContainer: {
     width: 120,
     justifyContent: "center",
+  },
+  dropdownListContainer: {
+    width: 140,
+    borderRadius: 8,
   },
   dropdown: {
     height: 30, // reduced from 32 ➜ smaller height

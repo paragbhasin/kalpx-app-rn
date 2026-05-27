@@ -4,11 +4,8 @@ import { ScrollView, TouchableOpacity, View } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Colors from "../../components/Colors";
 import TextComponent from "../../components/TextComponent";
+import { ENABLED_LOCALES } from "../../config/i18n";
 import styles from "./languageStyle";
-
-// Locales registered at startup. Mirror ENABLED_LOCALES in i18n.js.
-// To expose a language here, first add its imports and resource block there.
-const ENABLED_LOCALES = ["en"];
 
 const Language = () => {
   const { i18n } = useTranslation();

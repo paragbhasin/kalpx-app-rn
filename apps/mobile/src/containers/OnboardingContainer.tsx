@@ -142,7 +142,13 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
         const turnId = b.id || "";
         // Support dynamic stage data injection from screenData
         let dynamicData = null;
-        if (turnId === "turn3_felt") {
+        if (
+          turnId === "turn3_life_context" ||
+          turnId === "turn3_life_context_support" ||
+          turnId === "turn3_life_context_growth"
+        ) {
+          dynamicData = screenData.stage1_data;
+        } else if (turnId === "turn3_felt") {
           dynamicData = screenData.stage2_data;
         } else if (turnId === "turn3_clarify") {
           dynamicData = screenData.stage3_data;

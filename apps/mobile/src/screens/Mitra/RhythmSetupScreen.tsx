@@ -362,10 +362,10 @@ function ReminderTimeRow({
   );
 }
 
-function beginLabel(itemType: string): string {
-  if (itemType === "mantra") return "Begin Chanting";
-  if (itemType === "sankalp") return "Begin Embodying";
-  return "Begin Practice";
+function beginLabel(itemType: string, t: (key: string) => string): string {
+  if (itemType === "mantra") return t("rhythmHome.beginChanting");
+  if (itemType === "sankalp") return t("rhythmHome.beginEmbodying");
+  return t("rhythmHome.beginPractice");
 }
 
 function getConfirmationItems(
@@ -1499,7 +1499,7 @@ export default function RhythmSetupScreen({
                     activeOpacity={0.85}
                   >
                     <Text style={wStyles.confirmActionBtnText}>
-                      {beginLabel(item.item_type)}
+                      {beginLabel(item.item_type, t)}
                     </Text>
                   </TouchableOpacity>
                 </View>

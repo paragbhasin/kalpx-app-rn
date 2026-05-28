@@ -621,16 +621,6 @@ export default function RhythmSetupScreen({
     }
   }, [purposes, selectedMoments, i18n.language]);
 
-  // Re-fetch when locale changes while already on suggestion step
-  useEffect(() => {
-    if (wizardStep === "suggestion") {
-      setWizardItems({});
-      setSuggestError(null);
-      setSuggestionsLoaded(false);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [i18n.language]);
-
   useEffect(() => {
     if (wizardStep === "suggestion" && !editMode && !suggestionsLoaded) {
       void loadSuggestions();

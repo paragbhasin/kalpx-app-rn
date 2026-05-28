@@ -662,7 +662,7 @@ export function normalizeMantraFromBrowse(
   };
 }
 
-// Returns a mantra from `candidates` whose item_id differs from `currentItemId`.
+// Returns a random mantra from `candidates` whose item_id differs from `currentItemId`.
 // Falls back to null if no different mantra is available.
 export function pickDifferentMantra(
   candidates: QuickResetMantra[],
@@ -670,7 +670,7 @@ export function pickDifferentMantra(
 ): QuickResetMantra | null {
   const different = candidates.filter((m) => m.item_id !== currentItemId);
   if (different.length === 0) return null;
-  return different[0];
+  return different[Math.floor(Math.random() * different.length)];
 }
 
 // Normalises browse-mantras raw array → QuickResetMantra[].

@@ -828,7 +828,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
             {guidanceOpen && (
               <View style={styles.guidanceCard}>
                 <Text style={styles.guidanceHeader}>
-                  {sd.sankalp_how_to_live_label || "HOW TO LIVE THIS"}
+                  {sd.sankalp_how_to_live_label || t("innerPath.guidance.howToLive")}
                 </Text>
                 {guidanceItems.map((item: string, index: number) => (
                   <View key={`guide-${index}`} style={styles.guidanceItemRow}>
@@ -970,9 +970,9 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                 {!remindersOpen && (
                   <Text style={styles.accordionHeaderSubtitle}>
                     {[
-                      reminders.mantra_reminder_enabled && "Mantra",
-                      reminders.sankalp_reminder_enabled && "Sankalp",
-                      reminders.practice_reminder_enabled && "Practice",
+                      reminders.mantra_reminder_enabled && t("innerPath.reminders.mantra"),
+                      reminders.sankalp_reminder_enabled && t("innerPath.reminders.sankalp"),
+                      reminders.practice_reminder_enabled && t("innerPath.reminders.practice"),
                     ]
                       .filter(Boolean)
                       .join(", ") || t("innerPath.reminders.noneSet")}

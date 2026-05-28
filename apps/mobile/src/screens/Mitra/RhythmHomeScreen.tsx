@@ -168,7 +168,7 @@ function RhythmBand({
         }}
       >
         <Text style={styles.bandLabel}>
-          {RHYTHM_BAND_LABELS[band]} Practice
+          {t(`rhythmHome.bandTitle.${band}`, { defaultValue: `${RHYTHM_BAND_LABELS[band]} Practice` })}
         </Text>
         {slotHeld && (
           <Text style={styles.bandHeldLabel}>{slotHeldLabel(band, t)}</Text>

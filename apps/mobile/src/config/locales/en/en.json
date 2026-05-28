@@ -2080,7 +2080,8 @@
       "body": "Mantra, Sankalp, Practice — the cycle is complete."
     },
     "guidance": {
-      "title": "Today's guidance"
+      "title": "Today's guidance",
+      "howToLive": "HOW TO LIVE THIS"
     },
     "whyChosen": {
       "title": "Why these were chosen",
@@ -2097,6 +2098,9 @@
     "reminders": {
       "title": "Reminders",
       "noneSet": "None set",
+      "mantra": "Mantra",
+      "sankalp": "Sankalp",
+      "practice": "Practice",
       "row": "Remind me for {{label}}",
       "saving": "Saving…"
     },
@@ -2129,6 +2133,11 @@
       "morning": "Morning rhythm held",
       "afternoon": "Afternoon rhythm held",
       "night": "Night rhythm held"
+    },
+    "bandTitle": {
+      "morning": "Morning Practice",
+      "afternoon": "Afternoon Practice",
+      "night": "Night Practice"
     },
     "addToRhythm": "Add to your {{band}} rhythm",
     "reminderLine": "Mitra will gently remind you at {{time}}"

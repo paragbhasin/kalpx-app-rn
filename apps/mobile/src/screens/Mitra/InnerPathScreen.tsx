@@ -521,7 +521,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
       [
         {
           slot: "mantra",
-          label: "MANTRA",
+          label: t("rhythmHome.badge.mantra"),
           title:
             triadArr.find((tri: any) => tri?.slot === "mantra")?.title ||
             sd.card_mantra_title ||
@@ -539,7 +539,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
         },
         {
           slot: "sankalp",
-          label: "SANKALP",
+          label: t("rhythmHome.badge.sankalp"),
           title:
             triadArr.find((tri: any) => tri?.slot === "sankalp")?.title ||
             sd.card_sankalpa_title ||
@@ -557,7 +557,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
         },
         {
           slot: "practice",
-          label: "PRACTICE",
+          label: t("rhythmHome.badge.practice"),
           title:
             triadArr.find((tri: any) => tri?.slot === "practice")?.title ||
             sd.card_ritual_title ||
@@ -575,7 +575,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
             null,
         },
       ].filter((item) => item.title),
-    [sd, triadArr],
+    [sd, triadArr, t],
   );
 
   const handleTriadPress = (

@@ -29,10 +29,10 @@ import { Fonts } from "../../theme/fonts";
 // ── Constants ────────────────────────────────────────────────────────────────
 
 const QUICK_START_CHIPS = [
-  { label: "I feel overwhelmed", value: "overwhelmed" },
-  { label: "I need clarity", value: "need_clarity" },
-  { label: "I feel disconnected", value: "disconnected" },
-  { label: "Just help me calm down", value: "calm_now" },
+  { value: "overwhelmed" },
+  { value: "need_clarity" },
+  { value: "disconnected" },
+  { value: "calm_now" },
 ] as const;
 
 const RETURN_CARD_CHIPS: TellMitraFollowupOption[] = [

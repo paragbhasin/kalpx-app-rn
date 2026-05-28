@@ -3386,6 +3386,7 @@ export async function executeAction(
               stage3_choice: null as unknown as string,
               guidance_mode: "hybrid",
               life_context: draft.life_context || null,
+              locale: i18n.language || "en",
               freeforms: {
                 stage1: draft.freeforms?.stage1 || null,
                 stage2: draft.freeforms?.stage2 || null,
@@ -3454,6 +3455,7 @@ export async function executeAction(
               stage3_choice: draft.stage3_choice,
               guidance_mode: "hybrid",
               life_context: draft.life_context || null,
+              locale: i18n.language || "en",
               freeforms: {
                 stage1: draft.freeforms?.stage1 || null,
                 stage2: draft.freeforms?.stage2 || null,

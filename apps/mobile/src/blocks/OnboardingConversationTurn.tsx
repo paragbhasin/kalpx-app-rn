@@ -26,6 +26,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { VoiceTextInput } from "../components/VoiceTextInput";
 import { executeAction } from "../engine/actionExecutor";
@@ -98,6 +99,7 @@ const turnOneMessageIcons: (keyof typeof Ionicons.glyphMap)[] = [
 ];
 
 const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
+  const { t } = useTranslation();
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
   const user = useSelector(
     (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
@@ -222,6 +224,18 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
   );
 
   if (block.turnOneHero && isIntroTurn) {
+    const t1HeadlineLines = t("mitraStart.title").split("\n");
+    const t1Messages = [
+      t("mitraStart.line1"),
+      t("mitraStart.line2"),
+      t("mitraStart.line3"),
+    ];
+    const t1ChipLabel = (chip: { id: string; label: string }) => {
+      if (chip.id === "continue") return t("mitraStart.beginCta");
+      if (chip.id === "returning") return t("mitraStart.returning");
+      return chip.label;
+    };
+
     return (
       <View
         style={styles.turnOneWrap}
@@ -229,7 +243,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
         accessibilityLabel={`onboarding_turn_${turn}_root`}
       >
         <View style={styles.turnOneCard}>
-          <Text style={styles.turnOneHeadline}>{headlineLines.join("\n")}</Text>
+          <Text style={styles.turnOneHeadline}>{t1HeadlineLines.join("\n")}</Text>
 
           <View style={styles.turnOneHeadlineDivider}>
             <View style={styles.turnOneDividerLine} />
@@ -238,7 +252,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
           </View>
 
           <View style={styles.turnOneMessageList}>
-            {featureMessages.map((message, index) => (
+            {t1Messages.map((message, index) => (
               <View key={index} style={styles.turnOneMessageRow}>
                 <View style={styles.turnOneIconBubble}>
                   <Ionicons
@@ -311,7 +325,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                       color="#fff9ec"
                     />
                     <Text style={styles.turnOnePrimaryButtonText}>
-                      {chip.label.replace(" →", "")}
+                      {t1ChipLabel(chip).replace(" →", "")}
                     </Text>
                     <Ionicons name="arrow-forward" size={22} color="#fff9ec" />
                   </LinearGradient>
@@ -323,7 +337,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                     ]}
                   >
                     <Text style={styles.turnOneSecondaryButtonText}>
-                      {chip.label}
+                      {t1ChipLabel(chip)}
                     </Text>
                   </View>
                 )}

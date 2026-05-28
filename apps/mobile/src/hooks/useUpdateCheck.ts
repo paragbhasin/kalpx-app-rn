@@ -58,14 +58,13 @@ export function useUpdateCheck() {
 
         const latestStr = String(latest);
 
-        if (FORCE_UPDATE) {
-          setUpdateType("force");
-          setShowUpdate(true);
-          return;
-        }
-
         if (isNewer(currentStr, latestStr)) {
-          // Newer version available but not critical — soft update with daily snooze
+          if (FORCE_UPDATE) {
+            setUpdateType("force");
+            setShowUpdate(true);
+            return;
+          }
+          // Soft update — respect daily snooze
           const dismissedDate = await AsyncStorage.getItem(DISMISSED_KEY);
           if (dismissedDate === todayDateString()) return;
           if (!active) return;

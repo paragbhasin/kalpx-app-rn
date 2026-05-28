@@ -45,9 +45,9 @@ import {
 // 📌 Push Notification Service
 import { initScreenResolver } from "./src/engine/screenResolver";
 import {
+  checkExistingPermission,
   foregroundNotificationListener,
   notificationOpenListener,
-  requestPushPermission,
 } from "./src/service/pushNotifications";
 import { attachDeepLinkListeners } from "./src/utils/deeplink";
 import { registerDeviceToBackend } from "./src/utils/registerDevice";
@@ -285,14 +285,12 @@ export default function App() {
 
   // Push Notification setup
   useEffect(() => {
-    // Request permission — if granted, immediately register device so the
-    // backend has the FCM token even before splash-hide registerDeviceToBackend runs.
-    requestPushPermission().then((token) => {
+    // On boot: check existing permission only — never prompt at launch.
+    // Permission is requested only when the user enables a reminder.
+    checkExistingPermission().then((token) => {
       if (token) {
-        console.log("[NOTIF] ✅ Permission granted at boot — registering device...");
+        console.log("[NOTIF] ✅ Permission already granted — registering device...");
         registerDeviceToBackend();
-      } else {
-        console.log("[NOTIF] ⚠️ Permission not granted at boot — device not registered yet");
       }
     });
 

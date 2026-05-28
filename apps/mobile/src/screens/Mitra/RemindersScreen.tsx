@@ -20,11 +20,20 @@ import {
   apiGetJourneyReminders,
   apiPatchJourneyReminders,
   mitraJourneyHomeV3 as getMitraHomeV3,
+  mitraTrackEvent,
   patchRhythmItem,
 } from "../../engine/mitraApi";
 import type { AppDispatch, RootState } from "../../store";
 import { setHomeData } from "../../store/doorSlice";
 import { TimePickerModal } from "../../components/TimePickerModal";
+import NotificationPermissionModal from "../../components/NotificationPermissionModal";
+import {
+  checkNotificationPermission,
+  openNotificationSettings,
+  type NotifPermissionStatus,
+} from "../../service/notificationPermission";
+import { requestPushPermission } from "../../service/pushNotifications";
+import { registerDeviceToBackend } from "../../utils/registerDevice";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import { useSafeAreaInsets, SafeAreaView } from "react-native-safe-area-context";
@@ -136,6 +145,11 @@ export default function RemindersScreen() {
   const [pickerInitialTime, setPickerInitialTime] = useState<string | null>(null);
   const pickerCallback = useRef<((timeStr: string) => void) | null>(null);
 
+  // Notification permission modal state
+  const [permModalVisible, setPermModalVisible] = useState(false);
+  const [permModalStatus, setPermModalStatus] = useState<Extract<NotifPermissionStatus, 'undetermined' | 'denied'>>('undetermined');
+  const pendingToggleAction = useRef<(() => Promise<void>) | null>(null);
+
   useEffect(() => {
     apiGetJourneyReminders()
       .then(setReminders)
@@ -156,8 +170,48 @@ export default function RemindersScreen() {
     setPickerVisible(true);
   }
 
+  // ── Notification permission gate ──────────────────────────────────────────
+  async function withPermissionCheck(action: () => Promise<void>) {
+    const status = await checkNotificationPermission();
+    if (status === 'granted' || status === 'provisional') {
+      await action();
+      return;
+    }
+    const modalStatus = status === 'denied' ? 'denied' : 'undetermined';
+    mitraTrackEvent('notification_pre_prompt_view', { meta: { trigger: 'reminder_toggle', permission_status: modalStatus } });
+    setPermModalStatus(modalStatus);
+    setPermModalVisible(true);
+    pendingToggleAction.current = action;
+  }
+
+  async function handlePermissionAllow() {
+    setPermModalVisible(false);
+    if (permModalStatus === 'denied') {
+      mitraTrackEvent('notification_settings_open', { meta: {} });
+      openNotificationSettings();
+      return;
+    }
+    // undetermined → trigger native prompt
+    const token = await requestPushPermission();
+    if (token) {
+      mitraTrackEvent('notification_permission_granted', { meta: { source: 'reminder_toggle' } });
+      registerDeviceToBackend();
+      if (pendingToggleAction.current) {
+        await pendingToggleAction.current();
+      }
+    } else {
+      mitraTrackEvent('notification_permission_denied', { meta: { source: 'reminder_toggle' } });
+    }
+    pendingToggleAction.current = null;
+  }
+
+  function handlePermissionDismiss() {
+    setPermModalVisible(false);
+    pendingToggleAction.current = null;
+  }
+
   // ── Triad handlers ────────────────────────────────────────────────────────
-  async function handleTriadToggle(key: "mantra" | "sankalp" | "practice") {
+  async function executeTriadToggle(key: "mantra" | "sankalp" | "practice") {
     if (!reminders) return;
     const enabledKey = `${key}_reminder_enabled` as keyof JourneyTriadReminders;
     const timeKey = `${key}_reminder_time` as keyof JourneyTriadReminders;
@@ -175,10 +229,23 @@ export default function RemindersScreen() {
     try {
       const updated = await apiPatchJourneyReminders(patch);
       setReminders(updated);
+      mitraTrackEvent(isEnabled ? 'reminder_disabled' : 'reminder_enabled', {
+        meta: { type: 'inner_path', key },
+      });
     } catch {
       setReminders(prev);
     } finally {
       setTriadSavingKey(null);
+    }
+  }
+
+  async function handleTriadToggle(key: "mantra" | "sankalp" | "practice") {
+    if (!reminders) return;
+    const isCurrentlyEnabled = reminders[`${key}_reminder_enabled`] as boolean;
+    if (!isCurrentlyEnabled) {
+      await withPermissionCheck(() => executeTriadToggle(key));
+    } else {
+      await executeTriadToggle(key);
     }
   }
 
@@ -202,7 +269,7 @@ export default function RemindersScreen() {
   }
 
   // ── Rhythm handlers ───────────────────────────────────────────────────────
-  async function handleRhythmToggle(item: RhythmItem) {
+  async function executeRhythmToggle(item: RhythmItem) {
     setRhythmSavingId(item.rhythm_item_id);
     try {
       await patchRhythmItem(item.rhythm_item_id, {
@@ -211,9 +278,20 @@ export default function RemindersScreen() {
       });
       const fresh = await getMitraHomeV3({ forceFresh: true });
       dispatch(setHomeData(fresh));
+      mitraTrackEvent(item.reminder_enabled ? 'reminder_disabled' : 'reminder_enabled', {
+        meta: { type: 'daily_rhythm', rhythm_item_id: item.rhythm_item_id },
+      });
     } catch {
     } finally {
       setRhythmSavingId(null);
+    }
+  }
+
+  async function handleRhythmToggle(item: RhythmItem) {
+    if (!item.reminder_enabled) {
+      await withPermissionCheck(() => executeRhythmToggle(item));
+    } else {
+      await executeRhythmToggle(item);
     }
   }
 
@@ -326,6 +404,13 @@ export default function RemindersScreen() {
           setPickerVisible(false);
         }}
         onCancel={() => setPickerVisible(false)}
+      />
+
+      <NotificationPermissionModal
+        visible={permModalVisible}
+        permissionStatus={permModalStatus}
+        onAllow={handlePermissionAllow}
+        onDismiss={handlePermissionDismiss}
       />
     </SafeAreaView>
   );

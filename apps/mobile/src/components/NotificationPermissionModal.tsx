@@ -1,94 +1,191 @@
-import React from "react";
-import { Linking, Modal, Platform, TouchableOpacity, View } from "react-native";
-import Colors from "./Colors";
-import TextComponent from "./TextComponent";
+import React, { useEffect, useRef } from 'react';
+import {
+  Animated,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Colors } from '../theme/colors';
+import { Fonts } from '../theme/fonts';
+import { mitraTrackEvent } from '../engine/mitraApi';
+import type { NotifPermissionStatus } from '../service/notificationPermission';
 
-const openAppSettings = () => {
-  if (Platform.OS === "ios") {
-    Linking.openSettings();
-  } else {
-    Linking.sendIntent("android.settings.APP_NOTIFICATION_SETTINGS", [
-      {
-        key: "android.provider.extra.APP_PACKAGE",
-        value: "com.kalpx.app",
-      },
-    ]).catch(() => {
-      // fallback: open general settings if intent fails
-      Linking.openSettings();
+interface Props {
+  visible: boolean;
+  permissionStatus: Extract<NotifPermissionStatus, 'undetermined' | 'denied'>;
+  onAllow: () => void;
+  onDismiss: () => void;
+}
+
+const COPY = {
+  undetermined: {
+    title: 'Turn on notifications',
+    body: 'Get gentle reminders for your mantra and daily rhythm.',
+    primaryCta: 'Turn On',
+    secondaryCta: 'Not Now',
+  },
+  denied: {
+    title: 'Notifications are off',
+    body: 'Allow notifications in Settings to receive gentle reminders.',
+    primaryCta: 'Open Settings',
+    secondaryCta: 'Not Now',
+  },
+} as const;
+
+export default function NotificationPermissionModal({
+  visible,
+  permissionStatus,
+  onAllow,
+  onDismiss,
+}: Props) {
+  const slideAnim = useRef(new Animated.Value(80)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const copy = COPY[permissionStatus] ?? COPY.undetermined;
+
+  useEffect(() => {
+    if (visible) {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          tension: 70,
+          friction: 11,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      fadeAnim.setValue(0);
+      slideAnim.setValue(80);
+    }
+  }, [visible, permissionStatus]);
+
+  function handleAllow() {
+    mitraTrackEvent('notification_pre_prompt_accept', {
+      meta: { permission_status: permissionStatus },
     });
+    onAllow();
   }
-};
 
-const NotificationPermissionModal = ({ visible, onClose }) => {
+  function handleDismiss() {
+    onDismiss();
+  }
+
   return (
-    <Modal visible={visible} transparent animationType="fade">
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "rgba(0,0,0,0.6)",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: 20,
-        }}
-      >
-        <View
-          style={{
-            width: "100%",
-            backgroundColor: Colors.Colors.white,
-            borderRadius: 12,
-            padding: 24,
-            alignItems: "center",
-          }}
+    <Modal visible={visible} transparent animationType="none">
+      <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={handleDismiss} />
+        <Animated.View
+          style={[styles.card, { transform: [{ translateY: slideAnim }] }]}
         >
-          <TextComponent
-            type="headerSubBoldText"
-            style={{  color: Colors.Colors.BLACK, marginBottom: 6 }}
-          >
-            Allow Notifications
-          </TextComponent>
+          {/* Icon row */}
+          <View style={styles.iconRow}>
+            <View style={styles.iconWrap}>
+              <Ionicons name="notifications-outline" size={18} color={Colors.goldBright} />
+            </View>
+            <Text style={styles.title}>{copy.title}</Text>
+          </View>
 
-          <TextComponent
-            type="subText"
-            style={{
-              textAlign: "center",
-              marginBottom: 20,
-            }}
-          >
-           Allow Mitra to send gentle reminders for your rhythm, mantra, and inner path practice. You can adjust or turn off notifications any time in Settings.
-          </TextComponent>
+          {/* Body */}
+          <Text style={styles.body}>{copy.body}</Text>
 
-          {/* Open Settings Button */}
-          <TouchableOpacity
-            onPress={() => {
-              onClose();
-              openAppSettings(); // 🔥 correct cross-platform behavior
-            }}
-            style={{
-              backgroundColor: Colors.Colors.App_theme,
-              paddingVertical: 10,
-              paddingHorizontal: 40,
-              borderRadius: 8,
-              marginBottom: 12,
-            }}
-          >
-            <TextComponent type="boldText" style={{ color: "white" }}>
-              Enable Notifications
-            </TextComponent>
-          </TouchableOpacity>
-
-          {/* Cancel */}
-          <TouchableOpacity onPress={onClose}>
-            <TextComponent
-              type="mediumText"
-              style={{ color: Colors.Colors.Light_black }}
+          {/* Buttons */}
+          <View style={styles.btnRow}>
+            <TouchableOpacity
+              onPress={handleDismiss}
+              activeOpacity={0.7}
+              style={styles.secondaryBtn}
             >
-              Not Now
-            </TextComponent>
-          </TouchableOpacity>
-        </View>
-      </View>
+              <Text style={styles.secondaryBtnText}>{copy.secondaryCta}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={handleAllow}
+              activeOpacity={0.82}
+              style={styles.primaryBtn}
+            >
+              <Text style={styles.primaryBtnText}>{copy.primaryCta}</Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+      </Animated.View>
     </Modal>
   );
-};
+}
 
-export default NotificationPermissionModal;
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    justifyContent: 'flex-end',
+    paddingBottom: 34,
+    paddingHorizontal: 16,
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    paddingVertical: 18,
+    paddingHorizontal: 18,
+  },
+  iconRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 8,
+  },
+  iconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(212,160,23,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 15,
+    color: Colors.brownDeep,
+    flex: 1,
+  },
+  body: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    color: Colors.brownMuted,
+    lineHeight: 19,
+    marginBottom: 16,
+    paddingLeft: 44,
+  },
+  btnRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+    alignItems: 'center',
+  },
+  secondaryBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+  },
+  secondaryBtnText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 14,
+    color: Colors.brownMuted,
+  },
+  primaryBtn: {
+    backgroundColor: Colors.goldBright,
+    borderRadius: 8,
+    paddingVertical: 9,
+    paddingHorizontal: 18,
+  },
+  primaryBtnText: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 14,
+    color: '#fff',
+  },
+});

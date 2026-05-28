@@ -33,35 +33,25 @@ export async function registerDeviceToBackend() {
     const res = await api.post("/notifications/register-device/", payload);
     console.log("📡 Device Register Response:", res.data);
 
-    // 4️⃣ Confirm timezone for authenticated users so push notifications unlock.
-    // Gate 1 of is_eligible_for_push requires timezone_source='device_confirmed' or 'user_set'.
-    // Without this, ALL pushes are silently blocked even if the device token is registered.
-    if (res.data?.identity === "user") {
-      try {
-        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        if (tz && tz !== "UTC") {
-          await api.patch("users/profile/update_profile/", {
-            timezone: tz,
-            timezone_confirmed_from_device: true,
-          });
-          console.log("📡 Timezone confirmed from device:", tz);
-        }
-      } catch (tzErr) {
-        console.log("❌ Timezone confirm failed (non-fatal):", tzErr?.message);
+    // 5️⃣ Confirm device timezone so push eligibility Gate 1 passes.
+    // Without this, timezone_source stays "default" and all reminders
+    // are silently suppressed by is_eligible_for_push().
+    try {
+      const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (deviceTimezone) {
+        await api.patch("users/profile/update_profile/", {
+          timezone: deviceTimezone,
+          timezone_confirmed_from_device: true,
+        });
+        console.log("🕐 Timezone confirmed:", deviceTimezone);
       }
+    } catch (tzError) {
+      console.log("⚠️ Timezone confirm failed (non-fatal):", tzError?.message);
     }
   } catch (error) {
     console.log("❌ Device registration failed:", error?.message);
   }
 }
-
-
-
-
-
-
-
-
 
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 // import messaging from "@react-native-firebase/messaging";
@@ -119,7 +109,6 @@ export async function registerDeviceToBackend() {
 // } else {
 //   console.log("✅ Device registered successfully:", res.data);
 // }
-
 
 //   } catch (error) {
 //     console.log("❌ Device registration failed:", error?.message);

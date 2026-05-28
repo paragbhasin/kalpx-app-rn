@@ -2,34 +2,32 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Platform,
   ScrollView,
   StyleSheet,
   Switch,
+  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useDispatch, useSelector } from 'react-redux';
 import api from '../../Networks/axios';
-import TextComponent from '../../components/TextComponent';
 import { AppDispatch, RootState } from '../../store';
 import {
-  fetchPreferences,
-  fetchNotificationPrefs,
   fetchGlobalConsent,
-  updateNotificationPref,
-  updateGlobalConsent,
-  updatePreference,
-  type NotificationPrefs,
+  fetchNotificationPrefs,
+  fetchPreferences,
   type GlobalConsent,
+  type NotificationPrefs,
+  updateGlobalConsent,
+  updateNotificationPref,
+  updatePreference,
 } from '../../store/preferencesSlice';
-
-const GOLD = '#b8864b';
-const BORDER = 'rgba(184, 134, 75, 0.22)';
-const BG = '#fffaf5';
-const SECTION_BG = '#fff8f0';
-const TEXT_SECONDARY = '#7a6a58';
+import { Colors } from '../../theme/colors';
+import { Fonts } from '../../theme/fonts';
 
 const TZ_DISMISS_KEY = 'kalpx:tz_prompt_dismissed_at';
 
@@ -50,130 +48,155 @@ const TIMEZONES = [
   { label: 'South Africa Standard Time (SAST)', value: 'Africa/Johannesburg' },
 ];
 
+type NotifLevel = 'normal' | 'reduced' | 'off';
+
+const LEVELS: { value: NotifLevel; icon: string; label: string; sub: string }[] = [
+  {
+    value: 'off',
+    icon: 'moon-outline',
+    label: 'Silent',
+    sub: 'In-app only\nNo push',
+  },
+  {
+    value: 'reduced',
+    icon: 'leaf-outline',
+    label: 'Gentle',
+    sub: 'Morning &\nSacred time',
+  },
+  {
+    value: 'normal',
+    icon: 'infinite-outline',
+    label: 'Full',
+    sub: 'Complete\ncompanion',
+  },
+];
+
 type CategoryConfig = {
   key: keyof NotificationPrefs;
+  icon: string;
   label: string;
   description: string;
-  defaultOn: boolean;
 };
 
-const COMPANION_CATEGORIES: CategoryConfig[] = [
+const DAILY_RHYTHM: CategoryConfig[] = [
   {
     key: 'morning_presence',
-    label: 'Morning Companion',
+    icon: 'sunny-outline',
+    label: 'Morning companion',
     description: 'A gentle start before your day opens.',
-    defaultOn: true,
-  },
-  {
-    key: 'prep_heads_up',
-    label: 'Practice Reminders',
-    description: 'A nudge to return to your Sankalp or Mantra.',
-    defaultOn: true,
-  },
-  {
-    key: 'evening_reflection',
-    label: 'Evening Reflection',
-    description: 'A quiet close for the day.',
-    defaultOn: true,
-  },
-  {
-    key: 'milestone_reflections',
-    label: 'Journey Milestones',
-    description: 'Day 7 and Day 14 checkpoints, and weekly reflections.',
-    defaultOn: true,
   },
   {
     key: 'morning_briefing',
-    label: 'Morning Briefing',
+    icon: 'partly-sunny-outline',
+    label: 'Morning briefing',
     description: 'A daily reflection and practice to begin your day with Mitra.',
-    defaultOn: true,
+  },
+  {
+    key: 'prep_heads_up',
+    icon: 'time-outline',
+    label: 'Practice nudge',
+    description: 'A soft return to your Sankalp or Mantra.',
+  },
+  {
+    key: 'evening_reflection',
+    icon: 'moon-outline',
+    label: 'Evening reflection',
+    description: 'A quiet close for the day.',
   },
 ];
 
-const COMPANION_GUIDANCE_CATEGORIES: CategoryConfig[] = [
-  {
-    key: 'predictive_suggestions',
-    label: 'Mitra Suggestions',
-    description: 'Gentle suggestions when Mitra finds a practice that may help today.',
-    defaultOn: true,
-  },
+const SACRED_TIME: CategoryConfig[] = [
   {
     key: 'festival_ritucharya',
-    label: 'Festival & Season Rhythms',
-    description: 'Cultural and seasonal reflections woven into your practice.',
-    defaultOn: true,
-  },
-  {
-    key: 'gentle_reengagement',
-    label: 'Gentle Return',
-    description: "A quiet reminder when you've been away for a few days.",
-    defaultOn: true,
-  },
-  {
-    key: 'post_conflict_follow',
-    label: 'Quiet Reset',
-    description: 'A soft reminder to pause and return to your practice.',
-    defaultOn: true,
-  },
-  {
-    key: 'community_updates',
-    label: 'Community Updates',
-    description: 'Updates from KalpX spaces and reflections.',
-    defaultOn: true,
-  },
-  {
-    key: 'post_room_continuity',
-    label: 'After Room Sessions',
-    description: 'A gentle follow-up to help you carry practice forward.',
-    defaultOn: true,
+    icon: 'flame-outline',
+    label: 'Ekadashi & Purnima',
+    description: 'Gentle reminders on sacred moon days and fasting days.',
   },
 ];
 
-const SENSITIVE_CATEGORIES: CategoryConfig[] = [
+const JAPA_MANTRA: CategoryConfig[] = [
   {
-    key: 'grief_follow',
-    label: 'Grief Companionship',
-    description: 'Very gentle support during tender times.',
-    defaultOn: true,
+    key: 'notif_quick_chant_reminders',
+    icon: 'radio-button-on-outline',
+    label: 'Japa reminders',
+    description: 'An occasional return to your chosen sound.',
+  },
+  {
+    key: 'milestone_reflections',
+    icon: 'sparkles-outline',
+    label: 'Weekly chanting summary',
+    description: 'How many times you chanted this week, your most active mantra.',
   },
 ];
 
-const RHYTHM_AND_CHECKIN_CATEGORIES: CategoryConfig[] = [
+const INNER_PATH: CategoryConfig[] = [
   {
     key: 'notif_rhythm_reminders',
-    label: 'Daily Rhythm Reminders',
+    icon: 'footsteps-outline',
+    label: 'Daily rhythm reminders',
     description: 'A soft call to your rhythm at the time you set.',
-    defaultOn: true,
   },
   {
     key: 'notif_checkin_companion_nudge',
-    label: 'Check-in Companion',
-    description: 'A quiet follow-up when Mitra can offer a gentle anchor.',
-    defaultOn: true,
-  },
-  {
-    key: 'notif_quick_chant_reminders',
-    label: 'Mantra Reminders',
-    description: 'An occasional return to your chosen sound.',
-    defaultOn: true,
+    icon: 'heart-outline',
+    label: 'Check-in anchor',
+    description: 'A quiet follow-up when Mitra can offer support.',
   },
 ];
 
-const FREQUENCY_OPTIONS: { label: string; value: string; description: string }[] = [
-  { label: 'Normal', value: 'normal', description: 'Full companion rhythm' },
-  { label: 'Reduced', value: 'reduced', description: 'Fewer, more spaced' },
-  { label: 'Off', value: 'off', description: 'Pause all notifications' },
+const COMPANION_SUPPORT: CategoryConfig[] = [
+  {
+    key: 'predictive_suggestions',
+    icon: 'bulb-outline',
+    label: 'Mitra suggestions',
+    description: 'Gentle suggestions when Mitra finds a practice that may help today.',
+  },
+  {
+    key: 'gentle_reengagement',
+    icon: 'refresh-outline',
+    label: 'Gentle return',
+    description: 'A quiet reminder when you have been away for a few days.',
+  },
+  {
+    key: 'post_conflict_follow',
+    icon: 'water-outline',
+    label: 'Quiet reset',
+    description: 'A soft reminder to pause and return to your practice.',
+  },
+  {
+    key: 'post_room_continuity',
+    icon: 'arrow-forward-outline',
+    label: 'After room sessions',
+    description: 'A gentle follow-up to help you carry practice forward.',
+  },
+  {
+    key: 'community_updates',
+    icon: 'people-outline',
+    label: 'Community',
+    description: 'Updates from KalpX spaces and reflections.',
+  },
+];
+
+const DEEPLY_PERSONAL: CategoryConfig[] = [
+  {
+    key: 'grief_follow',
+    icon: 'heart-outline',
+    label: 'Grief companionship',
+    description: 'Very gentle support during tender times. Only if you want this.',
+  },
 ];
 
 function isValidHHMM(val: string): boolean {
   return /^([01]\d|2[0-3]):[0-5]\d$/.test(val);
 }
 
-const NotificationPreferences = () => {
+// ─────────────────────────────────────────────────────────────────────────────
+
+export default function NotificationPreferences() {
   const dispatch = useDispatch<AppDispatch>();
   const notifications = useSelector((s: RootState) => s.preferences.notifications);
   const quietHours = useSelector((s: RootState) => s.preferences.quiet_hours);
-  const frequency = useSelector((s: RootState) => s.preferences.recommended_frequency);
+  const frequency = useSelector((s: RootState) => s.preferences.recommended_frequency) as NotifLevel;
   const globalConsent = useSelector((s: RootState) => s.preferences.global_consent);
   const loaded = useSelector((s: RootState) => s.preferences.loaded);
 
@@ -183,12 +206,9 @@ const NotificationPreferences = () => {
   const [savingQuiet, setSavingQuiet] = useState(false);
   const [quietSaved, setQuietSaved] = useState(false);
 
-  // Timezone state
   const [selectedTimezone, setSelectedTimezone] = useState('Asia/Kolkata');
   const [savingTz, setSavingTz] = useState(false);
   const [tzSaved, setTzSaved] = useState(false);
-  const [showTzPicker, setShowTzPicker] = useState(false);
-  // Device timezone detection prompt: 'device' | 'readiness' | null
   const [tzPrompt, setTzPrompt] = useState<'device' | 'readiness' | null>(null);
   const [detectedTz, setDetectedTz] = useState<string | null>(null);
 
@@ -203,14 +223,12 @@ const NotificationPreferences = () => {
     setQuietEnd(quietHours.end);
   }, [quietHours.start, quietHours.end]);
 
-  // Device timezone detection on mount
   useEffect(() => {
     (async () => {
       try {
         const dismissed = await AsyncStorage.getItem(TZ_DISMISS_KEY);
         if (dismissed) {
-          const ts = Number(dismissed);
-          if (Date.now() - ts < 24 * 60 * 60 * 1000) return; // dismissed within 24h
+          if (Date.now() - Number(dismissed) < 24 * 60 * 60 * 1000) return;
         }
         const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
         if (tz && tz !== 'UTC') {
@@ -251,23 +269,21 @@ const NotificationPreferences = () => {
     setTzPrompt(null);
   }, []);
 
-  const handleGlobalConsentToggle = useCallback(
-    (key: keyof GlobalConsent, value: boolean) => {
-      dispatch(updateGlobalConsent({ [key]: value }));
+  const handleLevelChange = useCallback(
+    (level: NotifLevel) => {
+      dispatch(updatePreference({ key: 'recommended_frequency', value: level }));
+      if (level === 'off') {
+        dispatch(updateGlobalConsent({ receive_push_notifications: false }));
+      } else if (!globalConsent.receive_push_notifications) {
+        dispatch(updateGlobalConsent({ receive_push_notifications: true }));
+      }
     },
-    [dispatch],
+    [dispatch, globalConsent.receive_push_notifications],
   );
 
   const handleToggle = useCallback(
     (key: keyof NotificationPrefs, value: boolean) => {
       dispatch(updateNotificationPref({ key, value }));
-    },
-    [dispatch],
-  );
-
-  const handleFrequency = useCallback(
-    (value: string) => {
-      dispatch(updatePreference({ key: 'recommended_frequency', value }));
     },
     [dispatch],
   );
@@ -296,85 +312,289 @@ const NotificationPreferences = () => {
 
   if (!loaded) {
     return (
-      <View style={[styles.container, styles.center]}>
-        <ActivityIndicator color={GOLD} size="large" />
+      <View style={[styles.root, styles.center]}>
+        <ActivityIndicator color={Colors.goldBright} size="large" />
       </View>
     );
   }
 
+  const muted = frequency === 'off';
+
   return (
-    <View style={styles.container}>
-      {/* Header */}
+    <View style={styles.root}>
       <View style={styles.header}>
-        <View style={{ width: 22 }} />
-        <TextComponent type="headerText" style={styles.headerText}>
-          Notification Preferences
-        </TextComponent>
-        <View style={{ width: 22 }} />
+        <Text style={styles.headerTitle}>Notifications</Text>
+        <Text style={styles.headerSub}>How Mitra reaches you through the day</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ── Companion Level ──────────────────────────────────────────── */}
+        <View style={styles.levelCard}>
+          <Text style={styles.levelHeading}>Companion presence</Text>
+          <Text style={styles.levelSub}>
+            Choose how gently Mitra accompanies you.
+          </Text>
+          <View style={styles.levelRow}>
+            {LEVELS.map((lvl) => {
+              const active = frequency === lvl.value;
+              return (
+                <TouchableOpacity
+                  key={lvl.value}
+                  style={[styles.levelOption, active && styles.levelOptionActive]}
+                  onPress={() => handleLevelChange(lvl.value)}
+                  activeOpacity={0.78}
+                >
+                  <Ionicons
+                    name={lvl.icon}
+                    size={20}
+                    color={active ? Colors.goldBright : Colors.brownMuted}
+                    style={styles.levelIcon}
+                  />
+                  <Text style={[styles.levelLabel, active && styles.levelLabelActive]}>
+                    {lvl.label}
+                  </Text>
+                  <Text style={styles.levelOptionSub}>{lvl.sub}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+          {muted && (
+            <View style={styles.mutedNote}>
+              <Ionicons name="information-circle-outline" size={13} color={Colors.brownMuted} />
+              <Text style={styles.mutedNoteText}>
+                Push notifications are paused. You will still receive in-app reminders.
+              </Text>
+            </View>
+          )}
+        </View>
 
-        {/* Global consent */}
-        <Section title="Notification Consent" subtitle="Master switches for all Mitra notifications.">
-          <CategoryRow
-            label="Push Notifications"
-            description="Receive notifications on this device."
-            value={globalConsent.receive_push_notifications}
-            onToggle={(v) => handleGlobalConsentToggle('receive_push_notifications', v)}
-          />
-          <CategoryRow
-            label="Email Notifications"
-            description="Receive companion emails."
-            value={globalConsent.receive_emails}
-            onToggle={(v) => handleGlobalConsentToggle('receive_emails', v)}
-          />
-        </Section>
+        {/* ── Daily Rhythm ─────────────────────────────────────────────── */}
+        <SectionBlock
+          icon="sunny-outline"
+          title="Daily rhythm"
+          subtitle="Morning, midday, and night companions."
+          muted={muted}
+        >
+          {DAILY_RHYTHM.map((cat) => (
+            <CategoryRow
+              key={cat.key}
+              icon={cat.icon}
+              label={cat.label}
+              description={cat.description}
+              value={notifications[cat.key] ?? true}
+              onToggle={(v) => handleToggle(cat.key, v)}
+              disabled={muted}
+            />
+          ))}
+        </SectionBlock>
 
-        {/* Timezone */}
-        <Section title="Timezone" subtitle="Mitra uses your timezone to remind you at the right time.">
+        {/* ── Sacred Time ──────────────────────────────────────────────── */}
+        <SectionBlock
+          icon="radio-button-on-outline"
+          title="Sacred time"
+          subtitle="Ekadashi, Purnima, and seasonal rhythms of Sanatan living."
+          muted={muted}
+          accent
+        >
+          {SACRED_TIME.map((cat) => (
+            <CategoryRow
+              key={cat.key}
+              icon={cat.icon}
+              label={cat.label}
+              description={cat.description}
+              value={notifications[cat.key] ?? true}
+              onToggle={(v) => handleToggle(cat.key, v)}
+              disabled={muted}
+            />
+          ))}
+          <View style={styles.sacredNote}>
+            <Text style={styles.sacredNoteText}>
+              "Tonight's moon is traditionally used for reflection."
+            </Text>
+          </View>
+        </SectionBlock>
+
+        {/* ── Japa & Mantra ────────────────────────────────────────────── */}
+        <SectionBlock
+          icon="ellipse-outline"
+          title="Japa & mantra"
+          subtitle="Your mala, your count, your continuity."
+          muted={muted}
+        >
+          {JAPA_MANTRA.map((cat) => (
+            <CategoryRow
+              key={cat.key}
+              icon={cat.icon}
+              label={cat.label}
+              description={cat.description}
+              value={notifications[cat.key] ?? true}
+              onToggle={(v) => handleToggle(cat.key, v)}
+              disabled={muted}
+            />
+          ))}
+        </SectionBlock>
+
+        {/* ── Inner Path ───────────────────────────────────────────────── */}
+        <SectionBlock
+          icon="compass-outline"
+          title="Inner path"
+          subtitle="Journey continuity and check-in anchors."
+          muted={muted}
+        >
+          {INNER_PATH.map((cat) => (
+            <CategoryRow
+              key={cat.key}
+              icon={cat.icon}
+              label={cat.label}
+              description={cat.description}
+              value={(notifications as any)[cat.key] ?? true}
+              onToggle={(v) => handleToggle(cat.key as keyof NotificationPrefs, v)}
+              disabled={muted}
+            />
+          ))}
+        </SectionBlock>
+
+        {/* ── Companion Support ────────────────────────────────────────── */}
+        <SectionBlock
+          icon="leaf-outline"
+          title="Companion support"
+          subtitle="Mitra guidance, gentle returns, and community touchpoints."
+          muted={muted}
+        >
+          {COMPANION_SUPPORT.map((cat) => (
+            <CategoryRow
+              key={cat.key}
+              icon={cat.icon}
+              label={cat.label}
+              description={cat.description}
+              value={notifications[cat.key] ?? true}
+              onToggle={(v) => handleToggle(cat.key, v)}
+              disabled={muted}
+            />
+          ))}
+        </SectionBlock>
+
+        {/* ── Deeply Personal ──────────────────────────────────────────── */}
+        <SectionBlock
+          icon="heart-outline"
+          title="Deeply personal"
+          subtitle="These are tender. Turn on only if you want Mitra with you in those moments."
+          muted={muted}
+          sensitive
+        >
+          {DEEPLY_PERSONAL.map((cat) => (
+            <CategoryRow
+              key={cat.key}
+              icon={cat.icon}
+              label={cat.label}
+              description={cat.description}
+              value={notifications[cat.key] ?? true}
+              onToggle={(v) => handleToggle(cat.key, v)}
+              disabled={muted}
+            />
+          ))}
+        </SectionBlock>
+
+        {/* ── Quiet Hours ──────────────────────────────────────────────── */}
+        <SectionBlock
+          icon="moon-outline"
+          title="Quiet hours"
+          subtitle="No push during this window. Mitra will wait."
+        >
+          <View style={styles.quietRow}>
+            <View style={styles.quietField}>
+              <Text style={styles.quietLabel}>From</Text>
+              <TextInput
+                style={styles.timeInput}
+                value={quietStart}
+                onChangeText={setQuietStart}
+                placeholder="23:00"
+                placeholderTextColor={Colors.textFaint}
+                maxLength={5}
+                keyboardType="numbers-and-punctuation"
+                autoCorrect={false}
+              />
+            </View>
+            <Text style={styles.quietSep}>–</Text>
+            <View style={styles.quietField}>
+              <Text style={styles.quietLabel}>Until</Text>
+              <TextInput
+                style={styles.timeInput}
+                value={quietEnd}
+                onChangeText={setQuietEnd}
+                placeholder="05:00"
+                placeholderTextColor={Colors.textFaint}
+                maxLength={5}
+                keyboardType="numbers-and-punctuation"
+                autoCorrect={false}
+              />
+            </View>
+            <TouchableOpacity
+              style={[styles.saveBtn, (savingQuiet || quietSaved) && styles.saveBtnMuted]}
+              onPress={handleSaveQuietHours}
+              disabled={savingQuiet}
+            >
+              {savingQuiet ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.saveBtnText}>{quietSaved ? 'Saved' : 'Save'}</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+          {quietError ? <Text style={styles.errorText}>{quietError}</Text> : null}
+        </SectionBlock>
+
+        {/* ── Timezone ─────────────────────────────────────────────────── */}
+        <SectionBlock
+          icon="earth-outline"
+          title="Timezone"
+          subtitle="Mitra uses your timezone to remind you at the right moment."
+        >
           {tzPrompt === 'device' && detectedTz ? (
             <View style={styles.tzPromptBox}>
-              <TextComponent style={styles.tzPromptText}>
-                We detected your timezone as {detectedTz}.
-              </TextComponent>
+              <Text style={styles.tzPromptText}>
+                Detected: {detectedTz}
+              </Text>
               <View style={styles.tzPromptActions}>
                 <TouchableOpacity
-                  style={[styles.saveBtn, savingTz && styles.saveBtnDisabled]}
+                  style={[styles.saveBtn, savingTz && styles.saveBtnMuted]}
                   onPress={() => handleSaveTimezone(detectedTz, true)}
                   disabled={savingTz}
                 >
                   {savingTz ? (
                     <ActivityIndicator size="small" color="#fff" />
                   ) : (
-                    <TextComponent style={styles.saveBtnText}>Use this timezone</TextComponent>
+                    <Text style={styles.saveBtnText}>Use this</Text>
                   )}
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={styles.tzSecondaryBtn}
-                  onPress={() => { setTzPrompt(null); setShowTzPicker(true); }}
+                  style={styles.tzOutlineBtn}
+                  onPress={() => { setTzPrompt(null); }}
                 >
-                  <TextComponent style={styles.tzSecondaryText}>Choose manually</TextComponent>
+                  <Text style={styles.tzOutlineBtnText}>Choose manually</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tzDismissBtn} onPress={handleDismissTzPrompt}>
-                  <TextComponent style={styles.tzDismissText}>Not now</TextComponent>
+                <TouchableOpacity onPress={handleDismissTzPrompt}>
+                  <Text style={styles.tzDismissText}>Not now</Text>
                 </TouchableOpacity>
               </View>
             </View>
           ) : tzPrompt === 'readiness' ? (
             <View style={styles.tzPromptBox}>
-              <TextComponent style={styles.tzPromptText}>
-                To remind you at the right time, Mitra needs your timezone.
-              </TextComponent>
+              <Text style={styles.tzPromptText}>
+                Set your timezone so reminders arrive at the right time.
+              </Text>
               <View style={styles.tzPromptActions}>
                 <TouchableOpacity
                   style={styles.saveBtn}
-                  onPress={() => { setTzPrompt(null); setShowTzPicker(true); }}
+                  onPress={() => setTzPrompt(null)}
                 >
-                  <TextComponent style={styles.saveBtnText}>Set timezone</TextComponent>
+                  <Text style={styles.saveBtnText}>Set timezone</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tzDismissBtn} onPress={handleDismissTzPrompt}>
-                  <TextComponent style={styles.tzDismissText}>Not now</TextComponent>
+                <TouchableOpacity onPress={handleDismissTzPrompt}>
+                  <Text style={styles.tzDismissText}>Not now</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -391,316 +611,472 @@ const NotificationPreferences = () => {
               valueField="value"
               placeholder="Select timezone"
               value={selectedTimezone}
-              onChange={(item) => {
-                setSelectedTimezone(item.value);
-                setShowTzPicker(false);
-              }}
+              onChange={(item) => setSelectedTimezone(item.value)}
             />
             <TouchableOpacity
-              style={[styles.saveBtn, (savingTz || tzSaved) && styles.saveBtnDisabled]}
+              style={[styles.saveBtn, (savingTz || tzSaved) && styles.saveBtnMuted]}
               onPress={() => handleSaveTimezone(selectedTimezone)}
               disabled={savingTz || tzSaved}
             >
               {savingTz ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
-                <TextComponent style={styles.saveBtnText}>{tzSaved ? 'Saved' : 'Save'}</TextComponent>
+                <Text style={styles.saveBtnText}>{tzSaved ? 'Saved' : 'Save'}</Text>
               )}
             </TouchableOpacity>
           </View>
-        </Section>
+        </SectionBlock>
 
-        {/* Core companion rhythm */}
-        <Section title="Companion Rhythm" subtitle="Core companion notifications.">
-          {COMPANION_CATEGORIES.map((cat) => (
-            <CategoryRow
-              key={cat.key}
-              label={cat.label}
-              description={cat.description}
-              value={notifications[cat.key] ?? cat.defaultOn}
-              onToggle={(v) => handleToggle(cat.key, v)}
-            />
-          ))}
-        </Section>
-
-        {/* Companion guidance */}
-        <Section
-          title="Companion Guidance"
-          subtitle="Helpful touchpoints from Mitra to support your practice, rhythm, and connection."
-        >
-          {COMPANION_GUIDANCE_CATEGORIES.map((cat) => (
-            <CategoryRow
-              key={cat.key}
-              label={cat.label}
-              description={cat.description}
-              value={notifications[cat.key] ?? cat.defaultOn}
-              onToggle={(v) => handleToggle(cat.key, v)}
-            />
-          ))}
-        </Section>
-
-        {/* Deeply personal */}
-        <Section
-          title="Deeply Personal Support"
-          subtitle="These are deeply personal. Turn them on only if you want Mitra to support you in these moments."
-        >
-          {SENSITIVE_CATEGORIES.map((cat) => (
-            <CategoryRow
-              key={cat.key}
-              label={cat.label}
-              description={cat.description}
-              value={notifications[cat.key] ?? cat.defaultOn}
-              onToggle={(v) => handleToggle(cat.key, v)}
-            />
-          ))}
-        </Section>
-
-        {/* Rhythm, Check-in & Mantra */}
-        <Section
-          title="Rhythm & Practice"
-          subtitle="Gentle nudges tied to your daily rhythm and chosen practices."
-        >
-          {RHYTHM_AND_CHECKIN_CATEGORIES.map((cat) => (
-            <CategoryRow
-              key={cat.key}
-              label={cat.label}
-              description={cat.description}
-              value={(notifications as any)[cat.key] ?? cat.defaultOn}
-              onToggle={(v) => handleToggle(cat.key as keyof NotificationPrefs, v)}
-            />
-          ))}
-        </Section>
-
-        {/* Quiet hours */}
-        <Section title="Quiet Hours" subtitle="No notifications will be sent during this window. Default: 11 PM to 5 AM.">
-          <View style={styles.quietRow}>
-            <View style={styles.quietField}>
-              <TextComponent style={styles.quietLabel}>From</TextComponent>
-              <TextInput
-                style={styles.timeInput}
-                value={quietStart}
-                onChangeText={setQuietStart}
-                placeholder="23:00"
-                placeholderTextColor="#b0a090"
-                maxLength={5}
-                keyboardType="numbers-and-punctuation"
-                autoCorrect={false}
-              />
-            </View>
-            <View style={styles.quietField}>
-              <TextComponent style={styles.quietLabel}>Until</TextComponent>
-              <TextInput
-                style={styles.timeInput}
-                value={quietEnd}
-                onChangeText={setQuietEnd}
-                placeholder="05:00"
-                placeholderTextColor="#b0a090"
-                maxLength={5}
-                keyboardType="numbers-and-punctuation"
-                autoCorrect={false}
-              />
-            </View>
-            <TouchableOpacity
-              style={[styles.saveBtn, savingQuiet && styles.saveBtnDisabled]}
-              onPress={handleSaveQuietHours}
-              disabled={savingQuiet}
-            >
-              {savingQuiet ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <TextComponent style={styles.saveBtnText}>
-                  {quietSaved ? 'Saved' : 'Save'}
-                </TextComponent>
-              )}
-            </TouchableOpacity>
-          </View>
-          {quietError ? (
-            <TextComponent style={styles.errorText}>{quietError}</TextComponent>
-          ) : null}
-        </Section>
-
-        {/* Frequency */}
-        <Section title="Frequency" subtitle="How often Mitra reaches out across all categories.">
-          <View style={styles.frequencyRow}>
-            {FREQUENCY_OPTIONS.map((opt) => (
-              <TouchableOpacity
-                key={opt.value}
-                style={[styles.freqOption, frequency === opt.value && styles.freqOptionSelected]}
-                onPress={() => handleFrequency(opt.value)}
-              >
-                <TextComponent
-                  style={[styles.freqLabel, frequency === opt.value && styles.freqLabelSelected]}
-                >
-                  {opt.label}
-                </TextComponent>
-                <TextComponent style={styles.freqDesc}>{opt.description}</TextComponent>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </Section>
-
+        {/* ── Footer ───────────────────────────────────────────────────── */}
         <View style={styles.footer}>
-          <TextComponent style={styles.footerNote}>
-            Push consent above overrides all category settings. Device-level permission can be managed in system settings.
-          </TextComponent>
+          <Text style={styles.footerText}>
+            Notifications serve your rhythm, not our engagement.{'\n'}
+            You are always in control.
+          </Text>
         </View>
       </ScrollView>
     </View>
   );
-};
+}
 
-function Section({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
+// ─────────────────────────────────────────────────────────────────────────────
+// Sub-components
+// ─────────────────────────────────────────────────────────────────────────────
+
+function SectionBlock({
+  icon,
+  title,
+  subtitle,
+  muted = false,
+  accent = false,
+  sensitive = false,
+  children,
+}: {
+  icon: string;
+  title: string;
+  subtitle: string;
+  muted?: boolean;
+  accent?: boolean;
+  sensitive?: boolean;
+  children: React.ReactNode;
+}) {
+  const bg = sensitive
+    ? 'rgba(245, 237, 234, 0.6)'
+    : accent
+    ? 'rgba(201, 168, 76, 0.06)'
+    : Colors.cream;
+
   return (
-    <View style={styles.section}>
-      <TextComponent type="headerText" style={styles.sectionTitle}>{title}</TextComponent>
-      <TextComponent style={styles.sectionSubtitle}>{subtitle}</TextComponent>
+    <View style={[styles.section, { backgroundColor: bg }, muted && styles.sectionMuted]}>
+      <View style={styles.sectionHead}>
+        <View style={styles.sectionIconWrap}>
+          <Ionicons name={icon} size={14} color={accent || sensitive ? Colors.goldBright : Colors.gold} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.sectionTitle, sensitive && styles.sectionTitleSensitive]}>
+            {title}
+          </Text>
+          <Text style={styles.sectionSubtitle}>{subtitle}</Text>
+        </View>
+      </View>
       {children}
     </View>
   );
 }
 
 function CategoryRow({
+  icon,
   label,
   description,
   value,
   onToggle,
+  disabled = false,
 }: {
+  icon: string;
   label: string;
   description: string;
   value: boolean;
   onToggle: (v: boolean) => void;
+  disabled?: boolean;
 }) {
   return (
-    <View style={styles.categoryRow}>
+    <View style={[styles.categoryRow, disabled && styles.categoryRowDisabled]}>
+      <Ionicons
+        name={icon}
+        size={15}
+        color={disabled ? Colors.textFaint : value ? Colors.goldBright : Colors.brownMuted}
+        style={styles.categoryIcon}
+      />
       <View style={styles.categoryText}>
-        <TextComponent style={styles.categoryLabel}>{label}</TextComponent>
-        <TextComponent style={styles.categoryDesc}>{description}</TextComponent>
+        <Text style={[styles.categoryLabel, disabled && styles.categoryLabelMuted]}>{label}</Text>
+        <Text style={styles.categoryDesc}>{description}</Text>
       </View>
       <Switch
         value={value}
         onValueChange={onToggle}
-        trackColor={{ false: '#e0d8cc', true: GOLD }}
+        disabled={disabled}
+        trackColor={{ false: Colors.borderCream, true: Colors.goldBright }}
         thumbColor="#fff"
-        ios_backgroundColor="#e0d8cc"
+        ios_backgroundColor={Colors.borderCream}
       />
     </View>
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Styles
+// ─────────────────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: BG },
-  center: { justifyContent: 'center', alignItems: 'center' },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER,
-    backgroundColor: BG,
+  root: {
+    flex: 1,
+    backgroundColor: Colors.parchment,
   },
-  headerText: { fontSize: 17, color: '#3a2e24' },
-  scroll: { paddingBottom: 40 },
-  section: {
-    marginTop: 20,
+  center: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 18,
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.goldHairline,
+    backgroundColor: Colors.parchment,
+  },
+  headerTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 26,
+    color: Colors.brownDeep,
+    marginBottom: 2,
+  },
+  headerSub: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    color: Colors.brownMuted,
+    fontStyle: 'italic',
+  },
+  scroll: {
+    paddingBottom: 48,
+  },
+
+  // Level card
+  levelCard: {
     marginHorizontal: 16,
-    backgroundColor: SECTION_BG,
+    marginTop: 20,
+    backgroundColor: Colors.cream,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.goldHairline,
+    padding: 18,
+  },
+  levelHeading: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 17,
+    color: Colors.brownDeep,
+    marginBottom: 4,
+  },
+  levelSub: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    color: Colors.brownMuted,
+    marginBottom: 16,
+    fontStyle: 'italic',
+  },
+  levelRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  levelOption: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 6,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: BORDER,
+    borderColor: Colors.borderCream,
+    backgroundColor: '#fff',
+  },
+  levelOptionActive: {
+    borderColor: Colors.goldBright,
+    backgroundColor: 'rgba(212,160,23,0.08)',
+  },
+  levelIcon: {
+    marginBottom: 6,
+  },
+  levelLabel: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 13,
+    color: Colors.brownMuted,
+    marginBottom: 4,
+  },
+  levelLabelActive: {
+    color: Colors.brownDeep,
+  },
+  levelOptionSub: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 10,
+    color: Colors.textFaint,
+    textAlign: 'center',
+    lineHeight: 14,
+  },
+  mutedNote: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: 12,
+    gap: 6,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: Colors.goldHairline,
+  },
+  mutedNoteText: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 12,
+    color: Colors.brownMuted,
+    flex: 1,
+    lineHeight: 17,
+  },
+
+  // Section
+  section: {
+    marginHorizontal: 16,
+    marginTop: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.goldHairline,
     padding: 16,
   },
-  sectionTitle: { fontSize: 13, color: GOLD, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 2 },
-  sectionSubtitle: { fontSize: 12, color: TEXT_SECONDARY, marginBottom: 14 },
+  sectionMuted: {
+    opacity: 0.55,
+  },
+  sectionHead: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    marginBottom: 12,
+  },
+  sectionIconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(201,168,76,0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  sectionTitle: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 13,
+    color: Colors.brownDeep,
+    textTransform: 'uppercase',
+    letterSpacing: 1.1,
+    marginBottom: 2,
+  },
+  sectionTitleSensitive: {
+    color: Colors.ringTan,
+  },
+  sectionSubtitle: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 12,
+    color: Colors.brownMuted,
+    lineHeight: 17,
+  },
+
+  // Category row
   categoryRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
+    paddingVertical: 11,
     borderTopWidth: 1,
-    borderTopColor: BORDER,
+    borderTopColor: Colors.goldHairline,
+    gap: 10,
   },
-  categoryText: { flex: 1, paddingRight: 12 },
-  categoryLabel: { fontSize: 14, color: '#3a2e24', fontWeight: '500' },
-  categoryDesc: { fontSize: 12, color: TEXT_SECONDARY, marginTop: 2 },
-  quietRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 10, marginTop: 4 },
-  quietField: { flex: 1 },
-  quietLabel: { fontSize: 12, color: TEXT_SECONDARY, marginBottom: 4 },
+  categoryRowDisabled: {
+    opacity: 0.5,
+  },
+  categoryIcon: {
+    width: 18,
+    textAlign: 'center',
+  },
+  categoryText: {
+    flex: 1,
+  },
+  categoryLabel: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 14,
+    color: Colors.brownDeep,
+    marginBottom: 2,
+  },
+  categoryLabelMuted: {
+    color: Colors.brownMuted,
+  },
+  categoryDesc: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 12,
+    color: Colors.brownMuted,
+    lineHeight: 17,
+  },
+
+  // Sacred note
+  sacredNote: {
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: Colors.goldHairline,
+  },
+  sacredNoteText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 13,
+    color: Colors.brownMuted,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+
+  // Quiet hours
+  quietRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 8,
+    marginTop: 4,
+  },
+  quietField: {
+    flex: 1,
+  },
+  quietLabel: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 11,
+    color: Colors.brownMuted,
+    marginBottom: 5,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  quietSep: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 18,
+    color: Colors.brownMuted,
+    paddingBottom: 10,
+  },
   timeInput: {
     borderWidth: 1,
-    borderColor: BORDER,
+    borderColor: Colors.borderCream,
     borderRadius: 8,
     paddingHorizontal: 10,
-    paddingVertical: 8,
+    paddingVertical: Platform.OS === 'ios' ? 9 : 7,
     fontSize: 15,
-    color: '#3a2e24',
+    fontFamily: Fonts.sans.regular,
+    color: Colors.brownDeep,
     backgroundColor: '#fff',
   },
+  errorText: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 12,
+    color: '#c0392b',
+    marginTop: 6,
+  },
+
+  // Shared save button
   saveBtn: {
-    backgroundColor: GOLD,
+    backgroundColor: Colors.goldBright,
     borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 9,
+    paddingHorizontal: 14,
+    paddingVertical: Platform.OS === 'ios' ? 10 : 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  saveBtnDisabled: { opacity: 0.6 },
-  saveBtnText: { color: '#fff', fontSize: 14, fontWeight: '600' },
-  errorText: { color: '#c0392b', fontSize: 12, marginTop: 6 },
-  frequencyRow: { flexDirection: 'row', gap: 8, marginTop: 4, flexWrap: 'wrap' },
-  freqOption: {
-    flex: 1,
-    minWidth: 90,
-    borderWidth: 1,
-    borderColor: BORDER,
-    borderRadius: 10,
-    padding: 10,
-    backgroundColor: '#fff',
-    alignItems: 'center',
+  saveBtnMuted: {
+    opacity: 0.6,
   },
-  freqOptionSelected: { backgroundColor: '#fff5e8', borderColor: GOLD },
-  freqLabel: { fontSize: 13, fontWeight: '600', color: '#3a2e24', marginBottom: 2 },
-  freqLabelSelected: { color: GOLD },
-  freqDesc: { fontSize: 11, color: TEXT_SECONDARY, textAlign: 'center' },
-  footer: { marginHorizontal: 16, marginTop: 24 },
-  footerNote: { fontSize: 12, color: TEXT_SECONDARY, textAlign: 'center' },
+  saveBtnText: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 13,
+    color: '#fff',
+  },
+
   // Timezone
   tzPromptBox: {
-    backgroundColor: '#fff5e8',
-    borderRadius: 8,
+    backgroundColor: 'rgba(212,160,23,0.07)',
+    borderRadius: 10,
     padding: 12,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: BORDER,
+    borderColor: Colors.goldHairline,
   },
-  tzPromptText: { fontSize: 13, color: '#3a2e24', marginBottom: 10 },
-  tzPromptActions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  tzSecondaryBtn: {
+  tzPromptText: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    color: Colors.brownDeep,
+    marginBottom: 10,
+  },
+  tzPromptActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    alignItems: 'center',
+  },
+  tzOutlineBtn: {
     borderWidth: 1,
-    borderColor: GOLD,
+    borderColor: Colors.gold,
     borderRadius: 8,
     paddingHorizontal: 12,
-    paddingVertical: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingVertical: 9,
   },
-  tzSecondaryText: { color: GOLD, fontSize: 13 },
-  tzDismissBtn: { paddingHorizontal: 8, paddingVertical: 8, alignItems: 'center', justifyContent: 'center' },
-  tzDismissText: { color: TEXT_SECONDARY, fontSize: 12 },
-  tzPickerRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
+  tzOutlineBtnText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 13,
+    color: Colors.gold,
+  },
+  tzDismissText: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 12,
+    color: Colors.brownMuted,
+    paddingHorizontal: 4,
+    paddingVertical: 9,
+  },
+  tzPickerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 4,
+  },
   tzDropdown: {
     flex: 1,
     borderWidth: 1,
-    borderColor: BORDER,
+    borderColor: Colors.borderCream,
     borderRadius: 8,
     paddingHorizontal: 10,
-    paddingVertical: 8,
+    paddingVertical: Platform.OS === 'ios' ? 9 : 7,
     backgroundColor: '#fff',
   },
-  tzDropdownText: { fontSize: 13, color: '#3a2e24' },
-  tzDropdownItem: { fontSize: 13, color: '#3a2e24' },
-  tzDropdownContainer: { borderRadius: 8, borderColor: BORDER },
-});
+  tzDropdownText: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    color: Colors.brownDeep,
+  },
+  tzDropdownItem: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    color: Colors.brownDeep,
+  },
+  tzDropdownContainer: {
+    borderRadius: 8,
+    borderColor: Colors.borderCream,
+  },
 
-export default NotificationPreferences;
+  // Footer
+  footer: {
+    marginHorizontal: 16,
+    marginTop: 28,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: Colors.goldHairline,
+  },
+  footerText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 13,
+    color: Colors.brownMuted,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    lineHeight: 20,
+  },
+});

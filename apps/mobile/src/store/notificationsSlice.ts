@@ -14,7 +14,7 @@ import {
   PayloadAction,
 } from '@reduxjs/toolkit';
 
-export type PermissionStatus = 'granted' | 'denied' | 'unknown';
+export type PermissionStatus = 'granted' | 'denied' | 'undetermined' | 'unknown';
 
 export interface NotificationsSlice {
   token: string | null;

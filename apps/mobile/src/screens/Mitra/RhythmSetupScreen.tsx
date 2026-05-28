@@ -394,7 +394,7 @@ export default function RhythmSetupScreen({
   editMode?: boolean;
   embedded?: boolean;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const itemTypeLabelLocalized = (type: string) =>
     t(`rhythmSetup.itemType.${type}`, { defaultValue: "Library" });
   const dispatch = useDispatch();
@@ -596,7 +596,7 @@ export default function RhythmSetupScreen({
         selected_moments: selectedMoments,
         purposes,
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        locale: "en",
+        locale: i18n.language,
         source_surface: "rhythm_wizard",
       });
       const newItems: Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>> =

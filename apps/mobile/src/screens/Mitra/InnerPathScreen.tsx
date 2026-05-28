@@ -96,7 +96,8 @@ function innerPathHeldLabel(slot: string, t: (key: string) => string): string {
 }
 
 export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const navigation = useNavigation<any>();
   const dispatch = useDispatch<any>();
   const tabBarHeight = useBottomTabBarHeight();
@@ -495,7 +496,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
           const context = item.context || {};
           return {
             slot,
-            label: slot.toUpperCase(),
+            label: t(`rhythmHome.badge.${slot}`),
             title: item.title || "",
             context,
             shift: getShift(context),
@@ -781,7 +782,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                   )}
                 </View>
                 <View style={styles.triadCopy}>
-                  <Text style={styles.triadLabel}>{item.label}</Text>
+                  <Text style={[styles.triadLabel, isHindi && { letterSpacing: 0 }]}>{item.label}</Text>
                   <Text style={styles.triadTitle}>{item.title}</Text>
                   {!!item.subtitle && (
                     <Text style={styles.triadSubtitle}>{item.subtitle}</Text>
@@ -890,6 +891,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                             <Text
                               style={[
                                 styles.whyTabText,
+                                isHindi && { letterSpacing: 0 },
                                 isActive && styles.whyTabTextActive,
                               ]}
                             >
@@ -902,7 +904,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
 
                     <View style={styles.whyDivider} />
 
-                    <Text style={styles.whySectionLabel}>
+                    <Text style={[styles.whySectionLabel, isHindi && { letterSpacing: 0 }]}>
                       {activeWhyItem.label}
                     </Text>
                     <Text style={styles.whyItemTitle}>
@@ -911,7 +913,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
 
                     {!!activeWhyItem.context?.mitra_frame_through && (
                       <View style={styles.whyInfoCard}>
-                        <Text style={styles.whyInfoLabel}>{t("innerPath.whyPanel.essence")}</Text>
+                        <Text style={[styles.whyInfoLabel, isHindi && { letterSpacing: 0 }]}>{t("innerPath.whyPanel.essence")}</Text>
                         <Text style={styles.whyInfoText}>
                           {sentence(
                             activeWhyItem.slot === "sankalp"
@@ -924,10 +926,10 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
 
                     {!!activeWhyItem.shift && (
                       <View style={styles.whyInfoCard}>
-                        <Text style={styles.whyInfoLabel}>{t("innerPath.whyPanel.shift")}</Text>
+                        <Text style={[styles.whyInfoLabel, isHindi && { letterSpacing: 0 }]}>{t("innerPath.whyPanel.shift")}</Text>
                         <Text style={styles.whyInfoText}>
                           {sentence(
-                            `Mitra chose this to guide you from ${activeWhyItem.shift}`,
+                            t("innerPath.whyPanel.shiftFrom", { shift: activeWhyItem.shift }),
                           )}
                         </Text>
                       </View>
@@ -935,7 +937,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
 
                     {!!activeWhyItem.context?.mitra_use_for && (
                       <View style={styles.whyInfoCard}>
-                        <Text style={styles.whyInfoLabel}>{t("innerPath.whyPanel.usefulFor")}</Text>
+                        <Text style={[styles.whyInfoLabel, isHindi && { letterSpacing: 0 }]}>{t("innerPath.whyPanel.usefulFor")}</Text>
                         <Text style={styles.whyInfoText}>
                           {sentence(activeWhyItem.context.mitra_use_for)}
                         </Text>
@@ -944,7 +946,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
 
                     {!!activeWhyItem.context?.commentary_lineage && (
                       <View style={styles.whyInfoCard}>
-                        <Text style={styles.whyInfoLabel}>{t("innerPath.whyPanel.rootedIn")}</Text>
+                        <Text style={[styles.whyInfoLabel, isHindi && { letterSpacing: 0 }]}>{t("innerPath.whyPanel.rootedIn")}</Text>
                         <Text style={styles.whyInfoText}>
                           {sentence(activeWhyItem.context.commentary_lineage)}
                         </Text>

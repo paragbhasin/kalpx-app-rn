@@ -2092,6 +2092,7 @@
       "heading": "Why this supports today",
       "essence": "Essence",
       "shift": "Shift",
+      "shiftFrom": "Mitra chose this to guide you from {{shift}}",
       "usefulFor": "Useful for",
       "rootedIn": "Rooted in"
     },

@@ -45,7 +45,7 @@ import {
 // 📌 Push Notification Service
 import { initScreenResolver } from "./src/engine/screenResolver";
 import {
-  checkExistingPermission,
+  requestPushPermission,
   foregroundNotificationListener,
   notificationOpenListener,
 } from "./src/service/pushNotifications";
@@ -285,13 +285,10 @@ export default function App() {
 
   // Push Notification setup
   useEffect(() => {
-    // On boot: check existing permission only — never prompt at launch.
-    // Permission is requested only when the user enables a reminder.
-    checkExistingPermission().then((token) => {
-      if (token) {
-        console.log("[NOTIF] ✅ Permission already granted — registering device...");
-        registerDeviceToBackend();
-      }
+    // On launch: show native permission dialog (first time only).
+    // If already granted, register device. If denied, RemindersScreen handles it.
+    requestPushPermission().then((token) => {
+      if (token) registerDeviceToBackend();
     });
 
     // listeners

@@ -26,14 +26,7 @@ import {
 import type { AppDispatch, RootState } from "../../store";
 import { setHomeData } from "../../store/doorSlice";
 import { TimePickerModal } from "../../components/TimePickerModal";
-import NotificationPermissionModal from "../../components/NotificationPermissionModal";
-import {
-  checkNotificationPermission,
-  openNotificationSettings,
-  type NotifPermissionStatus,
-} from "../../service/notificationPermission";
-import { requestPushPermission } from "../../service/pushNotifications";
-import { registerDeviceToBackend } from "../../utils/registerDevice";
+import { useNotificationPermissionGate } from "../../hooks/useNotificationPermissionGate";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import { useSafeAreaInsets, SafeAreaView } from "react-native-safe-area-context";
@@ -145,10 +138,7 @@ export default function RemindersScreen() {
   const [pickerInitialTime, setPickerInitialTime] = useState<string | null>(null);
   const pickerCallback = useRef<((timeStr: string) => void) | null>(null);
 
-  // Notification permission modal state
-  const [permModalVisible, setPermModalVisible] = useState(false);
-  const [permModalStatus, setPermModalStatus] = useState<Extract<NotifPermissionStatus, 'undetermined' | 'denied'>>('undetermined');
-  const pendingToggleAction = useRef<(() => Promise<void>) | null>(null);
+  const { withPermissionCheck, renderPermissionModal } = useNotificationPermissionGate();
 
   useEffect(() => {
     apiGetJourneyReminders()
@@ -170,45 +160,7 @@ export default function RemindersScreen() {
     setPickerVisible(true);
   }
 
-  // ── Notification permission gate ──────────────────────────────────────────
-  async function withPermissionCheck(action: () => Promise<void>) {
-    const status = await checkNotificationPermission();
-    if (status === 'granted' || status === 'provisional') {
-      await action();
-      return;
-    }
-    const modalStatus = status === 'denied' ? 'denied' : 'undetermined';
-    mitraTrackEvent('notification_pre_prompt_view', { meta: { trigger: 'reminder_toggle', permission_status: modalStatus } });
-    setPermModalStatus(modalStatus);
-    setPermModalVisible(true);
-    pendingToggleAction.current = action;
-  }
-
-  async function handlePermissionAllow() {
-    setPermModalVisible(false);
-    if (permModalStatus === 'denied') {
-      mitraTrackEvent('notification_settings_open', { meta: {} });
-      openNotificationSettings();
-      return;
-    }
-    // undetermined → trigger native prompt
-    const token = await requestPushPermission();
-    if (token) {
-      mitraTrackEvent('notification_permission_granted', { meta: { source: 'reminder_toggle' } });
-      registerDeviceToBackend();
-      if (pendingToggleAction.current) {
-        await pendingToggleAction.current();
-      }
-    } else {
-      mitraTrackEvent('notification_permission_denied', { meta: { source: 'reminder_toggle' } });
-    }
-    pendingToggleAction.current = null;
-  }
-
-  function handlePermissionDismiss() {
-    setPermModalVisible(false);
-    pendingToggleAction.current = null;
-  }
+  // Permission gate provided by useNotificationPermissionGate hook
 
   // ── Triad handlers ────────────────────────────────────────────────────────
   async function executeTriadToggle(key: "mantra" | "sankalp" | "practice") {
@@ -406,12 +358,7 @@ export default function RemindersScreen() {
         onCancel={() => setPickerVisible(false)}
       />
 
-      <NotificationPermissionModal
-        visible={permModalVisible}
-        permissionStatus={permModalStatus}
-        onAllow={handlePermissionAllow}
-        onDismiss={handlePermissionDismiss}
-      />
+      {renderPermissionModal()}
     </SafeAreaView>
   );
 }

@@ -23,14 +23,14 @@ interface Props {
 
 const COPY = {
   undetermined: {
-    title: 'Stay connected to your rhythm',
-    body: 'Receive gentle reminders for your mantra, sankalp, and daily pauses.',
-    primaryCta: 'Allow Gentle Reminders',
-    secondaryCta: 'Maybe Later',
+    title: 'Turn on notifications',
+    body: 'Get gentle reminders for your mantra and daily rhythm.',
+    primaryCta: 'Turn On',
+    secondaryCta: 'Not Now',
   },
   denied: {
-    title: 'Notifications are currently off',
-    body: 'To receive gentle reminders, allow notifications for KalpX in your device settings.',
+    title: 'Notifications are off',
+    body: 'Allow notifications in Settings to receive gentle reminders.',
     primaryCta: 'Open Settings',
     secondaryCta: 'Not Now',
   },
@@ -42,33 +42,30 @@ export default function NotificationPermissionModal({
   onAllow,
   onDismiss,
 }: Props) {
-  const slideAnim = useRef(new Animated.Value(60)).current;
+  const slideAnim = useRef(new Animated.Value(80)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const copy = COPY[permissionStatus] ?? COPY.undetermined;
 
   useEffect(() => {
     if (visible) {
-      mitraTrackEvent('notification_pre_prompt_view', {
-        meta: { permission_status: permissionStatus },
-      });
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 260,
+          duration: 200,
           useNativeDriver: true,
         }),
         Animated.spring(slideAnim, {
           toValue: 0,
-          tension: 60,
-          friction: 10,
+          tension: 70,
+          friction: 11,
           useNativeDriver: true,
         }),
       ]).start();
     } else {
       fadeAnim.setValue(0);
-      slideAnim.setValue(60);
+      slideAnim.setValue(80);
     }
-  }, [visible]);
+  }, [visible, permissionStatus]);
 
   function handleAllow() {
     mitraTrackEvent('notification_pre_prompt_accept', {
@@ -78,9 +75,6 @@ export default function NotificationPermissionModal({
   }
 
   function handleDismiss() {
-    mitraTrackEvent('notification_pre_prompt_decline', {
-      meta: { permission_status: permissionStatus },
-    });
     onDismiss();
   }
 
@@ -91,37 +85,35 @@ export default function NotificationPermissionModal({
         <Animated.View
           style={[styles.card, { transform: [{ translateY: slideAnim }] }]}
         >
-          {/* Icon */}
-          <View style={styles.iconWrap}>
-            <Ionicons name="notifications-outline" size={26} color={Colors.goldBright} />
+          {/* Icon row */}
+          <View style={styles.iconRow}>
+            <View style={styles.iconWrap}>
+              <Ionicons name="notifications-outline" size={18} color={Colors.goldBright} />
+            </View>
+            <Text style={styles.title}>{copy.title}</Text>
           </View>
-
-          {/* Title */}
-          <Text style={styles.title}>{copy.title}</Text>
 
           {/* Body */}
           <Text style={styles.body}>{copy.body}</Text>
 
-          {/* Divider */}
-          <View style={styles.divider} />
+          {/* Buttons */}
+          <View style={styles.btnRow}>
+            <TouchableOpacity
+              onPress={handleDismiss}
+              activeOpacity={0.7}
+              style={styles.secondaryBtn}
+            >
+              <Text style={styles.secondaryBtnText}>{copy.secondaryCta}</Text>
+            </TouchableOpacity>
 
-          {/* Primary CTA */}
-          <TouchableOpacity
-            onPress={handleAllow}
-            activeOpacity={0.82}
-            style={styles.primaryBtn}
-          >
-            <Text style={styles.primaryBtnText}>{copy.primaryCta}</Text>
-          </TouchableOpacity>
-
-          {/* Secondary CTA */}
-          <TouchableOpacity
-            onPress={handleDismiss}
-            activeOpacity={0.7}
-            style={styles.secondaryBtn}
-          >
-            <Text style={styles.secondaryBtnText}>{copy.secondaryCta}</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleAllow}
+              activeOpacity={0.82}
+              style={styles.primaryBtn}
+            >
+              <Text style={styles.primaryBtnText}>{copy.primaryCta}</Text>
+            </TouchableOpacity>
+          </View>
         </Animated.View>
       </Animated.View>
     </Modal>
@@ -131,73 +123,69 @@ export default function NotificationPermissionModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.52)',
+    backgroundColor: 'rgba(0,0,0,0.35)',
     justifyContent: 'flex-end',
-    paddingBottom: 32,
+    paddingBottom: 34,
     paddingHorizontal: 16,
   },
   card: {
-    backgroundColor: Colors.parchment,
-    borderRadius: 20,
-    paddingTop: 32,
-    paddingBottom: 24,
-    paddingHorizontal: 28,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    paddingVertical: 18,
+    paddingHorizontal: 18,
+  },
+  iconRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.goldHairline,
+    gap: 10,
+    marginBottom: 8,
   },
   iconWrap: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: 'rgba(212,160,23,0.12)',
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(212,160,23,0.1)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 18,
   },
   title: {
-    fontFamily: Fonts.serif.bold,
-    fontSize: 22,
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 15,
     color: Colors.brownDeep,
-    textAlign: 'center',
-    marginBottom: 10,
-    lineHeight: 30,
+    flex: 1,
   },
   body: {
     fontFamily: Fonts.sans.regular,
-    fontSize: 14,
+    fontSize: 13,
     color: Colors.brownMuted,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 24,
+    lineHeight: 19,
+    marginBottom: 16,
+    paddingLeft: 44,
   },
-  divider: {
-    width: '100%',
-    height: 1,
-    backgroundColor: Colors.goldHairline,
-    marginBottom: 20,
-  },
-  primaryBtn: {
-    width: '100%',
-    backgroundColor: Colors.goldBright,
-    borderRadius: 12,
-    paddingVertical: 14,
+  btnRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
     alignItems: 'center',
-    marginBottom: 12,
-  },
-  primaryBtnText: {
-    fontFamily: Fonts.sans.semiBold,
-    fontSize: 15,
-    color: '#fff',
-    letterSpacing: 0.3,
   },
   secondaryBtn: {
     paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
   },
   secondaryBtnText: {
-    fontFamily: Fonts.sans.regular,
+    fontFamily: Fonts.sans.medium,
     fontSize: 14,
     color: Colors.brownMuted,
+  },
+  primaryBtn: {
+    backgroundColor: Colors.goldBright,
+    borderRadius: 8,
+    paddingVertical: 9,
+    paddingHorizontal: 18,
+  },
+  primaryBtnText: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 14,
+    color: '#fff',
   },
 });

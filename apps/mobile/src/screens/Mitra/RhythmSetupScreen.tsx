@@ -62,6 +62,7 @@ import LibrarySearchModal, {
   LibrarySearchItem,
 } from "../../components/LibrarySearchModal";
 import { TimePickerModal } from "../../components/TimePickerModal";
+import { useNotificationPermissionGate } from "../../hooks/useNotificationPermissionGate";
 import { executeAction } from "../../engine/actionExecutor";
 import {
   deleteRhythmItem,
@@ -571,6 +572,7 @@ export default function RhythmSetupScreen({
     (existingRhythm?.reminder_preference as "yes" | "no" | "later") ??
       (hasExistingRhythmReminder(existingRhythm) ? "yes" : "later"),
   );
+  const { withPermissionCheck, renderPermissionModal } = useNotificationPermissionGate();
 
   // Frozen at mount — never recomputed during save to prevent stale snapshot
   const originalBandItems = useMemo<BandItems>(
@@ -1428,7 +1430,13 @@ export default function RhythmSetupScreen({
             wStyles.primaryBtn,
             wizardSaving && wStyles.primaryBtnDisabled,
           ]}
-          onPress={() => void saveWizard()}
+          onPress={() => {
+            if (wizardReminderPref === 'yes') {
+              void withPermissionCheck(saveWizard);
+            } else {
+              void saveWizard();
+            }
+          }}
           disabled={wizardSaving}
           activeOpacity={0.8}
         >
@@ -1769,7 +1777,15 @@ export default function RhythmSetupScreen({
 
           <TouchableOpacity
             style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
-            onPress={handleSave}
+            onPress={() => {
+              const hasReminders = reminderPref === 'yes' ||
+                BANDS.some((b) => bandItems[b].some((i) => i.reminder_enabled));
+              if (hasReminders) {
+                void withPermissionCheck(handleSave);
+              } else {
+                void handleSave();
+              }
+            }}
             disabled={saving}
             activeOpacity={0.85}
           >
@@ -1792,6 +1808,7 @@ export default function RhythmSetupScreen({
           mode="select_for_rhythm"
           onItemSelected={handleItemSelected}
         />
+      {renderPermissionModal()}
     </SafeAreaView>
   );
 }

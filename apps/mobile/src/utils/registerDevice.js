@@ -40,6 +40,22 @@ console.log("fcmToken >>>>>>>>>>",fcmToken);
 
     console.log("📡 Device Register Response:", res.data);
 
+    // 5️⃣ Confirm device timezone so push eligibility Gate 1 passes.
+    // Without this, timezone_source stays "default" and all reminders
+    // are silently suppressed by is_eligible_for_push().
+    try {
+      const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (deviceTimezone) {
+        await api.patch("users/profile/update_profile/", {
+          timezone: deviceTimezone,
+          timezone_confirmed_from_device: true,
+        });
+        console.log("🕐 Timezone confirmed:", deviceTimezone);
+      }
+    } catch (tzError) {
+      console.log("⚠️ Timezone confirm failed (non-fatal):", tzError?.message);
+    }
+
   } catch (error) {
     console.log("❌ Device registration failed:", error?.message);
   }

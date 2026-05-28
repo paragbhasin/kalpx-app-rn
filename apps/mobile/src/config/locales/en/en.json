@@ -2148,6 +2148,7 @@
     "calmDown": "Just help me calm down"
   },
   "tellMitraThread": {
+    "title": "Tell Mitra",
     "mitraLabel": "MITRA",
     "recommendedNext": "RECOMMENDED NEXT",
     "enterRoom": "Enter {{room_label}}",
@@ -2263,6 +2264,14 @@
       "settle": "Settle",
       "understand": "Understand",
       "grow": "Grow"
+    },
+    "rooms": {
+      "room_stillness": { "label": "Find Calm", "desc": "A room to steady the mind when things feel too much." },
+      "room_release": { "label": "Set It Down", "desc": "A room to set down what feels heavy." },
+      "room_clarity": { "label": "Find Clarity", "desc": "A room to see the next step more clearly." },
+      "room_joy": { "label": "Notice What's Good", "desc": "A room to notice what is already good." },
+      "room_connection": { "label": "Feel Connected", "desc": "A room for when the heart feels alone." },
+      "room_growth": { "label": "Take the Next Step", "desc": "A room to turn energy into one clear action." }
     }
   },
   "remindersScreen": {

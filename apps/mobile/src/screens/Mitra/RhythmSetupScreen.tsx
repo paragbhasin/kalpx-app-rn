@@ -117,17 +117,6 @@ const BAND_ART: Record<RhythmTimeBand, React.ComponentType<any>> = {
 };
 const RHYTHM_BG = require("../../../assets/beige_bg.webp");
 
-const MOMENT_COPY: Record<RhythmTimeBand, { label: string; desc: string }> = {
-  morning: {
-    label: "Morning",
-    desc: "Begin the day with steadiness and intention.",
-  },
-  afternoon: {
-    label: "Afternoon",
-    desc: "Pause, reset, and return to yourself.",
-  },
-  night: { label: "Night", desc: "Reflect, release, and close gently." },
-};
 const PURPOSE_ART: Record<RhythmTimeBand, React.ComponentType<any>[]> = {
   morning: [M3Icon, M5Icon, M1Icon, M4Icon, M2Icon, M6Icon],
   afternoon: [A5Icon, A1Icon, A4Icon, A2Icon, A6Icon, A3Icon],
@@ -227,14 +216,6 @@ const PURPOSE_OPTIONS: Record<
     },
   ],
 };
-
-function itemTypeLabel(itemType: string): string {
-  if (itemType === "mantra") return "Mantra";
-  if (itemType === "sankalp") return "Sankalp";
-  if (itemType === "practice") return "Practice";
-  if (itemType === "reflection") return "Reflection";
-  return "Library";
-}
 
 const DEFAULT_REMINDER_TIMES: Record<RhythmTimeBand, string> = {
   morning: "06:00",

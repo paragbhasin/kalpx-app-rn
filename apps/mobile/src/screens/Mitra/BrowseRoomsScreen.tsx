@@ -126,8 +126,8 @@ export default function BrowseRoomsScreen() {
                 onPress={() => handleRoomTap(roomId)}
                 activeOpacity={0.8}
               >
-                <Text style={styles.roomLabel}>{ROOM_LABELS[roomId]}</Text>
-                <Text style={styles.roomDescription}>{ROOM_DESCRIPTIONS[roomId]}</Text>
+                <Text style={styles.roomLabel}>{t(`browseRooms.rooms.${roomId}.label`, { defaultValue: ROOM_LABELS[roomId] })}</Text>
+                <Text style={styles.roomDescription}>{t(`browseRooms.rooms.${roomId}.desc`, { defaultValue: ROOM_DESCRIPTIONS[roomId] })}</Text>
               </TouchableOpacity>
             ))}
           </View>

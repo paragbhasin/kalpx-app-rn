@@ -40,18 +40,6 @@ const TRIAD_DEFAULTS: Record<string, string> = {
   practice: "18:00",
 };
 
-const TRIAD_LABELS: Record<string, string> = {
-  mantra: "Mantra",
-  sankalp: "Sankalp",
-  practice: "Practice",
-};
-
-const BAND_LABELS: Record<RhythmTimeBand, string> = {
-  morning: "Morning",
-  afternoon: "Afternoon",
-  night: "Night",
-};
-
 function formatTime(hms: string | null, setTimeLabel: string): string {
   if (!hms) return setTimeLabel;
   const [h, m] = hms.split(":").map(Number);

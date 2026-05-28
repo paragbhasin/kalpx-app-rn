@@ -8,25 +8,51 @@ import {
   View,
 } from "react-native";
 import { Fonts } from "../theme/fonts";
+import type { UpdateType } from "../hooks/useUpdateCheck";
 
 interface Props {
   visible: boolean;
+  updateType?: UpdateType;
   onUpdateNow: () => void;
   onLater: () => void;
 }
 
-const UpdateModal: React.FC<Props> = ({ visible, onUpdateNow, onLater }) => {
+const COPY = {
+  soft: {
+    title: "New version available",
+    body: "Update KalpX for improvements, fixes, and a smoother experience.",
+  },
+  force: {
+    title: "Update required",
+    body: "This version is no longer supported. Please update KalpX to continue.",
+  },
+};
+
+const UpdateModal: React.FC<Props> = ({
+  visible,
+  updateType = "soft",
+  onUpdateNow,
+  onLater,
+}) => {
+  const copy = COPY[updateType];
+  const isForce = updateType === "force";
+
   return (
-    <Modal visible={visible} transparent animationType="fade" statusBarTranslucent>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      statusBarTranslucent
+      // Prevent hardware back button from dismissing a force-update modal
+      onRequestClose={isForce ? () => {} : onLater}
+    >
       <View style={styles.overlay}>
         <View style={styles.card}>
-          <View style={styles.dot} />
+          <View style={[styles.dot, isForce && styles.dotForce]} />
 
-          <Text style={styles.title}>New version available</Text>
+          <Text style={styles.title}>{copy.title}</Text>
 
-          <Text style={styles.body}>
-            Update KalpX for improvements, fixes, and a smoother experience.
-          </Text>
+          <Text style={styles.body}>{copy.body}</Text>
 
           <TouchableOpacity
             style={styles.updateButton}
@@ -36,13 +62,15 @@ const UpdateModal: React.FC<Props> = ({ visible, onUpdateNow, onLater }) => {
             <Text style={styles.updateText}>Update</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.laterButton}
-            onPress={onLater}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.laterText}>Later</Text>
-          </TouchableOpacity>
+          {!isForce && (
+            <TouchableOpacity
+              style={styles.laterButton}
+              onPress={onLater}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.laterText}>Later</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </Modal>
@@ -55,6 +83,7 @@ const CREAM = "#F6F0DD";
 const GOLD = "#C9961A";
 const DARK = "#1A1208";
 const MUTED = "#6B5E3E";
+const URGENT = "#B94040";
 
 const styles = StyleSheet.create({
   overlay: {
@@ -70,7 +99,6 @@ const styles = StyleSheet.create({
     paddingVertical: 36,
     paddingHorizontal: 28,
     alignItems: "center",
-    // Soft shadow
     ...Platform.select({
       ios: {
         shadowColor: "#000",
@@ -87,6 +115,9 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: GOLD,
     marginBottom: 20,
+  },
+  dotForce: {
+    backgroundColor: URGENT,
   },
   title: {
     fontFamily: Fonts.serif.bold,

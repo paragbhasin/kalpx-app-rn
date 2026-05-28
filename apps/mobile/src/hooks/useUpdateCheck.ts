@@ -4,19 +4,23 @@ import { useCallback, useEffect, useState } from "react";
 import { Platform } from "react-native";
 import VersionCheck from "react-native-version-check-expo";
 
+export type UpdateType = "soft" | "force";
+
 const DISMISSED_KEY = "update_popup_dismissed_date";
 
-// "1.2.3" → [1, 2, 3]
+// true = force update (no Later button), false = soft update (Later button shows)
+const FORCE_UPDATE = true;
+
 function parseVersion(v: string): number[] {
   return String(v)
     .split(".")
     .map((n) => parseInt(n, 10) || 0);
 }
 
-// Returns true when `latest` is strictly newer than `current`
-function isNewer(current: string, latest: string): boolean {
+// Returns true when `candidate` is strictly newer than `current`
+function isNewer(current: string, candidate: string): boolean {
   const c = parseVersion(current);
-  const l = parseVersion(latest);
+  const l = parseVersion(candidate);
   for (let i = 0; i < 3; i++) {
     const cv = c[i] ?? 0;
     const lv = l[i] ?? 0;
@@ -32,18 +36,17 @@ function todayDateString(): string {
 
 export function useUpdateCheck() {
   const [showUpdate, setShowUpdate] = useState(false);
+  const [updateType, setUpdateType] = useState<UpdateType>("soft");
 
   useEffect(() => {
     let active = true;
 
     const check = async () => {
       try {
-        const dismissedDate = await AsyncStorage.getItem(DISMISSED_KEY);
-        if (dismissedDate === todayDateString()) return; // user dismissed today
-
         const current =
           Constants.expoConfig?.version ??
           (await VersionCheck.getCurrentVersion());
+        const currentStr = String(current);
 
         const options =
           Platform.OS === "android"
@@ -51,8 +54,22 @@ export function useUpdateCheck() {
             : { bundleId: "com.kalpx.app", country: "in" };
         const latest = await VersionCheck.getLatestVersion(options);
 
-        if (!active) return;
-        if (latest && isNewer(String(current), String(latest))) {
+        if (!active || !latest) return;
+
+        const latestStr = String(latest);
+
+        if (FORCE_UPDATE) {
+          setUpdateType("force");
+          setShowUpdate(true);
+          return;
+        }
+
+        if (isNewer(currentStr, latestStr)) {
+          // Newer version available but not critical — soft update with daily snooze
+          const dismissedDate = await AsyncStorage.getItem(DISMISSED_KEY);
+          if (dismissedDate === todayDateString()) return;
+          if (!active) return;
+          setUpdateType("soft");
           setShowUpdate(true);
         }
       } catch {
@@ -68,12 +85,15 @@ export function useUpdateCheck() {
 
   const dismissUpdate = useCallback(async () => {
     setShowUpdate(false);
-    try {
-      await AsyncStorage.setItem(DISMISSED_KEY, todayDateString());
-    } catch {
-      // Ignore storage errors
+    // Force updates are not snoozable — re-check every launch
+    if (updateType === "soft") {
+      try {
+        await AsyncStorage.setItem(DISMISSED_KEY, todayDateString());
+      } catch {
+        // Ignore storage errors
+      }
     }
-  }, []);
+  }, [updateType]);
 
-  return { showUpdate, dismissUpdate };
+  return { showUpdate, updateType, dismissUpdate };
 }

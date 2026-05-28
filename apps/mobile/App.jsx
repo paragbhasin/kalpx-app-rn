@@ -147,7 +147,7 @@ function AppInner({ initialRoute, navigationRef }) {
   const dispatch = useDispatch();
   const [activeRouteName, setActiveRouteName] = useState(null);
 
-  const { showUpdate, dismissUpdate } = useUpdateCheck();
+  const { showUpdate, updateType, dismissUpdate } = useUpdateCheck();
 
   const handleOpenStore = () => {
     const url =
@@ -263,6 +263,7 @@ function AppInner({ initialRoute, navigationRef }) {
       <ToastHost />
       <UpdateModal
         visible={showUpdate}
+        updateType={updateType}
         onUpdateNow={handleOpenStore}
         onLater={dismissUpdate}
       />

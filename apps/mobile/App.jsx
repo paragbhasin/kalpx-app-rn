@@ -9,7 +9,9 @@ import { useEffect, useRef, useState } from "react";
 import {
   AccessibilityInfo,
   ImageBackground,
+  Linking,
   LogBox,
+  Platform,
   StatusBar,
   StyleSheet,
   Text,
@@ -51,6 +53,9 @@ import {
 } from "./src/service/pushNotifications";
 import { attachDeepLinkListeners } from "./src/utils/deeplink";
 import { registerDeviceToBackend } from "./src/utils/registerDevice";
+
+import UpdateModal from "./src/components/UpdateModal";
+import { useUpdateCheck } from "./src/hooks/useUpdateCheck";
 
 const TransparentTheme = {
   ...DefaultTheme,
@@ -141,6 +146,17 @@ function AppInner({ initialRoute, navigationRef }) {
   const currentBackground = useScreenStore((state) => state.currentBackground);
   const dispatch = useDispatch();
   const [activeRouteName, setActiveRouteName] = useState(null);
+
+  const { showUpdate, dismissUpdate } = useUpdateCheck();
+
+  const handleOpenStore = () => {
+    const url =
+      Platform.OS === "ios"
+        ? "https://apps.apple.com/app/kalpx/id6755144623"
+        : "market://details?id=com.kalpx.app";
+    Linking.openURL(url).catch(() => {});
+    dismissUpdate();
+  };
 
   // Hydrate the login user from AsyncStorage on app boot.
   // The login flow already persists access_token + refresh_token + user_id to
@@ -245,6 +261,11 @@ function AppInner({ initialRoute, navigationRef }) {
         </View>
       </NavigationContainer>
       <ToastHost />
+      <UpdateModal
+        visible={showUpdate}
+        onUpdateNow={handleOpenStore}
+        onLater={dismissUpdate}
+      />
     </View>
   );
 }

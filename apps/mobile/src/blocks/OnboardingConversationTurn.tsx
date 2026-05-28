@@ -139,6 +139,14 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
     ? block.headline || ""
     : String(firstMessage || "");
 
+  // Turn 8 overrides: translate the static allContainers.js mitra_message + CTA chip
+  const isTurn8Msg = block.id === "turn8_msg";
+  const isTurn8Cta = block.id === "turn8_cta";
+  const t8ChipLabel = (chip: { id: string; label: string }) => {
+    if (isTurn8Cta && chip.id === "ready") return t("turn8.beginCta");
+    return chip.label;
+  };
+
   useEffect(() => {
     Animated.sequence([
       Animated.timing(fadeAnim, {
@@ -505,9 +513,13 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
         ) : null}
 
         {!isPathHeaderBlock &&
-          messages.some((m) => m && String(m).trim().length > 0) && (
+          (isTurn8Msg || messages.some((m) => m && String(m).trim().length > 0)) && (
             <Animated.View style={[styles.mitraMsgCard, { opacity: fadeAnim }]}>
-              {messages.map((para, i) =>
+              {isTurn8Msg ? (
+                <Text style={[styles.mitraMsg, { letterSpacing: 0 }]}>
+                  {t("turn8.title")}
+                </Text>
+              ) : messages.map((para, i) =>
                 para && String(para).trim().length > 0 ? (
                   <Text
                     key={i}
@@ -610,7 +622,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                             : styles.chipLabelPrimary),
                       ]}
                     >
-                      {chip.label}
+                      {t8ChipLabel(chip)}
                     </Text>
                   </View>
                 )}

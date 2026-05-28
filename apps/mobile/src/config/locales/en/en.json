@@ -1859,6 +1859,32 @@
     "companionDesc2": "support what you carry, strengthen what is growing, and walk one day at a time",
     "beginCta": "Begin with Mitra →"
   },
+  "turn8": {
+    "title": "This is what I'm holding for you today:",
+    "beginCta": "Begin my journey",
+    "labels": {
+      "mantra": "YOUR MANTRA",
+      "sankalp": "YOUR INTENTION",
+      "practice": "YOUR PRACTICE"
+    },
+    "tabs": {
+      "mantra": "Mantra",
+      "sankalp": "Sankalp",
+      "practice": "Practice"
+    },
+    "why": {
+      "header": "Why these were chosen",
+      "subheader": "Understand why Mitra selected this mantra, sankalp, and practice.",
+      "chosenWith": "Chosen with care",
+      "whySupports": "Why this supports today",
+      "essence": "Essence",
+      "shift": "Shift",
+      "shiftLabel": "Mitra chose this to guide you from {{shift}}",
+      "usefulFor": "Useful for",
+      "rootedIn": "Rooted in"
+    },
+    "footer": "This isn't homework. It's sadhana — a daily practice that builds something real over time."
+  },
   "mitraStart": {
     "title": "I'm Mitra.\nI'm here with you.",
     "line1": "Hi. I am Mitra.",
@@ -1866,6 +1892,12 @@
     "line3": "I notice small things, like your mood and the shape of your day.",
     "beginCta": "Yes, let's begin →",
     "returning": "I'm returning"
+  },
+  "mitraPathSelect": {
+    "headline": "Do you need support in some area of life right now?",
+    "subtext": "Or are you feeling balanced and ready to grow?",
+    "chipSupport": "I need help with something in life right now",
+    "chipGrowth": "I feel balanced and want to grow"
   },
   "mitraFourDoor": {
     "door": {

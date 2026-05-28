@@ -621,6 +621,42 @@ export default function RhythmSetupScreen({
     }
   }, [purposes, selectedMoments, i18n.language]);
 
+  // When locale changes while suggestions are already displayed, re-fetch the
+  // SAME items in the new locale so title/why_this text updates in place.
+  const localeRef = useRef(i18n.language);
+  useEffect(() => {
+    const prevLocale = localeRef.current;
+    localeRef.current = i18n.language;
+    if (wizardStep !== "suggestion" || i18n.language === prevLocale) return;
+    const pinned = Object.entries(wizardItems)
+      .map(([slot, it]) => it ? { slot, item_id: it.item_id, item_type: it.item_type } : null)
+      .filter(Boolean) as { slot: string; item_id: string; item_type: string }[];
+    if (!pinned.length) return;
+    void (async () => {
+      setSuggestLoading(true);
+      try {
+        const resp = await postRhythmSuggest({
+          selected_moments: selectedMoments,
+          purposes,
+          tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          locale: i18n.language,
+          source_surface: "rhythm_wizard",
+          pinned_items: pinned as any,
+        });
+        const newItems: Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>> = {};
+        resp.items.forEach((it, idx) => {
+          newItems[it.slot] = { ...rhythmSuggestItemToLocalItem(it), sort_order: idx };
+        });
+        if (Object.keys(newItems).length) setWizardItems(newItems);
+      } catch {
+        // Silent — keep existing items on failure
+      } finally {
+        setSuggestLoading(false);
+      }
+    })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [i18n.language]);
+
   useEffect(() => {
     if (wizardStep === "suggestion" && !editMode && !suggestionsLoaded) {
       void loadSuggestions();

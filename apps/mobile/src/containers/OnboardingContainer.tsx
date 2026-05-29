@@ -29,6 +29,7 @@ import {
   View,
   ScrollView,
   StyleSheet,
+  useWindowDimensions,
 } from "react-native";
 import BlockRenderer from "../engine/BlockRenderer";
 import { useScreenStore } from "../engine/useScreenBridge";
@@ -62,6 +63,9 @@ function getUsableDynamicOnboardingData(data: any) {
 }
 
 const OnboardingContainer: React.FC<Props> = ({ schema }) => {
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+
   const updateBackground = useScreenStore(
     (state: any) => state.updateBackground,
   );
@@ -202,7 +206,10 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
   return (
     <ScrollView
       style={styles.scroll}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[
+        styles.content,
+        isTablet && styles.contentTablet,
+      ]}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
@@ -218,6 +225,17 @@ const styles = StyleSheet.create({
   // Cream background, not dark immersive — onboarding is welcoming, not practice-mode.
   scroll: { flex: 1 },
   content: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 32 },
+  // Tablet: fill the viewport and vertically center each turn block.
+  // flex:1 children (OnboardingIntroHero) fill the container and apply their
+  // own justifyContent:center; non-flex children (conversation turn cards)
+  // are centered by this container's justifyContent.
+  contentTablet: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingTop: 0,
+    paddingBottom: 0,
+    paddingHorizontal: 0,
+  },
   fullScreen: { flex: 1 },
 });
 

@@ -1,6 +1,7 @@
 import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef } from "react";
-import {Image, 
+import {
+  Image,
   Animated,
   Dimensions,
   Platform,
@@ -9,15 +10,27 @@ import {Image,
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 import Svg, { Path } from "react-native-svg";
-const MantraLotus3d = ({ width, height, opacity, style }: { width?: number; height?: number; opacity?: number; style?: any }) => <Image source={require("../../assets/mantra-lotus-3d.webp")} style={[{ width, height, opacity, resizeMode: 'contain' }, style]} />;
+import { sfs } from "../utils/responsive";
 import { Fonts } from "../theme/fonts";
 
+const MantraLotus3d = ({ width, height, opacity, style }: { width?: number; height?: number; opacity?: number; style?: any }) => (
+  <Image source={require("../../assets/mantra-lotus-3d.webp")} style={[{ width, height, opacity, resizeMode: "contain" }, style]} />
+);
+
 const AnimatedPath = Animated.createAnimatedComponent(Path);
-const { width: screenWidth } = Dimensions.get("window");
-const LOTUS_WIDTH = Math.min(screenWidth * 0.92, 360);
-const LOTUS_HEIGHT = Math.min(screenWidth * 0.72, 280);
+const { width: SCREEN_W } = Dimensions.get("window");
+const IS_TABLET = SCREEN_W >= 768;
+
+// Lotus size — much larger on tablet
+const LOTUS_WIDTH = IS_TABLET
+  ? Math.min(SCREEN_W * 0.65, 500)
+  : Math.min(SCREEN_W * 0.92, 360);
+const LOTUS_HEIGHT = IS_TABLET
+  ? Math.min(SCREEN_W * 0.5, 390)
+  : Math.min(SCREEN_W * 0.72, 280);
 
 interface RunnerCompletionViewProps {
   title: string;
@@ -38,6 +51,9 @@ const RunnerCompletionView: React.FC<RunnerCompletionViewProps> = ({
   onRepeat,
   testID,
 }) => {
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+
   const contentFade = useRef(new Animated.Value(0)).current;
   const checkProgress = useRef(new Animated.Value(0)).current;
   const messageOpacity = useRef(new Animated.Value(0)).current;
@@ -72,20 +88,31 @@ const RunnerCompletionView: React.FC<RunnerCompletionViewProps> = ({
     outputRange: [checkPathLength, 0],
   });
 
+  const checkSize = isTablet ? 72 : 48;
+
   return (
     <ScrollView
       style={styles.scroll}
-      contentContainerStyle={styles.scrollContent}
+      contentContainerStyle={[
+        styles.scrollContent,
+        isTablet && { paddingHorizontal: 48, paddingTop: 32 },
+      ]}
       showsVerticalScrollIndicator={false}
     >
-      <Animated.View style={[styles.content, { opacity: contentFade }]}>
-        <View style={styles.checkWrap}>
-          <Svg width={48} height={48} viewBox="0 0 48 48">
+      <Animated.View
+        style={[
+          styles.content,
+          { opacity: contentFade },
+          isTablet && { maxWidth: 640, alignSelf: "center", width: "100%" },
+        ]}
+      >
+        <View style={[styles.checkWrap, isTablet && { width: checkSize, height: checkSize, marginBottom: 12 }]}>
+          <Svg width={checkSize} height={checkSize} viewBox="0 0 48 48">
             <AnimatedPath
               d="M10 24 L20 34 L38 14"
               fill="none"
               stroke="#A68246"
-              strokeWidth={2.5}
+              strokeWidth={isTablet ? 3 : 2.5}
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeDasharray={`${checkPathLength}`}
@@ -95,23 +122,23 @@ const RunnerCompletionView: React.FC<RunnerCompletionViewProps> = ({
         </View>
 
         <Animated.View style={{ opacity: messageOpacity, width: "100%", alignItems: "center" }}>
-          <View style={styles.messageCard}>
-            <Text style={styles.messageText}>{title}</Text>
+          <View style={[styles.messageCard, isTablet && { borderLeftWidth: 3, paddingLeft: 28, paddingVertical: 8, marginBottom: 40 }]}>
+            <Text style={[styles.messageText, isTablet && { fontSize: 36, lineHeight: 52 }]}>{title}</Text>
             {!!subtitle && (
-              <Text style={styles.subtextText}>{subtitle}</Text>
+              <Text style={[styles.subtextText, isTablet && { fontSize: 20, lineHeight: 30, marginTop: 12 }]}>{subtitle}</Text>
             )}
           </View>
 
           {!!badgeLabel && (
-            <View style={styles.badgeWrap}>
-              <Text style={styles.badgeText}>{badgeLabel}</Text>
+            <View style={[styles.badgeWrap, isTablet && { paddingLeft: 28 }]}>
+              <Text style={[styles.badgeText, isTablet && { fontSize: 18 }]}>{badgeLabel}</Text>
             </View>
           )}
         </Animated.View>
       </Animated.View>
 
-      <View style={styles.bottomSection}>
-        <View style={styles.lotusWrap}>
+      <View style={[styles.bottomSection, isTablet && { maxWidth: 640, alignSelf: "center", width: "100%" }]}>
+        <View style={[styles.lotusWrap, isTablet && { minHeight: 340, marginTop: 0, marginBottom: 0 }]}>
           <MantraLotus3d
             width={LOTUS_WIDTH}
             height={LOTUS_HEIGHT}
@@ -120,19 +147,19 @@ const RunnerCompletionView: React.FC<RunnerCompletionViewProps> = ({
           />
         </View>
 
-        <View style={styles.footer}>
+        <View style={[styles.footer, isTablet && { paddingBottom: 60 }]}>
           <TouchableOpacity
-            style={styles.primaryCta}
+            style={[styles.primaryCta, isTablet && { maxWidth: 560, paddingVertical: 22 }]}
             onPress={onCtaPress}
             activeOpacity={0.8}
             testID={testID}
           >
-            <Text style={styles.primaryCtaText}>{ctaLabel}</Text>
+            <Text style={[styles.primaryCtaText, isTablet && { fontSize: 22, letterSpacing: 0.4 }]}>{ctaLabel}</Text>
           </TouchableOpacity>
 
           {!!onRepeat && (
             <TouchableOpacity style={styles.secondaryCta} onPress={onRepeat} activeOpacity={0.6}>
-              <Text style={styles.secondaryCtaText}>Repeat</Text>
+              <Text style={[styles.secondaryCtaText, isTablet && { fontSize: 22 }]}>Repeat</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -175,14 +202,14 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 26,
-    lineHeight: 38,
+    fontSize: sfs(26),
+    lineHeight: sfs(38),
     color: "#5C3A12",
   },
   subtextText: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: sfs(15),
+    lineHeight: sfs(22),
     color: "#8A6845",
     fontStyle: "italic",
     marginTop: 8,
@@ -194,7 +221,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontFamily: Fonts.sans.medium,
-    fontSize: 13,
+    fontSize: sfs(13),
     color: "#A68246",
     letterSpacing: 0.3,
   },
@@ -240,7 +267,7 @@ const styles = StyleSheet.create({
   },
   primaryCtaText: {
     fontFamily: Fonts.sans.regular,
-    fontSize: 16,
+    fontSize: sfs(16),
     color: "#432104",
     letterSpacing: 0.2,
   },
@@ -249,7 +276,7 @@ const styles = StyleSheet.create({
   },
   secondaryCtaText: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 18,
+    fontSize: sfs(18),
     color: "#432104",
     letterSpacing: 0.5,
     marginTop: 10,

@@ -48,6 +48,7 @@ import {
   Text,
   TouchableOpacity,
   UIManager,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
@@ -85,6 +86,12 @@ import store, { type RootState } from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
+import {
+  rfs,
+  rhPad,
+  TABLET_MAX_CONTENT_WIDTH,
+  TABLET_MAX_CARD_WIDTH,
+} from "../../utils/responsive";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ContinueJourney from "../Home/ContinueJourney";
 
@@ -112,6 +119,8 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
   const dispatch = useDispatch<any>();
   const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   const { loadScreen, goBack, updateBackground } = useScreenStore();
 
   useFocusEffect(
@@ -757,10 +766,23 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
         style={styles.scroll}
         contentContainerStyle={[
           styles.content,
-          { paddingBottom: tabBarHeight + insets.bottom + 16 },
+          {
+            paddingBottom: tabBarHeight + insets.bottom + 16,
+            paddingHorizontal: rhPad(20, width),
+          },
         ]}
         showsVerticalScrollIndicator={false}
       >
+        <View
+          style={[
+            styles.contentWrap,
+            isTablet && {
+              maxWidth: TABLET_MAX_CONTENT_WIDTH,
+              alignSelf: "center",
+              width: "100%",
+            },
+          ]}
+        >
         {showAllCompleteMessage && (
           <View style={styles.allCompleteBlock}>
             <Text style={styles.allCompleteTitle}>All three held today</Text>
@@ -771,14 +793,14 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
         )}
         <View style={styles.heroBlock}>
           <Text style={styles.sparkle}>✧</Text>
-          <Text style={styles.heroTitle}>
+          <Text style={[styles.heroTitle, { fontSize: rfs(24, width) }]}>
             {sd.headline_text ||
               sd.greeting?.headline ||
               sd.focus_phrase ||
               "Still here. That is the practice."}
           </Text>
           {!!sd.greeting_context && (
-            <Text style={styles.supportingLine}>{sd.greeting_context}</Text>
+            <Text style={[styles.supportingLine, { fontSize: rfs(13, width) }]}>{sd.greeting_context}</Text>
           )}
 
           <TouchableOpacity
@@ -786,7 +808,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
             onPress={toggleProgress}
             style={styles.dayPill}
           >
-            <Text style={styles.dayPillText}>
+            <Text style={[styles.dayPillText, { fontSize: rfs(13, width) }]}>
               Day {sd.day_number || 1} of {sd.total_days || 14}
             </Text>
             <Ionicons
@@ -807,13 +829,23 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
           </View>
         )}
 
-        <View style={styles.triadStack}>
+        <View style={[
+          styles.triadStack,
+          isTablet && {
+            maxWidth: TABLET_MAX_CARD_WIDTH,
+            alignSelf: "center",
+            width: "100%",
+          },
+        ]}>
           {triadItems.map((item) => (
             <TouchableOpacity
               key={item.slot}
               activeOpacity={0.9}
               onPress={() => handleTriadPress(item.slot as any, item.master)}
-              style={styles.triadCard}
+              style={[
+                styles.triadCard,
+                isTablet && { paddingVertical: 14, paddingLeft: 14, paddingRight: 18 },
+              ]}
             >
               <View style={styles.triadMain}>
                 <View style={styles.triadIconWrap}>
@@ -828,15 +860,13 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                   )}
                 </View>
                 <View style={styles.triadCopy}>
-                  <Text style={styles.triadLabel}>{item.label}</Text>
-                  <Text style={styles.triadTitle}>{item.title}</Text>
-                  {/* {!!item.subtitle && (
-                    <Text style={styles.triadSubtitle}>{item.subtitle}</Text>
-                  )} */}
+                  <Text style={[styles.triadLabel, { fontSize: rfs(13, width) }]}>{item.label}</Text>
+                  <Text style={[styles.triadTitle, { fontSize: rfs(16, width) }]}>{item.title}</Text>
+                  {!!item.subtitle && (
+                    <Text style={[styles.triadSubtitle, { fontSize: rfs(13, width) }]}>{item.subtitle}</Text>
+                  )}
                   {item.completedToday && (
-                    <Text style={styles.triadDoneLabel}>
-                      {innerPathHeldLabel(item.slot)}
-                    </Text>
+                    <Text style={[styles.triadDoneLabel, { fontSize: rfs(12, width) }]}>{innerPathHeldLabel(item.slot)}</Text>
                   )}
                 </View>
               </View>
@@ -858,15 +888,22 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
         </View>
 
         {hasGuidance && (
-          <View style={styles.sectionBlock}>
+          <View style={[
+            styles.sectionBlock,
+            isTablet && {
+              maxWidth: TABLET_MAX_CARD_WIDTH,
+              alignSelf: "center",
+              width: "100%",
+            },
+          ]}>
             <TouchableOpacity
               activeOpacity={0.85}
               onPress={toggleGuidance}
-              style={styles.accordionRow}
+              style={[styles.accordionRow, isTablet && { paddingVertical: 14 }]}
             >
               <View style={styles.accordionLead}>
                 <Text style={styles.accordionIcon}>✦</Text>
-                <Text style={styles.accordionTitle}>Today&apos;s guidance</Text>
+                <Text style={[styles.accordionTitle, { fontSize: rfs(18, width) }]}>Today&apos;s guidance</Text>
               </View>
               <Ionicons
                 name={guidanceOpen ? "chevron-up" : "chevron-down"}
@@ -875,14 +912,14 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
               />
             </TouchableOpacity>
             {guidanceOpen && (
-              <View style={styles.guidanceCard}>
-                <Text style={styles.guidanceHeader}>
+              <View style={[styles.guidanceCard, isTablet && { paddingHorizontal: 24, paddingVertical: 22 }]}>
+                <Text style={[styles.guidanceHeader, { fontSize: rfs(12, width) }]}>
                   {sd.sankalp_how_to_live_label || "HOW TO LIVE THIS"}
                 </Text>
                 {guidanceItems.map((item: string, index: number) => (
                   <View key={`guide-${index}`} style={styles.guidanceItemRow}>
                     <View style={styles.guidanceItemBar} />
-                    <Text style={styles.guidanceItemText}>{item}</Text>
+                    <Text style={[styles.guidanceItemText, { fontSize: rfs(13, width) }]}>{item}</Text>
                   </View>
                 ))}
               </View>
@@ -891,20 +928,27 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
         )}
 
         {hasWhyChosen && (
-          <View style={styles.sectionBlock}>
+          <View style={[
+            styles.sectionBlock,
+            isTablet && {
+              maxWidth: TABLET_MAX_CARD_WIDTH,
+              alignSelf: "center",
+              width: "100%",
+            },
+          ]}>
             <TouchableOpacity
               activeOpacity={0.85}
               onPress={toggleWhyChosen}
-              style={styles.accordionRow}
+              style={[styles.accordionRow, isTablet && { paddingVertical: 14 }]}
             >
               <View style={styles.accordionLead}>
                 <Text style={styles.accordionIcon}>✿</Text>
                 <View style={styles.whyHeaderCopy}>
-                  <Text style={styles.accordionTitle}>
+                  <Text style={[styles.accordionTitle, { fontSize: rfs(18, width) }]}>
                     Why these were chosen
                   </Text>
                   {!whyChosenOpen && (
-                    <Text style={styles.accordionSubtitle}>
+                    <Text style={[styles.accordionSubtitle, { fontSize: rfs(12, width) }]}>
                       Understand why Mitra selected this mantra, sankalp, and
                       practice.
                     </Text>
@@ -918,11 +962,11 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
               />
             </TouchableOpacity>
             {whyChosenOpen && (
-              <View style={styles.whyPanel}>
+              <View style={[styles.whyPanel, isTablet && { paddingHorizontal: 22, paddingVertical: 20 }]}>
                 {activeWhyItem && (
                   <View>
-                    <Text style={styles.whyEyebrow}>Chosen with care</Text>
-                    <Text style={styles.whyTitle}>Why this supports today</Text>
+                    <Text style={[styles.whyEyebrow, { fontSize: rfs(12, width) }]}>Chosen with care</Text>
+                    <Text style={[styles.whyTitle, { fontSize: rfs(14, width) }]}>Why this supports today</Text>
 
                     <View style={styles.whyTabsRow}>
                       {whyTabs.map((item) => {
@@ -941,6 +985,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                               style={[
                                 styles.whyTabText,
                                 isActive && styles.whyTabTextActive,
+                                { fontSize: rfs(10, width) },
                               ]}
                             >
                               {item.label}
@@ -952,17 +997,17 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
 
                     <View style={styles.whyDivider} />
 
-                    <Text style={styles.whySectionLabel}>
+                    <Text style={[styles.whySectionLabel, { fontSize: rfs(12, width) }]}>
                       {activeWhyItem.label}
                     </Text>
-                    <Text style={styles.whyItemTitle}>
+                    <Text style={[styles.whyItemTitle, { fontSize: rfs(18, width) }]}>
                       {activeWhyItem.title}
                     </Text>
 
                     {!!activeWhyItem.context?.mitra_frame_through && (
-                      <View style={styles.whyInfoCard}>
-                        <Text style={styles.whyInfoLabel}>Essence</Text>
-                        <Text style={styles.whyInfoText}>
+                      <View style={[styles.whyInfoCard, isTablet && { paddingHorizontal: 20, paddingVertical: 18 }]}>
+                        <Text style={[styles.whyInfoLabel, { fontSize: rfs(11, width) }]}>Essence</Text>
+                        <Text style={[styles.whyInfoText, { fontSize: rfs(15, width) }]}>
                           {sentence(
                             activeWhyItem.slot === "sankalp"
                               ? `This is ${activeWhyItem.context.mitra_frame_through}`
@@ -973,9 +1018,9 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                     )}
 
                     {!!activeWhyItem.shift && (
-                      <View style={styles.whyInfoCard}>
-                        <Text style={styles.whyInfoLabel}>Shift</Text>
-                        <Text style={styles.whyInfoText}>
+                      <View style={[styles.whyInfoCard, isTablet && { paddingHorizontal: 20, paddingVertical: 18 }]}>
+                        <Text style={[styles.whyInfoLabel, { fontSize: rfs(11, width) }]}>Shift</Text>
+                        <Text style={[styles.whyInfoText, { fontSize: rfs(15, width) }]}>
                           {sentence(
                             `Mitra chose this to guide you from ${activeWhyItem.shift}`,
                           )}
@@ -984,18 +1029,18 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                     )}
 
                     {!!activeWhyItem.context?.mitra_use_for && (
-                      <View style={styles.whyInfoCard}>
-                        <Text style={styles.whyInfoLabel}>Useful for</Text>
-                        <Text style={styles.whyInfoText}>
+                      <View style={[styles.whyInfoCard, isTablet && { paddingHorizontal: 20, paddingVertical: 18 }]}>
+                        <Text style={[styles.whyInfoLabel, { fontSize: rfs(11, width) }]}>Useful for</Text>
+                        <Text style={[styles.whyInfoText, { fontSize: rfs(15, width) }]}>
                           {sentence(activeWhyItem.context.mitra_use_for)}
                         </Text>
                       </View>
                     )}
 
                     {!!activeWhyItem.context?.commentary_lineage && (
-                      <View style={styles.whyInfoCard}>
-                        <Text style={styles.whyInfoLabel}>Rooted in</Text>
-                        <Text style={styles.whyInfoText}>
+                      <View style={[styles.whyInfoCard, isTablet && { paddingHorizontal: 20, paddingVertical: 18 }]}>
+                        <Text style={[styles.whyInfoLabel, { fontSize: rfs(11, width) }]}>Rooted in</Text>
+                        <Text style={[styles.whyInfoText, { fontSize: rfs(15, width) }]}>
                           {sentence(activeWhyItem.context.commentary_lineage)}
                         </Text>
                       </View>
@@ -1009,16 +1054,23 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
 
         {/* Reminders accordion — shown when user has an active journey */}
         {reminders?.has_journey && (
-          <View style={styles.accordionSection}>
+          <View style={[
+            styles.accordionSection,
+            isTablet && {
+              maxWidth: TABLET_MAX_CARD_WIDTH,
+              alignSelf: "center",
+              width: "100%",
+            },
+          ]}>
             <TouchableOpacity
               onPress={toggleReminders}
               activeOpacity={0.85}
-              style={styles.accordionHeader}
+              style={[styles.accordionHeader, isTablet && { paddingVertical: 14 }]}
             >
               <View style={styles.accordionHeaderLeft}>
-                <Text style={styles.accordionHeaderTitle}>Reminders</Text>
+                <Text style={[styles.accordionHeaderTitle, { fontSize: rfs(18, width) }]}>Reminders</Text>
                 {!remindersOpen && (
-                  <Text style={styles.accordionHeaderSubtitle}>
+                  <Text style={[styles.accordionHeaderSubtitle, { fontSize: rfs(13, width) }]}>
                     {[
                       reminders.mantra_reminder_enabled && "Mantra",
                       reminders.sankalp_reminder_enabled && "Sankalp",
@@ -1127,6 +1179,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
             )}
           </View>
         )}
+        </View>{/* end contentWrap */}
       </ScrollView>
       {renderPermissionModal()}
     </SafeAreaView>
@@ -1143,9 +1196,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingHorizontal: 20,
     paddingTop: 18,
     paddingBottom: 80,
+  },
+  contentWrap: {
+    flex: 1,
   },
   allCompleteBlock: {
     backgroundColor: "rgba(29, 186, 122, 0.10)",

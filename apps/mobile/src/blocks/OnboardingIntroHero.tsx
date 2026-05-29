@@ -6,11 +6,18 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { interpolate } from "../engine/utils/interpolation";
 import { Fonts } from "../theme/fonts";
+import {
+  TABLET_MAX_CARD_WIDTH,
+  rfs,
+  rs,
+  useTablet,
+} from "../utils/responsive";
 
 interface Props {
   block: {
@@ -31,6 +38,8 @@ interface Props {
 }
 
 const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
+  const { width } = useWindowDimensions();
+  const isTablet = useTablet();
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const replyAnim = useRef(new Animated.Value(0)).current;
@@ -103,20 +112,54 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
 
   return (
     <View
-      style={styles.container}
+      style={[styles.container, isTablet && styles.containerTablet]}
       testID={rootTestID}
       accessibilityLabel={rootTestID}
     >
       <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-        <Text style={styles.headline}>{headlineLines.join("\n")}</Text>
+        <Text
+          style={[
+            styles.headline,
+            {
+              fontSize: rfs(28, width),
+              lineHeight: rs(38, 46, width),
+              paddingHorizontal: rs(20, 60, width),
+            },
+          ]}
+        >
+          {headlineLines.join("\n")}
+        </Text>
 
         {block.subtext && (
-          <Text style={styles.subtext}>
+          <Text
+            style={[
+              styles.subtext,
+              {
+                fontSize: rfs(18, width),
+                paddingHorizontal: rs(30, 80, width),
+                marginBottom: rs(40, 48, width),
+              },
+            ]}
+          >
             {interpolate(block.subtext, screenData)}
           </Text>
         )}
 
-        <Animated.View style={[styles.responseWrap, { opacity: replyAnim }]}>
+        <Animated.View
+          style={[
+            styles.responseWrap,
+            { opacity: replyAnim },
+            isTablet && {
+              maxWidth: TABLET_MAX_CARD_WIDTH,
+              alignSelf: "center",
+              width: "100%",
+              paddingHorizontal: Math.max(
+                20,
+                (width - TABLET_MAX_CARD_WIDTH) / 2,
+              ),
+            },
+          ]}
+        >
           {(block.reply_chips || []).map((chip) => {
             const isReturning = chip.label.toLowerCase().includes("returning");
             if (isReturning) return null;
@@ -133,8 +176,20 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
                 testID={chipTestID}
                 accessibilityLabel={chipTestID}
               >
-                <View style={styles.premiumChip}>
-                  <Text style={styles.premiumChipLabel}>{chip.label}</Text>
+                <View
+                  style={[
+                    styles.premiumChip,
+                    { paddingVertical: rs(15, 18, width) },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.premiumChipLabel,
+                      { fontSize: rfs(16, width) },
+                    ]}
+                  >
+                    {chip.label}
+                  </Text>
                 </View>
               </TouchableOpacity>
             );
@@ -157,7 +212,11 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
                 testID="onboarding_im_returning"
                 accessibilityLabel="onboarding_im_returning"
               >
-                <Text style={styles.linkText}>{returningChip.label}</Text>
+                <Text
+                  style={[styles.linkText, { fontSize: rfs(18, width) }]}
+                >
+                  {returningChip.label}
+                </Text>
               </TouchableOpacity>
             );
           })()}
@@ -165,10 +224,19 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
       </Animated.View>
 
       {/* Lotus image at the bottom — purely decorative, must not intercept chip taps */}
-      <View style={styles.lotusWrap} pointerEvents="none">
+      <View
+        style={[styles.lotusWrap, isTablet && { marginTop: 0, marginBottom: 0 }]}
+        pointerEvents="none"
+      >
         <Image
           source={require("../../assets/new_home_lotus.webp")}
-          style={styles.lotus}
+          style={[
+            styles.lotus,
+            {
+              width: rs(340, 420, width),
+              height: rs(340, 420, width),
+            },
+          ]}
           resizeMode="contain"
         />
       </View>
@@ -183,6 +251,13 @@ const styles = StyleSheet.create({
     minHeight: 500,
     justifyContent: "space-between",
     // paddingTop: 40,
+  },
+  // Tablet: center content+lotus as a group within the flex:1 container.
+  // flexGrow:1 on the ScrollView contentContainerStyle makes this container
+  // fill the viewport; justifyContent:center distributes the two children
+  // (content block + lotusWrap) around the vertical midpoint.
+  containerTablet: {
+    justifyContent: "center",
   },
   content: {
     alignItems: "center",

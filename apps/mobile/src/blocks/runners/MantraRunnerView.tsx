@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import {Image, 
+import {Image,
   LayoutAnimation,
   Platform,
   ScrollView,
@@ -8,6 +8,7 @@ import {Image,
   TouchableOpacity,
   UIManager,
   View,
+  useWindowDimensions,
 } from "react-native";
 import Animated, {
   Easing,
@@ -22,6 +23,7 @@ const RudrakshSvg = ({ width, height, style }: { width?: number; height?: number
 import AudioPlayerBlock from "../AudioPlayerBlock";
 import { stopRoomAmbientAudio } from "../../engine/roomAmbientAudio";
 import { Fonts } from "../../theme/fonts";
+import { sfs } from "../../utils/responsive";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -181,6 +183,10 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   const [devanagariExpanded, setDevanagariExpanded] = useState(false);
   const sessionStartTimeRef = useRef(Date.now());
   const isCompletingRef = useRef(false);
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+  const interactionSize = isTablet ? 300 : 220;
+  const beadOrbitRadius = isTablet ? 100 : 72;
 
   useEffect(() => {
     stopRoomAmbientAudio().catch(() => {});
@@ -219,17 +225,16 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   const visualBeadsCount = Math.min(selectedTarget, MAX_VISUAL_BEADS);
   const beads = useMemo(() => {
     const arr = [];
-    const radius = 72;
     for (let i = 0; i < visualBeadsCount; i++) {
       const angle = (i / visualBeadsCount) * 2 * Math.PI - Math.PI / 2;
       arr.push({
-        x: Math.cos(angle) * (radius + 8),
-        y: Math.sin(angle) * (radius + 8),
+        x: Math.cos(angle) * (beadOrbitRadius + 8),
+        y: Math.sin(angle) * (beadOrbitRadius + 8),
         index: i,
       });
     }
     return arr;
-  }, [visualBeadsCount]);
+  }, [visualBeadsCount, beadOrbitRadius]);
 
   const isBeadTapped = (index: number) => {
     if (selectedTarget > MAX_VISUAL_BEADS) return index < chantCount % visualBeadsCount;
@@ -261,7 +266,7 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   return (
     <ScrollView
       style={styles.scroll}
-      contentContainerStyle={styles.scrollContent}
+      contentContainerStyle={[styles.scrollContent, isTablet && { paddingHorizontal: 40 }]}
       showsVerticalScrollIndicator={false}
     >
       {isDevMode && (
@@ -290,7 +295,7 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
         </TouchableOpacity>
       )}
 
-      <View style={styles.combinedMantraFlow}>
+      <View style={[styles.combinedMantraFlow, isTablet && { maxWidth: 640, alignSelf: 'center' }]}>
         <Text style={[styles.mantraTitle, { marginBottom: 12 }]}>{item.title}</Text>
 
         {(!!item.deity || !!item.source) && (
@@ -308,10 +313,10 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
               <Text style={styles.totalCountText}> / {selectedTarget}</Text>
             </View>
 
-            <View style={styles.interactionArea}>
-              <View style={styles.glowOuter}>
-                <View style={styles.glowMiddle}>
-                  <View style={styles.glowInner} />
+            <View style={[styles.interactionArea, isTablet && { width: interactionSize, height: interactionSize }]}>
+              <View style={[styles.glowOuter, isTablet && { width: 290, height: 290, borderRadius: 145 }]}>
+                <View style={[styles.glowMiddle, isTablet && { width: 250, height: 250, borderRadius: 125 }]}>
+                  <View style={[styles.glowInner, isTablet && { width: 190, height: 190, borderRadius: 95 }]} />
                 </View>
               </View>
 
@@ -349,7 +354,7 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
                 })}
               </Animated.View>
 
-              <Animated.View style={[styles.centerTapTarget, animatedCenterStyle]}>
+              <Animated.View style={[styles.centerTapTarget, animatedCenterStyle, isTablet && { width: 140, height: 140, borderRadius: 70 }]}>
                 <TouchableOpacity
                   style={styles.tapTouchable}
                   onPress={handleIncrement}
@@ -478,14 +483,14 @@ const styles = StyleSheet.create({
     paddingTop: 40,
   },
   mantraTitle: {
-    fontSize: 23,
+    fontSize: sfs(23),
     fontFamily: Fonts.serif.bold,
     color: BROWN,
     textAlign: "center",
     marginTop: -20,
   },
   mantraTraditionLine: {
-    fontSize: 11,
+    fontSize: sfs(11),
     letterSpacing: 1.3,
     fontFamily: Fonts.sans.medium,
     color: "#B89450",
@@ -500,12 +505,12 @@ const styles = StyleSheet.create({
     marginTop: -20,
   },
   currentCountText: {
-    fontSize: 64,
+    fontSize: sfs(64),
     fontFamily: Fonts.serif.regular,
     color: "#b89450",
   },
   totalCountText: {
-    fontSize: 32,
+    fontSize: sfs(32),
     fontFamily: Fonts.serif.regular,
     color: "#d1c1a1",
   },
@@ -602,13 +607,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   tapText: {
-    fontSize: 20,
+    fontSize: sfs(20),
     letterSpacing: 4,
     fontFamily: Fonts.sans.bold,
     color: "#b89450",
   },
   subTap: {
-    fontSize: 10,
+    fontSize: sfs(10),
     letterSpacing: 1,
     color: "#8a7a5a",
     fontFamily: Fonts.sans.medium,
@@ -649,7 +654,7 @@ const styles = StyleSheet.create({
   },
   repPillText: {
     fontFamily: Fonts.sans.medium,
-    fontSize: Platform.OS === "android" ? 13 : 14,
+    fontSize: Platform.OS === "android" ? sfs(13) : sfs(14),
     color: "#8a7a5a",
   },
   repPillTextSelected: {
@@ -686,13 +691,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cardLabel: {
-    fontSize: 18,
+    fontSize: sfs(18),
     fontFamily: Fonts.serif.bold,
     color: BROWN,
     marginHorizontal: 12,
   },
   toggleIcon: {
-    fontSize: 12,
+    fontSize: sfs(12),
     color: "#D4A017",
     display: "flex",
     alignItems: "center",
@@ -702,8 +707,8 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   cardText: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: sfs(16),
+    lineHeight: sfs(24),
     color: "#5a3c21",
     fontFamily: Fonts.serif.regular,
     textAlign: "center",
@@ -729,7 +734,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.8)",
   },
   verseIast: {
-    fontSize: 13,
+    fontSize: sfs(13),
     letterSpacing: 1,
     textTransform: "uppercase",
     color: "#615247",
@@ -739,7 +744,7 @@ const styles = StyleSheet.create({
   },
   verseDevanagari: {
     fontFamily: "NotoSansDevanagari_500Medium",
-    fontSize: 15,
+    fontSize: sfs(15),
     color: "#615247",
     textAlign: "center",
   },
@@ -771,13 +776,13 @@ const styles = StyleSheet.create({
   communityAddButtonText: {
     color: "#B88413",
     fontFamily: Fonts.sans.bold,
-    fontSize: 14,
+    fontSize: sfs(14),
   },
   backLink: {
     paddingVertical: 1,
   },
   backLinkText: {
-    fontSize: 16,
+    fontSize: sfs(16),
     fontFamily: Fonts.serif.regular,
     color: BROWN,
     textDecorationLine: "underline",

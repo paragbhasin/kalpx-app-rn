@@ -18,6 +18,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -26,6 +27,7 @@ import { executeAction } from "../../engine/actionExecutor";
 import { trackRoomTelemetry } from "../../engine/mitraApi";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import { Fonts } from "../../theme/fonts";
+import { sfs } from "../../utils/responsive";
 import { buildActionCtx } from "./actions/actionContextHelper";
 import InquiryModal from "./actions/InquiryModal";
 import StepModal, { type StepModalResult } from "./actions/StepModal";
@@ -207,6 +209,8 @@ const BETWEEN_STEP_LINES = [
 
 const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   const { loadScreen, goBack, screenData } = useScreenStore();
   const actionCtx = buildActionCtx({ loadScreen, goBack });
 
@@ -801,14 +805,15 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   }, [orderedActions, resumeActionId]);
 
   return (
-    <View>
+    <View style={styles.flex}>
       <ScrollView
-        style={styles.flex}
+        style={[styles.flex, isTablet && { maxWidth: 640, alignSelf: 'center' as const }]}
         contentContainerStyle={[
           styles.content,
           {
             paddingTop: 30,
             paddingBottom: Math.max(40, insets.bottom + 20),
+            paddingHorizontal: isTablet ? 48 : 26,
           },
         ]}
         showsVerticalScrollIndicator={false}
@@ -1210,7 +1215,7 @@ const styles = StyleSheet.create({
   },
   roomTitle: {
     fontFamily: Fonts.serif.bold,
-    fontSize: 30,
+    fontSize: sfs(30),
 
     color: "#432104",
     textAlign: "center",
@@ -1229,13 +1234,13 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(212,166,74,0.42)",
   },
   dividerDiamond: {
-    fontSize: 16,
+    fontSize: sfs(16),
     lineHeight: 16,
     color: "#D4A64A",
   },
   situationAck: {
     fontFamily: Fonts.sans.regular,
-    fontSize: 14,
+    fontSize: sfs(14),
     lineHeight: 25,
     color: "#7A6A58",
     fontStyle: "italic",
@@ -1262,13 +1267,13 @@ const styles = StyleSheet.create({
   },
   beginBtnText: {
     fontFamily: Fonts.sans.bold,
-    fontSize: 16,
+    fontSize: sfs(16),
     lineHeight: 24,
     color: "#FFF8EF",
   },
   beginArrow: {
     marginLeft: 16,
-    fontSize: 20,
+    fontSize: sfs(20),
     lineHeight: 28,
     color: "#FFF8EF",
   },
@@ -1287,7 +1292,7 @@ const styles = StyleSheet.create({
     maxWidth: 320,
     textAlign: "center",
     fontFamily: Fonts.sans.regular,
-    fontSize: 14,
+    fontSize: sfs(14),
     lineHeight: 22,
     color: "#6E6357",
     fontStyle: "italic",
@@ -1329,18 +1334,18 @@ const styles = StyleSheet.create({
   },
   whyHeaderTitle: {
     fontFamily: Fonts.sans.bold,
-    fontSize: 15,
+    fontSize: sfs(15),
     lineHeight: 20,
     color: "#432104",
   },
   whyPreview: {
     fontFamily: Fonts.sans.medium,
-    fontSize: 15,
+    fontSize: sfs(15),
     lineHeight: 24,
     color: "#3F352B",
   },
   chevron: {
-    fontSize: 24,
+    fontSize: sfs(24),
     lineHeight: 24,
     color: "#C89B39",
     marginTop: -2,
@@ -1354,7 +1359,7 @@ const styles = StyleSheet.create({
   },
   whyExpandedText: {
     fontFamily: Fonts.sans.regular,
-    fontSize: 15,
+    fontSize: sfs(15),
     lineHeight: 30,
     color: "#3F352B",
   },
@@ -1362,7 +1367,7 @@ const styles = StyleSheet.create({
     marginTop: 18,
     textAlign: "center",
     fontFamily: Fonts.sans.regular,
-    fontSize: 14,
+    fontSize: sfs(14),
     lineHeight: 21,
     color: "#8F8273",
     fontStyle: "italic",
@@ -1387,14 +1392,14 @@ const styles = StyleSheet.create({
   },
   sharedLead: {
     fontFamily: Fonts.sans.regular,
-    fontSize: 14,
+    fontSize: sfs(14),
     lineHeight: 20,
     color: "#5E5449",
     marginRight: 6,
   },
   sharedValue: {
     fontFamily: Fonts.sans.semiBold,
-    fontSize: 14,
+    fontSize: sfs(14),
     lineHeight: 20,
     color: "#3E2A15",
   },
@@ -1442,7 +1447,7 @@ const styles = StyleSheet.create({
   recommendedPreviewLabel: {
     flex: 1,
     fontFamily: Fonts.sans.semiBold,
-    fontSize: 11,
+    fontSize: sfs(11),
     lineHeight: 16,
     color: "#B0894D",
     letterSpacing: 1.1,
@@ -1450,27 +1455,27 @@ const styles = StyleSheet.create({
   },
   recommendedPreviewTitle: {
     fontFamily: Fonts.serif.bold,
-    fontSize: 16,
+    fontSize: sfs(16),
     lineHeight: 28,
     color: "#432104",
     marginBottom: 6,
   },
   recommendedPreviewHelper: {
     fontFamily: Fonts.sans.medium,
-    fontSize: 14,
+    fontSize: sfs(14),
     lineHeight: 22,
     color: "#74685C",
   },
   viewStepsLink: {
     fontFamily: Fonts.sans.regular,
-    fontSize: 15,
+    fontSize: sfs(15),
     lineHeight: 20,
     color: "#8A7968",
     textDecorationLine: "underline",
   },
   exitText: {
     fontFamily: Fonts.sans.regular,
-    fontSize: 13,
+    fontSize: sfs(13),
     lineHeight: 18,
     color: "#B0A090",
   },
@@ -1489,7 +1494,7 @@ const styles = StyleSheet.create({
   },
   stepsTitle: {
     fontFamily: Fonts.sans.bold,
-    fontSize: 15,
+    fontSize: sfs(15),
     lineHeight: 20,
     color: "#432104",
     textAlign: "center",
@@ -1510,7 +1515,7 @@ const styles = StyleSheet.create({
     minWidth: 24,
     textAlign: "right",
     fontFamily: Fonts.sans.regular,
-    fontSize: 13,
+    fontSize: sfs(13),
     lineHeight: 18,
     color: "#9F9F9F",
   },
@@ -1518,13 +1523,13 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 12,
     fontFamily: Fonts.sans.regular,
-    fontSize: 14,
+    fontSize: sfs(14),
     lineHeight: 20,
     color: "#432104",
   },
   stepSuggested: {
     fontFamily: Fonts.sans.regular,
-    fontSize: 11,
+    fontSize: sfs(11),
     lineHeight: 16,
     color: "#8B6914",
     fontStyle: "italic",
@@ -1565,7 +1570,7 @@ const styles = StyleSheet.create({
   },
   interstitialText: {
     fontFamily: Fonts.serif.bold,
-    fontSize: 24,
+    fontSize: sfs(24),
     lineHeight: 34,
     color: "#5C3A12",
     textAlign: "center",
@@ -1582,7 +1587,7 @@ const styles = StyleSheet.create({
   },
   interstitialTapHint: {
     fontFamily: Fonts.sans.medium,
-    fontSize: 14,
+    fontSize: sfs(14),
     color: "#76522B",
   },
   mantrasOpeningCard: {
@@ -1595,7 +1600,7 @@ const styles = StyleSheet.create({
   },
   mantrasOpeningEyebrow: {
     fontFamily: Fonts.sans.semiBold,
-    fontSize: 11,
+    fontSize: sfs(11),
     letterSpacing: 1.4,
     color: "#9A7A52",
     textAlign: "center",
@@ -1603,7 +1608,7 @@ const styles = StyleSheet.create({
   },
   mantrasOpeningLabel: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 28,
+    fontSize: sfs(28),
     lineHeight: 38,
     color: "#432104",
     textAlign: "center",
@@ -1611,7 +1616,7 @@ const styles = StyleSheet.create({
   },
   mantrasOpeningHelper: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 15,
+    fontSize: sfs(15),
     lineHeight: 22,
     color: "#8A7968",
     fontStyle: "italic",
@@ -1628,7 +1633,7 @@ const styles = StyleSheet.create({
   },
   mantrasOpeningBeginLabel: {
     fontFamily: Fonts.sans.medium,
-    fontSize: 16,
+    fontSize: sfs(16),
     color: "#432104",
     letterSpacing: 0.3,
   },
@@ -1648,7 +1653,7 @@ const styles = StyleSheet.create({
   },
   exitConfirmText: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 17,
+    fontSize: sfs(17),
     lineHeight: 26,
     color: "#432104",
     textAlign: "center",
@@ -1666,7 +1671,7 @@ const styles = StyleSheet.create({
   },
   exitConfirmYesLabel: {
     fontFamily: Fonts.sans.medium,
-    fontSize: 15,
+    fontSize: sfs(15),
     color: "#432104",
   },
   exitConfirmStay: {
@@ -1675,7 +1680,7 @@ const styles = StyleSheet.create({
   },
   exitConfirmStayLabel: {
     fontFamily: Fonts.sans.regular,
-    fontSize: 14,
+    fontSize: sfs(14),
     color: "#8A7968",
     textDecorationLine: "underline",
   },

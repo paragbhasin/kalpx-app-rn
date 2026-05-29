@@ -27,6 +27,7 @@ import {
   TouchableOpacity,
   UIManager,
   View,
+  useWindowDimensions,
 } from "react-native";
 const RudrakshBead = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/rudraksh.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import AudioPlayerBlock, {
@@ -44,6 +45,7 @@ import { navigate as rootNavigate } from "../../Shared/Routes/NavigationService"
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Fonts } from "../../theme/fonts";
 import { platformShadow } from "../../theme/shadows";
+import { sfs } from "../../utils/responsive";
 
 type Phase = "loading" | "opening" | "preview" | "done" | "error";
 const VISUAL_BEAD_COUNT = 18;
@@ -246,6 +248,11 @@ export default function QuickResetScreen({
 
   const runnerStartedAt = useRef<number>(0);
   const ringSpin = useRef(new Animated.Value(0)).current;
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+  const ringSize = isTablet ? 310 : 230;
+  const ringCenter = ringSize / 2;
+  const ringRadius = isTablet ? 120 : 86;
 
   const activeMantra = selectedMantra ?? openingState?.mantra ?? null;
 
@@ -430,8 +437,8 @@ export default function QuickResetScreen({
     const progressInCycle = beadCount % visualBeadCount;
     const beads = Array.from({ length: visualBeadCount }, (_, i) => {
       const angle = (i / visualBeadCount) * 2 * Math.PI - Math.PI / 2;
-      const cx = 115 + Math.cos(angle) * 86;
-      const cy = 115 + Math.sin(angle) * 86;
+      const cx = ringCenter + Math.cos(angle) * ringRadius;
+      const cy = ringCenter + Math.sin(angle) * ringRadius;
       return { cx, cy, i };
     });
     const spin = ringSpin.interpolate({
@@ -440,7 +447,7 @@ export default function QuickResetScreen({
     });
 
     return (
-      <View style={styles.openingShell}>
+      <View style={[styles.openingShell, isTablet && { maxWidth: 600, alignSelf: 'center', width: '100%' }]}>
         <Text style={styles.openingHeading}>{mantra.title}</Text>
         <Text style={styles.openingSubhead}>Quick Reset Mantra</Text>
 
@@ -448,7 +455,7 @@ export default function QuickResetScreen({
           <Text style={styles.progressMain}>{beadCount}</Text>
         </View>
 
-        <View style={styles.previewRingWrap}>
+        <View style={[styles.previewRingWrap, isTablet && { width: ringSize, height: ringSize }]}>
           <Animated.View
             style={[styles.previewRing, { transform: [{ rotate: spin }] }]}
           >
@@ -479,7 +486,7 @@ export default function QuickResetScreen({
           <TouchableOpacity
             onPress={handleTapBead}
             activeOpacity={0.85}
-            style={styles.previewTapButton}
+            style={[styles.previewTapButton, isTablet && { width: 148, height: 148, marginLeft: -74, marginTop: -74, borderRadius: 74 }]}
           >
             <Text style={styles.previewTapText}>TAP</Text>
             <Text style={styles.previewTapSubtext}>HERE</Text>
@@ -654,7 +661,7 @@ export default function QuickResetScreen({
           imageStyle={styles.backgroundImage}
         >
           <ScrollView
-            contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
+            contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }, isTablet && { paddingHorizontal: 48 }]}
             showsVerticalScrollIndicator={false}
           >
             {renderOpeningSurface(
@@ -685,7 +692,7 @@ export default function QuickResetScreen({
           imageStyle={styles.backgroundImage}
         >
           <ScrollView
-            contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
+            contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }, isTablet && { paddingHorizontal: 48 }]}
             showsVerticalScrollIndicator={false}
           >
             {renderOpeningSurface(selectedMantra, [
@@ -876,20 +883,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   contentBackBtnText: {
-    fontSize: 15,
+    fontSize: sfs(15),
     color: "#C99317",
     fontFamily: Fonts.sans.medium,
   },
   openingHeading: {
-    fontSize: 22,
+    fontSize: sfs(22),
     fontFamily: Fonts.serif.bold,
     color: "#432104",
     textAlign: "center",
-    lineHeight: 36,
+    lineHeight: sfs(36),
     // marginTop: -30,
   },
   openingSubhead: {
-    fontSize: 12,
+    fontSize: sfs(12),
     letterSpacing: 2.2,
     color: "#C7A048",
     fontFamily: Fonts.sans.bold,
@@ -903,8 +910,8 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   progressMain: {
-    fontSize: 60,
-    lineHeight: 60,
+    fontSize: sfs(60),
+    lineHeight: sfs(60),
     color: "#C7A048",
     fontFamily: Fonts.serif.regular,
   },
@@ -953,13 +960,13 @@ const styles = StyleSheet.create({
     ...platformShadow("#B89450", 2, 0.16, 10, 2),
   },
   previewTapText: {
-    fontSize: 20,
+    fontSize: sfs(20),
     letterSpacing: 4,
     color: "#B89450",
     fontFamily: Fonts.sans.bold,
   },
   previewTapSubtext: {
-    fontSize: 10,
+    fontSize: sfs(10),
     letterSpacing: 1.2,
     color: "#8A7A5A",
     fontFamily: Fonts.sans.medium,
@@ -975,7 +982,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   previewTapCheck: {
-    fontSize: 13,
+    fontSize: sfs(13),
     color: "#B89450",
     fontFamily: Fonts.sans.bold,
   },
@@ -992,21 +999,21 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   mantraTitle: {
-    fontSize: 22,
+    fontSize: sfs(22),
     fontFamily: Fonts.serif.bold,
     color: "#432104",
     fontWeight: "700",
     textAlign: "center",
   },
   mantraDevanagari: {
-    fontSize: 34,
+    fontSize: sfs(34),
     color: "#C99317",
     fontFamily: Fonts.sans.regular,
     textAlign: "center",
-    lineHeight: 42,
+    lineHeight: sfs(42),
   },
   mantraMeaning: {
-    fontSize: 15,
+    fontSize: sfs(15),
     fontFamily: Fonts.sans.regular,
     color: "#7B6550",
     textAlign: "center",
@@ -1033,17 +1040,17 @@ const styles = StyleSheet.create({
     backgroundColor: Platform.OS === "android" ? "#FEFCF9" : "rgba(255, 255, 255, 0.8)",
   },
   verseIast: {
-    fontSize: 13,
+    fontSize: sfs(13),
     letterSpacing: 1,
     textTransform: "uppercase",
     color: "#615247",
     fontFamily: Fonts.sans.regular,
     textAlign: "center",
-    lineHeight: 18,
+    lineHeight: sfs(18),
   },
   verseDevanagari: {
     fontFamily: "NotoSansDevanagari_500Medium",
-    fontSize: 15,
+    fontSize: sfs(15),
     color: "#615247",
     textAlign: "center",
   },
@@ -1059,7 +1066,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   audioLabel: {
-    fontSize: 16,
+    fontSize: sfs(16),
     letterSpacing: 5,
     color: "#C7A048",
     fontFamily: Fonts.sans.bold,
@@ -1085,14 +1092,14 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(199,160,72,0.45)",
   },
   collapsibleLabel: {
-    fontSize: 16,
+    fontSize: sfs(16),
     color: "#432104",
     fontFamily: Fonts.serif.bold,
   },
   collapsibleBody: {
     marginTop: 14,
-    fontSize: 15,
-    lineHeight: 24,
+    fontSize: sfs(15),
+    lineHeight: sfs(24),
     color: "#7B6550",
     fontFamily: Fonts.sans.regular,
     textAlign: "center",
@@ -1107,7 +1114,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   primaryBtnText: {
-    fontSize: 14,
+    fontSize: sfs(14),
     fontFamily: Fonts.sans.semiBold,
     color: "#fff",
   },
@@ -1122,7 +1129,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   secondaryActionText: {
-    fontSize: 15,
+    fontSize: sfs(15),
     color: "#C99317",
     fontFamily: Fonts.sans.medium,
     textDecorationLine: "underline",
@@ -1145,14 +1152,14 @@ const styles = StyleSheet.create({
     backgroundColor: Platform.OS === "android" ? "#FEFCF9" : "rgba(255,255,255,0.42)",
   },
   secondaryActionIcon: {
-    fontSize: 22,
+    fontSize: sfs(22),
     color: "#C99317",
   },
   secondaryActionCopy: {
     flex: 1,
   },
   secondaryActionRowText: {
-    fontSize: 16,
+    fontSize: sfs(16),
     color: "#432104",
     fontFamily: Fonts.serif.regular,
   },
@@ -1163,19 +1170,19 @@ const styles = StyleSheet.create({
     borderStyle: "dotted",
   },
   confirmText: {
-    fontSize: 14,
+    fontSize: sfs(14),
     color: "#7B6550",
     fontFamily: Fonts.sans.regular,
     textAlign: "center",
   },
   subtleText: {
-    fontSize: 15,
+    fontSize: sfs(15),
     color: "#7B6550",
     fontFamily: Fonts.sans.regular,
     textAlign: "center",
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: sfs(22),
     fontFamily: Fonts.serif.bold,
     color: "#432104",
     fontWeight: "700",
@@ -1187,15 +1194,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   copyLine: {
-    fontSize: 22,
+    fontSize: sfs(22),
     fontFamily: Fonts.serif.bold,
     color: "#432104",
     fontWeight: "700",
     textAlign: "center",
-    lineHeight: 32,
+    lineHeight: sfs(32),
   },
   copySubtext: {
-    fontSize: 15,
+    fontSize: sfs(15),
     fontFamily: Fonts.sans.regular,
     color: "#7B6550",
     textAlign: "center",
@@ -1216,7 +1223,7 @@ const styles = StyleSheet.create({
     marginBottom: 26,
   },
   pickerTitle: {
-    fontSize: 24,
+    fontSize: sfs(24),
     fontFamily: Fonts.serif.bold,
     color: "#432104",
     textAlign: "center",
@@ -1236,8 +1243,8 @@ const styles = StyleSheet.create({
   },
   pickerDividerIcon: {
     color: "#C7A048",
-    fontSize: 18,
-    lineHeight: 18,
+    fontSize: sfs(18),
+    lineHeight: sfs(18),
   },
   pickerItem: {
     paddingVertical: 18,
@@ -1251,19 +1258,19 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   pickerItemTitle: {
-    fontSize: 18,
+    fontSize: sfs(18),
     fontFamily: Fonts.serif.bold,
     color: "#432104",
     fontWeight: "700",
     textAlign: "center",
-    lineHeight: 24,
+    lineHeight: sfs(24),
   },
   pickerItemDevanagari: {
-    fontSize: 16,
+    fontSize: sfs(16),
     color: "#8B6914",
     fontFamily: Fonts.sans.regular,
     textAlign: "center",
-    lineHeight: 26,
+    lineHeight: sfs(26),
   },
   toastOverlay: {
     flex: 1,
@@ -1311,14 +1318,14 @@ const styles = StyleSheet.create({
   },
   toastTitle: {
     fontFamily: Fonts.serif.bold,
-    fontSize: 18,
+    fontSize: sfs(18),
     color: "#432104",
-    lineHeight: 22,
+    lineHeight: sfs(22),
     marginBottom: 8,
   },
   toastMessage: {
-    fontSize: 12,
-    lineHeight: 18,
+    fontSize: sfs(12),
+    lineHeight: sfs(18),
     color: "#6E563E",
     fontFamily: Fonts.sans.regular,
   },
@@ -1328,8 +1335,8 @@ const styles = StyleSheet.create({
   },
   toastCloseText: {
     color: "#BE9A56",
-    fontSize: 32,
-    lineHeight: 32,
+    fontSize: sfs(32),
+    lineHeight: sfs(32),
     fontFamily: Fonts.sans.regular,
   },
 });

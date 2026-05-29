@@ -14,7 +14,9 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
+import { rfs, rhPad, sfs, TABLET_MAX_CARD_WIDTH, TABLET_MAX_CONTENT_WIDTH } from "../../utils/responsive";
 import { useSelector } from "react-redux";
 const M3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/door_rhythm.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 const Mp2Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/door_chant.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
@@ -60,6 +62,8 @@ export default function MitraIntentionScreen() {
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
   const { handleScroll } = useScrollContext();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   const isLoggedIn = useSelector(
     (state: any) => !!(state.login?.user || state.socialLoginReducer?.user),
   );
@@ -139,14 +143,24 @@ export default function MitraIntentionScreen() {
     <View style={styles.container}>
       <SafeAreaView style={styles.safe}>
         <ScrollView
-          contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 56 }]}
+          contentContainerStyle={[
+            styles.scroll,
+            { paddingBottom: insets.bottom + 56 },
+            isTablet && {
+              paddingHorizontal: rhPad(20, width),
+              paddingTop: 0,
+              paddingBottom: 0,
+              flexGrow: 1,
+              justifyContent: 'center',
+            },
+          ]}
           onScroll={handleScroll}
           scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.header}>
-            <Text style={styles.heading}>{ENTRY_INTENTION_HEADING}</Text>
-            <Text style={styles.subtext}>{ENTRY_INTENTION_SUBTEXT}</Text>
+          <View style={[styles.header, isTablet && { maxWidth: TABLET_MAX_CONTENT_WIDTH, alignSelf: 'center', width: '100%', marginBottom: 30 }]}>
+            <Text style={[styles.heading, { fontSize: rfs(32, width) }]}>{ENTRY_INTENTION_HEADING}</Text>
+            <Text style={[styles.subtext, { fontSize: rfs(14, width) }]}>{ENTRY_INTENTION_SUBTEXT}</Text>
 
             <View style={styles.divider}>
               <View style={styles.line} />
@@ -159,7 +173,7 @@ export default function MitraIntentionScreen() {
             </View>
           </View>
 
-          <View style={styles.options}>
+          <View style={[styles.options, isTablet && { maxWidth: TABLET_MAX_CONTENT_WIDTH, alignSelf: 'center', width: '100%' }]}>
             {ENTRY_INTENTION_OPTIONS.map((opt) => {
               const accent =
                 (OPTION_ACCENTS as any)[opt.id] || OPTION_ACCENTS.daily_rhythm;
@@ -169,19 +183,20 @@ export default function MitraIntentionScreen() {
                   key={opt.id}
                   activeOpacity={0.85}
                   onPress={() => void handleSelect(opt.id)}
-                  style={styles.card}
+                  style={[styles.card, isTablet && { maxWidth: TABLET_MAX_CARD_WIDTH, alignSelf: 'center', width: '100%', padding: 20 }]}
                 >
                   <View
                     style={[
                       styles.iconContainer,
                       { backgroundColor: accent.iconBg },
+                      isTablet && { width: 68, height: 68, borderRadius: 34 },
                     ]}
                   >
-                    <IconComponent width={45} height={45} />
+                    <IconComponent width={isTablet ? 54 : 45} height={isTablet ? 54 : 45} />
                   </View>
                   <View style={styles.cardContent}>
-                    <Text style={styles.cardTitle}>{opt.title}</Text>
-                    <Text style={styles.cardBody}>{opt.body}</Text>
+                    <Text style={[styles.cardTitle, { fontSize: rfs(18, width) }]}>{opt.title}</Text>
+                    <Text style={[styles.cardBody, { fontSize: rfs(13, width) }]}>{opt.body}</Text>
                     <View style={styles.ctaRow}>
                       <Text
                         style={[
@@ -190,12 +205,13 @@ export default function MitraIntentionScreen() {
                           {
                             color: accent.chipColor,
                             borderBottomColor: accent.chipColor,
+                            fontSize: rfs(12, width),
                           },
                         ]}
                       >
                         {opt.cta}
                       </Text>
-                      <Text style={[styles.arrow, { color: accent.chipColor }]}>
+                      <Text style={[styles.arrow, { color: accent.chipColor, fontSize: rfs(22, width) }]}>
                         →
                       </Text>
                     </View>
@@ -228,10 +244,10 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontFamily: Fonts.serif.bold,
-    fontSize: 32,
+    fontSize: sfs(32),
     color: "#432104",
     textAlign: "center",
-    lineHeight: 40,
+    lineHeight: sfs(40),
   },
   divider: {
     flexDirection: "row",
@@ -251,9 +267,9 @@ const styles = StyleSheet.create({
   },
   subtext: {
     fontFamily: Fonts.sans.regular,
-    fontSize: 14,
+    fontSize: sfs(14),
     color: "rgba(67, 33, 4, 0.72)",
-    lineHeight: 26,
+    lineHeight: sfs(26),
     textAlign: "center",
   },
   options: {
@@ -289,16 +305,16 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontFamily: Fonts.serif.bold,
-    fontSize: 18,
+    fontSize: sfs(18),
     color: "#432104",
-    lineHeight: 24,
+    lineHeight: sfs(24),
     marginBottom: 6,
   },
   cardBody: {
     fontFamily: Fonts.sans.regular,
-    fontSize: 13,
+    fontSize: sfs(13),
     color: "rgba(67, 33, 4, 0.76)",
-    lineHeight: 20,
+    lineHeight: sfs(20),
     marginBottom: 12,
   },
   ctaRow: {
@@ -309,7 +325,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   chipText: {
-    fontSize: 12,
+    fontSize: sfs(12),
     fontWeight: "700",
   },
   ctaText: {
@@ -317,8 +333,8 @@ const styles = StyleSheet.create({
     paddingBottom: 2,
   },
   arrow: {
-    fontSize: 22,
-    lineHeight: 22,
+    fontSize: sfs(22),
+    lineHeight: sfs(22),
     fontWeight: "500",
   },
 });

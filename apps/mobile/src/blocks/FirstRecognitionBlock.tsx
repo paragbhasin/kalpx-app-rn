@@ -10,10 +10,11 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { Fonts } from '../theme/fonts';
 import { useScreenStore } from '../engine/useScreenBridge';
 import { interpolate } from '../engine/utils/interpolation';
+import { rfs, TABLET_MAX_CARD_WIDTH } from '../utils/responsive';
 
 const GOLD = '#eddeb4';
 const DEEP_BROWN = '#432104';
@@ -28,6 +29,8 @@ interface Props {
 
 const FirstRecognitionBlock: React.FC<Props> = ({ block }) => {
   const { screenData } = useScreenStore();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   // Prefer backend-delivered lines (sovereignty: no user-facing strings in TSX).
   // 2026-04-17 Option B: recognition closing paragraph now lives on the spine
   // per-lane × mode. Falls back to schema-provided body_paragraphs only if
@@ -39,15 +42,15 @@ const FirstRecognitionBlock: React.FC<Props> = ({ block }) => {
   const paras = backendLines.length > 0 ? backendLines : (block.body_paragraphs || []);
 
   return (
-    <View style={styles.card}>
-      {block.label && <Text style={styles.label}>{block.label}</Text>}
+    <View style={[styles.card, isTablet && { maxWidth: TABLET_MAX_CARD_WIDTH, alignSelf: 'center', width: '100%', padding: 28, marginVertical: 20 }]}>
+      {block.label && <Text style={[styles.label, { fontSize: rfs(11, width) }]}>{block.label}</Text>}
       {block.emphasized_line && (
-        <Text style={styles.emphasized}>
+        <Text style={[styles.emphasized, { fontSize: rfs(22, width) }]}>
           {interpolate(block.emphasized_line, screenData)}
         </Text>
       )}
       {paras.map((p, i) => (
-        <Text key={i} style={styles.body}>
+        <Text key={i} style={[styles.body, { fontSize: rfs(17, width) }]}>
           {interpolate(p, screenData)}
         </Text>
       ))}

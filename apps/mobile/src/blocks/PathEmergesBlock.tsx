@@ -15,7 +15,9 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
+import { rfs, TABLET_MAX_CARD_WIDTH } from "../utils/responsive";
 import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
 import appStore from "../store";
@@ -100,6 +102,8 @@ interface Props {
 
 const PathEmergesBlock: React.FC<Props> = () => {
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   const [whyOpen, setWhyOpen] = useState(false);
   const triad = screenData.onboarding_triad_data?.triad || {};
 
@@ -153,10 +157,10 @@ const PathEmergesBlock: React.FC<Props> = () => {
   };
 
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, isTablet && { maxWidth: TABLET_MAX_CARD_WIDTH, alignSelf: 'center', width: '100%' }]}>
       {!!screenData.v3_start_failed && (
         <View style={styles.errorBanner}>
-          <Text style={styles.errorText}>
+          <Text style={[styles.errorText, { fontSize: rfs(14, width) }]}>
             Something went wrong. Please try again.
           </Text>
         </View>
@@ -178,6 +182,7 @@ const PathEmergesBlock: React.FC<Props> = () => {
             style={[
               styles.card,
               { backgroundColor: theme.bg, borderColor: theme.border },
+              isTablet && { paddingHorizontal: 24, paddingVertical: 22, marginBottom: 18 },
             ]}
             testID={`triad-${card.kind}`}
             accessibilityLabel={`triad-${card.kind}`}
@@ -187,21 +192,22 @@ const PathEmergesBlock: React.FC<Props> = () => {
                 style={[
                   styles.iconCircle,
                   { borderColor: `${theme.accent}33` },
+                  isTablet && { width: 48, height: 48, borderRadius: 24 },
                 ]}
               >
                 <ThemeIcon kind={card.kind} accent={theme.accent} />
               </View>
 
               <View style={styles.textWrap}>
-                <Text style={[styles.label, { color: theme.accent }]}>
+                <Text style={[styles.label, { color: theme.accent, fontSize: rfs(13, width) }]}>
                   {LABELS[card.kind].toUpperCase()}
                 </Text>
-                <Text style={styles.title}>{title}</Text>
+                <Text style={[styles.title, { fontSize: rfs(18, width) }]}>{title}</Text>
               </View>
 
               <Ionicons
                 name="chevron-forward"
-                size={20}
+                size={isTablet ? 24 : 20}
                 color={theme.accent}
               />
             </View>
@@ -237,9 +243,9 @@ const PathEmergesBlock: React.FC<Props> = () => {
               />
             </View>
             <View style={styles.whyHeaderTextWrap}>
-              <Text style={styles.whyHeaderTitle}>Why these were chosen</Text>
+              <Text style={[styles.whyHeaderTitle, { fontSize: rfs(18, width) }]}>Why these were chosen</Text>
               {!whyOpen && (
-                <Text style={styles.whyHeaderSubtitle}>
+                <Text style={[styles.whyHeaderSubtitle, { fontSize: rfs(14, width) }]}>
                   Understand why Mitra selected this mantra, sankalp, and
                   practice.
                 </Text>
@@ -255,8 +261,8 @@ const PathEmergesBlock: React.FC<Props> = () => {
           {whyOpen && (
             <View style={styles.whyBody}>
               <View style={styles.whyBodyHeader}>
-                <Text style={styles.whyEyebrow}>Chosen with care</Text>
-                <Text style={styles.whyBodyTitle}>Why this supports today</Text>
+                <Text style={[styles.whyEyebrow, { fontSize: rfs(11, width) }]}>Chosen with care</Text>
+                <Text style={[styles.whyBodyTitle, { fontSize: rfs(18, width) }]}>Why this supports today</Text>
               </View>
 
               <View style={styles.tabRow}>
@@ -282,6 +288,7 @@ const PathEmergesBlock: React.FC<Props> = () => {
                             color: selected
                               ? THEME[tab.kind].accent
                               : "#7A6A58",
+                            fontSize: rfs(11, width),
                           },
                         ]}
                       >
@@ -300,7 +307,7 @@ const PathEmergesBlock: React.FC<Props> = () => {
                 <Text
                   style={[
                     styles.whyDetailLabel,
-                    { color: THEME[activeWhyKind].accent },
+                    { color: THEME[activeWhyKind].accent, fontSize: rfs(11, width) },
                   ]}
                 >
                   {activeWhyKind === "sankalp"
@@ -309,7 +316,7 @@ const PathEmergesBlock: React.FC<Props> = () => {
                       ? "Mantra"
                       : "Practice"}
                 </Text>
-                <Text style={styles.whyDetailTitle}>
+                <Text style={[styles.whyDetailTitle, { fontSize: rfs(18, width) }]}>
                   {activeWhyKind === "sankalp"
                     ? activeWhyItem.title || ""
                     : `${activeWhyItem.title || ""}`}
@@ -317,8 +324,8 @@ const PathEmergesBlock: React.FC<Props> = () => {
 
                 {!!activeWhyContext.mitra_frame_through && (
                   <View style={styles.primaryReasonCard}>
-                    <Text style={styles.reasonLabel}>Essence</Text>
-                    <Text style={styles.reasonBody}>
+                    <Text style={[styles.reasonLabel, { fontSize: rfs(11, width) }]}>Essence</Text>
+                    <Text style={[styles.reasonBody, { fontSize: rfs(15, width) }]}>
                       {sentence(
                         activeWhyKind === "sankalp"
                           ? `This is ${activeWhyContext.mitra_frame_through}`
@@ -330,8 +337,8 @@ const PathEmergesBlock: React.FC<Props> = () => {
 
                 {!!activeShift && (
                   <View style={styles.primaryReasonCard}>
-                    <Text style={styles.reasonLabel}>Shift</Text>
-                    <Text style={styles.reasonBody}>
+                    <Text style={[styles.reasonLabel, { fontSize: rfs(11, width) }]}>Shift</Text>
+                    <Text style={[styles.reasonBody, { fontSize: rfs(15, width) }]}>
                       {sentence(
                         `Mitra chose this to guide you from ${activeShift}`,
                       )}
@@ -342,8 +349,8 @@ const PathEmergesBlock: React.FC<Props> = () => {
                 <View style={styles.secondaryReasonGrid}>
                   {!!activeWhyContext.mitra_use_for && (
                     <View style={styles.secondaryReasonCard}>
-                      <Text style={styles.reasonLabel}>Useful for</Text>
-                      <Text style={styles.reasonBody}>
+                      <Text style={[styles.reasonLabel, { fontSize: rfs(11, width) }]}>Useful for</Text>
+                      <Text style={[styles.reasonBody, { fontSize: rfs(15, width) }]}>
                         {sentence(activeWhyContext.mitra_use_for)}
                       </Text>
                     </View>
@@ -351,8 +358,8 @@ const PathEmergesBlock: React.FC<Props> = () => {
 
                   {!!activeWhyContext.commentary_lineage && (
                     <View style={styles.secondaryReasonCard}>
-                      <Text style={styles.reasonLabel}>Rooted in</Text>
-                      <Text style={styles.reasonBody}>
+                      <Text style={[styles.reasonLabel, { fontSize: rfs(11, width) }]}>Rooted in</Text>
+                      <Text style={[styles.reasonBody, { fontSize: rfs(15, width) }]}>
                         {sentence(activeWhyContext.commentary_lineage)}
                       </Text>
                     </View>
@@ -373,7 +380,7 @@ const PathEmergesBlock: React.FC<Props> = () => {
         <View style={styles.footerLine} />
       </View>
 
-      <Text style={styles.footer}>
+      <Text style={[styles.footer, { fontSize: rfs(17, width) }]}>
         This isn&apos;t homework. It&apos;s sadhana — a daily practice that
         builds something real over time.
       </Text>

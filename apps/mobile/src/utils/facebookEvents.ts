@@ -51,13 +51,18 @@ export async function sendMetaEvent(eventName, customData: any = {}, userInfo : 
   }
 
   const payload = {
-    event: eventName,
+    event: "CUSTOM_APP_EVENTS",
     advertiser_tracking_enabled: 1,
     application_tracking_enabled: 1,
     extinfo,
-    // Use the dynamically built userData object
-    user_data: userData, 
-    custom_data: customData,
+    user_data: userData,
+    custom_events: JSON.stringify([
+      {
+        _eventName: eventName,
+        _logTime: Math.floor(Date.now() / 1000),
+        ...customData,
+      },
+    ]),
   };
 
   console.log("📤 FB Payload:", JSON.stringify(payload, null, 2));

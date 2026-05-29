@@ -29,6 +29,11 @@ import TextComponent from "../../components/TextComponent";
 import { RootState } from "../../store";
 import { trackPixelEvent } from "../../utils/facebookEvents";
 import { registerDeviceToBackend } from "../../utils/registerDevice";
+import { setSkipMitraStart } from "../../utils/postLoginGuard";
+import store from "../../store";
+import { loadScreenWithData, screenActions } from "../../store/screenSlice";
+import { navigate as rootNavigate } from "../../Shared/Routes/NavigationService";
+import { mitraJourneyHomeV3 } from "../../engine/mitraApi";
 import { ENV } from "../../Networks/baseURL";
 import { loginUser, socialLoginUser } from "./actions";
 import ReCaptchaRuntime from "./ReCaptchaRuntime";
@@ -75,6 +80,75 @@ export default function LoginScreen({ navigation }) {
 
 const resumePendingIfAny = async () => {
   try {
+    // MitraIntentionScreen ("What feels needed today?") stores this key when
+    // an unauthenticated user taps a door. Navigate directly to the target
+    // screen via the root navigation ref so we bypass Home's checkJourney
+    // (which would redirect new users to MitraStart instead).
+    const mitraIntentionPending = await AsyncStorage.getItem("mitra_intention_pending");
+    if (mitraIntentionPending) {
+      // Map door id → HomeStack screen name. For inner_path we keep the key
+      // and route through MitraIntention so executeDoor() runs from within
+      // HomeStack where DynamicEngine is reachable — and Home never becomes
+      // focused, so checkJourney never fires and MitraStart is never shown.
+      await AsyncStorage.removeItem("mitra_intention_pending");
+
+      // Determine if this is a returning user (has any companion state —
+      // rhythm, inner path, chant history, etc.) or a brand-new user.
+      // journey/status only covers inner-path journeys, so we use the full
+      // home endpoint which covers rhythm, chant, tell-mitra history, etc.
+      let isReturningUser = false;
+      try {
+        const homeResp = await mitraJourneyHomeV3({ forceFresh: true });
+        const ss = homeResp?.user_surface_state;
+        isReturningUser =
+          ss?.has_rhythm === true ||
+          ss?.has_inner_path === true ||
+          ss?.has_quick_chant_mantra === true ||
+          ss?.has_quick_chant_history === true ||
+          ss?.has_tell_mitra_history === true ||
+          ss?.has_quick_checkin_history === true ||
+          homeResp?.companion_rhythm?.has_rhythm === true ||
+          homeResp?.inner_path_summary?.has_active_path === true;
+      } catch { }
+
+      if (isReturningUser) {
+        // Returning user → go straight to FourDoor.
+        // checkJourney will find their journey/state and render FourDoorHomeContainer.
+        navigation.navigate("AppDrawer" as any);
+        return;
+      }
+
+      // New user (no journey) — set guard so checkJourney skips MitraStart,
+      // then navigate to the screen matching the card they tapped.
+      setSkipMitraStart();
+
+      if (mitraIntentionPending === "inner_path") {
+        store.dispatch(screenActions.setScreenValue({ key: "onboarding_turn", value: "turn_2" }));
+        store.dispatch(screenActions.setScreenValue({ key: "onboarding_draft_state", value: { started_at: Date.now(), entry_intention: "inner_path" } }));
+        store.dispatch(loadScreenWithData({ containerId: "welcome_onboarding", stateId: "turn_2", replace: true }) as any);
+        navigation.navigate("AppDrawer" as any);
+        setTimeout(() => rootNavigate("DynamicEngine"), 400);
+        return;
+      }
+
+      const screenMap: Record<string, string> = {
+        daily_rhythm: "RhythmSetup",
+        quick_chant: "QuickReset",
+        tell_mitra: "TellMitra",
+      };
+      const targetScreen = screenMap[mitraIntentionPending];
+      if (targetScreen) {
+        navigation.navigate("AppDrawer" as any, {
+          screen: "HomePage",
+          params: {
+            screen: "HomePage",
+            params: { screen: targetScreen },
+          },
+        });
+        return;
+      }
+    }
+
     const pendingKeys = [
       "pending_pooja_data",
       "pending_retreat_data",
@@ -279,7 +353,16 @@ if (key === "pending_classes_data") {
         ],
       });
 
-      console.log("🍎 Apple Credential:", credential);
+      console.log("🍎 Apple Credential:", {
+        user: credential.user,
+        email: credential.email,
+        realUserStatus: credential.realUserStatus,
+        identityToken: credential.identityToken
+          ? `${credential.identityToken.substring(0, 60)}... (len=${credential.identityToken.length})`
+          : "NULL/EMPTY",
+        authorizationCode: credential.authorizationCode ? "PRESENT" : "NULL",
+        fullName: credential.fullName,
+      });
 
       // 1️⃣ Extract JWT identity token
       const id_token = credential.identityToken;

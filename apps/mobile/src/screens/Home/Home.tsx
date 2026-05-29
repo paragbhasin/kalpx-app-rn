@@ -43,6 +43,7 @@ import store, { AppDispatch, RootState } from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
 import { registerDeviceToBackend } from "../../utils/registerDevice";
+import { consumeSkipMitraStart } from "../../utils/postLoginGuard";
 import { fetchProfileDetails } from "../Profile/actions";
 
 const FEATURE_ITEMS = [
@@ -247,14 +248,14 @@ export default function Home() {
                 setHasPartialState(true);
               } else {
                 setHasPartialState(false);
-                if (!v3AutoRoutedRef.current) {
+                if (!v3AutoRoutedRef.current && !consumeSkipMitraStart()) {
                   v3AutoRoutedRef.current = true;
                   navigation.navigate("MitraStart" as any);
                 }
               }
             } catch {
               setHasPartialState(false);
-              if (!v3AutoRoutedRef.current) {
+              if (!v3AutoRoutedRef.current && !consumeSkipMitraStart()) {
                 v3AutoRoutedRef.current = true;
                 navigation.navigate("MitraStart" as any);
               }

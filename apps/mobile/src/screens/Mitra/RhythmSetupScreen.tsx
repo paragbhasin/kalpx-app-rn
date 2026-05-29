@@ -11,8 +11,11 @@ import { Ionicons } from "@expo/vector-icons";
 import {
   getMissingSuggestionSlots,
   RHYTHM_BAND_LABELS,
+  RHYTHM_BAND_LABELS_HI,
   RHYTHM_BAND_SUBTITLES,
+  RHYTHM_BAND_SUBTITLES_HI,
   RHYTHM_SUGGEST_COPY,
+  RHYTHM_SUGGEST_COPY_HI,
   rhythmSuggestItemToLocalItem,
   toRhythmSetupPayloadItems,
 } from "@kalpx/contracts";
@@ -395,6 +398,10 @@ export default function RhythmSetupScreen({
   embedded?: boolean;
 }) {
   const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
+  const rhythmSuggestCopy = isHindi ? RHYTHM_SUGGEST_COPY_HI : RHYTHM_SUGGEST_COPY;
+  const rhythmBandLabels = isHindi ? RHYTHM_BAND_LABELS_HI : RHYTHM_BAND_LABELS;
+  const rhythmBandSubtitles = isHindi ? RHYTHM_BAND_SUBTITLES_HI : RHYTHM_BAND_SUBTITLES;
   const itemTypeLabelLocalized = (type: string) =>
     t(`rhythmSetup.itemType.${type}`, { defaultValue: "Library" });
   const dispatch = useDispatch();
@@ -615,7 +622,7 @@ export default function RhythmSetupScreen({
         );
       }
     } catch {
-      setSuggestError(RHYTHM_SUGGEST_COPY.error);
+      setSuggestError(rhythmSuggestCopy.error);
     } finally {
       setSuggestLoading(false);
     }
@@ -1230,7 +1237,7 @@ export default function RhythmSetupScreen({
               <View style={wStyles.loadingRow}>
                 <ActivityIndicator color="#C99317" />
                 <Text style={wStyles.loadingText}>
-                  {RHYTHM_SUGGEST_COPY.loading}
+                  {rhythmSuggestCopy.loading}
                 </Text>
               </View>
             )}
@@ -1247,7 +1254,7 @@ export default function RhythmSetupScreen({
                   activeOpacity={0.8}
                 >
                   <Text style={wStyles.retryBtnText}>
-                    {RHYTHM_SUGGEST_COPY.tryAgain}
+                    {rhythmSuggestCopy.tryAgain}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -1256,7 +1263,7 @@ export default function RhythmSetupScreen({
                   style={wStyles.secondaryLinkRow}
                 >
                   <Text style={wStyles.secondaryLink}>
-                    {RHYTHM_SUGGEST_COPY.chooseFromLibrary}
+                    {rhythmSuggestCopy.chooseFromLibrary}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -1278,7 +1285,7 @@ export default function RhythmSetupScreen({
                         activeOpacity={0.7}
                       >
                         <Text style={wStyles.changeBtnText}>
-                          {RHYTHM_SUGGEST_COPY.chooseFromLibrary}
+                          {rhythmSuggestCopy.chooseFromLibrary}
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -1592,10 +1599,10 @@ export default function RhythmSetupScreen({
                   </View>
                   <View style={styles.bandCopy}>
                     <Text style={styles.bandLabel}>
-                      {RHYTHM_BAND_LABELS[band]}
+                      {rhythmBandLabels[band]}
                     </Text>
-                    <Text style={styles.bandSubtitle}>
-                      {RHYTHM_BAND_SUBTITLES[band]}
+                    <Text style={[styles.bandSubtitle, isHindi && { letterSpacing: 0 }]}>
+                      {rhythmBandSubtitles[band]}
                     </Text>
                   </View>
                   <Text style={styles.chevron}>{isExpanded ? "⌃" : "⌄"}</Text>

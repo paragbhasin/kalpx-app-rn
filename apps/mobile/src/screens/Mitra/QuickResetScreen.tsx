@@ -190,7 +190,7 @@ export default function QuickResetScreen({
 }: {
   embedded?: boolean;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
   const { goBack, updateBackground, updateHeaderHidden } = useScreenStore();
@@ -562,7 +562,7 @@ export default function QuickResetScreen({
               </View>
               <View style={styles.secondaryActionCopy}>
                 <Text style={styles.secondaryActionRowText}>
-                  {getQuickResetActionLabel(action)}
+                  {getQuickResetActionLabel(action, i18n.language)}
                 </Text>
                 <View style={styles.secondaryActionUnderline} />
               </View>

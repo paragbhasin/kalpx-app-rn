@@ -290,14 +290,22 @@ if (key === "pending_classes_data") {
 
       console.log("🍏 Apple ID Token (JWT):", id_token);
   setLoading(true);
-      // 2️⃣ Send ONLY the JWT to backend
+      const applePayload: Record<string, any> = {
+        provider: "apple",
+        id_token: id_token,
+        authorization_code: credential.authorizationCode,
+        user_type: "user",
+      };
+      if (credential.email) applePayload.email = credential.email;
+      if (credential.fullName) {
+        const { givenName, familyName } = credential.fullName;
+        const name = [givenName, familyName].filter(Boolean).join(" ");
+        if (name) applePayload.full_name = name;
+      }
+      console.log("📤 Apple payload being sent:", JSON.stringify(applePayload));
       dispatch(
         socialLoginUser(
-          {
-            provider: "apple",
-            id_token: id_token,
-            user_type: "user",
-          },
+          applePayload,
           async (res) => {
             if (res.success) {
                trackPixelEvent("AppleLoginSuccess", {

@@ -22,11 +22,9 @@ module.exports = {
       buildNumber: "43",
       entitlements: {
         "aps-environment": "production",
-        "com.apple.security.application-groups": ["group.com.kalpx.app"],
       },
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
-        NSSupportsLiveActivities: true,
         NSCameraUsageDescription:
           "KalpX uses the camera only when you choose to capture or upload photos or videos.",
         NSPhotoLibraryUsageDescription:

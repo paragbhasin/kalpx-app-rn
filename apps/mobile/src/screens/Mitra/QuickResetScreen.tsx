@@ -41,7 +41,6 @@ import {
 } from "../../engine/mitraApi";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import { navigate as rootNavigate } from "../../Shared/Routes/NavigationService";
-import { liveActivity } from "../../native/liveActivity";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Fonts } from "../../theme/fonts";
 import { platformShadow } from "../../theme/shadows";
@@ -364,40 +363,20 @@ export default function QuickResetScreen({
     setMantraUpdatedToastVisible(true);
   }, []);
 
-  // ── Sync increments tapped from the Lock Screen Live Activity ─────────────
-  useFocusEffect(
-    useCallback(() => {
-      liveActivity.consumePendingIncrements().then((pending) => {
-        if (pending > 0) {
-          setBeadCount((c) => c + pending);
-        }
-      });
-    }, []),
-  );
-
   // ── Runner start ───────────────────────────────────────────────────────────
   const handleTapBead = useCallback(() => {
     if (!activeMantra) return;
-
     if (!isChantingActive) {
       runnerStartedAt.current = Date.now();
+      setBeadCount(0);
       setIsChantingActive(true);
-      setBeadCount(1);
-      liveActivity.start(activeMantra.title, activeMantra.devanagari ?? "", 1);
-      return;
     }
-
-    setBeadCount((prev) => {
-      const next = prev + 1;
-      liveActivity.update(next);
-      return next;
-    });
+    setBeadCount((count) => count + 1);
   }, [activeMantra, isChantingActive]);
 
   // ── Done chanting ──────────────────────────────────────────────────────────
   const handleDoneChanting = useCallback(async () => {
     if (!activeMantra) return;
-    liveActivity.end();
     const duration_ms = isChantingActive
       ? Date.now() - runnerStartedAt.current
       : 0;

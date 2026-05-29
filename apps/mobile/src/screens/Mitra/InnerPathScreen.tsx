@@ -426,7 +426,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
         setLoading(false);
       } catch (err: any) {
         if (!cancelled) {
-          setError(err?.message ?? "Could not load your path.");
+          setError(err?.message ?? t("errors.couldNotLoadPath"));
           setLoading(false);
         }
       }

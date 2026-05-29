@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { interpolate } from "../engine/utils/interpolation";
@@ -31,6 +32,8 @@ interface Props {
 }
 
 const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const replyAnim = useRef(new Animated.Value(0)).current;
@@ -89,7 +92,14 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
     }
   };
 
-  const headlineLines = (block.headline || "").split("\n").filter(Boolean);
+  const headline = t("mitraPathSelect.headline", { defaultValue: block.headline || "" });
+  const subtext = t("mitraPathSelect.subtext", { defaultValue: block.subtext || "" });
+  const chipLabel = (chip: { id: string; label: string }) => {
+    if (chip.id === "support") return t("mitraPathSelect.chipSupport", { defaultValue: chip.label });
+    if (chip.id === "growth") return t("mitraPathSelect.chipGrowth", { defaultValue: chip.label });
+    return chip.label;
+  };
+  const headlineLines = headline.split("\n").filter(Boolean);
   // `screenData.onboarding_turn` is a state-id string (e.g. "turn_2",
   // "turn_3_support") after the first turn response; extract digits.
   const rawTurn = screenData.onboarding_turn;
@@ -108,11 +118,11 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
       accessibilityLabel={rootTestID}
     >
       <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-        <Text style={styles.headline}>{headlineLines.join("\n")}</Text>
+        <Text style={[styles.headline, isHindi && { letterSpacing: 0 }]}>{headlineLines.join("\n")}</Text>
 
         {block.subtext && (
-          <Text style={styles.subtext}>
-            {interpolate(block.subtext, screenData)}
+          <Text style={[styles.subtext, isHindi && { letterSpacing: 0 }]}>
+            {interpolate(subtext, screenData)}
           </Text>
         )}
 
@@ -134,7 +144,7 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
                 accessibilityLabel={chipTestID}
               >
                 <View style={styles.premiumChip}>
-                  <Text style={styles.premiumChipLabel}>{chip.label}</Text>
+                  <Text style={[styles.premiumChipLabel, isHindi && { letterSpacing: 0 }]}>{chipLabel(chip)}</Text>
                 </View>
               </TouchableOpacity>
             );

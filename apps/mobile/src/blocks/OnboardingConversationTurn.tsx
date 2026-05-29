@@ -99,7 +99,8 @@ const turnOneMessageIcons: (keyof typeof Ionicons.glyphMap)[] = [
 ];
 
 const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
   const user = useSelector(
     (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
@@ -199,8 +200,8 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
         <View style={styles.turnOneInputDivider}>
           <View style={styles.turnOneInputLine} />
           <Ionicons name="diamond" size={10} color="#c7a258" />
-          <Text style={styles.turnOneInputDividerText}>
-            Or share in your own words
+          <Text style={[styles.turnOneInputDividerText, isHindi && { letterSpacing: 0 }]}>
+            {t("onboarding.inputDivider")}
           </Text>
           <Ionicons name="diamond" size={10} color="#c7a258" />
           <View style={styles.turnOneInputLine} />
@@ -209,7 +210,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
       <View style={{ marginTop: 10 }}>
         <VoiceTextInput
           voiceAvailable={false} // launch-gate: restore block.voice_available when conversational tier ships
-          placeholder="Share your reflection"
+          placeholder={t("onboarding.shareReflection")}
           onSend={(val, type) => {
             if (type === "text") {
               fire({ freeform_text: val, response_type: "text" });
@@ -223,8 +224,8 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
       {showHeroMeta && (
         <View style={styles.turnOnePrivacyRow}>
           <Ionicons name="lock-closed-outline" size={16} color="#7a6031" />
-          <Text style={styles.turnOnePrivacyText}>
-            Your thoughts are private and safe with Mitra.
+          <Text style={[styles.turnOnePrivacyText, isHindi && { letterSpacing: 0 }]}>
+            {t("onboarding.privacyText")}
           </Text>
         </View>
       )}
@@ -381,7 +382,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
       >
         <View style={styles.recognitionCard}>
           <Text style={styles.recognitionLabel}>
-            {rec.label || "RECOGNITION"}
+            {rec.label || t("onboarding.recognitionLabel")}
           </Text>
 
           <View style={styles.turnOneHeadlineDivider}>

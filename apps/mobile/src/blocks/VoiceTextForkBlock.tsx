@@ -15,6 +15,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { interpolate } from "../engine/utils/interpolation";
@@ -33,6 +34,8 @@ interface Props {
 }
 
 const VoiceTextForkBlock: React.FC<Props> = ({ block }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
 
   const fire = async (choice: "voice" | "text") => {
@@ -66,7 +69,7 @@ const VoiceTextForkBlock: React.FC<Props> = ({ block }) => {
           end={{ x: 1, y: 0.5 }}
           style={[styles.turnOneButton, styles.turnOnePrimaryButton]}
         >
-          <Text style={styles.turnOnePrimaryButtonText}>Speak with me</Text>
+          <Text style={[styles.turnOnePrimaryButtonText, isHindi && { letterSpacing: 0 }]}>{t("voiceFork.speakWithMe")}</Text>
         </LinearGradient>
       </TouchableOpacity>
 
@@ -76,7 +79,7 @@ const VoiceTextForkBlock: React.FC<Props> = ({ block }) => {
         activeOpacity={0.8}
       >
         <Text style={styles.icon}>✎</Text>
-        <Text style={styles.label}>Keep it written</Text>
+        <Text style={[styles.label, isHindi && { letterSpacing: 0 }]}>{t("voiceFork.keepItWritten")}</Text>
       </TouchableOpacity>
     </View>
   );

@@ -2391,5 +2391,46 @@
       "cta": "Return to My Rhythm",
       "secondary": "Your day can continue from here."
     }
+  },
+  "voiceFork": {
+    "speakWithMe": "Speak with me",
+    "keepItWritten": "Keep it written"
+  },
+  "guidanceMode": {
+    "mostChosen": "MOST CHOSEN",
+    "universal": {
+      "title": "Keep it simple and modern",
+      "desc": "Clear, accessible language. No unfamiliar terms.",
+      "example": "\"Today calls for slower pacing.\""
+    },
+    "hybrid": {
+      "title": "A blend — modern clarity with spiritual depth",
+      "desc": "Familiar terms, occasional Sanatan language where it fits.",
+      "example": "\"Today is a Tamas-leaning day. Slow pacing helps.\""
+    },
+    "rooted": {
+      "title": "I am drawn to the deeper roots",
+      "desc": "Sanatan vocabulary visible. Gunas, doshas, panchang context.",
+      "example": "\"Tamas rising. Your Kapha-pitta body is asking for sattvic rhythm.\""
+    }
+  },
+  "onboarding": {
+    "inputDivider": "Or share in your own words",
+    "shareReflection": "Share your reflection",
+    "privacyText": "Your thoughts are private and safe with Mitra.",
+    "recognitionLabel": "RECOGNITION"
+  },
+  "cycleReflection": {
+    "continueSame": "Continue Same",
+    "continueSameDesc": "Consistency is the base of transformation. Root your rhythm.",
+    "changeFocus": "Change Focus",
+    "changeFocusDesc": "Shift your intention and start fresh with a new focus.",
+    "fallbackTitle": "A shift is taking root",
+    "fallbackPara1": "Even a small shift matters.",
+    "fallbackPara2": "Continue this path so the change can root itself."
+  },
+  "errors": {
+    "somethingWentWrong": "Something went wrong. Please try again.",
+    "couldNotLoadPath": "Could not load your path."
   }
 }

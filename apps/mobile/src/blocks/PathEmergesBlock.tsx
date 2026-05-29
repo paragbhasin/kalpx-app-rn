@@ -160,7 +160,7 @@ const PathEmergesBlock: React.FC<Props> = () => {
       {!!screenData.v3_start_failed && (
         <View style={styles.errorBanner}>
           <Text style={styles.errorText}>
-            Something went wrong. Please try again.
+            {t("errors.somethingWentWrong")}
           </Text>
         </View>
       )}

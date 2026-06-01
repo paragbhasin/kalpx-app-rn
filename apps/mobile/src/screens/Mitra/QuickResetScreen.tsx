@@ -603,7 +603,7 @@ export default function QuickResetScreen({
             </TouchableOpacity>
           )}
           <TouchableOpacity
-            style={[styles.primaryBtn, japaEngine.canUndo && styles.primaryBtnFlex]}
+            style={styles.primaryBtn}
             onPress={handleDoneChanting}
             activeOpacity={0.8}
           >
@@ -690,7 +690,7 @@ export default function QuickResetScreen({
             <Text style={styles.sectionTitle}>Unable to open Quick Reset</Text>
             <Text style={styles.subtleText}>Please try again.</Text>
             <TouchableOpacity
-              style={styles.primaryBtn}
+              style={[styles.primaryBtn, styles.primaryBtnStandalone]}
               onPress={loadOpening}
               activeOpacity={0.8}
             >
@@ -809,7 +809,7 @@ export default function QuickResetScreen({
               </Text>
             )}
             <TouchableOpacity
-              style={styles.primaryBtn}
+              style={[styles.primaryBtn, styles.primaryBtnStandalone]}
               onPress={handleCloseToHome}
               activeOpacity={0.8}
             >
@@ -1000,18 +1000,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 10,
     width: "100%",
-    alignItems: "center",
+    alignItems: "stretch",
     marginTop: 6,
   },
   undoBtn: {
+    width: 100,
     paddingVertical: 14,
-    paddingHorizontal: 18,
+    paddingHorizontal: 12,
     borderRadius: 11,
     borderWidth: 1.5,
-    borderColor: "rgba(199,160,72,0.5)",
+    borderColor: "rgba(199,160,72,0.55)",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: Platform.OS === "android" ? "#FEFCF9" : "rgba(255,255,255,0.5)",
+    backgroundColor: Platform.OS === "android" ? "#FEFCF9" : "rgba(255,255,255,0.6)",
   },
   undoBtnText: {
     fontSize: 14,
@@ -1020,6 +1021,11 @@ const styles = StyleSheet.create({
   },
   primaryBtnFlex: {
     flex: 1,
+    width: undefined,
+  },
+  primaryBtnStandalone: {
+    alignSelf: "stretch",
+    flex: 0,
   },
   previewRingWrap: {
     width: 230,
@@ -1213,11 +1219,10 @@ const styles = StyleSheet.create({
   primaryBtn: {
     backgroundColor: "#C99317",
     borderRadius: 11,
-    // paddingHorizontal: 40,
     paddingVertical: 14,
-    width: "100%",
+    flex: 1,
     alignItems: "center",
-    marginTop: 6,
+    justifyContent: "center",
   },
   primaryBtnText: {
     fontSize: 14,

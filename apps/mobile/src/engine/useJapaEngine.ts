@@ -292,11 +292,14 @@ export function useJapaEngine({
     const idempotencyKey = uuidv4();
     const todayDate = todayLocalDate(tz);
     const clientCreatedAt = new Date().toISOString();
+    // cumulative_count is relative to this server session (starts at 0).
+    // newChantsSoFar = total taps since session started, excluding the baseline.
+    const newChantsSoFar = Math.max(0, currentCount - sessionInitialCount.current);
 
     try {
       const result = await japaSyncSession(serverSessionId.current, {
         delta_count: delta,
-        cumulative_count: currentCount,
+        cumulative_count: newChantsSoFar,
         idempotency_key: idempotencyKey,
         client_created_at: clientCreatedAt,
         today_local_date: todayDate,
@@ -573,8 +576,17 @@ export function useJapaEngine({
     if (syncTimerRef.current) { clearInterval(syncTimerRef.current); syncTimerRef.current = null; }
     if (elapsedTimerRef.current) { clearInterval(elapsedTimerRef.current); elapsedTimerRef.current = null; }
 
-    const finalCount = sessionCountRef.current;
+    // newChants = only what the user tapped this session (NOT the starting baseline).
+    // This is what the server needs — it starts its session count at 0.
+    const newChants = Math.max(0, sessionCountRef.current - sessionInitialCount.current);
     const durationMs = Date.now() - sessionStartedAt.current;
+
+    // Nothing new chanted — skip server call entirely, just clear local state
+    if (newChants === 0) {
+      if (mantraRef) AsyncStorage.removeItem(sessionKey(mantraRef)).catch(() => {});
+      await flushPendingQueue();
+      return;
+    }
 
     if (typeof serverSessionId.current !== 'number') {
       await ensureSessionStarted();
@@ -583,7 +595,7 @@ export function useJapaEngine({
     if (typeof serverSessionId.current === 'number') {
       const finalKey = uuidv4();
       await japaCompleteSession(serverSessionId.current, {
-        final_count: finalCount,
+        final_count: newChants,          // server counts from 0, send only new chants
         duration_ms: durationMs,
         completed_at: new Date().toISOString(),
         final_idempotency_key: finalKey,
@@ -591,20 +603,15 @@ export function useJapaEngine({
         timezone: tz,
       });
 
-      // Refresh stats from server after completion.
-      // Session is over so sessionCount won't change — store server values
-      // directly as the new baselines for the NEXT session.
+      // Refresh stats — next session will start from server's confirmed today_count
       const statsResp = await japaGetStats(mantraRef ?? undefined);
       if (statsResp?.stats?.length) {
         const row = statsResp.stats.find((s) => s.mantra_ref === mantraRef);
         if (row) {
-          // After completion: store server's today_count directly as the next session's base.
-          // Next session will start at server.today_count so it continues from there.
-          const nc = Math.max(0, finalCount - sessionInitialCount.current);
           persistStats(
-            row.today_count,            // next session starts right where server left off
-            row.week_count - nc,
-            row.lifetime_count - nc,
+            row.today_count,
+            row.week_count - newChants,
+            row.lifetime_count - newChants,
           );
         }
       }

@@ -228,10 +228,13 @@ export default function QuickResetScreen({
   const [isChantingActive, setIsChantingActive] = useState(false);
 
   const activeMantraRef = (selectedMantra ?? openingState?.mantra)?.item_id ?? null;
+  // Stable ref so onGoalReached never changes identity (avoids engine re-init)
+  const onGoalReachedRef = useRef<(() => void) | null>(null);
   const japaEngine = useJapaEngine({
     mantraRef: activeMantraRef,
     sourceSurface: "quick_chant",
     goalType: "unlimited",
+    onGoalReached: useCallback(() => { onGoalReachedRef.current?.(); }, []),
   });
   const beadCount = japaEngine.sessionCount;
   const [iastExpanded, setIastExpanded] = useState(false);
@@ -380,7 +383,9 @@ export default function QuickResetScreen({
   }, [activeMantra, isChantingActive, japaEngine]);
 
   // ── Done chanting ──────────────────────────────────────────────────────────
+  // Keep ref in sync so goal-reached callback always calls the latest version
   const handleDoneChanting = useCallback(async () => {
+    onGoalReachedRef.current = null; // prevent double-fire after manual done
     if (!activeMantra) return;
     const duration_ms = isChantingActive
       ? Date.now() - runnerStartedAt.current
@@ -406,6 +411,11 @@ export default function QuickResetScreen({
       }
     }
   }, [activeMantra, embedded, goBack, isChantingActive, navigation]);
+
+  // Wire onGoalReached ref to the latest handleDoneChanting
+  useEffect(() => {
+    onGoalReachedRef.current = handleDoneChanting;
+  }, [handleDoneChanting]);
 
   const handleCloseToHome = useCallback(() => {
     rootNavigate("Home");
@@ -454,11 +464,16 @@ export default function QuickResetScreen({
         <View style={styles.progressWrap}>
           <Text style={styles.progressMain}>{beadCount}</Text>
         </View>
-        {(japaEngine.todayCount > 0 || japaEngine.lifetimeCount > 0) && (
+        {(japaEngine.todayCount > 0 || japaEngine.weekCount > 0 || japaEngine.lifetimeCount > 0) && (
           <View style={styles.statsRow}>
             {japaEngine.todayCount > 0 && (
               <Text style={styles.statItem}>
                 Today {japaEngine.todayCount.toLocaleString()}
+              </Text>
+            )}
+            {japaEngine.weekCount > 0 && (
+              <Text style={styles.statItem}>
+                Week {japaEngine.weekCount.toLocaleString()}
               </Text>
             )}
             {japaEngine.lifetimeCount > 0 && (
@@ -467,6 +482,12 @@ export default function QuickResetScreen({
               </Text>
             )}
           </View>
+        )}
+        {japaEngine.completedMalas > 0 && (
+          <Text style={styles.malaLabel}>
+            {japaEngine.completedMalas} {japaEngine.completedMalas === 1 ? "mala" : "malas"}{" "}
+            {japaEngine.beadInRound > 0 ? `· ${japaEngine.beadInRound} beads` : "completed"}
+          </Text>
         )}
 
         <View style={styles.previewRingWrap}>
@@ -558,13 +579,24 @@ export default function QuickResetScreen({
           </CollapsibleCard>
         )}
 
-        <TouchableOpacity
-          style={styles.primaryBtn}
-          onPress={handleDoneChanting}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.primaryBtnText}>Done chanting</Text>
-        </TouchableOpacity>
+        <View style={styles.actionRow}>
+          {japaEngine.canUndo && (
+            <TouchableOpacity
+              style={styles.undoBtn}
+              onPress={japaEngine.undo}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.undoBtnText}>↩ Undo</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            style={[styles.primaryBtn, japaEngine.canUndo && styles.primaryBtnFlex]}
+            onPress={handleDoneChanting}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.primaryBtnText}>Done chanting</Text>
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.secondaryActions}>
           {secondaryActions.map((action) => (
@@ -933,14 +965,48 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 18,
     marginTop: -8,
-    marginBottom: 4,
+    marginBottom: 2,
     justifyContent: "center",
+    flexWrap: "wrap",
   },
   statItem: {
     fontSize: 12,
     color: "#8A7A5A",
     fontFamily: Fonts.sans.regular,
     letterSpacing: 0.4,
+  },
+  malaLabel: {
+    fontSize: 12,
+    color: "#C7A048",
+    fontFamily: Fonts.sans.medium,
+    letterSpacing: 0.3,
+    textAlign: "center",
+    marginBottom: 2,
+  },
+  actionRow: {
+    flexDirection: "row",
+    gap: 10,
+    width: "100%",
+    alignItems: "center",
+    marginTop: 6,
+  },
+  undoBtn: {
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    borderRadius: 11,
+    borderWidth: 1.5,
+    borderColor: "rgba(199,160,72,0.5)",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Platform.OS === "android" ? "#FEFCF9" : "rgba(255,255,255,0.5)",
+  },
+  undoBtnText: {
+    fontSize: 14,
+    color: "#B89450",
+    fontFamily: Fonts.sans.medium,
+  },
+  primaryBtnFlex: {
+    flex: 1,
   },
   previewRingWrap: {
     width: 230,

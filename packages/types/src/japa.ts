@@ -124,3 +124,16 @@ export interface JapaLocalStats {
   lifetimeCount: number;
   lastUpdated: number;              // unix ms
 }
+
+// Queued sync batch waiting to be sent when connectivity returns
+export interface JapaPendingBatch {
+  sessionId: number;
+  deltaCount: number;
+  cumulativeCount: number;
+  idempotencyKey: string;
+  clientCreatedAt: string;
+  todayLocalDate: string;
+  timezone: string;
+  sourceSurface: JapaSourceSurface;
+  retryCount: number;
+}

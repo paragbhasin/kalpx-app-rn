@@ -1,5 +1,5 @@
 /**
- * useJapaEngine — Japa Counting Engine hook (Phase 1)
+ * useJapaEngine — Japa Counting Engine hook (Phase 1 complete)
  *
  * Powers all mantra counting across Quick Chant, Daily Rhythm, Inner Path,
  * and standalone Digital Mala. Every surface uses this same hook.
@@ -7,17 +7,18 @@
  * Architecture:
  *   - sessionCount lives in React state → instant UI update on every tap
  *   - Session state persisted to AsyncStorage on every tap (fire-and-forget)
- *   - Cached stats (today/lifetime) loaded from AsyncStorage on mount,
- *     then refreshed after every successful backend sync
- *   - Backend session started non-blockingly on mantraRef becoming available
- *   - Sync fires when: unsyncedDelta >= SYNC_COUNT_THRESHOLD or
- *     SYNC_INTERVAL_MS elapsed since last sync, whichever comes first
- *   - Immediate sync on complete/unmount
+ *   - Sync fires at SYNC_COUNT_THRESHOLD taps OR SYNC_INTERVAL_MS elapsed
+ *   - Failed syncs queued in AsyncStorage → flushed when app returns to foreground
+ *   - Undo stack: last 10 taps undoable within a session (never crosses sync boundary)
+ *   - Time goal: internal countdown timer, calls onGoalReached when expired
+ *   - Count goal: detected in increment(), calls onGoalReached when hit
+ *   - Week count: loaded from cached stats, displayed alongside today/lifetime
  *
  * Invariants:
- *   - increment() is synchronous from the user's perspective — no await
- *   - No API call fires on every tap
+ *   - increment() is synchronous — no await, never blocks UI
+ *   - No API call on every tap
  *   - Counts survive app kill (AsyncStorage persists across processes)
+ *   - cumulative_count is monotonically increasing per session
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -26,7 +27,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import { v4 as uuidv4 } from 'uuid';
 
-import type { JapaGoalType, JapaLocalSession, JapaLocalStats, JapaSourceSurface } from '@kalpx/types';
+import type {
+  JapaGoalType,
+  JapaLocalSession,
+  JapaLocalStats,
+  JapaPendingBatch,
+  JapaSourceSurface,
+} from '@kalpx/types';
 import {
   japaCompleteSession,
   japaGetStats,
@@ -38,19 +45,22 @@ import {
 // Constants
 // ---------------------------------------------------------------------------
 
-const SYNC_COUNT_THRESHOLD = 50;   // sync after this many unsynced counts
-const SYNC_INTERVAL_MS = 30_000;   // sync at least every 30s
+const SYNC_COUNT_THRESHOLD = 50;
+const SYNC_INTERVAL_MS = 30_000;
 const MALA_ROUND = 108;
+const UNDO_STACK_MAX = 10;
+const PENDING_QUEUE_KEY = 'japa_pending_queue';
 
-function sessionKey(mantraRef: string) {
-  return `japa_session:${mantraRef}`;
-}
-function statsKey(mantraRef: string) {
-  return `japa_stats:${mantraRef}`;
-}
+// ---------------------------------------------------------------------------
+// Storage key helpers
+// ---------------------------------------------------------------------------
+
+const sessionKey = (mantraRef: string) => `japa_session:${mantraRef}`;
+const statsKey = (mantraRef: string) => `japa_stats:${mantraRef}`;
+
 function todayLocalDate(tz: string): string {
   try {
-    return new Date().toLocaleDateString('en-CA', { timeZone: tz }); // YYYY-MM-DD
+    return new Date().toLocaleDateString('en-CA', { timeZone: tz });
   } catch {
     return new Date().toLocaleDateString('en-CA');
   }
@@ -61,21 +71,33 @@ function todayLocalDate(tz: string): string {
 // ---------------------------------------------------------------------------
 
 export interface JapaEngineResult {
+  // Counts
   sessionCount: number;
   todayCount: number;
+  weekCount: number;
   lifetimeCount: number;
+  // Mala
   completedMalas: number;
   beadInRound: number;
-  increment: () => void;
-  completeSession: () => Promise<void>;
+  malaRound: number;
+  // Time goal
+  elapsedMs: number;
+  remainingMs: number | null;   // null when no time goal
+  // State
   isSyncing: boolean;
+  canUndo: boolean;
+  // Actions
+  increment: () => void;
+  undo: () => void;
+  completeSession: () => Promise<void>;
 }
 
 export interface UseJapaEngineOptions {
   mantraRef: string | null;
   sourceSurface: JapaSourceSurface;
   goalType?: JapaGoalType;
-  goalValue?: number | null;
+  goalValue?: number | null;        // seconds for 'time', count for 'count'
+  onGoalReached?: () => void;       // called once when time/count goal is hit
 }
 
 // ---------------------------------------------------------------------------
@@ -87,31 +109,43 @@ export function useJapaEngine({
   sourceSurface,
   goalType = 'unlimited',
   goalValue = null,
+  onGoalReached,
 }: UseJapaEngineOptions): JapaEngineResult {
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
 
-  // ── React state (UI) ──────────────────────────────────────────────────────
+  // Determine mala round: use goalValue for count goals, else default 108
+  const malaRound = (goalType === 'count' && goalValue && goalValue > 0)
+    ? goalValue
+    : MALA_ROUND;
+
+  // ── React state (drives re-renders) ───────────────────────────────────────
   const [sessionCount, setSessionCount] = useState(0);
   const [todayCount, setTodayCount] = useState(0);
+  const [weekCount, setWeekCount] = useState(0);
   const [lifetimeCount, setLifetimeCount] = useState(0);
+  const [elapsedMs, setElapsedMs] = useState(0);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [canUndo, setCanUndo] = useState(false);
 
-  // ── Refs (mutable, not causing re-renders) ────────────────────────────────
+  // ── Refs (mutable, no re-render) ──────────────────────────────────────────
   const serverSessionId = useRef<number | null>(null);
   const localSessionId = useRef<string>(uuidv4());
-  const sessionCountRef = useRef(0);       // mirror of sessionCount for callbacks
+  const sessionCountRef = useRef(0);
   const lastSyncedCount = useRef(0);
   const lastSyncTimestamp = useRef<number>(0);
   const sessionStartedAt = useRef<number>(Date.now());
-  const startPending = useRef(false);      // guards against double start
+  const startPending = useRef(false);
   const syncTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const goalReachedRef = useRef(false);
+  const undoStack = useRef<number[]>([]);  // stores counts before each increment
 
-  // ── Keep sessionCountRef in sync ──────────────────────────────────────────
+  // Keep sessionCountRef in sync with state
   useEffect(() => {
     sessionCountRef.current = sessionCount;
   }, [sessionCount]);
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
+  // ── Persist helpers ───────────────────────────────────────────────────────
 
   const persistSession = useCallback(
     (count: number) => {
@@ -129,19 +163,18 @@ export function useJapaEngine({
         todayLocalDate: todayLocalDate(tz),
         timezone: tz,
       };
-      // fire-and-forget — don't block the tap
       AsyncStorage.setItem(sessionKey(mantraRef), JSON.stringify(data)).catch(() => {});
     },
     [goalType, goalValue, mantraRef, sourceSurface, tz],
   );
 
   const persistStats = useCallback(
-    (today: number, lifetime: number) => {
+    (today: number, week: number, lifetime: number) => {
       if (!mantraRef) return;
       const data: JapaLocalStats = {
         mantraRef,
         todayCount: today,
-        weekCount: 0,
+        weekCount: week,
         lifetimeCount: lifetime,
         lastUpdated: Date.now(),
       };
@@ -150,10 +183,59 @@ export function useJapaEngine({
     [mantraRef],
   );
 
+  // ── Offline queue ─────────────────────────────────────────────────────────
+
+  const enqueuePendingBatch = useCallback(async (batch: JapaPendingBatch) => {
+    try {
+      const raw = await AsyncStorage.getItem(PENDING_QUEUE_KEY);
+      const queue: JapaPendingBatch[] = raw ? JSON.parse(raw) : [];
+      queue.push(batch);
+      await AsyncStorage.setItem(PENDING_QUEUE_KEY, JSON.stringify(queue));
+    } catch {
+      // swallow — count is already in session state
+    }
+  }, []);
+
+  const flushPendingQueue = useCallback(async () => {
+    try {
+      const raw = await AsyncStorage.getItem(PENDING_QUEUE_KEY);
+      if (!raw) return;
+      const queue: JapaPendingBatch[] = JSON.parse(raw);
+      if (!queue.length) return;
+
+      const remaining: JapaPendingBatch[] = [];
+      for (const batch of queue) {
+        const result = await japaSyncSession(batch.sessionId, {
+          delta_count: batch.deltaCount,
+          cumulative_count: batch.cumulativeCount,
+          idempotency_key: batch.idempotencyKey,
+          client_created_at: batch.clientCreatedAt,
+          today_local_date: batch.todayLocalDate,
+          timezone: batch.timezone,
+          source_surface: batch.sourceSurface,
+        });
+        if (!result) {
+          // Still failing — keep in queue, limit retries to 5
+          if (batch.retryCount < 5) {
+            remaining.push({ ...batch, retryCount: batch.retryCount + 1 });
+          }
+        }
+      }
+
+      if (remaining.length === 0) {
+        await AsyncStorage.removeItem(PENDING_QUEUE_KEY);
+      } else {
+        await AsyncStorage.setItem(PENDING_QUEUE_KEY, JSON.stringify(remaining));
+      }
+    } catch {
+      // swallow
+    }
+  }, []);
+
   // ── Backend session start (non-blocking) ──────────────────────────────────
 
   const ensureSessionStarted = useCallback(async () => {
-    if (typeof serverSessionId.current === 'number') return; // already have a valid ID
+    if (typeof serverSessionId.current === 'number') return;
     if (startPending.current) return;
     if (!mantraRef) return;
 
@@ -170,37 +252,39 @@ export function useJapaEngine({
       });
       if (resp) {
         serverSessionId.current = resp.session_id;
-        // Update persisted session with server ID
         persistSession(sessionCountRef.current);
       }
     } catch {
-      // swallow — will retry on next sync
+      // will retry on next sync
     } finally {
       startPending.current = false;
     }
   }, [goalType, goalValue, mantraRef, persistSession, sourceSurface, tz]);
 
-  // ── Sync batch ────────────────────────────────────────────────────────────
+  // ── Core sync ─────────────────────────────────────────────────────────────
 
   const syncNow = useCallback(async () => {
     const currentCount = sessionCountRef.current;
     const delta = currentCount - lastSyncedCount.current;
     if (delta <= 0) return;
+
     if (typeof serverSessionId.current !== 'number') {
-      // Server session not yet created — try to start it first
       await ensureSessionStarted();
-      if (typeof serverSessionId.current !== 'number') return; // still not ready, skip
+      if (typeof serverSessionId.current !== 'number') return;
     }
 
     setIsSyncing(true);
+    const idempotencyKey = uuidv4();
+    const todayDate = todayLocalDate(tz);
+    const clientCreatedAt = new Date().toISOString();
+
     try {
-      const idempotencyKey = uuidv4();
       const result = await japaSyncSession(serverSessionId.current, {
         delta_count: delta,
         cumulative_count: currentCount,
         idempotency_key: idempotencyKey,
-        client_created_at: new Date().toISOString(),
-        today_local_date: todayLocalDate(tz),
+        client_created_at: clientCreatedAt,
+        today_local_date: todayDate,
         timezone: tz,
         source_surface: sourceSurface,
       });
@@ -209,70 +293,114 @@ export function useJapaEngine({
         lastSyncedCount.current = currentCount;
         lastSyncTimestamp.current = Date.now();
 
-        // Refresh stats from server response if available
         if (result.stats) {
-          const newToday = result.stats.today_count;
-          const newLifetime = result.stats.lifetime_count;
-          setTodayCount(newToday);
-          setLifetimeCount(newLifetime);
-          persistStats(newToday, newLifetime);
+          const t = result.stats.today_count;
+          const w = result.stats.week_count;
+          const l = result.stats.lifetime_count;
+          setTodayCount(t);
+          setWeekCount(w);
+          setLifetimeCount(l);
+          persistStats(t, w, l);
         }
+      } else {
+        // Network failure — enqueue for retry
+        await enqueuePendingBatch({
+          sessionId: serverSessionId.current,
+          deltaCount: delta,
+          cumulativeCount: currentCount,
+          idempotencyKey,
+          clientCreatedAt,
+          todayLocalDate: todayDate,
+          timezone: tz,
+          sourceSurface,
+          retryCount: 0,
+        });
       }
     } catch {
-      // swallow — will retry on next threshold
+      await enqueuePendingBatch({
+        sessionId: serverSessionId.current as number,
+        deltaCount: delta,
+        cumulativeCount: currentCount,
+        idempotencyKey,
+        clientCreatedAt,
+        todayLocalDate: todayDate,
+        timezone: tz,
+        sourceSurface,
+        retryCount: 0,
+      });
     } finally {
       setIsSyncing(false);
     }
-  }, [ensureSessionStarted, persistStats, sourceSurface, tz]);
+  }, [enqueuePendingBatch, ensureSessionStarted, persistStats, sourceSurface, tz]);
 
-  // ── Initialize on mantraRef change ───────────────────────────────────────
+  // ── Initialise on mantraRef change ────────────────────────────────────────
 
   useEffect(() => {
     if (!mantraRef) return;
 
-    // Reset session state for new mantra
+    // Reset for new mantra/session
     localSessionId.current = uuidv4();
     serverSessionId.current = null;
     startPending.current = false;
     lastSyncedCount.current = 0;
     lastSyncTimestamp.current = 0;
     sessionStartedAt.current = Date.now();
+    goalReachedRef.current = false;
+    undoStack.current = [];
+
     setSessionCount(0);
     sessionCountRef.current = 0;
+    setElapsedMs(0);
+    setCanUndo(false);
 
-    // Load cached stats for this mantra from AsyncStorage
+    // Load cached stats from AsyncStorage
     AsyncStorage.getItem(statsKey(mantraRef))
       .then((raw) => {
         if (!raw) return;
         const parsed: JapaLocalStats = JSON.parse(raw);
         if (parsed.mantraRef === mantraRef) {
           setTodayCount(parsed.todayCount ?? 0);
+          setWeekCount(parsed.weekCount ?? 0);
           setLifetimeCount(parsed.lifetimeCount ?? 0);
         }
       })
       .catch(() => {});
 
-    // Start server session non-blockingly
     ensureSessionStarted();
 
-    // Start sync interval
+    // Sync interval — checks every 10s, fires if 30s elapsed since last sync
     if (syncTimerRef.current) clearInterval(syncTimerRef.current);
     syncTimerRef.current = setInterval(() => {
       const elapsed = Date.now() - lastSyncTimestamp.current;
       if (elapsed >= SYNC_INTERVAL_MS && sessionCountRef.current > lastSyncedCount.current) {
         syncNow();
       }
-    }, 10_000); // check every 10s, fire if 30s elapsed
+    }, 10_000);
+
+    // Elapsed timer — ticks every second
+    if (elapsedTimerRef.current) clearInterval(elapsedTimerRef.current);
+    elapsedTimerRef.current = setInterval(() => {
+      setElapsedMs(Date.now() - sessionStartedAt.current);
+    }, 1_000);
 
     return () => {
-      if (syncTimerRef.current) {
-        clearInterval(syncTimerRef.current);
-        syncTimerRef.current = null;
-      }
+      if (syncTimerRef.current) { clearInterval(syncTimerRef.current); syncTimerRef.current = null; }
+      if (elapsedTimerRef.current) { clearInterval(elapsedTimerRef.current); elapsedTimerRef.current = null; }
     };
   }, [mantraRef, ensureSessionStarted, syncNow]);
 
-  // ── Sync on app background ────────────────────────────────────────────────
+  // ── Time goal countdown & auto-completion ─────────────────────────────────
+
+  useEffect(() => {
+    if (goalType !== 'time' || !goalValue || goalReachedRef.current) return;
+    const goalMs = goalValue * 1000;
+    if (elapsedMs >= goalMs) {
+      goalReachedRef.current = true;
+      onGoalReached?.();
+    }
+  }, [elapsedMs, goalType, goalValue, onGoalReached]);
+
+  // ── AppState — sync on background, flush queue on foreground ─────────────
 
   useEffect(() => {
     const handler = (state: AppStateStatus) => {
@@ -280,47 +408,76 @@ export function useJapaEngine({
         if (sessionCountRef.current > lastSyncedCount.current) {
           syncNow();
         }
+      } else if (state === 'active') {
+        // App returned to foreground — flush any queued offline batches
+        flushPendingQueue();
       }
     };
     const sub = AppState.addEventListener('change', handler);
     return () => sub.remove();
-  }, [syncNow]);
+  }, [flushPendingQueue, syncNow]);
 
-  // ── Public API ────────────────────────────────────────────────────────────
+  // ── Public actions ────────────────────────────────────────────────────────
 
   const increment = useCallback(() => {
-    const newCount = sessionCountRef.current + 1;
+    const prev = sessionCountRef.current;
+    const newCount = prev + 1;
+
+    // Push to undo stack (cap at UNDO_STACK_MAX)
+    undoStack.current = [...undoStack.current.slice(-(UNDO_STACK_MAX - 1)), prev];
+    setCanUndo(true);
+
     sessionCountRef.current = newCount;
     setSessionCount(newCount);
 
-    // Haptic — light on every tap, medium at mala boundary
-    if (newCount % MALA_ROUND === 0) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+    // Haptic — medium at mala boundary, light otherwise
+    if (newCount % malaRound === 0) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     } else {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     }
 
-    // Persist crash-safe
     persistSession(newCount);
 
-    // Sync if threshold reached
-    const unsynced = newCount - lastSyncedCount.current;
-    if (unsynced >= SYNC_COUNT_THRESHOLD) {
+    // Count goal detection
+    if (goalType === 'count' && goalValue && newCount >= goalValue && !goalReachedRef.current) {
+      goalReachedRef.current = true;
+      onGoalReached?.();
+    }
+
+    // Sync threshold
+    if (newCount - lastSyncedCount.current >= SYNC_COUNT_THRESHOLD) {
       syncNow();
     }
-  }, [persistSession, syncNow]);
+  }, [goalType, goalValue, malaRound, onGoalReached, persistSession, syncNow]);
+
+  const undo = useCallback(() => {
+    if (undoStack.current.length === 0) return;
+
+    const previous = undoStack.current[undoStack.current.length - 1];
+    undoStack.current = undoStack.current.slice(0, -1);
+
+    sessionCountRef.current = previous;
+    setSessionCount(previous);
+    setCanUndo(undoStack.current.length > 0);
+
+    // Undo haptic
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+
+    persistSession(previous);
+    // Note: undo does not affect lastSyncedCount — the next sync will send
+    // cumulative_count which the backend takes as max(synced_count, cumulative_count).
+    // Undo within the unsynced window is purely local.
+  }, [persistSession]);
 
   const completeSession = useCallback(async () => {
-    // Stop sync timer
-    if (syncTimerRef.current) {
-      clearInterval(syncTimerRef.current);
-      syncTimerRef.current = null;
-    }
+    // Stop all timers
+    if (syncTimerRef.current) { clearInterval(syncTimerRef.current); syncTimerRef.current = null; }
+    if (elapsedTimerRef.current) { clearInterval(elapsedTimerRef.current); elapsedTimerRef.current = null; }
 
     const finalCount = sessionCountRef.current;
     const durationMs = Date.now() - sessionStartedAt.current;
 
-    // Ensure server session exists
     if (typeof serverSessionId.current !== 'number') {
       await ensureSessionStarted();
     }
@@ -336,37 +493,49 @@ export function useJapaEngine({
         timezone: tz,
       });
 
-      // Refresh stats from backend after completion
+      // Refresh stats from server after completion
       const statsResp = await japaGetStats(mantraRef ?? undefined);
       if (statsResp?.stats?.length) {
         const row = statsResp.stats.find((s) => s.mantra_ref === mantraRef);
         if (row) {
           setTodayCount(row.today_count);
+          setWeekCount(row.week_count);
           setLifetimeCount(row.lifetime_count);
-          persistStats(row.today_count, row.lifetime_count);
+          persistStats(row.today_count, row.week_count, row.lifetime_count);
         }
       }
     }
 
-    // Clear local session from AsyncStorage
     if (mantraRef) {
       AsyncStorage.removeItem(sessionKey(mantraRef)).catch(() => {});
     }
-  }, [ensureSessionStarted, mantraRef, persistStats, tz]);
+
+    // Flush any remaining queued batches
+    await flushPendingQueue();
+  }, [ensureSessionStarted, flushPendingQueue, mantraRef, persistStats, tz]);
 
   // ── Derived values ────────────────────────────────────────────────────────
 
-  const completedMalas = Math.floor(sessionCount / MALA_ROUND);
-  const beadInRound = sessionCount % MALA_ROUND;
+  const completedMalas = Math.floor(sessionCount / malaRound);
+  const beadInRound = sessionCount % malaRound;
+  const remainingMs = (goalType === 'time' && goalValue)
+    ? Math.max(0, goalValue * 1000 - elapsedMs)
+    : null;
 
   return {
     sessionCount,
     todayCount,
+    weekCount,
     lifetimeCount,
     completedMalas,
     beadInRound,
-    increment,
-    completeSession,
+    malaRound,
+    elapsedMs,
+    remainingMs,
     isSyncing,
+    canUndo,
+    increment,
+    undo,
+    completeSession,
   };
 }

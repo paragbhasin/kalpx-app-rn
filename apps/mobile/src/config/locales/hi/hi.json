@@ -2596,5 +2596,31 @@
     "companionedChant": {
       "hint": "चाहें तो साथ जपें। या बस सुनें।"
     }
+  },
+  "practiceRunner": {
+    "whatThisAsks": "यह अभ्यास आपसे क्या माँगता है",
+    "howLongPause": "आप कितनी देर रुकेंगे?",
+    "minLabel": "मिनट",
+    "minMin": "1 मिनट",
+    "maxMin": "10 मिनट",
+    "dragToAdjust": "समायोजित करने के लिए खींचें",
+    "begin": "शुरू करें",
+    "returnToMoment": "इस पल में वापस आएं",
+    "endPractice": "अभ्यास समाप्त करें",
+    "benefits": "लाभ",
+    "essence": "सार",
+    "back": "वापस",
+    "adding": "जोड़ रहे हैं...",
+    "addToMyPractice": "मेरे अभ्यास में जोड़ें"
+  },
+  "sankalpRunner": {
+    "tapToEmbody": "अपना संकल्प धारण करने के लिए टैप करें",
+    "vibrationSettle": "कंपन को भीतर स्थिर होने दें...",
+    "essence": "सार",
+    "benefits": "लाभ",
+    "howToLive": "कैसे जिएं",
+    "back": "वापस",
+    "adding": "जोड़ रहे हैं...",
+    "addToMyPractice": "मेरे अभ्यास में जोड़ें"
   }
 }

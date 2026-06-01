@@ -2644,5 +2644,31 @@
         "inRoomCarry": "Carry"
       }
     }
+  },
+  "practiceRunner": {
+    "whatThisAsks": "What this practice asks of you",
+    "howLongPause": "How long will you pause?",
+    "minLabel": "min",
+    "minMin": "1 min",
+    "maxMin": "10 min",
+    "dragToAdjust": "Drag to adjust",
+    "begin": "Begin",
+    "returnToMoment": "Return to the moment",
+    "endPractice": "End Practice",
+    "benefits": "Benefits",
+    "essence": "Essence",
+    "back": "Back",
+    "adding": "Adding...",
+    "addToMyPractice": "Add to My Practice"
+  },
+  "sankalpRunner": {
+    "tapToEmbody": "Tap to embody your intention",
+    "vibrationSettle": "Let the vibration settle within...",
+    "essence": "Essence",
+    "benefits": "Benefits",
+    "howToLive": "How To Live",
+    "back": "Back",
+    "adding": "Adding...",
+    "addToMyPractice": "Add to My Practice"
   }
 }

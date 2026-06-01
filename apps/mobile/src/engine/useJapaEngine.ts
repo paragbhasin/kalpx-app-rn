@@ -139,13 +139,16 @@ export function useJapaEngine({
   const undoStack = useRef<number[]>([]);
 
   // Baseline counts loaded from cache before this session began.
-  // displayed today    = cachedTodayBase   + sessionCount  (updates every tap)
-  // displayed week     = cachedWeekBase    + sessionCount  (updates every tap)
-  // displayed lifetime = cachedLifetimeBase + sessionCount (updates every tap)
-  // After sync: base = serverValue - sessionCount (keeps displayed value correct)
+  // sessionCount STARTS at cachedTodayBase so the big counter = today's running total.
+  // sessionInitialCount = the value sessionCount started at (= cachedTodayBase at init).
+  // delta for sync = sessionCount - lastSyncedCount (only new chants, never the baseline).
+  // displayed week     = cachedWeekBase    + newChants  (newChants = sessionCount - sessionInitialCount)
+  // displayed lifetime = cachedLifetimeBase + newChants
+  // After sync: adjust bases so display stays consistent with server.
   const cachedTodayBase = useRef(0);
   const cachedWeekBase = useRef(0);
   const cachedLifetimeBase = useRef(0);
+  const sessionInitialCount = useRef(0); // snapshot of cachedTodayBase at session start
 
   // Keep sessionCountRef in sync with state
   useEffect(() => {
@@ -303,18 +306,26 @@ export function useJapaEngine({
         lastSyncTimestamp.current = Date.now();
 
         if (result.stats) {
-          // Server's today_count INCLUDES the counts we just synced.
-          // Set base = serverValue - sessionCount so that:
-          //   displayed = base + sessionCount = serverValue (correct)
-          // and future taps keep adding on top instantly.
           const sc = sessionCountRef.current;
-          cachedTodayBase.current = result.stats.today_count - sc;
-          cachedWeekBase.current = result.stats.week_count - sc;
-          cachedLifetimeBase.current = result.stats.lifetime_count - sc;
-          // Persist bases (not displayed values) for next session startup
-          persistStats(cachedTodayBase.current, cachedWeekBase.current, cachedLifetimeBase.current);
-          // Force a re-render so the displayed counts (base + sessionCount) refresh
-          setSessionCount((c) => c);
+          const nc = Math.max(0, sc - sessionInitialCount.current); // new chants so far
+          // Update week/lifetime bases so their displayed values match server
+          cachedWeekBase.current = result.stats.week_count - nc;
+          cachedLifetimeBase.current = result.stats.lifetime_count - nc;
+          // If server's today_count differs from sessionCount (e.g. another device added
+          // counts), reconcile by bumping sessionCount to match server.
+          if (result.stats.today_count !== sc) {
+            const serverToday = result.stats.today_count;
+            sessionInitialCount.current = serverToday - nc; // adjust initial so newChants stays correct
+            sessionCountRef.current = serverToday;
+            setSessionCount(serverToday);
+            lastSyncedCount.current = serverToday;
+          }
+          // Persist baselines for next session startup (store server-confirmed today as base)
+          persistStats(
+            result.stats.today_count - nc, // next session's today base
+            cachedWeekBase.current,
+            cachedLifetimeBase.current,
+          );
         }
       } else {
         // Network failure — enqueue for retry
@@ -356,7 +367,6 @@ export function useJapaEngine({
     localSessionId.current = uuidv4();
     serverSessionId.current = null;
     startPending.current = false;
-    lastSyncedCount.current = 0;
     lastSyncTimestamp.current = 0;
     sessionStartedAt.current = Date.now();
     goalReachedRef.current = false;
@@ -364,26 +374,49 @@ export function useJapaEngine({
     cachedTodayBase.current = 0;
     cachedWeekBase.current = 0;
     cachedLifetimeBase.current = 0;
+    sessionInitialCount.current = 0;
 
+    // Start session at 0 first; will be updated to today's base after AsyncStorage loads.
     setSessionCount(0);
     sessionCountRef.current = 0;
+    lastSyncedCount.current = 0;
     setElapsedMs(0);
     setCanUndo(false);
 
-    // Load cached baselines from AsyncStorage.
-    // These are the counts BEFORE this session — sessionCount starts at 0
-    // so displayed = base + 0 = base on first render.
+    // Load cached baselines. Session counter then starts from today's existing count
+    // so the big number shows today's running total, not just this session's count.
     AsyncStorage.getItem(statsKey(mantraRef))
       .then((raw) => {
-        if (!raw) return;
-        const parsed: JapaLocalStats = JSON.parse(raw);
-        if (parsed.mantraRef === mantraRef) {
-          cachedTodayBase.current = parsed.todayCount ?? 0;
-          cachedWeekBase.current = parsed.weekCount ?? 0;
-          cachedLifetimeBase.current = parsed.lifetimeCount ?? 0;
-          // Trigger a re-render so the computed displayed values update
-          setSessionCount((c) => c);
-        }
+        const todayBase = (() => {
+          if (!raw) return 0;
+          try {
+            const parsed: JapaLocalStats = JSON.parse(raw);
+            return parsed.mantraRef === mantraRef ? (parsed.todayCount ?? 0) : 0;
+          } catch { return 0; }
+        })();
+        const weekBase = (() => {
+          if (!raw) return 0;
+          try {
+            const parsed: JapaLocalStats = JSON.parse(raw);
+            return parsed.mantraRef === mantraRef ? (parsed.weekCount ?? 0) : 0;
+          } catch { return 0; }
+        })();
+        const lifetimeBase = (() => {
+          if (!raw) return 0;
+          try {
+            const parsed: JapaLocalStats = JSON.parse(raw);
+            return parsed.mantraRef === mantraRef ? (parsed.lifetimeCount ?? 0) : 0;
+          } catch { return 0; }
+        })();
+
+        cachedTodayBase.current = todayBase;
+        cachedWeekBase.current = weekBase;
+        cachedLifetimeBase.current = lifetimeBase;
+        sessionInitialCount.current = todayBase;
+        // Session counter starts at today's existing count
+        sessionCountRef.current = todayBase;
+        lastSyncedCount.current = todayBase;
+        setSessionCount(todayBase);
       })
       .catch(() => {});
 
@@ -521,11 +554,14 @@ export function useJapaEngine({
       if (statsResp?.stats?.length) {
         const row = statsResp.stats.find((s) => s.mantra_ref === mantraRef);
         if (row) {
-          // After completion sessionCount is frozen — use server values as next-session bases
-          cachedTodayBase.current = row.today_count - finalCount;
-          cachedWeekBase.current = row.week_count - finalCount;
-          cachedLifetimeBase.current = row.lifetime_count - finalCount;
-          persistStats(cachedTodayBase.current, cachedWeekBase.current, cachedLifetimeBase.current);
+          // After completion: store server's today_count directly as the next session's base.
+          // Next session will start at server.today_count so it continues from there.
+          const nc = Math.max(0, finalCount - sessionInitialCount.current);
+          persistStats(
+            row.today_count,            // next session starts right where server left off
+            row.week_count - nc,
+            row.lifetime_count - nc,
+          );
         }
       }
     }
@@ -539,12 +575,15 @@ export function useJapaEngine({
   }, [ensureSessionStarted, flushPendingQueue, mantraRef, persistStats, tz]);
 
   // ── Derived values ────────────────────────────────────────────────────────
-  // today/week/lifetime computed from baseline + current session count.
-  // This means they increment on EVERY tap — never wait for the backend.
+  // sessionCount starts at today's existing count → it IS today's running total.
+  // newChants = only what happened this session (excludes the starting baseline).
+  // todayCount = sessionCount (same thing — the big number)
+  // week/lifetime add only the new chants on top of their own baselines.
 
-  const todayCount = Math.max(0, cachedTodayBase.current) + sessionCount;
-  const weekCount = Math.max(0, cachedWeekBase.current) + sessionCount;
-  const lifetimeCount = Math.max(0, cachedLifetimeBase.current) + sessionCount;
+  const newChants = Math.max(0, sessionCount - sessionInitialCount.current);
+  const todayCount = sessionCount;   // big number = today's total
+  const weekCount = Math.max(0, cachedWeekBase.current) + newChants;
+  const lifetimeCount = Math.max(0, cachedLifetimeBase.current) + newChants;
 
   const completedMalas = Math.floor(sessionCount / malaRound);
   const beadInRound = sessionCount % malaRound;

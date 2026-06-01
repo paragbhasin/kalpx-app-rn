@@ -164,16 +164,13 @@ export default function DigitalMalaScreen() {
             <Text style={styles.countMain}>{japaEngine.sessionCount}</Text>
           </View>
 
-          {/* Stats row */}
-          {(japaEngine.todayCount > 0 || japaEngine.weekCount > 0 || japaEngine.lifetimeCount > 0) && (
+          {/* Stats row — sessionCount = today's total, so skip Today */}
+          {(japaEngine.weekCount > japaEngine.sessionCount || japaEngine.lifetimeCount > japaEngine.sessionCount) && (
             <View style={styles.statsRow}>
-              {japaEngine.todayCount > 0 && (
-                <Text style={styles.statItem}>Today {japaEngine.todayCount.toLocaleString()}</Text>
-              )}
-              {japaEngine.weekCount > 0 && (
+              {japaEngine.weekCount > japaEngine.sessionCount && (
                 <Text style={styles.statItem}>Week {japaEngine.weekCount.toLocaleString()}</Text>
               )}
-              {japaEngine.lifetimeCount > 0 && (
+              {japaEngine.lifetimeCount > japaEngine.sessionCount && (
                 <Text style={styles.statItem}>Lifetime {japaEngine.lifetimeCount.toLocaleString()}</Text>
               )}
             </View>

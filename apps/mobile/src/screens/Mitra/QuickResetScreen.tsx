@@ -9,6 +9,7 @@ import type {
   QuickResetMantra,
   QuickResetOpeningState,
 } from "@kalpx/types";
+import { useJapaEngine } from "../../engine/useJapaEngine";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -224,8 +225,15 @@ export default function QuickResetScreen({
   );
   const [completionData, setCompletionData] =
     useState<QuickChantCompleteResponse | null>(null);
-  const [beadCount, setBeadCount] = useState(0);
   const [isChantingActive, setIsChantingActive] = useState(false);
+
+  const activeMantraRef = (selectedMantra ?? openingState?.mantra)?.item_id ?? null;
+  const japaEngine = useJapaEngine({
+    mantraRef: activeMantraRef,
+    sourceSurface: "quick_chant",
+    goalType: "unlimited",
+  });
+  const beadCount = japaEngine.sessionCount;
   const [iastExpanded, setIastExpanded] = useState(false);
   const [devExpanded, setDevExpanded] = useState(false);
   const [meaningExpanded, setMeaningExpanded] = useState(false);
@@ -252,7 +260,6 @@ export default function QuickResetScreen({
   // ── Initial load ────────────────────────────────────────────────────────────
   const loadOpening = useCallback(async () => {
     setPhase("loading");
-    setBeadCount(0);
     setIsChantingActive(false);
     const state = await getQuickResetOpening();
     if (state) {
@@ -353,7 +360,6 @@ export default function QuickResetScreen({
 
   const handlePickerSelect = useCallback((mantra: QuickResetMantra) => {
     setDefaultSetConfirmed(false);
-    setBeadCount(0);
     setIsChantingActive(false);
     setSelectedMantra(mantra);
     setPickerVisible(false);
@@ -368,11 +374,10 @@ export default function QuickResetScreen({
     if (!activeMantra) return;
     if (!isChantingActive) {
       runnerStartedAt.current = Date.now();
-      setBeadCount(0);
       setIsChantingActive(true);
     }
-    setBeadCount((count) => count + 1);
-  }, [activeMantra, isChantingActive]);
+    japaEngine.increment();
+  }, [activeMantra, isChantingActive, japaEngine]);
 
   // ── Done chanting ──────────────────────────────────────────────────────────
   const handleDoneChanting = useCallback(async () => {
@@ -380,6 +385,8 @@ export default function QuickResetScreen({
     const duration_ms = isChantingActive
       ? Date.now() - runnerStartedAt.current
       : 0;
+    // Flush the japa engine (sync final count + mark session complete on backend)
+    await japaEngine.completeSession();
     const result = await postQuickChantComplete({
       mantra_ref: activeMantra.item_id,
       duration_ms,
@@ -447,6 +454,20 @@ export default function QuickResetScreen({
         <View style={styles.progressWrap}>
           <Text style={styles.progressMain}>{beadCount}</Text>
         </View>
+        {(japaEngine.todayCount > 0 || japaEngine.lifetimeCount > 0) && (
+          <View style={styles.statsRow}>
+            {japaEngine.todayCount > 0 && (
+              <Text style={styles.statItem}>
+                Today {japaEngine.todayCount.toLocaleString()}
+              </Text>
+            )}
+            {japaEngine.lifetimeCount > 0 && (
+              <Text style={styles.statItem}>
+                Lifetime {japaEngine.lifetimeCount.toLocaleString()}
+              </Text>
+            )}
+          </View>
+        )}
 
         <View style={styles.previewRingWrap}>
           <Animated.View
@@ -907,6 +928,19 @@ const styles = StyleSheet.create({
     lineHeight: 60,
     color: "#C7A048",
     fontFamily: Fonts.serif.regular,
+  },
+  statsRow: {
+    flexDirection: "row",
+    gap: 18,
+    marginTop: -8,
+    marginBottom: 4,
+    justifyContent: "center",
+  },
+  statItem: {
+    fontSize: 12,
+    color: "#8A7A5A",
+    fontFamily: Fonts.sans.regular,
+    letterSpacing: 0.4,
   },
   previewRingWrap: {
     width: 230,

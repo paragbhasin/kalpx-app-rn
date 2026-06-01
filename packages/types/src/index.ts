@@ -7,3 +7,4 @@ export * from './retreats';
 export * from './notifications';
 export * from './whyThis';
 export * from './mitraFourDoor';
+export * from './japa';

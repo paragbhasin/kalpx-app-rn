@@ -78,3 +78,17 @@ export const ROOM_GUIDED_COPY = {
     returnHome:    "Return home",
   },
 } as const;
+
+export const ROOM_GUIDED_COPY_HI = {
+  begin:            "शुरू करें",
+  whyThisLabel:     "यह क्यों चुना गया",
+  viewAllSteps:     "सभी चरण देखें",
+  exitLabel:        "अभी जाता हूँ",
+  reflectionPrompt: "क्या थोड़ा बदला?",
+  nextStep: {
+    finishHere:    "यहाँ समाप्त करें",
+    tellMitraMore: "मित्र को और बताएं",
+    continueStep:  "एक और चरण जारी रखें",
+    returnHome:    "होम पर लौटें",
+  },
+} as const;

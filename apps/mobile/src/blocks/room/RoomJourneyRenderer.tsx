@@ -15,7 +15,7 @@
  *   - RoomContainer (ambient audio, context_picker, why_this_l2)
  *   - All app navigation contracts
  */
-import { ROOM_LABELS, ROOM_REFLECTION_OPTIONS } from '@kalpx/contracts';
+import { ROOM_LABELS, ROOM_LABELS_HI, ROOM_REFLECTION_OPTIONS } from '@kalpx/contracts';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -145,7 +145,7 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
   const entryCtx = ctx.entry_context ?? {};
   const recId: string | null = entryCtx.recommended_first_action_id ?? null;
   const roomSteps = (envelope as any).room_steps;
-  const roomDisplayName = ROOM_LABELS[envelope.room_id as keyof typeof ROOM_LABELS] ?? '';
+  const roomDisplayName = (isHindi ? ROOM_LABELS_HI : ROOM_LABELS)[envelope.room_id as keyof typeof ROOM_LABELS] ?? '';
   const arrivalCopyRaw = getRoomArrivalCopy(roomId, ctx);
   const arrivalCopy = {
     ...arrivalCopyRaw,

@@ -24,7 +24,7 @@ import RoomPrincipleBanner from "./RoomPrincipleBanner";
 import RoomGuidedSection from "./RoomGuidedSection";
 import RoomJourneyRenderer from "./RoomJourneyRenderer";
 import { isJourneyEnabled } from "./roomJourneyConfig";
-import { ROOM_LABELS } from "@kalpx/contracts";
+import { ROOM_LABELS, ROOM_LABELS_HI } from "@kalpx/contracts";
 import { LIFE_CONTEXT_LABELS } from "./roomConstants";
 import type { RoomRendererProps } from "./types";
 
@@ -45,7 +45,7 @@ const RoomRenderer: React.FC<RoomRendererProps> = ({
   // HARD GATE: flag off → render nothing. No side effects, no subtree.
   if (!flagOn) return null;
 
-  const roomDisplayName = ROOM_LABELS[envelope.room_id as keyof typeof ROOM_LABELS];
+  const roomDisplayName = (isHindi ? ROOM_LABELS_HI : ROOM_LABELS)[envelope.room_id as keyof typeof ROOM_LABELS];
   const lifeContextLabel = envelope.life_context && LIFE_CONTEXT_LABELS[envelope.life_context]
     ? t(LIFE_CONTEXT_LABELS[envelope.life_context])
     : null;

@@ -2,7 +2,7 @@
  * RoomGuidedSection — mobile guided room surface aligned to the web layout.
  */
 import { Ionicons } from "@expo/vector-icons";
-import { ROOM_GUIDED_COPY, ROOM_LABELS } from "@kalpx/contracts";
+import { ROOM_GUIDED_COPY, ROOM_GUIDED_COPY_HI, ROOM_LABELS, ROOM_LABELS_HI } from "@kalpx/contracts";
 import React, {
   useCallback,
   useEffect,
@@ -124,6 +124,8 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   const insets = useSafeAreaInsets();
   const { t, i18n } = useTranslation();
   const isHindi = i18n.language === "hi";
+  const copy = isHindi ? ROOM_GUIDED_COPY_HI : ROOM_GUIDED_COPY;
+  const roomLabels = isHindi ? ROOM_LABELS_HI : ROOM_LABELS;
   const { loadScreen, goBack, screenData } = useScreenStore();
   const actionCtx = buildActionCtx({ loadScreen, goBack });
 
@@ -134,7 +136,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   const roomId: string = envelope.room_id;
   const renderId: string = (envelope as any).provenance?.render_id ?? "";
   const roomDisplayName =
-    ROOM_LABELS[envelope.room_id as keyof typeof ROOM_LABELS] ||
+    roomLabels[envelope.room_id as keyof typeof ROOM_LABELS] ||
     (envelope as any).room_display_name ||
     "";
   const roomSteps = (envelope as any).room_steps;
@@ -798,7 +800,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
           activeOpacity={0.9}
           testID="room_guided_begin"
         >
-          <Text style={styles.beginBtnText}>{ROOM_GUIDED_COPY.begin}</Text>
+          <Text style={styles.beginBtnText}>{copy.begin}</Text>
           <Text style={styles.beginArrow}>→</Text>
         </TouchableOpacity>
 
@@ -898,7 +900,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
             testID="room_guided_view_all_steps"
           >
             <Text style={styles.viewStepsLink}>
-              {ROOM_GUIDED_COPY.viewAllSteps}
+              {copy.viewAllSteps}
             </Text>
           </TouchableOpacity>
 
@@ -906,7 +908,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
             onPress={handleExitRequest}
             testID="room_guided_exit"
           >
-            <Text style={styles.exitText}>{ROOM_GUIDED_COPY.exitLabel}</Text>
+            <Text style={styles.exitText}>{copy.exitLabel}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -1075,7 +1077,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
         <View style={styles.exitConfirmOverlay}>
           <View style={styles.exitConfirmSheet}>
             <Text style={[styles.exitConfirmText, isHindi && { letterSpacing: 0 }]}>
-              {ROOM_LABELS[envelope?.room_id as keyof typeof ROOM_LABELS] ??
+              {roomLabels[envelope?.room_id as keyof typeof ROOM_LABELS] ??
                 t("room.thisRoom")}{" "}
               {t("room.willCloseReturnAnytime")}
             </Text>

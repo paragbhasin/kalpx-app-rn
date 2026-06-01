@@ -384,6 +384,7 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
             {mantraRef &&
               (japaEngine.todayCount > 0 ||
                 japaEngine.weekCount > 0 ||
+                japaEngine.yearCount > 0 ||
                 japaEngine.lifetimeCount > 0) && (
                 <View style={styles.japaStatsRow}>
                   {japaEngine.todayCount > 0 && (
@@ -394,6 +395,11 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
                   {japaEngine.weekCount > 0 && (
                     <Text style={styles.japaStatItem}>
                       Week {japaEngine.weekCount.toLocaleString()}
+                    </Text>
+                  )}
+                  {japaEngine.yearCount > 0 && (
+                    <Text style={styles.japaStatItem}>
+                      Year {japaEngine.yearCount.toLocaleString()}
                     </Text>
                   )}
                   {japaEngine.lifetimeCount > 0 && (

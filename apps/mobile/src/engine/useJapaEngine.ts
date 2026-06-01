@@ -76,6 +76,7 @@ export interface JapaEngineResult {
   sessionCount: number;
   todayCount: number;
   weekCount: number;
+  yearCount: number;
   lifetimeCount: number;
   // Mala
   completedMalas: number;
@@ -150,8 +151,17 @@ export function useJapaEngine({
   // After sync: adjust bases so display stays consistent with server.
   const cachedTodayBase = useRef(0);
   const cachedWeekBase = useRef(0);
+  const cachedYearBase = useRef(0);
   const cachedLifetimeBase = useRef(0);
   const sessionInitialCount = useRef(0); // snapshot of cachedTodayBase at session start
+
+  // Tracks the active mantraRef so stale async callbacks (sync, refreshStats,
+  // AsyncStorage loads) can detect they've been superseded and bail out before
+  // mutating shared refs with the wrong mantra's data.
+  const currentMantraRef = useRef<string | null>(mantraRef);
+  useEffect(() => {
+    currentMantraRef.current = mantraRef;
+  }, [mantraRef]);
 
   // Keep sessionCountRef in sync with state
   useEffect(() => {
@@ -184,12 +194,13 @@ export function useJapaEngine({
   // Persists the BASELINE (pre-session) counts, not the displayed counts.
   // On next session start these become the new baselines to add onto.
   const persistStats = useCallback(
-    (todayBase: number, weekBase: number, lifetimeBase: number) => {
+    (todayBase: number, weekBase: number, yearBase: number, lifetimeBase: number) => {
       if (!mantraRef) return;
       const data: JapaLocalStats = {
         mantraRef,
         todayCount: todayBase,
         weekCount: weekBase,
+        yearCount: yearBase,
         lifetimeCount: lifetimeBase,
         lastUpdated: Date.now(),
       };
@@ -312,10 +323,15 @@ export function useJapaEngine({
         lastSyncTimestamp.current = Date.now();
 
         if (result.stats) {
+          // Guard: if the user switched mantra while this sync was in-flight,
+          // do NOT write to shared refs — they now belong to the new mantra.
+          if (result.stats.mantra_ref !== currentMantraRef.current) return;
+
           const sc = sessionCountRef.current;
           const nc = Math.max(0, sc - sessionInitialCount.current); // new chants so far
-          // Update week/lifetime bases so their displayed values match server
+          // Update week/year/lifetime bases so their displayed values match server
           cachedWeekBase.current = result.stats.week_count - nc;
+          cachedYearBase.current = result.stats.year_count - nc;
           cachedLifetimeBase.current = result.stats.lifetime_count - nc;
           // If server's today_count differs from sessionCount (e.g. another device added
           // counts), reconcile by bumping sessionCount to match server.
@@ -330,6 +346,7 @@ export function useJapaEngine({
           persistStats(
             result.stats.today_count - nc, // next session's today base
             cachedWeekBase.current,
+            cachedYearBase.current,
             cachedLifetimeBase.current,
           );
         }
@@ -370,15 +387,36 @@ export function useJapaEngine({
     if (!mantraRef) return;
     try {
       const statsResp = await japaGetStats(mantraRef);
-      if (!statsResp?.stats?.length) return;
-      const row = statsResp.stats.find((s) => s.mantra_ref === mantraRef);
-      if (!row) return;
+
+      // Guard: mantra switched while request was in-flight — don't touch shared refs.
+      if (mantraRef !== currentMantraRef.current) return;
+
+      const row = statsResp?.stats?.find((s) => s.mantra_ref === mantraRef);
+
+      if (!row) {
+        // Server has no history for this mantra. If no new chants have been tapped
+        // this session, any non-zero base is stale local cache (e.g. after account
+        // deletion + re-signup with same login). Zero it out so the display is correct.
+        const nc = Math.max(0, sessionCountRef.current - sessionInitialCount.current);
+        if (nc === 0) {
+          cachedWeekBase.current = 0;
+          cachedYearBase.current = 0;
+          cachedLifetimeBase.current = 0;
+          sessionInitialCount.current = 0;
+          sessionCountRef.current = 0;
+          lastSyncedCount.current = 0;
+          setSessionCount(0);
+          persistStats(0, 0, 0, 0);
+        }
+        return;
+      }
 
       const sc = sessionCountRef.current;
       const nc = Math.max(0, sc - sessionInitialCount.current);
 
       // Update baselines so displayed values match server + any unsynced local taps
       cachedWeekBase.current = row.week_count - nc;
+      cachedYearBase.current = row.year_count - nc;
       cachedLifetimeBase.current = row.lifetime_count - nc;
 
       // Reconcile today: if server's today_count > sessionCount, another device/session
@@ -395,6 +433,7 @@ export function useJapaEngine({
       persistStats(
         row.today_count - Math.max(0, sessionCountRef.current - sessionInitialCount.current),
         cachedWeekBase.current,
+        cachedYearBase.current,
         cachedLifetimeBase.current,
       );
 
@@ -420,6 +459,7 @@ export function useJapaEngine({
     undoStack.current = [];
     cachedTodayBase.current = 0;
     cachedWeekBase.current = 0;
+    cachedYearBase.current = 0;
     cachedLifetimeBase.current = 0;
     sessionInitialCount.current = 0;
 
@@ -434,6 +474,10 @@ export function useJapaEngine({
     // so the big number shows today's running total, not just this session's count.
     AsyncStorage.getItem(statsKey(mantraRef))
       .then((raw) => {
+        // Guard: mantra switched while AsyncStorage was loading — don't overwrite
+        // the new mantra's already-reset refs with this stale read.
+        if (mantraRef !== currentMantraRef.current) return;
+
         const todayBase = (() => {
           if (!raw) return 0;
           try {
@@ -448,6 +492,13 @@ export function useJapaEngine({
             return parsed.mantraRef === mantraRef ? (parsed.weekCount ?? 0) : 0;
           } catch { return 0; }
         })();
+        const yearBase = (() => {
+          if (!raw) return 0;
+          try {
+            const parsed: JapaLocalStats = JSON.parse(raw);
+            return parsed.mantraRef === mantraRef ? (parsed.yearCount ?? 0) : 0;
+          } catch { return 0; }
+        })();
         const lifetimeBase = (() => {
           if (!raw) return 0;
           try {
@@ -458,6 +509,7 @@ export function useJapaEngine({
 
         cachedTodayBase.current = todayBase;
         cachedWeekBase.current = weekBase;
+        cachedYearBase.current = yearBase;
         cachedLifetimeBase.current = lifetimeBase;
         sessionInitialCount.current = todayBase;
         // Session counter starts at today's existing count
@@ -611,6 +663,7 @@ export function useJapaEngine({
           persistStats(
             row.today_count,
             row.week_count - newChants,
+            row.year_count - newChants,
             row.lifetime_count - newChants,
           );
         }
@@ -634,6 +687,7 @@ export function useJapaEngine({
   const newChants = Math.max(0, sessionCount - sessionInitialCount.current);
   const todayCount = sessionCount;   // big number = today's total
   const weekCount = Math.max(0, cachedWeekBase.current) + newChants;
+  const yearCount = Math.max(0, cachedYearBase.current) + newChants;
   const lifetimeCount = Math.max(0, cachedLifetimeBase.current) + newChants;
 
   const completedMalas = Math.floor(sessionCount / malaRound);
@@ -646,6 +700,7 @@ export function useJapaEngine({
     sessionCount,
     todayCount,
     weekCount,
+    yearCount,
     lifetimeCount,
     completedMalas,
     beadInRound,

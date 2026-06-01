@@ -53,6 +53,7 @@ export interface JapaStatsRow {
   today_count: number;
   week_count: number;
   month_count: number;
+  year_count: number;
   lifetime_count: number;
   last_practiced_at: string | null;
   completed_malas: number;
@@ -121,6 +122,7 @@ export interface JapaLocalStats {
   mantraRef: string;
   todayCount: number;
   weekCount: number;
+  yearCount: number;
   lifetimeCount: number;
   lastUpdated: number;              // unix ms
 }

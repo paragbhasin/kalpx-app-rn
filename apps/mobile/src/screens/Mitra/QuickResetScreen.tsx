@@ -488,7 +488,7 @@ export default function QuickResetScreen({
         <View style={styles.progressWrap}>
           <Text style={styles.progressMain}>{beadCount}</Text>
         </View>
-        {(japaEngine.todayCount > 0 || japaEngine.weekCount > 0 || japaEngine.lifetimeCount > 0) && (
+        {(japaEngine.todayCount > 0 || japaEngine.weekCount > 0 || japaEngine.yearCount > 0 || japaEngine.lifetimeCount > 0) && (
           <View style={styles.statsRow}>
             {japaEngine.todayCount > 0 && (
               <Text style={styles.statItem}>
@@ -498,6 +498,11 @@ export default function QuickResetScreen({
             {japaEngine.weekCount > 0 && (
               <Text style={styles.statItem}>
                 Week {japaEngine.weekCount.toLocaleString()}
+              </Text>
+            )}
+            {japaEngine.yearCount > 0 && (
+              <Text style={styles.statItem}>
+                Year {japaEngine.yearCount.toLocaleString()}
               </Text>
             )}
             {japaEngine.lifetimeCount > 0 && (

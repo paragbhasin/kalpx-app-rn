@@ -33,6 +33,7 @@ import {
   View,
 } from "react-native";
 import api from "../Networks/axios";
+import i18n from "../config/i18n";
 import LifeContextPickerSheet, {
   type LifeContext,
 } from "../blocks/room/LifeContextPickerSheet";
@@ -426,8 +427,8 @@ const RoomRenderBranch: React.FC<RenderBranchProps> = ({
       setLoading(false);
       return;
     }
-    // Fetch key includes life_context + intent_type so switching context re-fetches.
-    const fetchKey = `${roomId}::${lifeContext || ""}::${entryContext?.situation?.intent_type || ""}`;
+    // Fetch key includes life_context + intent_type + locale so switching any re-fetches.
+    const fetchKey = `${roomId}::${lifeContext || ""}::${entryContext?.situation?.intent_type || ""}::${i18n.language || "en"}`;
     if (fetchedRef.current === fetchKey) return;
     fetchedRef.current = fetchKey;
 
@@ -438,6 +439,7 @@ const RoomRenderBranch: React.FC<RenderBranchProps> = ({
         // Build query params: life_context + entry context params (with mismatch guard).
         const ecParams = getRoomRenderParamsFromEntryContext(entryContext, roomId as string);
         const qp = new URLSearchParams();
+        qp.set('locale', i18n.language || 'en');
         if (lifeContext)                       qp.set('life_context',        lifeContext);
         if (ecParams.intent_type)              qp.set('intent_type',         ecParams.intent_type);
         if (ecParams.source_surface)           qp.set('source_surface',      ecParams.source_surface);

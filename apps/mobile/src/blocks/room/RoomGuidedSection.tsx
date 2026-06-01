@@ -45,79 +45,22 @@ const CARRY_INPUT_TEMPLATE: Record<string, string> = {
   clarity_journal: "step_text_input_clarity_journal",
 };
 
-const CARRY_MEMORY_MODAL: Record<
-  string,
-  NonNullable<StepPayload["memory_modal"]>
-> = {
-  connection_named: {
-    title: "Name someone who matters",
-    sanatan_context:
-      "Sambandha reminds us that even one true bond can hold us.",
-    why_we_ask:
-      "Naming someone helps you return from feeling alone to one thread of care.",
-    prompt: "Who is close to your heart right now?",
-    placeholder: "Write a name, relationship, or a few words…",
-    primary_label: "Save this connection",
-  },
-  joy_named: {
-    title: "Write what’s good right now",
-    sanatan_context: "Santosha begins by noticing what is already enough.",
-    why_we_ask:
-      "Writing one good thing helps the mind stay with it instead of rushing past it.",
-    prompt: "What feels good, steady, or quietly enough right now?",
-    placeholder: "Write one good thing…",
-    primary_label: "Save this joy",
-  },
-  growth_journal: {
-    title: "Write what you noticed",
-    sanatan_context: "Growth ripens through one right action, not speed.",
-    why_we_ask:
-      "Naming what you noticed turns observation into the seed of a next step.",
-    prompt: "What did you notice, or what is forming?",
-    placeholder: "Write what came up…",
-    primary_label: "Save this",
-  },
-  connection_reach_out: {
-    title: "Reach out to one person",
-    sanatan_context:
-      "A short act of reaching is itself the practice of sambandha.",
-    why_we_ask:
-      "Writing the message, even without sending, brings the connection closer.",
-    prompt: "Write a short message to someone who matters.",
-    placeholder: "Your message…",
-    primary_label: "Save and copy message",
-  },
-  release_named: {
-    title: "Name what you’re setting down",
-    sanatan_context:
-      "Letting go is not giving up. It is loosening the grip so life can move again.",
-    why_we_ask:
-      "Naming the weight helps you separate yourself from what you are carrying.",
-    prompt: "What is ready to be set down for now?",
-    placeholder: "Write one word or a few lines…",
-    primary_label: "Save this release",
-  },
-  stillness_named: {
-    title: "Write what became still",
-    sanatan_context:
-      "Stillness begins when attention returns to one steady anchor.",
-    why_we_ask:
-      "Naming what settled helps you recognize the ground beneath the noise.",
-    prompt: "What feels quieter now?",
-    placeholder: "Write one word or a few lines…",
-    primary_label: "Save this stillness",
-  },
-  clarity_journal: {
-    title: "Write one honest question",
-    sanatan_context:
-      "Clarity comes when we stop obeying confusion and look at what is actually here.",
-    why_we_ask:
-      "Writing the question separates the real decision from the noise around it.",
-    prompt: "What is the question you are actually sitting with?",
-    placeholder: "Write your honest question…",
-    primary_label: "Save this question",
-  },
-};
+function getCarryMemoryModal(
+  t: (key: string) => string,
+  writesEvent: string,
+): NonNullable<StepPayload["memory_modal"]> | null {
+  const k = `room.carryModal.${writesEvent}`;
+  const title = t(`${k}.title` as any);
+  if (!title || title === `${k}.title`) return null;
+  return {
+    title,
+    sanatan_context: t(`${k}.sanatanContext` as any),
+    why_we_ask: t(`${k}.whyWeAsk` as any),
+    prompt: t(`${k}.prompt` as any),
+    placeholder: t(`${k}.placeholder` as any),
+    primary_label: t(`${k}.primaryLabel` as any),
+  };
+}
 
 interface Props {
   envelope: RoomRenderV1;
@@ -164,46 +107,17 @@ function extractBecauseYouSharedLabel(
   return parts.length ? parts.join(" · ") : null;
 }
 
-const ROOM_COMPLETION_LINES: Record<
-  string,
-  { message: string; subtext: string }
-> = {
-  room_stillness: {
-    message: "You made space.",
-    subtext: "Let this quiet stay with you for a little while.",
-  },
-  room_release: {
-    message: "You set something down.",
-    subtext: "You do not have to carry it in the same way now.",
-  },
-  room_clarity: {
-    message: "You sat with the question.",
-    subtext: "One clear seeing is enough for now.",
-  },
-  room_growth: {
-    message: "You moved toward what matters.",
-    subtext: "Small sincere action is still action.",
-  },
-  room_connection: {
-    message: "You softened toward connection.",
-    subtext: "Let the heart stay open, gently.",
-  },
-  room_joy: {
-    message: "You noticed what is good.",
-    subtext: "Let this become part of your day.",
-  },
-};
-const COMPLETION_FALLBACK = {
-  message: "You stayed with it.",
-  subtext: "You can return to this room anytime.",
-};
+const KNOWN_ROOM_COMPLETION_IDS = new Set([
+  "room_stillness", "room_release", "room_clarity",
+  "room_growth", "room_connection", "room_joy",
+]);
 
-const BETWEEN_STEP_LINES = [
-  "Good. Take one breath.",
-  "You stayed with that.",
-  "Let this settle for a moment.",
-  "One step is complete.",
-  "Now, gently, the next step.",
+const BETWEEN_STEP_LINE_KEYS = [
+  "room.interstitial.line0",
+  "room.interstitial.line1",
+  "room.interstitial.line2",
+  "room.interstitial.line3",
+  "room.interstitial.line4",
 ];
 
 const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
@@ -278,7 +192,13 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     roomCtx.sanatan_insight_line ?? ctx.sanatan_insight_line ?? null;
   const principleBanner = envelope.principle_banner ?? null;
   const memoryEchoLine = envelope.memory_echo_line ?? null;
-  const completionCopy = ROOM_COMPLETION_LINES[roomId] ?? COMPLETION_FALLBACK;
+  const completionKeyBase = KNOWN_ROOM_COMPLETION_IDS.has(roomId)
+    ? `room.completion.${roomId}`
+    : "room.completion.fallback";
+  const completionCopy = {
+    message: t(`${completionKeyBase}.message` as any),
+    subtext: t(`${completionKeyBase}.subtext` as any),
+  };
   const completionWisdom =
     roomCtx.bridge_line || roomCtx.sanatan_insight_line || "";
 
@@ -332,7 +252,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
               message: completionCopy.message,
               subtext: completionCopy.subtext,
               wisdom_anchor_line: completionWisdom,
-              return_home_cta: "Return to Mitra Home",
+              return_home_cta: t("room.returnToMitraHome"),
               return_action: "return_to_mitra_home",
             },
           },
@@ -341,9 +261,9 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
       );
       return;
     }
-    const lineIndex = interstitialIndexRef.current % BETWEEN_STEP_LINES.length;
+    const lineIndex = interstitialIndexRef.current % BETWEEN_STEP_LINE_KEYS.length;
     interstitialIndexRef.current += 1;
-    setInterstitialLine(BETWEEN_STEP_LINES[lineIndex]);
+    setInterstitialLine(BETWEEN_STEP_LINE_KEYS[lineIndex]);
     setPendingNextAction(nextAction);
   }
 
@@ -438,7 +358,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
       if (actionType === "in_room_step" && action?.step_payload) {
         setStepAction(action);
         setStepPayload(action.step_payload);
-        setStepLabel(action.label || "Step");
+        setStepLabel(action.label || t("room.constants.actionKind.inRoomStep"));
         return;
       }
 
@@ -458,7 +378,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
             step_config: {},
             input_slots: [],
             memory_modal: writesEvent
-              ? (CARRY_MEMORY_MODAL[writesEvent] ?? null)
+              ? (getCarryMemoryModal(t, writesEvent))
               : null,
           });
         } else {
@@ -716,7 +636,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
           step_config: {},
           input_slots: [],
           memory_modal: writesEvent
-            ? (CARRY_MEMORY_MODAL[writesEvent] ?? null)
+            ? (getCarryMemoryModal(t, writesEvent))
             : null,
         });
       } else {
@@ -739,7 +659,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
       pendingOpenedForRef.current = pendingResumeActionId;
       setStepAction(action);
       setStepPayload(action.step_payload);
-      setStepLabel(action.label || "Step");
+      setStepLabel(action.label || t("room.constants.actionKind.inRoomStep"));
       return;
     }
 
@@ -1031,7 +951,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
       <InquiryModal
         visible={!!inquiryAction}
         presentation="screen"
-        label={inquiryAction?.label || "Inquiry"}
+        label={inquiryAction?.label || t("room.constants.actionKind.inquiry")}
         inquiryPayload={inquiryAction?.inquiry_payload}
         onCancel={() => {
           actionCtx.setScreenValue(null, "room_pending_resume_action_id");
@@ -1076,7 +996,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
         visible={!!carryAction}
         presentation="screen"
         stepPayload={carryPayload}
-        label={carryAction?.label || "Carry"}
+        label={carryAction?.label || t("room.constants.actionKind.inRoomCarry")}
         onCancel={() => {
           actionCtx.setScreenValue(null, "room_pending_resume_action_id");
           actionCtx.setScreenValue(null, "room_pending_carry_action_id");
@@ -1103,7 +1023,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
             <View style={styles.interstitialIconWrap}>
               <Ionicons name="leaf-outline" size={24} color="#B6862F" />
             </View>
-            <Text style={styles.interstitialText}>{interstitialLine}</Text>
+            <Text style={styles.interstitialText}>{t(interstitialLine as any)}</Text>
             <View style={styles.interstitialCta}>
               <Text style={[styles.interstitialTapHint, isHindi && { letterSpacing: 0 }]}>{t("room.tapWhenReady")}</Text>
             </View>

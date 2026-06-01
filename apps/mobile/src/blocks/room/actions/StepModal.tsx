@@ -1032,7 +1032,7 @@ const GroundingBody: React.FC<{
           style={[styles.groundingProgress, styles.screenGroundingProgress]}
           testID="step_modal_grounding_progress"
         >
-          {index + 1} of {TOTAL_PROMPTS}
+          {t("room.phases.stepModal.progressOf", { current: index + 1, total: TOTAL_PROMPTS })}
         </Text>
         <Text style={styles.screenGroundingPrompt}>{prompt}</Text>
         <View style={styles.screenGroundingInputWrap}>
@@ -1085,7 +1085,7 @@ const GroundingBody: React.FC<{
         style={styles.groundingProgress}
         testID="step_modal_grounding_progress"
       >
-        {index + 1} of {TOTAL_PROMPTS}
+        {t("room.phases.stepModal.progressOf", { current: index + 1, total: TOTAL_PROMPTS })}
       </Text>
       <Text style={styles.textPrompt}>{prompt}</Text>
       <TextInput

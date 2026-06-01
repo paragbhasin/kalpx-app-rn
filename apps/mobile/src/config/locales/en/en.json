@@ -2549,7 +2549,8 @@
         "saveWithoutCopying": "Save without copying",
         "unknownStepMessage": "This step will open an inline panel in a future release.",
         "immersiveGoNow": "I'll go now",
-        "immersiveCancel": "Cancel"
+        "immersiveCancel": "Cancel",
+        "progressOf": "{{current}} of {{total}}"
       },
       "inquiryModal": {
         "noCategories": "No categories.",
@@ -2642,6 +2643,102 @@
         "inquiry": "Inquiry",
         "inRoomStep": "Step",
         "inRoomCarry": "Carry"
+      }
+    },
+    "interstitial": {
+      "line0": "Good. Take one breath.",
+      "line1": "You stayed with that.",
+      "line2": "Let this settle for a moment.",
+      "line3": "One step is complete.",
+      "line4": "Now, gently, the next step."
+    },
+    "completion": {
+      "room_stillness": {
+        "message": "You made space.",
+        "subtext": "Let this quiet stay with you for a little while."
+      },
+      "room_release": {
+        "message": "You set something down.",
+        "subtext": "You do not have to carry it in the same way now."
+      },
+      "room_clarity": {
+        "message": "You sat with the question.",
+        "subtext": "One clear seeing is enough for now."
+      },
+      "room_growth": {
+        "message": "You moved toward what matters.",
+        "subtext": "Small sincere action is still action."
+      },
+      "room_connection": {
+        "message": "You softened toward connection.",
+        "subtext": "Let the heart stay open, gently."
+      },
+      "room_joy": {
+        "message": "You noticed what is good.",
+        "subtext": "Let this become part of your day."
+      },
+      "fallback": {
+        "message": "You stayed with it.",
+        "subtext": "You can return to this room anytime."
+      }
+    },
+    "returnToMitraHome": "Return to Mitra Home",
+    "carryModal": {
+      "connection_named": {
+        "title": "Name someone who matters",
+        "sanatanContext": "Sambandha reminds us that even one true bond can hold us.",
+        "whyWeAsk": "Naming someone helps you return from feeling alone to one thread of care.",
+        "prompt": "Who is close to your heart right now?",
+        "placeholder": "Write a name, relationship, or a few words…",
+        "primaryLabel": "Save this connection"
+      },
+      "joy_named": {
+        "title": "Write what's good right now",
+        "sanatanContext": "Santosha begins by noticing what is already enough.",
+        "whyWeAsk": "Writing one good thing helps the mind stay with it instead of rushing past it.",
+        "prompt": "What feels good, steady, or quietly enough right now?",
+        "placeholder": "Write one good thing…",
+        "primaryLabel": "Save this joy"
+      },
+      "growth_journal": {
+        "title": "Write what you noticed",
+        "sanatanContext": "Growth ripens through one right action, not speed.",
+        "whyWeAsk": "Naming what you noticed turns observation into the seed of a next step.",
+        "prompt": "What did you notice, or what is forming?",
+        "placeholder": "Write what came up…",
+        "primaryLabel": "Save this"
+      },
+      "connection_reach_out": {
+        "title": "Reach out to one person",
+        "sanatanContext": "A short act of reaching is itself the practice of sambandha.",
+        "whyWeAsk": "Writing the message, even without sending, brings the connection closer.",
+        "prompt": "Write a short message to someone who matters.",
+        "placeholder": "Your message…",
+        "primaryLabel": "Save and copy message"
+      },
+      "release_named": {
+        "title": "Name what you're setting down",
+        "sanatanContext": "Letting go is not giving up. It is loosening the grip so life can move again.",
+        "whyWeAsk": "Naming the weight helps you separate yourself from what you are carrying.",
+        "prompt": "What is ready to be set down for now?",
+        "placeholder": "Write one word or a few lines…",
+        "primaryLabel": "Save this release"
+      },
+      "stillness_named": {
+        "title": "Write what became still",
+        "sanatanContext": "Stillness begins when attention returns to one steady anchor.",
+        "whyWeAsk": "Naming what settled helps you recognize the ground beneath the noise.",
+        "prompt": "What feels quieter now?",
+        "placeholder": "Write one word or a few lines…",
+        "primaryLabel": "Save this stillness"
+      },
+      "clarity_journal": {
+        "title": "Write one honest question",
+        "sanatanContext": "Clarity comes when we stop obeying confusion and look at what is actually here.",
+        "whyWeAsk": "Writing the question separates the real decision from the noise around it.",
+        "prompt": "What is the question you are actually sitting with?",
+        "placeholder": "Write your honest question…",
+        "primaryLabel": "Save this question"
       }
     }
   },

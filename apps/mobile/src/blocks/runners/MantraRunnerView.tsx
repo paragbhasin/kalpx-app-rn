@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import {Image, 
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {Image,
   LayoutAnimation,
   Platform,
   ScrollView,
@@ -9,6 +9,8 @@ import {Image,
   UIManager,
   View,
 } from "react-native";
+import { useJapaEngine } from "../../engine/useJapaEngine";
+import type { JapaSourceSurface } from "@kalpx/types";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -54,6 +56,9 @@ export interface MantraRunnerViewProps {
   isCommunityRunner?: boolean;
   addLoading?: boolean;
   onAddToPractice?: () => void;
+  // Japa engine wiring — pass these to connect counts to the shared engine
+  mantraRef?: string | null;
+  sourceSurface?: JapaSourceSurface;
 }
 
 const hasContent = (val: any): boolean => {
@@ -172,8 +177,9 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   isCommunityRunner,
   addLoading,
   onAddToPractice,
+  mantraRef,
+  sourceSurface = "inner_path",
 }) => {
-  const [chantCount, setChantCount] = useState(0);
   const [selectedTarget, setSelectedTarget] = useState(initialReps || 27);
   const [meaningExpanded, setMeaningExpanded] = useState(false);
   const [essenceExpanded, setEssenceExpanded] = useState(true);
@@ -181,6 +187,21 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   const [devanagariExpanded, setDevanagariExpanded] = useState(false);
   const sessionStartTimeRef = useRef(Date.now());
   const isCompletingRef = useRef(false);
+  const onCompleteRef = useRef(onComplete);
+  useEffect(() => { onCompleteRef.current = onComplete; }, [onComplete]);
+
+  // ── Japa engine — only active when mantraRef is provided ──────────────────
+  const japaEngine = useJapaEngine({
+    mantraRef: mantraRef ?? null,
+    sourceSurface,
+    goalType: "count",
+    goalValue: selectedTarget,
+    onGoalReached: useCallback(() => { onCompleteRef.current?.(selectedTarget, Math.round((Date.now() - sessionStartTimeRef.current) / 1000)); }, [selectedTarget]),
+  });
+
+  // chantCount: use engine count when wired, else fallback to local state
+  const [localCount, setLocalCount] = useState(0);
+  const chantCount = mantraRef ? japaEngine.sessionCount : localCount;
 
   useEffect(() => {
     stopRoomAmbientAudio().catch(() => {});
@@ -188,7 +209,7 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
 
   useEffect(() => {
     isCompletingRef.current = false;
-    setChantCount(0);
+    setLocalCount(0);
     setSelectedTarget(initialReps || 27);
     sessionStartTimeRef.current = Date.now();
   }, [runnerStartTimeKey]);
@@ -240,18 +261,24 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
     return index === chantCount;
   };
 
-  const handleIncrement = () => {
+  const handleIncrement = useCallback(() => {
     if (chantCount >= selectedTarget || isCompletingRef.current) return;
-    setChantCount((prev) => {
-      const nextCount = prev + 1;
-      if (nextCount >= selectedTarget && !isCompletingRef.current) {
-        isCompletingRef.current = true;
-        const durationSec = Math.round((Date.now() - sessionStartTimeRef.current) / 1000);
-        setTimeout(() => onComplete(nextCount, durationSec), 800);
-      }
-      return nextCount;
-    });
-  };
+    if (mantraRef) {
+      // Engine handles haptics, persistence, sync, and goal detection via onGoalReached
+      japaEngine.increment();
+    } else {
+      // Fallback: legacy local-only counting (no engine wired)
+      setLocalCount((prev) => {
+        const nextCount = prev + 1;
+        if (nextCount >= selectedTarget && !isCompletingRef.current) {
+          isCompletingRef.current = true;
+          const durationSec = Math.round((Date.now() - sessionStartTimeRef.current) / 1000);
+          setTimeout(() => onCompleteRef.current(nextCount, durationSec), 800);
+        }
+        return nextCount;
+      });
+    }
+  }, [chantCount, japaEngine, mantraRef, selectedTarget]);
 
   const audioUrl =
     typeof item.audio_url === "string" && item.audio_url.trim().length > 0
@@ -307,6 +334,19 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
               <Text style={styles.currentCountText}>{chantCount}</Text>
               <Text style={styles.totalCountText}> / {selectedTarget}</Text>
             </View>
+            {mantraRef && (japaEngine.todayCount > 0 || japaEngine.lifetimeCount > 0) && (
+              <View style={styles.japaStatsRow}>
+                {japaEngine.todayCount > 0 && (
+                  <Text style={styles.japaStatItem}>Today {japaEngine.todayCount.toLocaleString()}</Text>
+                )}
+                {japaEngine.weekCount > 0 && (
+                  <Text style={styles.japaStatItem}>Week {japaEngine.weekCount.toLocaleString()}</Text>
+                )}
+                {japaEngine.lifetimeCount > 0 && (
+                  <Text style={styles.japaStatItem}>Lifetime {japaEngine.lifetimeCount.toLocaleString()}</Text>
+                )}
+              </View>
+            )}
 
             <View style={styles.interactionArea}>
               <View style={styles.glowOuter}>
@@ -405,7 +445,7 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
                   style={[styles.repPill, isSelected && styles.repPillSelected]}
                   onPress={() => {
                     setSelectedTarget(option);
-                    setChantCount(0);
+                    setLocalCount(0);
                   }}
                 >
                   <Text style={[styles.repPillText, isSelected && styles.repPillTextSelected]}>
@@ -781,6 +821,21 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif.regular,
     color: BROWN,
     textDecorationLine: "underline",
+  },
+  japaStatsRow: {
+    flexDirection: "row",
+    gap: 16,
+    justifyContent: "center",
+    flexWrap: "wrap",
+    marginTop: -8,
+    marginBottom: 4,
+  },
+  japaStatItem: {
+    fontSize: 11,
+    color: "#b89450",
+    fontFamily: Fonts.sans.regular,
+    letterSpacing: 0.4,
+    opacity: 0.8,
   },
 });
 

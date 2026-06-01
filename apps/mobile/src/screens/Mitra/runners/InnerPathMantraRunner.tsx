@@ -23,6 +23,8 @@ export default function InnerPathMantraRunner() {
     <SafeAreaView style={styles.safeArea}>
       <MantraRunnerView
         item={item}
+        mantraRef={item.item_id ?? null}
+        sourceSurface="inner_path"
         onComplete={(repsCompleted, durationSec) => {
           navigation.replace("InnerPathMantraCompletion", {
             item_id: item.item_id,

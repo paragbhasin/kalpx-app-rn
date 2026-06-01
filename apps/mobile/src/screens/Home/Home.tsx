@@ -37,7 +37,6 @@ import {
 import { useTranslation } from "react-i18next";
 import i18n from "../../config/i18n";
 import { useDispatch, useSelector } from "react-redux";
-import NotificationPermissionModal from "../../components/NotificationPermissionModal";
 import FourDoorHomeContainer from "../../containers/FourDoorHomeContainer";
 import { stopRoomAmbientAudio } from "../../engine/roomAmbientAudio";
 import { useScreenStore } from "../../engine/useScreenBridge";
@@ -45,6 +44,8 @@ import api from "../../Networks/axios";
 import store, { AppDispatch, RootState } from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
+import { registerDeviceToBackend } from "../../utils/registerDevice";
+import { consumeSkipMitraStart } from "../../utils/postLoginGuard";
 import { fetchProfileDetails } from "../Profile/actions";
 
 const FEATURE_ITEMS = [
@@ -94,7 +95,6 @@ export default function Home() {
     (state) => state.updateHeaderHidden,
   );
 
-  const [showNotificationPopup, setShowNotificationPopup] = useState(false);
   const [mitraJourneyId, setMitraJourneyId] = useState<string | null>(null);
   const [hasPartialState, setHasPartialState] = useState(false);
   const [showInnerPathReentry, setShowInnerPathReentry] = useState(false);
@@ -138,40 +138,17 @@ export default function Home() {
 
   useFocusEffect(
     React.useCallback(() => {
-      console.log("[NOTIF] Home focused — checking permission status...");
+      // Permission is handled by RemindersScreen when user enables a reminder.
+      // Only register device here if permission is already granted.
       messaging()
         .hasPermission()
         .then((authStatus) => {
-          console.log("[NOTIF] hasPermission() raw status:", authStatus);
           const isGranted =
             authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
             authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-          const isDenied = authStatus === messaging.AuthorizationStatus.DENIED;
-          const isNotDetermined =
-            authStatus === messaging.AuthorizationStatus.NOT_DETERMINED;
-
-          console.log(
-            `[NOTIF] isGranted=${isGranted} | isDenied=${isDenied} | isNotDetermined=${isNotDetermined}`,
-          );
-
-          setShowNotificationPopup(isDenied);
-          if (isDenied) {
-            console.log("[NOTIF] Permission DENIED → showing NotificationPermissionModal");
-          }
-
-          if (isGranted) {
-            console.log("[NOTIF] Permission GRANTED → calling registerDeviceToBackend...");
-            const { registerDeviceToBackend } = require("../../utils/registerDevice");
-            registerDeviceToBackend()
-              .then(() => console.log("[NOTIF] ✅ Device registered with backend"))
-              .catch((err: any) =>
-                console.log("[NOTIF] ❌ Device registration failed:", err?.message),
-              );
-          }
+          if (isGranted) registerDeviceToBackend();
         })
-        .catch((err: any) =>
-          console.log("[NOTIF] ❌ hasPermission() threw:", err?.message),
-        );
+        .catch(() => {});
     }, []),
   );
 
@@ -274,14 +251,14 @@ export default function Home() {
                 setHasPartialState(true);
               } else {
                 setHasPartialState(false);
-                if (!v3AutoRoutedRef.current) {
+                if (!v3AutoRoutedRef.current && !consumeSkipMitraStart()) {
                   v3AutoRoutedRef.current = true;
                   navigation.navigate("MitraStart" as any);
                 }
               }
             } catch {
               setHasPartialState(false);
-              if (!v3AutoRoutedRef.current) {
+              if (!v3AutoRoutedRef.current && !consumeSkipMitraStart()) {
                 v3AutoRoutedRef.current = true;
                 navigation.navigate("MitraStart" as any);
               }
@@ -1002,10 +979,6 @@ export default function Home() {
         </ScrollView>
       )}
 
-      <NotificationPermissionModal
-        visible={showNotificationPopup}
-        onClose={() => setShowNotificationPopup(false)}
-      />
     </SafeAreaView>
   );
 }

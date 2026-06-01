@@ -67,6 +67,7 @@ import RhythmEditScreen from "../screens/Mitra/RhythmEditScreen";
 import RhythmHomeScreen from "../screens/Mitra/RhythmHomeScreen";
 import RhythmSetupScreen from "../screens/Mitra/RhythmSetupScreen";
 import QuickResetScreen from "../screens/Mitra/QuickResetScreen";
+import DigitalMalaScreen from "../screens/Mitra/DigitalMalaScreen";
 import RemindersScreen from "../screens/Mitra/RemindersScreen";
 import QuickCheckinScreen from "../screens/Mitra/QuickCheckinScreen";
 import BrowseRoomsScreen from "../screens/Mitra/BrowseRoomsScreen";
@@ -378,6 +379,7 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen name="RhythmSetup" component={RhythmSetupScreen} options={{ headerShown: false }} />
     <Stack.Screen name="RhythmEdit" component={RhythmEditScreen} options={{ headerShown: false }} />
     <Stack.Screen name="QuickReset" component={QuickResetScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="DigitalMala" component={DigitalMalaScreen} options={{ headerShown: false }} />
     <Stack.Screen name="QuickCheckin" component={QuickCheckinScreen} options={{ headerShown: false }} />
     <Stack.Screen name="BrowseRooms" component={BrowseRoomsScreen} options={{ headerShown: false, gestureEnabled: false }} />
     <Stack.Screen name="InnerPath" component={InnerPathScreen} options={{ headerShown: false }} />

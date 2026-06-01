@@ -28,6 +28,7 @@ import type {
   JourneyTriadReminders,
   JourneyTriadRemindersPatch,
 } from "@kalpx/types";
+import { useNotificationPermissionGate } from "../../hooks/useNotificationPermissionGate";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, {
@@ -52,7 +53,20 @@ import {
   View,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-const In1Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/in1.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const In1Icon = ({
+  width,
+  height,
+  style,
+}: {
+  width?: number;
+  height?: number;
+  style?: any;
+}) => (
+  <Image
+    source={require("../../../assets/in1.webp")}
+    style={[{ width, height, resizeMode: "contain" }, style]}
+  />
+);
 import CycleProgressBlock from "../../blocks/dashboard/CycleProgressBlock";
 import { TimePickerModal } from "../../components/TimePickerModal";
 import {
@@ -128,6 +142,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     "mantra" | "sankalp" | "practice" | null
   >(null);
   const [showAllCompleteMessage, setShowAllCompleteMessage] = useState(false);
+  const { withPermissionCheck, renderPermissionModal } = useNotificationPermissionGate();
 
   // After daily-view data is loaded, watch for runner container transitions.
   const watchRunnerRef = useRef(false);
@@ -141,15 +156,17 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
         return;
       }
       // P0-B: re-fetch daily view after returning from runner so completed_today renders correctly
-      mitraJourneyDailyView(null, i18n.language || "en").then((result) => {
-        if (!result?.envelope) return;
-        const flat = ingestDailyView(result.envelope);
-        for (const [k, v] of Object.entries(flat)) {
-          if (v !== undefined) {
-            dispatch(screenActions.setScreenValue({ key: k, value: v }));
+      mitraJourneyDailyView(null, i18n.language || "en")
+        .then((result) => {
+          if (!result?.envelope) return;
+          const flat = ingestDailyView(result.envelope);
+          for (const [k, v] of Object.entries(flat)) {
+            if (v !== undefined) {
+              dispatch(screenActions.setScreenValue({ key: k, value: v }));
+            }
           }
-        }
-      }).catch(() => {});
+        })
+        .catch(() => {});
     }, [dispatch]),
   );
   const currentContainerId = useSelector(
@@ -449,7 +466,12 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
   useEffect(() => {
     if (sd.triad_all_complete) {
       setShowAllCompleteMessage(true);
-      dispatch(screenActions.setScreenValue({ key: 'triad_all_complete', value: false }));
+      dispatch(
+        screenActions.setScreenValue({
+          key: "triad_all_complete",
+          value: false,
+        }),
+      );
       const timer = setTimeout(() => setShowAllCompleteMessage(false), 5000);
       return () => clearTimeout(timer);
     }
@@ -587,11 +609,23 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     const journeyId = String((sd as any)?.journey_id ?? "");
     const dayNumber = Number((sd as any)?.day_number) || 0;
     if (slot === "mantra") {
-      navigation.navigate("InnerPathMantraRunner" as any, { item, journeyId, dayNumber });
+      navigation.navigate("InnerPathMantraRunner" as any, {
+        item,
+        journeyId,
+        dayNumber,
+      });
     } else if (slot === "sankalp") {
-      navigation.navigate("InnerPathSankalpRunner" as any, { item, journeyId, dayNumber });
+      navigation.navigate("InnerPathSankalpRunner" as any, {
+        item,
+        journeyId,
+        dayNumber,
+      });
     } else {
-      navigation.navigate("InnerPathPracticeRunner" as any, { item, journeyId, dayNumber });
+      navigation.navigate("InnerPathPracticeRunner" as any, {
+        item,
+        journeyId,
+        dayNumber,
+      });
     }
   };
   const handleBack = () => {
@@ -641,7 +675,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     practice: "18:00",
   };
 
-  async function handleReminderToggle(key: "mantra" | "sankalp" | "practice") {
+  async function doReminderToggle(key: "mantra" | "sankalp" | "practice") {
     if (!reminders || reminderSaving) return;
     const enabledKey = `${key}_reminder_enabled` as keyof JourneyTriadReminders;
     const timeKey = `${key}_reminder_time` as keyof JourneyTriadReminders;
@@ -660,6 +694,16 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
       // non-fatal
     } finally {
       setReminderSaving(false);
+    }
+  }
+
+  async function handleReminderToggle(key: "mantra" | "sankalp" | "practice") {
+    if (!reminders || reminderSaving) return;
+    const isCurrentlyEnabled = reminders[`${key}_reminder_enabled`] as boolean;
+    if (!isCurrentlyEnabled) {
+      await withPermissionCheck(() => doReminderToggle(key));
+    } else {
+      await doReminderToggle(key);
     }
   }
 
@@ -712,7 +756,10 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     <SafeAreaView style={styles.safe}>
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + insets.bottom + 16 }]}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: tabBarHeight + insets.bottom + 16 },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         {showAllCompleteMessage && (
@@ -784,9 +831,9 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                 <View style={styles.triadCopy}>
                   <Text style={[styles.triadLabel, isHindi && { letterSpacing: 0 }]}>{item.label}</Text>
                   <Text style={styles.triadTitle}>{item.title}</Text>
-                  {!!item.subtitle && (
+                  {/* {!!item.subtitle && (
                     <Text style={styles.triadSubtitle}>{item.subtitle}</Text>
-                  )}
+                  )} */}
                   {item.completedToday && (
                     <Text style={styles.triadDoneLabel}>{innerPathHeldLabel(item.slot, t)}</Text>
                   )}
@@ -1080,6 +1127,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
           </View>
         )}
       </ScrollView>
+      {renderPermissionModal()}
     </SafeAreaView>
   );
 }

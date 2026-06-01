@@ -9,7 +9,9 @@ import { useEffect, useRef, useState } from "react";
 import {
   AccessibilityInfo,
   ImageBackground,
+  Linking,
   LogBox,
+  Platform,
   StatusBar,
   StyleSheet,
   Text,
@@ -45,12 +47,15 @@ import {
 // 📌 Push Notification Service
 import { initScreenResolver } from "./src/engine/screenResolver";
 import {
+  requestPushPermission,
   foregroundNotificationListener,
   notificationOpenListener,
-  requestPushPermission,
 } from "./src/service/pushNotifications";
 import { attachDeepLinkListeners } from "./src/utils/deeplink";
 import { registerDeviceToBackend } from "./src/utils/registerDevice";
+
+import UpdateModal from "./src/components/UpdateModal";
+import { useUpdateCheck } from "./src/hooks/useUpdateCheck";
 
 const TransparentTheme = {
   ...DefaultTheme,
@@ -141,6 +146,17 @@ function AppInner({ initialRoute, navigationRef }) {
   const currentBackground = useScreenStore((state) => state.currentBackground);
   const dispatch = useDispatch();
   const [activeRouteName, setActiveRouteName] = useState(null);
+
+  const { showUpdate, updateType, dismissUpdate } = useUpdateCheck();
+
+  const handleOpenStore = () => {
+    const url =
+      Platform.OS === "ios"
+        ? "https://apps.apple.com/app/kalpx/id6755144623"
+        : "market://details?id=com.kalpx.app";
+    Linking.openURL(url).catch(() => {});
+    dismissUpdate();
+  };
 
   // Hydrate the login user from AsyncStorage on app boot.
   // The login flow already persists access_token + refresh_token + user_id to
@@ -245,6 +261,12 @@ function AppInner({ initialRoute, navigationRef }) {
         </View>
       </NavigationContainer>
       <ToastHost />
+      <UpdateModal
+        visible={showUpdate}
+        updateType={updateType}
+        onUpdateNow={handleOpenStore}
+        onLater={dismissUpdate}
+      />
     </View>
   );
 }
@@ -285,15 +307,10 @@ export default function App() {
 
   // Push Notification setup
   useEffect(() => {
-    // Request permission — if granted, immediately register device so the
-    // backend has the FCM token even before splash-hide registerDeviceToBackend runs.
+    // On launch: show native permission dialog (first time only).
+    // If already granted, register device. If denied, RemindersScreen handles it.
     requestPushPermission().then((token) => {
-      if (token) {
-        console.log("[NOTIF] ✅ Permission granted at boot — registering device...");
-        registerDeviceToBackend();
-      } else {
-        console.log("[NOTIF] ⚠️ Permission not granted at boot — device not registered yet");
-      }
+      if (token) registerDeviceToBackend();
     });
 
     // listeners

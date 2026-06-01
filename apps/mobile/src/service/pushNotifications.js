@@ -28,6 +28,24 @@ async function callNotificationReceipt(category, threadId, state, deviceTime) {
   }
 }
 
+/**
+ * Check if permission is already granted and return FCM token if so.
+ * Does NOT trigger a native permission dialog — safe to call on boot.
+ */
+export async function checkExistingPermission() {
+  try {
+    const authStatus = await messaging().hasPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+    if (!enabled) return null;
+    return await messaging().getToken();
+  } catch (error) {
+    console.log('Check Existing Permission Error:', error);
+    return null;
+  }
+}
+
 // Ask for permission + get FCM token
 export async function requestPushPermission() {
   try {

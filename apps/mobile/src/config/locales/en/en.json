@@ -2432,5 +2432,19 @@
   "errors": {
     "somethingWentWrong": "Something went wrong. Please try again.",
     "couldNotLoadPath": "Could not load your path."
+  },
+  "notificationPermission": {
+    "undetermined": {
+      "title": "Stay connected to your rhythm",
+      "body": "Receive gentle reminders for your mantra, sankalp, and daily pauses.",
+      "primaryCta": "Allow Gentle Reminders",
+      "secondaryCta": "Maybe Later"
+    },
+    "denied": {
+      "title": "Notifications are currently off",
+      "body": "To receive gentle reminders, allow notifications for KalpX in your device settings.",
+      "primaryCta": "Open Settings",
+      "secondaryCta": "Not Now"
+    }
   }
 }

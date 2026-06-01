@@ -12,46 +12,46 @@ export async function registerDeviceToBackend() {
       console.log("❌ No FCM token yet");
       return;
     }
-console.log("fcmToken >>>>>>>>>>",fcmToken);
+
     // 2️⃣ Device ID (unique per device)
     const deviceId = Device.osInternalBuildId;
 
-      let guestUUID = await AsyncStorage.getItem("guestUUID");
+    let guestUUID = await AsyncStorage.getItem("guestUUID");
     if (!guestUUID) {
       guestUUID = `guest_${Math.random().toString(36).substring(2, 15)}`;
       await AsyncStorage.setItem("guestUUID", guestUUID);
     }
 
-    // 3️⃣ Payload WITHOUT guest_uuid (backend no longer wants it)
     const payload = {
       device_id: deviceId,
       platform: Platform.OS,
       token: fcmToken,
-      guest_uuid: guestUUID
+      guest_uuid: guestUUID,
     };
 
-    console.log("📡 Registering Device 8→", payload);
-
-    // 4️⃣ POST request
-    const res = await api.post(
-      "/notifications/register-device/",
-      payload
-    );
-
+    // 3️⃣ Register device token
+    const res = await api.post("/notifications/register-device/", payload);
     console.log("📡 Device Register Response:", res.data);
 
+    // 5️⃣ Confirm device timezone so push eligibility Gate 1 passes.
+    // Without this, timezone_source stays "default" and all reminders
+    // are silently suppressed by is_eligible_for_push().
+    try {
+      const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (deviceTimezone) {
+        await api.patch("users/profile/update_profile/", {
+          timezone: deviceTimezone,
+          timezone_confirmed_from_device: true,
+        });
+        console.log("🕐 Timezone confirmed:", deviceTimezone);
+      }
+    } catch (tzError) {
+      console.log("⚠️ Timezone confirm failed (non-fatal):", tzError?.message);
+    }
   } catch (error) {
     console.log("❌ Device registration failed:", error?.message);
   }
 }
-
-
-
-
-
-
-
-
 
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 // import messaging from "@react-native-firebase/messaging";
@@ -109,7 +109,6 @@ console.log("fcmToken >>>>>>>>>>",fcmToken);
 // } else {
 //   console.log("✅ Device registered successfully:", res.data);
 // }
-
 
 //   } catch (error) {
 //     console.log("❌ Device registration failed:", error?.message);

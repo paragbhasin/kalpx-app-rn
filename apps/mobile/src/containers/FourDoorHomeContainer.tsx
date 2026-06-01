@@ -278,15 +278,21 @@ export default function FourDoorHomeContainer({
     await loadHome(true, true);
   }, [loadHome]);
 
-  const openQuickResetSurface = useCallback(() => {
+  const openQuickResetSurface = useCallback(async () => {
+    const token = await AsyncStorage.getItem("access_token");
+    if (!token) { navigation.navigate("Login" as any); return; }
     navigation.navigate("QuickReset" as any);
   }, [navigation]);
 
-  const openTellMitraSurface = useCallback(() => {
+  const openTellMitraSurface = useCallback(async () => {
+    const token = await AsyncStorage.getItem("access_token");
+    if (!token) { navigation.navigate("Login" as any); return; }
     navigation.navigate("TellMitra" as any);
   }, [navigation]);
 
   const openMyRhythmSurface = useCallback(async () => {
+    const token = await AsyncStorage.getItem("access_token");
+    if (!token) { navigation.navigate("Login" as any); return; }
     const hasRhythmInState =
       homeData?.companion_rhythm?.has_rhythm === true ||
       homeData?.my_rhythm_summary?.has_rhythm === true ||
@@ -475,7 +481,9 @@ export default function FourDoorHomeContainer({
   const currentRouteName = navigation
     .getState?.()
     ?.routes?.slice(-1)?.[0]?.name;
-  const openInnerPathSurface = () => {
+  const openInnerPathSurface = async () => {
+    const token = await AsyncStorage.getItem("access_token");
+    if (!token) { navigation.navigate("Login" as any); return; }
     const hasExistingInnerPath =
       forceInnerPathReentry ||
       homeData?.inner_path_summary?.has_active_path === true ||
@@ -582,7 +590,7 @@ export default function FourDoorHomeContainer({
             subtitle={innerPathSubtitle}
             orientationLine={seg === "new" && isFirstVisit ? t("mitraFourDoor.orientation.innerPath") : null}
             highlighted={seg === "rhythm_only"}
-            onPress={openInnerPathSurface}
+            onPress={() => void openInnerPathSurface()}
           />
           <DoorCard
             Icon={Mp2Icon}
@@ -670,8 +678,8 @@ export default function FourDoorHomeContainer({
                 )}
                 {!acw?.suggestion && !!acw?.prana_label && (
                   <View style={{ flexDirection: "row", gap: 12, marginTop: 12, flexWrap: "wrap" }}>
-                    <TouchableOpacity onPress={openInnerPathSurface}>
-                      <Text style={styles.softCtaLink}>{t("mitraFourDoor.checkin.ctaInnerPath")}</Text>
+                    <TouchableOpacity onPress={() => void openInnerPathSurface()}>
+                                 <Text style={styles.softCtaLink}>{t("mitraFourDoor.checkin.ctaInnerPath")}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => void openMyRhythmSurface()}>
                       <Text style={styles.softCtaLink}>{t("mitraFourDoor.checkin.ctaMyRhythm")}</Text>

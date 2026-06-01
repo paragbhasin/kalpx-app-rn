@@ -1847,7 +1847,9 @@
       "shift": "बदलाव",
       "shiftLabel": "मित्र ने यह इसलिए चुना: {{shift}}",
       "usefulFor": "उपयोगी है",
-      "rootedIn": "आधारित है"
+      "rootedIn": "आधारित है",
+      "frameSankalp": "यह {{frame}} है",
+      "frameItem": "{{title}} — {{frame}}"
     },
     "footer": "यह गृहकार्य नहीं है। यह साधना है — एक दैनिक अभ्यास जो समय के साथ कुछ वास्तविक बनाता है।"
   },
@@ -2384,7 +2386,9 @@
     "inputDivider": "या अपने शब्दों में साझा करें",
     "shareReflection": "अपना मनन साझा करें",
     "privacyText": "आपके विचार मित्र के साथ निजी और सुरक्षित हैं।",
-    "recognitionLabel": "पहचान"
+    "recognitionLabel": "पहचान",
+    "showMePath": "मुझे मेरा पथ दिखाएं",
+    "turn8Message": "आज मैं यह आपके लिए लेकर चल रहा हूँ:"
   },
   "cycleReflection": {
     "continueSame": "वही जारी रखें",

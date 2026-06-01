@@ -350,7 +350,7 @@ export default function Home() {
             const v3Result = await mitraStartJourney({
               inference_state: stashedInference,
               guidance_mode: stashedMode,
-              locale: "en",
+              locale: i18n.language.split("-")[0] || "en",
               tz:
                 Intl.DateTimeFormat().resolvedOptions().timeZone ||
                 "Asia/Kolkata",
@@ -672,7 +672,7 @@ export default function Home() {
               const v3Result = await mitraStartJourney({
                 inference_state: stashedInf,
                 guidance_mode: stashedMode,
-                locale: "en",
+                locale: i18n.language.split("-")[0] || "en",
               });
               if (v3Result) {
                 const t = v3Result.triad || {};

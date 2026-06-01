@@ -3621,7 +3621,7 @@ export async function executeAction(
                 confidence: inf.confidence || 0.0,
               },
               guidance_mode: draft.guidance_mode || "hybrid",
-              locale: "en",
+              locale: i18n.language.split("-")[0] || "en",
               tz:
                 Intl.DateTimeFormat().resolvedOptions().timeZone ||
                 "Asia/Kolkata",

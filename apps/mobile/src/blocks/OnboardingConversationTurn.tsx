@@ -362,6 +362,10 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
 
   if (block.isTurn7) {
     const rec = block.recognition || {};
+    const t7ChipLabel = (chip: { id: string; label: string }) => {
+      if (chip.id === "show_path") return t("onboarding.showMePath");
+      return chip.label;
+    };
     // 2026-04-17 Option B — prefer backend-delivered lines from the spine.
     // screenData.recognition_body_lines is populated by actionExecutor when
     // /onboarding/complete/ returns. Falls back to schema body_paragraphs
@@ -381,8 +385,8 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
         accessibilityLabel="onboarding_recognition_root"
       >
         <View style={styles.recognitionCard}>
-          <Text style={styles.recognitionLabel}>
-            {rec.label || t("onboarding.recognitionLabel")}
+          <Text style={[styles.recognitionLabel, isHindi && { letterSpacing: 0 }]}>
+            {t("onboarding.recognitionLabel")}
           </Text>
 
           <View style={styles.turnOneHeadlineDivider}>
@@ -432,8 +436,8 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                     end={{ x: 1, y: 0.5 }}
                     style={[styles.turnOneButton, styles.turnOnePrimaryButton]}
                   >
-                    <Text style={styles.turnOnePrimaryButtonText}>
-                      {chip.label}
+                    <Text style={[styles.turnOnePrimaryButtonText, isHindi && { letterSpacing: 0 }]}>
+                      {t7ChipLabel(chip)}
                     </Text>
                   </LinearGradient>
                 </TouchableOpacity>
@@ -518,7 +522,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
             <Animated.View style={[styles.mitraMsgCard, { opacity: fadeAnim }]}>
               {isTurn8Msg ? (
                 <Text style={[styles.mitraMsg, { letterSpacing: 0 }]}>
-                  {t("turn8.title")}
+                  {t("onboarding.turn8Message")}
                 </Text>
               ) : messages.map((para, i) =>
                 para && String(para).trim().length > 0 ? (

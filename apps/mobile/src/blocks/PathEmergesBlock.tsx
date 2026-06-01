@@ -316,8 +316,8 @@ const PathEmergesBlock: React.FC<Props> = () => {
                     <Text style={[styles.reasonBody, isHindi && { letterSpacing: 0 }]}>
                       {sentence(
                         activeWhyKind === "sankalp"
-                          ? `This is ${activeWhyContext.mitra_frame_through}`
-                          : `${activeWhyItem.title || "This"} is ${activeWhyContext.mitra_frame_through}`,
+                          ? t("turn8.why.frameSankalp", { frame: activeWhyContext.mitra_frame_through })
+                          : t("turn8.why.frameItem", { title: activeWhyItem.title || "", frame: activeWhyContext.mitra_frame_through }),
                       )}
                     </Text>
                   </View>

@@ -1881,7 +1881,9 @@
       "shift": "Shift",
       "shiftLabel": "Mitra chose this to guide you from {{shift}}",
       "usefulFor": "Useful for",
-      "rootedIn": "Rooted in"
+      "rootedIn": "Rooted in",
+      "frameSankalp": "This is {{frame}}",
+      "frameItem": "{{title}} is {{frame}}"
     },
     "footer": "This isn't homework. It's sadhana — a daily practice that builds something real over time."
   },
@@ -2418,7 +2420,9 @@
     "inputDivider": "Or share in your own words",
     "shareReflection": "Share your reflection",
     "privacyText": "Your thoughts are private and safe with Mitra.",
-    "recognitionLabel": "RECOGNITION"
+    "recognitionLabel": "RECOGNITION",
+    "showMePath": "Show me my path",
+    "turn8Message": "This is what I'm holding for you today:"
   },
   "cycleReflection": {
     "continueSame": "Continue Same",

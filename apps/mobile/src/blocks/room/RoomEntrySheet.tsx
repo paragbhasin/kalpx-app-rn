@@ -42,6 +42,7 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 import { mitraTrackEvent } from "../../engine/mitraApi";
 import { Colors } from "../../theme/colors";
@@ -56,7 +57,7 @@ export interface RoomEntrySheetProps {
 
 interface SheetRow {
   room_id: RoomId;
-  label: string;
+  labelKey: string;
   testID: string;
   /** Subtle accent derived from §6 Opening Experience palette family. */
   accent: string;
@@ -78,42 +79,42 @@ interface SheetRow {
 const ROOM_ROWS: SheetRow[] = [
   {
     room_id: "room_stillness",
-    label: "I'm overwhelmed",
+    labelKey: "room.entrySheet.stillness",
     testID: "room_entry_sheet_stillness",
     accent: "#B9A98D",
     backing: "#F6F2EA",
   },
   {
     room_id: "room_connection",
-    label: "I feel alone",
+    labelKey: "room.entrySheet.connection",
     testID: "room_entry_sheet_connection",
     accent: "#C8A698",
     backing: "#F7EFEB",
   },
   {
     room_id: "room_release",
-    label: "Something is heavy",
+    labelKey: "room.entrySheet.release",
     testID: "room_entry_sheet_release",
     accent: "#9A9A9A",
     backing: "#F1F0EE",
   },
   {
     room_id: "room_clarity",
-    label: "I'm not sure / I want clarity",
+    labelKey: "room.entrySheet.clarity",
     testID: "room_entry_sheet_clarity",
     accent: "#A9B2B6",
     backing: "#F0F2F3",
   },
   {
     room_id: "room_growth",
-    label: "I want to grow as a person",
+    labelKey: "room.entrySheet.growth",
     testID: "room_entry_sheet_growth",
     accent: "#9C7F5A",
     backing: "#F4EDE2",
   },
   {
     room_id: "room_joy",
-    label: "I'm in a good place",
+    labelKey: "room.entrySheet.joy",
     testID: "room_entry_sheet_joy",
     accent: "#C9A84C",
     backing: "#FBF4DC",
@@ -125,6 +126,8 @@ const RoomEntrySheet: React.FC<RoomEntrySheetProps> = ({
   onDismiss,
   onRoomEntry,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   // Fire open analytics once per visibility transition to visible=true.
   useEffect(() => {
     if (!visible) return;
@@ -181,8 +184,8 @@ const RoomEntrySheet: React.FC<RoomEntrySheetProps> = ({
           testID="room_entry_sheet"
         >
           <View style={styles.handle} />
-          <Text style={styles.header} testID="room_entry_sheet_header">
-            More ways to be supported
+          <Text style={[styles.header, isHindi && { letterSpacing: 0 }]} testID="room_entry_sheet_header">
+            {t("room.entrySheet.header")}
           </Text>
           {ROOM_ROWS.map((row) => (
             <TouchableOpacity
@@ -193,7 +196,7 @@ const RoomEntrySheet: React.FC<RoomEntrySheetProps> = ({
               testID={row.testID}
               accessible={true}
               accessibilityRole="button"
-              accessibilityLabel={row.label}
+              accessibilityLabel={t(row.labelKey)}
             >
               <View
                 style={[styles.accent, { backgroundColor: row.accent }]}
@@ -201,11 +204,11 @@ const RoomEntrySheet: React.FC<RoomEntrySheetProps> = ({
                 importantForAccessibility="no"
               />
               <Text
-                style={styles.rowLabel}
+                style={[styles.rowLabel, isHindi && { letterSpacing: 0 }]}
                 accessible={false}
                 importantForAccessibility="no"
               >
-                {row.label}
+                {t(row.labelKey)}
               </Text>
               <Ionicons
                 name="chevron-forward"

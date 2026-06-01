@@ -2392,7 +2392,20 @@
       "failure": "This rhythm practice finished, but we couldn't save it yet.",
       "cta": "Return to My Rhythm",
       "secondary": "Your day can continue from here."
-    }
+    },
+    "reflectionChip": {
+      "moreCalmLabel": "A little more calm",
+      "oneClearThingLabel": "One clear thing",
+      "softerHeartLabel": "A softer heart",
+      "needMoreTimeLabel": "I need more time"
+    },
+    "writeAFewWords": "Write a few words",
+    "carryFromThisPlaceholder": "Anything to carry from this?",
+    "addingLabel": "Adding...",
+    "addToMyPractice": "Add to My Practice",
+    "returnToMyRhythm": "Return to My Rhythm",
+    "returnToInnerPath": "Return to Inner Path",
+    "returnToMitraHome": "Return to Mitra Home"
   },
   "voiceFork": {
     "speakWithMe": "Speak with me",
@@ -2449,6 +2462,187 @@
       "body": "To receive gentle reminders, allow notifications for KalpX in your device settings.",
       "primaryCta": "Open Settings",
       "secondaryCta": "Not Now"
+    }
+  },
+  "room": {
+    "phases": {
+      "common": {
+        "illGoNow": "I'll go now",
+        "moveForwardWithoutWriting": "Move forward without writing",
+        "done": "Done",
+        "next": "Next",
+        "cancel": "Cancel",
+        "back": "Back",
+        "continue": "Continue"
+      },
+      "grounding": {
+        "instruction": "Rest your palms. Feel what is here.",
+        "inputPlaceholder": "Notice quietly, or write a few words…",
+        "writingOptional": "Writing is optional.",
+        "openingLine": "Let us return to the room around you.",
+        "closingText": "Good. You are here.",
+        "hint": "or just notice quietly."
+      },
+      "inquiry": {
+        "listLabel": "Which feels most like you right now?",
+        "moveOnForNow": "Move on for now",
+        "inputPlaceholder": "Write a few words, or reflect quietly…",
+        "letThisLand": "Let this land"
+      },
+      "reachOut": {
+        "sharedConfirm": "Shared ✓",
+        "reachOutMyOwnWay": "I'll reach out my own way"
+      },
+      "text": {
+        "charsRemaining": "{{count}} remaining"
+      },
+      "timer": {
+        "inhale": "Inhale",
+        "hold": "Hold",
+        "exhale": "Exhale",
+        "heartPhase0": "Rest your hand on your heart.",
+        "heartPhase1": "Feel the warmth.",
+        "heartPhase2": "Breathe slowly.",
+        "preStart": "Let's begin gently…",
+        "start": "Start",
+        "pause": "Pause",
+        "rest": "Rest",
+        "completionBreathe": "You made space.",
+        "completionSit": "You sat with it.",
+        "completionHeart": "Your heart has steadied.",
+        "completionWalk": "You moved through it.",
+        "defaultInstructionHeart": "Rest your hand on your heart. Breathe.",
+        "defaultInstructionBreathe": "Breathe gently.",
+        "defaultInstructionWalk": "Walk at your own pace.",
+        "defaultInstructionSit": "Let your thoughts settle like dust in still water."
+      },
+      "voice": {
+        "ready": "Your voice note is ready.",
+        "recording": "Recording… tap to stop.",
+        "idle": "When you're ready, press and speak.",
+        "permissionDenied": "Microphone access was denied. You can write instead.",
+        "writeInstead": "Write instead",
+        "statusRecording": "Recording…",
+        "statusStopped": "Recorded {{time}} — tap Done to save",
+        "statusIdle": "Tap the circle to begin"
+      },
+      "stepModal": {
+        "groundingPrompt0": "Name 5 things you can see",
+        "groundingPrompt1": "Name 4 things you can hear",
+        "groundingPrompt2": "Name 3 things you can feel",
+        "groundingPrompt3": "Name 2 things you can smell",
+        "groundingPrompt4": "Name 1 thing you can taste",
+        "groundingPromptRoom0": "What do you see around you?",
+        "groundingPromptRoom1": "What sounds do you notice?",
+        "groundingPromptRoom2": "What do you feel against your skin?",
+        "groundingPromptRoom3": "Is there a scent nearby?",
+        "groundingPromptRoom4": "What taste is in your mouth?",
+        "textInputPlaceholder": "Type what you feel..",
+        "textInputFallbackPrompt": "Take a moment and write what comes.",
+        "promptSlotNameShort": "What's closest to you right now?",
+        "promptSlotNameFull": "What feels most full or alive right now?",
+        "voiceNoteDefaultPrompt": "Leave a voice note — what are you releasing?",
+        "reachOutDefaultPrompt": "Reach out — a short message to someone who matters.",
+        "reachOutDefaultLabel": "Copy and close",
+        "reachOutContactPlaceholder": "Who — e.g. my mom (optional)",
+        "reachOutMessagePlaceholder": "Your message…",
+        "saveWithoutCopying": "Save without copying",
+        "unknownStepMessage": "This step will open an inline panel in a future release.",
+        "immersiveGoNow": "I'll go now",
+        "immersiveCancel": "Cancel"
+      },
+      "inquiryModal": {
+        "noCategories": "No categories.",
+        "tryAPractice": "Try a practice",
+        "writeAFewWords": "Write a few words",
+        "journalOnThis": "Journal on this",
+        "journalPlaceholder": "Write what comes..."
+      }
+    },
+    "mitraSuggestsBeginningWith": "Mitra suggests beginning with",
+    "sanatanWisdomSays": "Sanatan wisdom says",
+    "becauseYouShared": "Because you shared ·",
+    "stepsInThisSpace": "Steps in this space",
+    "suggested": "suggested",
+    "tapWhenReady": "Tap when ready",
+    "mitraInvitesYouToBeginWith": "MITRA INVITES YOU TO BEGIN WITH",
+    "beginArrow": "Begin →",
+    "thisRoom": "This room",
+    "willCloseReturnAnytime": "will close. You can return anytime.",
+    "exitConfirmYes": "Yes, go now",
+    "exitConfirmStay": "Stay in room",
+    "youChose": "You chose: {{label}}",
+    "startHere": "Start here",
+    "nextStepIntro": "You can stay, continue, or come back when you're ready.",
+    "viewWisdom": "View wisdom",
+    "entrySheet": {
+      "header": "More ways to be supported",
+      "stillness": "I'm overwhelmed",
+      "connection": "I feel alone",
+      "release": "Something is heavy",
+      "clarity": "I'm not sure / I want clarity",
+      "growth": "I want to grow as a person",
+      "joy": "I'm in a good place"
+    },
+    "lifeContext": {
+      "header": "What part of life is this touching most right now?",
+      "workCareer": "Work & career",
+      "relationships": "Relationships",
+      "myself": "Myself",
+      "healthEnergy": "Health & energy",
+      "moneySecurity": "Money & security",
+      "purposeDirection": "Purpose & direction",
+      "dailyLife": "Daily life",
+      "skipForNow": "Skip for now"
+    },
+    "whyThis": {
+      "unavailable": "The reason behind this isn't available right now.",
+      "letThisStay": "Let this stay with me",
+      "gotIt": "Got it",
+      "goDeeper": "Go deeper",
+      "headerLabel": "WHY THIS",
+      "thoughtFromTradition": "A thought from the tradition."
+    },
+    "quickSupport": {
+      "triggered": "I Feel Triggered",
+      "checkIn": "Quick Check-in",
+      "goodPlace": "I'm in a good place",
+      "moreWays": "More ways to be supported"
+    },
+    "greeting": {
+      "welcome": "Welcome, {{name}}.",
+      "carryHeldToday": "{{label}} — held today",
+      "joyCarriedForward": "Joy carried forward"
+    },
+    "breath": {
+      "cycleOf": "Cycle {{current}} of {{total}}",
+      "slowlyInhale": "Slowly Inhale",
+      "holdWithAwareness": "Hold with awareness",
+      "gentlyExhale": "Gently Exhale",
+      "pauseInStillness": "Pause in stillness"
+    },
+    "companionedChant": {
+      "hint": "Chant along if you'd like. Or just listen."
+    },
+    "constants": {
+      "lifeContext": {
+        "workCareer": "Work & career",
+        "relationships": "Relationships",
+        "self": "Myself",
+        "healthEnergy": "Health & energy",
+        "moneySecurity": "Money & security",
+        "purposeDirection": "Purpose & direction",
+        "dailyLife": "Daily life"
+      },
+      "actionKind": {
+        "runnerMantra": "Mantra",
+        "runnerSankalp": "Sankalp",
+        "runnerPractice": "Practice",
+        "teaching": "Teaching",
+        "inquiry": "Inquiry",
+        "inRoomStep": "Step",
+        "inRoomCarry": "Carry"
+      }
     }
   }
 }

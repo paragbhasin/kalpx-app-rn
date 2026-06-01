@@ -13,6 +13,7 @@
 
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { useTranslation } from "react-i18next";
 
 import { executeAction } from "../../engine/actionExecutor";
 import { useScreenStore } from "../../engine/useScreenBridge";
@@ -26,6 +27,7 @@ interface Props {
 }
 
 const RoomPrincipleBanner: React.FC<Props> = ({ banner }) => {
+  const { t } = useTranslation();
   const { screenData, loadScreen, goBack } = useScreenStore();
 
   if (!banner) return null;
@@ -84,7 +86,7 @@ const RoomPrincipleBanner: React.FC<Props> = ({ banner }) => {
   return (
     <TouchableOpacity
       accessibilityRole="button"
-      accessibilityLabel="View wisdom"
+      accessibilityLabel={t("room.viewWisdom")}
       style={styles.wrap}
       activeOpacity={0.7}
       onPress={onPress}

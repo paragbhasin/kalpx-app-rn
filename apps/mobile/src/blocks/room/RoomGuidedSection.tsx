@@ -21,6 +21,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 import { executeAction } from "../../engine/actionExecutor";
 import { trackRoomTelemetry } from "../../engine/mitraApi";
@@ -207,6 +208,8 @@ const BETWEEN_STEP_LINES = [
 
 const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   const insets = useSafeAreaInsets();
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const { loadScreen, goBack, screenData } = useScreenStore();
   const actionCtx = buildActionCtx({ loadScreen, goBack });
 
@@ -268,8 +271,8 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
     roomCtx.why_this_room_line ?? ctx.why_this_room_line ?? null;
   const whyThisRoomLine = normalizeWhyThisRoomLine(rawWhyThisRoomLine);
   const derivedLifeContextLabel =
-    (envelope.life_context
-      ? LIFE_CONTEXT_LABELS[envelope.life_context]
+    (envelope.life_context && LIFE_CONTEXT_LABELS[envelope.life_context]
+      ? t(LIFE_CONTEXT_LABELS[envelope.life_context])
       : null) || extractBecauseYouSharedLabel(rawWhyThisRoomLine);
   const sanatanInsightLine =
     roomCtx.sanatan_insight_line ?? ctx.sanatan_insight_line ?? null;
@@ -851,8 +854,8 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
               </Text>
 
               <View style={{ flex: 1 }}>
-                <Text style={styles.recommendedPreviewLabel}>
-                  Mitra suggests beginning with
+                <Text style={[styles.recommendedPreviewLabel, isHindi && { letterSpacing: 0 }]}>
+                  {t("room.mitraSuggestsBeginningWith")}
                 </Text>
 
                 <Text style={styles.recommendedPreviewTitle}>
@@ -929,8 +932,8 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
               </View>
               <View style={styles.whyHeaderText}>
                 {whyExpanded ? (
-                  <Text style={styles.whyHeaderTitle}>
-                    {principleBanner?.source_line || "Sanatan wisdom says"}
+                  <Text style={[styles.whyHeaderTitle, isHindi && { letterSpacing: 0 }]}>
+                    {principleBanner?.source_line || t("room.sanatanWisdomSays")}
                   </Text>
                 ) : (
                   <Text style={styles.whyPreview} numberOfLines={2}>
@@ -965,7 +968,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
         <View style={styles.footerBlock}>
           {derivedLifeContextLabel ? (
             <View style={styles.sharedPill}>
-              <Text style={styles.sharedLead}>Because you shared ·</Text>
+              <Text style={[styles.sharedLead, isHindi && { letterSpacing: 0 }]}>{t("room.becauseYouShared")}</Text>
               <Text style={styles.sharedValue}>{derivedLifeContextLabel}</Text>
             </View>
           ) : null}
@@ -1000,7 +1003,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
             onPress={() => setStepsOpen(false)}
           />
           <View style={styles.stepsSheet}>
-            <Text style={styles.stepsTitle}>Steps in this space</Text>
+            <Text style={[styles.stepsTitle, isHindi && { letterSpacing: 0 }]}>{t("room.stepsInThisSpace")}</Text>
             <ScrollView showsVerticalScrollIndicator={false}>
               {nonExitActions.map((action: any, index: number) => (
                 <TouchableOpacity
@@ -1016,7 +1019,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
                   <Text style={styles.stepNum}>{index + 1}</Text>
                   <Text style={styles.stepLabel}>{action.label}</Text>
                   {action.action_id === recId ? (
-                    <Text style={styles.stepSuggested}>suggested</Text>
+                    <Text style={[styles.stepSuggested, isHindi && { letterSpacing: 0 }]}>{t("room.suggested")}</Text>
                   ) : null}
                 </TouchableOpacity>
               ))}
@@ -1102,7 +1105,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
             </View>
             <Text style={styles.interstitialText}>{interstitialLine}</Text>
             <View style={styles.interstitialCta}>
-              <Text style={styles.interstitialTapHint}>Tap when ready</Text>
+              <Text style={[styles.interstitialTapHint, isHindi && { letterSpacing: 0 }]}>{t("room.tapWhenReady")}</Text>
             </View>
           </View>
         </TouchableOpacity>
@@ -1117,8 +1120,8 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
             color="#A68246"
             style={{ marginBottom: 16 }}
           />
-          <Text style={styles.mantrasOpeningEyebrow}>
-            MITRA INVITES YOU TO BEGIN WITH
+          <Text style={[styles.mantrasOpeningEyebrow, isHindi && { letterSpacing: 0 }]}>
+            {t("room.mitraInvitesYouToBeginWith")}
           </Text>
           <Text style={styles.mantrasOpeningLabel}>
             {mantrasOpeningCardAction.label}
@@ -1137,7 +1140,7 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
             }}
             testID="mantra_opening_begin_btn"
           >
-            <Text style={styles.mantrasOpeningBeginLabel}>Begin →</Text>
+            <Text style={[styles.mantrasOpeningBeginLabel, isHindi && { letterSpacing: 0 }]}>{t("room.beginArrow")}</Text>
           </TouchableOpacity>
         </View>
       ) : null}
@@ -1151,24 +1154,24 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
       >
         <View style={styles.exitConfirmOverlay}>
           <View style={styles.exitConfirmSheet}>
-            <Text style={styles.exitConfirmText}>
+            <Text style={[styles.exitConfirmText, isHindi && { letterSpacing: 0 }]}>
               {ROOM_LABELS[envelope?.room_id as keyof typeof ROOM_LABELS] ??
-                "This room"}{" "}
-              will close. You can return anytime.
+                t("room.thisRoom")}{" "}
+              {t("room.willCloseReturnAnytime")}
             </Text>
             <TouchableOpacity
               style={styles.exitConfirmYes}
               onPress={handleConfirmExit}
               testID="room_exit_confirm_yes"
             >
-              <Text style={styles.exitConfirmYesLabel}>Yes, go now</Text>
+              <Text style={[styles.exitConfirmYesLabel, isHindi && { letterSpacing: 0 }]}>{t("room.exitConfirmYes")}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.exitConfirmStay}
               onPress={() => setExitConfirmVisible(false)}
               testID="room_exit_confirm_stay"
             >
-              <Text style={styles.exitConfirmStayLabel}>Stay in room</Text>
+              <Text style={[styles.exitConfirmStayLabel, isHindi && { letterSpacing: 0 }]}>{t("room.exitConfirmStay")}</Text>
             </TouchableOpacity>
           </View>
         </View>

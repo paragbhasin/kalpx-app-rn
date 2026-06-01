@@ -22,6 +22,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '../../../theme/colors';
 import { Fonts } from '../../../theme/fonts';
@@ -47,40 +48,44 @@ interface InquiryDetailProps {
 
 export const InquiryList: React.FC<InquiryListProps> = ({
   categories, companionLine, onSelect, onSkipStep, onEscape,
-}) => (
-  <ScrollView contentContainerStyle={styles.listScroll} showsVerticalScrollIndicator={false}>
-    {companionLine ? (
-      <Text style={styles.companion}>{companionLine}</Text>
-    ) : null}
+}) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === 'hi';
+  return (
+    <ScrollView contentContainerStyle={styles.listScroll} showsVerticalScrollIndicator={false}>
+      {companionLine ? (
+        <Text style={styles.companion}>{companionLine}</Text>
+      ) : null}
 
-    <Text style={styles.listLabel}>Which feels most like you right now?</Text>
+      <Text style={[styles.listLabel, isHindi && { letterSpacing: 0 }]}>{t('room.phases.inquiry.listLabel')}</Text>
 
-    {categories.map((cat) => (
-      <Pressable
-        key={cat.id}
-        style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-        onPress={() => onSelect(cat)}
-        accessibilityRole="button"
-        accessibilityLabel={cat.anchor_line || cat.label}
-      >
-        <Text style={styles.cardText}>{cat.anchor_line || cat.label}</Text>
-      </Pressable>
-    ))}
+      {categories.map((cat) => (
+        <Pressable
+          key={cat.id}
+          style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+          onPress={() => onSelect(cat)}
+          accessibilityRole="button"
+          accessibilityLabel={cat.anchor_line || cat.label}
+        >
+          <Text style={styles.cardText}>{cat.anchor_line || cat.label}</Text>
+        </Pressable>
+      ))}
 
-    {/* Step-skip: advance without choosing */}
-    <TouchableOpacity onPress={onSkipStep} style={styles.skipBtn} hitSlop={{ top: 8, bottom: 8 }}>
-      <Text style={styles.skipText}>Move on for now</Text>
-    </TouchableOpacity>
+      {/* Step-skip: advance without choosing */}
+      <TouchableOpacity onPress={onSkipStep} style={styles.skipBtn} hitSlop={{ top: 8, bottom: 8 }}>
+        <Text style={[styles.skipText, isHindi && { letterSpacing: 0 }]}>{t('room.phases.inquiry.moveOnForNow')}</Text>
+      </TouchableOpacity>
 
-    {/* Visual divider before room-exit */}
-    <View style={styles.exitDivider} />
+      {/* Visual divider before room-exit */}
+      <View style={styles.exitDivider} />
 
-    {/* Room-exit: opens exit confirm, never advances */}
-    <TouchableOpacity onPress={onEscape} style={styles.exitBtn} hitSlop={{ top: 8, bottom: 8 }}>
-      <Text style={styles.exitText}>I'll go now</Text>
-    </TouchableOpacity>
-  </ScrollView>
-);
+      {/* Room-exit: opens exit confirm, never advances */}
+      <TouchableOpacity onPress={onEscape} style={styles.exitBtn} hitSlop={{ top: 8, bottom: 8 }}>
+        <Text style={[styles.exitText, isHindi && { letterSpacing: 0 }]}>{t('room.phases.common.illGoNow')}</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
+};
 
 // ─── InquiryDetail ────────────────────────────────────────────────────────────
 
@@ -89,6 +94,8 @@ export const InquiryDetail: React.FC<InquiryDetailProps> = ({
 }) => {
   const [text, setText] = useState('');
   const insets = useSafeAreaInsets();
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === 'hi';
 
   return (
     <KeyboardAvoidingView
@@ -108,7 +115,7 @@ export const InquiryDetail: React.FC<InquiryDetailProps> = ({
           style={styles.input}
           value={text}
           onChangeText={setText}
-          placeholder="Write a few words, or reflect quietly…"
+          placeholder={t('room.phases.inquiry.inputPlaceholder')}
           placeholderTextColor="#B8A898"
           multiline
           numberOfLines={4}
@@ -121,7 +128,7 @@ export const InquiryDetail: React.FC<InquiryDetailProps> = ({
             onPress={() => onSave(category.id, text.trim())}
             activeOpacity={0.7}
           >
-            <Text style={styles.ctaText}>Let this land</Text>
+            <Text style={[styles.ctaText, isHindi && { letterSpacing: 0 }]}>{t('room.phases.inquiry.letThisLand')}</Text>
           </TouchableOpacity>
 
           {/* Step-skip: saves empty text, advances */}
@@ -130,7 +137,7 @@ export const InquiryDetail: React.FC<InquiryDetailProps> = ({
             style={styles.skipBtn}
             hitSlop={{ top: 8, bottom: 8 }}
           >
-            <Text style={styles.skipText}>Move forward without writing</Text>
+            <Text style={[styles.skipText, isHindi && { letterSpacing: 0 }]}>{t('room.phases.common.moveForwardWithoutWriting')}</Text>
           </TouchableOpacity>
 
           {/* Visual divider before room-exit */}
@@ -138,7 +145,7 @@ export const InquiryDetail: React.FC<InquiryDetailProps> = ({
 
           {/* Room-exit: opens exit confirm, never advances */}
           <TouchableOpacity onPress={onEscape} style={styles.exitBtn} hitSlop={{ top: 8, bottom: 8 }}>
-            <Text style={styles.exitText}>I'll go now</Text>
+            <Text style={[styles.exitText, isHindi && { letterSpacing: 0 }]}>{t('room.phases.common.illGoNow')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

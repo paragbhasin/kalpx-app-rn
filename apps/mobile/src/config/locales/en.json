@@ -276,5 +276,72 @@
     "spiritualIntent": "Your Spiritual Intent",
     "intentPlaceholder": "Share your intent…",
     "nextStep": "Take the Next Step"
+  },
+  "room": {
+    "actions": {
+      "addAnother": "Add another",
+      "returnHome": "Return home",
+      "illGoNow": "I'll go now",
+      "noted": "Noted.",
+      "inquiry": "Inquiry",
+      "step": "Step",
+      "aTeaching": "A teaching",
+      "beginRoomJourney": "Begin room journey",
+      "continueToNextStep": "Continue to next step",
+      "mitraBeginsWith": "Mitra begins with",
+      "begin": "Begin",
+      "tapWhenReady": "Tap when ready",
+      "whenYouReady": "When you're ready, tap to begin",
+      "returnToMitraHome": "Return to Mitra Home",
+      "leaveThisRoom": "Leave this room?",
+      "practiceHeld": "Your practice so far is held. You can return anytime.",
+      "yesIllGoNow": "Yes, I'll go now",
+      "stay": "Stay",
+      "aGentleStep": "A gentle step",
+      "mitraIsWithYou": "Mitra is with you for this step.",
+      "continue": "Continue",
+      "writeWhatYouWouldHaveSpoken": "Write what you would have spoken.",
+      "letThisLand": "Let this land",
+      "writeAFewWords": "Write a few words…",
+      "copyAndGo": "Copy and go",
+      "aThreadOfCare": "A thread of care has been remembered.",
+      "stayWithTheSound": "Stay with the sound.",
+      "stayWithTheOffering": "Stay with the offering.",
+      "letThePracticeHoldYou": "Let the practice hold you.",
+      "youMadeSpace": "You made space.",
+      "whatIsPresentRightNow": "What is present right now?",
+      "writeOneWordOrFewLines": "Write one word or a few lines…",
+      "writeShortMessageToSomeone": "Write a short message to someone who matters.",
+      "yourMessage": "Your message…",
+      "savedToYourPath": "Saved to your path.",
+      "couldntSave": "Couldn't save. Please try again.",
+      "writeAnother": "Write another",
+      "nameAnother": "Name another",
+      "addAnotherItem": "Add another",
+      "youreHereThatIsEnough": "You're here. That is enough.",
+      "youStayedWithIt": "You stayed with it.",
+      "youCanReturnAnytime": "You can return to this room anytime.",
+      "whatDoesThisBringUp": "What does this bring up?"
+    },
+    "constants": {
+      "lifeContext": {
+        "workCareer": "Work or career",
+        "relationships": "A relationship",
+        "self": "Yourself",
+        "healthEnergy": "Health or energy",
+        "moneySecurity": "Money or finances",
+        "purposeDirection": "Your direction",
+        "dailyLife": "Daily life"
+      },
+      "actionKind": {
+        "runnerMantra": "Chant",
+        "runnerSankalp": "Offering",
+        "runnerPractice": "Practice",
+        "teaching": "Teaching",
+        "inquiry": "Reflection",
+        "inRoomStep": "Step",
+        "inRoomCarry": "Carry with you"
+      }
+    }
   }
 }

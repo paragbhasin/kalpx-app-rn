@@ -2358,7 +2358,20 @@
       "failure": "यह लय अभ्यास पूरा हुआ, लेकिन हम इसे अभी सहेज नहीं सके।",
       "cta": "मेरी लय पर लौटें",
       "secondary": "आपका दिन यहाँ से जारी रह सकता है।"
-    }
+    },
+    "reflectionChip": {
+      "moreCalmLabel": "थोड़ी और शांति",
+      "oneClearThingLabel": "एक स्पष्ट बात",
+      "softerHeartLabel": "एक कोमल हृदय",
+      "needMoreTimeLabel": "मुझे और समय चाहिए"
+    },
+    "writeAFewWords": "कुछ शब्द लिखें",
+    "carryFromThisPlaceholder": "इससे क्या साथ लेना है?",
+    "addingLabel": "जोड़ा जा रहा है...",
+    "addToMyPractice": "मेरे अभ्यास में जोड़ें",
+    "returnToMyRhythm": "मेरी लय पर लौटें",
+    "returnToInnerPath": "आंतरिक पथ पर लौटें",
+    "returnToMitraHome": "मित्र होम पर लौटें"
   },
   "voiceFork": {
     "speakWithMe": "मेरे साथ बोलें",
@@ -2402,5 +2415,186 @@
   "errors": {
     "somethingWentWrong": "कुछ गलत हो गया। कृपया पुनः प्रयास करें।",
     "couldNotLoadPath": "आपका पथ लोड नहीं हो सका।"
+  },
+  "room": {
+    "phases": {
+      "common": {
+        "illGoNow": "मैं अभी जाऊँगा",
+        "moveForwardWithoutWriting": "बिना लिखे आगे बढ़ें",
+        "done": "हो गया",
+        "next": "अगला",
+        "cancel": "रद्द करें",
+        "back": "वापस",
+        "continue": "जारी रखें"
+      },
+      "grounding": {
+        "instruction": "अपनी हथेलियाँ रखें। यहाँ जो है उसे महसूस करें।",
+        "inputPlaceholder": "चुपचाप देखें, या कुछ शब्द लिखें…",
+        "writingOptional": "लिखना वैकल्पिक है।",
+        "openingLine": "आइए अपने आसपास के कमरे में वापस लौटते हैं।",
+        "closingText": "अच्छा। आप यहाँ हैं।",
+        "hint": "या बस चुपचाप महसूस करें।"
+      },
+      "inquiry": {
+        "listLabel": "अभी आपको सबसे ज़्यादा कौन-सी बात सही लगती है?",
+        "moveOnForNow": "अभी के लिए आगे बढ़ें",
+        "inputPlaceholder": "कुछ शब्द लिखें, या चुपचाप सोचें…",
+        "letThisLand": "इसे महसूस होने दें"
+      },
+      "reachOut": {
+        "sharedConfirm": "साझा हुआ ✓",
+        "reachOutMyOwnWay": "मैं अपने तरीके से संपर्क करूँगा"
+      },
+      "text": {
+        "charsRemaining": "{{count}} शेष"
+      },
+      "timer": {
+        "inhale": "श्वास लें",
+        "hold": "रोकें",
+        "exhale": "छोड़ें",
+        "heartPhase0": "अपना हाथ हृदय पर रखें।",
+        "heartPhase1": "गर्मी महसूस करें।",
+        "heartPhase2": "धीरे-धीरे श्वास लें।",
+        "preStart": "चलिए धीरे से शुरू करते हैं…",
+        "start": "शुरू करें",
+        "pause": "रुकें",
+        "rest": "विश्राम",
+        "completionBreathe": "आपने स्थान बनाया।",
+        "completionSit": "आप इसके साथ बैठे।",
+        "completionHeart": "आपका हृदय स्थिर हो गया।",
+        "completionWalk": "आप इससे गुज़र गए।",
+        "defaultInstructionHeart": "अपना हाथ हृदय पर रखें। श्वास लें।",
+        "defaultInstructionBreathe": "धीरे श्वास लें।",
+        "defaultInstructionWalk": "अपनी गति से चलें।",
+        "defaultInstructionSit": "अपने विचारों को शांत जल में धूल की तरह बैठने दें।"
+      },
+      "voice": {
+        "ready": "आपका वॉयस नोट तैयार है।",
+        "recording": "रिकॉर्ड हो रहा है… रोकने के लिए टैप करें।",
+        "idle": "जब तैयार हों, दबाएँ और बोलें।",
+        "permissionDenied": "माइक्रोफ़ोन की अनुमति नहीं मिली। आप इसके बजाय लिख सकते हैं।",
+        "writeInstead": "लिखें",
+        "statusRecording": "रिकॉर्ड हो रहा है…",
+        "statusStopped": "{{time}} रिकॉर्ड हुआ — सहेजने के लिए Done टैप करें",
+        "statusIdle": "शुरू करने के लिए वृत्त पर टैप करें"
+      },
+      "stepModal": {
+        "groundingPrompt0": "5 चीज़ें बताएं जो आप देख सकते हैं",
+        "groundingPrompt1": "4 चीज़ें बताएं जो आप सुन सकते हैं",
+        "groundingPrompt2": "3 चीज़ें बताएं जो आप महसूस कर सकते हैं",
+        "groundingPrompt3": "2 चीज़ें बताएं जो आप सूँघ सकते हैं",
+        "groundingPrompt4": "1 चीज़ बताएं जो आप चख सकते हैं",
+        "groundingPromptRoom0": "आप अपने आसपास क्या देखते हैं?",
+        "groundingPromptRoom1": "आप कौन-सी आवाज़ें सुनते हैं?",
+        "groundingPromptRoom2": "आपकी त्वचा पर क्या महसूस होता है?",
+        "groundingPromptRoom3": "क्या पास में कोई सुगंध है?",
+        "groundingPromptRoom4": "आपके मुँह में क्या स्वाद है?",
+        "textInputPlaceholder": "जो महसूस हो, लिखें..",
+        "textInputFallbackPrompt": "एक पल रुकें और जो आए वह लिखें।",
+        "promptSlotNameShort": "अभी आपके सबसे करीब क्या है?",
+        "promptSlotNameFull": "अभी क्या सबसे पूर्ण या जीवंत लगता है?",
+        "voiceNoteDefaultPrompt": "एक वॉयस नोट छोड़ें — आप क्या छोड़ रहे हैं?",
+        "reachOutDefaultPrompt": "संपर्क करें — किसी अपने को एक छोटा संदेश।",
+        "reachOutDefaultLabel": "कॉपी करें और बंद करें",
+        "reachOutContactPlaceholder": "कौन — जैसे, मेरी माँ (वैकल्पिक)",
+        "reachOutMessagePlaceholder": "आपका संदेश…",
+        "saveWithoutCopying": "कॉपी किए बिना सहेजें",
+        "unknownStepMessage": "यह चरण भविष्य के संस्करण में खुलेगा।",
+        "immersiveGoNow": "मैं अभी जाऊँगा",
+        "immersiveCancel": "रद्द करें"
+      },
+      "inquiryModal": {
+        "noCategories": "कोई श्रेणी नहीं।",
+        "tryAPractice": "एक अभ्यास आज़माएं",
+        "writeAFewWords": "कुछ शब्द लिखें",
+        "journalOnThis": "इस पर लिखें",
+        "journalPlaceholder": "जो आए लिखें..."
+      }
+    },
+    "mitraSuggestsBeginningWith": "मित्र इससे शुरू करने का सुझाव देता है",
+    "sanatanWisdomSays": "सनातन ज्ञान कहता है",
+    "becauseYouShared": "क्योंकि आपने साझा किया ·",
+    "stepsInThisSpace": "इस स्थान के चरण",
+    "suggested": "सुझाया गया",
+    "tapWhenReady": "तैयार हों तो टैप करें",
+    "mitraInvitesYouToBeginWith": "मित्र आपको इससे शुरू करने के लिए आमंत्रित करता है",
+    "beginArrow": "शुरू करें →",
+    "thisRoom": "यह कक्ष",
+    "willCloseReturnAnytime": "बंद होगा। आप कभी भी वापस आ सकते हैं।",
+    "exitConfirmYes": "हाँ, जाएँ",
+    "exitConfirmStay": "कक्ष में रहें",
+    "youChose": "आपने चुना: {{label}}",
+    "startHere": "यहाँ से शुरू करें",
+    "nextStepIntro": "आप रुक सकते हैं, जारी रख सकते हैं, या जब तैयार हों तब वापस आ सकते हैं।",
+    "viewWisdom": "ज्ञान देखें",
+    "entrySheet": {
+      "header": "समर्थित होने के और तरीके",
+      "stillness": "मैं अभिभूत हूँ",
+      "connection": "मैं अकेला महसूस करता हूँ",
+      "release": "कुछ भारी है",
+      "clarity": "मुझे यकीन नहीं / मुझे स्पष्टता चाहिए",
+      "growth": "मैं एक इंसान के रूप में बढ़ना चाहता हूँ",
+      "joy": "मैं अच्छी जगह पर हूँ"
+    },
+    "lifeContext": {
+      "header": "जीवन का कौन-सा पहलू अभी सबसे ज़्यादा प्रभावित हो रहा है?",
+      "workCareer": "काम और करियर",
+      "relationships": "रिश्ते",
+      "myself": "मैं स्वयं",
+      "healthEnergy": "स्वास्थ्य और ऊर्जा",
+      "moneySecurity": "पैसा और सुरक्षा",
+      "purposeDirection": "उद्देश्य और दिशा",
+      "dailyLife": "दैनिक जीवन",
+      "skipForNow": "अभी छोड़ें"
+    },
+    "constants": {
+      "lifeContext": {
+        "workCareer": "काम और करियर",
+        "relationships": "रिश्ते",
+        "self": "मैं स्वयं",
+        "healthEnergy": "स्वास्थ्य और ऊर्जा",
+        "moneySecurity": "पैसा और सुरक्षा",
+        "purposeDirection": "उद्देश्य और दिशा",
+        "dailyLife": "दैनिक जीवन"
+      },
+      "actionKind": {
+        "runnerMantra": "मंत्र",
+        "runnerSankalp": "संकल्प",
+        "runnerPractice": "अभ्यास",
+        "teaching": "शिक्षण",
+        "inquiry": "जिज्ञासा",
+        "inRoomStep": "चरण",
+        "inRoomCarry": "संकल्प"
+      }
+    },
+    "whyThis": {
+      "unavailable": "इस सिफारिश का कारण अभी उपलब्ध नहीं है।",
+      "letThisStay": "यह मेरे साथ रहे",
+      "gotIt": "समझ गया",
+      "goDeeper": "और गहरे जाएं",
+      "headerLabel": "यह क्यों",
+      "thoughtFromTradition": "परंपरा से एक विचार।"
+    },
+    "quickSupport": {
+      "triggered": "मैं उत्तेजित महसूस कर रहा हूँ",
+      "checkIn": "त्वरित जाँच",
+      "goodPlace": "मैं अच्छे स्थान पर हूँ",
+      "moreWays": "समर्थित होने के और तरीके"
+    },
+    "greeting": {
+      "welcome": "स्वागत है, {{name}}।",
+      "carryHeldToday": "{{label}} — आज साथ है",
+      "joyCarriedForward": "आनंद आगे लाया गया"
+    },
+    "breath": {
+      "cycleOf": "चक्र {{current}} / {{total}}",
+      "slowlyInhale": "धीरे-धीरे श्वास लें",
+      "holdWithAwareness": "जागरूकता के साथ रोकें",
+      "gentlyExhale": "धीरे से श्वास छोड़ें",
+      "pauseInStillness": "शांति में रुकें"
+    },
+    "companionedChant": {
+      "hint": "चाहें तो साथ जपें। या बस सुनें।"
+    }
   }
 }

@@ -47,6 +47,7 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import type { StepPayload } from "../types";
@@ -107,34 +108,7 @@ export function classifyStep(templateId?: string | null): StepModalKind {
   return "unknown";
 }
 
-const GROUNDING_PROMPTS = [
-  "Name 5 things you can see",
-  "Name 4 things you can hear",
-  "Name 3 things you can feel",
-  "Name 2 things you can smell",
-  "Name 1 thing you can taste",
-];
-
-const GROUNDING_PROMPTS_ROOM = [
-  "What do you see around you?",
-  "What sounds do you notice?",
-  "What do you feel against your skin?",
-  "Is there a scent nearby?",
-  "What taste is in your mouth?",
-];
-
-const TIMER_COMPLETION_LINES: Record<string, string> = {
-  timer_breathe: "You made space.",
-  timer_sit:     "You sat with it.",
-  timer_heart:   "Your heart has steadied.",
-  timer_walk:    "You moved through it.",
-};
-
-const HEART_PHASES = [
-  "Rest your hand on your heart.",
-  "Feel the warmth.",
-  "Breathe slowly.",
-];
+// Strings below are now sourced from i18n — see room.phases.stepModal / room.phases.timer keys.
 
 const MAX_TEXT = 1000;
 
@@ -150,6 +124,8 @@ const StepModal: React.FC<Props> = ({
   isRoomGuided = false,
   helperLine = null,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [sheetHeight, setSheetHeight] = useState(0);
   const { height: windowHeight } = useWindowDimensions();
@@ -274,7 +250,7 @@ const StepModal: React.FC<Props> = ({
                     accessibilityLabel="Cancel"
                     testID="step_modal_cancel"
                   >
-                    <Text style={styles.headerCancel}>Cancel</Text>
+                    <Text style={[styles.headerCancel, isHindi && { letterSpacing: 0 }]}>{t('room.phases.common.cancel')}</Text>
                   </TouchableOpacity>
                 ) : null}
               </View>
@@ -371,13 +347,11 @@ function defaultTimerSeconds(kind: TimerBodyProps["kind"]): number {
   return 60;
 }
 
-function defaultInstruction(kind: TimerBodyProps["kind"]): string {
-  if (kind === "timer_heart") {
-    return "Rest your hand on your heart. Breathe.";
-  }
-  if (kind === "timer_breathe") return "Breathe gently.";
-  if (kind === "timer_walk") return "Walk at your own pace.";
-  return "Let your thoughts settle like dust in still water.";
+function defaultInstructionKey(kind: TimerBodyProps["kind"]): string {
+  if (kind === "timer_heart") return "room.phases.timer.defaultInstructionHeart";
+  if (kind === "timer_breathe") return "room.phases.timer.defaultInstructionBreathe";
+  if (kind === "timer_walk") return "room.phases.timer.defaultInstructionWalk";
+  return "room.phases.timer.defaultInstructionSit";
 }
 
 const WALK_ANIMATION_END_FRAME = 68;
@@ -388,8 +362,9 @@ const BreathingOrb: React.FC<{
   inhaleMs: number;
   exhaleMs: number;
 }> = ({ running, inhaleMs, exhaleMs }) => {
+  const { t } = useTranslation();
   const scale = useRef(new Animated.Value(1)).current;
-  const [phase, setPhase] = useState("Inhale");
+  const [phase, setPhase] = useState<"inhale" | "exhale">("inhale");
   const animationRef = useRef<Animated.CompositeAnimation | null>(null);
   const phaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -411,10 +386,10 @@ const BreathingOrb: React.FC<{
 
     const schedulePhaseCycle = () => {
       if (cancelled) return;
-      setPhase("Inhale");
+      setPhase("inhale");
       phaseTimerRef.current = setTimeout(() => {
         if (cancelled) return;
-        setPhase("Exhale");
+        setPhase("exhale");
         phaseTimerRef.current = setTimeout(() => {
           schedulePhaseCycle();
         }, exhaleDuration);
@@ -449,7 +424,7 @@ const BreathingOrb: React.FC<{
         toValue: 1,
         useNativeDriver: true,
       }).start();
-      setPhase("Inhale");
+      setPhase("inhale");
     }
 
     return () => {
@@ -486,13 +461,13 @@ const BreathingOrb: React.FC<{
         {Platform.OS === "ios" ? (
           <BlurView intensity={40} style={styles.blurWrapper}>
             <View style={styles.innerGlass}>
-              <Text style={styles.circleText}>{phase}</Text>
+              <Text style={styles.circleText}>{t(`room.phases.timer.${phase}`)}</Text>
             </View>
           </BlurView>
         ) : (
           <View style={[styles.blurWrapper, styles.androidCircleFill]}>
             <View style={styles.innerGlass}>
-              <Text style={styles.circleText}>{phase}</Text>
+              <Text style={styles.circleText}>{t(`room.phases.timer.${phase}`)}</Text>
             </View>
           </View>
         )}
@@ -509,6 +484,8 @@ const TimerBody: React.FC<TimerBodyProps> = ({
   isRoomGuided = false,
   contextLine = null,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const totalSec = useMemo(() => {
     const raw = stepPayload?.duration_sec;
     if (typeof raw === "number" && raw > 0 && raw <= 60 * 60) return raw;
@@ -528,7 +505,7 @@ const TimerBody: React.FC<TimerBodyProps> = ({
 
   const baseCueText =
     (stepPayload?.cue_text && String(stepPayload.cue_text)) ||
-    defaultInstruction(kind);
+    t(defaultInstructionKey(kind));
 
   const [remaining, setRemaining] = useState<number>(totalSec);
   const [running, setRunning] = useState<boolean>(false);
@@ -560,7 +537,7 @@ const TimerBody: React.FC<TimerBodyProps> = ({
   useEffect(() => {
     if (kind !== "timer_heart" || !running || !isRoomGuided) return;
     const t = setInterval(() => {
-      setHeartPhase((p) => Math.min(p + 1, HEART_PHASES.length - 1));
+      setHeartPhase((p) => Math.min(p + 1, 2));
     }, 10000);
     return () => clearInterval(t);
   }, [kind, running, isRoomGuided]);
@@ -627,8 +604,14 @@ const TimerBody: React.FC<TimerBodyProps> = ({
   useEffect(() => {
     if (!atZero || !isRoomGuided || hasCompletedRef.current) return;
     hasCompletedRef.current = true;
-    const line = TIMER_COMPLETION_LINES[kind] ?? null;
-    if (line) setCompletionLineText(line);
+    const completionKeyMap: Record<string, string> = {
+      timer_breathe: "room.phases.timer.completionBreathe",
+      timer_sit:     "room.phases.timer.completionSit",
+      timer_heart:   "room.phases.timer.completionHeart",
+      timer_walk:    "room.phases.timer.completionWalk",
+    };
+    const lineKey = completionKeyMap[kind] ?? null;
+    if (lineKey) setCompletionLineText(t(lineKey));
   }, [atZero, isRoomGuided, kind]);
 
   const mm = Math.floor(remaining / 60);
@@ -639,7 +622,7 @@ const TimerBody: React.FC<TimerBodyProps> = ({
 
   // Display cue: heart uses phase rotation in room context; others use baseCueText.
   const displayCue = (kind === "timer_heart" && isRoomGuided)
-    ? HEART_PHASES[heartPhase]
+    ? t(`room.phases.timer.heartPhase${heartPhase}`)
     : baseCueText;
 
   return (
@@ -647,9 +630,9 @@ const TimerBody: React.FC<TimerBodyProps> = ({
       {/* Completion line overlay (room-guided) */}
       {completionLineText ? (
         <View style={styles.timerCompletionOverlay}>
-          <Text style={styles.timerCompletionLine}>{completionLineText}</Text>
+          <Text style={[styles.timerCompletionLine, isHindi && { letterSpacing: 0 }]}>{completionLineText}</Text>
           <TouchableOpacity style={styles.timerContinueBtn} onPress={() => onDone({})}>
-            <Text style={styles.timerContinueBtnText}>Continue</Text>
+            <Text style={[styles.timerContinueBtnText, isHindi && { letterSpacing: 0 }]}>{t('room.phases.common.continue')}</Text>
           </TouchableOpacity>
         </View>
       ) : null}
@@ -659,7 +642,7 @@ const TimerBody: React.FC<TimerBodyProps> = ({
         style={isRoomGuided ? styles.timerCueRoom : styles.timerCue}
         testID="step_modal_timer_cue"
       >
-        {preStartVisible ? "Let's begin gently…" : displayCue}
+        {preStartVisible ? t('room.phases.timer.preStart') : displayCue}
       </Text>
 
       {kind === "timer_breathe" && (
@@ -723,7 +706,7 @@ const TimerBody: React.FC<TimerBodyProps> = ({
             onPress={() => setRunning(true)}
             testID="step_modal_timer_start"
           >
-            <Text style={styles.ctrlBtnLabel}>Start</Text>
+            <Text style={[styles.ctrlBtnLabel, isHindi && { letterSpacing: 0 }]}>{t('room.phases.timer.start')}</Text>
           </TouchableOpacity>
         ) : null}
         {running ? (
@@ -732,7 +715,7 @@ const TimerBody: React.FC<TimerBodyProps> = ({
             onPress={() => setRunning(false)}
             testID="step_modal_timer_pause"
           >
-            <Text style={styles.ctrlBtnLabel}>{isRoomGuided ? "Rest" : "Pause"}</Text>
+            <Text style={[styles.ctrlBtnLabel, isHindi && { letterSpacing: 0 }]}>{isRoomGuided ? t('room.phases.timer.rest') : t('room.phases.timer.pause')}</Text>
           </TouchableOpacity>
         ) : null}
         <TouchableOpacity
@@ -744,8 +727,8 @@ const TimerBody: React.FC<TimerBodyProps> = ({
           testID="step_modal_timer_done"
           accessibilityState={{ disabled: false }}
         >
-          <Text style={[styles.primaryActionLabel, { fontSize: 15 }]}>
-            Done
+          <Text style={[styles.primaryActionLabel, { fontSize: 15 }, isHindi && { letterSpacing: 0 }]}>
+            {t('room.phases.common.done')}
           </Text>
         </TouchableOpacity>
       </View>
@@ -757,9 +740,10 @@ const TimerBody: React.FC<TimerBodyProps> = ({
 
 // Resolves the prompt_slot key that BE sends in step_config to authored
 // prompt text. BE sends the slot name; FE owns the resolved copy.
-const PROMPT_SLOT_TEXT: Record<string, string> = {
-  name_short_prompt: "What's closest to you right now?",
-  name_full_prompt: "What feels most full or alive right now?",
+// Keys are now i18n-driven — see room.phases.stepModal.promptSlot* in locale files.
+const PROMPT_SLOT_I18N_KEYS: Record<string, string> = {
+  name_short_prompt: "room.phases.stepModal.promptSlotNameShort",
+  name_full_prompt: "room.phases.stepModal.promptSlotNameFull",
 };
 
 interface TextInputBodyProps {
@@ -773,16 +757,18 @@ const TextInputBody: React.FC<TextInputBodyProps> = ({
   onDone,
   isScreen = false,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const mm = stepPayload?.memory_modal;
   const [text, setText] = useState<string>("");
   const promptSlot = stepPayload?.step_config?.prompt_slot;
   const promptText =
     mm?.prompt ||
     (stepPayload?.prompt && String(stepPayload.prompt)) ||
-    (typeof promptSlot === "string" && PROMPT_SLOT_TEXT[promptSlot]) ||
-    "Take a moment and write what comes.";
-  const placeholderText = mm?.placeholder || "Type what you feel..";
-  const doneLabel = mm?.primary_label || "Done";
+    (typeof promptSlot === "string" && PROMPT_SLOT_I18N_KEYS[promptSlot] && t(PROMPT_SLOT_I18N_KEYS[promptSlot])) ||
+    t("room.phases.stepModal.textInputFallbackPrompt");
+  const placeholderText = mm?.placeholder || t("room.phases.stepModal.textInputPlaceholder");
+  const doneLabel = mm?.primary_label || t("room.phases.common.done");
 
   const trimmed = text.trim();
   const enabled = trimmed.length >= 1;
@@ -844,7 +830,7 @@ const TextInputBody: React.FC<TextInputBodyProps> = ({
         onPress={() => onDone({ text: trimmed })}
         testID="step_modal_text_done"
       >
-        <Text style={styles.primaryActionLabel}>{doneLabel}</Text>
+        <Text style={[styles.primaryActionLabel, isHindi && { letterSpacing: 0 }]}>{doneLabel}</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -863,6 +849,8 @@ const ScreenTextInputExperience: React.FC<ScreenTextInputExperienceProps> = ({
   onCancel,
   onDone,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const mm = stepPayload?.memory_modal;
   const [text, setText] = useState<string>("");
   const promptSlot = stepPayload?.step_config?.prompt_slot;
@@ -870,10 +858,10 @@ const ScreenTextInputExperience: React.FC<ScreenTextInputExperienceProps> = ({
   const promptText =
     mm?.prompt ||
     (stepPayload?.prompt && String(stepPayload.prompt)) ||
-    (typeof promptSlot === "string" && PROMPT_SLOT_TEXT[promptSlot]) ||
-    "Take a moment and write what comes.";
-  const placeholderText = mm?.placeholder || "Type what you feel..";
-  const doneLabel = mm?.primary_label || "Done";
+    (typeof promptSlot === "string" && PROMPT_SLOT_I18N_KEYS[promptSlot] && t(PROMPT_SLOT_I18N_KEYS[promptSlot])) ||
+    t("room.phases.stepModal.textInputFallbackPrompt");
+  const placeholderText = mm?.placeholder || t("room.phases.stepModal.textInputPlaceholder");
+  const doneLabel = mm?.primary_label || t("room.phases.common.done");
   const trimmed = text.trim();
   const enabled = trimmed.length >= 1;
 
@@ -900,7 +888,7 @@ const ScreenTextInputExperience: React.FC<ScreenTextInputExperienceProps> = ({
           accessibilityLabel="Cancel"
           testID="step_modal_cancel"
         >
-          <Text style={styles.immersiveCancel}>Cancel</Text>
+          <Text style={[styles.immersiveCancel, isHindi && { letterSpacing: 0 }]}>{t('room.phases.stepModal.immersiveCancel')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -959,12 +947,12 @@ const ScreenTextInputExperience: React.FC<ScreenTextInputExperienceProps> = ({
             source={require("../../../../assets/lotus_icon.png")}
             style={styles.immersivePrimaryLotus}
           />
-          <Text style={styles.immersivePrimaryLabel}>{doneLabel}</Text>
+          <Text style={[styles.immersivePrimaryLabel, isHindi && { letterSpacing: 0 }]}>{doneLabel}</Text>
         </View>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={onCancel} testID="step_modal_go_now">
-        <Text style={styles.immersiveSecondaryAction}>I&apos;ll go now</Text>
+        <Text style={[styles.immersiveSecondaryAction, isHindi && { letterSpacing: 0 }]}>{t('room.phases.stepModal.immersiveGoNow')}</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -979,14 +967,19 @@ const GroundingBody: React.FC<{
   isRoomGuided?: boolean;
   contextLine?: string | null;
 }> = ({ onDone, isScreen = false, label = "Step", isRoomGuided = false, contextLine = null }) => {
-  const prompts = isRoomGuided ? GROUNDING_PROMPTS_ROOM : GROUNDING_PROMPTS;
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
+  const TOTAL_PROMPTS = 5;
+  const getPrompt = (i: number) => isRoomGuided
+    ? t(`room.phases.stepModal.groundingPromptRoom${i}`)
+    : t(`room.phases.stepModal.groundingPrompt${i}`);
   const [index, setIndex] = useState<number>(0);
   const [answers, setAnswers] = useState<string[]>(["", "", "", "", ""]);
   const [closingText, setClosingText] = useState<string | null>(null);
   const hasCompletedRef = useRef(false);
   const current = answers[index] ?? "";
-  const prompt = prompts[index];
-  const isLast = index === prompts.length - 1;
+  const prompt = getPrompt(index);
+  const isLast = index === TOTAL_PROMPTS - 1;
   const trimmed = current.trim();
   const enabled = isRoomGuided ? true : trimmed.length >= 1;
 
@@ -1003,24 +996,24 @@ const GroundingBody: React.FC<{
     if (isLast) {
       if (isRoomGuided && !hasCompletedRef.current) {
         hasCompletedRef.current = true;
-        setClosingText("Good. You are here.");
+        setClosingText(t("room.phases.grounding.closingText"));
       } else if (!isRoomGuided) {
         onDone({ grounding: answers.map((a) => a.trim()) });
       }
       return;
     }
-    setIndex((i) => Math.min(prompts.length - 1, i + 1));
+    setIndex((i) => Math.min(TOTAL_PROMPTS - 1, i + 1));
   };
 
   if (closingText) {
     return (
       <View style={[styles.timerRoot, { alignItems: "center", justifyContent: "center" }]}>
-        <Text style={styles.timerCompletionLine}>{closingText}</Text>
+        <Text style={[styles.timerCompletionLine, isHindi && { letterSpacing: 0 }]}>{closingText}</Text>
         <TouchableOpacity
           style={styles.timerContinueBtn}
           onPress={() => onDone({ grounding: answers.map((a) => a.trim()) })}
         >
-          <Text style={styles.timerContinueBtnText}>Continue</Text>
+          <Text style={[styles.timerContinueBtnText, isHindi && { letterSpacing: 0 }]}>{t('room.phases.common.continue')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -1039,7 +1032,7 @@ const GroundingBody: React.FC<{
           style={[styles.groundingProgress, styles.screenGroundingProgress]}
           testID="step_modal_grounding_progress"
         >
-          {index + 1} of {prompts.length}
+          {index + 1} of {TOTAL_PROMPTS}
         </Text>
         <Text style={styles.screenGroundingPrompt}>{prompt}</Text>
         <View style={styles.screenGroundingInputWrap}>
@@ -1049,7 +1042,7 @@ const GroundingBody: React.FC<{
             multiline
             textAlignVertical="top"
             style={styles.screenGroundingInput}
-            placeholder="Type what you feel.."
+            placeholder={t("room.phases.stepModal.textInputPlaceholder")}
             placeholderTextColor="#B0B0B5"
             testID="step_modal_grounding_input"
             maxLength={MAX_TEXT}
@@ -1066,8 +1059,8 @@ const GroundingBody: React.FC<{
             isLast ? "step_modal_grounding_done" : "step_modal_grounding_next"
           }
         >
-          <Text style={styles.screenGroundingActionLabel}>
-            {isLast ? "Done" : "Next"}
+          <Text style={[styles.screenGroundingActionLabel, isHindi && { letterSpacing: 0 }]}>
+            {isLast ? t('room.phases.common.done') : t('room.phases.common.next')}
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -1081,8 +1074,8 @@ const GroundingBody: React.FC<{
       keyboardShouldPersistTaps="handled"
     >
       {isRoomGuided && index === 0 ? (
-        <Text style={styles.groundingOpeningLine}>
-          Let us return to the room around you.
+        <Text style={[styles.groundingOpeningLine, isHindi && { letterSpacing: 0 }]}>
+          {t('room.phases.grounding.openingLine')}
         </Text>
       ) : null}
       {isRoomGuided && index === 0 && contextLine ? (
@@ -1092,7 +1085,7 @@ const GroundingBody: React.FC<{
         style={styles.groundingProgress}
         testID="step_modal_grounding_progress"
       >
-        {index + 1} of {prompts.length}
+        {index + 1} of {TOTAL_PROMPTS}
       </Text>
       <Text style={styles.textPrompt}>{prompt}</Text>
       <TextInput
@@ -1101,13 +1094,13 @@ const GroundingBody: React.FC<{
         multiline
         textAlignVertical="top"
         style={styles.textInput}
-        placeholder="Type what you feel.."
+        placeholder={t("room.phases.stepModal.textInputPlaceholder")}
         placeholderTextColor="#B0B0B5"
         testID="step_modal_grounding_input"
         maxLength={MAX_TEXT}
       />
       {isRoomGuided ? (
-        <Text style={styles.groundingHint}>or just notice quietly.</Text>
+        <Text style={[styles.groundingHint, isHindi && { letterSpacing: 0 }]}>{t('room.phases.grounding.hint')}</Text>
       ) : null}
       <TouchableOpacity
         style={[styles.primaryAction, !enabled ? styles.ctrlDisabled : null]}
@@ -1117,8 +1110,8 @@ const GroundingBody: React.FC<{
           isLast ? "step_modal_grounding_done" : "step_modal_grounding_next"
         }
       >
-        <Text style={styles.primaryActionLabel}>
-          {isLast ? "Done" : "Next"}
+        <Text style={[styles.primaryActionLabel, isHindi && { letterSpacing: 0 }]}>
+          {isLast ? t('room.phases.common.done') : t('room.phases.common.next')}
         </Text>
       </TouchableOpacity>
     </ScrollView>
@@ -1150,9 +1143,11 @@ const VoiceNoteBody: React.FC<VoiceNoteBodyProps> = ({
   stepPayload,
   onDone,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const prompt =
     (stepPayload?.prompt && String(stepPayload.prompt)) ||
-    "Leave a voice note — what are you releasing?";
+    t("room.phases.stepModal.voiceNoteDefaultPrompt");
 
   const [phase, setPhase] = useState<VoiceNotePhase>("idle");
   const [elapsed, setElapsed] = useState<number>(0);
@@ -1203,13 +1198,13 @@ const VoiceNoteBody: React.FC<VoiceNoteBodyProps> = ({
       </Text>
 
       {phase === "recording" ? (
-        <Text style={styles.voiceNoteStatus}>Recording…</Text>
+        <Text style={[styles.voiceNoteStatus, isHindi && { letterSpacing: 0 }]}>{t('room.phases.voice.statusRecording')}</Text>
       ) : phase === "stopped" ? (
-        <Text style={styles.voiceNoteStatus}>
-          Recorded {timeLabel} — tap Done to save
+        <Text style={[styles.voiceNoteStatus, isHindi && { letterSpacing: 0 }]}>
+          {t('room.phases.voice.statusStopped', { time: timeLabel })}
         </Text>
       ) : (
-        <Text style={styles.voiceNoteStatus}>Tap the circle to begin</Text>
+        <Text style={[styles.voiceNoteStatus, isHindi && { letterSpacing: 0 }]}>{t('room.phases.voice.statusIdle')}</Text>
       )}
 
       <TouchableOpacity
@@ -1249,7 +1244,7 @@ const VoiceNoteBody: React.FC<VoiceNoteBodyProps> = ({
           onPress={handleDone}
           testID="step_modal_voice_note_done"
         >
-          <Text style={styles.primaryActionLabel}>Done</Text>
+          <Text style={[styles.primaryActionLabel, isHindi && { letterSpacing: 0 }]}>{t('room.phases.common.done')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -1273,11 +1268,13 @@ const MAX_CONTACT = 40;
 const MAX_REACH_OUT = 280;
 
 const ReachOutBody: React.FC<ReachOutBodyProps> = ({ stepPayload, onDone }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const mm = stepPayload?.memory_modal;
   const prompt =
     (stepPayload?.prompt && String(stepPayload.prompt)) ||
-    "Reach out — a short message to someone who matters.";
-  const primaryLabel = mm?.primary_label || "Copy and close";
+    t("room.phases.stepModal.reachOutDefaultPrompt");
+  const primaryLabel = mm?.primary_label || t("room.phases.stepModal.reachOutDefaultLabel");
 
   const [contact, setContact] = useState<string>("");
   const [message, setMessage] = useState<string>("");
@@ -1330,7 +1327,7 @@ const ReachOutBody: React.FC<ReachOutBodyProps> = ({ stepPayload, onDone }) => {
         value={contact}
         onChangeText={(v) => setContact(v.slice(0, MAX_CONTACT))}
         style={styles.reachOutContactInput}
-        placeholder="Who — e.g. my mom (optional)"
+        placeholder={t("room.phases.stepModal.reachOutContactPlaceholder")}
         placeholderTextColor="#B0B0B5"
         testID="step_modal_reach_out_contact"
         maxLength={MAX_CONTACT}
@@ -1342,7 +1339,7 @@ const ReachOutBody: React.FC<ReachOutBodyProps> = ({ stepPayload, onDone }) => {
         multiline
         textAlignVertical="top"
         style={styles.textInput}
-        placeholder="Your message…"
+        placeholder={t("room.phases.stepModal.reachOutMessagePlaceholder")}
         placeholderTextColor="#B0B0B5"
         testID="step_modal_reach_out_message"
         maxLength={MAX_REACH_OUT}
@@ -1358,7 +1355,7 @@ const ReachOutBody: React.FC<ReachOutBodyProps> = ({ stepPayload, onDone }) => {
           onPress={handleCopyAndClose}
           testID="step_modal_reach_out_copy_done"
         >
-          <Text style={styles.primaryActionLabel}>{primaryLabel}</Text>
+          <Text style={[styles.primaryActionLabel, isHindi && { letterSpacing: 0 }]}>{primaryLabel}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -1367,7 +1364,7 @@ const ReachOutBody: React.FC<ReachOutBodyProps> = ({ stepPayload, onDone }) => {
           onPress={handleDoneWithoutCopy}
           testID="step_modal_reach_out_done"
         >
-          <Text style={styles.ctrlBtnLabel}>Save without copying</Text>
+          <Text style={[styles.ctrlBtnLabel, isHindi && { letterSpacing: 0 }]}>{t('room.phases.stepModal.saveWithoutCopying')}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -1379,17 +1376,19 @@ const ReachOutBody: React.FC<ReachOutBodyProps> = ({ stepPayload, onDone }) => {
 const UnknownBody: React.FC<{ onDone: (extra: StepModalResult) => void }> = ({
   onDone,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   return (
     <View style={styles.timerRoot}>
-      <Text style={styles.timerCue}>
-        This step will open an inline panel in a future release.
+      <Text style={[styles.timerCue, isHindi && { letterSpacing: 0 }]}>
+        {t('room.phases.stepModal.unknownStepMessage')}
       </Text>
       <TouchableOpacity
         style={[styles.ctrlBtn, styles.ctrlDone]}
         onPress={() => onDone({})}
         testID="step_modal_unknown_done"
       >
-        <Text style={[styles.primaryActionLabel, { fontSize: 15 }]}>Done</Text>
+        <Text style={[styles.primaryActionLabel, { fontSize: 15 }, isHindi && { letterSpacing: 0 }]}>{t('room.phases.common.done')}</Text>
       </TouchableOpacity>
     </View>
   );

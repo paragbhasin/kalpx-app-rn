@@ -15,6 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '../../../theme/colors';
 import { Fonts } from '../../../theme/fonts';
@@ -38,6 +39,8 @@ const TextPhase: React.FC<Props> = ({
   onSave,
   onSkip,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === 'hi';
   const [text, setText] = useState('');
   const insets = useSafeAreaInsets();
   const charsLeft = maxChars - text.length;
@@ -72,7 +75,7 @@ const TextPhase: React.FC<Props> = ({
         />
 
         {nearLimit && (
-          <Text style={styles.charCount}>{charsLeft} remaining</Text>
+          <Text style={[styles.charCount, isHindi && { letterSpacing: 0 }]}>{t('room.phases.text.charsRemaining', { count: charsLeft })}</Text>
         )}
 
         <View style={styles.actions}>
@@ -81,11 +84,11 @@ const TextPhase: React.FC<Props> = ({
             onPress={() => onSave(text.trim())}
             activeOpacity={0.7}
           >
-            <Text style={styles.ctaText}>{ctaLabel}</Text>
+            <Text style={[styles.ctaText, isHindi && { letterSpacing: 0 }]}>{ctaLabel}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={onSkip} style={styles.skipBtn} hitSlop={{ top: 8, bottom: 8 }}>
-            <Text style={styles.skipText}>Move forward without writing</Text>
+            <Text style={[styles.skipText, isHindi && { letterSpacing: 0 }]}>{t('room.phases.common.moveForwardWithoutWriting')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

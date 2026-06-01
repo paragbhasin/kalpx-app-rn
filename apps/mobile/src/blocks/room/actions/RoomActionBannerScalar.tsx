@@ -12,6 +12,7 @@
 
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 
 import type { PrincipleBanner } from "../types";
 
@@ -22,10 +23,12 @@ interface Props {
 }
 
 const RoomActionBannerScalar: React.FC<Props> = ({ banner, cardLabel, testID }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   return (
     <View style={styles.wrap} testID={testID ?? "room_principle_banner"}>
       <View style={styles.card}>
-        <Text style={styles.cardLabel}>{cardLabel ?? "A teaching"}</Text>
+        <Text style={[styles.cardLabel, isHindi && { letterSpacing: 0 }]}>{cardLabel ?? t("room.actions.aTeaching")}</Text>
         <Text style={styles.line}>{banner.wisdom_anchor_line}</Text>
       </View>
     </View>

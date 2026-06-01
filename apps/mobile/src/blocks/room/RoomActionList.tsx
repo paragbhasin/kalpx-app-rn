@@ -9,6 +9,7 @@
 
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 
 import {
   RoomActionCarryPill,
@@ -26,6 +27,8 @@ interface Props {
 }
 
 const RoomActionList: React.FC<Props> = ({ envelope }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const { actions } = envelope;
 
   const sortedActions = [...actions].sort((a, b) => {
@@ -42,13 +45,14 @@ const RoomActionList: React.FC<Props> = ({ envelope }) => {
       {sortedActions.map((action, index) => (
         <View key={action.action_id} style={styles.row}>
           {action.primary_recommendation && index === 0 ? (
-            <Text style={styles.startHereLabel}>Start here</Text>
+            <Text style={[styles.startHereLabel, isHindi && { letterSpacing: 0 }]}>{t("room.startHere")}</Text>
           ) : null}
           {renderActionComponent(
             action,
             index,
             envelope,
             action.primary_recommendation === true,
+            t,
           )}
         </View>
       ))}
@@ -61,10 +65,11 @@ function renderActionComponent(
   index: number,
   envelope: RoomRenderV1,
   isPrimary: boolean,
+  t: (key: string) => string,
 ) {
-  const kindLabelValue = ACTION_KIND_LABELS[action.action_type];
+  const kindLabelKey = ACTION_KIND_LABELS[action.action_type];
   const kindLabel =
-    kindLabelValue && kindLabelValue.length > 0 ? kindLabelValue : undefined;
+    kindLabelKey && kindLabelKey.length > 0 ? t(kindLabelKey) : undefined;
 
   switch (action.action_type) {
     case "runner_mantra":

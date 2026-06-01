@@ -31,6 +31,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import type { InquiryCategory, InquiryPayload } from "../types";
@@ -67,6 +68,8 @@ const InquiryModal: React.FC<Props> = ({
   onCategorySelected,
   isRoomGuided = false,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const insets = useSafeAreaInsets();
   const [selected, setSelected] = useState<InquiryCategory | null>(null);
   const [journalOpen, setJournalOpen] = useState<boolean>(false);
@@ -195,13 +198,14 @@ const InquiryModal: React.FC<Props> = ({
                     }
                   >
                     <Text
-                      style={
+                      style={[
                         showImmersiveDetail || showImmersiveJournal
                           ? styles.screenBackButtonText
-                          : styles.headerCancel
-                      }
+                          : styles.headerCancel,
+                        isHindi && { letterSpacing: 0 },
+                      ]}
                     >
-                      Back
+                      {t('room.phases.common.back')}
                     </Text>
                   </TouchableOpacity>
                 ) : (
@@ -211,7 +215,7 @@ const InquiryModal: React.FC<Props> = ({
                     accessibilityLabel="Cancel"
                     testID="inquiry_modal_cancel"
                   >
-                    <Text style={styles.headerCancel}>Cancel</Text>
+                    <Text style={[styles.headerCancel, isHindi && { letterSpacing: 0 }]}>{t('room.phases.common.cancel')}</Text>
                   </TouchableOpacity>
                 )}
                 {/* <Text style={styles.headerTitle} numberOfLines={1}>
@@ -230,7 +234,7 @@ const InquiryModal: React.FC<Props> = ({
                   keyboardShouldPersistTaps="handled"
                 >
                   {categories.length === 0 ? (
-                    <Text style={styles.emptyHint}>No categories.</Text>
+                    <Text style={[styles.emptyHint, isHindi && { letterSpacing: 0 }]}>{t('room.phases.inquiryModal.noCategories')}</Text>
                   ) : (
                     <>
                       {showImmersiveList ? (
@@ -338,10 +342,10 @@ const InquiryModal: React.FC<Props> = ({
                           onPress={handlePractice}
                           testID="inquiry_modal_try_practice"
                         >
-                          <Text style={styles.primaryActionLabel}>
+                          <Text style={[styles.primaryActionLabel, isHindi && { letterSpacing: 0 }]}>
                             {selected.practice_label
                               ? selected.practice_label
-                              : "Try a practice"}
+                              : t('room.phases.inquiryModal.tryAPractice')}
                           </Text>
                         </TouchableOpacity>
                       ) : null}
@@ -357,9 +361,10 @@ const InquiryModal: React.FC<Props> = ({
                           style={[
                             styles.primaryActionLabel,
                             isScreen ? styles.screenSecondaryActionLabel : null,
+                            isHindi && { letterSpacing: 0 },
                           ]}
                         >
-                          {isRoomGuided ? "Write a few words" : "Journal on this"}
+                          {isRoomGuided ? t('room.phases.inquiryModal.writeAFewWords') : t('room.phases.inquiryModal.journalOnThis')}
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -381,7 +386,7 @@ const InquiryModal: React.FC<Props> = ({
                           styles.textInput,
                           isScreen ? styles.screenTextInput : null,
                         ]}
-                        placeholder="Write what comes..."
+                        placeholder={t('room.phases.inquiryModal.journalPlaceholder')}
                         placeholderTextColor="#B0B0B5"
                         testID="inquiry_modal_journal_input"
                         maxLength={MAX_TEXT}
@@ -406,7 +411,7 @@ const InquiryModal: React.FC<Props> = ({
                         onPress={handleJournalDone}
                         testID="inquiry_modal_journal_done"
                       >
-                        <Text style={styles.primaryActionLabel}>Done</Text>
+                        <Text style={[styles.primaryActionLabel, isHindi && { letterSpacing: 0 }]}>{t('room.phases.common.done')}</Text>
                       </TouchableOpacity>
                     </View>
                   )}

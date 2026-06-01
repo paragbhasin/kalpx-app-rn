@@ -213,10 +213,11 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
 
     (async () => {
       try {
+        const locale = i18n.language || "en";
         const fetcher = isDay14Fetch
           ? mitraJourneyDay14View
           : mitraJourneyDay7View;
-        const result = await fetcher();
+        const result = await fetcher(null, locale);
         if (isCancelled) return;
 
         if (result.envelope) {

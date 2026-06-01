@@ -1303,14 +1303,20 @@ export function mitraJourneyDailyView(
 
 export function mitraJourneyDay7View(
   etag: string | null = null,
+  locale?: string,
 ): Promise<V3GetResult<V3Day7ViewEnvelope>> {
-  return v3Get<V3Day7ViewEnvelope>("mitra/v3/journey/day-7-view/", etag);
+  const params: Record<string, string> = {};
+  if (locale) params.locale = locale;
+  return v3Get<V3Day7ViewEnvelope>("mitra/v3/journey/day-7-view/", etag, Object.keys(params).length ? params : undefined);
 }
 
 export function mitraJourneyDay14View(
   etag: string | null = null,
+  locale?: string,
 ): Promise<V3GetResult<V3Day14ViewEnvelope>> {
-  return v3Get<V3Day14ViewEnvelope>("mitra/v3/journey/day-14-view/", etag);
+  const params: Record<string, string> = {};
+  if (locale) params.locale = locale;
+  return v3Get<V3Day14ViewEnvelope>("mitra/v3/journey/day-14-view/", etag, Object.keys(params).length ? params : undefined);
 }
 
 async function v3DecisionPost(

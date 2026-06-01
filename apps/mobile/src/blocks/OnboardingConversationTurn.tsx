@@ -30,6 +30,7 @@ import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { VoiceTextInput } from "../components/VoiceTextInput";
 import { executeAction } from "../engine/actionExecutor";
+import { mitraCompleteOnboarding } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { interpolate } from "../engine/utils/interpolation";
 import { RootState } from "../store";
@@ -162,6 +163,59 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
       }),
     ]).start();
   }, [fadeAnim, replyAnim]);
+
+  // Re-fetch recognition copy when language changes while on turn 7.
+  // The recognition_line and recognition_body_lines were fetched at the
+  // locale that was active when the user completed the onboarding stages.
+  // If the user switches language before reading the recognition screen,
+  // re-call /onboarding/complete/ with the new locale so the backend
+  // returns translated copy without requiring the user to redo onboarding.
+  const isTurn7Active = !!block.isTurn7;
+  const prevLangRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!isTurn7Active) return;
+    // Skip the initial mount — the data is already fresh from actionExecutor.
+    if (prevLangRef.current === null) {
+      prevLangRef.current = i18n.language;
+      return;
+    }
+    if (prevLangRef.current === i18n.language) return;
+    prevLangRef.current = i18n.language;
+
+    const draft = (screenData as any)?.onboarding_draft_state;
+    if (!draft?.stage0_choice && !draft?.path) {
+      // No picks available — clear stale recognition so user does not see
+      // the wrong-language copy; the screen will be empty until they redo onboarding.
+      const { screenActions } = require("../store/screenSlice");
+      const { store } = require("../store");
+      store.dispatch(screenActions.setScreenValue({ key: "recognition_line", value: null }));
+      store.dispatch(screenActions.setScreenValue({ key: "recognition_body_lines", value: [] }));
+      return;
+    }
+
+    mitraCompleteOnboarding({
+      stage0_choice: draft.stage0_choice || draft.path || "support",
+      stage1_choice: draft.stage1_choice || "",
+      stage2_choice: draft.stage2_choice || "",
+      stage3_choice: draft.stage3_choice || (null as unknown as string),
+      guidance_mode: draft.guidance_mode || "hybrid",
+      life_context: draft.life_context || null,
+      locale: i18n.language,
+      freeforms: {
+        stage1: draft.freeforms?.stage1 || null,
+        stage2: draft.freeforms?.stage2 || null,
+        stage3: draft.freeforms?.stage3 || null,
+      },
+    }).then((complete) => {
+      if (!complete) return;
+      const { screenActions } = require("../store/screenSlice");
+      const { store } = require("../store");
+      store.dispatch(screenActions.setScreenValue({ key: "recognition_line", value: complete.recognition?.line || null }));
+      store.dispatch(screenActions.setScreenValue({ key: "recognition_body_lines", value: complete.recognition?.body_lines || [] }));
+    }).catch(() => {
+      // Silent: retain previous-locale copy rather than blanking on network error.
+    });
+  }, [i18n.language, isTurn7Active]);
 
   const inlineImageSource = resolveBlockImage(block.image?.url);
   const headlineLines = (block.headline || "").split("\n").filter(Boolean);

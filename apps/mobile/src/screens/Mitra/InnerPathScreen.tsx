@@ -245,7 +245,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
           // Embedded: DynamicEngine (already on screen) re-renders when schema switches.
           // Standalone: navigation.replace opens DynamicEngine.
           try {
-            const env7 = await mitraJourneyDay7View();
+            const env7 = await mitraJourneyDay7View(null, i18n.language || "en");
             if (cancelled) return;
             if (__DEV__) {
               console.log(
@@ -321,7 +321,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                 routeRunId,
                 "BEFORE mitraJourneyDay14View",
               );
-            const env14 = await mitraJourneyDay14View();
+            const env14 = await mitraJourneyDay14View(null, i18n.language || "en");
             if (__DEV__)
               console.log(
                 "[InnerPathScreen]",

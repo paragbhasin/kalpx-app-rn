@@ -334,13 +334,15 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
               <Text style={styles.currentCountText}>{chantCount}</Text>
               <Text style={styles.totalCountText}> / {selectedTarget}</Text>
             </View>
-            {/* sessionCount starts at today's base — only show week/lifetime if they add context */}
-            {mantraRef && (japaEngine.weekCount > japaEngine.sessionCount || japaEngine.lifetimeCount > japaEngine.sessionCount) && (
+            {mantraRef && (japaEngine.todayCount > 0 || japaEngine.weekCount > 0 || japaEngine.lifetimeCount > 0) && (
               <View style={styles.japaStatsRow}>
-                {japaEngine.weekCount > japaEngine.sessionCount && (
+                {japaEngine.todayCount > 0 && (
+                  <Text style={styles.japaStatItem}>Today {japaEngine.todayCount.toLocaleString()}</Text>
+                )}
+                {japaEngine.weekCount > 0 && (
                   <Text style={styles.japaStatItem}>Week {japaEngine.weekCount.toLocaleString()}</Text>
                 )}
-                {japaEngine.lifetimeCount > japaEngine.sessionCount && (
+                {japaEngine.lifetimeCount > 0 && (
                   <Text style={styles.japaStatItem}>Lifetime {japaEngine.lifetimeCount.toLocaleString()}</Text>
                 )}
               </View>

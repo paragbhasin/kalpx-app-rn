@@ -464,15 +464,19 @@ export default function QuickResetScreen({
         <View style={styles.progressWrap}>
           <Text style={styles.progressMain}>{beadCount}</Text>
         </View>
-        {/* sessionCount IS today's total — no separate Today row needed */}
-        {(japaEngine.weekCount > japaEngine.sessionCount || japaEngine.lifetimeCount > japaEngine.sessionCount) && (
+        {(japaEngine.todayCount > 0 || japaEngine.weekCount > 0 || japaEngine.lifetimeCount > 0) && (
           <View style={styles.statsRow}>
-            {japaEngine.weekCount > japaEngine.sessionCount && (
+            {japaEngine.todayCount > 0 && (
+              <Text style={styles.statItem}>
+                Today {japaEngine.todayCount.toLocaleString()}
+              </Text>
+            )}
+            {japaEngine.weekCount > 0 && (
               <Text style={styles.statItem}>
                 Week {japaEngine.weekCount.toLocaleString()}
               </Text>
             )}
-            {japaEngine.lifetimeCount > japaEngine.sessionCount && (
+            {japaEngine.lifetimeCount > 0 && (
               <Text style={styles.statItem}>
                 Lifetime {japaEngine.lifetimeCount.toLocaleString()}
               </Text>

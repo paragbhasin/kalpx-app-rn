@@ -83,11 +83,15 @@ export default function DigitalMalaScreen() {
     useCallback(() => {
       updateBackground(require("../../../assets/beige_bg.webp"));
       updateHeaderHidden(false);
+      // Fetch fresh counts when screen comes into focus
+      japaEngine.refreshStats();
       return () => {
         updateBackground(null);
         updateHeaderHidden(false);
+        // Flush unsynced delta when leaving
+        japaEngine.syncNow();
       };
-    }, [updateBackground, updateHeaderHidden]),
+    }, [updateBackground, updateHeaderHidden, japaEngine.refreshStats, japaEngine.syncNow]),
   );
 
   const ringSpin = useRef(new Animated.Value(0)).current;

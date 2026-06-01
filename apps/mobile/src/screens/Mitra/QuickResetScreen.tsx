@@ -237,6 +237,19 @@ export default function QuickResetScreen({
     onGoalReached: useCallback(() => { onGoalReachedRef.current?.(); }, []),
   });
   const beadCount = japaEngine.sessionCount;
+
+  // Sync on leave, refresh on enter — no API per tap
+  useFocusEffect(
+    useCallback(() => {
+      // Screen focused: fetch fresh counts from server
+      japaEngine.refreshStats();
+      return () => {
+        // Screen blurred (navigating away): flush any unsynced delta immediately
+        japaEngine.syncNow();
+      };
+    }, [japaEngine.refreshStats, japaEngine.syncNow]),
+  );
+
   const [iastExpanded, setIastExpanded] = useState(false);
   const [devExpanded, setDevExpanded] = useState(false);
   const [meaningExpanded, setMeaningExpanded] = useState(false);

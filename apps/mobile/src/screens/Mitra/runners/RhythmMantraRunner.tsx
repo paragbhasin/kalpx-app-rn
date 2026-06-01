@@ -1,5 +1,5 @@
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
-import React, { useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 import { SafeAreaView, StyleSheet } from "react-native";
 import MantraRunnerView from "../../../blocks/runners/MantraRunnerView";
 import { useScreenStore } from "../../../engine/useScreenBridge";
@@ -12,10 +12,18 @@ export default function RhythmMantraRunner() {
   const { item, slot, journeyId, dayNumber } = route.params;
   const updateBackground = useScreenStore((state) => state.updateBackground);
 
+  const engineApiRef = useRef<{ syncNow: () => Promise<void>; refreshStats: () => Promise<void> } | null>(null);
+
   useFocusEffect(
     useCallback(() => {
       updateBackground(BEIGE_BG);
-      return () => updateBackground(null);
+      // Screen focused — fetch fresh counts
+      engineApiRef.current?.refreshStats();
+      return () => {
+        updateBackground(null);
+        // Screen blurred — flush unsynced delta
+        engineApiRef.current?.syncNow();
+      };
     }, [updateBackground]),
   );
 
@@ -25,6 +33,7 @@ export default function RhythmMantraRunner() {
         item={item}
         mantraRef={item.item_id ?? null}
         sourceSurface="daily_rhythm"
+        onEngineReady={(api) => { engineApiRef.current = api; }}
         onComplete={(repsCompleted, durationSec) => {
           navigation.replace("RhythmMantraCompletion", {
             item_id: item.item_id,

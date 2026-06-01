@@ -56,9 +56,11 @@ export interface MantraRunnerViewProps {
   isCommunityRunner?: boolean;
   addLoading?: boolean;
   onAddToPractice?: () => void;
-  // Japa engine wiring — pass these to connect counts to the shared engine
+  // Japa engine wiring
   mantraRef?: string | null;
   sourceSurface?: JapaSourceSurface;
+  // Called by parent screen's useFocusEffect so the engine syncs on nav events
+  onEngineReady?: (api: { syncNow: () => Promise<void>; refreshStats: () => Promise<void> }) => void;
 }
 
 const hasContent = (val: any): boolean => {
@@ -179,6 +181,7 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   onAddToPractice,
   mantraRef,
   sourceSurface = "inner_path",
+  onEngineReady,
 }) => {
   const [selectedTarget, setSelectedTarget] = useState(initialReps || 27);
   const [meaningExpanded, setMeaningExpanded] = useState(false);
@@ -202,6 +205,12 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   // chantCount: use engine count when wired, else fallback to local state
   const [localCount, setLocalCount] = useState(0);
   const chantCount = mantraRef ? japaEngine.sessionCount : localCount;
+
+  // Expose sync/refresh to parent screen so it can hook into navigation events
+  useEffect(() => {
+    if (!mantraRef || !onEngineReady) return;
+    onEngineReady({ syncNow: japaEngine.syncNow, refreshStats: japaEngine.refreshStats });
+  }, [mantraRef, onEngineReady, japaEngine.syncNow, japaEngine.refreshStats]);
 
   useEffect(() => {
     stopRoomAmbientAudio().catch(() => {});

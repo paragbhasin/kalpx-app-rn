@@ -47,7 +47,7 @@ import {
 // ---------------------------------------------------------------------------
 
 const SYNC_COUNT_THRESHOLD = 50;
-const SYNC_INTERVAL_MS = 30_000;
+const SYNC_INTERVAL_MS = 60_000;  // 60s safety-net — screen blur/focus now handle the common case
 const MALA_ROUND = 108;
 const UNDO_STACK_MAX = 10;
 const PENDING_QUEUE_KEY = 'japa_pending_queue';
@@ -91,6 +91,9 @@ export interface JapaEngineResult {
   increment: () => void;
   undo: () => void;
   completeSession: () => Promise<void>;
+  // Navigation hooks — call these from useFocusEffect in the screen
+  syncNow: () => Promise<void>;       // flush unsynced delta → call on screen blur
+  refreshStats: () => Promise<void>;  // fetch fresh stats from server → call on screen focus
 }
 
 export interface UseJapaEngineOptions {
@@ -358,6 +361,47 @@ export function useJapaEngine({
     }
   }, [enqueuePendingBatch, ensureSessionStarted, persistStats, sourceSurface, tz]);
 
+  // ── Refresh stats from server (call on screen focus) ──────────────────────
+
+  const refreshStats = useCallback(async () => {
+    if (!mantraRef) return;
+    try {
+      const statsResp = await japaGetStats(mantraRef);
+      if (!statsResp?.stats?.length) return;
+      const row = statsResp.stats.find((s) => s.mantra_ref === mantraRef);
+      if (!row) return;
+
+      const sc = sessionCountRef.current;
+      const nc = Math.max(0, sc - sessionInitialCount.current);
+
+      // Update baselines so displayed values match server + any unsynced local taps
+      cachedWeekBase.current = row.week_count - nc;
+      cachedLifetimeBase.current = row.lifetime_count - nc;
+
+      // Reconcile today: if server's today_count > sessionCount, another device/session
+      // added counts — bump our sessionCount to match so user sees the latest total
+      if (row.today_count > sc) {
+        const gap = row.today_count - sc;
+        sessionInitialCount.current = sessionInitialCount.current + gap;
+        sessionCountRef.current = row.today_count;
+        lastSyncedCount.current = row.today_count;
+        setSessionCount(row.today_count);
+      }
+
+      // Persist updated baselines to AsyncStorage
+      persistStats(
+        row.today_count - Math.max(0, sessionCountRef.current - sessionInitialCount.current),
+        cachedWeekBase.current,
+        cachedLifetimeBase.current,
+      );
+
+      // Trigger re-render for week/lifetime
+      setSessionCount((c) => c);
+    } catch {
+      // swallow — stale local values remain, not a critical failure
+    }
+  }, [mantraRef, persistStats]);
+
   // ── Initialise on mantraRef change ────────────────────────────────────────
 
   useEffect(() => {
@@ -606,5 +650,7 @@ export function useJapaEngine({
     increment,
     undo,
     completeSession,
+    syncNow,
+    refreshStats,
   };
 }

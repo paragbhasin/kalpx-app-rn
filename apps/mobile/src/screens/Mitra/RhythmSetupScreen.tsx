@@ -770,6 +770,7 @@ export default function RhythmSetupScreen({
           band,
           item.item_id,
           item.item_type,
+          i18n.language,
         );
         if (resolved?.resolved) {
           enrichedItem = {

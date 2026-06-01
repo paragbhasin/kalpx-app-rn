@@ -237,12 +237,14 @@ export async function mitraRhythmResolveItem(
   slot: string,
   itemId: string,
   itemType: string,
+  locale?: string,
 ): Promise<RhythmResolvedItem | null> {
   try {
     const res = await api.post<RhythmResolvedItem>('mitra/v3/rhythm/resolve-item/', {
       slot,
       item_id: itemId,
       item_type: itemType,
+      ...(locale ? { locale } : {}),
     });
     return res.data;
   } catch (err: any) {

@@ -79,19 +79,24 @@ export default function DigitalMalaScreen() {
     };
   });
 
+  const japaRefreshRef = useRef(japaEngine.refreshStats);
+  const japaSyncRef = useRef(japaEngine.syncNow);
+  useEffect(() => {
+    japaRefreshRef.current = japaEngine.refreshStats;
+    japaSyncRef.current = japaEngine.syncNow;
+  }, [japaEngine.refreshStats, japaEngine.syncNow]);
+
   useFocusEffect(
     useCallback(() => {
       updateBackground(require("../../../assets/beige_bg.webp"));
       updateHeaderHidden(false);
-      // Fetch fresh counts when screen comes into focus
-      japaEngine.refreshStats();
+      japaRefreshRef.current?.();
       return () => {
         updateBackground(null);
         updateHeaderHidden(false);
-        // Flush unsynced delta when leaving
-        japaEngine.syncNow();
+        japaSyncRef.current?.();
       };
-    }, [updateBackground, updateHeaderHidden, japaEngine.refreshStats, japaEngine.syncNow]),
+    }, [updateBackground, updateHeaderHidden]),
   );
 
   const ringSpin = useRef(new Animated.Value(0)).current;
@@ -147,11 +152,7 @@ export default function DigitalMalaScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ImageBackground
-        source={require("../../../assets/beige_bg.webp")}
-        style={styles.bg}
-        imageStyle={{ resizeMode: "cover" }}
-      >
+ 
         <ScrollView
           contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 40 }]}
           showsVerticalScrollIndicator={false}
@@ -269,7 +270,7 @@ export default function DigitalMalaScreen() {
             </TouchableOpacity>
           </View>
         </ScrollView>
-      </ImageBackground>
+
     </SafeAreaView>
   );
 }

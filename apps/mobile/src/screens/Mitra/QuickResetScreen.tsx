@@ -238,16 +238,25 @@ export default function QuickResetScreen({
   });
   const beadCount = japaEngine.sessionCount;
 
-  // Sync on leave, refresh on enter — no API per tap
+  // Keep stable refs so the useFocusEffect below never re-fires when the engine
+  // re-initialises (mantraRef changes null → real ID after API responds).
+  // Re-firing with changing deps was disrupting the navigation lifecycle and
+  // clearing the global background applied by the first useFocusEffect above.
+  const japaRefreshRef = useRef(japaEngine.refreshStats);
+  const japaSyncRef = useRef(japaEngine.syncNow);
+  useEffect(() => {
+    japaRefreshRef.current = japaEngine.refreshStats;
+    japaSyncRef.current = japaEngine.syncNow;
+  }, [japaEngine.refreshStats, japaEngine.syncNow]);
+
+  // Sync on leave, refresh on enter — empty deps = stable, fires once on focus
   useFocusEffect(
     useCallback(() => {
-      // Screen focused: fetch fresh counts from server
-      japaEngine.refreshStats();
+      japaRefreshRef.current?.();
       return () => {
-        // Screen blurred (navigating away): flush any unsynced delta immediately
-        japaEngine.syncNow();
+        japaSyncRef.current?.();
       };
-    }, [japaEngine.refreshStats, japaEngine.syncNow]),
+    }, []),
   );
 
   const [iastExpanded, setIastExpanded] = useState(false);
@@ -657,11 +666,7 @@ export default function QuickResetScreen({
       <SafeAreaView
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
-        <ImageBackground
-          source={require("../../../assets/beige_bg.webp")}
-          style={styles.background}
-          imageStyle={styles.backgroundImage}
-        >
+        <View style={styles.background}>
           <View style={styles.centerContent}>
             <ActivityIndicator size="large" color="#C99317" />
           </View>
@@ -671,7 +676,7 @@ export default function QuickResetScreen({
             message={highlightedToastMessage}
             onClose={handleHighlightedToastClose}
           />
-        </ImageBackground>
+        </View>
       </SafeAreaView>
     );
   }
@@ -681,11 +686,7 @@ export default function QuickResetScreen({
       <SafeAreaView
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
-        <ImageBackground
-          source={require("../../../assets/beige_bg.webp")}
-          style={styles.background}
-          imageStyle={styles.backgroundImage}
-        >
+        <View style={styles.background}>
           <View style={styles.centerContent}>
             <Text style={styles.sectionTitle}>Unable to open Quick Reset</Text>
             <Text style={styles.subtleText}>Please try again.</Text>
@@ -703,7 +704,7 @@ export default function QuickResetScreen({
             message={highlightedToastMessage}
             onClose={handleHighlightedToastClose}
           />
-        </ImageBackground>
+        </View>
       </SafeAreaView>
     );
   }
@@ -714,11 +715,7 @@ export default function QuickResetScreen({
       <SafeAreaView
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
-        <ImageBackground
-          source={require("../../../assets/beige_bg.webp")}
-          style={styles.background}
-          imageStyle={styles.backgroundImage}
-        >
+        <View style={styles.background}>
           <ScrollView
             contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
             showsVerticalScrollIndicator={false}
@@ -735,7 +732,7 @@ export default function QuickResetScreen({
             message={highlightedToastMessage}
             onClose={handleHighlightedToastClose}
           />
-        </ImageBackground>
+        </View>
       </SafeAreaView>
     );
   }
@@ -745,11 +742,7 @@ export default function QuickResetScreen({
       <SafeAreaView
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
-        <ImageBackground
-          source={require("../../../assets/beige_bg.webp")}
-          style={styles.background}
-          imageStyle={styles.backgroundImage}
-        >
+        <View style={styles.background}>
           <ScrollView
             contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
             showsVerticalScrollIndicator={false}
@@ -766,7 +759,7 @@ export default function QuickResetScreen({
             message={highlightedToastMessage}
             onClose={handleHighlightedToastClose}
           />
-        </ImageBackground>
+        </View>
       </SafeAreaView>
     );
   }
@@ -778,11 +771,7 @@ export default function QuickResetScreen({
       <SafeAreaView
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
-        <ImageBackground
-          source={require("../../../assets/beige_bg.webp")}
-          style={styles.background}
-          imageStyle={styles.backgroundImage}
-        >
+        <View style={styles.background}>
           <View style={styles.centerContent}>
             <View style={styles.copyBlock}>
               {renderCopyWithBreaks(completionData.copy.headline)}
@@ -822,7 +811,7 @@ export default function QuickResetScreen({
             message={highlightedToastMessage}
             onClose={handleHighlightedToastClose}
           />
-        </ImageBackground>
+        </View>
       </SafeAreaView>
     );
   }
@@ -832,11 +821,7 @@ export default function QuickResetScreen({
     <SafeAreaView
       style={[styles.safeArea, embedded && styles.embeddedTransparent]}
     >
-      <ImageBackground
-        source={require("../../../assets/beige_bg.webp")}
-        style={styles.background}
-        imageStyle={styles.backgroundImage}
-      >
+      <View style={styles.background}>
         <View style={styles.centerContent}>
           <ActivityIndicator size="large" color="#C99317" />
         </View>
@@ -846,7 +831,7 @@ export default function QuickResetScreen({
           message={highlightedToastMessage}
           onClose={handleHighlightedToastClose}
         />
-      </ImageBackground>
+      </View>
     </SafeAreaView>
   );
 

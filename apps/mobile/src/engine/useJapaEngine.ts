@@ -6,19 +6,20 @@
  *
  * Architecture:
  *   - sessionCount lives in React state → instant UI update on every tap
+ *   - today/week/lifetime computed as (cachedBase + sessionCount) → also instant
+ *   - cachedBase = what existed BEFORE this session (loaded from AsyncStorage)
+ *   - After each sync: cachedBase = serverValue - sessionCount (keeps display correct)
  *   - Session state persisted to AsyncStorage on every tap (fire-and-forget)
  *   - Sync fires at SYNC_COUNT_THRESHOLD taps OR SYNC_INTERVAL_MS elapsed
  *   - Failed syncs queued in AsyncStorage → flushed when app returns to foreground
- *   - Undo stack: last 10 taps undoable within a session (never crosses sync boundary)
+ *   - Undo stack: last 10 taps undoable within a session
  *   - Time goal: internal countdown timer, calls onGoalReached when expired
  *   - Count goal: detected in increment(), calls onGoalReached when hit
- *   - Week count: loaded from cached stats, displayed alongside today/lifetime
  *
- * Invariants:
- *   - increment() is synchronous — no await, never blocks UI
- *   - No API call on every tap
- *   - Counts survive app kill (AsyncStorage persists across processes)
- *   - cumulative_count is monotonically increasing per session
+ * Key invariant:
+ *   todayCount = cachedTodayBase + sessionCount
+ *   → increments on EVERY tap, never waits for backend
+ *   → backend sync only adjusts the base, display stays smooth
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -120,9 +121,6 @@ export function useJapaEngine({
 
   // ── React state (drives re-renders) ───────────────────────────────────────
   const [sessionCount, setSessionCount] = useState(0);
-  const [todayCount, setTodayCount] = useState(0);
-  const [weekCount, setWeekCount] = useState(0);
-  const [lifetimeCount, setLifetimeCount] = useState(0);
   const [elapsedMs, setElapsedMs] = useState(0);
   const [isSyncing, setIsSyncing] = useState(false);
   const [canUndo, setCanUndo] = useState(false);
@@ -138,7 +136,16 @@ export function useJapaEngine({
   const syncTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const goalReachedRef = useRef(false);
-  const undoStack = useRef<number[]>([]);  // stores counts before each increment
+  const undoStack = useRef<number[]>([]);
+
+  // Baseline counts loaded from cache before this session began.
+  // displayed today    = cachedTodayBase   + sessionCount  (updates every tap)
+  // displayed week     = cachedWeekBase    + sessionCount  (updates every tap)
+  // displayed lifetime = cachedLifetimeBase + sessionCount (updates every tap)
+  // After sync: base = serverValue - sessionCount (keeps displayed value correct)
+  const cachedTodayBase = useRef(0);
+  const cachedWeekBase = useRef(0);
+  const cachedLifetimeBase = useRef(0);
 
   // Keep sessionCountRef in sync with state
   useEffect(() => {
@@ -168,14 +175,16 @@ export function useJapaEngine({
     [goalType, goalValue, mantraRef, sourceSurface, tz],
   );
 
+  // Persists the BASELINE (pre-session) counts, not the displayed counts.
+  // On next session start these become the new baselines to add onto.
   const persistStats = useCallback(
-    (today: number, week: number, lifetime: number) => {
+    (todayBase: number, weekBase: number, lifetimeBase: number) => {
       if (!mantraRef) return;
       const data: JapaLocalStats = {
         mantraRef,
-        todayCount: today,
-        weekCount: week,
-        lifetimeCount: lifetime,
+        todayCount: todayBase,
+        weekCount: weekBase,
+        lifetimeCount: lifetimeBase,
         lastUpdated: Date.now(),
       };
       AsyncStorage.setItem(statsKey(mantraRef), JSON.stringify(data)).catch(() => {});
@@ -294,13 +303,18 @@ export function useJapaEngine({
         lastSyncTimestamp.current = Date.now();
 
         if (result.stats) {
-          const t = result.stats.today_count;
-          const w = result.stats.week_count;
-          const l = result.stats.lifetime_count;
-          setTodayCount(t);
-          setWeekCount(w);
-          setLifetimeCount(l);
-          persistStats(t, w, l);
+          // Server's today_count INCLUDES the counts we just synced.
+          // Set base = serverValue - sessionCount so that:
+          //   displayed = base + sessionCount = serverValue (correct)
+          // and future taps keep adding on top instantly.
+          const sc = sessionCountRef.current;
+          cachedTodayBase.current = result.stats.today_count - sc;
+          cachedWeekBase.current = result.stats.week_count - sc;
+          cachedLifetimeBase.current = result.stats.lifetime_count - sc;
+          // Persist bases (not displayed values) for next session startup
+          persistStats(cachedTodayBase.current, cachedWeekBase.current, cachedLifetimeBase.current);
+          // Force a re-render so the displayed counts (base + sessionCount) refresh
+          setSessionCount((c) => c);
         }
       } else {
         // Network failure — enqueue for retry
@@ -347,21 +361,28 @@ export function useJapaEngine({
     sessionStartedAt.current = Date.now();
     goalReachedRef.current = false;
     undoStack.current = [];
+    cachedTodayBase.current = 0;
+    cachedWeekBase.current = 0;
+    cachedLifetimeBase.current = 0;
 
     setSessionCount(0);
     sessionCountRef.current = 0;
     setElapsedMs(0);
     setCanUndo(false);
 
-    // Load cached stats from AsyncStorage
+    // Load cached baselines from AsyncStorage.
+    // These are the counts BEFORE this session — sessionCount starts at 0
+    // so displayed = base + 0 = base on first render.
     AsyncStorage.getItem(statsKey(mantraRef))
       .then((raw) => {
         if (!raw) return;
         const parsed: JapaLocalStats = JSON.parse(raw);
         if (parsed.mantraRef === mantraRef) {
-          setTodayCount(parsed.todayCount ?? 0);
-          setWeekCount(parsed.weekCount ?? 0);
-          setLifetimeCount(parsed.lifetimeCount ?? 0);
+          cachedTodayBase.current = parsed.todayCount ?? 0;
+          cachedWeekBase.current = parsed.weekCount ?? 0;
+          cachedLifetimeBase.current = parsed.lifetimeCount ?? 0;
+          // Trigger a re-render so the computed displayed values update
+          setSessionCount((c) => c);
         }
       })
       .catch(() => {});
@@ -493,15 +514,18 @@ export function useJapaEngine({
         timezone: tz,
       });
 
-      // Refresh stats from server after completion
+      // Refresh stats from server after completion.
+      // Session is over so sessionCount won't change — store server values
+      // directly as the new baselines for the NEXT session.
       const statsResp = await japaGetStats(mantraRef ?? undefined);
       if (statsResp?.stats?.length) {
         const row = statsResp.stats.find((s) => s.mantra_ref === mantraRef);
         if (row) {
-          setTodayCount(row.today_count);
-          setWeekCount(row.week_count);
-          setLifetimeCount(row.lifetime_count);
-          persistStats(row.today_count, row.week_count, row.lifetime_count);
+          // After completion sessionCount is frozen — use server values as next-session bases
+          cachedTodayBase.current = row.today_count - finalCount;
+          cachedWeekBase.current = row.week_count - finalCount;
+          cachedLifetimeBase.current = row.lifetime_count - finalCount;
+          persistStats(cachedTodayBase.current, cachedWeekBase.current, cachedLifetimeBase.current);
         }
       }
     }
@@ -515,6 +539,12 @@ export function useJapaEngine({
   }, [ensureSessionStarted, flushPendingQueue, mantraRef, persistStats, tz]);
 
   // ── Derived values ────────────────────────────────────────────────────────
+  // today/week/lifetime computed from baseline + current session count.
+  // This means they increment on EVERY tap — never wait for the backend.
+
+  const todayCount = Math.max(0, cachedTodayBase.current) + sessionCount;
+  const weekCount = Math.max(0, cachedWeekBase.current) + sessionCount;
+  const lifetimeCount = Math.max(0, cachedLifetimeBase.current) + sessionCount;
 
   const completedMalas = Math.floor(sessionCount / malaRound);
   const beadInRound = sessionCount % malaRound;

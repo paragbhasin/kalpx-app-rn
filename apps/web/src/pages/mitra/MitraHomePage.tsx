@@ -239,9 +239,16 @@ export function MitraHomePage() {
     return <LoadingScreen />;
   }
 
-  // Entry-view redirects for active-journey users (checkpoint / welcome-back / onboarding)
-  // daily_view falls through to the four-door companion home (Stream O)
-  if (hasActiveJourney === true && viewKey && viewKey !== "daily_view") {
+  // Entry-view redirects for active-journey users (welcome-back / onboarding only).
+  // Checkpoint views (day_7_view, day_14_view) are NOT auto-redirected — they reveal
+  // only when the user taps the Inner Path card.
+  if (
+    hasActiveJourney === true &&
+    viewKey &&
+    viewKey !== "daily_view" &&
+    viewKey !== "day_7_view" &&
+    viewKey !== "day_14_view"
+  ) {
     const redirectPath = mapJourneyEntryViewPath(viewKey);
     if (redirectPath) return <Navigate to={redirectPath} replace />;
   }
@@ -596,7 +603,13 @@ export function MitraHomePage() {
                 {/* Inner Path */}
                 <button
                   className="mitra-home-door-card"
-                  onClick={() => navigate("/en/mitra/inner-path")}
+                  onClick={() => {
+                    if (viewKey === "day_7_view" || viewKey === "day_14_view") {
+                      navigate(mapJourneyEntryViewPath(viewKey));
+                    } else {
+                      navigate("/en/mitra/inner-path");
+                    }
+                  }}
                   style={{
                     width: "100%",
                     border:

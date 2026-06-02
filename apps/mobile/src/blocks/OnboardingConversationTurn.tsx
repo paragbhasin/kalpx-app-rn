@@ -17,7 +17,7 @@
 
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   Animated,
   Image,
@@ -28,13 +28,11 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import { useSelector } from "react-redux";
 import { VoiceTextInput } from "../components/VoiceTextInput";
 import { executeAction } from "../engine/actionExecutor";
 import { mitraCompleteOnboarding } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { interpolate } from "../engine/utils/interpolation";
-import { RootState } from "../store";
 import { Fonts } from "../theme/fonts";
 import {
   TABLET_MAX_CARD_WIDTH,
@@ -78,7 +76,6 @@ interface Props {
 const GOLD_BORDER = "#9f9f9f"; // subtle gold border / card accent
 const AMBER_CTA = "#c89a47"; // primary CTA fill (matches "Begin Chanting")
 const DEEP_BROWN = "#432104"; // primary text
-const WARM_SUBTEXT = "#6b5a45"; // secondary text
 const CREAM = "#FEFDF9A1"; // card surface
 const CHIP_BG = "#FBF5F5"; // secondary chip fill
 
@@ -112,14 +109,8 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
   const { width } = useWindowDimensions();
   const isTablet = useTablet();
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
-  const user = useSelector(
-    (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
-  );
-  const isLoggedIn = !!user;
-
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const replyAnim = useRef(new Animated.Value(0)).current;
-  const [text, setText] = useState("");
   // `screenData.onboarding_turn` is a state-id string (e.g. "turn_2",
   // "turn_3_support") after the first turn response; extract digits so
   // testIDs like `onboarding_turn_<n>_root` get a real number, not NaN.
@@ -228,7 +219,6 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
 
   const inlineImageSource = resolveBlockImage(block.image?.url);
   const headlineLines = (block.headline || "").split("\n").filter(Boolean);
-  const featureMessages = messages.slice(0, 3);
   const closingMessage = messages[3] || "";
 
   const fire = async (payload: Record<string, any>) => {

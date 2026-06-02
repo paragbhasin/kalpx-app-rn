@@ -4,7 +4,6 @@ import React from "react";
 import { useSelector } from "react-redux";
 import {
   Image,
-  ImageBackground,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -41,7 +40,7 @@ export default function MitraStartScreen() {
   useFocusEffect(
     React.useCallback(() => {
       updateBackground(START_BACKGROUND);
-      updateHeaderHidden(true);
+      updateHeaderHidden(false);
 
       return () => {
         updateBackground(null);
@@ -54,18 +53,12 @@ export default function MitraStartScreen() {
   }
 
   return (
-    <ImageBackground source={START_BACKGROUND} style={styles.container}>
+    <View style={styles.container}>
       <SafeAreaView style={styles.safe}>
         <ScrollView
           contentContainerStyle={styles.scroll}
           showsVerticalScrollIndicator={false}
         >
-          <Image
-            source={require("../../../assets/KalpXlogo.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-
           <View style={styles.card}>
             <Text style={styles.title}>{t("mitraStart.title")}</Text>
 
@@ -119,7 +112,7 @@ export default function MitraStartScreen() {
           </View>
         </ScrollView>
       </SafeAreaView>
-    </ImageBackground>
+    </View>
   );
 }
 
@@ -138,13 +131,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 104,
     justifyContent: "space-between",
-  },
-  logo: {
-    height: 40,
-    aspectRatio: 118 / 48,
-    maxWidth: 118,
-    marginLeft: 6,
-    marginBottom: 24,
   },
   card: {
     backgroundColor: Platform.OS === "android" ? "#FEFCF9" : "rgba(255, 255, 255, 0.4)",

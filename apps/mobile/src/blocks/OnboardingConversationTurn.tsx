@@ -135,7 +135,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
   const hasPathHeaderCopy =
     hasHeadline || String(firstMessage).trim().length > 0;
   const isPathHeaderBlock =
-    isPathEmergesTurn && hasPathHeaderCopy && !hasReplyChips;
+    isPathEmergesTurn && hasPathHeaderCopy && !hasReplyChips && block.id !== "turn8_msg";
   const isPathButtonBlock = isPathEmergesTurn && !hasHeadline && hasReplyChips;
   const pathHeaderText = hasHeadline
     ? block.headline || ""
@@ -648,7 +648,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                 {isPathButtonBlock && chip.style === "primary" ? (
                   <View style={styles.pathBeginButton}>
                     <View style={styles.pathBeginLeaf}></View>
-                    <Text style={styles.pathBeginLabel}>{chip.label}</Text>
+                    <Text style={styles.pathBeginLabel}>{t8ChipLabel(chip)}</Text>
                   </View>
                 ) : isIntroTurn && chip.style !== "primary" ? (
                   <LinearGradient

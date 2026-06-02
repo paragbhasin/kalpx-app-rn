@@ -963,7 +963,9 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                         <Text style={[styles.whyInfoLabel, isHindi && { letterSpacing: 0 }]}>{t("innerPath.whyPanel.essence")}</Text>
                         <Text style={styles.whyInfoText}>
                           {sentence(
-                            activeWhyItem.slot === "sankalp"
+                            isHindi
+                              ? activeWhyItem.context.mitra_frame_through
+                              : activeWhyItem.slot === "sankalp"
                               ? `This is ${activeWhyItem.context.mitra_frame_through}`
                               : `${activeWhyItem.title || "This"} is ${activeWhyItem.context.mitra_frame_through}`,
                           )}

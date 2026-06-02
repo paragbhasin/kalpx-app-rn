@@ -61,7 +61,7 @@ export function useUpdateCheck() {
         if (isNewer(currentStr, latestStr)) {
           if (FORCE_UPDATE) {
             setUpdateType("force");
-            // setShowUpdate(true);
+            setShowUpdate(true);
             return;
           }
           // Soft update — respect daily snooze

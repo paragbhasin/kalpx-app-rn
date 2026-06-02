@@ -107,10 +107,10 @@ const turnOneMessageIcons: (keyof typeof Ionicons.glyphMap)[] = [
 ];
 
 const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
-  const { width } = useWindowDimensions();
-  const isTablet = useTablet();
   const { t, i18n } = useTranslation();
   const isHindi = i18n.language === "hi";
+  const { width } = useWindowDimensions();
+  const isTablet = useTablet();
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
   const user = useSelector(
     (state: RootState) => state.login?.user || state.socialLoginReducer?.user,

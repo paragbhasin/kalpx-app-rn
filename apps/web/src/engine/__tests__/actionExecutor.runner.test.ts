@@ -17,6 +17,8 @@ vi.stubGlobal('localStorage', {
 vi.mock('../mitraApi', () => ({
   trackEvent: vi.fn().mockResolvedValue(undefined),
   trackCompletion: vi.fn().mockResolvedValue(undefined),
+  postRhythmComplete: vi.fn().mockResolvedValue(null),
+  postInnerPathComplete: vi.fn().mockResolvedValue(null),
   onboardingComplete: vi.fn().mockResolvedValue(null),
   startJourneyV3: vi.fn().mockResolvedValue(null),
   getDailyView: vi.fn().mockResolvedValue(null),
@@ -27,7 +29,7 @@ vi.mock('../../lib/webRouter', () => ({ webNavigate: vi.fn() }));
 vi.mock('../../hooks/useJourneyStatus', () => ({ invalidateJourneyStatusCache: vi.fn() }));
 
 import { webNavigate } from '../../lib/webRouter';
-import { trackCompletion } from '../mitraApi';
+import { postInnerPathComplete, postRhythmComplete, trackCompletion } from '../mitraApi';
 
 function makeDispatch() {
   return vi.fn((action: any) => Promise.resolve(action));
@@ -118,6 +120,47 @@ describe('start_runner', () => {
     expect(dispatch).toHaveBeenCalled();
   });
 
+  it('stores return path for rhythm_daily launches', async () => {
+    const dispatch = makeDispatch();
+    const ctx: ActionContext = { dispatch: dispatch as any, screenData: { journey_id: 1 } };
+    await executeAction(
+      {
+        type: 'start_runner',
+        payload: {
+          source: 'rhythm_daily',
+          variant: 'mantra',
+          item: { item_id: 'mantra.om', title: 'Om' },
+        },
+      },
+      ctx,
+    );
+    const updateCall = (dispatch as any).mock.calls.find((args: any[]) =>
+      args[0]?.payload?.runner_return_path !== undefined
+    );
+    expect(updateCall?.[0]?.payload?.runner_return_path).toBe('/en/mitra/rhythm');
+  });
+
+  it('stores return path for inner_path launches', async () => {
+    const dispatch = makeDispatch();
+    const ctx: ActionContext = { dispatch: dispatch as any, screenData: { journey_id: 1 } };
+    await executeAction(
+      {
+        type: 'start_runner',
+        payload: {
+          source: 'core',
+          variant: 'practice',
+          practice_launch_surface: 'inner_path',
+          item: { item_id: 'practice.breath', title: 'Breath' },
+        },
+      },
+      ctx,
+    );
+    const updateCall = (dispatch as any).mock.calls.find((args: any[]) =>
+      args[0]?.payload?.runner_return_path !== undefined
+    );
+    expect(updateCall?.[0]?.payload?.runner_return_path).toBe('/en/mitra/inner-path');
+  });
+
   // G13: sankalp_audio_url seeding
   it('seeds sankalp_audio_url from item.audio_url when variant=sankalp', async () => {
     const dispatch = makeDispatch();
@@ -195,6 +238,72 @@ describe('complete_runner', () => {
     expect(trackCompletion).not.toHaveBeenCalled();
     expect(webNavigate).toHaveBeenCalledWith(expect.stringContaining('completion_return'));
   });
+
+  it('calls trackCompletion and postRhythmComplete for rhythm_daily', async () => {
+    const ctx = makeContext({
+      runner_active_item: { item_id: 'mantra.om', title: 'Om' },
+      runner_variant: 'mantra',
+      runner_source: 'rhythm_daily',
+      runner_rhythm_slot: 'morning',
+      runner_reps_completed: 7,
+      runner_start_time: Date.now() - 30_000,
+      journey_id: 1,
+      day_number: 3,
+    });
+    await executeAction({ type: 'complete_runner' }, ctx);
+    expect(trackCompletion).toHaveBeenCalledWith(
+      expect.objectContaining({
+        item_type: 'mantra',
+        item_id: 'mantra.om',
+        source: 'rhythm_daily',
+      }),
+    );
+    expect(postRhythmComplete).toHaveBeenCalledWith('morning', 'mantra.om');
+    expect((postRhythmComplete as any).mock.invocationCallOrder[0]).toBeLessThan(
+      (trackCompletion as any).mock.invocationCallOrder[0],
+    );
+  });
+
+  it('calls postInnerPathComplete before trackCompletion for inner_path launches', async () => {
+    const ctx = makeContext({
+      runner_active_item: { item_id: 'practice.breath', title: 'Breath' },
+      runner_variant: 'practice',
+      runner_source: 'core',
+      practice_launch_surface: 'inner_path',
+      runner_start_time: Date.now() - 30_000,
+      journey_id: 1,
+      day_number: 3,
+    });
+    await executeAction({ type: 'complete_runner' }, ctx);
+    expect(postInnerPathComplete).toHaveBeenCalledWith('practice', 'practice.breath');
+    expect(trackCompletion).toHaveBeenCalledWith(
+      expect.objectContaining({
+        item_type: 'practice',
+        item_id: 'practice.breath',
+        source: 'core',
+      }),
+    );
+    expect((postInnerPathComplete as any).mock.invocationCallOrder[0]).toBeLessThan(
+      (trackCompletion as any).mock.invocationCallOrder[0],
+    );
+  });
+
+  it('ignores duplicate complete_runner calls for the same runner session', async () => {
+    const ctx = makeContext({
+      runner_active_item: { item_id: 'mantra.om', title: 'Om' },
+      runner_variant: 'mantra',
+      runner_source: 'rhythm_daily',
+      runner_rhythm_slot: 'morning',
+      runner_reps_completed: 7,
+      runner_start_time: 123456789,
+      journey_id: 1,
+      day_number: 3,
+    });
+    await executeAction({ type: 'complete_runner' }, ctx);
+    await executeAction({ type: 'complete_runner' }, ctx);
+    expect(postRhythmComplete).toHaveBeenCalledTimes(1);
+    expect(trackCompletion).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('repeat_runner', () => {
@@ -244,6 +353,26 @@ describe('runner_exit', () => {
       await executeAction({ type: 'runner_exit' }, ctx);
       expect(webNavigate).toHaveBeenCalledWith('/en/mitra/dashboard');
     }
+  });
+
+  it('returns to My Rhythm when runner_return_path is present', async () => {
+    const ctx = makeContext({
+      runner_source: 'rhythm_daily',
+      runner_return_path: '/en/mitra/rhythm',
+      runner_active_item: { item_id: 'x' },
+    });
+    await executeAction({ type: 'runner_exit' }, ctx);
+    expect(webNavigate).toHaveBeenCalledWith('/en/mitra/rhythm');
+  });
+
+  it('returns to Inner Path when runner_return_path is present', async () => {
+    const ctx = makeContext({
+      runner_source: 'core',
+      runner_return_path: '/en/mitra/inner-path',
+      runner_active_item: { item_id: 'x' },
+    });
+    await executeAction({ type: 'runner_exit' }, ctx);
+    expect(webNavigate).toHaveBeenCalledWith('/en/mitra/inner-path');
   });
 
   // G27: trigger-sourced exit
@@ -302,6 +431,28 @@ describe('return_to_source', () => {
     const ctx = makeContext({ runner_source: 'additional_mantra' });
     await executeAction({ type: 'return_to_source' }, ctx);
     expect(webNavigate).toHaveBeenCalledWith('/en/mitra/dashboard');
+  });
+
+  it('uses runner_return_path when available for non-support sources', async () => {
+    const ctx = makeContext({
+      runner_source: 'rhythm_daily',
+      runner_return_path: '/en/mitra/rhythm',
+    });
+    await executeAction({ type: 'return_to_source' }, ctx);
+    expect(webNavigate).toHaveBeenCalledWith('/en/mitra/rhythm');
+  });
+});
+
+describe('return_to_inner_path', () => {
+  it('does not call postInnerPathComplete again on return', async () => {
+    const ctx = makeContext({
+      triad_all_complete_pending: true,
+      runner_active_item: { item_id: 'practice.breath' },
+      runner_variant: 'practice',
+      practice_launch_surface: 'inner_path',
+    });
+    await executeAction({ type: 'return_to_inner_path' }, ctx);
+    expect(postInnerPathComplete).not.toHaveBeenCalled();
   });
 });
 

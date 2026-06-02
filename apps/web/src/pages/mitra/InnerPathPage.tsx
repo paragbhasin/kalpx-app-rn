@@ -34,6 +34,9 @@ export function InnerPathPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const screenState = useScreenState();
+  const [isDesktop, setIsDesktop] = useState(
+    typeof window === "undefined" ? true : window.innerWidth >= 1024,
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [progressOpen, setProgressOpen] = useState(false);
@@ -60,6 +63,13 @@ export function InnerPathPage() {
       return () => window.clearTimeout(t);
     }
   }, [screenState.screenData.triad_all_complete, dispatch]);
+
+  useEffect(() => {
+    const onResize = () => setIsDesktop(window.innerWidth >= 1024);
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -184,7 +194,8 @@ export function InnerPathPage() {
         "",
       subtitle: "Return through sound",
       completedToday:
-        triadArr.find((t: any) => t?.slot === "mantra")?.completed_today === true,
+        triadArr.find((t: any) => t?.slot === "mantra")?.completed_today ===
+        true,
       master:
         sd.master_mantra ||
         triadArr.find((t: any) => t?.slot === "mantra") ||
@@ -202,7 +213,8 @@ export function InnerPathPage() {
         "",
       subtitle: "Hold today's intention",
       completedToday:
-        triadArr.find((t: any) => t?.slot === "sankalp")?.completed_today === true,
+        triadArr.find((t: any) => t?.slot === "sankalp")?.completed_today ===
+        true,
       master:
         sd.master_sankalp ||
         triadArr.find((t: any) => t?.slot === "sankalp") ||
@@ -220,7 +232,8 @@ export function InnerPathPage() {
         "",
       subtitle: "Move through the body",
       completedToday:
-        triadArr.find((t: any) => t?.slot === "practice")?.completed_today === true,
+        triadArr.find((t: any) => t?.slot === "practice")?.completed_today ===
+        true,
       master:
         sd.master_practice ||
         triadArr.find((t: any) => t?.slot === "practice") ||
@@ -405,7 +418,7 @@ export function InnerPathPage() {
 
   if (loading) {
     return (
-      <MitraMobileShell>
+      <MitraMobileShell wideDesktop>
         <div
           style={{
             display: "flex",
@@ -444,7 +457,7 @@ export function InnerPathPage() {
 
   if (error) {
     return (
-      <MitraMobileShell>
+      <MitraMobileShell wideDesktop>
         <div
           style={{
             display: "flex",
@@ -484,9 +497,418 @@ export function InnerPathPage() {
     );
   }
 
+  const whyChosenPanel =
+    whyChosenOpen && hasWhyThis ? (
+      <div
+        style={{
+          marginTop: 14,
+          padding: isDesktop ? "24px 28px 26px" : "20px 18px 18px",
+          borderRadius: 11,
+          border: "1px solid rgba(233, 214, 179, 0.95)",
+          background:
+            "linear-gradient(180deg, rgba(255,251,245,0.98) 0%, rgba(255,247,235,0.94) 48%, rgba(252,242,226,0.96) 100%)",
+          boxShadow:
+            "0 18px 40px rgba(139, 106, 42, 0.08), inset 0 1px 0 rgba(255,255,255,0.85)",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "radial-gradient(circle at top right, rgba(243,224,188,0.45), transparent 30%), radial-gradient(circle at bottom left, rgba(214,188,134,0.22), transparent 32%)",
+            pointerEvents: "none",
+          }}
+        />
+        {whyTabs.length > 0 ? (
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                marginBottom: 18,
+              }}
+            >
+              <div>
+                <p
+                  style={{
+                    margin: "0 0 3px",
+                    fontSize: 11,
+                    letterSpacing: 1.6,
+                    textTransform: "uppercase",
+                    color: "#B38722",
+                    fontWeight: 700,
+                  }}
+                >
+                  Chosen with care
+                </p>
+                <p
+                  style={{
+                    margin: 0,
+                    fontFamily: "var(--kalpx-font-serif)",
+                    fontSize: 18,
+                    lineHeight: 1.2,
+                    color: "#432104",
+                  }}
+                >
+                  Why this supports today
+                </p>
+              </div>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                marginBottom: 18,
+                flexWrap: "wrap",
+                justifyContent: isDesktop ? "flex-start" : "center",
+              }}
+            >
+              {whyTabs.map((item) => {
+                const isActive = activeWhyItem?.slot === item.slot;
+                return (
+                  <button
+                    key={item.slot}
+                    type="button"
+                    onClick={() => setActiveWhyTab(item.slot)}
+                    style={{
+                      border: isActive
+                        ? "1px solid rgba(179, 135, 34, 0.68)"
+                        : "1px solid rgba(214,183,130,0.42)",
+                      color: isActive ? "#8B6A2A" : "#7F6A52",
+                      padding: "8px 10px",
+                      borderRadius: 999,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      letterSpacing: 0.9,
+                      textTransform: "uppercase",
+                      cursor: "pointer",
+                      fontFamily: "var(--kalpx-font-sans)",
+                      boxShadow: isActive
+                        ? "0 10px 20px rgba(179,135,34,0.12)"
+                        : "none",
+                      transition:
+                        "background 160ms ease, box-shadow 160ms ease, border-color 160ms ease",
+                    }}
+                  >
+                    {item.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {activeWhyItem && (
+              <div
+                style={{
+                  borderTop: "1px solid rgba(214,183,130,0.36)",
+                  paddingTop: 20,
+                }}
+              >
+                <p
+                  style={{
+                    margin: "0 0 12px",
+                    fontFamily: "var(--kalpx-font-sans)",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: 1,
+                    textTransform: "uppercase",
+                    color: "var(--kalpx-cta)",
+                  }}
+                >
+                  {activeWhyItem.label}
+                </p>
+                <p
+                  style={{
+                    margin: "0 0 18px",
+                    fontFamily: "var(--kalpx-font-serif)",
+                    fontSize: 18,
+                    fontWeight: 700,
+                    lineHeight: 1.18,
+                    color: "#432104",
+                    textWrap: "balance",
+                  }}
+                >
+                  {activeWhyItem.title}
+                </p>
+
+                {!!activeWhyItem.context?.mitra_frame_through && (
+                  <div
+                    style={{
+                      margin: "0 0 14px",
+                      padding: "14px 16px",
+                      borderRadius: 18,
+                      background:
+                        "linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,248,237,0.88))",
+                      border: "1px solid rgba(230, 214, 186, 0.9)",
+                    }}
+                  >
+                    <p
+                      style={{
+                        margin: "0 0 6px",
+                        fontSize: 11,
+                        letterSpacing: 1.4,
+                        textTransform: "uppercase",
+                        color: "#A57A2B",
+                        fontWeight: 700,
+                      }}
+                    >
+                      Essence
+                    </p>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: 16,
+                        lineHeight: 1.75,
+                        color: "#5D5348",
+                      }}
+                    >
+                      {sentence(
+                        activeWhyItem.slot === "sankalp"
+                          ? `This is ${activeWhyItem.context.mitra_frame_through}`
+                          : `${activeWhyItem.title || "This"} is ${activeWhyItem.context.mitra_frame_through}`,
+                      )}
+                    </p>
+                  </div>
+                )}
+
+                {!!activeWhyItem.shift && (
+                  <div
+                    style={{
+                      margin: "0 0 14px",
+                      padding: "14px 16px",
+                      borderRadius: 18,
+                      background:
+                        "linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,248,237,0.88))",
+                      border: "1px solid rgba(230, 214, 186, 0.9)",
+                    }}
+                  >
+                    <p
+                      style={{
+                        margin: "0 0 6px",
+                        fontSize: 11,
+                        letterSpacing: 1.4,
+                        textTransform: "uppercase",
+                        color: "#A57A2B",
+                        fontWeight: 700,
+                      }}
+                    >
+                      Shift
+                    </p>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: 16,
+                        lineHeight: 1.75,
+                        color: "#5D5348",
+                      }}
+                    >
+                      {sentence(
+                        `Mitra chose this to guide you from ${activeWhyItem.shift}`,
+                      )}
+                    </p>
+                  </div>
+                )}
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr",
+                    gap: 12,
+                  }}
+                >
+                  {!!activeWhyItem.context?.mitra_use_for && (
+                    <div
+                      style={{
+                        padding: "14px 16px",
+                        borderRadius: 18,
+                        background: "rgba(255,255,255,0.64)",
+                        border: "1px solid rgba(230, 214, 186, 0.86)",
+                      }}
+                    >
+                      <p
+                        style={{
+                          margin: "0 0 8px",
+                          fontSize: 11,
+                          letterSpacing: 1.4,
+                          textTransform: "uppercase",
+                          color: "#A57A2B",
+                          fontWeight: 700,
+                        }}
+                      >
+                        Useful for
+                      </p>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: 15,
+                          lineHeight: 1.7,
+                          color: "#5D5348",
+                        }}
+                      >
+                        {sentence(activeWhyItem.context.mitra_use_for)}
+                      </p>
+                    </div>
+                  )}
+
+                  {!!activeWhyItem.context?.commentary_lineage && (
+                    <div
+                      style={{
+                        padding: "14px 16px",
+                        borderRadius: 18,
+                        background: "rgba(255,255,255,0.64)",
+                        border: "1px solid rgba(230, 214, 186, 0.86)",
+                      }}
+                    >
+                      <p
+                        style={{
+                          margin: "0 0 8px",
+                          fontSize: 11,
+                          letterSpacing: 1.4,
+                          textTransform: "uppercase",
+                          color: "#A57A2B",
+                          fontWeight: 700,
+                        }}
+                      >
+                        Rooted in
+                      </p>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: 15,
+                          lineHeight: 1.7,
+                          color: "#5D5348",
+                        }}
+                      >
+                        {sentence(activeWhyItem.context.commentary_lineage)}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : null}
+      </div>
+    ) : null;
+
+  const remindersPanel =
+    reminders?.has_journey && remindersOpen ? (
+      <div style={{ padding: isDesktop ? "14px 8px 4px" : "12px 4px 4px" }}>
+        {(["mantra", "sankalp", "practice"] as const).map((key) => {
+          const enabled = reminders[`${key}_reminder_enabled`] as boolean;
+          const time = reminders[`${key}_reminder_time`] as string | null;
+          const label = key.charAt(0).toUpperCase() + key.slice(1);
+          return (
+            <div
+              key={key}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                marginBottom: 10,
+                padding: "12px 14px",
+                background: enabled
+                  ? "rgba(201,168,76,0.08)"
+                  : "rgba(0,0,0,0.02)",
+                borderRadius: 10,
+                border: `1px solid ${enabled ? "rgba(201,168,76,0.25)" : "rgba(0,0,0,0.06)"}`,
+                transition: "all 0.2s",
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "var(--kalpx-font-serif)",
+                  fontSize: 16,
+                  color: "#432104",
+                  flex: 1,
+                }}
+              >
+                Remind me for {label.toLowerCase()}
+              </span>
+              {enabled && (
+                <input
+                  type="time"
+                  value={time ? time.slice(0, 5) : TRIAD_REMINDER_DEFAULTS[key]}
+                  onChange={(e) =>
+                    void handleReminderTime(
+                      key,
+                      e.target.value || TRIAD_REMINDER_DEFAULTS[key],
+                    )
+                  }
+                  disabled={reminderSaving}
+                  style={{
+                    border: "1px solid rgba(201,168,76,0.3)",
+                    borderRadius: 8,
+                    padding: "4px 8px",
+                    fontSize: 13,
+                    color: "#432104",
+                    background: "#fff",
+                    outline: "none",
+                  }}
+                />
+              )}
+              <button
+                type="button"
+                onClick={() => void handleReminderToggle(key)}
+                disabled={reminderSaving}
+                aria-label={`${enabled ? "Disable" : "Enable"} reminder for ${label}`}
+                style={{
+                  width: 44,
+                  height: 24,
+                  borderRadius: 12,
+                  border: "none",
+                  background: enabled ? "#C99317" : "rgba(0,0,0,0.15)",
+                  cursor: reminderSaving ? "not-allowed" : "pointer",
+                  position: "relative",
+                  transition: "background 0.2s",
+                  flexShrink: 0,
+                }}
+              >
+                <span
+                  style={{
+                    position: "absolute",
+                    top: 2,
+                    left: enabled ? 22 : 2,
+                    width: 20,
+                    height: 20,
+                    borderRadius: "50%",
+                    background: "#fff",
+                    transition: "left 0.2s",
+                  }}
+                />
+              </button>
+            </div>
+          );
+        })}
+        {reminderSaving && (
+          <p
+            style={{
+              fontSize: 12,
+              color: "var(--kalpx-text-muted)",
+              textAlign: "center",
+              margin: "4px 0 0",
+            }}
+          >
+            Saving…
+          </p>
+        )}
+      </div>
+    ) : null;
+
   return (
-    <MitraMobileShell>
-      <div style={{ maxWidth: 480, margin: "0 auto", padding: "15px" }}>
+    <MitraMobileShell wideDesktop>
+      <div
+        style={{
+          maxWidth: isDesktop ? 1360 : 480,
+          margin: "0 auto",
+          padding: isDesktop ? "24px 20px 48px" : "15px",
+          width: "100%",
+        }}
+      >
         {showAllCompleteMessage && (
           <div
             style={{
@@ -498,7 +920,14 @@ export function InnerPathPage() {
               textAlign: "center",
             }}
           >
-            <div style={{ fontSize: 13, fontWeight: 700, color: "#1DBA7A", marginBottom: 4 }}>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 700,
+                color: "#1DBA7A",
+                marginBottom: 4,
+              }}
+            >
               All three held today
             </div>
             <div style={{ fontSize: 13, color: "#5A6B5A", lineHeight: 1.5 }}>
@@ -523,7 +952,7 @@ export function InnerPathPage() {
         </button> */}
 
         {/* Page identity */}
-        <div style={{ marginBottom: 10, textAlign: "center" }}>
+        <div style={{ marginBottom: isDesktop ? 24 : 10, textAlign: "center" }}>
           <div style={{ marginBottom: 10 }}>
             <Sparkles
               size={18}
@@ -535,7 +964,7 @@ export function InnerPathPage() {
           <h1
             style={{
               fontFamily: "var(--kalpx-font-serif)",
-              fontSize: "clamp(16px, 8vw, 64px)",
+              fontSize: "clamp(16px, 8vw, 30px)",
               fontWeight: 700,
               color: "var(--kalpx-text)",
               margin: "0 0 14px",
@@ -616,220 +1045,469 @@ export function InnerPathPage() {
           </div>
         )}
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 8,
-            marginBottom: 24,
-          }}
-        >
-          {triadItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.slot}
-                type="button"
-                onClick={() =>
-                  handleAction({
-                    type: "start_runner",
-                    payload: {
-                      source: "core",
-                      variant: item.slot,
-                      item: item.master,
-                      practice_launch_surface: "inner_path",
-                    },
-                  })
-                }
+        {isDesktop ? (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 0.95fr) minmax(420px, 0.9fr)",
+              gap: 40,
+              alignItems: "start",
+            }}
+          >
+            <div>
+              <div
                 style={{
-                  width: "100%",
                   display: "flex",
-                  alignItems: "center",
-                  gap: 18,
-                  padding: "15px",
-                  borderRadius: 11,
-                  border: "1px solid rgba(242, 223, 182, 0.95)",
-
-                  boxShadow:
-                    "0 16px 30px rgba(166,125,54,0.08), inset 0 0 0 1px rgba(255,255,255,0.3)",
-                  cursor: "pointer",
-                  textAlign: "left",
+                  flexDirection: "column",
+                  gap: 12,
+                  marginBottom: 28,
                 }}
               >
+                {triadItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.slot}
+                      type="button"
+                      onClick={() =>
+                        handleAction({
+                          type: "start_runner",
+                          payload: {
+                            source: "core",
+                            variant: item.slot,
+                            item: item.master,
+                            practice_launch_surface: "inner_path",
+                          },
+                        })
+                      }
+                      style={{
+                        width: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 20,
+                        padding: "20px 24px",
+                        borderRadius: 18,
+                        border: "1px solid rgba(242, 223, 182, 0.95)",
+                        boxShadow:
+                          "0 16px 30px rgba(166,125,54,0.08), inset 0 0 0 1px rgba(255,255,255,0.3)",
+                        cursor: "pointer",
+                        textAlign: "left",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 62,
+                          height: 62,
+                          minWidth: 62,
+                          borderRadius: "50%",
+                          background: "rgba(255,250,244,0.86)",
+                          border: "1px solid rgba(235,221,194,0.95)",
+                          boxShadow:
+                            "0 12px 28px rgba(176,139,70,0.16), inset 0 -8px 18px rgba(246,236,217,0.85)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {item.iconSrc ? (
+                          <img
+                            src={item.iconSrc}
+                            alt=""
+                            style={{ width: 38, height: 38, display: "block" }}
+                          />
+                        ) : (
+                          Icon && (
+                            <Icon
+                              size={28}
+                              strokeWidth={1.7}
+                              color={item.accent}
+                            />
+                          )
+                        )}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p
+                          style={{
+                            margin: "0 0 10px",
+                            fontSize: 14,
+                            fontWeight: 700,
+                            letterSpacing: 3.2,
+                            color: item.accent,
+                          }}
+                        >
+                          {item.label}
+                        </p>
+                        <p
+                          style={{
+                            margin: "0 0 10px",
+                            fontFamily: "var(--kalpx-font-serif)",
+                            fontSize: 24,
+                            lineHeight: 1.26,
+                            color: "var(--kalpx-text)",
+                            textWrap: "balance",
+                          }}
+                        >
+                          {item.title}
+                        </p>
+                        {!!item.subtitle && (
+                          <p
+                            style={{
+                              margin: 0,
+                              fontFamily: "var(--kalpx-font-serif)",
+                              fontSize: 16,
+                              fontStyle: "italic",
+                              color: "#A57A2B",
+                              lineHeight: 1.45,
+                              fontWeight: 700,
+                            }}
+                          >
+                            {item.subtitle}
+                          </p>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+              {hasSankalpCarry && (
                 <div
                   style={{
-                    width: 40,
-                    height: 40,
-                    minWidth: 40,
-                    borderRadius: "50%",
-                    background: "rgba(255,250,244,0.86)",
-                    border: "1px solid rgba(235,221,194,0.95)",
-                    boxShadow:
-                      "0 12px 28px rgba(176,139,70,0.16), inset 0 -8px 18px rgba(246,236,217,0.85)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    gap: 16,
+                    marginBottom: 18,
                   }}
                 >
-                  {item.iconSrc ? (
-                    <img
-                      src={item.iconSrc}
-                      alt=""
-                      style={{ width: 30, height: 30, display: "block" }}
-                    />
-                  ) : (
-                    Icon && (
-                      <Icon size={20} strokeWidth={1.7} color={item.accent} />
-                    )
-                  )}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p
+                  <div
                     style={{
-                      margin: "0 0 8px",
-                      fontSize: 14,
-                      fontWeight: 700,
-                      letterSpacing: 3.2,
-                      color: item.accent,
+                      flex: 1,
+                      height: 1,
+                      background: "rgba(214,183,130,0.35)",
                     }}
-                  >
-                    {item.label}
-                  </p>
-                  <p
+                  />
+                  <img
+                    src="/lotus_icon.png"
+                    alt=""
+                    style={{ width: 22, height: 18, opacity: 0.74 }}
+                  />
+                  <div
                     style={{
-                      margin: "0 0 8px",
-                      fontFamily: "var(--kalpx-font-serif)",
-                      fontSize: "clamp(20px, 4.6vw, 26px)",
-                      lineHeight: 1.26,
-                      color: "var(--kalpx-text)",
-                      textWrap: "balance",
+                      flex: 1,
+                      height: 1,
+                      background: "rgba(214,183,130,0.35)",
                     }}
-                  >
-                    {item.title}
-                  </p>
-                  {!!item.subtitle && (
-                    <p
-                      style={{
-                        margin: 0,
-                        fontFamily: "var(--kalpx-font-serif)",
-                        fontSize: 16,
-                        fontStyle: "italic",
-                        color: "#A57A2B",
-                        lineHeight: 1.45,
-                        fontWeight: 700,
-                      }}
-                    >
-                      {item.subtitle}
-                    </p>
-                  )}
-                  {item.completedToday && (
-                    <p
-                      style={{
-                        margin: "6px 0 0",
-                        fontFamily: "var(--kalpx-font-serif)",
-                        fontSize: 12,
-                        letterSpacing: 0.4,
-                        color: "#7A9E7E",
-                      }}
-                    >
-                      {innerPathHeldLabel(item.slot)}
-                    </p>
-                  )}
+                  />
                 </div>
-              </button>
-            );
-          })}
-        </div>
+              )}
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 16,
-            marginBottom: 18,
-          }}
-        >
-          <div
-            style={{ flex: 1, height: 1, background: "rgba(214,183,130,0.35)" }}
-          />
-          <img
-            src="/lotus_icon.png"
-            alt=""
-            style={{ width: 22, height: 18, opacity: 0.74 }}
-          />
-          <div
-            style={{ flex: 1, height: 1, background: "rgba(214,183,130,0.35)" }}
-          />
-        </div>
-        {guidanceOpen && hasSankalpCarry && (
-          <div style={{ marginBottom: 14 }}>
-            <AccordionRow
-              icon={<Sparkles size={18} strokeWidth={1.7} color="#8C6BC6" />}
-              title="Today's guidance"
-              open={guidanceOpen}
-              onClick={() => setGuidanceOpen((value) => !value)}
-            />
-            {guidanceOpen && hasSankalpCarry && (
-              <div style={{ marginTop: 12 }}>
-                <SankalpCarryBlock sd={sd} />
-              </div>
-            )}
+              {hasSankalpCarry && (
+                <div style={{ marginBottom: 14 }}>
+                  <AccordionRow
+                    icon={
+                      <Sparkles size={18} strokeWidth={1.7} color="#8C6BC6" />
+                    }
+                    title="Today's guidance"
+                    open={guidanceOpen}
+                    onClick={() => setGuidanceOpen((value) => !value)}
+                  />
+                  {guidanceOpen && (
+                    <div style={{ marginTop: 12 }}>
+                      <SankalpCarryBlock sd={sd} />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* {hasWhyThis && (
+                <div style={{ marginBottom: 14 }}>
+                  <AccordionRow
+                    icon={
+                      <img
+                        src="/lotus_icon.png"
+                        alt=""
+                        style={{ width: 18, height: 14, opacity: 0.8 }}
+                      />
+                    }
+                    title="Why these were chosen"
+                    open={whyChosenOpen}
+                    onClick={() => setWhyChosenOpen((value) => !value)}
+                  />
+                </div>
+              )} */}
+            </div>
+
+            <div style={{ paddingTop: 4 }}>
+              {hasWhyThis && (
+                <div style={{ marginBottom: 16 }}>
+                  <AccordionRow
+                    icon={
+                      <img
+                        src="/lotus_icon.png"
+                        alt=""
+                        style={{ width: 18, height: 14, opacity: 0.8 }}
+                      />
+                    }
+                    title="Why these were chosen"
+                    open={whyChosenOpen}
+                    onClick={() => setWhyChosenOpen((value) => !value)}
+                  />
+                  {whyChosenPanel}
+                </div>
+              )}
+
+              {reminders?.has_journey && (
+                <div>
+                  <AccordionRow
+                    icon={<Bell size={16} color="#C99317" />}
+                    title="Reminders"
+                    subtitle={
+                      [
+                        reminders.mantra_reminder_enabled && "Mantra",
+                        reminders.sankalp_reminder_enabled && "Sankalp",
+                        reminders.practice_reminder_enabled && "Practice",
+                      ]
+                        .filter(Boolean)
+                        .join(", ") || "None set"
+                    }
+                    open={remindersOpen}
+                    onClick={() => setRemindersOpen((o) => !o)}
+                  />
+                  {remindersPanel}
+                </div>
+              )}
+            </div>
           </div>
-        )}
+        ) : (
+          <>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+                marginBottom: 24,
+              }}
+            >
+              {triadItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.slot}
+                    type="button"
+                    onClick={() =>
+                      handleAction({
+                        type: "start_runner",
+                        payload: {
+                          source: "core",
+                          variant: item.slot,
+                          item: item.master,
+                          practice_launch_surface: "inner_path",
+                        },
+                      })
+                    }
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 18,
+                      padding: "15px",
+                      borderRadius: 11,
+                      border: "1px solid rgba(242, 223, 182, 0.95)",
 
-        {/* Per-item transformation labels */}
-        {hasWhyThis && (
-          <div style={{ marginBottom: 18 }}>
-            <AccordionRow
-              icon={
-                <img
-                  src="/lotus_icon.png"
-                  alt=""
-                  style={{ width: 18, height: 14, opacity: 0.8 }}
-                />
-              }
-              title="Why these were chosen"
-              subtitle="Understand why Mitra selected this mantra, sankalp, and practice."
-              open={whyChosenOpen}
-              onClick={() => setWhyChosenOpen((value) => !value)}
-            />
-            {whyChosenOpen && (
-              <div
-                style={{
-                  marginTop: 14,
-                  padding: "20px 18px 18px",
-                  borderRadius: 11,
-                  border: "1px solid rgba(233, 214, 179, 0.95)",
-                  background:
-                    "linear-gradient(180deg, rgba(255,251,245,0.98) 0%, rgba(255,247,235,0.94) 48%, rgba(252,242,226,0.96) 100%)",
-                  boxShadow:
-                    "0 18px 40px rgba(139, 106, 42, 0.08), inset 0 1px 0 rgba(255,255,255,0.85)",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-              >
-                <div
-                  aria-hidden="true"
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background:
-                      "radial-gradient(circle at top right, rgba(243,224,188,0.45), transparent 30%), radial-gradient(circle at bottom left, rgba(214,188,134,0.22), transparent 32%)",
-                    pointerEvents: "none",
-                  }}
-                />
-                {whyTabs.length > 0 ? (
-                  <div style={{ position: "relative", zIndex: 1 }}>
+                      boxShadow:
+                        "0 16px 30px rgba(166,125,54,0.08), inset 0 0 0 1px rgba(255,255,255,0.3)",
+                      cursor: "pointer",
+                      textAlign: "left",
+                    }}
+                  >
                     <div
                       style={{
+                        width: 40,
+                        height: 40,
+                        minWidth: 40,
+                        borderRadius: "50%",
+                        background: "rgba(255,250,244,0.86)",
+                        border: "1px solid rgba(235,221,194,0.95)",
+                        boxShadow:
+                          "0 12px 28px rgba(176,139,70,0.16), inset 0 -8px 18px rgba(246,236,217,0.85)",
                         display: "flex",
                         alignItems: "center",
-                        gap: 10,
-                        marginBottom: 18,
+                        justifyContent: "center",
                       }}
                     >
-                      {/* <div
+                      {item.iconSrc ? (
+                        <img
+                          src={item.iconSrc}
+                          alt=""
+                          style={{ width: 30, height: 30, display: "block" }}
+                        />
+                      ) : (
+                        Icon && (
+                          <Icon
+                            size={20}
+                            strokeWidth={1.7}
+                            color={item.accent}
+                          />
+                        )
+                      )}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p
+                        style={{
+                          margin: "0 0 8px",
+                          fontSize: 14,
+                          fontWeight: 700,
+                          letterSpacing: 3.2,
+                          color: item.accent,
+                        }}
+                      >
+                        {item.label}
+                      </p>
+                      <p
+                        style={{
+                          margin: "0 0 8px",
+                          fontFamily: "var(--kalpx-font-serif)",
+                          fontSize: "clamp(20px, 4.6vw, 26px)",
+                          lineHeight: 1.26,
+                          color: "var(--kalpx-text)",
+                          textWrap: "balance",
+                        }}
+                      >
+                        {item.title}
+                      </p>
+                      {!!item.subtitle && (
+                        <p
+                          style={{
+                            margin: 0,
+                            fontFamily: "var(--kalpx-font-serif)",
+                            fontSize: 16,
+                            fontStyle: "italic",
+                            color: "#A57A2B",
+                            lineHeight: 1.45,
+                            fontWeight: 700,
+                          }}
+                        >
+                          {item.subtitle}
+                        </p>
+                      )}
+                      {item.completedToday && (
+                        <p
+                          style={{
+                            margin: "6px 0 0",
+                            fontFamily: "var(--kalpx-font-serif)",
+                            fontSize: 12,
+                            letterSpacing: 0.4,
+                            color: "#7A9E7E",
+                          }}
+                        >
+                          {innerPathHeldLabel(item.slot)}
+                        </p>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 16,
+                marginBottom: 18,
+              }}
+            >
+              <div
+                style={{
+                  flex: 1,
+                  height: 1,
+                  background: "rgba(214,183,130,0.35)",
+                }}
+              />
+              <img
+                src="/lotus_icon.png"
+                alt=""
+                style={{ width: 22, height: 18, opacity: 0.74 }}
+              />
+              <div
+                style={{
+                  flex: 1,
+                  height: 1,
+                  background: "rgba(214,183,130,0.35)",
+                }}
+              />
+            </div>
+            {guidanceOpen && hasSankalpCarry && (
+              <div style={{ marginBottom: 14 }}>
+                <AccordionRow
+                  icon={
+                    <Sparkles size={18} strokeWidth={1.7} color="#8C6BC6" />
+                  }
+                  title="Today's guidance"
+                  open={guidanceOpen}
+                  onClick={() => setGuidanceOpen((value) => !value)}
+                />
+                {guidanceOpen && hasSankalpCarry && (
+                  <div style={{ marginTop: 12 }}>
+                    <SankalpCarryBlock sd={sd} />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Per-item transformation labels */}
+            {hasWhyThis && (
+              <div style={{ marginBottom: 18 }}>
+                <AccordionRow
+                  icon={
+                    <img
+                      src="/lotus_icon.png"
+                      alt=""
+                      style={{ width: 18, height: 14, opacity: 0.8 }}
+                    />
+                  }
+                  title="Why these were chosen"
+                  subtitle="Understand why Mitra selected this mantra, sankalp, and practice."
+                  open={whyChosenOpen}
+                  onClick={() => setWhyChosenOpen((value) => !value)}
+                />
+                {whyChosenOpen && (
+                  <div
+                    style={{
+                      marginTop: 14,
+                      padding: "20px 18px 18px",
+                      borderRadius: 11,
+                      border: "1px solid rgba(233, 214, 179, 0.95)",
+                      background:
+                        "linear-gradient(180deg, rgba(255,251,245,0.98) 0%, rgba(255,247,235,0.94) 48%, rgba(252,242,226,0.96) 100%)",
+                      boxShadow:
+                        "0 18px 40px rgba(139, 106, 42, 0.08), inset 0 1px 0 rgba(255,255,255,0.85)",
+                      position: "relative",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div
+                      aria-hidden="true"
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        background:
+                          "radial-gradient(circle at top right, rgba(243,224,188,0.45), transparent 30%), radial-gradient(circle at bottom left, rgba(214,188,134,0.22), transparent 32%)",
+                        pointerEvents: "none",
+                      }}
+                    />
+                    {whyTabs.length > 0 ? (
+                      <div style={{ position: "relative", zIndex: 1 }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                            marginBottom: 18,
+                          }}
+                        >
+                          {/* <div
                         style={{
                           width: 38,
                           height: 38,
@@ -850,111 +1528,190 @@ export function InnerPathPage() {
                           style={{ width: 18, height: 14, opacity: 0.82 }}
                         />
                       </div> */}
-                      <div>
-                        <p
+                          <div>
+                            <p
+                              style={{
+                                margin: "0 0 3px",
+                                fontSize: 11,
+                                letterSpacing: 1.6,
+                                textTransform: "uppercase",
+                                color: "#B38722",
+                                fontWeight: 700,
+                              }}
+                            >
+                              Chosen with care
+                            </p>
+                            <p
+                              style={{
+                                margin: 0,
+                                fontFamily: "var(--kalpx-font-serif)",
+                                fontSize: 18,
+                                lineHeight: 1.2,
+                                color: "#432104",
+                              }}
+                            >
+                              Why this supports today
+                            </p>
+                          </div>
+                        </div>
+                        <div
                           style={{
-                            margin: "0 0 3px",
-                            fontSize: 11,
-                            letterSpacing: 1.6,
-                            textTransform: "uppercase",
-                            color: "#B38722",
-                            fontWeight: 700,
+                            display: "flex",
+                            gap: 8,
+                            marginBottom: 18,
+                            flexWrap: "wrap",
+                            justifyContent: "center",
                           }}
                         >
-                          Chosen with care
-                        </p>
-                        <p
-                          style={{
-                            margin: 0,
-                            fontFamily: "var(--kalpx-font-serif)",
-                            fontSize: 18,
-                            lineHeight: 1.2,
-                            color: "#432104",
-                          }}
-                        >
-                          Why this supports today
-                        </p>
-                      </div>
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: 8,
-                        marginBottom: 18,
-                        flexWrap: "wrap",
-                        justifyContent: "center",
-                      }}
-                    >
-                      {whyTabs.map((item) => {
-                        const isActive = activeWhyItem?.slot === item.slot;
-                        return (
-                          <button
-                            key={item.slot}
-                            type="button"
-                            onClick={() => setActiveWhyTab(item.slot)}
-                            style={{
-                              border: isActive
-                                ? "1px solid rgba(179, 135, 34, 0.68)"
-                                : "1px solid rgba(214,183,130,0.42)",
+                          {whyTabs.map((item) => {
+                            const isActive = activeWhyItem?.slot === item.slot;
+                            return (
+                              <button
+                                key={item.slot}
+                                type="button"
+                                onClick={() => setActiveWhyTab(item.slot)}
+                                style={{
+                                  border: isActive
+                                    ? "1px solid rgba(179, 135, 34, 0.68)"
+                                    : "1px solid rgba(214,183,130,0.42)",
 
-                              color: isActive ? "#8B6A2A" : "#7F6A52",
-                              padding: "8px 10px",
-                              borderRadius: 999,
-                              fontSize: 12,
-                              fontWeight: 700,
-                              letterSpacing: 0.9,
-                              textTransform: "uppercase",
-                              cursor: "pointer",
-                              fontFamily: "var(--kalpx-font-sans)",
-                              boxShadow: isActive
-                                ? "0 10px 20px rgba(179,135,34,0.12)"
-                                : "none",
-                              transition:
-                                "background 160ms ease, box-shadow 160ms ease, border-color 160ms ease",
+                                  color: isActive ? "#8B6A2A" : "#7F6A52",
+                                  padding: "8px 10px",
+                                  borderRadius: 999,
+                                  fontSize: 12,
+                                  fontWeight: 700,
+                                  letterSpacing: 0.9,
+                                  textTransform: "uppercase",
+                                  cursor: "pointer",
+                                  fontFamily: "var(--kalpx-font-sans)",
+                                  boxShadow: isActive
+                                    ? "0 10px 20px rgba(179,135,34,0.12)"
+                                    : "none",
+                                  transition:
+                                    "background 160ms ease, box-shadow 160ms ease, border-color 160ms ease",
+                                }}
+                              >
+                                {item.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {activeWhyItem && (
+                          <div
+                            style={{
+                              borderTop: "1px solid rgba(214,183,130,0.36)",
+                              paddingTop: 20,
                             }}
                           >
-                            {item.label}
-                          </button>
-                        );
-                      })}
-                    </div>
+                            <p
+                              style={{
+                                margin: "0 0 12px",
+                                fontFamily: "var(--kalpx-font-sans)",
+                                fontSize: 11,
+                                fontWeight: 700,
+                                letterSpacing: 1,
+                                textTransform: "uppercase",
+                                color: "var(--kalpx-cta)",
+                              }}
+                            >
+                              {activeWhyItem.label}
+                            </p>
+                            <p
+                              style={{
+                                margin: "0 0 18px",
+                                fontFamily: "var(--kalpx-font-serif)",
+                                fontSize: 18,
+                                fontWeight: 700,
+                                lineHeight: 1.18,
+                                color: "#432104",
+                                textWrap: "balance",
+                              }}
+                            >
+                              {activeWhyItem.title}
+                            </p>
 
-                    {activeWhyItem && (
-                      <div
-                        style={{
-                          borderTop: "1px solid rgba(214,183,130,0.36)",
-                          paddingTop: 20,
-                        }}
-                      >
-                        <p
-                          style={{
-                            margin: "0 0 12px",
-                            fontFamily: "var(--kalpx-font-sans)",
-                            fontSize: 11,
-                            fontWeight: 700,
-                            letterSpacing: 1,
-                            textTransform: "uppercase",
-                            color: "var(--kalpx-cta)",
-                          }}
-                        >
-                          {activeWhyItem.label}
-                        </p>
-                        <p
-                          style={{
-                            margin: "0 0 18px",
-                            fontFamily: "var(--kalpx-font-serif)",
-                            fontSize: 18,
-                            fontWeight: 700,
-                            lineHeight: 1.18,
-                            color: "#432104",
-                            textWrap: "balance",
-                          }}
-                        >
-                          {activeWhyItem.title}
-                        </p>
+                            {activeWhyItem.slot === "sankalp"
+                              ? !!activeWhyItem.context
+                                  ?.mitra_frame_through && (
+                                  <div
+                                    style={{
+                                      margin: "0 0 14px",
+                                      padding: "14px 16px",
+                                      borderRadius: 18,
+                                      background:
+                                        "linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,248,237,0.88))",
+                                      border:
+                                        "1px solid rgba(230, 214, 186, 0.9)",
+                                    }}
+                                  >
+                                    <p
+                                      style={{
+                                        margin: "0 0 6px",
+                                        fontSize: 11,
+                                        letterSpacing: 1.4,
+                                        textTransform: "uppercase",
+                                        color: "#A57A2B",
+                                        fontWeight: 700,
+                                      }}
+                                    >
+                                      Essence
+                                    </p>
+                                    <p
+                                      style={{
+                                        margin: 0,
+                                        fontSize: 16,
+                                        lineHeight: 1.75,
+                                        color: "#5D5348",
+                                      }}
+                                    >
+                                      {sentence(
+                                        `This is ${activeWhyItem.context.mitra_frame_through}`,
+                                      )}
+                                    </p>
+                                  </div>
+                                )
+                              : !!activeWhyItem.context
+                                  ?.mitra_frame_through && (
+                                  <div
+                                    style={{
+                                      margin: "0 0 14px",
+                                      padding: "14px 16px",
+                                      borderRadius: 18,
+                                      background:
+                                        "linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,248,237,0.88))",
+                                      border:
+                                        "1px solid rgba(230, 214, 186, 0.9)",
+                                    }}
+                                  >
+                                    <p
+                                      style={{
+                                        margin: "0 0 6px",
+                                        fontSize: 11,
+                                        letterSpacing: 1.4,
+                                        textTransform: "uppercase",
+                                        color: "#A57A2B",
+                                        fontWeight: 700,
+                                      }}
+                                    >
+                                      Essence
+                                    </p>
+                                    <p
+                                      style={{
+                                        margin: 0,
+                                        fontSize: 16,
+                                        lineHeight: 1.75,
+                                        color: "#5D5348",
+                                      }}
+                                    >
+                                      {sentence(
+                                        `${activeWhyItem.title || "This"} is ${activeWhyItem.context.mitra_frame_through}`,
+                                      )}
+                                    </p>
+                                  </div>
+                                )}
 
-                        {activeWhyItem.slot === "sankalp"
-                          ? !!activeWhyItem.context?.mitra_frame_through && (
+                            {!!activeWhyItem.shift && (
                               <div
                                 style={{
                                   margin: "0 0 14px",
@@ -975,7 +1732,7 @@ export function InnerPathPage() {
                                     fontWeight: 700,
                                   }}
                                 >
-                                  Essence
+                                  Shift
                                 </p>
                                 <p
                                   style={{
@@ -986,384 +1743,206 @@ export function InnerPathPage() {
                                   }}
                                 >
                                   {sentence(
-                                    `This is ${activeWhyItem.context.mitra_frame_through}`,
-                                  )}
-                                </p>
-                              </div>
-                            )
-                          : !!activeWhyItem.context?.mitra_frame_through && (
-                              <div
-                                style={{
-                                  margin: "0 0 14px",
-                                  padding: "14px 16px",
-                                  borderRadius: 18,
-                                  background:
-                                    "linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,248,237,0.88))",
-                                  border: "1px solid rgba(230, 214, 186, 0.9)",
-                                }}
-                              >
-                                <p
-                                  style={{
-                                    margin: "0 0 6px",
-                                    fontSize: 11,
-                                    letterSpacing: 1.4,
-                                    textTransform: "uppercase",
-                                    color: "#A57A2B",
-                                    fontWeight: 700,
-                                  }}
-                                >
-                                  Essence
-                                </p>
-                                <p
-                                  style={{
-                                    margin: 0,
-                                    fontSize: 16,
-                                    lineHeight: 1.75,
-                                    color: "#5D5348",
-                                  }}
-                                >
-                                  {sentence(
-                                    `${activeWhyItem.title || "This"} is ${activeWhyItem.context.mitra_frame_through}`,
+                                    `Mitra chose this to guide you from ${activeWhyItem.shift}`,
                                   )}
                                 </p>
                               </div>
                             )}
 
-                        {!!activeWhyItem.shift && (
-                          <div
-                            style={{
-                              margin: "0 0 14px",
-                              padding: "14px 16px",
-                              borderRadius: 18,
-                              background:
-                                "linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,248,237,0.88))",
-                              border: "1px solid rgba(230, 214, 186, 0.9)",
-                            }}
-                          >
-                            <p
+                            <div
                               style={{
-                                margin: "0 0 6px",
-                                fontSize: 11,
-                                letterSpacing: 1.4,
-                                textTransform: "uppercase",
-                                color: "#A57A2B",
-                                fontWeight: 700,
+                                display: "grid",
+                                gridTemplateColumns:
+                                  "repeat(auto-fit, minmax(220px, 1fr))",
+                                gap: 12,
                               }}
                             >
-                              Shift
-                            </p>
-                            <p
-                              style={{
-                                margin: 0,
-                                fontSize: 16,
-                                lineHeight: 1.75,
-                                color: "#5D5348",
-                              }}
-                            >
-                              {sentence(
-                                `Mitra chose this to guide you from ${activeWhyItem.shift}`,
+                              {!!activeWhyItem.context?.mitra_use_for && (
+                                <div
+                                  style={{
+                                    padding: "14px 16px",
+                                    borderRadius: 18,
+                                    background: "rgba(255,255,255,0.64)",
+                                    border:
+                                      "1px solid rgba(230, 214, 186, 0.86)",
+                                  }}
+                                >
+                                  <p
+                                    style={{
+                                      margin: "0 0 8px",
+                                      fontSize: 11,
+                                      letterSpacing: 1.4,
+                                      textTransform: "uppercase",
+                                      color: "#A57A2B",
+                                      fontWeight: 700,
+                                    }}
+                                  >
+                                    Useful for
+                                  </p>
+                                  <p
+                                    style={{
+                                      margin: 0,
+                                      fontSize: 15,
+                                      lineHeight: 1.7,
+                                      color: "#5D5348",
+                                    }}
+                                  >
+                                    {sentence(
+                                      activeWhyItem.context.mitra_use_for,
+                                    )}
+                                  </p>
+                                </div>
                               )}
-                            </p>
+
+                              {!!activeWhyItem.context?.commentary_lineage && (
+                                <div
+                                  style={{
+                                    padding: "14px 16px",
+                                    borderRadius: 18,
+                                    background: "rgba(255,255,255,0.64)",
+                                    border:
+                                      "1px solid rgba(230, 214, 186, 0.86)",
+                                  }}
+                                >
+                                  <p
+                                    style={{
+                                      margin: "0 0 8px",
+                                      fontSize: 11,
+                                      letterSpacing: 1.4,
+                                      textTransform: "uppercase",
+                                      color: "#A57A2B",
+                                      fontWeight: 700,
+                                    }}
+                                  >
+                                    Rooted in
+                                  </p>
+                                  <p
+                                    style={{
+                                      margin: 0,
+                                      fontSize: 15,
+                                      lineHeight: 1.7,
+                                      color: "#5D5348",
+                                    }}
+                                  >
+                                    {sentence(
+                                      activeWhyItem.context.commentary_lineage,
+                                    )}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <>
+                        {(whyThis.level1 || whyThis.level2) && (
+                          <div style={{ marginBottom: 18 }}>
+                            {whyThis.level1 && (
+                              <p
+                                style={{
+                                  fontSize: 20,
+                                  fontWeight: 700,
+                                  color: "var(--kalpx-text)",
+                                  margin: "0 0 8px",
+                                  fontFamily: "var(--kalpx-font-serif)",
+                                }}
+                              >
+                                {whyThis.level1}
+                              </p>
+                            )}
+                            {whyThis.level2 && (
+                              <p
+                                style={{
+                                  fontSize: 15,
+                                  color: "var(--kalpx-text-soft)",
+                                  lineHeight: 1.7,
+                                  margin: 0,
+                                }}
+                              >
+                                {whyThis.level2}
+                              </p>
+                            )}
                           </div>
                         )}
 
-                        <div
-                          style={{
-                            display: "grid",
-                            gridTemplateColumns:
-                              "repeat(auto-fit, minmax(220px, 1fr))",
-                            gap: 12,
-                          }}
-                        >
-                          {!!activeWhyItem.context?.mitra_use_for && (
-                            <div
-                              style={{
-                                padding: "14px 16px",
-                                borderRadius: 18,
-                                background: "rgba(255,255,255,0.64)",
-                                border: "1px solid rgba(230, 214, 186, 0.86)",
-                              }}
-                            >
-                              <p
+                        {l1Items.length > 0 && (
+                          <div
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 8,
+                            }}
+                          >
+                            {l1Items.map((it) => (
+                              <div
+                                key={it.id}
                                 style={{
-                                  margin: "0 0 8px",
-                                  fontSize: 11,
-                                  letterSpacing: 1.4,
-                                  textTransform: "uppercase",
-                                  color: "#A57A2B",
-                                  fontWeight: 700,
+                                  borderLeft: "3px solid var(--kalpx-cta)",
+                                  paddingLeft: 12,
+                                  paddingTop: 2,
+                                  paddingBottom: 2,
                                 }}
                               >
-                                Useful for
-                              </p>
-                              <p
-                                style={{
-                                  margin: 0,
-                                  fontSize: 15,
-                                  lineHeight: 1.7,
-                                  color: "#5D5348",
-                                }}
-                              >
-                                {sentence(activeWhyItem.context.mitra_use_for)}
-                              </p>
-                            </div>
-                          )}
-
-                          {!!activeWhyItem.context?.commentary_lineage && (
-                            <div
-                              style={{
-                                padding: "14px 16px",
-                                borderRadius: 18,
-                                background: "rgba(255,255,255,0.64)",
-                                border: "1px solid rgba(230, 214, 186, 0.86)",
-                              }}
-                            >
-                              <p
-                                style={{
-                                  margin: "0 0 8px",
-                                  fontSize: 11,
-                                  letterSpacing: 1.4,
-                                  textTransform: "uppercase",
-                                  color: "#A57A2B",
-                                  fontWeight: 700,
-                                }}
-                              >
-                                Rooted in
-                              </p>
-                              <p
-                                style={{
-                                  margin: 0,
-                                  fontSize: 15,
-                                  lineHeight: 1.7,
-                                  color: "#5D5348",
-                                }}
-                              >
-                                {sentence(
-                                  activeWhyItem.context.commentary_lineage,
-                                )}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                                <p
+                                  style={{
+                                    fontFamily: "var(--kalpx-font-sans)",
+                                    fontSize: 11,
+                                    fontWeight: 600,
+                                    letterSpacing: 0.8,
+                                    textTransform: "uppercase",
+                                    color: "var(--kalpx-cta)",
+                                    margin: "0 0 2px",
+                                  }}
+                                >
+                                  {L1_DISPLAY_LABELS[it.id] ?? it.id}
+                                </p>
+                                <p
+                                  style={{
+                                    fontFamily: "var(--kalpx-font-serif)",
+                                    fontSize: 14,
+                                    color: "var(--kalpx-text-soft)",
+                                    margin: 0,
+                                    lineHeight: 1.5,
+                                  }}
+                                >
+                                  {it.label}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
-                ) : (
-                  <>
-                    {(whyThis.level1 || whyThis.level2) && (
-                      <div style={{ marginBottom: 18 }}>
-                        {whyThis.level1 && (
-                          <p
-                            style={{
-                              fontSize: 20,
-                              fontWeight: 700,
-                              color: "var(--kalpx-text)",
-                              margin: "0 0 8px",
-                              fontFamily: "var(--kalpx-font-serif)",
-                            }}
-                          >
-                            {whyThis.level1}
-                          </p>
-                        )}
-                        {whyThis.level2 && (
-                          <p
-                            style={{
-                              fontSize: 15,
-                              color: "var(--kalpx-text-soft)",
-                              lineHeight: 1.7,
-                              margin: 0,
-                            }}
-                          >
-                            {whyThis.level2}
-                          </p>
-                        )}
-                      </div>
-                    )}
-
-                    {l1Items.length > 0 && (
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 8,
-                        }}
-                      >
-                        {l1Items.map((it) => (
-                          <div
-                            key={it.id}
-                            style={{
-                              borderLeft: "3px solid var(--kalpx-cta)",
-                              paddingLeft: 12,
-                              paddingTop: 2,
-                              paddingBottom: 2,
-                            }}
-                          >
-                            <p
-                              style={{
-                                fontFamily: "var(--kalpx-font-sans)",
-                                fontSize: 11,
-                                fontWeight: 600,
-                                letterSpacing: 0.8,
-                                textTransform: "uppercase",
-                                color: "var(--kalpx-cta)",
-                                margin: "0 0 2px",
-                              }}
-                            >
-                              {L1_DISPLAY_LABELS[it.id] ?? it.id}
-                            </p>
-                            <p
-                              style={{
-                                fontFamily: "var(--kalpx-font-serif)",
-                                fontSize: 14,
-                                color: "var(--kalpx-text-soft)",
-                                margin: 0,
-                                lineHeight: 1.5,
-                              }}
-                            >
-                              {it.label}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </>
                 )}
               </div>
             )}
-          </div>
-        )}
 
-        {reminders?.has_journey && (
-          <div style={{ marginTop: 16 }}>
-            <AccordionRow
-              icon={<Bell size={16} color="#C99317" />}
-              title="Reminders"
-              subtitle={
-                [
-                  reminders.mantra_reminder_enabled && "Mantra",
-                  reminders.sankalp_reminder_enabled && "Sankalp",
-                  reminders.practice_reminder_enabled && "Practice",
-                ]
-                  .filter(Boolean)
-                  .join(", ") || "None set"
-              }
-              open={remindersOpen}
-              onClick={() => setRemindersOpen((o) => !o)}
-            />
-            {remindersOpen && (
-              <div style={{ padding: "12px 4px 4px" }}>
-                {(["mantra", "sankalp", "practice"] as const).map((key) => {
-                  const enabled = reminders[
-                    `${key}_reminder_enabled`
-                  ] as boolean;
-                  const time = reminders[`${key}_reminder_time`] as
-                    | string
-                    | null;
-                  const label = key.charAt(0).toUpperCase() + key.slice(1);
-                  return (
-                    <div
-                      key={key}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 12,
-                        marginBottom: 10,
-                        padding: "12px 14px",
-                        background: enabled
-                          ? "rgba(201,168,76,0.08)"
-                          : "rgba(0,0,0,0.02)",
-                        borderRadius: 10,
-                        border: `1px solid ${enabled ? "rgba(201,168,76,0.25)" : "rgba(0,0,0,0.06)"}`,
-                        transition: "all 0.2s",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontFamily: "var(--kalpx-font-serif)",
-                          fontSize: 16,
-                          color: "#432104",
-                          flex: 1,
-                        }}
-                      >
-                        Remind me for {label.toLowerCase()}
-                      </span>
-                      {enabled && (
-                        <input
-                          type="time"
-                          value={
-                            time
-                              ? time.slice(0, 5)
-                              : TRIAD_REMINDER_DEFAULTS[key]
-                          }
-                          onChange={(e) =>
-                            void handleReminderTime(
-                              key,
-                              e.target.value || TRIAD_REMINDER_DEFAULTS[key],
-                            )
-                          }
-                          disabled={reminderSaving}
-                          style={{
-                            border: "1px solid rgba(201,168,76,0.3)",
-                            borderRadius: 8,
-                            padding: "4px 8px",
-                            fontSize: 13,
-                            color: "#432104",
-                            background: "#fff",
-                            outline: "none",
-                          }}
-                        />
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => void handleReminderToggle(key)}
-                        disabled={reminderSaving}
-                        aria-label={`${enabled ? "Disable" : "Enable"} reminder for ${label}`}
-                        style={{
-                          width: 44,
-                          height: 24,
-                          borderRadius: 12,
-                          border: "none",
-                          background: enabled ? "#C99317" : "rgba(0,0,0,0.15)",
-                          cursor: reminderSaving ? "not-allowed" : "pointer",
-                          position: "relative",
-                          transition: "background 0.2s",
-                          flexShrink: 0,
-                        }}
-                      >
-                        <span
-                          style={{
-                            position: "absolute",
-                            top: 2,
-                            left: enabled ? 22 : 2,
-                            width: 20,
-                            height: 20,
-                            borderRadius: "50%",
-                            background: "#fff",
-                            transition: "left 0.2s",
-                          }}
-                        />
-                      </button>
-                    </div>
-                  );
-                })}
-                {reminderSaving && (
-                  <p
-                    style={{
-                      fontSize: 12,
-                      color: "var(--kalpx-text-muted)",
-                      textAlign: "center",
-                      margin: "4px 0 0",
-                    }}
-                  >
-                    Saving…
-                  </p>
-                )}
+            {reminders?.has_journey && (
+              <div style={{ marginTop: 16 }}>
+                <AccordionRow
+                  icon={<Bell size={16} color="#C99317" />}
+                  title="Reminders"
+                  subtitle={
+                    [
+                      reminders.mantra_reminder_enabled && "Mantra",
+                      reminders.sankalp_reminder_enabled && "Sankalp",
+                      reminders.practice_reminder_enabled && "Practice",
+                    ]
+                      .filter(Boolean)
+                      .join(", ") || "None set"
+                  }
+                  open={remindersOpen}
+                  onClick={() => setRemindersOpen((o) => !o)}
+                />
+                {remindersPanel}
               </div>
             )}
-          </div>
-        )}
 
-        {hasContinuity && <ContinuityBanner sd={sd} />}
+            {hasContinuity && <ContinuityBanner sd={sd} />}
+          </>
+        )}
       </div>
     </MitraMobileShell>
   );

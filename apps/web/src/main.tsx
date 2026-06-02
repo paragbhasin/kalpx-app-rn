@@ -5,10 +5,16 @@ import { App } from './App';
 import { WEB_ENV } from './lib/env';
 import './styles/global.css';
 
+const googleClientId = WEB_ENV.googleClientId.trim();
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <GoogleOAuthProvider clientId={WEB_ENV.googleClientId}>
+    {googleClientId ? (
+      <GoogleOAuthProvider clientId={googleClientId}>
+        <App />
+      </GoogleOAuthProvider>
+    ) : (
       <App />
-    </GoogleOAuthProvider>
+    )}
   </React.StrictMode>,
 );

@@ -57,6 +57,9 @@ export function RoomPage() {
   const dispatch = useDispatch<AppDispatch>();
   const screenState = useScreenState();
   const sd = screenState.screenData;
+  const [isDesktop, setIsDesktop] = useState(
+    typeof window === "undefined" ? true : window.innerWidth >= 1024,
+  );
 
   const fullRoomId = roomId?.startsWith("room_")
     ? roomId
@@ -94,6 +97,14 @@ export function RoomPage() {
   const hasExplicitlyExitedRef = useRef(false);
   const hasRoomExitedFiredRef = useRef(false);
   const fullRoomIdRef = useRef<string>("");
+
+  // Room ambient audio — start on render phase, stop on unmount (mirrors RoomContainer.tsx)
+  useEffect(() => {
+    const onResize = () => setIsDesktop(window.innerWidth >= 1024);
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   // Room ambient audio — start on render phase, stop on unmount (mirrors RoomContainer.tsx)
   useEffect(() => {
@@ -312,12 +323,14 @@ export function RoomPage() {
   }
 
   return (
-    <div style={{ ...roomBgStyle, maxWidth: 480, margin: "0 auto" }}>
+    <div style={roomBgStyle}>
+      <div style={{ maxWidth: isDesktop ? 1440 : 480, margin: "0 auto" }}>
       {envelope ? (
         <RoomRenderer
           envelope={envelope}
           screenData={screenState.screenData}
           onAction={handleAction}
+          isDesktop={isDesktop}
         />
       ) : (
         <div style={{ padding: 24, textAlign: "center" }}>
@@ -357,6 +370,7 @@ export function RoomPage() {
           onReturnHome={() => { hasExplicitlyExitedRef.current = true; dispatch(updateScreenData({ show_room_reflection: false })); webNavigate("/en/mitra/dashboard"); }}
         />
       )}
+      </div>
     </div>
   );
 }

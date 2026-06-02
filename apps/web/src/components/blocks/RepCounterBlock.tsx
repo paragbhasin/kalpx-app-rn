@@ -35,6 +35,22 @@ interface Props {
   onAction?: (action: any) => void;
 }
 
+function useIsDesktopRunner() {
+  const [isDesktop, setIsDesktop] = useState(() =>
+    typeof window === "undefined" ? true : window.innerWidth >= 1024,
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onResize = () => setIsDesktop(window.innerWidth >= 1024);
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  return isDesktop;
+}
+
 /* ── CollapsibleCard ──────────────────────────────────────────────── */
 export function CollapsibleCard({
   label,
@@ -397,9 +413,92 @@ function MalaBeadRing({
   );
 }
 
+function DesktopInfoSection({
+  label,
+  expanded,
+  onToggle,
+  children,
+}: {
+  label: string;
+  expanded: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        width: "100%",
+        borderRadius: 11,
+        border: "1px solid rgba(184,148,80,0.22)",
+        background: "rgba(255,253,249,0.7)",
+        boxShadow: "0 18px 48px rgba(184,148,80,0.08)",
+        padding: expanded ? "32px 38px 34px" : "15px",
+        boxSizing: "border-box",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+      }}
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        style={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          gap: 18,
+          padding: 0,
+          cursor: "pointer",
+        }}
+      >
+        <span
+          style={{ flex: 1, height: 1, background: "rgba(184,148,80,0.45)" }}
+        />
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 10,
+            fontFamily: "var(--kalpx-font-serif)",
+            fontSize: 26,
+            fontWeight: 700,
+            color: BROWN,
+            lineHeight: 1.1,
+          }}
+        >
+          {label}
+          {expanded ? (
+            <ChevronUp size={18} color={GOLD} strokeWidth={2} />
+          ) : (
+            <ChevronDown size={18} color={GOLD} strokeWidth={2} />
+          )}
+        </span>
+        <span
+          style={{ flex: 1, height: 1, background: "rgba(184,148,80,0.45)" }}
+        />
+      </button>
+
+      {expanded && (
+        <div
+          style={{
+            marginTop: 28,
+            fontFamily: "var(--kalpx-font-serif)",
+            fontSize: 21,
+            lineHeight: 2.05,
+            color: "#5a3c21",
+            textAlign: "left",
+          }}
+        >
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Main export ──────────────────────────────────────────────────── */
 export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
   ensureCSS();
+  const isDesktop = useIsDesktopRunner();
   const infoViewOnly = screenData["info_view_only"] === true;
 
   /* ── Data resolution ── */
@@ -477,6 +576,269 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
       key: "runner_reps_completed",
       value: 0,
     });
+  }
+
+  if (isDesktop) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 1360,
+          margin: "0 auto",
+          padding: "30px 10px 10px",
+          boxSizing: "border-box",
+        }}
+      >
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 1.12fr) minmax(420px, 0.78fr)",
+            gap: 40,
+            alignItems: "start",
+          }}
+        >
+          <div
+            style={{
+              position: "relative",
+              borderRadius: 30,
+              border: "1px solid rgba(184,148,80,0.22)",
+              background:
+                "radial-gradient(circle at 50% 38%, rgba(255,255,255,0.95) 0%, rgba(255,253,249,0.92) 36%, rgba(251,246,238,0.84) 100%)",
+              boxShadow: "0 24px 60px rgba(184,148,80,0.1)",
+              padding: "15px",
+              backdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background:
+                  "radial-gradient(circle at 50% 45%, rgba(233,205,145,0.28), transparent 42%)",
+                pointerEvents: "none",
+              }}
+            />
+
+            <div
+              style={{
+                position: "relative",
+                zIndex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              {title && (
+                <p
+                  style={{
+                    maxWidth: 560,
+                    fontFamily: "var(--kalpx-font-serif)",
+                    fontSize: 30,
+                    fontWeight: 700,
+                    color: BROWN,
+                    textAlign: "center",
+                    margin: "0 0 10px",
+                    lineHeight: 1.35,
+                  }}
+                >
+                  {title}
+                </p>
+              )}
+
+              {traditionLine && (
+                <p
+                  style={{
+                    fontSize: 13,
+                    letterSpacing: 2.8,
+                    fontFamily: "var(--kalpx-font-sans, sans-serif)",
+                    fontWeight: 600,
+                    color: GOLD,
+                    textAlign: "center",
+                    textTransform: "uppercase",
+                    margin: "0 0 22px",
+                  }}
+                >
+                  {traditionLine}
+                </p>
+              )}
+
+              {!infoViewOnly && (
+                <>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "baseline",
+                      gap: 8,
+                      margin: "0 0 12px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 56,
+                        fontFamily: "var(--kalpx-font-serif)",
+                        fontWeight: 300,
+                        color: GOLD,
+                        lineHeight: 1,
+                      }}
+                    >
+                      {reps}
+                    </span>
+                    {!unlimited && (
+                      <span
+                        style={{
+                          fontSize: 30,
+                          fontFamily: "var(--kalpx-font-serif)",
+                          color: "#d1c1a1",
+                          lineHeight: 1,
+                        }}
+                      >
+                        / {repsTotal}
+                      </span>
+                    )}
+                  </div>
+
+                  <MalaBeadRing
+                    count={beadCount}
+                    reps={reps}
+                    repsTotal={repsTotal}
+                    unlimited={unlimited}
+                    onTap={increment}
+                  />
+                </>
+              )}
+
+              {(iast || devanagari) && (
+                <div
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 14,
+                    marginTop: 28,
+                  }}
+                >
+                  {iast && (
+                    <MantraTextCard
+                      text={iast}
+                      expanded={iastExp}
+                      onToggle={() => setIastExp((v) => !v)}
+                    />
+                  )}
+                  {devanagari && (
+                    <MantraTextCard
+                      text={devanagari}
+                      isDevanagari
+                      expanded={devExp}
+                      onToggle={() => setDevExp((v) => !v)}
+                    />
+                  )}
+                </div>
+              )}
+
+              {!infoViewOnly && (
+                <div
+                  style={{
+                    width: "100%",
+                    display: "grid",
+                    gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+                    gap: 16,
+                    marginTop: 26,
+                  }}
+                >
+                  {REP_PRESETS.map((n) => {
+                    const sel = repsTotal === n && !unlimited;
+                    return (
+                      <button
+                        key={n}
+                        onClick={() => setPreset(n)}
+                        data-testid={`rep-chip-${n}`}
+                        style={{
+                          minHeight: 60,
+                          borderRadius: 999,
+                          border: `1px solid ${sel ? GOLD : "#e8c587"}`,
+                          background: sel
+                            ? "linear-gradient(90deg, #c28d35 0%, #d7a64f 100%)"
+                            : "rgba(255,255,255,0.58)",
+                          color: sel ? "#fff" : MUTED,
+                          fontSize: 18,
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          transition: "all 0.15s ease",
+                          boxShadow: sel
+                            ? "0 14px 30px rgba(194,141,53,0.24)"
+                            : "none",
+                        }}
+                      >
+                        {n}
+                        {sel ? " ✓" : ""}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div
+            style={{
+              position: "relative",
+              display: "flex",
+              flexDirection: "column",
+              gap: 34,
+            }}
+          >
+            {audioUrl && (
+              <div style={{ width: "100%" }}>
+                <AudioPlayerBlock
+                  block={{ audio_key: "mantra_audio_url", loop: true }}
+                  screenData={audioScreenData}
+                />
+              </div>
+            )}
+
+            {meaning && (
+              <DesktopInfoSection
+                label="Meaning"
+                expanded={meanExp}
+                onToggle={() => setMeanExp((v) => !v)}
+              >
+                {meaning}
+              </DesktopInfoSection>
+            )}
+
+            {essence && (
+              <DesktopInfoSection
+                label="Essence"
+                expanded={essExp}
+                onToggle={() => setEssExp((v) => !v)}
+              >
+                {essence}
+              </DesktopInfoSection>
+            )}
+
+            <button
+              onClick={() => onAction?.({ type: "runner_exit" })}
+              style={{
+                alignSelf: "center",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: 20,
+                fontFamily: "var(--kalpx-font-serif)",
+                color: BROWN,
+                textDecoration: "underline",
+                padding: "4px 0",
+                marginTop: 10,
+              }}
+            >
+              Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   /* ── Render ── */

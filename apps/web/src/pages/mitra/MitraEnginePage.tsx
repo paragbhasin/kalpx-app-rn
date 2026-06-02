@@ -2,10 +2,6 @@ import { Volume2, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation, useSearchParams } from "react-router-dom";
-import Quick1Icon from "../../../../mobile/assets/quick_1.webp";
-import Quick2Icon from "../../../../mobile/assets/quick_2.webp";
-import Quick3Icon from "../../../../mobile/assets/quick_3.webp";
-import Quick4Icon from "../../../../mobile/assets/quick_4.webp";
 import { CompletionReturnBlock } from "../../components/blocks/CompletionReturnBlock";
 import { PracticeTimerBlock } from "../../components/blocks/PracticeTimerBlock";
 import {
@@ -30,6 +26,10 @@ import {
 } from "../../store/screenSlice";
 import { showSnackBar } from "../../store/snackBarSlice";
 import { QuickResetPage } from "./QuickResetPage";
+const Quick1Icon = "/mobile-assets/quick_1.webp";
+const Quick2Icon = "/mobile-assets/quick_2.webp";
+const Quick3Icon = "/mobile-assets/quick_3.webp";
+const Quick4Icon = "/mobile-assets/quick_4.webp";
 
 function CommunityRunnerActionBar({
   addLoading,
@@ -1142,7 +1142,11 @@ export function MitraEnginePage() {
 
   if (isMantraRunnerState) {
     return (
-      <MitraMobileShell backgroundImage="/beige_bg.png">
+      <MitraMobileShell
+        backgroundImage="/beige_bg.png"
+        wideDesktop
+        plainDesktopBackground
+      >
         {resolving ? (
           <div style={{ textAlign: "center", padding: 80 }}>
             <div
@@ -1245,7 +1249,11 @@ export function MitraEnginePage() {
 
   if (isSankalpState) {
     return (
-      <MitraMobileShell backgroundImage="/beige_bg.png">
+      <MitraMobileShell
+        backgroundImage="/beige_bg.png"
+        wideDesktop
+        plainDesktopBackground
+      >
         {resolving ? (
           <div style={{ textAlign: "center", padding: 80 }}>
             <div
@@ -1289,7 +1297,11 @@ export function MitraEnginePage() {
 
   if (isPracticeState) {
     return (
-      <MitraMobileShell backgroundImage="/guided_bg.png">
+      <MitraMobileShell
+        backgroundImage="/guided_bg.png"
+        wideDesktop
+        plainDesktopBackground
+      >
         {resolving ? (
           <div style={{ textAlign: "center", padding: 80 }}>
             <div

@@ -295,9 +295,26 @@ const S = {
   } as const,
 };
 
+function useIsDesktopQuickReset() {
+  const [isDesktop, setIsDesktop] = useState(() =>
+    typeof window === "undefined" ? true : window.innerWidth >= 1024,
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onResize = () => setIsDesktop(window.innerWidth >= 1024);
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  return isDesktop;
+}
+
 export function QuickResetPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const isDesktop = useIsDesktopQuickReset();
 
   const [phase, setPhase] = useState<Phase>("loading");
   const [openingState, setOpeningState] =
@@ -480,7 +497,9 @@ export function QuickResetPage() {
     try {
       const fresh = await getMitraHomeV3({ forceFresh: true });
       if (fresh) dispatch(setHomeData(fresh));
-    } catch { /* non-blocking */ }
+    } catch {
+      /* non-blocking */
+    }
     navigate(-1);
   }, [dispatch, navigate]);
 
@@ -499,6 +518,355 @@ export function QuickResetPage() {
       const lit = i < beadCount % visualBeadCount;
       return { cx, cy, i, lit };
     });
+
+    if (isDesktop) {
+      return (
+        <div
+          style={{
+            width: "100%",
+            maxWidth: 1360,
+            margin: "0 auto",
+            padding: "25px 15px",
+            boxSizing: "border-box",
+          }}
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 1.12fr) minmax(420px, 0.78fr)",
+              gap: 40,
+              alignItems: "start",
+            }}
+          >
+            <div
+              style={{
+                position: "relative",
+                borderRadius: 30,
+                border: "1px solid rgba(184,148,80,0.22)",
+                background:
+                  "radial-gradient(circle at 50% 38%, rgba(255,255,255,0.95) 0%, rgba(255,253,249,0.92) 36%, rgba(251,246,238,0.84) 100%)",
+                boxShadow: "0 24px 60px rgba(184,148,80,0.1)",
+                padding: "34px 34px 30px",
+                backdropFilter: "blur(10px)",
+                WebkitBackdropFilter: "blur(10px)",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background:
+                    "radial-gradient(circle at 50% 45%, rgba(233,205,145,0.28), transparent 42%)",
+                  pointerEvents: "none",
+                }}
+              />
+
+              <div
+                style={{
+                  position: "relative",
+                  zIndex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
+                <div style={{ height: 8 }} />
+                <p
+                  style={{
+                    fontFamily: "var(--kalpx-font-serif)",
+                    fontWeight: 700,
+                    fontSize: 30,
+                    color: "#432104",
+                    textAlign: "center",
+                    margin: "0 0 10px",
+                    lineHeight: 1.35,
+                    maxWidth: 560,
+                  }}
+                >
+                  {mantra.title}
+                </p>
+                <p
+                  style={{
+                    fontSize: 13,
+                    letterSpacing: 2.8,
+                    fontWeight: 600,
+                    color: "#C7A048",
+                    textTransform: "uppercase",
+                    textAlign: "center",
+                    margin: "0 0 22px",
+                  }}
+                >
+                  Quick Reset Mantra
+                </p>
+
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "baseline",
+                    gap: 8,
+                    margin: "0 0 12px",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 56,
+                      fontFamily: "var(--kalpx-font-serif)",
+                      fontWeight: 300,
+                      color: "#C7A048",
+                      lineHeight: 1,
+                    }}
+                  >
+                    {beadCount}
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    position: "relative",
+                    width: 230,
+                    height: 230,
+                    marginBottom: 16,
+                  }}
+                >
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      animation:
+                        "kalpx-quickreset-ring-spin 40s linear infinite",
+                    }}
+                  >
+                    {beads.map(({ cx, cy, i, lit }) => (
+                      <img
+                        key={i}
+                        src="/rudraksh.svg"
+                        alt=""
+                        draggable={false}
+                        style={{
+                          position: "absolute",
+                          width: 28,
+                          height: 28,
+                          left: cx - 14,
+                          top: cy - 14,
+                          opacity: lit ? 0.18 : 1,
+                          transition: "opacity 0.25s ease",
+                          userSelect: "none",
+                          pointerEvents: "none",
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <button
+                    onClick={handleTapBead}
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      width: 108,
+                      height: 108,
+                      transform: "translate(-50%,-50%)",
+                      borderRadius: "50%",
+                      background: "#fffdf9",
+                      border: "1.5px solid #e8c587",
+                      boxShadow: "0 2px 10px rgba(184,148,80,0.16)",
+                      cursor: "pointer",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 2,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 20,
+                        letterSpacing: 4,
+                        fontWeight: 700,
+                        color: "#b89450",
+                        lineHeight: 1,
+                      }}
+                    >
+                      TAP
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 10,
+                        letterSpacing: 1.2,
+                        color: "#8a7a5a",
+                        lineHeight: 1,
+                      }}
+                    >
+                      HERE
+                    </span>
+                  </button>
+                </div>
+
+                <div
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 14,
+                    marginTop: 12,
+                  }}
+                >
+                  {mantra.iast && (
+                    <MantraTextCard
+                      text={mantra.iast}
+                      expanded={iastExpanded}
+                      onToggle={() => setIastExpanded((v) => !v)}
+                    />
+                  )}
+                  {mantra.devanagari && (
+                    <MantraTextCard
+                      text={mantra.devanagari}
+                      isDevanagari
+                      expanded={devExpanded}
+                      onToggle={() => setDevExpanded((v) => !v)}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 24,
+              }}
+            >
+              {mantra.audio_url && (
+                <div style={{ width: "100%" }}>
+                  <AudioPlayerBlock
+                    block={{
+                      audio_url: mantra.audio_url,
+                      audio_key: "quick_reset_audio_url",
+                      loop: true,
+                      autoplay: false,
+                      label: "Mantra Audio",
+                    }}
+                    screenData={{ quick_reset_audio_url: mantra.audio_url }}
+                  />
+                </div>
+              )}
+
+              {mantra.meaning && (
+                <div style={{ width: "100%" }}>
+                  <CollapsibleCard
+                    label="Meaning"
+                    expanded={meaningExpanded}
+                    onToggle={() => setMeaningExpanded((v) => !v)}
+                  >
+                    {mantra.meaning}
+                  </CollapsibleCard>
+                </div>
+              )}
+
+              {mantra.essence && (
+                <div style={{ width: "100%" }}>
+                  <CollapsibleCard
+                    label="Essence"
+                    expanded={essenceExpanded}
+                    onToggle={() => setEssenceExpanded((v) => !v)}
+                  >
+                    {mantra.essence}
+                  </CollapsibleCard>
+                </div>
+              )}
+
+              <div
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                }}
+              >
+                {isRunning ? (
+                  <button style={S.primaryBtn} onClick={handleDoneChanting}>
+                    Done chanting
+                  </button>
+                ) : (
+                  <button style={S.primaryBtn} onClick={handleBeginChanting}>
+                    {primaryLabel}
+                  </button>
+                )}
+                {isRunning && (
+                  <button style={S.endEarlyBtn} onClick={handleEndEarly}>
+                    End early
+                  </button>
+                )}
+                {secondaryActions.map((action) => (
+                  <button
+                    key={action}
+                    style={{
+                      ...S.secondaryBtn,
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-start",
+                      gap: 18,
+                    }}
+                    onClick={() => handleSecondaryAction(action)}
+                  >
+                    <span
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: "50%",
+                        border: "1px dashed rgba(212,160,23,0.38)",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#C99317",
+                        background: "rgba(255,255,255,0.42)",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {action === "change_mantra" ? (
+                        <RotateCw size={20} strokeWidth={1.8} />
+                      ) : (
+                        <SlidersHorizontal size={20} strokeWidth={1.8} />
+                      )}
+                    </span>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                        minWidth: 0,
+                        flex: 1,
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontFamily: "var(--kalpx-font-serif)",
+                          fontSize: 16,
+                          color: "#432104",
+                          lineHeight: 1.2,
+                          textAlign: "left",
+                        }}
+                      >
+                        {getQuickResetActionLabel(action)}
+                      </span>
+                      <span
+                        style={{
+                          width: "100%",
+                          marginTop: 6,
+                          borderBottom: "2px dotted rgba(232,197,135,0.95)",
+                        }}
+                      />
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div style={S.openingShell}>
@@ -752,7 +1120,11 @@ export function QuickResetPage() {
   // );
 
   const renderShell = (content: React.ReactNode) => (
-    <MitraMobileShell backgroundImage="/beige_bg.png">
+    <MitraMobileShell
+      backgroundImage="/beige_bg.png"
+      wideDesktop={isDesktop}
+      plainDesktopBackground={isDesktop}
+    >
       <div style={S.page}>
         <style>{QUICK_RESET_RING_CSS}</style>
         {content}
@@ -916,6 +1288,164 @@ export function QuickResetPage() {
 
   // ── Picker overlay ─────────────────────────────────────────────────────────
   function renderPickerOverlay() {
+    if (isDesktop) {
+      return (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 140,
+            background: "rgba(67,33,4,0.14)",
+            backdropFilter: "blur(3px)",
+            WebkitBackdropFilter: "blur(3px)",
+            display: "flex",
+            justifyContent: "flex-end",
+          }}
+          onClick={() => setPickerOpen(false)}
+        >
+          <div
+            style={{
+              width: "min(460px, 100vw)",
+              height: "100vh",
+              background:
+                "linear-gradient(180deg, rgba(255,250,244,0.98) 0%, rgba(255,247,239,0.98) 100%)",
+              borderLeft: "1px solid rgba(218,194,142,0.42)",
+              boxShadow: "-24px 0 64px rgba(67,33,4,0.12)",
+              display: "flex",
+              flexDirection: "column",
+              position: "relative",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              style={{
+                padding: "24px 24px 18px",
+                position: "relative",
+                flexShrink: 0,
+              }}
+            >
+              <img
+                src="/leaves-bird.png"
+                alt=""
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  top: "-28px",
+                  right: "10px",
+                  width: "165px",
+                  pointerEvents: "none",
+                  userSelect: "none",
+                  opacity: 0.92,
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setPickerOpen(false)}
+                style={{
+                  position: "absolute",
+                  top: 18,
+                  right: 18,
+                  width: 36,
+                  height: 36,
+                  borderRadius: "50%",
+                  border: "1px solid rgba(218,194,142,0.55)",
+                  background: "rgba(255,255,255,0.8)",
+                  color: "#8B6A2A",
+                  fontSize: 18,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                aria-label="Close mantra picker"
+              >
+                ×
+              </button>
+              <div style={{ textAlign: "center", paddingTop: 8 }}>
+                <p style={{ ...S.pageTitle, margin: "0 0 12px", fontSize: 24 }}>
+                  Choose a Mantra
+                </p>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 12,
+                    color: "#C7A048",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 88,
+                      height: 1,
+                      background: "rgba(199,160,72,0.45)",
+                    }}
+                  />
+                  <span style={{ fontSize: 18, lineHeight: 1 }}>✦</span>
+                  <div
+                    style={{
+                      width: 88,
+                      height: 1,
+                      background: "rgba(199,160,72,0.45)",
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                flex: 1,
+                overflowY: "auto",
+                padding: "0 24px 24px",
+                boxSizing: "border-box",
+              }}
+            >
+              {pickerLoading ? (
+                <p
+                  style={{
+                    color: "#C99317",
+                    fontSize: 15,
+                    textAlign: "center",
+                    marginTop: 32,
+                  }}
+                >
+                  Loading…
+                </p>
+              ) : (
+                pickerMantras.map((mantra) => (
+                  <div
+                    key={mantra.item_id}
+                    style={{
+                      ...S.pickerItem,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 18,
+                    }}
+                    onClick={() => handlePickerSelect(mantra)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && handlePickerSelect(mantra)
+                    }
+                  >
+                    <div style={{ flex: 1 }}>
+                      <p style={S.pickerItemTitle}>{mantra.title}</p>
+                      {mantra.devanagari && (
+                        <p style={S.pickerItemDevanagari}>
+                          {mantra.devanagari}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div style={S.overlay as React.CSSProperties}>
         <div

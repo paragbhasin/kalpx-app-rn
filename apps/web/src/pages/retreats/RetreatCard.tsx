@@ -1,8 +1,7 @@
 import { CalendarDays, LocationEdit, Star } from "lucide-react";
 import type { CSSProperties } from "react";
-import retreatImage from "../../../../mobile/assets/retreat/retreat1.webp";
-import facilitatorImage from "../../../../mobile/assets/retreat/retreat2.webp";
-
+const retreatImage = "/mobile-assets/retreat/retreat1.webp";
+const facilitatorImage = "/mobile-assets/retreat/retreat2.webp";
 type RetreatBadgeType = "offer" | "urgency" | string;
 
 type Retreat = {
@@ -106,11 +105,18 @@ export function RetreatCard({
 
           <div style={metaRowStyle}>
             <div style={metaIconStyle}>
-              <Star size={18} color="#D4A017" fill="#D4A017" strokeWidth={1.8} />
+              <Star
+                size={18}
+                color="#D4A017"
+                fill="#D4A017"
+                strokeWidth={1.8}
+              />
             </div>
             <span style={metaTextStyle}>
               {card.rating_avg || "4.9"}
-              <span style={metaMutedTextStyle}>({card.rating_count || "223"})</span>
+              <span style={metaMutedTextStyle}>
+                ({card.rating_count || "223"})
+              </span>
             </span>
           </div>
         </div>
@@ -121,7 +127,9 @@ export function RetreatCard({
       <div style={footerStyle}>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <span style={footerLabelStyle}>Starting From</span>
-          <span style={footerPriceStyle}>₹{formatPrice(card.cheapest_price_minor)}</span>
+          <span style={footerPriceStyle}>
+            ₹{formatPrice(card.cheapest_price_minor)}
+          </span>
         </div>
 
         <button type="button" style={ctaStyle}>

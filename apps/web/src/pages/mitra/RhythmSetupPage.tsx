@@ -299,6 +299,7 @@ export function RhythmSetupPage() {
   return (
     <MitraMobileShell backgroundImage="/beige_bg.png">
       <main
+        className="rhythm-setup-main"
         style={{
           minHeight: "100%",
           display: "flex",
@@ -307,8 +308,12 @@ export function RhythmSetupPage() {
           padding: "24px 16px calc(45px + env(safe-area-inset-bottom))",
         }}
       >
-        <div style={{ width: "100%", maxWidth: 420, position: "relative" }}>
+        <div
+          className="rhythm-setup-content"
+          style={{ width: "100%", maxWidth: 420, position: "relative" }}
+        >
           <img
+            className="rhythm-setup-hero-art"
             src="/leaves-bird.png"
             alt=""
             aria-hidden="true"
@@ -337,6 +342,7 @@ export function RhythmSetupPage() {
             ← Back
           </button> */}
           <h2
+            className="rhythm-setup-title"
             style={{
               fontFamily: "var(--kalpx-font-serif)",
               fontWeight: 700,
@@ -349,8 +355,9 @@ export function RhythmSetupPage() {
           </h2>
 
           {BANDS.map((band) => (
-            <div key={band} style={{ marginBottom: 18 }}>
+            <div key={band} className="rhythm-setup-band" style={{ marginBottom: 18 }}>
               <button
+                className="rhythm-setup-band-toggle"
                 onClick={() => setOpenBand(openBand === band ? null : band)}
                 style={{
                   width: "100%",
@@ -370,6 +377,7 @@ export function RhythmSetupPage() {
                 }}
               >
                 <div
+                  className="rhythm-setup-band-icon-wrap"
                   style={{
                     width: 40,
                     height: 40,
@@ -384,14 +392,16 @@ export function RhythmSetupPage() {
                   }}
                 >
                   <img
+                    className="rhythm-setup-band-icon"
                     src={BAND_ART[band]}
                     alt=""
                     aria-hidden="true"
                     style={{ width: 50, height: 50, objectFit: "contain" }}
                   />
                 </div>
-                <div>
+                <div className="rhythm-setup-band-copy">
                   <div
+                    className="rhythm-setup-band-title"
                     style={{
                       fontFamily: "var(--kalpx-font-serif)",
                       fontWeight: 700,
@@ -402,11 +412,12 @@ export function RhythmSetupPage() {
                   >
                     {RHYTHM_BAND_LABELS[band]}
                   </div>
-                  <div style={{ fontSize: 14, color: "#7B6550" }}>
+                  <div className="rhythm-setup-band-subtitle" style={{ fontSize: 14, color: "#7B6550" }}>
                     {RHYTHM_BAND_SUBTITLES[band]}
                   </div>
                 </div>
                 <span
+                  className="rhythm-setup-band-chevron"
                   style={{
                     color: "#C99317",
                     marginLeft: "auto",
@@ -423,12 +434,13 @@ export function RhythmSetupPage() {
               </button>
 
               {openBand === band && (
-                <div style={{ padding: "12px 2px 0" }}>
+                <div className="rhythm-setup-band-panel" style={{ padding: "12px 2px 0" }}>
                   {bandItems[band].map((item, idx) => {
                     const isFirst = idx === 0;
                     const isLast = idx === bandItems[band].length - 1;
                     return (
                       <div
+                        className="rhythm-setup-item-card"
                         key={item.rhythm_item_id ?? `${item.item_id}-${idx}`}
                         style={{
                           padding: "12px 14px",
@@ -440,6 +452,7 @@ export function RhythmSetupPage() {
                       >
                         {/* Item info */}
                         <div
+                          className="rhythm-setup-item-info-row"
                           style={{
                             display: "flex",
                             justifyContent: "space-between",
@@ -447,8 +460,9 @@ export function RhythmSetupPage() {
                             marginBottom: 8,
                           }}
                         >
-                          <div>
+                          <div className="rhythm-setup-item-copy">
                             <div
+                              className="rhythm-setup-item-title"
                               style={{
                                 fontFamily: "var(--kalpx-font-serif)",
                                 fontSize: 17,
@@ -458,11 +472,12 @@ export function RhythmSetupPage() {
                             >
                               {item.title_snapshot}
                             </div>
-                            <div style={{ fontSize: 12, color: "#432104" }}>
+                            <div className="rhythm-setup-item-type" style={{ fontSize: 12, color: "#432104" }}>
                               {item.item_type}
                             </div>
                           </div>
                           <button
+                            className="rhythm-setup-remove-button"
                             onClick={() => removeItemAt(band, idx)}
                             style={{
                               background: "none",
@@ -478,6 +493,7 @@ export function RhythmSetupPage() {
 
                         {/* Gentle reminder toggle */}
                         <div
+                          className="rhythm-setup-reminder-row"
                           style={{
                             display: "flex",
                             alignItems: "center",
@@ -486,6 +502,7 @@ export function RhythmSetupPage() {
                           }}
                         >
                           <button
+                            className="rhythm-setup-reminder-button"
                             type="button"
                             role="switch"
                             aria-checked={item.reminder_enabled}
@@ -525,6 +542,7 @@ export function RhythmSetupPage() {
                             }}
                           >
                             <span
+                              className="rhythm-setup-reminder-track"
                               aria-hidden="true"
                               style={{
                                 width: 22,
@@ -541,6 +559,7 @@ export function RhythmSetupPage() {
                               }}
                             >
                               <span
+                                className="rhythm-setup-reminder-knob"
                                 style={{
                                   width: 10,
                                   height: 10,
@@ -628,6 +647,7 @@ export function RhythmSetupPage() {
 
                         {/* Move to another slot */}
                         <div
+                          className="rhythm-setup-move-actions"
                           style={{
                             display: "flex",
                             gap: 6,
@@ -646,6 +666,7 @@ export function RhythmSetupPage() {
                             .filter((s) => s !== band)
                             .map((s) => (
                               <button
+                                className="rhythm-setup-move-button"
                                 key={s}
                                 onClick={() => moveItemToSlot(band, idx, s)}
                                 style={{
@@ -667,6 +688,7 @@ export function RhythmSetupPage() {
                     );
                   })}
                   <button
+                    className="rhythm-setup-add-library-button"
                     onClick={() => setPickerBand(band)}
                     style={{
                       width: "100%",
@@ -751,6 +773,7 @@ export function RhythmSetupPage() {
           )}
 
           <button
+            className="rhythm-setup-save-button"
             onClick={() => void handleSave()}
             disabled={saving}
             style={{

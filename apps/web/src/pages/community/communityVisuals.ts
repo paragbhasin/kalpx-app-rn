@@ -1,5 +1,5 @@
-import { WEB_ENV } from "../../lib/env";
 import type { CommunityListItem } from "../../engine/communityApi";
+import { WEB_ENV } from "../../lib/env";
 
 const COMMUNITY_BACKGROUNDS: Record<string, string> = {
   "daily-dharma-reflections": new URL(
@@ -178,7 +178,9 @@ export function resolveCommunityImage(community: CommunityListItem): string {
   );
 }
 
-export function getConsistentCommunityStats(communityIdOrSlug: string | number) {
+export function getConsistentCommunityStats(
+  communityIdOrSlug: string | number,
+) {
   const idStr = communityIdOrSlug.toString();
   let hash = 0;
   for (let index = 0; index < idStr.length; index += 1) {

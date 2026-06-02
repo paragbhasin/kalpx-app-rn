@@ -146,12 +146,13 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
   const recId: string | null = entryCtx.recommended_first_action_id ?? null;
   const roomSteps = (envelope as any).room_steps;
   const roomDisplayName = (isHindi ? ROOM_LABELS_HI : ROOM_LABELS)[envelope.room_id as keyof typeof ROOM_LABELS] ?? '';
-  const arrivalCopyRaw = getRoomArrivalCopy(roomId, ctx);
+  const locale = i18n.language || 'en';
+  const arrivalCopyRaw = getRoomArrivalCopy(roomId, ctx, locale);
   const arrivalCopy = {
     ...arrivalCopyRaw,
     companionLine: arrivalCopyRaw.companionLine || t('room.actions.youreHereThatIsEnough'),
   };
-  const completionCopyRaw = getCompletionCopy(roomId);
+  const completionCopyRaw = getCompletionCopy(roomId, locale);
   const completionCopy = {
     ...completionCopyRaw,
     message: completionCopyRaw.message || t('room.actions.youStayedWithIt'),
@@ -232,7 +233,7 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
 
     const completedFamily = classifyActionFamily(completedAction);
     const nextFamily = classifyActionFamily(nextAction);
-    const betweenLine = getBetweenStepLine({ completedFamily, nextFamily });
+    const betweenLine = getBetweenStepLine({ completedFamily, nextFamily, locale });
 
     setPhase({ id: 'next_gentle_step', betweenLine, nextActionIndex: nextIndex });
   }, [orderedActions]);
@@ -551,7 +552,7 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
     const action = orderedActions[actionIndex];
     if (!action) return null;
     const family = classifyActionFamily(action);
-    const companionLine = getRoomStepCompanionLine({ action, roomContext: ctx });
+    const companionLine = getRoomStepCompanionLine({ action, roomContext: ctx, locale });
 
     // ── Timer (breathe/sit/walk/heart) ──
     const timerKind = getTimerKind(action);
@@ -586,7 +587,7 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
         return (
           <InquiryDetail
             category={selectedCategory}
-            reflectivePrompt={getInquiryCategoryPrompt(selectedCategory) || t('room.actions.whatDoesThisBringUp')}
+            reflectivePrompt={getInquiryCategoryPrompt(selectedCategory, locale) || t('room.actions.whatDoesThisBringUp')}
             onSave={(categoryId, text) => handleInquirySubmit(actionIndex, selectedCategory, text)}
             onSkip={() => advancePhase(actionIndex)}
             onEscape={handleExitRequest}
@@ -643,10 +644,10 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
       }
       return (
         <TextPhase
-          companionLine={getCarryCompanion(writesEvent)}
-          prompt={getCarryPrompt(writesEvent)}
-          placeholder={getCarryPlaceholder(writesEvent)}
-          ctaLabel={getCarryCTA(writesEvent)}
+          companionLine={getCarryCompanion(writesEvent, locale)}
+          prompt={getCarryPrompt(writesEvent, locale)}
+          placeholder={getCarryPlaceholder(writesEvent, locale)}
+          ctaLabel={getCarryCTA(writesEvent, locale)}
           onSave={(text) => {
             dispatchCarryCaptured(action, text);
             setTimeout(() => advancePhase(actionIndex), 700);
@@ -794,8 +795,8 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
     const action = orderedActions[actionIndex];
     if (!action) return null;
     const family = classifyActionFamily(action);
-    const companionLine = getRoomStepCompanionLine({ action, roomContext: ctx });
-    const stepIntro = getStepIntroLine(family);
+    const companionLine = getRoomStepCompanionLine({ action, roomContext: ctx, locale });
+    const stepIntro = getStepIntroLine(family, locale);
     const isFirst = actionIndex === 0;
     const rp = action.runner_payload;
 

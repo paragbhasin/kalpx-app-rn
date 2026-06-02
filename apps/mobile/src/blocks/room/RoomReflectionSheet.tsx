@@ -13,7 +13,7 @@ import {
   View,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import { ROOM_REFLECTION_OPTIONS, ROOM_GUIDED_COPY, ROOM_COMPLETION_HEADER, ROOM_NEXT_STEP_LINE } from "@kalpx/contracts";
+import { ROOM_REFLECTION_OPTIONS, ROOM_REFLECTION_OPTIONS_HI, ROOM_GUIDED_COPY, ROOM_GUIDED_COPY_HI, ROOM_COMPLETION_HEADER, ROOM_COMPLETION_HEADER_HI, ROOM_NEXT_STEP_LINE, ROOM_NEXT_STEP_LINE_HI } from "@kalpx/contracts";
 import type { VerifiedRoomId } from "@kalpx/types";
 import { postRoomReflection, trackRoomTelemetry } from "../../engine/mitraApi";
 
@@ -39,7 +39,11 @@ const RoomReflectionSheet: React.FC<Props> = ({
   const { t, i18n } = useTranslation();
   const isHindi = i18n.language === "hi";
   const [phase, setPhase] = useState<Phase>("reflection");
-  const options = ROOM_REFLECTION_OPTIONS[roomId as VerifiedRoomId] ?? [];
+  const reflectOptions = isHindi ? ROOM_REFLECTION_OPTIONS_HI : ROOM_REFLECTION_OPTIONS;
+  const guidedCopy = isHindi ? ROOM_GUIDED_COPY_HI : ROOM_GUIDED_COPY;
+  const completionHeader = isHindi ? ROOM_COMPLETION_HEADER_HI : ROOM_COMPLETION_HEADER;
+  const nextStepLine = isHindi ? ROOM_NEXT_STEP_LINE_HI : ROOM_NEXT_STEP_LINE;
+  const options = reflectOptions[roomId as VerifiedRoomId] ?? [];
 
   async function handleOption(code: string, isBridge: boolean) {
     void postRoomReflection(roomId, {
@@ -71,12 +75,12 @@ const RoomReflectionSheet: React.FC<Props> = ({
         <View style={styles.sheet} onStartShouldSetResponder={() => true}>
           {phase === "reflection" ? (
             <>
-              {ROOM_COMPLETION_HEADER[roomId as VerifiedRoomId] ? (
+              {completionHeader[roomId as VerifiedRoomId] ? (
                 <Text style={styles.completionHeader}>
-                  {ROOM_COMPLETION_HEADER[roomId as VerifiedRoomId]}
+                  {completionHeader[roomId as VerifiedRoomId]}
                 </Text>
               ) : null}
-              <Text style={styles.prompt}>{ROOM_GUIDED_COPY.reflectionPrompt}</Text>
+              <Text style={styles.prompt}>{guidedCopy.reflectionPrompt}</Text>
               {options.map((opt) => (
                 <TouchableOpacity
                   key={opt.code}
@@ -96,15 +100,15 @@ const RoomReflectionSheet: React.FC<Props> = ({
               <Text style={[styles.nextStepIntro, isHindi && { letterSpacing: 0 }]}>
                 {t("room.nextStepIntro")}
               </Text>
-              {ROOM_NEXT_STEP_LINE[roomId as VerifiedRoomId] ? (
+              {nextStepLine[roomId as VerifiedRoomId] ? (
                 <Text style={styles.nextStepLine}>
-                  {ROOM_NEXT_STEP_LINE[roomId as VerifiedRoomId]}
+                  {nextStepLine[roomId as VerifiedRoomId]}
                 </Text>
               ) : null}
               {[
-                { key: "finish_here",  label: ROOM_GUIDED_COPY.nextStep.finishHere },
-                { key: "tell_mitra",   label: ROOM_GUIDED_COPY.nextStep.tellMitraMore },
-                { key: "return_home",  label: ROOM_GUIDED_COPY.nextStep.returnHome },
+                { key: "finish_here",  label: guidedCopy.nextStep.finishHere },
+                { key: "tell_mitra",   label: guidedCopy.nextStep.tellMitraMore },
+                { key: "return_home",  label: guidedCopy.nextStep.returnHome },
               ].map(({ key, label }) => (
                 <TouchableOpacity
                   key={key}

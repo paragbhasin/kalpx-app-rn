@@ -26,9 +26,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { VoiceTextInput } from "../components/VoiceTextInput";
 import { executeAction } from "../engine/actionExecutor";
+import { mitraCompleteOnboarding } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { interpolate } from "../engine/utils/interpolation";
 import { RootState } from "../store";
@@ -98,6 +100,8 @@ const turnOneMessageIcons: (keyof typeof Ionicons.glyphMap)[] = [
 ];
 
 const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
   const user = useSelector(
     (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
@@ -131,11 +135,19 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
   const hasPathHeaderCopy =
     hasHeadline || String(firstMessage).trim().length > 0;
   const isPathHeaderBlock =
-    isPathEmergesTurn && hasPathHeaderCopy && !hasReplyChips;
+    isPathEmergesTurn && hasPathHeaderCopy && !hasReplyChips && block.id !== "turn8_msg";
   const isPathButtonBlock = isPathEmergesTurn && !hasHeadline && hasReplyChips;
   const pathHeaderText = hasHeadline
     ? block.headline || ""
     : String(firstMessage || "");
+
+  // Turn 8 overrides: translate the static allContainers.js mitra_message + CTA chip
+  const isTurn8Msg = block.id === "turn8_msg";
+  const isTurn8Cta = block.id === "turn8_cta";
+  const t8ChipLabel = (chip: { id: string; label: string }) => {
+    if (isTurn8Cta && chip.id === "ready") return t("turn8.beginCta");
+    return chip.label;
+  };
 
   useEffect(() => {
     Animated.sequence([
@@ -151,6 +163,59 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
       }),
     ]).start();
   }, [fadeAnim, replyAnim]);
+
+  // Re-fetch recognition copy when language changes while on turn 7.
+  // The recognition_line and recognition_body_lines were fetched at the
+  // locale that was active when the user completed the onboarding stages.
+  // If the user switches language before reading the recognition screen,
+  // re-call /onboarding/complete/ with the new locale so the backend
+  // returns translated copy without requiring the user to redo onboarding.
+  const isTurn7Active = !!block.isTurn7;
+  const prevLangRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!isTurn7Active) return;
+    // Skip the initial mount — the data is already fresh from actionExecutor.
+    if (prevLangRef.current === null) {
+      prevLangRef.current = i18n.language;
+      return;
+    }
+    if (prevLangRef.current === i18n.language) return;
+    prevLangRef.current = i18n.language;
+
+    const draft = (screenData as any)?.onboarding_draft_state;
+    if (!draft?.stage0_choice && !draft?.path) {
+      // No picks available — clear stale recognition so user does not see
+      // the wrong-language copy; the screen will be empty until they redo onboarding.
+      const { screenActions } = require("../store/screenSlice");
+      const { store } = require("../store");
+      store.dispatch(screenActions.setScreenValue({ key: "recognition_line", value: null }));
+      store.dispatch(screenActions.setScreenValue({ key: "recognition_body_lines", value: [] }));
+      return;
+    }
+
+    mitraCompleteOnboarding({
+      stage0_choice: draft.stage0_choice || draft.path || "support",
+      stage1_choice: draft.stage1_choice || "",
+      stage2_choice: draft.stage2_choice || "",
+      stage3_choice: draft.stage3_choice || (null as unknown as string),
+      guidance_mode: draft.guidance_mode || "hybrid",
+      life_context: draft.life_context || null,
+      locale: i18n.language,
+      freeforms: {
+        stage1: draft.freeforms?.stage1 || null,
+        stage2: draft.freeforms?.stage2 || null,
+        stage3: draft.freeforms?.stage3 || null,
+      },
+    }).then((complete) => {
+      if (!complete) return;
+      const { screenActions } = require("../store/screenSlice");
+      const { store } = require("../store");
+      store.dispatch(screenActions.setScreenValue({ key: "recognition_line", value: complete.recognition?.line || null }));
+      store.dispatch(screenActions.setScreenValue({ key: "recognition_body_lines", value: complete.recognition?.body_lines || [] }));
+    }).catch(() => {
+      // Silent: retain previous-locale copy rather than blanking on network error.
+    });
+  }, [i18n.language, isTurn7Active]);
 
   const inlineImageSource = resolveBlockImage(block.image?.url);
   const headlineLines = (block.headline || "").split("\n").filter(Boolean);
@@ -189,8 +254,8 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
         <View style={styles.turnOneInputDivider}>
           <View style={styles.turnOneInputLine} />
           <Ionicons name="diamond" size={10} color="#c7a258" />
-          <Text style={styles.turnOneInputDividerText}>
-            Or share in your own words
+          <Text style={[styles.turnOneInputDividerText, isHindi && { letterSpacing: 0 }]}>
+            {t("onboarding.inputDivider")}
           </Text>
           <Ionicons name="diamond" size={10} color="#c7a258" />
           <View style={styles.turnOneInputLine} />
@@ -199,7 +264,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
       <View style={{ marginTop: 10 }}>
         <VoiceTextInput
           voiceAvailable={false} // launch-gate: restore block.voice_available when conversational tier ships
-          placeholder="Share your reflection"
+          placeholder={t("onboarding.shareReflection")}
           onSend={(val, type) => {
             if (type === "text") {
               fire({ freeform_text: val, response_type: "text" });
@@ -213,8 +278,8 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
       {showHeroMeta && (
         <View style={styles.turnOnePrivacyRow}>
           <Ionicons name="lock-closed-outline" size={16} color="#7a6031" />
-          <Text style={styles.turnOnePrivacyText}>
-            Your thoughts are private and safe with Mitra.
+          <Text style={[styles.turnOnePrivacyText, isHindi && { letterSpacing: 0 }]}>
+            {t("onboarding.privacyText")}
           </Text>
         </View>
       )}
@@ -222,6 +287,18 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
   );
 
   if (block.turnOneHero && isIntroTurn) {
+    const t1HeadlineLines = t("mitraStart.title").split("\n");
+    const t1Messages = [
+      t("mitraStart.line1"),
+      t("mitraStart.line2"),
+      t("mitraStart.line3"),
+    ];
+    const t1ChipLabel = (chip: { id: string; label: string }) => {
+      if (chip.id === "continue") return t("mitraStart.beginCta");
+      if (chip.id === "returning") return t("mitraStart.returning");
+      return chip.label;
+    };
+
     return (
       <View
         style={styles.turnOneWrap}
@@ -229,7 +306,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
         accessibilityLabel={`onboarding_turn_${turn}_root`}
       >
         <View style={styles.turnOneCard}>
-          <Text style={styles.turnOneHeadline}>{headlineLines.join("\n")}</Text>
+          <Text style={styles.turnOneHeadline}>{t1HeadlineLines.join("\n")}</Text>
 
           <View style={styles.turnOneHeadlineDivider}>
             <View style={styles.turnOneDividerLine} />
@@ -238,7 +315,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
           </View>
 
           <View style={styles.turnOneMessageList}>
-            {featureMessages.map((message, index) => (
+            {t1Messages.map((message, index) => (
               <View key={index} style={styles.turnOneMessageRow}>
                 <View style={styles.turnOneIconBubble}>
                   <Ionicons
@@ -311,7 +388,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                       color="#fff9ec"
                     />
                     <Text style={styles.turnOnePrimaryButtonText}>
-                      {chip.label.replace(" →", "")}
+                      {t1ChipLabel(chip).replace(" →", "")}
                     </Text>
                     <Ionicons name="arrow-forward" size={22} color="#fff9ec" />
                   </LinearGradient>
@@ -323,7 +400,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                     ]}
                   >
                     <Text style={styles.turnOneSecondaryButtonText}>
-                      {chip.label}
+                      {t1ChipLabel(chip)}
                     </Text>
                   </View>
                 )}
@@ -339,6 +416,10 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
 
   if (block.isTurn7) {
     const rec = block.recognition || {};
+    const t7ChipLabel = (chip: { id: string; label: string }) => {
+      if (chip.id === "show_path") return t("onboarding.showMePath");
+      return chip.label;
+    };
     // 2026-04-17 Option B — prefer backend-delivered lines from the spine.
     // screenData.recognition_body_lines is populated by actionExecutor when
     // /onboarding/complete/ returns. Falls back to schema body_paragraphs
@@ -358,8 +439,8 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
         accessibilityLabel="onboarding_recognition_root"
       >
         <View style={styles.recognitionCard}>
-          <Text style={styles.recognitionLabel}>
-            {rec.label || "RECOGNITION"}
+          <Text style={[styles.recognitionLabel, isHindi && { letterSpacing: 0 }]}>
+            {t("onboarding.recognitionLabel")}
           </Text>
 
           <View style={styles.turnOneHeadlineDivider}>
@@ -409,8 +490,8 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                     end={{ x: 1, y: 0.5 }}
                     style={[styles.turnOneButton, styles.turnOnePrimaryButton]}
                   >
-                    <Text style={styles.turnOnePrimaryButtonText}>
-                      {chip.label}
+                    <Text style={[styles.turnOnePrimaryButtonText, isHindi && { letterSpacing: 0 }]}>
+                      {t7ChipLabel(chip)}
                     </Text>
                   </LinearGradient>
                 </TouchableOpacity>
@@ -491,9 +572,13 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
         ) : null}
 
         {!isPathHeaderBlock &&
-          messages.some((m) => m && String(m).trim().length > 0) && (
+          (isTurn8Msg || messages.some((m) => m && String(m).trim().length > 0)) && (
             <Animated.View style={[styles.mitraMsgCard, { opacity: fadeAnim }]}>
-              {messages.map((para, i) =>
+              {isTurn8Msg ? (
+                <Text style={[styles.mitraMsg, { letterSpacing: 0 }]}>
+                  {t("onboarding.turn8Message")}
+                </Text>
+              ) : messages.map((para, i) =>
                 para && String(para).trim().length > 0 ? (
                   <Text
                     key={i}
@@ -563,7 +648,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                 {isPathButtonBlock && chip.style === "primary" ? (
                   <View style={styles.pathBeginButton}>
                     <View style={styles.pathBeginLeaf}></View>
-                    <Text style={styles.pathBeginLabel}>{chip.label}</Text>
+                    <Text style={styles.pathBeginLabel}>{t8ChipLabel(chip)}</Text>
                   </View>
                 ) : isIntroTurn && chip.style !== "primary" ? (
                   <LinearGradient
@@ -596,7 +681,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                             : styles.chipLabelPrimary),
                       ]}
                     >
-                      {chip.label}
+                      {t8ChipLabel(chip)}
                     </Text>
                   </View>
                 )}

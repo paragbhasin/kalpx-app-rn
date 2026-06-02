@@ -18,6 +18,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import i18n from "../../config/i18n";
 import {
   ActivityIndicator,
   Dimensions,
@@ -237,7 +238,7 @@ export default function ContinueJourney({
   const fetchEntryView = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await mitraJourneyEntryView(_entryViewEtag);
+      const result = await mitraJourneyEntryView(_entryViewEtag, undefined, i18n.language || "en");
       if (result.etag) _entryViewEtag = result.etag;
 
       if (result.notModified || !result.envelope) {

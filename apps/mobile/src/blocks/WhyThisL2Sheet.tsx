@@ -18,6 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
@@ -28,6 +29,8 @@ import { isRoomWhyThisContext } from "@kalpx/contracts";
 const VALID_INFO_TYPES = ["mantra", "sankalp", "practice"] as const;
 
 const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const { screenData, loadScreen, goBack } = useScreenStore();
   const sd = screenData as any;
   const p = sd.why_this_principle;
@@ -47,15 +50,15 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
   if (!p) {
     return (
       <View style={styles.sheet}>
-        <Text style={styles.essence}>
-          The reason behind this isn't available right now.
+        <Text style={[styles.essence, isHindi && { letterSpacing: 0 }]}>
+          {t("room.whyThis.unavailable")}
         </Text>
         <TouchableOpacity
           style={styles.dismissPill}
           onPress={handleGotIt}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Text style={styles.dismissText}>{isRoomCtx ? "Let this stay with me" : "Got it"}</Text>
+          <Text style={[styles.dismissText, isHindi && { letterSpacing: 0 }]}>{isRoomCtx ? t("room.whyThis.letThisStay") : t("room.whyThis.gotIt")}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -86,13 +89,13 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
   const sourceLine: string =
     p.principle_banner?.source_line ||
     (isRoomCtx ? null : p.tradition_family) ||
-    "A thought from the tradition.";
-  const headerLabel = isRoomCtx ? sourceLine : "WHY THIS";
+    t("room.whyThis.thoughtFromTradition");
+  const headerLabel = isRoomCtx ? sourceLine : t("room.whyThis.headerLabel");
 
   return (
     <View style={styles.sheet}>
       <View style={styles.handle} />
-      <Text style={styles.label}>{headerLabel}</Text>
+      <Text style={[styles.label, isHindi && { letterSpacing: 0 }]}>{headerLabel}</Text>
       {!isRoomCtx && (p.name || p.title) ? (
         <Text style={styles.name}>{p.name || p.title}</Text>
       ) : null}
@@ -120,7 +123,7 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
           testID="why_this_l2_go_deeper"
           accessibilityLabel="why_this_l2_go_deeper"
         >
-          <Text style={styles.deeperText}>Go deeper</Text>
+          <Text style={[styles.deeperText, isHindi && { letterSpacing: 0 }]}>{t("room.whyThis.goDeeper")}</Text>
         </TouchableOpacity>
       )}
 
@@ -130,7 +133,7 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
         accessibilityLabel="Dismiss"
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        <Text style={styles.dismissText}>{isRoomCtx ? "Let this stay with me" : "Got it"}</Text>
+        <Text style={[styles.dismissText, isHindi && { letterSpacing: 0 }]}>{isRoomCtx ? t("room.whyThis.letThisStay") : t("room.whyThis.gotIt")}</Text>
       </TouchableOpacity>
     </View>
   );

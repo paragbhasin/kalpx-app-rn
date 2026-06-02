@@ -34,8 +34,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
+import i18n from "../../config/i18n";
 import { useDispatch, useSelector } from "react-redux";
-import NotificationPermissionModal from "../../components/NotificationPermissionModal";
 import FourDoorHomeContainer from "../../containers/FourDoorHomeContainer";
 import { stopRoomAmbientAudio } from "../../engine/roomAmbientAudio";
 import { useScreenStore } from "../../engine/useScreenBridge";
@@ -44,6 +45,7 @@ import store, { AppDispatch, RootState } from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
 import { registerDeviceToBackend } from "../../utils/registerDevice";
+import { consumeSkipMitraStart } from "../../utils/postLoginGuard";
 import { fetchProfileDetails } from "../Profile/actions";
 
 const FEATURE_ITEMS = [
@@ -73,6 +75,7 @@ const FEATURE_ITEMS = [
 export const collapseControl = { avoidCollapse: false };
 
 export default function Home() {
+  const { t } = useTranslation();
   const navigation: any = useNavigation();
   const isFocused = useIsFocused();
   const tabBarHeight = useBottomTabBarHeight();
@@ -92,7 +95,6 @@ export default function Home() {
     (state) => state.updateHeaderHidden,
   );
 
-  const [showNotificationPopup, setShowNotificationPopup] = useState(false);
   const [mitraJourneyId, setMitraJourneyId] = useState<string | null>(null);
   const [hasPartialState, setHasPartialState] = useState(false);
   const [showInnerPathReentry, setShowInnerPathReentry] = useState(false);
@@ -136,39 +138,17 @@ export default function Home() {
 
   useFocusEffect(
     React.useCallback(() => {
-      console.log("[NOTIF] Home focused — checking permission status...");
+      // Permission is handled by RemindersScreen when user enables a reminder.
+      // Only register device here if permission is already granted.
       messaging()
         .hasPermission()
         .then((authStatus) => {
-          console.log("[NOTIF] hasPermission() raw status:", authStatus);
           const isGranted =
             authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
             authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-          const isDenied = authStatus === messaging.AuthorizationStatus.DENIED;
-          const isNotDetermined =
-            authStatus === messaging.AuthorizationStatus.NOT_DETERMINED;
-
-          console.log(
-            `[NOTIF] isGranted=${isGranted} | isDenied=${isDenied} | isNotDetermined=${isNotDetermined}`,
-          );
-
-          setShowNotificationPopup(isDenied);
-          if (isDenied) {
-            console.log("[NOTIF] Permission DENIED → showing NotificationPermissionModal");
-          }
-
-          if (isGranted) {
-            console.log("[NOTIF] Permission GRANTED → calling registerDeviceToBackend...");
-            registerDeviceToBackend()
-              .then(() => console.log("[NOTIF] ✅ Device registered with backend"))
-              .catch((err: any) =>
-                console.log("[NOTIF] ❌ Device registration failed:", err?.message),
-              );
-          }
+          if (isGranted) registerDeviceToBackend();
         })
-        .catch((err: any) =>
-          console.log("[NOTIF] ❌ hasPermission() threw:", err?.message),
-        );
+        .catch(() => {});
     }, []),
   );
 
@@ -271,14 +251,14 @@ export default function Home() {
                 setHasPartialState(true);
               } else {
                 setHasPartialState(false);
-                if (!v3AutoRoutedRef.current) {
+                if (!v3AutoRoutedRef.current && !consumeSkipMitraStart()) {
                   v3AutoRoutedRef.current = true;
                   navigation.navigate("MitraStart" as any);
                 }
               }
             } catch {
               setHasPartialState(false);
-              if (!v3AutoRoutedRef.current) {
+              if (!v3AutoRoutedRef.current && !consumeSkipMitraStart()) {
                 v3AutoRoutedRef.current = true;
                 navigation.navigate("MitraStart" as any);
               }
@@ -370,7 +350,7 @@ export default function Home() {
             const v3Result = await mitraStartJourney({
               inference_state: stashedInference,
               guidance_mode: stashedMode,
-              locale: "en",
+              locale: i18n.language.split("-")[0] || "en",
               tz:
                 Intl.DateTimeFormat().resolvedOptions().timeZone ||
                 "Asia/Kolkata",
@@ -560,7 +540,7 @@ export default function Home() {
           try {
             const { mitraJourneyDailyView } = require("../../engine/mitraApi");
             const { ingestDailyView } = require("../../engine/v3Ingest");
-            const result = await mitraJourneyDailyView(null);
+            const result = await mitraJourneyDailyView(null, i18n.language || "en");
             if (result?.envelope) {
               for (const [k, v] of Object.entries(
                 ingestDailyView(result.envelope),
@@ -692,7 +672,7 @@ export default function Home() {
               const v3Result = await mitraStartJourney({
                 inference_state: stashedInf,
                 guidance_mode: stashedMode,
-                locale: "en",
+                locale: i18n.language.split("-")[0] || "en",
               });
               if (v3Result) {
                 const t = v3Result.triad || {};
@@ -941,19 +921,19 @@ export default function Home() {
           {/* ── Hero Section ── */}
           <View style={styles.heroSection}>
             <Text style={styles.heroQuote}>
-              &quot;In this path, no effort is ever lost.&quot;
+              {t("mitraHome.heroQuote")}
             </Text>
-            <Text style={styles.heroSource}>— Bhagavad Gita 2.40</Text>
+            <Text style={styles.heroSource}>{t("mitraHome.heroSource")}</Text>
             <View style={styles.turnOneHeadlineDivider}>
               <View style={styles.turnOneDividerLine} />
               <Ionicons name="diamond" size={10} color="#c7a258" />
               <View style={styles.turnOneDividerLine} />
             </View>
             <Text style={[styles.heroTitle, { marginTop: 20 }]}>
-              KalpX Mitra
+              {t("mitraHome.heroTitle")}
             </Text>
             <Text style={[styles.companionTitle, { marginTop: 5 }]}>
-              Your daily companion for life
+              {t("mitraHome.companionTitle")}
             </Text>
           </View>
 
@@ -962,11 +942,10 @@ export default function Home() {
           {/* ── Companion Preview ── */}
           <View style={styles.companionSection}>
             <Text style={styles.companionDesc}>
-              Grounded in timeless Sanatan wisdom.
+              {t("mitraHome.companionDesc1")}
             </Text>
             <Text style={styles.companionDesc}>
-              support what you carry, strengthen what is growing, and walk one
-              day at a time
+              {t("mitraHome.companionDesc2")}
             </Text>
           </View>
 
@@ -994,16 +973,12 @@ export default function Home() {
               end={{ x: 1, y: 0 }}
               style={styles.ctaButton}
             >
-              <Text style={styles.ctaText}>Begin with Mitra →</Text>
+              <Text style={styles.ctaText}>{t("mitraHome.beginCta")}</Text>
             </LinearGradient>
           </TouchableOpacity>
         </ScrollView>
       )}
 
-      <NotificationPermissionModal
-        visible={showNotificationPopup}
-        onClose={() => setShowNotificationPopup(false)}
-      />
     </SafeAreaView>
   );
 }

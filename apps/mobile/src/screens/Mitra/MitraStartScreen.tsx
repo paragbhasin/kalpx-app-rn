@@ -4,7 +4,6 @@ import React from "react";
 import { useSelector } from "react-redux";
 import {
   Image,
-  ImageBackground,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -13,20 +12,22 @@ import {
   View,
   Platform,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import type { RootState } from "../../store";
 import { Fonts } from "../../theme/fonts";
 import { platformShadow } from "../../theme/shadows";
 
-const INTRO_LINES = [
-  "Hi. I am Mitra.",
-  "I am here to help you feel more calm, steady, and clear — on hard days and good days.",
-  "I notice small things, like your mood and the shape of your day.",
-];
 const START_BACKGROUND = require("../../../assets/new_home.webp");
 
 export default function MitraStartScreen() {
+  const { t } = useTranslation();
   const navigation = useNavigation<any>();
+  const INTRO_LINES = [
+    t("mitraStart.line1"),
+    t("mitraStart.line2"),
+    t("mitraStart.line3"),
+  ];
   const user = useSelector(
     (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
   );
@@ -39,7 +40,7 @@ export default function MitraStartScreen() {
   useFocusEffect(
     React.useCallback(() => {
       updateBackground(START_BACKGROUND);
-      updateHeaderHidden(true);
+      updateHeaderHidden(false);
 
       return () => {
         updateBackground(null);
@@ -52,20 +53,14 @@ export default function MitraStartScreen() {
   }
 
   return (
-    <ImageBackground source={START_BACKGROUND} style={styles.container}>
+    <View style={styles.container}>
       <SafeAreaView style={styles.safe}>
         <ScrollView
           contentContainerStyle={styles.scroll}
           showsVerticalScrollIndicator={false}
         >
-          <Image
-            source={require("../../../assets/KalpXlogo.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-
           <View style={styles.card}>
-            <Text style={styles.title}>I'm Mitra.{"\n"}I'm here with you.</Text>
+            <Text style={styles.title}>{t("mitraStart.title")}</Text>
 
             <View style={styles.divider}>
               <View style={styles.line} />
@@ -101,7 +96,7 @@ export default function MitraStartScreen() {
                 end={{ x: 1, y: 0 }}
                 style={styles.gradient}
               >
-                <Text style={styles.beginText}>Yes, let's begin →</Text>
+                <Text style={styles.beginText}>{t("mitraStart.beginCta")}</Text>
               </LinearGradient>
             </TouchableOpacity>
 
@@ -111,13 +106,13 @@ export default function MitraStartScreen() {
                 activeOpacity={0.8}
                 style={styles.returningButton}
               >
-                <Text style={styles.returningText}>I'm returning</Text>
+                <Text style={styles.returningText}>{t("mitraStart.returning")}</Text>
               </TouchableOpacity>
             ) : null}
           </View>
         </ScrollView>
       </SafeAreaView>
-    </ImageBackground>
+    </View>
   );
 }
 
@@ -136,13 +131,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 104,
     justifyContent: "space-between",
-  },
-  logo: {
-    height: 40,
-    aspectRatio: 118 / 48,
-    maxWidth: 118,
-    marginLeft: 6,
-    marginBottom: 24,
   },
   card: {
     backgroundColor: Platform.OS === "android" ? "#FEFCF9" : "rgba(255, 255, 255, 0.4)",

@@ -19,6 +19,7 @@
 
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useTranslation } from "react-i18next";
 
 import api from "../../../Networks/axios";
 import { executeAction } from "../../../engine/actionExecutor";
@@ -49,8 +50,7 @@ const CARRY_TOAST_COPY: Record<string, string> = {
   connection_reach_out: "Saved. Carry this connection with you.",
   clarity_journal:      "Saved. Keep this question close.",
 };
-const CARRY_TOAST_FALLBACK = "Saved to your path.";
-const CARRY_TOAST_ERROR    = "Couldn't save. Please try again.";
+// Toast fallbacks are now sourced from i18n: t("room.actions.savedToYourPath"), t("room.actions.couldntSave")
 
 const CARRY_CONFIRM_COPY: Record<string, string> = {
   joy_named:            "Saved. You can write another.",
@@ -287,6 +287,8 @@ const RoomActionCarryPill: React.FC<Props> = ({
   kindLabel,
   isPrimary = false,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const { loadScreen, goBack, screenData } = useScreenStore();
   const { showToast } = useToast();
   const [modalVisible, setModalVisible] = useState(false);
@@ -400,13 +402,13 @@ const RoomActionCarryPill: React.FC<Props> = ({
     const ok = await doCarryWrite();
     if (ok) {
       if (NAVIGATE_AFTER.has(writesEvent)) {
-        showToast(CARRY_TOAST_COPY[writesEvent] ?? CARRY_TOAST_FALLBACK, 3000, "success");
+        showToast(CARRY_TOAST_COPY[writesEvent] ?? t("room.actions.savedToYourPath"), 3000, "success");
         loadScreen({ container_id: dashboardContainer, state_id: "day_active" } as any);
       } else {
         setConfirmed(true);
       }
     } else {
-      showToast(CARRY_TOAST_ERROR, 4000, "error");
+      showToast(t("room.actions.couldntSave"), 4000, "error");
     }
   };
 
@@ -425,7 +427,7 @@ const RoomActionCarryPill: React.FC<Props> = ({
       setModalError(null);
       setConfirmed(true);
     } else {
-      setModalError(CARRY_TOAST_ERROR);
+      setModalError(t("room.actions.couldntSave"));
     }
   };
 
@@ -437,10 +439,10 @@ const RoomActionCarryPill: React.FC<Props> = ({
           testID={`room_carry_${writesEvent}_confirmed`}
         >
           {kindLabel ? <Text style={styles.kindLabel}>{kindLabel}</Text> : null}
-          <Text style={styles.confirmedText}>
+          <Text style={[styles.confirmedText, isHindi && { letterSpacing: 0 }]}>
             {activeModal?.confirmation
               ?? CARRY_CONFIRM_COPY[writesEvent]
-              ?? CARRY_TOAST_FALLBACK}
+              ?? t("room.actions.savedToYourPath")}
           </Text>
           <View style={styles.confirmedActions}>
             <TouchableOpacity
@@ -450,14 +452,14 @@ const RoomActionCarryPill: React.FC<Props> = ({
               accessibilityLabel={
                 activeModal?.add_another_label
                   ?? CONFIRMED_ADD_LABEL[writesEvent]
-                  ?? "Add another"
+                  ?? t("room.actions.addAnother")
               }
               testID={`room_carry_${writesEvent}_add_another`}
             >
-              <Text style={styles.confirmedBtnLabel}>
+              <Text style={[styles.confirmedBtnLabel, isHindi && { letterSpacing: 0 }]}>
                 {activeModal?.add_another_label
                   ?? CONFIRMED_ADD_LABEL[writesEvent]
-                  ?? "Add another"}
+                  ?? t("room.actions.addAnother")}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -466,10 +468,10 @@ const RoomActionCarryPill: React.FC<Props> = ({
                 loadScreen({ container_id: dashboardContainer, state_id: "day_active" } as any)
               }
               accessibilityRole="button"
-              accessibilityLabel="Return home"
+              accessibilityLabel={t("room.actions.returnHome")}
               testID={`room_carry_${writesEvent}_return_home`}
             >
-              <Text style={styles.confirmedBtnLabel}>Return home</Text>
+              <Text style={[styles.confirmedBtnLabel, isHindi && { letterSpacing: 0 }]}>{t("room.actions.returnHome")}</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -49,6 +49,8 @@ const OPTION_ACCENTS = {
 
 export function MitraIntentionPage() {
   const navigate = useNavigate();
+  const isDesktop =
+    typeof window === "undefined" ? true : window.innerWidth >= 1024;
 
   // After login redirects back here, pick up the door the guest originally selected.
   useEffect(() => {
@@ -101,20 +103,20 @@ export function MitraIntentionPage() {
   }
 
   return (
-    <MitraMobileShell backgroundImage="/beige_bg.png">
+    <MitraMobileShell backgroundImage="/beige_bg.png" wideDesktop>
       <main
         style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           width: "100%",
-          padding: "28px 16px 24px",
+          padding: isDesktop ? "48px 32px 56px" : "28px 16px 24px",
         }}
       >
         <div
           style={{
             width: "100%",
-            maxWidth: 420,
+            maxWidth: isDesktop ? 1320 : 420,
             position: "relative",
           }}
         >
@@ -124,10 +126,10 @@ export function MitraIntentionPage() {
             aria-hidden="true"
             style={{
               position: "absolute",
-              top: -160,
-              right: -26,
-              width: 220,
-              opacity: 0.36,
+              top: isDesktop ? -118 : -160,
+              right: isDesktop ? 64 : -26,
+              width: isDesktop ? 300 : 220,
+              opacity: isDesktop ? 0.28 : 0.36,
               pointerEvents: "none",
               userSelect: "none",
             }}
@@ -136,11 +138,10 @@ export function MitraIntentionPage() {
             style={{
               fontFamily: "var(--kalpx-font-serif)",
               fontWeight: 700,
-              fontSize: 34,
-              lineHeight: 1.28,
+              fontSize: isDesktop ? 56 : 34,
+              lineHeight: isDesktop ? 1.12 : 1.28,
               color: "#432104",
-
-              marginTop: 0,
+              margin: 0,
               textAlign: "center",
             }}
           >
@@ -149,11 +150,11 @@ export function MitraIntentionPage() {
           <div
             style={{
               fontFamily: "var(--kalpx-font-ui, var(--kalpx-font-serif))",
-              fontSize: 18,
+              fontSize: isDesktop ? 24 : 18,
               lineHeight: 1.45,
               color: "rgba(67, 33, 4, 0.72)",
-              marginTop: 0,
-
+              marginTop: isDesktop ? 8 : 0,
+              marginBottom: isDesktop ? 10 : 0,
               textAlign: "center",
             }}
           >
@@ -167,12 +168,12 @@ export function MitraIntentionPage() {
               justifyContent: "center",
               gap: 14,
               color: "#D6A63A",
-              marginBottom: 24,
+              marginBottom: isDesktop ? 42 : 24,
             }}
           >
             <div
               style={{
-                width: 150,
+                width: isDesktop ? 220 : 150,
                 maxWidth: "36%",
                 height: 1,
                 background: "rgba(214, 166, 58, 0.28)",
@@ -205,13 +206,18 @@ export function MitraIntentionPage() {
             </p>
           ))} */}
 
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 20,
-            }}
-          >
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: isDesktop
+                  ? "repeat(2, minmax(0, 1fr))"
+                  : "minmax(0, 1fr)",
+                gap: isDesktop ? 28 : 20,
+                maxWidth: isDesktop ? 1180 : "100%",
+                margin: "0 auto",
+                alignItems: "stretch",
+              }}
+            >
             {ENTRY_INTENTION_OPTIONS.map((opt) => {
               const accent = OPTION_ACCENTS[opt.id];
 
@@ -224,20 +230,23 @@ export function MitraIntentionPage() {
                     width: "100%",
                     background: "rgba(255, 252, 247, 0.92)",
                     border: "1px solid rgba(226, 199, 144, 0.48)",
-                    borderRadius: 11,
-                    padding: "15px",
+                    borderRadius: isDesktop ? 22 : 11,
+                    padding: isDesktop ? "28px 26px 24px" : "15px",
                     textAlign: "left",
                     cursor: "pointer",
                     boxShadow: "0 16px 40px rgba(201,168,76,0.10)",
                     display: "flex",
                     alignItems: "center",
-                    gap: 18,
+                    gap: isDesktop ? 22 : 18,
+                    minHeight: isDesktop ? 220 : undefined,
+                    transition:
+                      "transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease",
                   }}
                 >
                   <div
                     style={{
-                      width: 50,
-                      height: 50,
+                      width: isDesktop ? 72 : 50,
+                      height: isDesktop ? 72 : 50,
                       borderRadius: "50%",
                       background: accent.iconBg,
                       display: "flex",
@@ -247,23 +256,30 @@ export function MitraIntentionPage() {
                       boxShadow: "inset 0 0 30px rgba(255,255,255,0.8)",
                     }}
                   >
-                    <img src={accent.Icon} alt="" width={50} height={50} />
+                    <img
+                      src={accent.Icon}
+                      alt=""
+                      width={isDesktop ? 72 : 50}
+                      height={isDesktop ? 72 : 50}
+                    />
                   </div>
                   <div
                     style={{
                       flex: 1,
                       display: "flex",
                       flexDirection: "column",
+                      justifyContent: "space-between",
+                      minHeight: isDesktop ? 166 : undefined,
                     }}
                   >
                     <div
                       style={{
                         fontFamily: "var(--kalpx-font-serif)",
                         fontWeight: 700,
-                        fontSize: 20,
-                        lineHeight: 1.35,
+                        fontSize: isDesktop ? 24 : 20,
+                        lineHeight: isDesktop ? 1.25 : 1.35,
                         color: "#432104",
-                        marginBottom: 8,
+                        marginBottom: isDesktop ? 12 : 8,
                       }}
                     >
                       {opt.title}
@@ -271,9 +287,10 @@ export function MitraIntentionPage() {
                     <div
                       style={{
                         color: "rgba(67, 33, 4, 0.76)",
-                        fontSize: 13,
-                        lineHeight: 1.52,
-                        marginBottom: 14,
+                        fontSize: isDesktop ? 16 : 13,
+                        lineHeight: isDesktop ? 1.5 : 1.52,
+                        marginBottom: isDesktop ? 18 : 14,
+                        maxWidth: isDesktop ? 360 : undefined,
                       }}
                     >
                       {opt.body}
@@ -285,7 +302,7 @@ export function MitraIntentionPage() {
                         justifyContent: "flex-end",
                         gap: 12,
                         width: "100%",
-                        fontSize: 12,
+                        fontSize: isDesktop ? 14 : 12,
                         fontWeight: 700,
                         color: accent.chipColor,
                       }}
@@ -298,7 +315,14 @@ export function MitraIntentionPage() {
                       >
                         {opt.cta}
                       </span>
-                      <span style={{ fontSize: 18, lineHeight: 1 }}>→</span>
+                      <span
+                        style={{
+                          fontSize: isDesktop ? 28 : 18,
+                          lineHeight: 1,
+                        }}
+                      >
+                        →
+                      </span>
                     </div>
                   </div>
                 </button>

@@ -169,6 +169,12 @@ function itemTypeLabel(t: string): string {
   return "Library";
 }
 
+function beginLabel(itemType: string): string {
+  if (itemType === "mantra") return "Begin Chanting";
+  if (itemType === "sankalp") return "Begin Embodying";
+  return "Begin Practice";
+}
+
 function sortBands(bands: RhythmTimeBand[]): RhythmTimeBand[] {
   return BANDS.filter((band) => bands.includes(band));
 }
@@ -238,6 +244,8 @@ export function RhythmWizardPage() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const isDesktop =
+    typeof window === "undefined" ? true : window.innerWidth >= 1024;
   const isEditMode = searchParams.get("edit") === "1";
 
   const homeData = useSelector((s: RootState) => s.door.homeData);
@@ -392,7 +400,7 @@ export function RhythmWizardPage() {
         items: itemsArr as any[],
         reminder_preference: reminderPref,
       });
-      const newHome = await getMitraHomeV3();
+      const newHome = await getMitraHomeV3({ forceFresh: true });
       dispatch(setHomeData(newHome));
       setStep("confirmation");
     } catch {
@@ -402,12 +410,18 @@ export function RhythmWizardPage() {
     }
   }
 
-  function beginTodaysPractice() {
-    const band = getRhythmTimeBand();
-    const cr = homeData?.companion_rhythm;
-    const slotItem =
-      cr?.[band]?.items?.[0] ?? cr?.[selectedMoments[0]]?.items?.[0];
-    const runItem = slotItem ?? items[band] ?? items[selectedMoments[0]];
+  function beginRhythmItem(
+    band: RhythmTimeBand,
+    runItem:
+      | {
+          item_id: string;
+          item_type: string;
+          title_snapshot?: string | null;
+          description_snapshot?: string | null;
+        }
+      | undefined
+      | null,
+  ) {
     if (!runItem) {
       navigate("/en/mitra/rhythm");
       return;
@@ -452,11 +466,17 @@ export function RhythmWizardPage() {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    padding: "10px 16px calc(45px + env(safe-area-inset-bottom))",
+    padding: isDesktop
+      ? "42px 32px calc(56px + env(safe-area-inset-bottom))"
+      : "10px 16px calc(45px + env(safe-area-inset-bottom))",
   };
   const container: React.CSSProperties = {
     width: "100%",
-    maxWidth: 420,
+    maxWidth:
+      isDesktop &&
+      (step === "moments" || step === "purpose" || step === "suggestion")
+        ? 1280
+        : 420,
     position: "relative",
   };
   const goldBtn: React.CSSProperties = {
@@ -489,6 +509,10 @@ export function RhythmWizardPage() {
       backTo={wizardBackTarget}
       onBack={step !== "confirmation" ? handleBack : undefined}
       showBack={step !== "confirmation"}
+      wideDesktop={
+        isDesktop &&
+        (step === "moments" || step === "purpose" || step === "suggestion")
+      }
     >
       <main style={main}>
         <div style={container}>
@@ -503,21 +527,21 @@ export function RhythmWizardPage() {
                 aria-hidden="true"
                 style={{
                   position: "absolute",
-                  top: -180,
-                  right: -22,
-                  width: 245,
+                  top: isDesktop ? -120 : -180,
+                  right: isDesktop ? 80 : -22,
+                  width: isDesktop ? 320 : 245,
                   pointerEvents: "none",
                   userSelect: "none",
-                  opacity: 0.5,
+                  opacity: isDesktop ? 0.32 : 0.5,
                 }}
               />
               <h2
                 style={{
                   fontFamily: SERIF,
                   fontWeight: 700,
-                  fontSize: 26,
+                  fontSize: isDesktop ? 54 : 26,
                   color: DARK,
-                  margin: "0 0 8px",
+                  margin: isDesktop ? "0 0 14px" : "0 0 8px",
                   textAlign: "center",
                 }}
               >
@@ -526,8 +550,8 @@ export function RhythmWizardPage() {
               <p
                 style={{
                   color: MID,
-                  fontSize: 15,
-                  marginBottom: 10,
+                  fontSize: isDesktop ? 22 : 15,
+                  marginBottom: isDesktop ? 16 : 10,
                   lineHeight: 1.6,
                   textAlign: "center",
                 }}
@@ -541,14 +565,14 @@ export function RhythmWizardPage() {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 8,
-                  marginBottom: 10,
+                  marginBottom: isDesktop ? 18 : 10,
                   color: "#E4B44F",
                   width: "100%",
                 }}
               >
                 <div
                   style={{
-                    width: 100,
+                    width: isDesktop ? 180 : 100,
                     height: 1,
                     background: "rgba(228,180,79,0.4)",
                   }}
@@ -568,7 +592,7 @@ export function RhythmWizardPage() {
 
                 <div
                   style={{
-                    width: 100,
+                    width: isDesktop ? 180 : 100,
                     height: 1,
                     background: "rgba(228,180,79,0.4)",
                   }}
@@ -579,9 +603,9 @@ export function RhythmWizardPage() {
                 <div
                   style={{
                     color: "#8E5D99",
-                    fontSize: 13,
+                    fontSize: isDesktop ? 18 : 13,
                     fontWeight: 700,
-                    marginBottom: 4,
+                    marginBottom: isDesktop ? 8 : 4,
                   }}
                 >
                   You can select more than one
@@ -589,7 +613,7 @@ export function RhythmWizardPage() {
                 <div
                   style={{
                     color: MID,
-                    fontSize: 13,
+                    fontSize: isDesktop ? 18 : 13,
                     lineHeight: 1.5,
                   }}
                 >
@@ -598,139 +622,209 @@ export function RhythmWizardPage() {
                 </div>
               </div>
 
-              {BANDS.map((band) => {
-                const selected = selectedMoments.includes(band);
-                return (
-                  <button
-                    key={band}
-                    onClick={() => toggleMoment(band)}
-                    style={{
-                      width: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 18,
-                      padding: "10px",
-                      borderRadius: 28,
-                      marginBottom: 16,
-                      border: `1.5px solid ${selected ? BORDER_ACTIVE : "rgba(201,168,76,0.26)"}`,
-                      background: selected ? "rgba(255,251,244,0.98)" : CARD_BG,
-                      boxShadow: selected
-                        ? "0 18px 36px rgba(222,184,97,0.16)"
-                        : "0 10px 26px rgba(67,33,4,0.08)",
-                      cursor: "pointer",
-                      textAlign: "left",
-                      position: "relative",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <div
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: isDesktop
+                    ? "repeat(3, minmax(0, 1fr))"
+                    : "minmax(0, 1fr)",
+                  gap: isDesktop ? 24 : 0,
+                  alignItems: "stretch",
+                  marginBottom: isDesktop ? 18 : 0,
+                }}
+              >
+                {BANDS.map((band) => {
+                  const selected = selectedMoments.includes(band);
+                  return (
+                    <button
+                      key={band}
+                      onClick={() => toggleMoment(band)}
                       style={{
-                        width: 45,
-                        height: 45,
-                        borderRadius: "45%",
-                        background:
-                          "radial-gradient(circle at 30% 30%, rgba(255,251,243,0.98), rgba(245,232,202,0.8))",
+                        width: "100%",
                         display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                        boxShadow: "inset 0 0 18px rgba(231,206,149,0.18)",
+                        flexDirection: isDesktop ? "column" : "row",
+                        alignItems: isDesktop ? "flex-start" : "center",
+                        gap: isDesktop ? 18 : 18,
+                        padding: isDesktop ? "28px 26px 24px" : "10px",
+                        borderRadius: isDesktop ? 30 : 28,
+                        marginBottom: isDesktop ? 0 : 16,
+                        minHeight: isDesktop ? 320 : undefined,
+                        border: `1.5px solid ${selected ? BORDER_ACTIVE : "rgba(201,168,76,0.26)"}`,
+                        background: selected ? "rgba(255,251,244,0.98)" : CARD_BG,
+                        boxShadow: selected
+                          ? "0 22px 42px rgba(222,184,97,0.16)"
+                          : "0 12px 28px rgba(67,33,4,0.08)",
+                        cursor: "pointer",
+                        textAlign: "left",
+                        position: "relative",
+                        overflow: "hidden",
                       }}
                     >
-                      <img
-                        src={MOMENT_ART[band]}
-                        alt=""
-                        aria-hidden="true"
-                        style={{ width: 66, height: 66, objectFit: "contain" }}
-                      />
-                    </div>
-                    <div style={{ flex: 1 }}>
                       <div
                         style={{
-                          fontFamily: SERIF,
-                          fontWeight: 700,
-                          fontSize: 19,
-                          color: DARK,
-                          marginBottom: 8,
-                        }}
-                      >
-                        {MOMENT_COPY[band].label}
-                      </div>
-                      <div
-                        style={{
+                          width: isDesktop ? 84 : 45,
+                          height: isDesktop ? 84 : 45,
+                          borderRadius: "45%",
+                          background:
+                            "radial-gradient(circle at 30% 30%, rgba(255,251,243,0.98), rgba(245,232,202,0.8))",
                           display: "flex",
                           alignItems: "center",
-                          gap: 8,
-                          marginBottom: 12,
-                          color: "#E4B44F",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                          boxShadow: "inset 0 0 18px rgba(231,206,149,0.18)",
                         }}
                       >
-                        <div
+                        <img
+                          src={MOMENT_ART[band]}
+                          alt=""
+                          aria-hidden="true"
                           style={{
-                            width: 56,
-                            height: 1,
-                            background: "rgba(228,180,79,0.4)",
-                          }}
-                        />
-                        <span style={{ fontSize: 13, lineHeight: 1 }}>✦</span>
-                        <div
-                          style={{
-                            width: 56,
-                            height: 1,
-                            background: "rgba(228,180,79,0.4)",
+                            width: isDesktop ? 96 : 66,
+                            height: isDesktop ? 96 : 66,
+                            objectFit: "contain",
                           }}
                         />
                       </div>
                       <div
                         style={{
-                          fontSize: 15,
-                          color: MID,
-                          lineHeight: 1.45,
-                          maxWidth: 220,
+                          flex: 1,
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "space-between",
+                          width: "100%",
                         }}
                       >
-                        {MOMENT_COPY[band].desc}
+                        <div>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              gap: 16,
+                              marginBottom: isDesktop ? 14 : 8,
+                            }}
+                          >
+                            <div
+                              style={{
+                                fontFamily: SERIF,
+                                fontWeight: 700,
+                                fontSize: isDesktop ? 28 : 19,
+                                color: DARK,
+                              }}
+                            >
+                              {MOMENT_COPY[band].label}
+                            </div>
+                            {isDesktop && (
+                              <div
+                                style={{
+                                  width: 28,
+                                  height: 28,
+                                  borderRadius: 999,
+                                  flexShrink: 0,
+                                  border: `2px solid ${selected ? GOLD : "rgba(201,168,76,0.4)"}`,
+                                  background: "transparent",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                {selected && (
+                                  <div
+                                    style={{
+                                      width: 14,
+                                      height: 14,
+                                      borderRadius: 999,
+                                      background: GOLD,
+                                    }}
+                                  />
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 8,
+                              marginBottom: isDesktop ? 18 : 12,
+                              color: "#E4B44F",
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: isDesktop ? 78 : 56,
+                                height: 1,
+                                background: "rgba(228,180,79,0.4)",
+                              }}
+                            />
+                            <span style={{ fontSize: 13, lineHeight: 1 }}>✦</span>
+                            <div
+                              style={{
+                                width: isDesktop ? 78 : 56,
+                                height: 1,
+                                background: "rgba(228,180,79,0.4)",
+                              }}
+                            />
+                          </div>
+                          <div
+                            style={{
+                              fontSize: isDesktop ? 18 : 15,
+                              color: MID,
+                              lineHeight: 1.5,
+                              maxWidth: isDesktop ? 290 : 220,
+                            }}
+                          >
+                            {MOMENT_COPY[band].desc}
+                          </div>
+                        </div>
+                        {!isDesktop && (
+                          <div
+                            style={{
+                              width: 20,
+                              height: 20,
+                              borderRadius: 999,
+                              marginLeft: "auto",
+                              flexShrink: 0,
+                              border: `2px solid ${selected ? GOLD : "rgba(201,168,76,0.4)"}`,
+                              background: "transparent",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            {selected && (
+                              <div
+                                style={{
+                                  width: 10,
+                                  height: 10,
+                                  borderRadius: 999,
+                                  background: GOLD,
+                                }}
+                              />
+                            )}
+                          </div>
+                        )}
                       </div>
-                    </div>
-                    <div
-                      style={{
-                        width: 20,
-                        height: 20,
-                        borderRadius: 19,
-                        flexShrink: 0,
-                        border: `2px solid ${selected ? GOLD : "rgba(201,168,76,0.4)"}`,
-                        background: "transparent",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      {selected && (
-                        <div
-                          style={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: 5,
-                            background: GOLD,
-                          }}
-                        />
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
+                    </button>
+                  );
+                })}
+              </div>
 
               <button
                 onClick={advanceMomentsToPurpose}
                 disabled={selectedMoments.length === 0}
                 style={{
                   ...goldBtn,
-                  marginTop: 20,
+                  marginTop: isDesktop ? 8 : 20,
+                  width: isDesktop ? 320 : "100%",
+                  alignSelf: "center",
+                  display: "block",
+                  marginLeft: "auto",
+                  marginRight: "auto",
                   opacity: selectedMoments.length === 0 ? 0.45 : 1,
                   cursor:
                     selectedMoments.length === 0 ? "not-allowed" : "pointer",
-                  borderRadius: 12,
-
+                  borderRadius: isDesktop ? 16 : 12,
                   boxShadow: "0 16px 34px rgba(222,184,97,0.22)",
                 }}
               >
@@ -765,22 +859,26 @@ export function RhythmWizardPage() {
                 aria-hidden="true"
                 style={{
                   position: "absolute",
-                  top: -168,
-                  right: -22,
-                  width: 245,
+                  top: isDesktop ? -118 : -168,
+                  right: isDesktop ? 72 : -22,
+                  width: isDesktop ? 320 : 245,
                   pointerEvents: "none",
                   userSelect: "none",
-                  opacity: 0.5,
+                  opacity: isDesktop ? 0.32 : 0.5,
                 }}
               />
               <h2
                 style={{
                   fontFamily: SERIF,
                   fontWeight: 700,
-                  fontSize: 26,
+                  fontSize: isDesktop ? 50 : 26,
                   color: DARK,
-                  margin: "0 0 8px",
-                  maxWidth: 200,
+                  margin: isDesktop ? "0 0 14px" : "0 0 8px",
+                  maxWidth: isDesktop ? 640 : 200,
+                  textAlign: isDesktop ? "center" : "left",
+                  lineHeight: isDesktop ? 1.15 : undefined,
+                  marginLeft: isDesktop ? "auto" : undefined,
+                  marginRight: isDesktop ? "auto" : undefined,
                 }}
               >
                 What should each moment give you?
@@ -788,22 +886,34 @@ export function RhythmWizardPage() {
               <p
                 style={{
                   color: MID,
-                  fontSize: 15,
-                  marginBottom: 28,
+                  fontSize: isDesktop ? 22 : 15,
+                  marginBottom: isDesktop ? 42 : 28,
                   lineHeight: 1.6,
+                  textAlign: isDesktop ? "center" : "left",
+                  maxWidth: isDesktop ? 680 : undefined,
+                  marginLeft: isDesktop ? "auto" : undefined,
+                  marginRight: isDesktop ? "auto" : undefined,
                 }}
               >
                 Mitra will choose a practice that fits.
               </p>
 
               {selectedMoments.map((band) => (
-                <div key={band} style={{ marginBottom: 28 }}>
+                <div
+                  key={band}
+                  style={{
+                    marginBottom: isDesktop ? 42 : 28,
+                    maxWidth: isDesktop ? 1120 : undefined,
+                    marginLeft: isDesktop ? "auto" : undefined,
+                    marginRight: isDesktop ? "auto" : undefined,
+                  }}
+                >
                   <div
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: 8,
-                      marginBottom: 12,
+                      gap: isDesktop ? 14 : 8,
+                      marginBottom: isDesktop ? 20 : 12,
                     }}
                   >
                     <img
@@ -811,8 +921,8 @@ export function RhythmWizardPage() {
                       alt=""
                       aria-hidden="true"
                       style={{
-                        width: 60,
-                        height: 60,
+                        width: isDesktop ? 76 : 60,
+                        height: isDesktop ? 76 : 60,
                         objectFit: "contain",
                         flexShrink: 0,
                       }}
@@ -821,7 +931,7 @@ export function RhythmWizardPage() {
                       style={{
                         fontFamily: SERIF,
                         fontWeight: 700,
-                        fontSize: 16,
+                        fontSize: isDesktop ? 28 : 16,
                         color: DARK,
                       }}
                     >
@@ -838,8 +948,10 @@ export function RhythmWizardPage() {
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
-                      gap: 8,
+                      gridTemplateColumns: isDesktop
+                        ? "repeat(3, minmax(0, 1fr))"
+                        : "1fr 1fr",
+                      gap: isDesktop ? 16 : 8,
                     }}
                   >
                     {PURPOSE_OPTIONS[band].map((opt, idx) => {
@@ -851,21 +963,21 @@ export function RhythmWizardPage() {
                           key={opt.value}
                           onClick={() => setPurpose(band, opt.value)}
                           style={{
-                            padding: "14px 12px",
-                            borderRadius: 16,
+                            padding: isDesktop ? "16px 18px" : "14px 12px",
+                            borderRadius: isDesktop ? 22 : 16,
                             textAlign: "left",
                             border: `1.5px solid ${sel ? BORDER_ACTIVE : "rgba(201,168,76,0.22)"}`,
                             background: sel
                               ? "rgba(255,251,244,0.98)"
                               : CARD_BG,
                             cursor: "pointer",
-                            minHeight: 92,
+                            minHeight: isDesktop ? 112 : 92,
                             boxShadow: sel
                               ? "0 12px 24px rgba(222,184,97,0.14)"
                               : "0 6px 18px rgba(67,33,4,0.05)",
                             display: "flex",
                             alignItems: "flex-start",
-                            gap: 10,
+                            gap: isDesktop ? 14 : 10,
                           }}
                         >
                           <div
@@ -881,8 +993,8 @@ export function RhythmWizardPage() {
                               alt=""
                               aria-hidden="true"
                               style={{
-                                width: 42,
-                                height: 42,
+                                width: isDesktop ? 54 : 42,
+                                height: isDesktop ? 54 : 42,
                                 objectFit: "contain",
                               }}
                             />
@@ -896,9 +1008,9 @@ export function RhythmWizardPage() {
                               style={{
                                 fontFamily: SERIF,
                                 fontWeight: 600,
-                                fontSize: 13,
+                                fontSize: isDesktop ? 18 : 13,
                                 color: DARK,
-                                marginBottom: 4,
+                                marginBottom: isDesktop ? 8 : 4,
                                 lineHeight: 1.2,
                               }}
                             >
@@ -906,9 +1018,10 @@ export function RhythmWizardPage() {
                             </div>
                             <div
                               style={{
-                                fontSize: 12,
+                                fontSize: isDesktop ? 15 : 12,
                                 color: LIGHT,
                                 fontWeight: 600,
+                                lineHeight: isDesktop ? 1.45 : undefined,
                               }}
                             >
                               {opt.desc}
@@ -929,6 +1042,11 @@ export function RhythmWizardPage() {
                     disabled={!allSelected}
                     style={{
                       ...goldBtn,
+                      width: isDesktop ? 360 : "100%",
+                      display: "block",
+                      marginLeft: "auto",
+                      marginRight: "auto",
+                      borderRadius: isDesktop ? 16 : 11,
                       opacity: allSelected ? 1 : 0.45,
                       cursor: allSelected ? "pointer" : "not-allowed",
                     }}
@@ -957,21 +1075,25 @@ export function RhythmWizardPage() {
                     aria-hidden="true"
                     style={{
                       position: "absolute",
-                      top: -180,
-                      right: -22,
-                      width: 245,
+                      top: isDesktop ? -120 : -180,
+                      right: isDesktop ? 72 : -22,
+                      width: isDesktop ? 320 : 245,
                       pointerEvents: "none",
                       userSelect: "none",
-                      opacity: 0.5,
+                      opacity: isDesktop ? 0.32 : 0.5,
                     }}
                   />
                   <h2
                     style={{
                       fontFamily: SERIF,
                       fontWeight: 700,
-                      fontSize: 26,
+                      fontSize: isDesktop ? 50 : 26,
                       color: DARK,
-                      margin: "0 0 8px",
+                      margin: isDesktop ? "0 0 14px" : "0 0 8px",
+                      textAlign: isDesktop ? "center" : "left",
+                      maxWidth: isDesktop ? 720 : undefined,
+                      marginLeft: isDesktop ? "auto" : undefined,
+                      marginRight: isDesktop ? "auto" : undefined,
                     }}
                   >
                     {isEditMode
@@ -981,9 +1103,13 @@ export function RhythmWizardPage() {
                   <p
                     style={{
                       color: MID,
-                      fontSize: 15,
-                      marginBottom: 28,
+                      fontSize: isDesktop ? 22 : 15,
+                      marginBottom: isDesktop ? 40 : 28,
                       lineHeight: 1.6,
+                      textAlign: isDesktop ? "center" : "left",
+                      maxWidth: isDesktop ? 820 : undefined,
+                      marginLeft: isDesktop ? "auto" : undefined,
+                      marginRight: isDesktop ? "auto" : undefined,
                     }}
                   >
                     {isEditMode
@@ -1040,175 +1166,352 @@ export function RhythmWizardPage() {
                   )}
 
                   {!suggestLoading &&
-                    selectedMoments.map((band) => {
-                      const item = items[band];
-                      if (!item) {
+                    (isDesktop ? (
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns:
+                            selectedMoments.length === 1
+                              ? "minmax(360px, 920px)"
+                              : "repeat(auto-fit, minmax(360px, 520px))",
+                          justifyContent: "center",
+                          gap: 24,
+                          maxWidth: 1180,
+                          margin: "0 auto",
+                        }}
+                      >
+                        {selectedMoments.map((band) => {
+                          const item = items[band];
+                          if (!item) {
+                            return (
+                              <div
+                                key={band}
+                                style={{
+                                  border: "1px solid rgba(201,100,76,0.3)",
+                                  borderRadius: 18,
+                                  background: "rgba(255,245,245,0.9)",
+                                  padding: "18px 22px",
+                                }}
+                              >
+                                <p
+                                  style={{
+                                    color: "#9b4e4e",
+                                    fontSize: 14,
+                                    margin: "0 0 10px",
+                                  }}
+                                >
+                                  Mitra could not suggest a{" "}
+                                  {MOMENT_COPY[band].label.toLowerCase()} practice.
+                                </p>
+                                <button
+                                  onClick={() => setPickerBand(band)}
+                                  style={{
+                                    background: "none",
+                                    border: `1px solid rgba(201,168,76,0.4)`,
+                                    color: GOLD,
+                                    borderRadius: 10,
+                                    padding: "7px 12px",
+                                    fontSize: 13,
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  {RHYTHM_SUGGEST_COPY.chooseFromLibrary}
+                                </button>
+                              </div>
+                            );
+                          }
+
+                          const helperText = item.why_this || item.description_snapshot;
+
+                          return (
+                            <div
+                              key={band}
+                              style={{
+                                width: "100%",
+                                maxWidth:
+                                  selectedMoments.length === 1 ? 920 : 520,
+                                border: `1.5px solid ${BORDER}`,
+                                borderRadius: 28,
+                                background: "rgba(255,251,244,0.96)",
+                                padding: "24px 24px 22px",
+                                boxShadow: "0 18px 36px rgba(67,33,4,0.06)",
+                                display: "grid",
+                                gap: 18,
+                                minHeight: 320,
+                              }}
+                            >
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 12,
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    fontSize: 13,
+                                    fontWeight: 700,
+                                    letterSpacing: 2,
+                                    color: "#8B6914",
+                                    textTransform: "uppercase",
+                                    background:
+                                      "linear-gradient(180deg, #F8F0D8 0%, #FDF8EC 100%)",
+                                    borderRadius: 999,
+                                    padding: "8px 14px",
+                                  }}
+                                >
+                                  {itemTypeLabel(item.item_type)}
+                                </span>
+                                <span style={{ fontSize: 16, color: LIGHT }}>
+                                  {MOMENT_COPY[band].label}
+                                </span>
+                                <button
+                                  onClick={() => setPickerBand(band)}
+                                  style={{
+                                    background: "none",
+                                    border: `1px solid rgba(201,168,76,0.4)`,
+                                    color: GOLD,
+                                    borderRadius: 999,
+                                    padding: "10px 16px",
+                                    fontSize: 15,
+                                    cursor: "pointer",
+                                    whiteSpace: "nowrap",
+                                    marginLeft: "auto",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    gap: 8,
+                                  }}
+                                >
+                                  <Pencil size={14} strokeWidth={1.8} />
+                                  Change
+                                </button>
+                              </div>
+
+                              <div
+                                style={{
+                                  fontFamily: SERIF,
+                                  fontWeight: 700,
+                                  fontSize: 22,
+                                  color: DARK,
+                                  lineHeight: 1.45,
+                                }}
+                              >
+                                {item.title_snapshot}
+                              </div>
+
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 8,
+                                  color: "#E4B44F",
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    width: 96,
+                                    height: 1,
+                                    background: "rgba(228,180,79,0.4)",
+                                  }}
+                                />
+                                <span style={{ fontSize: 13, lineHeight: 1 }}>✦</span>
+                                <div
+                                  style={{
+                                    width: 96,
+                                    height: 1,
+                                    background: "rgba(228,180,79,0.4)",
+                                  }}
+                                />
+                              </div>
+
+                              {helperText && (
+                                <div
+                                  style={{
+                                    fontSize: 17,
+                                    color: "#8B6914",
+                                    lineHeight: 1.6,
+                                    fontStyle: "italic",
+                                  }}
+                                >
+                                  {helperText}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      selectedMoments.map((band) => {
+                        const item = items[band];
+                        if (!item) {
+                          return (
+                            <div
+                              key={band}
+                              style={{
+                                border: "1px solid rgba(201,100,76,0.3)",
+                                borderRadius: 12,
+                                background: "rgba(255,245,245,0.9)",
+                                padding: "14px 18px",
+                                marginBottom: 14,
+                              }}
+                            >
+                              <p
+                                style={{
+                                  color: "#9b4e4e",
+                                  fontSize: 14,
+                                  margin: "0 0 10px",
+                                }}
+                              >
+                                Mitra could not suggest a{" "}
+                                {MOMENT_COPY[band].label.toLowerCase()} practice.
+                              </p>
+                              <button
+                                onClick={() => setPickerBand(band)}
+                                style={{
+                                  background: "none",
+                                  border: `1px solid rgba(201,168,76,0.4)`,
+                                  color: GOLD,
+                                  borderRadius: 8,
+                                  padding: "5px 10px",
+                                  fontSize: 13,
+                                  cursor: "pointer",
+                                }}
+                              >
+                                {RHYTHM_SUGGEST_COPY.chooseFromLibrary}
+                              </button>
+                            </div>
+                          );
+                        }
                         return (
                           <div
                             key={band}
                             style={{
-                              border: "1px solid rgba(201,100,76,0.3)",
-                              borderRadius: 12,
-                              background: "rgba(255,245,245,0.9)",
-                              padding: "14px 18px",
-                              marginBottom: 14,
+                              border: `1.5px solid ${BORDER}`,
+                              borderRadius: 26,
+                              background: "rgba(255,251,244,0.95)",
+                              padding: "15px",
+                              marginBottom: 18,
+                              boxShadow: "0 14px 32px rgba(67,33,4,0.06)",
                             }}
                           >
-                            <p
+                            <div
                               style={{
-                                color: "#9b4e4e",
-                                fontSize: 14,
-                                margin: "0 0 10px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 10,
+                                marginBottom: 18,
                               }}
                             >
-                              Mitra could not suggest a{" "}
-                              {MOMENT_COPY[band].label.toLowerCase()} practice.
-                            </p>
-                            <button
-                              onClick={() => setPickerBand(band)}
+                              <span
+                                style={{
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  letterSpacing: 2,
+                                  color: "#8B6914",
+                                  textTransform: "uppercase",
+                                  background:
+                                    "linear-gradient(180deg, #F8F0D8 0%, #FDF8EC 100%)",
+                                  borderRadius: 10,
+                                  padding: "6px 12px",
+                                }}
+                              >
+                                {itemTypeLabel(item.item_type)}
+                              </span>
+                              <span style={{ fontSize: 13, color: LIGHT }}>
+                                {MOMENT_COPY[band].label}
+                              </span>
+                              <button
+                                onClick={() => setPickerBand(band)}
+                                style={{
+                                  background: "none",
+                                  border: `1px solid rgba(201,168,76,0.4)`,
+                                  color: GOLD,
+                                  borderRadius: 16,
+                                  padding: "10px 18px",
+                                  fontSize: 13,
+                                  cursor: "pointer",
+                                  whiteSpace: "nowrap",
+                                  flexShrink: 0,
+                                  minWidth: 106,
+                                  marginLeft: "auto",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  gap: 8,
+                                }}
+                              >
+                                <Pencil size={14} strokeWidth={1.8} />
+                                Change
+                              </button>
+                            </div>
+                            <div
                               style={{
-                                background: "none",
-                                border: `1px solid rgba(201,168,76,0.4)`,
-                                color: GOLD,
-                                borderRadius: 8,
-                                padding: "5px 10px",
-                                fontSize: 13,
-                                cursor: "pointer",
+                                fontFamily: SERIF,
+                                fontWeight: 700,
+                                fontSize: 18,
+                                color: DARK,
+                                marginBottom: 14,
+                                lineHeight: 1.45,
                               }}
                             >
-                              {RHYTHM_SUGGEST_COPY.chooseFromLibrary}
-                            </button>
+                              {item.title_snapshot}
+                            </div>
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 8,
+                                marginBottom: 14,
+                                color: "#E4B44F",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: 86,
+                                  height: 1,
+                                  background: "rgba(228,180,79,0.4)",
+                                }}
+                              />
+                              <span style={{ fontSize: 13, lineHeight: 1 }}>
+                                ✦
+                              </span>
+                              <div
+                                style={{
+                                  width: 118,
+                                  height: 1,
+                                  background: "rgba(228,180,79,0.4)",
+                                }}
+                              />
+                            </div>
+                            {item.why_this && (
+                              <div
+                                style={{
+                                  fontSize: 14,
+                                  color: "#8B6914",
+                                  lineHeight: 1.6,
+                                  fontStyle: "italic",
+                                }}
+                              >
+                                {item.why_this}
+                              </div>
+                            )}
+                            {!item.why_this && item.description_snapshot && (
+                              <div
+                                style={{
+                                  fontSize: 14,
+                                  color: "#8B6914",
+                                  lineHeight: 1.6,
+                                  fontStyle: "italic",
+                                }}
+                              >
+                                {item.description_snapshot}
+                              </div>
+                            )}
                           </div>
                         );
-                      }
-                      return (
-                        <div
-                          key={band}
-                          style={{
-                            border: `1.5px solid ${BORDER}`,
-                            borderRadius: 26,
-                            background: "rgba(255,251,244,0.95)",
-                            padding: "15px",
-                            marginBottom: 18,
-                            boxShadow: "0 14px 32px rgba(67,33,4,0.06)",
-                          }}
-                        >
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 10,
-                              marginBottom: 18,
-                            }}
-                          >
-                            <span
-                              style={{
-                                fontSize: 11,
-                                fontWeight: 700,
-                                letterSpacing: 2,
-                                color: "#8B6914",
-                                textTransform: "uppercase",
-                                background:
-                                  "linear-gradient(180deg, #F8F0D8 0%, #FDF8EC 100%)",
-                                borderRadius: 10,
-                                padding: "6px 12px",
-                              }}
-                            >
-                              {itemTypeLabel(item.item_type)}
-                            </span>
-                            <span style={{ fontSize: 13, color: LIGHT }}>
-                              {MOMENT_COPY[band].label}
-                            </span>
-                            <button
-                              onClick={() => setPickerBand(band)}
-                              style={{
-                                background: "none",
-                                border: `1px solid rgba(201,168,76,0.4)`,
-                                color: GOLD,
-                                borderRadius: 16,
-                                padding: "10px 18px",
-                                fontSize: 13,
-                                cursor: "pointer",
-                                whiteSpace: "nowrap",
-                                flexShrink: 0,
-                                minWidth: 106,
-                                marginLeft: "auto",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                gap: 8,
-                              }}
-                            >
-                              <Pencil size={14} strokeWidth={1.8} />
-                              Change
-                            </button>
-                          </div>
-                          <div
-                            style={{
-                              fontFamily: SERIF,
-                              fontWeight: 700,
-                              fontSize: 18,
-                              color: DARK,
-                              marginBottom: 14,
-                              lineHeight: 1.45,
-                            }}
-                          >
-                            {item.title_snapshot}
-                          </div>
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 8,
-                              marginBottom: 14,
-                              color: "#E4B44F",
-                            }}
-                          >
-                            <div
-                              style={{
-                                width: 86,
-                                height: 1,
-                                background: "rgba(228,180,79,0.4)",
-                              }}
-                            />
-                            <span style={{ fontSize: 13, lineHeight: 1 }}>
-                              ✦
-                            </span>
-                            <div
-                              style={{
-                                width: 118,
-                                height: 1,
-                                background: "rgba(228,180,79,0.4)",
-                              }}
-                            />
-                          </div>
-                          {item.why_this && (
-                            <div
-                              style={{
-                                fontSize: 14,
-                                color: "#8B6914",
-                                lineHeight: 1.6,
-                                fontStyle: "italic",
-                              }}
-                            >
-                              {item.why_this}
-                            </div>
-                          )}
-                          {!item.why_this && item.description_snapshot && (
-                            <div
-                              style={{
-                                fontSize: 14,
-                                color: "#8B6914",
-                                lineHeight: 1.6,
-                                fontStyle: "italic",
-                              }}
-                            >
-                              {item.description_snapshot}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+                      })
+                    ))}
 
                   {error && (
                     <p
@@ -1236,11 +1539,15 @@ export function RhythmWizardPage() {
                     }}
                     style={{
                       ...goldBtn,
-                      marginTop: 20,
+                      marginTop: isDesktop ? 10 : 20,
+                      width: isDesktop ? 320 : "100%",
+                      display: "block",
+                      marginLeft: "auto",
+                      marginRight: "auto",
                       opacity: acceptDisabled ? 0.45 : 1,
                       cursor: acceptDisabled ? "not-allowed" : "pointer",
 
-                      borderRadius: 11,
+                      borderRadius: isDesktop ? 16 : 11,
                       boxShadow: "0 16px 34px rgba(222,184,97,0.22)",
                     }}
                     disabled={acceptDisabled}
@@ -1252,6 +1559,10 @@ export function RhythmWizardPage() {
                       onClick={() => navigate("/en/mitra/rhythm/edit")}
                       style={{
                         ...ghostBtn,
+                        width: isDesktop ? 320 : "100%",
+                        display: "block",
+                        marginLeft: "auto",
+                        marginRight: "auto",
                         marginTop: 18,
 
                         borderRadius: 11,
@@ -1445,8 +1756,9 @@ export function RhythmWizardPage() {
                     key={band}
                     style={{
                       display: "flex",
-                      alignItems: "center",
-                      gap: 14,
+                      flexDirection: "column",
+                      alignItems: "stretch",
+                      gap: 16,
                       padding: "14px 18px",
                       borderRadius: 14,
                       marginBottom: 10,
@@ -1454,53 +1766,80 @@ export function RhythmWizardPage() {
                       background: CARD_BG,
                     }}
                   >
-                    <div style={{ flex: 1 }}>
-                      <div
-                        style={{
-                          fontSize: 12,
-                          color: "#D4A017",
-                          marginBottom: 2,
-                          textTransform: "uppercase",
-                          fontWeight: 700,
-                        }}
-                      >
-                        {MOMENT_COPY[band].label}
-                      </div>
-                      <div
-                        style={{
-                          fontFamily: SERIF,
-                          fontWeight: 700,
-                          fontSize: 15,
-                          color: DARK,
-                        }}
-                      >
-                        {item.title_snapshot}
-                      </div>
-                    </div>
-                    <span
+                    <div
                       style={{
-                        fontSize: 10,
-                        fontWeight: 700,
-                        letterSpacing: 1.2,
-                        color: "#8B6914",
-                        textTransform: "uppercase",
-                        background: "#F5F0E0",
-                        borderRadius: 6,
-                        padding: "8px 8px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 14,
                       }}
                     >
-                      {itemTypeLabel(item.item_type)}
-                    </span>
+                      <div style={{ flex: 1 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            color: "#D4A017",
+                            marginBottom: 2,
+                            textTransform: "uppercase",
+                            fontWeight: 700,
+                          }}
+                        >
+                          {MOMENT_COPY[band].label}
+                        </div>
+                        <div
+                          style={{
+                            fontFamily: SERIF,
+                            fontWeight: 700,
+                            fontSize: 15,
+                            color: DARK,
+                            lineHeight: 1.45,
+                          }}
+                        >
+                          {item.title_snapshot}
+                        </div>
+                      </div>
+                      <span
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          letterSpacing: 1.2,
+                          color: "#8B6914",
+                          textTransform: "uppercase",
+                          background: "#F5F0E0",
+                          borderRadius: 6,
+                          padding: "8px 8px",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {itemTypeLabel(item.item_type)}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() =>
+                        beginRhythmItem(band, {
+                          item_id: item.item_id,
+                          item_type: item.item_type,
+                          title_snapshot: item.title_snapshot,
+                          description_snapshot: item.description_snapshot,
+                        })
+                      }
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        borderRadius: 11,
+                        border: "none",
+                        background: GOLD_BTN,
+                        color: "#fff",
+                        fontFamily: SERIF,
+                        fontSize: 18,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {beginLabel(item.item_type)}
+                    </button>
                   </div>
                 );
               })}
-
-              <button
-                onClick={beginTodaysPractice}
-                style={{ ...goldBtn, marginTop: 20 }}
-              >
-                Begin today's practice
-              </button>
               <button onClick={() => navigate("/en/mitra")} style={ghostBtn}>
                 Return Home
               </button>

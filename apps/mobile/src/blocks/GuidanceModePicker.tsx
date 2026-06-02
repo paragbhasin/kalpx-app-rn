@@ -12,6 +12,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import Svg, { Line, Path } from "react-native-svg";
 import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
@@ -234,6 +235,8 @@ interface Props {
 }
 
 const GuidanceModePicker: React.FC<Props> = ({ block }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
 
   const fire = async (modeId: string) => {
@@ -290,7 +293,7 @@ const GuidanceModePicker: React.FC<Props> = ({ block }) => {
             {isHybrid ? (
               <View style={styles.mostChosenBadge}>
                 <Ionicons name="star-outline" size={12} color="#FFFFFF" />
-                <Text style={styles.mostChosenText}>MOST CHOSEN</Text>
+                <Text style={[styles.mostChosenText, isHindi && { letterSpacing: 0 }]}>{t("guidanceMode.mostChosen")}</Text>
               </View>
             ) : null}
 
@@ -309,19 +312,20 @@ const GuidanceModePicker: React.FC<Props> = ({ block }) => {
 
               <View style={styles.textCol}>
                 <Text
-                  style={[styles.title, isHybrid ? { marginTop: 8 } : null]}
+                  style={[styles.title, isHybrid ? { marginTop: 8 } : null, isHindi && { letterSpacing: 0 }]}
                 >
-                  {m.title}
+                  {t(`guidanceMode.${m.id}.title`)}
                 </Text>
-                <Text style={styles.desc}>{m.desc}</Text>
+                <Text style={[styles.desc, isHindi && { letterSpacing: 0 }]}>{t(`guidanceMode.${m.id}.desc`)}</Text>
                 <Text
                   style={[
                     styles.example,
                     isHybrid ? styles.exampleHybrid : null,
                     isRooted ? styles.exampleRooted : null,
+                    isHindi && { letterSpacing: 0 },
                   ]}
                 >
-                  {m.example}
+                  {t(`guidanceMode.${m.id}.example`)}
                 </Text>
               </View>
 

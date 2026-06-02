@@ -1,5 +1,5 @@
 const quoteImage = new URL(
-  "../../../../mobile/assets/about-kalpx3.png",
+  "/mobile-assets/about-kalpx3.png",
   import.meta.url,
 ).href;
 

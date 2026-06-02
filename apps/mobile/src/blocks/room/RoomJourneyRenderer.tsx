@@ -15,8 +15,9 @@
  *   - RoomContainer (ambient audio, context_picker, why_this_l2)
  *   - All app navigation contracts
  */
-import { ROOM_LABELS, ROOM_REFLECTION_OPTIONS } from '@kalpx/contracts';
+import { ROOM_LABELS, ROOM_LABELS_HI, ROOM_REFLECTION_OPTIONS } from '@kalpx/contracts';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Image,
   Modal,
@@ -111,10 +112,10 @@ function getTimerKind(action: ActionEnvelope): TimerKind | null {
   return null;
 }
 
-function getRunnerWaitLine(family: JourneyActionFamily): string {
-  if (family === 'sankalp') return 'Stay with the offering.';
-  if (family === 'practice') return 'Let the practice hold you.';
-  return 'Stay with the sound.';
+function getRunnerWaitLineKey(family: JourneyActionFamily): string {
+  if (family === 'sankalp') return 'room.actions.stayWithTheOffering';
+  if (family === 'practice') return 'room.actions.letThePracticeHoldYou';
+  return 'room.actions.stayWithTheSound';
 }
 
 function getWritesEvent(action: ActionEnvelope): string | null {
@@ -132,6 +133,8 @@ interface Props {
 }
 
 const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === 'hi';
   const { height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const { loadScreen, goBack, screenData } = useScreenStore();
@@ -142,9 +145,19 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
   const entryCtx = ctx.entry_context ?? {};
   const recId: string | null = entryCtx.recommended_first_action_id ?? null;
   const roomSteps = (envelope as any).room_steps;
-  const roomDisplayName = ROOM_LABELS[envelope.room_id as keyof typeof ROOM_LABELS] ?? '';
-  const arrivalCopy = getRoomArrivalCopy(roomId, ctx);
-  const completionCopy = getCompletionCopy(roomId);
+  const roomDisplayName = (isHindi ? ROOM_LABELS_HI : ROOM_LABELS)[envelope.room_id as keyof typeof ROOM_LABELS] ?? '';
+  const locale = i18n.language || 'en';
+  const arrivalCopyRaw = getRoomArrivalCopy(roomId, ctx, locale);
+  const arrivalCopy = {
+    ...arrivalCopyRaw,
+    companionLine: arrivalCopyRaw.companionLine || t('room.actions.youreHereThatIsEnough'),
+  };
+  const completionCopyRaw = getCompletionCopy(roomId, locale);
+  const completionCopy = {
+    ...completionCopyRaw,
+    message: completionCopyRaw.message || t('room.actions.youStayedWithIt'),
+    subtext: completionCopyRaw.subtext || t('room.actions.youCanReturnAnytime'),
+  };
   const reflectionOptions = ROOM_REFLECTION_OPTIONS[roomId as keyof typeof ROOM_REFLECTION_OPTIONS] ?? [];
   const renderId: string = (envelope as any).provenance?.render_id ?? '';
 
@@ -220,7 +233,7 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
 
     const completedFamily = classifyActionFamily(completedAction);
     const nextFamily = classifyActionFamily(nextAction);
-    const betweenLine = getBetweenStepLine({ completedFamily, nextFamily });
+    const betweenLine = getBetweenStepLine({ completedFamily, nextFamily, locale });
 
     setPhase({ id: 'next_gentle_step', betweenLine, nextActionIndex: nextIndex });
   }, [orderedActions]);
@@ -240,7 +253,7 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
     const current = phaseRef.current;
     if (current.id === 'runner_wait') {
       const completedIndex = current.actionIndex;
-      setRunnerBeat('You made space.');
+      setRunnerBeat(t('room.actions.youMadeSpace'));
       setTimeout(() => {
         setRunnerBeat(null);
         advancePhase(completedIndex);
@@ -539,7 +552,7 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
     const action = orderedActions[actionIndex];
     if (!action) return null;
     const family = classifyActionFamily(action);
-    const companionLine = getRoomStepCompanionLine({ action, roomContext: ctx });
+    const companionLine = getRoomStepCompanionLine({ action, roomContext: ctx, locale });
 
     // ── Timer (breathe/sit/walk/heart) ──
     const timerKind = getTimerKind(action);
@@ -574,7 +587,7 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
         return (
           <InquiryDetail
             category={selectedCategory}
-            reflectivePrompt={getInquiryCategoryPrompt(selectedCategory)}
+            reflectivePrompt={getInquiryCategoryPrompt(selectedCategory, locale) || t('room.actions.whatDoesThisBringUp')}
             onSave={(categoryId, text) => handleInquirySubmit(actionIndex, selectedCategory, text)}
             onSkip={() => advancePhase(actionIndex)}
             onEscape={handleExitRequest}
@@ -609,7 +622,7 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
             onPress={() => advancePhase(actionIndex)}
             activeOpacity={0.7}
           >
-            <Text style={styles.ctaText}>Continue</Text>
+            <Text style={[styles.ctaText, isHindi && { letterSpacing: 0 }]}>{t('room.actions.continue')}</Text>
           </TouchableOpacity>
         </ScrollView>
       );
@@ -624,17 +637,17 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
         // Show confirmation beat instead of save UI. Never dispatch again.
         return (
           <CarryConfirmationBeat
-            line="A thread of care has been remembered."
+            line={t('room.actions.aThreadOfCare')}
             onAdvance={() => advancePhase(actionIndex)}
           />
         );
       }
       return (
         <TextPhase
-          companionLine={getCarryCompanion(writesEvent)}
-          prompt={getCarryPrompt(writesEvent)}
-          placeholder={getCarryPlaceholder(writesEvent)}
-          ctaLabel={getCarryCTA(writesEvent)}
+          companionLine={getCarryCompanion(writesEvent, locale)}
+          prompt={getCarryPrompt(writesEvent, locale)}
+          placeholder={getCarryPlaceholder(writesEvent, locale)}
+          ctaLabel={getCarryCTA(writesEvent, locale)}
           onSave={(text) => {
             dispatchCarryCaptured(action, text);
             setTimeout(() => advancePhase(actionIndex), 700);
@@ -652,9 +665,9 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
       return (
         <TextPhase
           companionLine={modal?.why_we_ask ?? modal?.sanatan_context ?? companionLine}
-          prompt={modal?.prompt ?? action.step_payload?.prompt ?? 'What is present right now?'}
-          placeholder={modal?.placeholder ?? 'Write a few words…'}
-          ctaLabel={modal?.primary_label ?? 'Let this land'}
+          prompt={modal?.prompt ?? action.step_payload?.prompt ?? t('room.actions.whatIsPresentRightNow')}
+          placeholder={modal?.placeholder ?? t('room.actions.writeAFewWords')}
+          ctaLabel={modal?.primary_label ?? t('room.actions.letThisLand')}
           maxChars={maxChars}
           onSave={(text) => {
             dispatchStepCompleted(action, { text });
@@ -672,9 +685,9 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
         return (
           <TextPhase
             companionLine={companionLine}
-            prompt="Write what you would have spoken."
-            placeholder="Write a few words…"
-            ctaLabel="Let this land"
+            prompt={t('room.actions.writeWhatYouWouldHaveSpoken')}
+            placeholder={t('room.actions.writeAFewWords')}
+            ctaLabel={t('room.actions.letThisLand')}
             onSave={(text) => handleInlineComplete(actionIndex, { text })}
             onSkip={() => advancePhase(actionIndex)}
           />
@@ -700,9 +713,9 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
       return (
         <ReachOutPhase
           companionLine={modal?.why_we_ask ?? companionLine}
-          prompt={modal?.prompt ?? 'Write a short message to someone who matters.'}
-          placeholder={modal?.placeholder ?? 'Your message…'}
-          ctaLabel={modal?.primary_label ?? 'Copy and go'}
+          prompt={modal?.prompt ?? t('room.actions.writeShortMessageToSomeone')}
+          placeholder={modal?.placeholder ?? t('room.actions.yourMessage')}
+          ctaLabel={modal?.primary_label ?? t('room.actions.copyAndGo')}
           onSave={(text) => handleInlineComplete(actionIndex, { text })}
           onSkip={() => advancePhase(actionIndex)}
         />
@@ -712,14 +725,14 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
     // ── Unknown / unrecognized action — never return null, never get stuck ──
     return (
       <View style={styles.unknownStep}>
-        <Text style={styles.unknownTitle}>A gentle step</Text>
-        <Text style={styles.unknownCompanion}>{companionLine || 'Mitra is with you for this step.'}</Text>
+        <Text style={[styles.unknownTitle, isHindi && { letterSpacing: 0 }]}>{t('room.actions.aGentleStep')}</Text>
+        <Text style={[styles.unknownCompanion, isHindi && { letterSpacing: 0 }]}>{companionLine || t('room.actions.mitraIsWithYou')}</Text>
         <TouchableOpacity
           style={styles.ctaBtn}
           onPress={() => advancePhase(actionIndex)}
           activeOpacity={0.7}
         >
-          <Text style={styles.ctaText}>Continue</Text>
+          <Text style={[styles.ctaText, isHindi && { letterSpacing: 0 }]}>{t('room.actions.continue')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -733,7 +746,7 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
         style={[styles.phaseFill, { minHeight: windowHeight }]}
         onPress={handleBegin}
         accessibilityRole="button"
-        accessibilityLabel="Begin room journey"
+        accessibilityLabel={t('room.actions.beginRoomJourney')}
       >
         <ScrollView
           contentContainerStyle={[
@@ -770,7 +783,7 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
             </View>
           ) : null}
 
-          <Text style={styles.arrivalHint}>When you're ready, tap to begin</Text>
+          <Text style={[styles.arrivalHint, isHindi && { letterSpacing: 0 }]}>{t('room.actions.whenYouReady')}</Text>
         </ScrollView>
       </Pressable>
     );
@@ -782,8 +795,8 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
     const action = orderedActions[actionIndex];
     if (!action) return null;
     const family = classifyActionFamily(action);
-    const companionLine = getRoomStepCompanionLine({ action, roomContext: ctx });
-    const stepIntro = getStepIntroLine(family);
+    const companionLine = getRoomStepCompanionLine({ action, roomContext: ctx, locale });
+    const stepIntro = getStepIntroLine(family, locale);
     const isFirst = actionIndex === 0;
     const rp = action.runner_payload;
 
@@ -796,7 +809,7 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
         showsVerticalScrollIndicator={false}
       >
         {isFirst ? (
-          <Text style={styles.introBrow}>Mitra begins with</Text>
+          <Text style={[styles.introBrow, isHindi && { letterSpacing: 0 }]}>{t('room.actions.mitraBeginsWith')}</Text>
         ) : null}
 
         <Text style={styles.introLabel}>
@@ -817,11 +830,11 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
           activeOpacity={0.7}
           testID={`room_journey_begin_${action.action_id}`}
         >
-          <Text style={styles.ctaText}>Begin</Text>
+          <Text style={[styles.ctaText, isHindi && { letterSpacing: 0 }]}>{t('room.actions.begin')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={handleExitRequest} style={styles.escapeBtn} hitSlop={{ top: 8, bottom: 8 }}>
-          <Text style={styles.escapeText}>I'll go now</Text>
+          <Text style={[styles.escapeText, isHindi && { letterSpacing: 0 }]}>{t('room.actions.illGoNow')}</Text>
         </TouchableOpacity>
       </ScrollView>
     );
@@ -831,13 +844,13 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
     const currentAction = phase.id === 'runner_wait' ? orderedActions[phase.actionIndex] : null;
     const waitLine = runnerBeat ?? (
       currentAction
-        ? getRunnerWaitLine(classifyActionFamily(currentAction))
-        : 'Stay with the sound.'
+        ? t(getRunnerWaitLineKey(classifyActionFamily(currentAction)))
+        : t('room.actions.stayWithTheSound')
     );
     return (
       <View style={[styles.phaseFill, styles.runnerCenter, { minHeight: windowHeight }]}>
         <Image source={LOTUS_ICON} style={styles.runnerLotus} resizeMode="contain" />
-        <Text style={styles.runnerText}>{waitLine}</Text>
+        <Text style={[styles.runnerText, isHindi && { letterSpacing: 0 }]}>{waitLine}</Text>
       </View>
     );
   }
@@ -850,10 +863,10 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
         style={[styles.phaseFill, styles.betweenCenter, { minHeight: windowHeight }]}
         onPress={() => setPhase({ id: 'action_intro', actionIndex: nextIdx })}
         accessibilityRole="button"
-        accessibilityLabel="Continue to next step"
+        accessibilityLabel={t('room.actions.continueToNextStep')}
       >
         <Text style={styles.betweenLine}>{phase.betweenLine}</Text>
-        <Text style={styles.betweenHint}>Tap when ready</Text>
+        <Text style={[styles.betweenHint, isHindi && { letterSpacing: 0 }]}>{t('room.actions.tapWhenReady')}</Text>
       </Pressable>
     );
   }
@@ -897,7 +910,7 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
           activeOpacity={0.7}
           testID="room_journey_return_home"
         >
-          <Text style={styles.ctaText}>Return to Mitra Home</Text>
+          <Text style={[styles.ctaText, isHindi && { letterSpacing: 0 }]}>{t('room.actions.returnToMitraHome')}</Text>
         </TouchableOpacity>
       </ScrollView>
     );
@@ -915,23 +928,23 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
       >
         <View style={styles.exitOverlay}>
           <View style={styles.exitSheet}>
-            <Text style={styles.exitTitle}>Leave this room?</Text>
-            <Text style={styles.exitBody}>
-              Your practice so far is held. You can return anytime.
+            <Text style={[styles.exitTitle, isHindi && { letterSpacing: 0 }]}>{t('room.actions.leaveThisRoom')}</Text>
+            <Text style={[styles.exitBody, isHindi && { letterSpacing: 0 }]}>
+              {t('room.actions.practiceHeld')}
             </Text>
             <TouchableOpacity
               style={styles.exitConfirmBtn}
               onPress={handleConfirmExit}
               activeOpacity={0.8}
             >
-              <Text style={styles.exitConfirmText}>Yes, I'll go now</Text>
+              <Text style={[styles.exitConfirmText, isHindi && { letterSpacing: 0 }]}>{t('room.actions.yesIllGoNow')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.exitCancelBtn}
               onPress={() => setExitConfirmVisible(false)}
               hitSlop={{ top: 8, bottom: 8 }}
             >
-              <Text style={styles.exitCancelText}>Stay</Text>
+              <Text style={[styles.exitCancelText, isHindi && { letterSpacing: 0 }]}>{t('room.actions.stay')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -969,7 +982,7 @@ const RoomJourneyRenderer: React.FC<Props> = ({ envelope }) => {
               style={styles.floatingEscape}
               hitSlop={{ top: 8, bottom: 8 }}
             >
-              <Text style={styles.escapeText}>I'll go now</Text>
+              <Text style={[styles.escapeText, isHindi && { letterSpacing: 0 }]}>{t('room.actions.illGoNow')}</Text>
             </TouchableOpacity>
           )}
         </View>

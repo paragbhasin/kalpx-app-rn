@@ -16,6 +16,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Colors } from '../../../theme/colors';
 import { Fonts } from '../../../theme/fonts';
 import type { StepPayload } from '../types';
@@ -68,19 +69,16 @@ function formatTime(sec: number): string {
   return m > 0 ? `${m}:${s.toString().padStart(2, '0')}` : `${s}s`;
 }
 
-const HEART_PHASES = [
-  'Rest your hand on your heart.',
-  'Feel the warmth.',
-  'Breathe slowly.',
-];
+// Heart phase strings are now sourced from i18n translations (room.phases.timer.heartPhase0/1/2)
 
 // ─── BreathingOrb ─────────────────────────────────────────────────────────────
 
 const BreathingOrb: React.FC<{ running: boolean; inhaleMs: number; holdMs: number; exhaleMs: number }> = ({
   running, inhaleMs, holdMs, exhaleMs,
 }) => {
+  const { t } = useTranslation();
   const scale = useRef(new Animated.Value(1)).current;
-  const [phase, setPhase] = useState('Inhale');
+  const [phase, setPhase] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
   const animRef = useRef<Animated.CompositeAnimation | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -93,7 +91,7 @@ const BreathingOrb: React.FC<{ running: boolean; inhaleMs: number; holdMs: numbe
     clear();
     if (!running) {
       Animated.spring(scale, { toValue: 1, useNativeDriver: true }).start();
-      setPhase('Inhale');
+      setPhase('inhale');
       return;
     }
     // Hold phase: animate from 1.28 → 1.28 (no movement) for holdMs.
@@ -114,16 +112,16 @@ const BreathingOrb: React.FC<{ running: boolean; inhaleMs: number; holdMs: numbe
     loop.start();
 
     const tick = () => {
-      setPhase('Inhale');
+      setPhase('inhale');
       timerRef.current = setTimeout(() => {
         if (holdMs > 0) {
-          setPhase('Hold');
+          setPhase('hold');
           timerRef.current = setTimeout(() => {
-            setPhase('Exhale');
+            setPhase('exhale');
             timerRef.current = setTimeout(tick, exhaleMs);
           }, holdMs);
         } else {
-          setPhase('Exhale');
+          setPhase('exhale');
           timerRef.current = setTimeout(tick, exhaleMs);
         }
       }, inhaleMs);
@@ -142,11 +140,11 @@ const BreathingOrb: React.FC<{ running: boolean; inhaleMs: number; holdMs: numbe
       <Animated.View style={[styles.orb, { transform: [{ scale }] }]}>
         {Platform.OS === 'ios' ? (
           <BlurView intensity={40} style={styles.orbInner}>
-            <Text style={styles.orbPhase}>{phase}</Text>
+            <Text style={styles.orbPhase}>{t(`room.phases.timer.${phase}`)}</Text>
           </BlurView>
         ) : (
           <View style={[styles.orbInner, styles.orbInnerAndroid]}>
-            <Text style={styles.orbPhase}>{phase}</Text>
+            <Text style={styles.orbPhase}>{t(`room.phases.timer.${phase}`)}</Text>
           </View>
         )}
       </Animated.View>
@@ -160,6 +158,8 @@ const WALK_END_FRAME = 68;
 const WALK_COLOR = '#4A3B2F';
 
 const TimerPhase: React.FC<Props> = ({ kind, stepPayload, companionLine, onComplete, onEscape }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === 'hi';
   const totalSec = computeTotalSec(kind, stepPayload);
   const { inhaleMs, holdMs, exhaleMs } = getBreathTimings(stepPayload);
 
@@ -243,7 +243,7 @@ const TimerPhase: React.FC<Props> = ({ kind, stepPayload, companionLine, onCompl
       {kind === 'timer_heart' && (
         <View style={styles.heartContainer}>
           <Text style={styles.heartEmoji}>🫀</Text>
-          <Text style={styles.heartPhase}>{HEART_PHASES[heartPhaseIndex]}</Text>
+          <Text style={[styles.heartPhase, isHindi && { letterSpacing: 0 }]}>{t(`room.phases.timer.heartPhase${heartPhaseIndex}`)}</Text>
         </View>
       )}
 
@@ -265,7 +265,7 @@ const TimerPhase: React.FC<Props> = ({ kind, stepPayload, companionLine, onCompl
 
       {/* Quiet escape */}
       <TouchableOpacity onPress={handleEscape} style={styles.escapeBtn} hitSlop={{ top: 8, bottom: 8 }}>
-        <Text style={styles.escapeText}>I'll go now</Text>
+        <Text style={[styles.escapeText, isHindi && { letterSpacing: 0 }]}>{t('room.phases.common.illGoNow')}</Text>
       </TouchableOpacity>
     </View>
   );

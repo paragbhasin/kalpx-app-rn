@@ -24,6 +24,7 @@ import {
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
+import { useTranslation } from "react-i18next";
 import api from "../../Networks/axios";
 import { Colors } from "../../theme/colors";
 
@@ -36,6 +37,15 @@ const ROOM_LABELS: Record<string, string> = {
   room_clarity:    "Clarity",
   room_growth:     "Growth",
   room_stillness:  "Stillness",
+};
+
+const ROOM_LABELS_HI: Record<string, string> = {
+  room_joy:        "आनंद",
+  room_connection: "जुड़ाव",
+  room_release:    "त्याग",
+  room_clarity:    "स्पष्टता",
+  room_growth:     "विकास",
+  room_stillness:  "शांति",
 };
 
 const ROOM_BADGE_COLOR: Record<string, string> = {
@@ -58,6 +68,17 @@ const EVENT_LABELS: Record<string, string> = {
   stillness_named:      "What became still",
 };
 
+const EVENT_LABELS_HI: Record<string, string> = {
+  joy_named:            "जो अच्छा लगा",
+  joy_carry:            "आनंद थामा",
+  connection_named:     "जुड़ाव नाम लिया",
+  connection_reach_out: "संदेश तैयार किया",
+  growth_journal:       "विकास नोट",
+  clarity_journal:      "ईमानदार प्रश्न",
+  release_named:        "रख दिया",
+  stillness_named:      "जो शांत हुआ",
+};
+
 const CONTEXT_LABELS: Record<string, string> = {
   work_career:       "Work",
   relationships:     "Relationships",
@@ -66,6 +87,16 @@ const CONTEXT_LABELS: Record<string, string> = {
   money_security:    "Money & security",
   purpose_direction: "Purpose",
   daily_life:        "Daily life",
+};
+
+const CONTEXT_LABELS_HI: Record<string, string> = {
+  work_career:       "काम",
+  relationships:     "रिश्ते",
+  self:              "स्वयं",
+  health_energy:     "स्वास्थ्य और ऊर्जा",
+  money_security:    "पैसे और सुरक्षा",
+  purpose_direction: "उद्देश्य",
+  daily_life:        "रोज़मर्रा",
 };
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -114,19 +145,23 @@ const MemoryCard: React.FC<{
   entry: MemoryEntry;
   onDelete: (memory_id: string) => void;
 }> = ({ entry, onDelete }) => {
+  const { i18n } = useTranslation();
+  const isHi = i18n.language === 'hi';
   const badgeColor = ROOM_BADGE_COLOR[entry.room_id] ?? Colors.gold;
-  const eventLabel = EVENT_LABELS[entry.event_type] ?? entry.event_type;
-  const contextLabel = entry.life_context ? CONTEXT_LABELS[entry.life_context] ?? entry.life_context : null;
+  const evLabels = isHi ? EVENT_LABELS_HI : EVENT_LABELS;
+  const ctxLabels = isHi ? CONTEXT_LABELS_HI : CONTEXT_LABELS;
+  const eventLabel = evLabels[entry.event_type] ?? entry.event_type;
+  const contextLabel = entry.life_context ? ctxLabels[entry.life_context] ?? entry.life_context : null;
   const dateStr = formatDate(entry.captured_at);
 
   const handleDelete = () => {
     Alert.alert(
-      "Remove this reflection?",
-      "It will be removed from your saved reflections.",
+      isHi ? "यह विचार हटाएं?" : "Remove this reflection?",
+      isHi ? "यह आपके सहेजे विचारों से हट जाएगा।" : "It will be removed from your saved reflections.",
       [
-        { text: "Cancel", style: "cancel" },
+        { text: isHi ? "रद्द करें" : "Cancel", style: "cancel" },
         {
-          text: "Remove",
+          text: isHi ? "हटाएं" : "Remove",
           style: "destructive",
           onPress: () => onDelete(entry.memory_id),
         },
@@ -171,20 +206,27 @@ const RoomSection: React.FC<{
   room_id: string;
   items: MemoryEntry[];
   onDelete: (memory_id: string) => void;
-}> = ({ room_id, items, onDelete }) => (
+}> = ({ room_id, items, onDelete }) => {
+  const { i18n } = useTranslation();
+  const isHi = i18n.language === 'hi';
+  const roomLabels = isHi ? ROOM_LABELS_HI : ROOM_LABELS;
+  return (
   <View style={styles.section}>
     <Text style={styles.sectionHeader}>
-      {ROOM_LABELS[room_id] ?? room_id.replace("room_", "")}
+      {roomLabels[room_id] ?? room_id.replace("room_", "")}
     </Text>
     {items.map((entry) => (
       <MemoryCard key={entry.memory_id} entry={entry} onDelete={onDelete} />
     ))}
   </View>
-);
+  );
+};
 
 // ── Main screen ────────────────────────────────────────────────────────────
 
 const RoomMemoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+  const { i18n } = useTranslation();
+  const isHi = i18n.language === 'hi';
   const [memories, setMemories] = useState<MemoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -196,7 +238,7 @@ const RoomMemoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       const res = await api.get("mitra/rooms/memory/");
       setMemories(res?.data?.memories ?? []);
     } catch (err: any) {
-      setError("Couldn't load your reflections. Please try again.");
+      setError(isHi ? "आपके विचार लोड नहीं हो सके। कृपया पुनः प्रयास करें।" : "Couldn't load your reflections. Please try again.");
       if (__DEV__) {
         console.warn("[RoomMemoryScreen] fetch failed:", err?.response?.status || err?.message);
       }
@@ -238,7 +280,7 @@ const RoomMemoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerRight} />
-        <Text style={styles.headerTitle}>Saved reflections</Text>
+        <Text style={styles.headerTitle}>{isHi ? "सहेजे विचार" : "Saved reflections"}</Text>
         <View style={styles.headerRight} />
       </View>
 
@@ -250,15 +292,16 @@ const RoomMemoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <View style={styles.center}>
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity style={styles.retryBtn} onPress={fetchMemories}>
-            <Text style={styles.retryLabel}>Try again</Text>
+            <Text style={styles.retryLabel}>{isHi ? "पुनः प्रयास करें" : "Try again"}</Text>
           </TouchableOpacity>
         </View>
       ) : memories.length === 0 ? (
         <View style={styles.center}>
-          <Text style={styles.emptyTitle}>Nothing saved yet.</Text>
+          <Text style={styles.emptyTitle}>{isHi ? "अभी कुछ सहेजा नहीं।" : "Nothing saved yet."}</Text>
           <Text style={styles.emptySubtitle}>
-            When you name something, write it down, or set it down in a room,{"\n"}
-            it will appear here.
+            {isHi
+              ? "जब आप किसी चीज़ को नाम दें, लिखें, या किसी कमरे में रखें —\nवह यहाँ दिखेगा।"
+              : `When you name something, write it down, or set it down in a room,\nit will appear here.`}
           </Text>
         </View>
       ) : (

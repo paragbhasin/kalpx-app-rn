@@ -1,4 +1,5 @@
 import { api } from '../lib/api';
+import { getActiveLocale } from '../lib/locale';
 import type { MitraHomeV3Response, TellMitraV3Response, QuickCheckinEnergyState, QuickCheckinResponse, RhythmSuggestRequest, RhythmSuggestResponse, TellMitraFollowupMeta, QuickResetOpeningState, QuickChantCompleteRequest, QuickChantCompleteResponse, QuickResetSetDefaultResponse, RhythmCompleteResponse, RhythmResolvedItem, RhythmItemMutationResponse, RhythmSettingsResponse, RhythmTimeBand, RhythmItemType, RhythmItemSource, RhythmReminderPreference, JourneyTriadReminders, JourneyTriadRemindersPatch } from '@kalpx/types';
 import { normalizeTellMitraResult, normalizeRhythmSuggestResponse } from '@kalpx/contracts';
 import type { RhythmSetupPayload } from '@kalpx/contracts';
@@ -203,7 +204,13 @@ export async function getJourneyHome(params: {
 // ─── Telemetry — camelCase to match mobile wire format ────────────────────────
 
 function getTz(): string {
-  try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return 'UTC'; }
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (!tz) return 'UTC';
+    return tz === 'Asia/Calcutta' ? 'Asia/Kolkata' : tz;
+  } catch {
+    return 'UTC';
+  }
 }
 
 /**
@@ -217,7 +224,7 @@ export async function trackEvent(eventName: string, properties?: Record<string, 
       eventName,
       journeyId: p.journeyId ?? p.journey_id ?? null,
       dayNumber: p.dayNumber ?? p.day_number ?? 1,
-      locale: 'en',
+      locale: getActiveLocale(),
       tz: getTz(),
       meta: p.meta ?? {},
     });
@@ -255,6 +262,7 @@ export async function fetchOnboardingChips(params: {
   guidance_mode: string;
   stage1_choice?: string;
   stage2_choice?: string;
+  locale?: string;
 }): Promise<any> {
   try {
     const res = await api.get('mitra/onboarding/chips/', { params });
@@ -278,6 +286,7 @@ export async function onboardingComplete(payload: {
   guidance_mode: string;
   life_context?: string | null;
   freeforms?: Record<string, string | null>;
+  locale?: string;
 }): Promise<any> {
   try {
     const res = await api.post('mitra/onboarding/complete/', payload);
@@ -772,7 +781,7 @@ export async function acceptPredictiveAlert(id: string | number): Promise<any> {
  * GET /api/mitra/v3/journey/home/ — Four-Door home envelope (S03).
  * Returns MitraHomeV3Response with door_states, inner_path_summary, etc.
  */
-export async function getMitraHomeV3(opts?: { forceFresh?: boolean }): Promise<MitraHomeV3Response> {
+export async function getMitraHomeV3(opts?: { forceFresh?: boolean; locale?: string }): Promise<MitraHomeV3Response> {
   if (!opts?.forceFresh) {
     if (_mitraHomeCache && Date.now() - _mitraHomeCache.ts < MITRA_HOME_TTL_MS) {
       return _mitraHomeCache.data;
@@ -783,6 +792,7 @@ export async function getMitraHomeV3(opts?: { forceFresh?: boolean }): Promise<M
   }
 
   const params: Record<string, string | number> = { tz: getTz() };
+  if (opts?.locale) params['locale'] = opts.locale;
   if (opts?.forceFresh) params['_t'] = Date.now();
   const request = (async () => {
     try {
@@ -821,6 +831,7 @@ export async function postTellMitraV3(payload: TellMitraV3Payload): Promise<Tell
 
 export async function postRhythmSetup(payload: RhythmSetupPayload): Promise<{ status: string; reminder_preference: string; slots_set: string[]; item_count: number }> {
   const resp = await api.post<{ status: string; reminder_preference: string; slots_set: string[]; item_count: number }>('mitra/v3/rhythm/setup/', payload);
+  invalidateMitraHomeV3Cache();
   return resp.data;
 }
 

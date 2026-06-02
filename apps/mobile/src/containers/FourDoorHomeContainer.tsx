@@ -1,16 +1,8 @@
 import {
-  DOOR_LABELS,
-  QUICK_CHANT_HAS_MANTRA_SUBTITLE,
-  QUICK_CHANT_HISTORY_ONLY_SUBTITLE,
-  QUICK_CHANT_NO_STATE_SUBTITLE,
-  SEGMENT_GREETING_SUBTEXT,
-  SEGMENT_INNER_PATH_NO_STATE_SUBTITLE,
-  SEGMENT_RHYTHM_NO_STATE_SUBTITLE,
-  TELL_MITRA_ACTIVE_PATH_SUBTITLE,
-  TELL_MITRA_DEFAULT_SUBTITLE,
-  TELL_MITRA_HAS_HISTORY_SUBTITLE,
   type MitraHomeSegment,
 } from "@kalpx/contracts";
+import { useTranslation } from "react-i18next";
+import i18n from "../config/i18n";
 import type { JourneyTriadRemindersPatch, QuickCheckinPranaLabel } from "@kalpx/types";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, {
@@ -84,11 +76,11 @@ function getGreetingVisualState(headline?: string | null) {
   };
 }
 
-function getFallbackGreetingHeadline(userName?: string) {
+function getFallbackGreetingHeadline(userName: string | undefined, t: (key: string, opts?: any) => string) {
   const hour = new Date().getHours();
-  const dayPart = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
-  const name = userName?.trim() || "friend";
-  return `Good ${dayPart}, ${name}`;
+  const timeKey = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
+  const name = userName?.trim() || t("mitraFourDoor.greeting.friend");
+  return t(`mitraFourDoor.greeting.${timeKey}`, { name });
 }
 
 function mapFeelingToPranaType(feeling: FeelingOption) {
@@ -143,6 +135,7 @@ export default function FourDoorHomeContainer({
   userName?: string;
   forceInnerPathReentry?: boolean;
 }) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
@@ -203,17 +196,17 @@ export default function FourDoorHomeContainer({
       if (!silent) setLoading(true);
       if (!silent) setError(null);
       try {
-        const data = await mitraJourneyHomeV3({ forceFresh });
+        const data = await mitraJourneyHomeV3({ forceFresh, locale: i18n.language || "en" });
         dispatch(setHomeData(data));
       } catch {
         if (!silent || !homeDataRef.current) {
-          setError("Unable to load. Please try again.");
+          setError(t("mitraFourDoor.error.loadFailed"));
         }
       } finally {
         if (!silent) setLoading(false);
       }
     },
-    [dispatch],
+    [dispatch, t],
   );
 
   useEffect(() => {
@@ -285,15 +278,21 @@ export default function FourDoorHomeContainer({
     await loadHome(true, true);
   }, [loadHome]);
 
-  const openQuickResetSurface = useCallback(() => {
+  const openQuickResetSurface = useCallback(async () => {
+    const token = await AsyncStorage.getItem("access_token");
+    if (!token) { navigation.navigate("Login" as any); return; }
     navigation.navigate("QuickReset" as any);
   }, [navigation]);
 
-  const openTellMitraSurface = useCallback(() => {
+  const openTellMitraSurface = useCallback(async () => {
+    const token = await AsyncStorage.getItem("access_token");
+    if (!token) { navigation.navigate("Login" as any); return; }
     navigation.navigate("TellMitra" as any);
   }, [navigation]);
 
   const openMyRhythmSurface = useCallback(async () => {
+    const token = await AsyncStorage.getItem("access_token");
+    if (!token) { navigation.navigate("Login" as any); return; }
     const hasRhythmInState =
       homeData?.companion_rhythm?.has_rhythm === true ||
       homeData?.my_rhythm_summary?.has_rhythm === true ||
@@ -306,7 +305,7 @@ export default function FourDoorHomeContainer({
     }
 
     try {
-      const fresh = await mitraJourneyHomeV3({ forceFresh: true });
+      const fresh = await mitraJourneyHomeV3({ forceFresh: true, locale: i18n.language || "en" });
       dispatch(setHomeData(fresh));
       const hasRhythmFresh =
         fresh?.companion_rhythm?.has_rhythm === true ||
@@ -325,9 +324,9 @@ export default function FourDoorHomeContainer({
     "new") as MitraHomeSegment;
   const greetingHeadline =
     homeData?.greeting?.headline?.trim() ||
-    getFallbackGreetingHeadline(userName);
+    getFallbackGreetingHeadline(userName, t);
   const greetingSubtext =
-    homeData?.greeting?.subtext?.trim() || SEGMENT_GREETING_SUBTEXT[seg] || "";
+    homeData?.greeting?.subtext?.trim() || t(`mitraFourDoor.greetingSegment.${seg}`) || "";
   const greetingVisual = getGreetingVisualState(greetingHeadline);
   const hasGreetingCopy = !!(greetingHeadline || greetingSubtext);
 
@@ -337,8 +336,8 @@ export default function FourDoorHomeContainer({
       "new") as MitraHomeSegment;
     if (!cr?.has_rhythm) {
       return (
-        SEGMENT_RHYTHM_NO_STATE_SUBTITLE[segVal] ||
-        "Build a gentle daily rhythm"
+        t(`mitraFourDoor.rhythmSegment.${segVal}`) ||
+        t("mitraFourDoor.rhythm.noStateFallback")
       );
     }
     const hasMorning = (cr.morning?.items?.length ?? 0) > 0;
@@ -352,25 +351,25 @@ export default function FourDoorHomeContainer({
       (!hasAfternoon || afternoonDone) &&
       (!hasNight || nightDone);
     if (allDone && (hasMorning || hasAfternoon || hasNight)) {
-      return "Your rhythm has been held today";
+      return t("mitraFourDoor.rhythm.allDone");
     }
-    if (hasMorning && !morningDone) return "Begin with your morning rhythm";
+    if (hasMorning && !morningDone) return t("mitraFourDoor.rhythm.beginMorning");
     if (hasAfternoon && !afternoonDone) {
       return hasMorning && morningDone
-        ? "Morning held · return at midday"
-        : "Return with your afternoon rhythm";
+        ? t("mitraFourDoor.rhythm.morningHeldAfternoon")
+        : t("mitraFourDoor.rhythm.returnAfternoon");
     }
     if (hasNight && !nightDone) {
       return hasAfternoon
-        ? "Afternoon held · close gently tonight"
-        : "Close the day with your night rhythm";
+        ? t("mitraFourDoor.rhythm.afternoonHeldNight")
+        : t("mitraFourDoor.rhythm.closeNight");
     }
     return (
       homeData?.my_rhythm_summary?.next_practice_label ??
       doorStates?.my_rhythm?.subtitle ??
       ""
     );
-  }, [doorStates, homeData]);
+  }, [doorStates, homeData, t]);
 
   const innerPathSubtitle = useMemo(() => {
     const ips = homeData?.inner_path_summary;
@@ -380,15 +379,15 @@ export default function FourDoorHomeContainer({
       return (
         ips?.path_title ??
         doorStates?.inner_path?.subtitle ??
-        SEGMENT_INNER_PATH_NO_STATE_SUBTITLE[segVal]
+        t(`mitraFourDoor.innerPathSegment.${segVal}`)
       );
     }
-    const dayLine = `Day ${ips.day_number} of ${ips.total_days}`;
+    const dayCount = { day: ips.day_number, total: ips.total_days };
     const heldCount = ips.today_held_count ?? 0;
-    if (ips.today_practice_held || heldCount >= 3) return `${dayLine} · today's practice is held`;
-    if (heldCount > 0) return `${dayLine} · today's step has begun`;
-    return dayLine;
-  }, [doorStates, homeData]);
+    if (ips.today_practice_held || heldCount >= 3) return t("mitraFourDoor.innerPath.practiceHeld", dayCount);
+    if (heldCount > 0) return t("mitraFourDoor.innerPath.stepBegun", dayCount);
+    return t("mitraFourDoor.innerPath.dayCount", dayCount);
+  }, [doorStates, homeData, t]);
   const hasMantra =
     homeData?.user_surface_state?.has_quick_chant_mantra === true;
   const hasQuickChantHistory =
@@ -399,17 +398,17 @@ export default function FourDoorHomeContainer({
 
   // Quick Chant subtitle — 3-way conditional (CRITICAL: only show "chosen mantra" if has_quick_chant_mantra)
   const quickResetSubtitle = hasMantra
-    ? QUICK_CHANT_HAS_MANTRA_SUBTITLE
+    ? t("mitraFourDoor.quickChant.hasMantra")
     : hasQuickChantHistory
-      ? QUICK_CHANT_HISTORY_ONLY_SUBTITLE
-      : QUICK_CHANT_NO_STATE_SUBTITLE;
+      ? t("mitraFourDoor.quickChant.historyOnly")
+      : t("mitraFourDoor.quickChant.noState");
 
   // Tell Mitra subtitle — conditional on state
   const tellMitraSubtitle = hasTMHistory
-    ? TELL_MITRA_HAS_HISTORY_SUBTITLE
+    ? t("mitraFourDoor.tellMitra.hasHistory")
     : hasIP || seg === "rhythm_and_path"
-      ? TELL_MITRA_ACTIVE_PATH_SUBTITLE
-      : TELL_MITRA_DEFAULT_SUBTITLE;
+      ? t("mitraFourDoor.tellMitra.activePath")
+      : t("mitraFourDoor.tellMitra.default");
 
   if (loading && !homeData) {
     return (
@@ -465,13 +464,13 @@ export default function FourDoorHomeContainer({
   if (!homeData) {
     return (
       <View style={styles.centeredWrap}>
-        <Text style={styles.errorText}>{error || "Unable to load."}</Text>
+        <Text style={styles.errorText}>{error || t("mitraFourDoor.error.unableToLoad")}</Text>
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => void loadHome()}
           style={styles.retryButton}
         >
-          <Text style={styles.retryButtonText}>Try again</Text>
+          <Text style={styles.retryButtonText}>{t("mitraFourDoor.error.tryAgain")}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -482,7 +481,9 @@ export default function FourDoorHomeContainer({
   const currentRouteName = navigation
     .getState?.()
     ?.routes?.slice(-1)?.[0]?.name;
-  const openInnerPathSurface = () => {
+  const openInnerPathSurface = async () => {
+    const token = await AsyncStorage.getItem("access_token");
+    if (!token) { navigation.navigate("Login" as any); return; }
     const hasExistingInnerPath =
       forceInnerPathReentry ||
       homeData?.inner_path_summary?.has_active_path === true ||
@@ -578,31 +579,31 @@ export default function FourDoorHomeContainer({
 
           <DoorCard
             Icon={M3Icon}
-            label={DOOR_LABELS.my_rhythm}
+            label={t("mitraFourDoor.door.myRhythm")}
             subtitle={rhythmSubtitle}
-            orientationLine={seg === "new" && isFirstVisit ? "Shape the day with a simple rhythm." : null}
+            orientationLine={seg === "new" && isFirstVisit ? t("mitraFourDoor.orientation.myRhythm") : null}
             onPress={() => void openMyRhythmSurface()}
           />
           <DoorCard
             Icon={Mp3Icon}
-            label={DOOR_LABELS.inner_path}
+            label={t("mitraFourDoor.door.innerPath")}
             subtitle={innerPathSubtitle}
-            orientationLine={seg === "new" && isFirstVisit ? "Walk a 14-day path with Mitra beside you." : null}
+            orientationLine={seg === "new" && isFirstVisit ? t("mitraFourDoor.orientation.innerPath") : null}
             highlighted={seg === "rhythm_only"}
-            onPress={openInnerPathSurface}
+            onPress={() => void openInnerPathSurface()}
           />
           <DoorCard
             Icon={Mp2Icon}
-            label={DOOR_LABELS.quick_reset}
+            label={t("mitraFourDoor.door.quickChant")}
             subtitle={quickResetSubtitle}
-            orientationLine={seg === "new" && isFirstVisit ? "Return through mantra, in a single moment." : null}
+            orientationLine={seg === "new" && isFirstVisit ? t("mitraFourDoor.orientation.quickChant") : null}
             onPress={() => void openQuickResetSurface()}
           />
           <DoorCard
             Icon={Mp4Icon}
-            label={DOOR_LABELS.tell_mitra}
+            label={t("mitraFourDoor.door.tellMitra")}
             subtitle={tellMitraSubtitle}
-            orientationLine={seg === "new" && isFirstVisit ? "Share what is moving. Mitra will listen." : null}
+            orientationLine={seg === "new" && isFirstVisit ? t("mitraFourDoor.orientation.tellMitra") : null}
             onPress={() => void openTellMitraSurface()}
           />
 
@@ -612,7 +613,7 @@ export default function FourDoorHomeContainer({
                 <View style={styles.checkinHeaderRow}>
                   <Text style={styles.checkinTitle}>
                     {(acw?.prana_label as QuickCheckinPranaLabel) ||
-                      "How are you landing?"}
+                      t("mitraFourDoor.checkin.heading")}
                   </Text>
                   {acw?.dismissible && (
                     <TouchableOpacity
@@ -640,7 +641,7 @@ export default function FourDoorHomeContainer({
                       setPendingPranaMessage(null);
                     }}
                   >
-                    <Text style={styles.suggestionButtonText}>Tell Mitra →</Text>
+                    <Text style={styles.suggestionButtonText}>{t("mitraFourDoor.checkin.tellMitraCta")}</Text>
                   </TouchableOpacity>
                 )}
 
@@ -665,32 +666,32 @@ export default function FourDoorHomeContainer({
 
                 {acw?.companion_boundary && (
                   <Text style={styles.boundaryText}>
-                    If this feels heavy to carry,{" "}
+                    {t("mitraFourDoor.checkin.boundaryBefore")}{" "}
                     <Text
                       style={styles.boundaryLink}
                       onPress={() => void openTellMitraSurface()}
                     >
-                      Tell Mitra
+                      {t("mitraFourDoor.checkin.boundaryLink")}
                     </Text>{" "}
-                    is here.
+                    {t("mitraFourDoor.checkin.boundaryAfter")}
                   </Text>
                 )}
                 {!acw?.suggestion && !!acw?.prana_label && (
                   <View style={{ flexDirection: "row", gap: 12, marginTop: 12, flexWrap: "wrap" }}>
-                    <TouchableOpacity onPress={openInnerPathSurface}>
-                      <Text style={styles.softCtaLink}>Continue Inner Path</Text>
+                    <TouchableOpacity onPress={() => void openInnerPathSurface()}>
+                                 <Text style={styles.softCtaLink}>{t("mitraFourDoor.checkin.ctaInnerPath")}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => void openMyRhythmSurface()}>
-                      <Text style={styles.softCtaLink}>My Rhythm</Text>
+                      <Text style={styles.softCtaLink}>{t("mitraFourDoor.checkin.ctaMyRhythm")}</Text>
                     </TouchableOpacity>
                   </View>
                 )}
               </>
             ) : (
               <>
-                <Text style={styles.checkinTitle}>How are you landing?</Text>
+                <Text style={styles.checkinTitle}>{t("mitraFourDoor.checkin.heading")}</Text>
                 <Text style={styles.checkinSubtitle}>
-                  One tap. Mitra meets you where you are.
+                  {t("mitraFourDoor.checkin.subtext")}
                 </Text>
                 <View style={styles.feelingGrid}>
                   {FEELING_OPTIONS.map((feeling) => {
@@ -715,7 +716,7 @@ export default function FourDoorHomeContainer({
                               isSelected && styles.feelingChipTextSelected,
                             ]}
                           >
-                            {feeling}
+                            {t(`mitraFourDoor.feeling.${feeling.toLowerCase()}`)}
                           </Text>
                           {isSubmittingSelection ? (
                             <ActivityIndicator
@@ -744,17 +745,16 @@ export default function FourDoorHomeContainer({
       >
         <View style={styles.reminderOverlay}>
           <View style={styles.reminderSheet}>
-            <Text style={styles.reminderTitle}>Want gentle reminders?</Text>
+            <Text style={styles.reminderTitle}>{t("mitraFourDoor.reminders.title")}</Text>
             <Text style={styles.reminderSubtitle}>
-              Mitra will gently remind you at the times you choose.
+              {t("mitraFourDoor.reminders.subtitle")}
             </Text>
 
             {(["mantra", "sankalp", "practice"] as const).map((key) => {
-              const label = key.charAt(0).toUpperCase() + key.slice(1);
               const enabled = reminderToggles[key];
               return (
                 <View key={key} style={[styles.reminderRow, enabled && styles.reminderRowEnabled]}>
-                  <Text style={styles.reminderRowLabel}>Remind me for {label.toLowerCase()}</Text>
+                  <Text style={styles.reminderRowLabel}>{t("mitraFourDoor.reminders.rowLabel", { label: t(`mitraFourDoor.reminders.${key}`) })}</Text>
                   <View style={styles.reminderRowRight}>
                     {enabled && (
                       <TouchableOpacity
@@ -800,7 +800,7 @@ export default function FourDoorHomeContainer({
               {reminderSaving ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.reminderPrimaryBtnText}>Set reminders</Text>
+                <Text style={styles.reminderPrimaryBtnText}>{t("mitraFourDoor.reminders.saveBtn")}</Text>
               )}
             </TouchableOpacity>
 
@@ -810,7 +810,7 @@ export default function FourDoorHomeContainer({
               style={styles.reminderSkipBtn}
               activeOpacity={0.7}
             >
-              <Text style={styles.reminderSkipText}>Skip for now</Text>
+              <Text style={styles.reminderSkipText}>{t("mitraFourDoor.reminders.skipBtn")}</Text>
             </TouchableOpacity>
           </View>
         </View>

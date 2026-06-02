@@ -17,11 +17,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Colors } from '../../../theme/colors';
 import { Fonts } from '../../../theme/fonts';
 import type { StepPayload } from '../types';
-
-const GROUNDING_INSTRUCTION = 'Rest your palms. Feel what is here.';
 
 interface Props {
   stepPayload: StepPayload | null | undefined;
@@ -31,6 +30,8 @@ interface Props {
 }
 
 const GroundingPhase: React.FC<Props> = ({ stepPayload, companionLine, onComplete, onEscape }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === 'hi';
   const sc = stepPayload?.step_config;
   const totalSec =
     typeof sc?.['duration_sec'] === 'number' && sc['duration_sec'] > 0
@@ -86,25 +87,25 @@ const GroundingPhase: React.FC<Props> = ({ stepPayload, companionLine, onComplet
           <Text style={styles.companion}>{companionLine}</Text>
         ) : null}
 
-        <Text style={styles.instruction}>{GROUNDING_INSTRUCTION}</Text>
+        <Text style={[styles.instruction, isHindi && { letterSpacing: 0 }]}>{t('room.phases.grounding.instruction')}</Text>
 
         <TextInput
           style={styles.input}
           value={text}
           onChangeText={setText}
-          placeholder="Notice quietly, or write a few words…"
+          placeholder={t('room.phases.grounding.inputPlaceholder')}
           placeholderTextColor="#B8A898"
           multiline
           numberOfLines={3}
           returnKeyType="default"
           onSubmitEditing={Keyboard.dismiss}
         />
-        <Text style={styles.hint}>Writing is optional.</Text>
+        <Text style={[styles.hint, isHindi && { letterSpacing: 0 }]}>{t('room.phases.grounding.writingOptional')}</Text>
 
         <Text style={styles.timer}>{remaining}s</Text>
 
         <TouchableOpacity onPress={handleEscape} style={styles.escapeBtn} hitSlop={{ top: 8, bottom: 8 }}>
-          <Text style={styles.escapeText}>I'll go now</Text>
+          <Text style={[styles.escapeText, isHindi && { letterSpacing: 0 }]}>{t('room.phases.common.illGoNow')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>

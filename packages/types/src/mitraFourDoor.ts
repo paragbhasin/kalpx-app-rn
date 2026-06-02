@@ -372,6 +372,7 @@ export interface RhythmSuggestRequest {
   tz?: string;
   locale?: string;
   source_surface?: string;
+  pinned_items?: { slot: RhythmTimeBand; item_id: string; item_type: string }[];
 }
 
 export interface RhythmSuggestItem {

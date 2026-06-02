@@ -15,6 +15,7 @@
 
 import React from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import RoomActionList from "./RoomActionList";
@@ -23,7 +24,7 @@ import RoomPrincipleBanner from "./RoomPrincipleBanner";
 import RoomGuidedSection from "./RoomGuidedSection";
 import RoomJourneyRenderer from "./RoomJourneyRenderer";
 import { isJourneyEnabled } from "./roomJourneyConfig";
-import { ROOM_LABELS } from "@kalpx/contracts";
+import { ROOM_LABELS, ROOM_LABELS_HI } from "@kalpx/contracts";
 import { LIFE_CONTEXT_LABELS } from "./roomConstants";
 import type { RoomRendererProps } from "./types";
 
@@ -37,14 +38,16 @@ const RoomRenderer: React.FC<RoomRendererProps> = ({
   envelope,
   _forceFlagOn,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const flagOn = _forceFlagOn === true || isFlagOn();
 
   // HARD GATE: flag off → render nothing. No side effects, no subtree.
   if (!flagOn) return null;
 
-  const roomDisplayName = ROOM_LABELS[envelope.room_id as keyof typeof ROOM_LABELS];
-  const lifeContextLabel = envelope.life_context
-    ? LIFE_CONTEXT_LABELS[envelope.life_context]
+  const roomDisplayName = (isHindi ? ROOM_LABELS_HI : ROOM_LABELS)[envelope.room_id as keyof typeof ROOM_LABELS];
+  const lifeContextLabel = envelope.life_context && LIFE_CONTEXT_LABELS[envelope.life_context]
+    ? t(LIFE_CONTEXT_LABELS[envelope.life_context])
     : null;
   const ctx = envelope.room_context;
   const isGuided = !!(ctx?.entry_context?.recommended_first_action_id);
@@ -72,8 +75,8 @@ const RoomRenderer: React.FC<RoomRendererProps> = ({
           <Text style={styles.roomPurpose}>{ctx.room_purpose_line}</Text>
         ) : null}
         {lifeContextLabel ? (
-          <Text style={styles.lifeContext}>
-            {"You chose: " + lifeContextLabel}
+          <Text style={[styles.lifeContext, isHindi && { letterSpacing: 0 }]}>
+            {t("room.youChose", { label: lifeContextLabel })}
           </Text>
         ) : null}
         {ctx?.situation_acknowledgement_line ? (

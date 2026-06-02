@@ -30,8 +30,10 @@ import {
   ScrollView,
   StyleSheet,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import BlockRenderer from "../engine/BlockRenderer";
 import { useScreenStore } from "../engine/useScreenBridge";
+import { mitraFetchOnboardingChips } from "../engine/mitraApi";
 
 interface Props {
   schema: { blocks: any[]; tone?: any; state_id?: string };
@@ -62,6 +64,7 @@ function getUsableDynamicOnboardingData(data: any) {
 }
 
 const OnboardingContainer: React.FC<Props> = ({ schema }) => {
+  const { i18n } = useTranslation();
   const updateBackground = useScreenStore(
     (state: any) => state.updateBackground,
   );
@@ -69,6 +72,7 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
     (state: any) => state.updateHeaderHidden,
   );
   const screenData = useScreenStore((state: any) => state.screenData);
+  const updateScreenData = useScreenStore((state: any) => state.updateScreenData);
   const currentStateId = useScreenStore((state: any) => state.currentStateId);
   const _rawTurn = screenData.onboarding_turn;
   const turn =
@@ -114,6 +118,34 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
     return () => sub.remove();
   }, [turn]);
 
+  // Re-fetch stage chip labels when locale changes so chips render in the new language.
+  useEffect(() => {
+    const draft = (screenData.onboarding_draft_state as any) || {};
+    const lane: string = draft.path || "support";
+    const locale = i18n.language || "en";
+
+    if (screenData.stage1_data) {
+      mitraFetchOnboardingChips({ stage: 1, lane, guidance_mode: "hybrid", locale })
+        .then(data => { if (data) updateScreenData("stage1_data", data); });
+    }
+    if (screenData.stage2_data) {
+      mitraFetchOnboardingChips({
+        stage: 2, lane, guidance_mode: "hybrid",
+        stage1_choice: draft.stage1_choice || "",
+        locale,
+      }).then(data => { if (data) updateScreenData("stage2_data", data); });
+    }
+    if (screenData.stage3_data) {
+      mitraFetchOnboardingChips({
+        stage: 3, lane, guidance_mode: "hybrid",
+        stage1_choice: draft.stage1_choice || "",
+        stage2_choice: draft.stage2_choice || "",
+        locale,
+      }).then(data => { if (data) updateScreenData("stage3_data", data); });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [i18n.language]);
+
   const blocks = schema?.blocks || [];
   const hasGuidanceModePicker = blocks.some(
     (b: any) => b.type === "guidance_mode_picker",
@@ -142,7 +174,13 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
         const turnId = b.id || "";
         // Support dynamic stage data injection from screenData
         let dynamicData = null;
-        if (turnId === "turn3_felt") {
+        if (
+          turnId === "turn3_life_context" ||
+          turnId === "turn3_life_context_support" ||
+          turnId === "turn3_life_context_growth"
+        ) {
+          dynamicData = screenData.stage1_data;
+        } else if (turnId === "turn3_felt") {
           dynamicData = screenData.stage2_data;
         } else if (turnId === "turn3_clarify") {
           dynamicData = screenData.stage3_data;

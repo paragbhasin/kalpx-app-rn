@@ -237,12 +237,14 @@ export async function mitraRhythmResolveItem(
   slot: string,
   itemId: string,
   itemType: string,
+  locale?: string,
 ): Promise<RhythmResolvedItem | null> {
   try {
     const res = await api.post<RhythmResolvedItem>('mitra/v3/rhythm/resolve-item/', {
       slot,
       item_id: itemId,
       item_type: itemType,
+      ...(locale ? { locale } : {}),
     });
     return res.data;
   } catch (err: any) {
@@ -374,6 +376,7 @@ export async function mitraFetchOnboardingChips(params: {
   guidance_mode: string;
   stage1_choice?: string;
   stage2_choice?: string;
+  locale?: string;
 }): Promise<any> {
   try {
     console.log("[MITRA] Fetch Chips Payload:", params);
@@ -403,6 +406,7 @@ export async function mitraCompleteOnboarding(payload: {
   guidance_mode: string;
   life_context?: string | null;
   freeforms: Record<string, string | null>;
+  locale?: string;
 }): Promise<any> {
   try {
     console.log("[MITRA] Complete Onboarding Payload:", payload);
@@ -1263,11 +1267,13 @@ async function v3Get<E extends V3Envelope>(
 export function mitraJourneyEntryView(
   etag: string | null = null,
   signals?: { crisis?: boolean; grief?: boolean; loneliness?: boolean },
+  locale?: string,
 ): Promise<V3GetResult<V3EntryViewEnvelope>> {
   const params: Record<string, string> = { tz: getTz() };
   if (signals?.crisis) params.crisis = "1";
   if (signals?.grief) params.grief = "1";
   if (signals?.loneliness) params.loneliness = "1";
+  if (locale) params.locale = locale;
   return v3Get<V3EntryViewEnvelope>("mitra/v3/journey/entry-view/", etag, params);
 }
 
@@ -1290,20 +1296,29 @@ export async function mitraJourneyHome(params: {
 
 export function mitraJourneyDailyView(
   etag: string | null = null,
+  locale?: string,
 ): Promise<V3GetResult<V3DailyViewEnvelope>> {
-  return v3Get<V3DailyViewEnvelope>("mitra/v3/journey/daily-view/", etag);
+  const params: Record<string, string> = { tz: getTz() };
+  if (locale) params.locale = locale;
+  return v3Get<V3DailyViewEnvelope>("mitra/v3/journey/daily-view/", etag, params);
 }
 
 export function mitraJourneyDay7View(
   etag: string | null = null,
+  locale?: string,
 ): Promise<V3GetResult<V3Day7ViewEnvelope>> {
-  return v3Get<V3Day7ViewEnvelope>("mitra/v3/journey/day-7-view/", etag);
+  const params: Record<string, string> = {};
+  if (locale) params.locale = locale;
+  return v3Get<V3Day7ViewEnvelope>("mitra/v3/journey/day-7-view/", etag, Object.keys(params).length ? params : undefined);
 }
 
 export function mitraJourneyDay14View(
   etag: string | null = null,
+  locale?: string,
 ): Promise<V3GetResult<V3Day14ViewEnvelope>> {
-  return v3Get<V3Day14ViewEnvelope>("mitra/v3/journey/day-14-view/", etag);
+  const params: Record<string, string> = {};
+  if (locale) params.locale = locale;
+  return v3Get<V3Day14ViewEnvelope>("mitra/v3/journey/day-14-view/", etag, Object.keys(params).length ? params : undefined);
 }
 
 async function v3DecisionPost(
@@ -2131,9 +2146,11 @@ export async function postRoomReflection(
 // ---------------------------------------------------------------------------
 export async function mitraJourneyHomeV3(opts?: {
   forceFresh?: boolean;
+  locale?: string;
 }): Promise<MitraHomeV3Response> {
   try {
     const params: Record<string, string | number> = { tz: getTz() };
+    if (opts?.locale) params.locale = opts.locale;
     if (opts?.forceFresh) params._t = Date.now();
     const resp = await api.get<MitraHomeV3Response>(
       "mitra/v3/journey/home/",

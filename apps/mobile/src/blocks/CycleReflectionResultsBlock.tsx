@@ -13,13 +13,14 @@
  * checkpoint flow-local state (Rule 4) and navigates to the appropriate target.
  */
 import React from "react";
-import {Image, 
+import {Image,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { cleanupFlowState } from "@kalpx/contracts";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { readMomentSlot, useContentSlots } from "../hooks/useContentSlots";
@@ -67,6 +68,8 @@ const ACTION_DESC_SLOT: Record<ActionId, string> = {
 const CycleReflectionResultsBlock: React.FC<
   CycleReflectionResultsBlockProps
 > = ({ block }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const screenData = useScreenStore((s) => s.screenData);
   const ss = screenData as Record<string, any>;
 
@@ -157,8 +160,8 @@ const CycleReflectionResultsBlock: React.FC<
   // Feeling-keyed copy now served from registry via slot().
   const title = slot("result_title");
   const paragraphs = [
-    slot("paragraph_1") || "Even a small shift matters.",
-    slot("paragraph_2") || "Continue this path so the change can root itself.",
+    slot("paragraph_1") || t("cycleReflection.fallbackPara1"),
+    slot("paragraph_2") || t("cycleReflection.fallbackPara2"),
   ];
 
   const onContinueSame = () => {
@@ -209,7 +212,7 @@ const CycleReflectionResultsBlock: React.FC<
   return (
     <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
       <Text style={styles.resultTitle}>
-        {title || "A shift is taking root"}
+        {title || t("cycleReflection.fallbackTitle")}
       </Text>
 
       {/* Smaller decorative lotus */}
@@ -241,11 +244,11 @@ const CycleReflectionResultsBlock: React.FC<
             onPress={onContinueSame}
             activeOpacity={0.92}
           >
-            <Text style={styles.ctaText}>Continue Same</Text>
+            <Text style={[styles.ctaText, isHindi && { letterSpacing: 0 }]}>{t("cycleReflection.continueSame")}</Text>
           </TouchableOpacity>
 
-          <Text style={styles.optionDescription}>
-            Consistency is the base of transformation. Root your rhythm.
+          <Text style={[styles.optionDescription, isHindi && { letterSpacing: 0 }]}>
+            {t("cycleReflection.continueSameDesc")}
           </Text>
 
           <View style={{ height: 20 }} />
@@ -255,11 +258,11 @@ const CycleReflectionResultsBlock: React.FC<
             onPress={onChangeFocus}
             activeOpacity={0.92}
           >
-            <Text style={styles.ctaText}>Change Focus</Text>
+            <Text style={[styles.ctaText, isHindi && { letterSpacing: 0 }]}>{t("cycleReflection.changeFocus")}</Text>
           </TouchableOpacity>
 
-          <Text style={styles.optionDescription}>
-            Shift your intention and start fresh with a new focus.
+          <Text style={[styles.optionDescription, isHindi && { letterSpacing: 0 }]}>
+            {t("cycleReflection.changeFocusDesc")}
           </Text>
         </View>
       </View>

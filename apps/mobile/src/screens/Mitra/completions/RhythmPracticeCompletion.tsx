@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ImageBackground, SafeAreaView, StyleSheet } from "react-native";
 import { useDispatch } from "react-redux";
 import RunnerCompletionView from "../../../components/RunnerCompletionView";
-import { RHYTHM_PRACTICE_COMPLETION_COPY as COPY } from "../../../constants/completionCopy";
+import { useCompletionCopy } from "../../../constants/completionCopy";
 import {
   mitraJourneyHomeV3,
   mitraRhythmComplete,
@@ -19,6 +19,7 @@ export default function RhythmPracticeCompletion() {
   const dispatch = useDispatch();
   const { item_id, item_title, slot, journeyId, dayNumber } = route.params;
   const completedRef = useRef(false);
+  const COPY = useCompletionCopy("rhythm_practice");
   const [badge, setBadge] = useState<string>(COPY.pending);
 
   useEffect(() => {

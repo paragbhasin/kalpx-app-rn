@@ -68,6 +68,7 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
 
   return (
     <div
+      className="rhythm-library-picker-backdrop"
       style={{
         position: "fixed",
         inset: 0,
@@ -80,6 +81,7 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
       onClick={onClose}
     >
       <div
+        className="rhythm-library-picker-sheet"
         style={{
           background: "#FFF8EF",
           borderRadius: "18px 18px 0 0",

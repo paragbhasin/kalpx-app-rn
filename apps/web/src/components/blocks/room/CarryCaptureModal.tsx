@@ -605,7 +605,7 @@ export function CarryCaptureModal({
                     margin: 0,
                     color: "#2C1C11",
                     fontFamily: "var(--kalpx-font-serif)",
-                    fontSize: "clamp(30px, 4.8vw, 68px)",
+                    fontSize: "clamp(30px, 4.8vw, 30px)",
 
                     fontWeight: 700,
                     letterSpacing: "-0.04em",

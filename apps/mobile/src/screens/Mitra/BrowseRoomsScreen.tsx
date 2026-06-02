@@ -5,6 +5,7 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
+import { useTranslation } from "react-i18next";
 import {
   SafeAreaView,
   ScrollView,
@@ -46,6 +47,7 @@ const ROOM_GROUPS: RoomGroup[] = [
 ];
 
 export default function BrowseRoomsScreen() {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
   const tabBarHeight = useBottomTabBarHeight();
@@ -110,13 +112,13 @@ export default function BrowseRoomsScreen() {
     <SafeAreaView style={styles.safeArea}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Browse Rooms</Text>
+        <Text style={styles.headerTitle}>{t("browseRooms.title")}</Text>
       </View>
 
       <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: tabBarHeight + insets.bottom + 16 }]} showsVerticalScrollIndicator={false}>
         {ROOM_GROUPS.map((group) => (
           <View key={group.label} style={styles.group}>
-            <Text style={styles.groupLabel}>{group.label}</Text>
+            <Text style={styles.groupLabel}>{t(`browseRooms.group.${group.label.toLowerCase()}`, { defaultValue: group.label })}</Text>
             {group.rooms.map((roomId) => (
               <TouchableOpacity
                 key={roomId}
@@ -124,8 +126,8 @@ export default function BrowseRoomsScreen() {
                 onPress={() => handleRoomTap(roomId)}
                 activeOpacity={0.8}
               >
-                <Text style={styles.roomLabel}>{ROOM_LABELS[roomId]}</Text>
-                <Text style={styles.roomDescription}>{ROOM_DESCRIPTIONS[roomId]}</Text>
+                <Text style={styles.roomLabel}>{t(`browseRooms.rooms.${roomId}.label`, { defaultValue: ROOM_LABELS[roomId] })}</Text>
+                <Text style={styles.roomDescription}>{t(`browseRooms.rooms.${roomId}.desc`, { defaultValue: ROOM_DESCRIPTIONS[roomId] })}</Text>
               </TouchableOpacity>
             ))}
           </View>

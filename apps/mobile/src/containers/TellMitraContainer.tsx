@@ -23,6 +23,7 @@ import {
   View,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTranslation } from 'react-i18next';
 import { Fonts } from '../theme/fonts';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -58,6 +59,7 @@ async function persistTellMitraThread(
 }
 
 export default function TellMitraContainer() {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
@@ -84,7 +86,7 @@ export default function TellMitraContainer() {
   // ── Flag-on state ─────────────────────────────────────────────────────────
   const [conversation, setConversation] = useState<TellMitraConversationItem[]>([]);
   const [threadDraft, setThreadDraft] = useState('');
-  const [composerPlaceholder, setComposerPlaceholder] = useState("What's on your mind?");
+  const [composerPlaceholder, setComposerPlaceholder] = useState(() => t('tellMitraInput.placeholder'));
   const scrollViewRef = useRef<any>(null);
   const composerInputRef = useRef<TextInput>(null);
   const pendingTellMitraReturnRef = useRef<{
@@ -257,11 +259,11 @@ export default function TellMitraContainer() {
   }) => {
     const inputText = override?.text ?? draft;
     if (!inputText.trim()) {
-      setErrorMsg("Please share what's on your mind");
+      setErrorMsg(t('tellMitraInput.errorEmpty'));
       return;
     }
     if (inputText.length > MAX_CHARS) {
-      setErrorMsg('Please keep it under 1000 characters');
+      setErrorMsg(t('tellMitraInput.errorTooLong'));
       return;
     }
     setErrorMsg('');
@@ -316,7 +318,7 @@ export default function TellMitraContainer() {
         navigation.navigate("Home" as any);
       }
     } catch {
-      setErrorMsg('Something went wrong. Please try again.');
+      setErrorMsg(t('tellMitraInput.errorGeneric'));
     } finally {
       setIsSubmitting(false);
     }
@@ -460,7 +462,7 @@ export default function TellMitraContainer() {
     } catch {
       setConversation(prev => [
         ...prev.filter(i => i.id !== loadingId),
-        { id: genId(), type: 'error', message: 'Something went wrong. Please try again.' },
+        { id: genId(), type: 'error', message: t('tellMitraInput.errorGeneric') },
       ]);
     } finally {
       setIsSubmitting(false);
@@ -486,7 +488,7 @@ export default function TellMitraContainer() {
       setConversation(prev =>
         prev.map(item => item.id === chipGroupId ? { ...item, disabled: true } as TellMitraConversationItem : item)
       );
-      setComposerPlaceholder('What would you like Mitra to know?');
+      setComposerPlaceholder(t('tellMitraInput.placeholderLetMeTell'));
       composerInputRef.current?.focus();
       return;
     }
@@ -536,7 +538,7 @@ export default function TellMitraContainer() {
   };
 
   const handleTellMitraMoreThread = () => {
-    setComposerPlaceholder('Add anything else Mitra should understand…');
+    setComposerPlaceholder(t('tellMitraInput.placeholderTellMitraMore'));
     composerInputRef.current?.focus();
   };
 
@@ -609,7 +611,7 @@ export default function TellMitraContainer() {
           onStartFresh={() => {
             setConversation([]);
             setThreadDraft('');
-            setComposerPlaceholder("What's on your mind?");
+            setComposerPlaceholder(t('tellMitraInput.placeholder'));
             freshResetPendingRef.current = true;
             lastReturnCardKeyRef.current = null;
             pendingTellMitraReturnRef.current = null;
@@ -643,7 +645,7 @@ export default function TellMitraContainer() {
         value={draft}
         onChangeText={(t) => dispatch(setTellMitraDraft(t.slice(0, MAX_CHARS)))}
         multiline
-        placeholder="What's on your mind?"
+        placeholder={t('tellMitraInput.placeholder')}
         placeholderTextColor="#9b8b77"
         maxLength={MAX_CHARS}
       />
@@ -661,7 +663,7 @@ export default function TellMitraContainer() {
       )}
       {!!followupQuestion && (
         <View style={styles.chipsContainer}>
-          <Text style={styles.chipsPrompt}>Want to help Mitra understand what feels heaviest?</Text>
+          <Text style={styles.chipsPrompt}>{t('tellMitraInput.chipsPrompt')}</Text>
           <View style={styles.chipsRow}>
             {followupQuestion.options.map((opt) => (
               <TouchableOpacity
@@ -699,7 +701,7 @@ export default function TellMitraContainer() {
           activeOpacity={0.7}
           style={styles.ghostLink}
         >
-          <Text style={styles.ghostLinkText}>Try Quick Check-in instead</Text>
+          <Text style={styles.ghostLinkText}>{t('tellMitraInput.quickCheckinLink')}</Text>
         </TouchableOpacity>
       )}
       <TouchableOpacity
@@ -709,11 +711,11 @@ export default function TellMitraContainer() {
         activeOpacity={0.8}
       >
         <Text style={styles.submitBtnText}>
-          {isSubmitting ? 'Sending...' : 'Share with Mitra'}
+          {isSubmitting ? t('tellMitraInput.sending') : t('tellMitraInput.shareWithMitra')}
         </Text>
       </TouchableOpacity>
       <Text style={styles.disclaimerText}>
-        Mitra is here for reflection and Sanatan-rooted guidance. It is not a substitute for medical, legal, financial, therapy, crisis, or emergency support. Share only what you feel comfortable sharing.
+        {t('tellMitraInput.disclaimer')}
       </Text>
     </View>
   );

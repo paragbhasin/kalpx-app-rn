@@ -2,7 +2,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import React, { useEffect, useRef, useState } from "react";
 import { ImageBackground, SafeAreaView, StyleSheet } from "react-native";
 import RunnerCompletionView from "../../../components/RunnerCompletionView";
-import { INNER_PATH_PRACTICE_COMPLETION_COPY as COPY } from "../../../constants/completionCopy";
+import { useCompletionCopy } from "../../../constants/completionCopy";
 import {
   mitraInnerPathComplete,
   mitraTrackCompletion,
@@ -15,6 +15,7 @@ export default function InnerPathPracticeCompletion() {
   const route = useRoute<any>();
   const { item_id, item_title, journeyId, dayNumber } = route.params;
   const completedRef = useRef(false);
+  const COPY = useCompletionCopy("innerPath_practice");
   const [badge, setBadge] = useState<string>(COPY.pending);
 
   useEffect(() => {

@@ -18,6 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Colors } from '../../../theme/colors';
 import { Fonts } from '../../../theme/fonts';
 
@@ -40,6 +41,8 @@ const ReachOutPhase: React.FC<Props> = ({
   onSave,
   onSkip,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === 'hi';
   const [text, setText] = useState('');
   const [copied, setCopied] = useState(false);
 
@@ -88,8 +91,8 @@ const ReachOutPhase: React.FC<Props> = ({
             onPress={handleCopyAndGo}
             activeOpacity={0.7}
           >
-            <Text style={styles.ctaText}>
-              {copied ? 'Shared ✓' : ctaLabel}
+            <Text style={[styles.ctaText, isHindi && { letterSpacing: 0 }]}>
+              {copied ? t('room.phases.reachOut.sharedConfirm') : ctaLabel}
             </Text>
           </TouchableOpacity>
 
@@ -98,7 +101,7 @@ const ReachOutPhase: React.FC<Props> = ({
             style={styles.secondaryBtn}
             hitSlop={{ top: 8, bottom: 8 }}
           >
-            <Text style={styles.secondaryText}>I'll reach out my own way</Text>
+            <Text style={[styles.secondaryText, isHindi && { letterSpacing: 0 }]}>{t('room.phases.reachOut.reachOutMyOwnWay')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -106,7 +109,7 @@ const ReachOutPhase: React.FC<Props> = ({
             style={styles.skipBtn}
             hitSlop={{ top: 8, bottom: 8 }}
           >
-            <Text style={styles.skipText}>I'll go now</Text>
+            <Text style={[styles.skipText, isHindi && { letterSpacing: 0 }]}>{t('room.phases.common.illGoNow')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

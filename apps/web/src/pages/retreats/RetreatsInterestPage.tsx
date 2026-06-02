@@ -2,15 +2,16 @@ import type { CSSProperties } from "react";
 import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AppShell } from "../../components/ui";
-import landingHero from "../../../../mobile/assets/retreat/landing1.webp";
 import { ExploreRetreats } from "./ExploreRetreats";
 import { MyRetreatBookings } from "./MyRetreatBookings";
+const landingHero = "/mobile-assets/retreat/landing1.webp";
 
 type RetreatTab = "explore" | "bookings";
 
 export function RetreatsInterestPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get("tab") === "bookings" ? "bookings" : "explore";
+  const activeTab =
+    searchParams.get("tab") === "bookings" ? "bookings" : "explore";
   const isDesktop =
     typeof window === "undefined" ? true : window.innerWidth >= 1024;
 
@@ -57,7 +58,9 @@ export function RetreatsInterestPage() {
               onClick={() => goToActiveTab("explore")}
               style={{
                 ...tabButtonStyle,
-                ...(activeTab === "explore" ? activeTabStyle : inactiveTabStyle),
+                ...(activeTab === "explore"
+                  ? activeTabStyle
+                  : inactiveTabStyle),
               }}
             >
               Explore Retreats
@@ -67,7 +70,9 @@ export function RetreatsInterestPage() {
               onClick={() => goToActiveTab("bookings")}
               style={{
                 ...tabButtonStyle,
-                ...(activeTab === "bookings" ? activeTabStyle : inactiveTabStyle),
+                ...(activeTab === "bookings"
+                  ? activeTabStyle
+                  : inactiveTabStyle),
               }}
             >
               My Bookings

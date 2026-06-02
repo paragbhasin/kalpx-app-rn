@@ -52,10 +52,22 @@ export const RHYTHM_BAND_LABELS: Record<RhythmTimeBand, string> = {
   night: "Night",
 };
 
+export const RHYTHM_BAND_LABELS_HI: Record<RhythmTimeBand, string> = {
+  morning: "सुबह",
+  afternoon: "दोपहर",
+  night: "रात",
+};
+
 export const RHYTHM_BAND_SUBTITLES: Record<RhythmTimeBand, string> = {
   morning: "Smriti — remembering before the day begins",
   afternoon: "Karma Yoga — a small return in the middle of everything",
   night: "Sharanagati — offering what the day held",
+};
+
+export const RHYTHM_BAND_SUBTITLES_HI: Record<RhythmTimeBand, string> = {
+  morning: "स्मृति — दिन शुरू होने से पहले खुद को याद करना",
+  afternoon: "कर्म योग — सब कुछ के बीच एक छोटी वापसी",
+  night: "शरणागति — दिन ने जो थामा उसे अर्पित करना",
 };
 
 export const RHYTHM_ITEM_TYPE_LABELS: Record<RhythmItemType, string> = {
@@ -64,6 +76,14 @@ export const RHYTHM_ITEM_TYPE_LABELS: Record<RhythmItemType, string> = {
   practice: "Practice",
   reflection: "Reflection",
   library: "Library",
+};
+
+export const RHYTHM_ITEM_TYPE_LABELS_HI: Record<RhythmItemType, string> = {
+  mantra: "मंत्र",
+  sankalp: "संकल्प",
+  practice: "अभ्यास",
+  reflection: "चिंतन",
+  library: "पुस्तकालय",
 };
 
 // ── Door constants ──────────────────────────────────────────────────────────
@@ -81,6 +101,13 @@ export const DOOR_LABELS: Record<DoorId, string> = {
   inner_path: "Inner Path",
   quick_reset: "Quick Chant",
   tell_mitra: "Tell Mitra",
+};
+
+export const DOOR_LABELS_HI: Record<DoorId, string> = {
+  my_rhythm: "मेरी लय",
+  inner_path: "आंतरिक पथ",
+  quick_reset: "त्वरित जप",
+  tell_mitra: "मित्र को बताएं",
 };
 
 // ── Room constants ──────────────────────────────────────────────────────────
@@ -104,6 +131,15 @@ export const ROOM_LABELS: Record<VerifiedRoomId, string> = {
   room_growth: "Take the Next Step",
 };
 
+export const ROOM_LABELS_HI: Record<VerifiedRoomId, string> = {
+  room_stillness: "शांत हों",
+  room_release: "इसे रख दें",
+  room_clarity: "स्पष्टता पाएं",
+  room_joy: "अच्छाई देखें",
+  room_connection: "जुड़ाव महसूस करें",
+  room_growth: "अगला कदम उठाएं",
+};
+
 // Descriptions verified against core/tell_mitra_view.py _ROOM_LABELS on origin/dev.
 export const ROOM_DESCRIPTIONS: Record<VerifiedRoomId, string> = {
   room_stillness: "A room to steady the mind when things feel too much.",
@@ -112,6 +148,15 @@ export const ROOM_DESCRIPTIONS: Record<VerifiedRoomId, string> = {
   room_joy: "A room to notice what is already good.",
   room_connection: "A room for when the heart feels alone.",
   room_growth: "A room to turn energy into one clear action.",
+};
+
+export const ROOM_DESCRIPTIONS_HI: Record<VerifiedRoomId, string> = {
+  room_stillness: "एक कमरा जब चीजें बहुत अधिक लगें तो मन को स्थिर करने के लिए।",
+  room_release: "एक कमरा जो भारी लगे उसे रखने के लिए।",
+  room_clarity: "एक कमरा अगला कदम स्पष्ट रूप से देखने के लिए।",
+  room_joy: "एक कमरा यह देखने के लिए कि पहले से क्या अच्छा है।",
+  room_connection: "एक कमरा जब हृदय अकेला महसूस करे।",
+  room_growth: "एक कमरा ऊर्जा को एक स्पष्ट कार्य में बदलने के लिए।",
 };
 
 // ── Guards ──────────────────────────────────────────────────────────────────
@@ -204,6 +249,15 @@ export const RHYTHM_SUGGEST_COPY = {
   chooseFromLibrary: "Choose from Library",
   signInRequired: "Sign in to let Mitra shape your rhythm.",
   signIn: "Sign in",
+} as const;
+
+export const RHYTHM_SUGGEST_COPY_HI = {
+  loading: "मित्र आपकी लय बना रहा है…",
+  error: "मित्र अभी इसे स्वचालित रूप से नहीं बना सका।",
+  tryAgain: "फिर कोशिश करें",
+  chooseFromLibrary: "पुस्तकालय से चुनें",
+  signInRequired: "मित्र को आपकी लय बनाने दें — साइन इन करें।",
+  signIn: "साइन इन करें",
 } as const;
 
 /**
@@ -631,7 +685,15 @@ export const QUICK_RESET_ACTION_LABELS: Record<string, string> = {
   choose_from_library: "Choose from library",
 };
 
-export function getQuickResetActionLabel(action: string): string {
+export const QUICK_RESET_ACTION_LABELS_HI: Record<string, string> = {
+  mitra_suggest_for_this_moment: "एक और शांत मंत्र आज़माएं",
+  set_as_default: "मेरा क्विक रीसेट मंत्र सेट करें",
+  change_mantra: "मंत्र बदलें",
+  choose_from_library: "पुस्तकालय से चुनें",
+};
+
+export function getQuickResetActionLabel(action: string, locale = "en"): string {
+  if (locale === "hi") return QUICK_RESET_ACTION_LABELS_HI[action] ?? QUICK_RESET_ACTION_LABELS[action] ?? action;
   return QUICK_RESET_ACTION_LABELS[action] ?? action;
 }
 
@@ -662,7 +724,7 @@ export function normalizeMantraFromBrowse(
   };
 }
 
-// Returns a mantra from `candidates` whose item_id differs from `currentItemId`.
+// Returns a random mantra from `candidates` whose item_id differs from `currentItemId`.
 // Falls back to null if no different mantra is available.
 export function pickDifferentMantra(
   candidates: QuickResetMantra[],
@@ -670,7 +732,7 @@ export function pickDifferentMantra(
 ): QuickResetMantra | null {
   const different = candidates.filter((m) => m.item_id !== currentItemId);
   if (different.length === 0) return null;
-  return different[0];
+  return different[Math.floor(Math.random() * different.length)];
 }
 
 // Normalises browse-mantras raw array → QuickResetMantra[].

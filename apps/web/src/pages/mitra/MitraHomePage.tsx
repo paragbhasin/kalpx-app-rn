@@ -91,7 +91,9 @@ export function MitraHomePage() {
   >(null);
   const [feelingLoading, setFeelingLoading] = useState(false);
   const [dismissingCheckin, setDismissingCheckin] = useState(false);
-  const [pendingPranaMessage, setPendingPranaMessage] = useState<string | null>(null);
+  const [pendingPranaMessage, setPendingPranaMessage] = useState<string | null>(
+    null,
+  );
   const { loading, error, hasActiveJourney, rawStatus, refetch } =
     useJourneyStatus();
   const {
@@ -237,9 +239,16 @@ export function MitraHomePage() {
     return <LoadingScreen />;
   }
 
-  // Entry-view redirects for active-journey users (checkpoint / welcome-back / onboarding)
-  // daily_view falls through to the four-door companion home (Stream O)
-  if (hasActiveJourney === true && viewKey && viewKey !== "daily_view") {
+  // Entry-view redirects for active-journey users (welcome-back / onboarding only).
+  // Checkpoint views (day_7_view, day_14_view) are NOT auto-redirected — they reveal
+  // only when the user taps the Inner Path card.
+  if (
+    hasActiveJourney === true &&
+    viewKey &&
+    viewKey !== "daily_view" &&
+    viewKey !== "day_7_view" &&
+    viewKey !== "day_14_view"
+  ) {
     const redirectPath = mapJourneyEntryViewPath(viewKey);
     if (redirectPath) return <Navigate to={redirectPath} replace />;
   }
@@ -293,9 +302,10 @@ export function MitraHomePage() {
     } else if (hasMorning && !morningDone) {
       rhythmSubtitle = "Begin with your morning rhythm";
     } else if (hasAfternoon && !afternoonDone) {
-      rhythmSubtitle = hasMorning && morningDone
-        ? "Morning held · return at midday"
-        : "Return with your afternoon rhythm";
+      rhythmSubtitle =
+        hasMorning && morningDone
+          ? "Morning held · return at midday"
+          : "Return with your afternoon rhythm";
     } else if (hasNight && !nightDone) {
       rhythmSubtitle = hasAfternoon
         ? "Afternoon held · close gently tonight"
@@ -312,7 +322,8 @@ export function MitraHomePage() {
     if (innerPathSummary?.has_active_path) {
       const dayLine = `Day ${innerPathSummary.day_number} of ${innerPathSummary.total_days}`;
       const heldCount = (innerPathSummary as any).today_held_count ?? 0;
-      const practiceHeld = (innerPathSummary as any).today_practice_held ?? false;
+      const practiceHeld =
+        (innerPathSummary as any).today_practice_held ?? false;
       if (practiceHeld || heldCount >= 3) {
         innerPathSubtitle = `${dayLine} · today's practice is held`;
       } else if (heldCount > 0) {
@@ -342,6 +353,7 @@ export function MitraHomePage() {
 
     return (
       <div
+        className="mitra-home-surface"
         style={{
           minHeight: "100vh",
           backgroundImage: "url(/beige_bg.png)",
@@ -354,6 +366,7 @@ export function MitraHomePage() {
       >
         <Header transparent hidden={shouldHideChrome} />
         <main
+          className="mitra-home-main"
           style={{
             flex: 1,
             display: "flex",
@@ -365,6 +378,7 @@ export function MitraHomePage() {
         >
           {greeting && (
             <div
+              className="mitra-home-hero"
               style={{
                 width: "100%",
                 position: "relative",
@@ -375,6 +389,11 @@ export function MitraHomePage() {
               }}
             >
               <img
+                className={`mitra-home-hero-img ${
+                  isNightGreeting
+                    ? "mitra-home-hero-img--night"
+                    : "mitra-home-hero-img--day"
+                }`}
                 src={greetingImageSrc}
                 alt=""
                 style={{
@@ -385,6 +404,7 @@ export function MitraHomePage() {
                 }}
               />
               <div
+                className="mitra-home-hero-content"
                 style={{
                   position: "relative",
                   width: "100%",
@@ -397,6 +417,7 @@ export function MitraHomePage() {
                 }}
               >
                 <div
+                  className="mitra-home-hero-copy"
                   style={{
                     width: "100%",
                     maxWidth: 420,
@@ -405,6 +426,7 @@ export function MitraHomePage() {
                   }}
                 >
                   <h1
+                    className="mitra-home-title"
                     style={{
                       fontFamily: "var(--kalpx-font-serif)",
                       fontWeight: 700,
@@ -422,6 +444,7 @@ export function MitraHomePage() {
                   {greeting.subtext && (
                     <>
                       <p
+                        className="mitra-home-subtitle"
                         style={{
                           fontFamily: "var(--kalpx-font-serif)",
                           fontSize: 17,
@@ -433,6 +456,7 @@ export function MitraHomePage() {
                       </p>
 
                       <div
+                        className="mitra-home-divider"
                         style={{
                           display: "flex",
                           alignItems: "center",
@@ -479,7 +503,10 @@ export function MitraHomePage() {
             </div>
           )}
 
-          <div style={{ width: "100%", maxWidth: 420, padding: "0 16px" }}>
+          <div
+            className="mitra-home-content"
+            style={{ width: "100%", maxWidth: 420, padding: "0 16px" }}
+          >
             {fourDoorError && (
               <p
                 style={{
@@ -496,6 +523,7 @@ export function MitraHomePage() {
             {/* Four Door Cards */}
             {doorStates && (
               <div
+                className="mitra-home-door-grid"
                 style={{
                   display: "flex",
                   flexDirection: "column",
@@ -505,6 +533,7 @@ export function MitraHomePage() {
               >
                 {/* My Rhythm */}
                 <button
+                  className="mitra-home-door-card"
                   onClick={() => navigate(myRhythmTarget)}
                   style={{
                     width: "100%",
@@ -556,25 +585,43 @@ export function MitraHomePage() {
                       {rhythmSubtitle}
                     </div>
                     {segment === "new" && isFirstVisit && (
-                      <div style={{ color: "rgba(67,33,4,0.38)", fontSize: 12, fontStyle: "italic", marginTop: 3 }}>
+                      <div
+                        style={{
+                          color: "rgba(67,33,4,0.38)",
+                          fontSize: 12,
+                          fontStyle: "italic",
+                          marginTop: 3,
+                        }}
+                      >
                         Shape the day with a simple rhythm.
                       </div>
                     )}
                   </div>
-                  <div style={{ color: "#C9A84C", opacity: 0.5, fontSize: 18 }}>
-                    →
-                  </div>
+                  <div style={{ color: "#C9A84C", fontSize: 18 }}>→</div>
                 </button>
 
                 {/* Inner Path */}
                 <button
-                  onClick={() => navigate("/en/mitra/inner-path")}
+                  className="mitra-home-door-card"
+                  onClick={() => {
+                    if (viewKey === "day_7_view" || viewKey === "day_14_view") {
+                      navigate(mapJourneyEntryViewPath(viewKey));
+                    } else {
+                      navigate("/en/mitra/inner-path");
+                    }
+                  }}
                   style={{
                     width: "100%",
-                    border: segment === "rhythm_only" ? "1.5px solid rgba(201,168,76,0.55)" : "1px solid rgba(201,168,76,0.28)",
+                    border:
+                      segment === "rhythm_only"
+                        ? "1.5px solid rgba(201,168,76,0.55)"
+                        : "1px solid rgba(201,168,76,0.28)",
                     borderRadius: 20,
                     padding: "10px",
-                    boxShadow: segment === "rhythm_only" ? "0 10px 25px rgba(201,168,76,0.14)" : "0 10px 25px rgba(67,33,4,0.08)",
+                    boxShadow:
+                      segment === "rhythm_only"
+                        ? "0 10px 25px rgba(201,168,76,0.14)"
+                        : "0 10px 25px rgba(67,33,4,0.08)",
                     textAlign: "left",
                     cursor: "pointer",
                     display: "flex",
@@ -617,18 +664,24 @@ export function MitraHomePage() {
                       {innerPathSubtitle}
                     </div>
                     {segment === "new" && isFirstVisit && (
-                      <div style={{ color: "rgba(67,33,4,0.38)", fontSize: 12, fontStyle: "italic", marginTop: 3 }}>
+                      <div
+                        style={{
+                          color: "rgba(67,33,4,0.38)",
+                          fontSize: 12,
+                          fontStyle: "italic",
+                          marginTop: 3,
+                        }}
+                      >
                         Walk a 14-day path with Mitra beside you.
                       </div>
                     )}
                   </div>
-                  <div style={{ color: "#C9A84C", opacity: 0.5, fontSize: 18 }}>
-                    →
-                  </div>
+                  <div style={{ color: "#C9A84C", fontSize: 18 }}>→</div>
                 </button>
 
                 {/* Quick Reset */}
                 <button
+                  className="mitra-home-door-card"
                   onClick={() => navigate("/en/mitra/quick-reset")}
                   style={{
                     width: "100%",
@@ -679,18 +732,24 @@ export function MitraHomePage() {
                       {quickChantSubtitle}
                     </div>
                     {segment === "new" && isFirstVisit && (
-                      <div style={{ color: "rgba(67,33,4,0.38)", fontSize: 12, fontStyle: "italic", marginTop: 3 }}>
+                      <div
+                        style={{
+                          color: "rgba(67,33,4,0.38)",
+                          fontSize: 12,
+                          fontStyle: "italic",
+                          marginTop: 3,
+                        }}
+                      >
                         Return through mantra, in a single moment.
                       </div>
                     )}
                   </div>
-                  <div style={{ color: "#C9A84C", opacity: 0.5, fontSize: 18 }}>
-                    →
-                  </div>
+                  <div style={{ color: "#C9A84C", fontSize: 18 }}>→</div>
                 </button>
 
                 {/* Tell Mitra */}
                 <button
+                  className="mitra-home-door-card"
                   onClick={() => navigate("/en/mitra/tell-mitra")}
                   style={{
                     width: "100%",
@@ -741,14 +800,19 @@ export function MitraHomePage() {
                       {tellMitraSubtitle}
                     </div>
                     {segment === "new" && isFirstVisit && (
-                      <div style={{ color: "rgba(67,33,4,0.38)", fontSize: 12, fontStyle: "italic", marginTop: 3 }}>
+                      <div
+                        style={{
+                          color: "rgba(67,33,4,0.38)",
+                          fontSize: 12,
+                          fontStyle: "italic",
+                          marginTop: 3,
+                        }}
+                      >
                         Share what is moving. Mitra will listen.
                       </div>
                     )}
                   </div>
-                  <div style={{ color: "#C9A84C", opacity: 0.5, fontSize: 18 }}>
-                    →
-                  </div>
+                  <div style={{ color: "#C9A84C", fontSize: 18 }}>→</div>
                 </button>
 
                 {(() => {
@@ -758,6 +822,7 @@ export function MitraHomePage() {
                     feelingLoading || dismissingCheckin;
                   return (
                     <div
+                      className="mitra-home-checkin"
                       style={{
                         width: "100%",
                         border: "1px solid rgba(201,168,76,0.28)",
@@ -853,13 +918,16 @@ export function MitraHomePage() {
                             <button
                               type="button"
                               onClick={() => {
-                                navigate(`/en/mitra/tell-mitra?initialMessage=${encodeURIComponent(pendingPranaMessage)}`);
+                                navigate(
+                                  `/en/mitra/tell-mitra?initialMessage=${encodeURIComponent(pendingPranaMessage)}`,
+                                );
                                 setPendingPranaMessage(null);
                               }}
                               style={{
                                 width: "100%",
                                 border: "1px solid rgba(201,168,76,0.38)",
-                                background: "linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,250,243,0.96))",
+                                background:
+                                  "linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,250,243,0.96))",
                                 color: "#432104",
                                 borderRadius: 18,
                                 padding: "14px 18px",
@@ -968,6 +1036,7 @@ export function MitraHomePage() {
                             One tap. Mitra meets you where you are.
                           </div>
                           <div
+                            className="mitra-home-feeling-grid"
                             style={{
                               display: "grid",
                               gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
@@ -1173,7 +1242,8 @@ export function MitraHomePage() {
                 marginBottom: 0,
               }}
             >
-              support what you carry, strengthen what is growing, and walk one day at a time
+              support what you carry, strengthen what is growing, and walk one
+              day at a time
             </p>
 
             {error && (

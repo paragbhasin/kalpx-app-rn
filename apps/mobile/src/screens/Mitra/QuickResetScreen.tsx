@@ -9,8 +9,10 @@ import type {
   QuickResetMantra,
   QuickResetOpeningState,
 } from "@kalpx/types";
+import { useJapaEngine } from "../../engine/useJapaEngine";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Animated,
@@ -189,6 +191,7 @@ export default function QuickResetScreen({
 }: {
   embedded?: boolean;
 }) {
+  const { t, i18n } = useTranslation();
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
   const { goBack, updateBackground, updateHeaderHidden } = useScreenStore();
@@ -224,8 +227,40 @@ export default function QuickResetScreen({
   );
   const [completionData, setCompletionData] =
     useState<QuickChantCompleteResponse | null>(null);
-  const [beadCount, setBeadCount] = useState(0);
   const [isChantingActive, setIsChantingActive] = useState(false);
+
+  const activeMantraRef = (selectedMantra ?? openingState?.mantra)?.item_id ?? null;
+  // Stable ref so onGoalReached never changes identity (avoids engine re-init)
+  const onGoalReachedRef = useRef<(() => void) | null>(null);
+  const japaEngine = useJapaEngine({
+    mantraRef: activeMantraRef,
+    sourceSurface: "quick_chant",
+    goalType: "unlimited",
+    onGoalReached: useCallback(() => { onGoalReachedRef.current?.(); }, []),
+  });
+  const beadCount = japaEngine.sessionCount;
+
+  // Keep stable refs so the useFocusEffect below never re-fires when the engine
+  // re-initialises (mantraRef changes null → real ID after API responds).
+  // Re-firing with changing deps was disrupting the navigation lifecycle and
+  // clearing the global background applied by the first useFocusEffect above.
+  const japaRefreshRef = useRef(japaEngine.refreshStats);
+  const japaSyncRef = useRef(japaEngine.syncNow);
+  useEffect(() => {
+    japaRefreshRef.current = japaEngine.refreshStats;
+    japaSyncRef.current = japaEngine.syncNow;
+  }, [japaEngine.refreshStats, japaEngine.syncNow]);
+
+  // Sync on leave, refresh on enter — empty deps = stable, fires once on focus
+  useFocusEffect(
+    useCallback(() => {
+      japaRefreshRef.current?.();
+      return () => {
+        japaSyncRef.current?.();
+      };
+    }, []),
+  );
+
   const [iastExpanded, setIastExpanded] = useState(false);
   const [devExpanded, setDevExpanded] = useState(false);
   const [meaningExpanded, setMeaningExpanded] = useState(false);
@@ -235,9 +270,9 @@ export default function QuickResetScreen({
   const [pickerLoading, setPickerLoading] = useState(false);
   const [defaultSetConfirmed, setDefaultSetConfirmed] = useState(false);
   const [highlightedToastTitle, setHighlightedToastTitle] =
-    useState("Mantra Updated ✦");
+    useState(t("quickReset.mantraUpdatedTitle"));
   const [highlightedToastMessage, setHighlightedToastMessage] = useState(
-    "Your rhythm has been gently realigned.",
+    t("quickReset.mantraUpdatedMessage"),
   );
   const [mantraUpdatedToastVisible, setMantraUpdatedToastVisible] =
     useState(false);
@@ -252,7 +287,6 @@ export default function QuickResetScreen({
   // ── Initial load ────────────────────────────────────────────────────────────
   const loadOpening = useCallback(async () => {
     setPhase("loading");
-    setBeadCount(0);
     setIsChantingActive(false);
     const state = await getQuickResetOpening();
     if (state) {
@@ -317,26 +351,26 @@ export default function QuickResetScreen({
     if (different) {
       setDefaultSetConfirmed(false);
       setSelectedMantra(different);
-      setHighlightedToastTitle("Mantra Updated ✦");
-      setHighlightedToastMessage("Your rhythm has been gently realigned.");
+      setHighlightedToastTitle(t("quickReset.mantraUpdatedTitle"));
+      setHighlightedToastMessage(t("quickReset.mantraUpdatedMessage"));
       setMantraUpdatedToastVisible(true);
     }
     // If none found, keep current — silent
-  }, [activeMantra]);
+  }, [activeMantra, t]);
 
   // ── Secondary action: "Set as my Quick Reset mantra" ──────────────────────
   const handleSetDefault = useCallback(
     async (mantra: QuickResetMantra) => {
       await postQuickResetSetDefault(mantra.item_id);
       setDefaultSetConfirmed(true);
-      setHighlightedToastTitle("Quick Reset Mantra Set ✦");
+      setHighlightedToastTitle(t("quickReset.mantraSetTitle"));
       setHighlightedToastMessage(
-        "Your mantra has been set for future Quick Reset moments.",
+        t("quickReset.mantraSetMessage"),
       );
       setMantraUpdatedToastVisible(true);
       await loadOpening();
     },
-    [loadOpening],
+    [loadOpening, t],
   );
 
   // ── Mantra picker modal ────────────────────────────────────────────────────
@@ -353,33 +387,35 @@ export default function QuickResetScreen({
 
   const handlePickerSelect = useCallback((mantra: QuickResetMantra) => {
     setDefaultSetConfirmed(false);
-    setBeadCount(0);
     setIsChantingActive(false);
     setSelectedMantra(mantra);
     setPickerVisible(false);
     setPhase("preview");
-    setHighlightedToastTitle("Mantra Updated ✦");
-    setHighlightedToastMessage("Your rhythm has been gently realigned.");
+    setHighlightedToastTitle(t("quickReset.mantraUpdatedTitle"));
+    setHighlightedToastMessage(t("quickReset.mantraUpdatedMessage"));
     setMantraUpdatedToastVisible(true);
-  }, []);
+  }, [t]);
 
   // ── Runner start ───────────────────────────────────────────────────────────
   const handleTapBead = useCallback(() => {
     if (!activeMantra) return;
     if (!isChantingActive) {
       runnerStartedAt.current = Date.now();
-      setBeadCount(0);
       setIsChantingActive(true);
     }
-    setBeadCount((count) => count + 1);
-  }, [activeMantra, isChantingActive]);
+    japaEngine.increment();
+  }, [activeMantra, isChantingActive, japaEngine]);
 
   // ── Done chanting ──────────────────────────────────────────────────────────
+  // Keep ref in sync so goal-reached callback always calls the latest version
   const handleDoneChanting = useCallback(async () => {
+    onGoalReachedRef.current = null; // prevent double-fire after manual done
     if (!activeMantra) return;
     const duration_ms = isChantingActive
       ? Date.now() - runnerStartedAt.current
       : 0;
+    // Flush the japa engine (sync final count + mark session complete on backend)
+    await japaEngine.completeSession();
     const result = await postQuickChantComplete({
       mantra_ref: activeMantra.item_id,
       duration_ms,
@@ -399,6 +435,11 @@ export default function QuickResetScreen({
       }
     }
   }, [activeMantra, embedded, goBack, isChantingActive, navigation]);
+
+  // Wire onGoalReached ref to the latest handleDoneChanting
+  useEffect(() => {
+    onGoalReachedRef.current = handleDoneChanting;
+  }, [handleDoneChanting]);
 
   const handleCloseToHome = useCallback(() => {
     rootNavigate("Home");
@@ -442,11 +483,41 @@ export default function QuickResetScreen({
     return (
       <View style={styles.openingShell}>
         <Text style={styles.openingHeading}>{mantra.title}</Text>
-        <Text style={styles.openingSubhead}>Quick Reset Mantra</Text>
+        <Text style={styles.openingSubhead}>{t("quickReset.subtitle")}</Text>
 
         <View style={styles.progressWrap}>
           <Text style={styles.progressMain}>{beadCount}</Text>
         </View>
+        {(japaEngine.todayCount > 0 || japaEngine.weekCount > 0 || japaEngine.yearCount > 0 || japaEngine.lifetimeCount > 0) && (
+          <View style={styles.statsRow}>
+            {japaEngine.todayCount > 0 && (
+              <Text style={styles.statItem}>
+                Today {japaEngine.todayCount.toLocaleString()}
+              </Text>
+            )}
+            {japaEngine.weekCount > 0 && (
+              <Text style={styles.statItem}>
+                Week {japaEngine.weekCount.toLocaleString()}
+              </Text>
+            )}
+            {japaEngine.yearCount > 0 && (
+              <Text style={styles.statItem}>
+                Year {japaEngine.yearCount.toLocaleString()}
+              </Text>
+            )}
+            {japaEngine.lifetimeCount > 0 && (
+              <Text style={styles.statItem}>
+                Lifetime {japaEngine.lifetimeCount.toLocaleString()}
+              </Text>
+            )}
+          </View>
+        )}
+        {japaEngine.completedMalas > 0 && (
+          <Text style={styles.malaLabel}>
+            {japaEngine.completedMalas} {japaEngine.completedMalas === 1 ? "mala" : "malas"}{" "}
+            {japaEngine.beadInRound > 0 ? `· ${japaEngine.beadInRound} beads` : "completed"}
+          </Text>
+        )}
 
         <View style={styles.previewRingWrap}>
           <Animated.View
@@ -481,8 +552,8 @@ export default function QuickResetScreen({
             activeOpacity={0.85}
             style={styles.previewTapButton}
           >
-            <Text style={styles.previewTapText}>TAP</Text>
-            <Text style={styles.previewTapSubtext}>HERE</Text>
+            <Text style={styles.previewTapText}>{t("quickReset.tap")}</Text>
+            <Text style={styles.previewTapSubtext}>{t("quickReset.here")}</Text>
             <View style={styles.previewTapCheckWrap}>
               <Text style={styles.previewTapCheck}>✓</Text>
             </View>
@@ -511,7 +582,7 @@ export default function QuickResetScreen({
             <AudioPlayerBlock
               block={{
                 audio_url: mantra.audio_url,
-                label: "Guided Audio",
+                label: t("quickReset.guidedAudio"),
               }}
             />
           </View>
@@ -519,7 +590,7 @@ export default function QuickResetScreen({
 
         {!!mantra.meaning && (
           <CollapsibleCard
-            label="Meaning"
+            label={t("quickReset.meaning")}
             expanded={meaningExpanded}
             onToggle={() => setMeaningExpanded((value) => !value)}
           >
@@ -529,7 +600,7 @@ export default function QuickResetScreen({
 
         {!!mantra.essence && (
           <CollapsibleCard
-            label="Essence"
+            label={t("quickReset.essence")}
             expanded={essenceExpanded}
             onToggle={() => setEssenceExpanded((value) => !value)}
           >
@@ -537,13 +608,24 @@ export default function QuickResetScreen({
           </CollapsibleCard>
         )}
 
-        <TouchableOpacity
-          style={styles.primaryBtn}
-          onPress={handleDoneChanting}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.primaryBtnText}>Done chanting</Text>
-        </TouchableOpacity>
+        <View style={styles.actionRow}>
+          {japaEngine.canUndo && (
+            <TouchableOpacity
+              style={styles.undoBtn}
+              onPress={japaEngine.undo}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.undoBtnText}>↩ Undo</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            style={styles.primaryBtn}
+            onPress={handleDoneChanting}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.primaryBtnText}>{t("quickReset.doneChanting")}</Text>
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.secondaryActions}>
           {secondaryActions.map((action) => (
@@ -560,7 +642,7 @@ export default function QuickResetScreen({
               </View>
               <View style={styles.secondaryActionCopy}>
                 <Text style={styles.secondaryActionRowText}>
-                  {getQuickResetActionLabel(action)}
+                  {getQuickResetActionLabel(action, i18n.language)}
                 </Text>
                 <View style={styles.secondaryActionUnderline} />
               </View>
@@ -591,11 +673,7 @@ export default function QuickResetScreen({
       <SafeAreaView
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
-        <ImageBackground
-          source={require("../../../assets/beige_bg.webp")}
-          style={styles.background}
-          imageStyle={styles.backgroundImage}
-        >
+        <View style={styles.background}>
           <View style={styles.centerContent}>
             <ActivityIndicator size="large" color="#C99317" />
           </View>
@@ -605,7 +683,7 @@ export default function QuickResetScreen({
             message={highlightedToastMessage}
             onClose={handleHighlightedToastClose}
           />
-        </ImageBackground>
+        </View>
       </SafeAreaView>
     );
   }
@@ -615,20 +693,16 @@ export default function QuickResetScreen({
       <SafeAreaView
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
-        <ImageBackground
-          source={require("../../../assets/beige_bg.webp")}
-          style={styles.background}
-          imageStyle={styles.backgroundImage}
-        >
+        <View style={styles.background}>
           <View style={styles.centerContent}>
-            <Text style={styles.sectionTitle}>Unable to open Quick Reset</Text>
-            <Text style={styles.subtleText}>Please try again.</Text>
+            <Text style={styles.sectionTitle}>{t("quickReset.errorTitle")}</Text>
+            <Text style={styles.subtleText}>{t("quickReset.pleaseRetry")}</Text>
             <TouchableOpacity
-              style={styles.primaryBtn}
+              style={[styles.primaryBtn, styles.primaryBtnStandalone]}
               onPress={loadOpening}
               activeOpacity={0.8}
             >
-              <Text style={styles.primaryBtnText}>Retry</Text>
+              <Text style={styles.primaryBtnText}>{t("quickReset.retry")}</Text>
             </TouchableOpacity>
           </View>
           <HighlightedToast
@@ -637,7 +711,7 @@ export default function QuickResetScreen({
             message={highlightedToastMessage}
             onClose={handleHighlightedToastClose}
           />
-        </ImageBackground>
+        </View>
       </SafeAreaView>
     );
   }
@@ -648,11 +722,7 @@ export default function QuickResetScreen({
       <SafeAreaView
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
-        <ImageBackground
-          source={require("../../../assets/beige_bg.webp")}
-          style={styles.background}
-          imageStyle={styles.backgroundImage}
-        >
+        <View style={styles.background}>
           <ScrollView
             contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
             showsVerticalScrollIndicator={false}
@@ -669,7 +739,7 @@ export default function QuickResetScreen({
             message={highlightedToastMessage}
             onClose={handleHighlightedToastClose}
           />
-        </ImageBackground>
+        </View>
       </SafeAreaView>
     );
   }
@@ -679,11 +749,7 @@ export default function QuickResetScreen({
       <SafeAreaView
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
-        <ImageBackground
-          source={require("../../../assets/beige_bg.webp")}
-          style={styles.background}
-          imageStyle={styles.backgroundImage}
-        >
+        <View style={styles.background}>
           <ScrollView
             contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
             showsVerticalScrollIndicator={false}
@@ -700,7 +766,7 @@ export default function QuickResetScreen({
             message={highlightedToastMessage}
             onClose={handleHighlightedToastClose}
           />
-        </ImageBackground>
+        </View>
       </SafeAreaView>
     );
   }
@@ -712,11 +778,7 @@ export default function QuickResetScreen({
       <SafeAreaView
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
-        <ImageBackground
-          source={require("../../../assets/beige_bg.webp")}
-          style={styles.background}
-          imageStyle={styles.backgroundImage}
-        >
+        <View style={styles.background}>
           <View style={styles.centerContent}>
             <View style={styles.copyBlock}>
               {renderCopyWithBreaks(completionData.copy.headline)}
@@ -733,21 +795,21 @@ export default function QuickResetScreen({
                 style={styles.secondaryActionBtn}
               >
                 <Text style={styles.secondaryActionText}>
-                  Set as my Quick Reset mantra
+                  {t("quickReset.setAsMyMantra")}
                 </Text>
               </TouchableOpacity>
             )}
             {defaultSetConfirmed && (
               <Text style={styles.confirmText}>
-                Set as your Quick Reset mantra.
+                {t("quickReset.setAsYourMantra")}
               </Text>
             )}
             <TouchableOpacity
-              style={styles.primaryBtn}
+              style={[styles.primaryBtn, styles.primaryBtnStandalone]}
               onPress={handleCloseToHome}
               activeOpacity={0.8}
             >
-              <Text style={styles.primaryBtnText}>Close</Text>
+              <Text style={styles.primaryBtnText}>{t("quickReset.close")}</Text>
             </TouchableOpacity>
           </View>
           <HighlightedToast
@@ -756,7 +818,7 @@ export default function QuickResetScreen({
             message={highlightedToastMessage}
             onClose={handleHighlightedToastClose}
           />
-        </ImageBackground>
+        </View>
       </SafeAreaView>
     );
   }
@@ -766,11 +828,7 @@ export default function QuickResetScreen({
     <SafeAreaView
       style={[styles.safeArea, embedded && styles.embeddedTransparent]}
     >
-      <ImageBackground
-        source={require("../../../assets/beige_bg.webp")}
-        style={styles.background}
-        imageStyle={styles.backgroundImage}
-      >
+      <View style={styles.background}>
         <View style={styles.centerContent}>
           <ActivityIndicator size="large" color="#C99317" />
         </View>
@@ -780,7 +838,7 @@ export default function QuickResetScreen({
           message={highlightedToastMessage}
           onClose={handleHighlightedToastClose}
         />
-      </ImageBackground>
+      </View>
     </SafeAreaView>
   );
 
@@ -804,9 +862,9 @@ export default function QuickResetScreen({
                 activeOpacity={0.7}
                 style={styles.pickerBackBtn}
               >
-                <Text style={styles.contentBackBtnText}>Close</Text>
+                <Text style={styles.contentBackBtnText}>{t("quickReset.close")}</Text>
               </TouchableOpacity>
-              <Text style={styles.pickerTitle}>Choose a Mantra</Text>
+              <Text style={styles.pickerTitle}>{t("quickReset.chooseMantra")}</Text>
               <View style={styles.pickerDivider}>
                 <View style={styles.pickerDividerLine} />
                 <Text style={styles.pickerDividerIcon}>✦</Text>
@@ -907,6 +965,59 @@ const styles = StyleSheet.create({
     lineHeight: 60,
     color: "#C7A048",
     fontFamily: Fonts.serif.regular,
+  },
+  statsRow: {
+    flexDirection: "row",
+    gap: 18,
+    marginTop: -8,
+    marginBottom: 2,
+    justifyContent: "center",
+    flexWrap: "wrap",
+  },
+  statItem: {
+    fontSize: 12,
+    color: "#8A7A5A",
+    fontFamily: Fonts.sans.regular,
+    letterSpacing: 0.4,
+  },
+  malaLabel: {
+    fontSize: 12,
+    color: "#C7A048",
+    fontFamily: Fonts.sans.medium,
+    letterSpacing: 0.3,
+    textAlign: "center",
+    marginBottom: 2,
+  },
+  actionRow: {
+    flexDirection: "row",
+    gap: 10,
+    width: "100%",
+    alignItems: "stretch",
+    marginTop: 6,
+  },
+  undoBtn: {
+    width: 100,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 11,
+    borderWidth: 1.5,
+    borderColor: "rgba(199,160,72,0.55)",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Platform.OS === "android" ? "#FEFCF9" : "rgba(255,255,255,0.6)",
+  },
+  undoBtnText: {
+    fontSize: 14,
+    color: "#B89450",
+    fontFamily: Fonts.sans.medium,
+  },
+  primaryBtnFlex: {
+    flex: 1,
+    width: undefined,
+  },
+  primaryBtnStandalone: {
+    alignSelf: "stretch",
+    flex: 0,
   },
   previewRingWrap: {
     width: 230,
@@ -1100,11 +1211,10 @@ const styles = StyleSheet.create({
   primaryBtn: {
     backgroundColor: "#C99317",
     borderRadius: 11,
-    // paddingHorizontal: 40,
     paddingVertical: 14,
-    width: "100%",
+    flex: 1,
     alignItems: "center",
-    marginTop: 6,
+    justifyContent: "center",
   },
   primaryBtnText: {
     fontSize: 14,

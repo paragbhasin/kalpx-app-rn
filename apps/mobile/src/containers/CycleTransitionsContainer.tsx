@@ -1005,6 +1005,10 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
             isCommunityRunner={isCommunityRunner}
             addLoading={communityAddLoading}
             onAddToPractice={() => void handleCommunityAdd()}
+            mantraRef={activeRunnerItemId || null}
+            sourceSurface={
+              screenData.runner_source === "rhythm_daily" ? "daily_rhythm" : "inner_path"
+            }
           />
         )}
         {currentType === "sankalp" && (

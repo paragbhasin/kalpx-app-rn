@@ -17,6 +17,7 @@
 
 import React from "react";
 import {Image,  StyleSheet, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 const MantraLotus3d = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/mantra-lotus-3d.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
@@ -36,6 +37,8 @@ const isSameCalendarDay = (a: number, b: number) => {
 };
 
 const GreetingCard: React.FC<Props> = ({ screenData }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const sd = screenData ?? {};
   const context: string = sd.greeting_context ?? "";
   const userName: string = sd.user_name ?? "";
@@ -71,7 +74,7 @@ const GreetingCard: React.FC<Props> = ({ screenData }) => {
       <View style={styles.card} accessibilityLabel="greeting_card">
         <View style={styles.leftAccent} />
         <View style={styles.body}>
-          <Text style={styles.name}>Welcome, {displayName}.</Text>
+          <Text style={[styles.name, isHindi && { letterSpacing: 0 }]}>{t("room.greeting.welcome", { name: displayName })}</Text>
           {!!displayContext && (
             <Text style={styles.context}>{displayContext}</Text>
           )}
@@ -83,8 +86,8 @@ const GreetingCard: React.FC<Props> = ({ screenData }) => {
       </View>
       {carryIsToday && (
         <View style={styles.carryChip} accessibilityLabel="joy_carry_chip">
-          <Text style={styles.carryChipText} numberOfLines={1}>
-            {carryLabel ? `${carryLabel} — held today` : "Joy carried forward"}
+          <Text style={[styles.carryChipText, isHindi && { letterSpacing: 0 }]} numberOfLines={1}>
+            {carryLabel ? t("room.greeting.carryHeldToday", { label: carryLabel }) : t("room.greeting.joyCarriedForward")}
           </Text>
         </View>
       )}

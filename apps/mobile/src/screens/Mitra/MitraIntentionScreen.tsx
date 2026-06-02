@@ -1,11 +1,10 @@
 import {
-  ENTRY_INTENTION_HEADING,
   ENTRY_INTENTION_OPTIONS,
-  ENTRY_INTENTION_SUBTEXT,
 } from "@kalpx/contracts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Image,
   SafeAreaView,
@@ -59,6 +58,7 @@ const OPTION_ACCENTS = {
 } as const;
 
 export default function MitraIntentionScreen() {
+  const { t } = useTranslation();
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
   const { handleScroll } = useScrollContext();
@@ -159,8 +159,8 @@ export default function MitraIntentionScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={[styles.header, isTablet && { maxWidth: TABLET_MAX_CONTENT_WIDTH, alignSelf: 'center', width: '100%', marginBottom: 30 }]}>
-            <Text style={[styles.heading, { fontSize: rfs(32, width) }]}>{ENTRY_INTENTION_HEADING}</Text>
-            <Text style={[styles.subtext, { fontSize: rfs(14, width) }]}>{ENTRY_INTENTION_SUBTEXT}</Text>
+            <Text style={[styles.heading, { fontSize: rfs(32, width) }]}>{t("mitraIntention.heading")}</Text>
+            <Text style={[styles.subtext, { fontSize: rfs(14, width) }]}>{t("mitraIntention.subtext")}</Text>
 
             <View style={styles.divider}>
               <View style={styles.line} />
@@ -195,8 +195,8 @@ export default function MitraIntentionScreen() {
                     <IconComponent width={isTablet ? 54 : 45} height={isTablet ? 54 : 45} />
                   </View>
                   <View style={styles.cardContent}>
-                    <Text style={[styles.cardTitle, { fontSize: rfs(18, width) }]}>{opt.title}</Text>
-                    <Text style={[styles.cardBody, { fontSize: rfs(13, width) }]}>{opt.body}</Text>
+                    <Text style={[styles.cardTitle, { fontSize: rfs(18, width) }]}>{t(`mitraIntention.options.${opt.id}.title`)}</Text>
+                    <Text style={[styles.cardBody, { fontSize: rfs(13, width) }]}>{t(`mitraIntention.options.${opt.id}.body`)}</Text>
                     <View style={styles.ctaRow}>
                       <Text
                         style={[
@@ -209,7 +209,7 @@ export default function MitraIntentionScreen() {
                           },
                         ]}
                       >
-                        {opt.cta}
+                        {t(`mitraIntention.options.${opt.id}.cta`)}
                       </Text>
                       <Text style={[styles.arrow, { color: accent.chipColor, fontSize: rfs(22, width) }]}>
                         →

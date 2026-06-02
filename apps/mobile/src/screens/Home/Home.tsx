@@ -35,6 +35,8 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import { useTranslation } from "react-i18next";
+import i18n from "../../config/i18n";
 import { useDispatch, useSelector } from "react-redux";
 import FourDoorHomeContainer from "../../containers/FourDoorHomeContainer";
 import { stopRoomAmbientAudio } from "../../engine/roomAmbientAudio";
@@ -77,6 +79,7 @@ export const collapseControl = { avoidCollapse: false };
 export default function Home() {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+  const { t } = useTranslation();
   const navigation: any = useNavigation();
   const isFocused = useIsFocused();
   const tabBarHeight = useBottomTabBarHeight();
@@ -351,7 +354,7 @@ export default function Home() {
             const v3Result = await mitraStartJourney({
               inference_state: stashedInference,
               guidance_mode: stashedMode,
-              locale: "en",
+              locale: i18n.language.split("-")[0] || "en",
               tz:
                 Intl.DateTimeFormat().resolvedOptions().timeZone ||
                 "Asia/Kolkata",
@@ -541,7 +544,7 @@ export default function Home() {
           try {
             const { mitraJourneyDailyView } = require("../../engine/mitraApi");
             const { ingestDailyView } = require("../../engine/v3Ingest");
-            const result = await mitraJourneyDailyView(null);
+            const result = await mitraJourneyDailyView(null, i18n.language || "en");
             if (result?.envelope) {
               for (const [k, v] of Object.entries(
                 ingestDailyView(result.envelope),
@@ -673,7 +676,7 @@ export default function Home() {
               const v3Result = await mitraStartJourney({
                 inference_state: stashedInf,
                 guidance_mode: stashedMode,
-                locale: "en",
+                locale: i18n.language.split("-")[0] || "en",
               });
               if (v3Result) {
                 const t = v3Result.triad || {};
@@ -933,9 +936,9 @@ export default function Home() {
             isTablet && { maxWidth: TABLET_MAX_CARD_WIDTH, width: '100%', marginBottom: rs(24, 40, width) },
           ]}>
             <Text style={[styles.heroQuote, { fontSize: rs(18, 26, width) }]}>
-              &quot;In this path, no effort is ever lost.&quot;
+              {t("mitraHome.heroQuote")}
             </Text>
-            <Text style={[styles.heroSource, { fontSize: rs(14, 19, width) }]}>— Bhagavad Gita 2.40</Text>
+            <Text style={[styles.heroSource, { fontSize: rs(14, 19, width) }]}>{t("mitraHome.heroSource")}</Text>
             <View style={[styles.turnOneHeadlineDivider, isTablet && { marginVertical: 16 }]}>
               <View style={styles.turnOneDividerLine} />
               <Ionicons name="diamond" size={isTablet ? 14 : 10} color="#c7a258" />
@@ -946,14 +949,14 @@ export default function Home() {
               fontSize: rs(28, 44, width),
               lineHeight: rs(36, 54, width),
             }]}>
-              KalpX Mitra
+              {t("mitraHome.heroTitle")}
             </Text>
             <Text style={[styles.companionTitle, {
               marginTop: rs(5, 10, width),
               fontSize: rs(18, 26, width),
               lineHeight: rs(24, 34, width),
             }]}>
-              Your daily companion for life
+              {t("mitraHome.companionTitle")}
             </Text>
           </View>
 
@@ -963,11 +966,10 @@ export default function Home() {
             isTablet && { maxWidth: TABLET_MAX_CARD_WIDTH, width: '100%', marginTop: 0, marginBottom: rs(32, 48, width) },
           ]}>
             <Text style={[styles.companionDesc, { fontSize: rs(16, 22, width), lineHeight: rs(24, 32, width) }]}>
-              Grounded in timeless Sanatan wisdom.
+              {t("mitraHome.companionDesc1")}
             </Text>
             <Text style={[styles.companionDesc, { fontSize: rs(16, 22, width), lineHeight: rs(24, 32, width) }]}>
-              support what you carry, strengthen what is growing, and walk one
-              day at a time
+              {t("mitraHome.companionDesc2")}
             </Text>
           </View>
 
@@ -1004,7 +1006,7 @@ export default function Home() {
                 isTablet && { paddingVertical: 20, width: '100%' },
               ]}
             >
-              <Text style={[styles.ctaText, { fontSize: rs(16, 22, width) }]}>Begin with Mitra →</Text>
+              <Text style={[styles.ctaText, { fontSize: rs(16, 22, width) }]}>{t("mitraHome.beginCta")}</Text>
             </LinearGradient>
           </TouchableOpacity>
         </ScrollView>

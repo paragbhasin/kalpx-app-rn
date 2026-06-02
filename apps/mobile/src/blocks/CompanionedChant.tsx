@@ -12,6 +12,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { Animated, Easing, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Fonts } from "../theme/fonts";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { rfs, TABLET_MAX_CARD_WIDTH } from "../utils/responsive";
@@ -23,6 +24,8 @@ interface Props {
 }
 
 const CompanionedChant: React.FC<Props> = ({ block, mantra, transliteration }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const { screenData } = useScreenStore();
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
@@ -89,9 +92,9 @@ const CompanionedChant: React.FC<Props> = ({ block, mantra, transliteration }) =
           testID="companioned-chant-mitra-orb"
         />
       </View>
-      <Text style={[styles.mantra, { fontSize: rfs(24, width) }]}>{mantraText}</Text>
-      <Text style={[styles.translit, { fontSize: rfs(14, width) }]}>{translit}</Text>
-      <Text style={[styles.hint, { fontSize: rfs(13, width) }]}>Chant along if you'd like. Or just listen.</Text>
+      <Text style={styles.mantra}>{mantraText}</Text>
+      <Text style={styles.translit}>{translit}</Text>
+      <Text style={[styles.hint, isHindi && { letterSpacing: 0 }]}>{t("room.companionedChant.hint")}</Text>
     </View>
   );
 };

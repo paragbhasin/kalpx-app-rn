@@ -31,6 +31,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 import { executeAction } from "../../engine/actionExecutor";
 import { useScreenStore } from "../../engine/useScreenBridge";
@@ -46,6 +47,8 @@ type Props = {
 };
 
 const QuickSupportBlock: React.FC<Props> = ({ screenData }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const sd = screenData ?? {};
 
   const [sheetVisible, setSheetVisible] = useState(false);
@@ -83,7 +86,7 @@ const QuickSupportBlock: React.FC<Props> = ({ screenData }) => {
           color={Colors.brownDeep}
           style={styles.primaryIcon}
         />
-        <Text style={styles.primaryText}>I Feel Triggered</Text>
+        <Text style={[styles.primaryText, isHindi && { letterSpacing: 0 }]}>{t("room.quickSupport.triggered")}</Text>
       </TouchableOpacity>
 
       {/* §14.1 Chip 2 — Quick Check-in */}
@@ -99,7 +102,7 @@ const QuickSupportBlock: React.FC<Props> = ({ screenData }) => {
           color={Colors.brownDeep}
           style={styles.primaryIcon}
         />
-        <Text style={styles.primaryText}>Quick Check-in</Text>
+        <Text style={[styles.primaryText, isHindi && { letterSpacing: 0 }]}>{t("room.quickSupport.checkIn")}</Text>
       </TouchableOpacity>
 
       {/* §14.1 Chip 3 — I'm in a good place → enter_room room_joy */}
@@ -121,7 +124,7 @@ const QuickSupportBlock: React.FC<Props> = ({ screenData }) => {
           color={Colors.brownDeep}
           style={styles.primaryIcon}
         />
-        <Text style={styles.primaryText}>I'm in a good place</Text>
+        <Text style={[styles.primaryText, isHindi && { letterSpacing: 0 }]}>{t("room.quickSupport.goodPlace")}</Text>
       </TouchableOpacity>
 
       {/* §14.2 Footer link — opens RoomEntrySheet */}
@@ -131,7 +134,7 @@ const QuickSupportBlock: React.FC<Props> = ({ screenData }) => {
         onPress={() => setSheetVisible(true)}
         testID="quick_support_more_ways"
       >
-        <Text style={styles.moreText}>More ways to be supported</Text>
+        <Text style={[styles.moreText, isHindi && { letterSpacing: 0 }]}>{t("room.quickSupport.moreWays")}</Text>
         <Ionicons
           name="arrow-forward"
           size={14}

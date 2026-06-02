@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Animated, Image, Easing } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useScreenStore } from '../engine/useScreenBridge';
 
 interface BreathAnimationBlockProps {
@@ -14,6 +15,8 @@ interface BreathAnimationBlockProps {
 }
 
 const BreathAnimationBlock: React.FC<BreathAnimationBlockProps> = ({ block }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === 'hi';
   const { cycles = 3, inhale_duration = 4000, hold_inhale_duration = 4000, exhale_duration = 4000, hold_exhale_duration = 4000 } = block;
   const [currentCycle, setCurrentCycle] = useState(1);
   const [phase, setPhase] = useState<'Inhale' | 'Hold' | 'Exhale' | 'Hold Out'>('Inhale');
@@ -84,17 +87,17 @@ const BreathAnimationBlock: React.FC<BreathAnimationBlockProps> = ({ block }) =>
 
   const getPhaseText = () => {
     switch (phase) {
-      case 'Inhale': return 'Slowly Inhale';
-      case 'Hold': return 'Hold with awareness';
-      case 'Exhale': return 'Gently Exhale';
-      case 'Hold Out': return 'Pause in stillness';
+      case 'Inhale': return t('room.breath.slowlyInhale');
+      case 'Hold': return t('room.breath.holdWithAwareness');
+      case 'Exhale': return t('room.breath.gentlyExhale');
+      case 'Hold Out': return t('room.breath.pauseInStillness');
       default: return '';
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.cycleText}>Cycle {currentCycle} of {cycles}</Text>
+      <Text style={[styles.cycleText, isHindi && { letterSpacing: 0 }]}>{t('room.breath.cycleOf', { current: currentCycle, total: cycles })}</Text>
       
       <View style={styles.animationArea}>
         <Animated.View style={[styles.ballContainer, { transform: [{ scale: scaleAnim }] }]}>
@@ -106,7 +109,7 @@ const BreathAnimationBlock: React.FC<BreathAnimationBlockProps> = ({ block }) =>
         </Animated.View>
       </View>
 
-      <Text style={styles.phaseText}>{getPhaseText()}</Text>
+      <Text style={[styles.phaseText, isHindi && { letterSpacing: 0 }]}>{getPhaseText()}</Text>
     </View>
   );
 };

@@ -15,9 +15,10 @@ interface Props {
   envelope: any;
   screenData?: Record<string, any>;
   onAction?: (action: any) => void;
+  isDesktop?: boolean;
 }
 
-export function RoomRenderer({ envelope, screenData, onAction }: Props) {
+export function RoomRenderer({ envelope, screenData, onAction, isDesktop = false }: Props) {
   const roomName = ROOM_LABELS[envelope.room_id as keyof typeof ROOM_LABELS] ?? ROOM_DISPLAY_NAMES[envelope.room_id] ?? envelope.room_id;
   const lifeContextLabel = envelope.life_context
     ? LIFE_CONTEXT_LABELS[envelope.life_context] || envelope.life_context
@@ -34,6 +35,7 @@ export function RoomRenderer({ envelope, screenData, onAction }: Props) {
           lifeContextLabel={lifeContextLabel}
           screenData={screenData}
           onAction={onAction}
+          isDesktop={isDesktop}
         />
       ) : (
         <>

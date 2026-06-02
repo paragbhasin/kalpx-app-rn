@@ -1,11 +1,23 @@
-import { Award, CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, Globe, MapPin, MessageCircle, Pencil, Plus, Star } from "lucide-react";
+import {
+  Award,
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Globe,
+  MessageCircle,
+  Pencil,
+  Plus,
+  Star,
+} from "lucide-react";
 import type { CSSProperties } from "react";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+
 import { AppShell } from "../../components/ui";
-import retreatImg from "../../../../mobile/assets/retreat/retreat1.webp";
-import hostImg from "../../../../mobile/assets/retreat/retreat2.webp";
 import { FacilitatorCard } from "./FacilitatorCard";
+const retreatImg = "/mobile-assets/retreat/retreat1.webp";
+const hostImg = "/mobile-assets/retreat/retreat2.webp";
 
 const policies = [
   "A deposit is required to confirm your booking.",
@@ -39,7 +51,14 @@ export function RetreatBookingDetailsPage() {
 
   const images = useMemo(() => [retreatImg, retreatImg, retreatImg], []);
   const gallery = useMemo(
-    () => [retreatImg, retreatImg, retreatImg, retreatImg, retreatImg, retreatImg],
+    () => [
+      retreatImg,
+      retreatImg,
+      retreatImg,
+      retreatImg,
+      retreatImg,
+      retreatImg,
+    ],
     [],
   );
 
@@ -60,23 +79,45 @@ export function RetreatBookingDetailsPage() {
           </div>
           <div style={desktopRightGalleryColStyle}>
             <div style={desktopSmallImageStyle}>
-              <img src={gallery[1] || gallery[0]} style={galleryImageStyle} alt="Top Right" />
+              <img
+                src={gallery[1] || gallery[0]}
+                style={galleryImageStyle}
+                alt="Top Right"
+              />
             </div>
             <div style={{ ...desktopSmallImageStyle, marginTop: 8 }}>
-              <img src={gallery[2] || gallery[0]} style={galleryImageStyle} alt="Bottom Right" />
+              <img
+                src={gallery[2] || gallery[0]}
+                style={galleryImageStyle}
+                alt="Bottom Right"
+              />
             </div>
           </div>
         </div>
 
         <div style={desktopBottomGalleryStyle}>
           <div style={desktopBottomGalleryCellStyle}>
-            <img src={gallery[3] || gallery[0]} style={galleryImageStyle} alt="Bottom 1" />
+            <img
+              src={gallery[3] || gallery[0]}
+              style={galleryImageStyle}
+              alt="Bottom 1"
+            />
           </div>
           <div style={desktopBottomGalleryCellStyle}>
-            <img src={gallery[4] || gallery[0]} style={galleryImageStyle} alt="Bottom 2" />
+            <img
+              src={gallery[4] || gallery[0]}
+              style={galleryImageStyle}
+              alt="Bottom 2"
+            />
           </div>
-          <div style={{ ...desktopBottomGalleryCellStyle, position: "relative" }}>
-            <img src={gallery[5] || gallery[0]} style={galleryImageStyle} alt="Bottom 3" />
+          <div
+            style={{ ...desktopBottomGalleryCellStyle, position: "relative" }}
+          >
+            <img
+              src={gallery[5] || gallery[0]}
+              style={galleryImageStyle}
+              alt="Bottom 3"
+            />
             <div style={overlayCountStyle}>10+</div>
           </div>
         </div>
@@ -84,13 +125,15 @@ export function RetreatBookingDetailsPage() {
         <div style={desktopContentGridStyle}>
           <div style={desktopLeftColumnStyle}>
             <section style={sectionStackStyle}>
-              <h1 style={desktopPageTitleStyle}>Rejuvenating yoga & Ayurvedic Retreat</h1>
+              <h1 style={desktopPageTitleStyle}>
+                Rejuvenating yoga & Ayurvedic Retreat
+              </h1>
               <p style={desktopLeadStyle}>
-                A gentle 7-day wellness journey designed to help you pause, reset
-                your mind, and reconnect with yourself. Through mindful practices,
-                guided reflection, and moments of intentional rest, this retreat
-                supports clarity, balance, and inner calm at a natural, unhurried
-                pace.
+                A gentle 7-day wellness journey designed to help you pause,
+                reset your mind, and reconnect with yourself. Through mindful
+                practices, guided reflection, and moments of intentional rest,
+                this retreat supports clarity, balance, and inner calm at a
+                natural, unhurried pace.
               </p>
             </section>
 
@@ -105,11 +148,20 @@ export function RetreatBookingDetailsPage() {
                   </div>
 
                   <div style={hostRightColStyle}>
-                    <HostMeta icon={<Star size={14} color="#D4A017" fill="#D4A017" />} text="4.9" />
+                    <HostMeta
+                      icon={<Star size={14} color="#D4A017" fill="#D4A017" />}
+                      text="4.9"
+                    />
                     <hr style={hostHrStyle} />
-                    <HostMeta icon={<MessageCircle size={14} color="#D4A017" />} text="76 Reviews" />
+                    <HostMeta
+                      icon={<MessageCircle size={14} color="#D4A017" />}
+                      text="76 Reviews"
+                    />
                     <hr style={hostHrStyle} />
-                    <HostMeta icon={<Award size={14} color="#D4A017" />} text="10+ Exp" />
+                    <HostMeta
+                      icon={<Award size={14} color="#D4A017" />}
+                      text="10+ Exp"
+                    />
                   </div>
                 </div>
 
@@ -146,7 +198,8 @@ export function RetreatBookingDetailsPage() {
                 </div>
                 <div style={addressBodyStyle}>
                   <p style={addressTextStyle}>
-                    KalpX Wellness Retreat, Vythiri Forest Road, Wayanad, Kerala – 673576, India
+                    KalpX Wellness Retreat, Vythiri Forest Road, Wayanad, Kerala
+                    – 673576, India
                   </p>
                   <div style={addressInfoGridStyle}>
                     <div>
@@ -155,7 +208,9 @@ export function RetreatBookingDetailsPage() {
                     </div>
                     <div>
                       <h4 style={miniCapsStyle}>Tips and Noted</h4>
-                      <p style={miniBodyStyle}>1. Bus Location is near from Airport about 2km</p>
+                      <p style={miniBodyStyle}>
+                        1. Bus Location is near from Airport about 2km
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -197,7 +252,10 @@ export function RetreatBookingDetailsPage() {
                     <div style={addonLeftStyle}>
                       <div style={addonIconTileStyle(addon.selected)}>
                         {addon.selected ? (
-                          <Check size={14} color={addon.selected ? "#fff" : "#D4A017"} />
+                          <Check
+                            size={14}
+                            color={addon.selected ? "#fff" : "#D4A017"}
+                          />
                         ) : (
                           <Plus size={14} color="#D4A017" />
                         )}
@@ -228,12 +286,18 @@ export function RetreatBookingDetailsPage() {
                       </div>
                       <div style={reviewStarsStyle}>
                         {Array.from({ length: 5 }).map((_, index) => (
-                          <Star key={index} size={12} color="#D4A017" fill="#D4A017" />
+                          <Star
+                            key={index}
+                            size={12}
+                            color="#D4A017"
+                            fill="#D4A017"
+                          />
                         ))}
                       </div>
                     </div>
                     <p style={reviewTextStyle}>
-                      Amzing Experince enjoyed every day here. Teacher is very Good
+                      Amzing Experince enjoyed every day here. Teacher is very
+                      Good
                     </p>
                     <div style={reviewImagesStyle}>
                       <img src={images[0]} style={reviewThumbStyle} alt="" />
@@ -286,15 +350,29 @@ export function RetreatBookingDetailsPage() {
                       <span style={miniCapsDarkStyle}>Add Ons</span>
                       <div style={priceAddonRowStyle}>
                         <div style={priceAddonLeftStyle}>
-                          <input type="checkbox" checked readOnly style={miniCheckboxStyle} />
-                          <span style={priceAddonTextStyle}>Airport Pickup</span>
+                          <input
+                            type="checkbox"
+                            checked
+                            readOnly
+                            style={miniCheckboxStyle}
+                          />
+                          <span style={priceAddonTextStyle}>
+                            Airport Pickup
+                          </span>
                         </div>
                         <span style={priceAddonValueStyle}>₹4000/-</span>
                       </div>
                       <div style={priceAddonRowStyle}>
                         <div style={priceAddonLeftStyle}>
-                          <input type="checkbox" checked readOnly style={miniCheckboxStyle} />
-                          <span style={priceAddonTextStyle}>Gluten Free Meal</span>
+                          <input
+                            type="checkbox"
+                            checked
+                            readOnly
+                            style={miniCheckboxStyle}
+                          />
+                          <span style={priceAddonTextStyle}>
+                            Gluten Free Meal
+                          </span>
                         </div>
                         <span style={priceAddonValueStyle}>₹2000/-</span>
                       </div>
@@ -312,7 +390,11 @@ export function RetreatBookingDetailsPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => navigate(`/en/retreats/cancellation/${bookingId || "1"}`)}
+                      onClick={() =>
+                        navigate(
+                          `/en/retreats/cancellation/${bookingId || "1"}`,
+                        )
+                      }
                       style={cancelButtonStyle}
                     >
                       Cancel booking
@@ -328,14 +410,26 @@ export function RetreatBookingDetailsPage() {
   ) : (
     <div style={mobilePageStyle}>
       <div style={mobileHeroStyle}>
-        <button type="button" onClick={() => navigate(-1)} style={heroBackButtonStyle}>
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          style={heroBackButtonStyle}
+        >
           <ChevronLeft size={18} color="#fff" />
         </button>
         <img src={images[currentImg]} style={mobileHeroImageStyle} alt="" />
-        <button type="button" onClick={prevImg} style={{ ...heroNavButtonStyle, left: 16 }}>
+        <button
+          type="button"
+          onClick={prevImg}
+          style={{ ...heroNavButtonStyle, left: 16 }}
+        >
           <ChevronLeft size={12} color="#000" />
         </button>
-        <button type="button" onClick={nextImg} style={{ ...heroNavButtonStyle, right: 16 }}>
+        <button
+          type="button"
+          onClick={nextImg}
+          style={{ ...heroNavButtonStyle, right: 16 }}
+        >
           <ChevronRight size={12} color="#000" />
         </button>
         <div style={heroDotsStyle}>
@@ -346,7 +440,9 @@ export function RetreatBookingDetailsPage() {
       </div>
 
       <main style={mobileContentWrapStyle}>
-        <h1 style={mobileHeadingStyle}>Rejuvenating yoga & Ayurvedic Retreat</h1>
+        <h1 style={mobileHeadingStyle}>
+          Rejuvenating yoga & Ayurvedic Retreat
+        </h1>
 
         <section style={mobileSectionCardStyle}>
           <div style={mobileSectionHeaderStyle}>
@@ -367,7 +463,9 @@ export function RetreatBookingDetailsPage() {
               size={10}
               color="#1877F2"
               style={{
-                transform: isSummaryExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                transform: isSummaryExpanded
+                  ? "rotate(180deg)"
+                  : "rotate(0deg)",
               }}
             />
           </button>
@@ -376,7 +474,9 @@ export function RetreatBookingDetailsPage() {
             <div style={expandedSummaryStyle}>
               <div style={mobileInnerSectionStyle}>
                 <div style={mobileSectionRowHeaderStyle}>
-                  <h4 style={mobileSubHeadingStyle}>Your Guides on This Journey</h4>
+                  <h4 style={mobileSubHeadingStyle}>
+                    Your Guides on This Journey
+                  </h4>
                   <button type="button" style={mobileGhostActionStyle}>
                     View all
                   </button>
@@ -394,7 +494,8 @@ export function RetreatBookingDetailsPage() {
                   />
                 </div>
                 <p style={mobileBodyCopyStyle}>
-                  KalpX Wellness Retreat, Vythiri Forest Road, Wayanad, Kerala - 673576, India
+                  KalpX Wellness Retreat, Vythiri Forest Road, Wayanad, Kerala -
+                  673576, India
                 </p>
                 <div style={mobileInfoStackStyle}>
                   <div>
@@ -438,7 +539,9 @@ export function RetreatBookingDetailsPage() {
                       </div>
                       <div>
                         <h5 style={mobileAddonNameStyle}>{addon.name}</h5>
-                        <p style={mobileAddonSubStyle}>Comfortable Airport Pickup</p>
+                        <p style={mobileAddonSubStyle}>
+                          Comfortable Airport Pickup
+                        </p>
                       </div>
                     </div>
                     <div style={mobileAddonPriceStyle}>₹4000/-</div>
@@ -452,7 +555,11 @@ export function RetreatBookingDetailsPage() {
         <section style={mobileSectionCardStyle}>
           <div style={mobileSectionRowHeaderStyle}>
             <h3 style={mobileSectionCapsStyle}>Packages Selected</h3>
-            <button type="button" onClick={() => setIsEditingPackage((prev) => !prev)} style={mobileEditButtonStyle}>
+            <button
+              type="button"
+              onClick={() => setIsEditingPackage((prev) => !prev)}
+              style={mobileEditButtonStyle}
+            >
               <Pencil size={11} color="#707070" />
               Change
             </button>
@@ -506,10 +613,18 @@ export function RetreatBookingDetailsPage() {
                 </div>
 
                 <div style={mobileSaveRowStyle}>
-                  <button type="button" onClick={() => setIsEditingPackage(false)} style={mobilePrimarySaveStyle}>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingPackage(false)}
+                    style={mobilePrimarySaveStyle}
+                  >
                     Save Changes
                   </button>
-                  <button type="button" onClick={() => setIsEditingPackage(false)} style={mobileSecondarySaveStyle}>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingPackage(false)}
+                    style={mobileSecondarySaveStyle}
+                  >
                     Cancel
                   </button>
                 </div>
@@ -521,7 +636,11 @@ export function RetreatBookingDetailsPage() {
         <section style={mobileSectionCardStyle}>
           <div style={mobileSectionRowHeaderStyle}>
             <h3 style={mobileSectionCapsStyle}>Participant Details</h3>
-            <button type="button" onClick={() => setIsEditingParticipant((prev) => !prev)} style={mobileEditButtonStyle}>
+            <button
+              type="button"
+              onClick={() => setIsEditingParticipant((prev) => !prev)}
+              style={mobileEditButtonStyle}
+            >
               <Pencil size={11} color="#707070" />
               Change
             </button>
@@ -542,21 +661,31 @@ export function RetreatBookingDetailsPage() {
             </div>
           ) : (
             <div style={participantEditCardStyle}>
-              {["First Name", "Last Name", "Email Id", "Mobile Number"].map((field) => (
-                <div key={field} style={participantFieldWrapStyle}>
-                  <label style={participantFieldLabelStyle}>{field}</label>
-                  <input
-                    type="text"
-                    placeholder={`Enter your ${field.toLowerCase()}`}
-                    style={participantInputStyle}
-                  />
-                </div>
-              ))}
+              {["First Name", "Last Name", "Email Id", "Mobile Number"].map(
+                (field) => (
+                  <div key={field} style={participantFieldWrapStyle}>
+                    <label style={participantFieldLabelStyle}>{field}</label>
+                    <input
+                      type="text"
+                      placeholder={`Enter your ${field.toLowerCase()}`}
+                      style={participantInputStyle}
+                    />
+                  </div>
+                ),
+              )}
               <div style={mobileSaveRowStyle}>
-                <button type="button" onClick={() => setIsEditingParticipant(false)} style={mobilePrimarySaveStyle}>
+                <button
+                  type="button"
+                  onClick={() => setIsEditingParticipant(false)}
+                  style={mobilePrimarySaveStyle}
+                >
                   Save Changes
                 </button>
-                <button type="button" onClick={() => setIsEditingParticipant(false)} style={mobileSecondarySaveStyle}>
+                <button
+                  type="button"
+                  onClick={() => setIsEditingParticipant(false)}
+                  style={mobileSecondarySaveStyle}
+                >
                   Cancel
                 </button>
               </div>
@@ -596,7 +725,9 @@ export function RetreatBookingDetailsPage() {
 
         <button
           type="button"
-          onClick={() => navigate(`/en/retreats/cancellation/${bookingId || "1"}`)}
+          onClick={() =>
+            navigate(`/en/retreats/cancellation/${bookingId || "1"}`)
+          }
           style={mobileCancelBookingStyle}
         >
           Cancel Booking
@@ -607,7 +738,9 @@ export function RetreatBookingDetailsPage() {
         <div style={mobileStickyPaymentWrapStyle}>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <span style={mobileStickyLabelStyle}>Total Amount Left</span>
-            <span style={mobileStickyValueStyle}>₹{balanceLeft.toLocaleString("en-IN")}</span>
+            <span style={mobileStickyValueStyle}>
+              ₹{balanceLeft.toLocaleString("en-IN")}
+            </span>
           </div>
           <button type="button" style={mobileStickyButtonStyle}>
             Make Payment
@@ -657,7 +790,9 @@ function PriceRow({
   return (
     <div style={priceRowStyle}>
       <span style={priceLabelStyle}>{label}</span>
-      <span style={{ ...priceValueStyle, fontStyle: italic ? "italic" : "normal" }}>
+      <span
+        style={{ ...priceValueStyle, fontStyle: italic ? "italic" : "normal" }}
+      >
         {value}
       </span>
     </div>
@@ -1556,7 +1691,6 @@ const mobileGhostActionStyle: CSSProperties = {
   fontWeight: 700,
   cursor: "pointer",
 };
-
 
 const mobileMapStyle: CSSProperties = {
   borderRadius: 16,

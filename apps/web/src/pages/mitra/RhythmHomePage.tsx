@@ -53,8 +53,15 @@ function heldLabel(itemType: string): string {
   if (itemType === "mantra") return "Mantra held today · return anytime";
   if (itemType === "sankalp") return "Sankalp carried today · return anytime";
   if (itemType === "practice") return "Practice held today · return anytime";
-  if (itemType === "reflection") return "Reflection held today · return anytime";
+  if (itemType === "reflection")
+    return "Reflection held today · return anytime";
   return "Held today · return anytime";
+}
+
+function slotHeldLabel(band: RhythmTimeBand): string {
+  if (band === "morning") return "Morning rhythm held";
+  if (band === "afternoon") return "Afternoon rhythm held";
+  return "Night rhythm held";
 }
 
 function RhythmItemCard({
@@ -68,6 +75,7 @@ function RhythmItemCard({
 }) {
   return (
     <div
+      className="rhythm-item-card"
       style={{
         border: "1px solid rgba(201,168,76,0.35)",
         borderRadius: 28,
@@ -78,6 +86,7 @@ function RhythmItemCard({
       }}
     >
       <div
+        className="rhythm-item-card-meta"
         style={{
           display: "flex",
           alignItems: "center",
@@ -118,6 +127,7 @@ function RhythmItemCard({
         )}
       </div>
       <p
+        className="rhythm-item-card-title"
         style={{
           fontFamily: "var(--kalpx-font-serif)",
           fontSize: 18,
@@ -130,6 +140,7 @@ function RhythmItemCard({
         {item.title_snapshot || ""}
       </p>
       <div
+        className="rhythm-item-card-divider"
         style={{
           display: "flex",
           alignItems: "center",
@@ -146,7 +157,10 @@ function RhythmItemCard({
             background: "rgba(210,166,61,0.45)",
           }}
         />
-        <span style={{ fontSize: 28, lineHeight: 1 }}>
+        <span
+          className="rhythm-item-card-divider-lotus"
+          style={{ fontSize: 28, lineHeight: 1 }}
+        >
           <img src="/lotus_icon.png" alt="" height={20} width={20} />
         </span>
         <div
@@ -172,7 +186,10 @@ function RhythmItemCard({
         </p>
       )}
       {item.description_snapshot && (
-        <div style={{ marginBottom: 28 }}>
+        <div
+          className="rhythm-item-card-description"
+          style={{ marginBottom: 28 }}
+        >
           <p
             style={{
               fontFamily: "var(--kalpx-font-serif)",
@@ -191,17 +208,21 @@ function RhythmItemCard({
         <p
           style={{
             fontFamily: "var(--kalpx-font-serif)",
-            fontSize: 12,
+            fontSize: 14,
             color: "#7A9E7E",
             textAlign: "center",
             margin: "0 0 14px",
             letterSpacing: "0.02em",
+            fontWeight: 700,
           }}
         >
           {heldLabel(item.item_type)}
         </p>
       )}
-      <div style={{ display: "flex", justifyContent: "center" }}>
+      <div
+        className="rhythm-item-card-action"
+        style={{ display: "flex", justifyContent: "center" }}
+      >
         <button
           onClick={onAction}
           disabled={resolving}
@@ -241,6 +262,7 @@ function BandSection({
   resolvingItemId,
   onAddItem,
   slotDone,
+  trailingAction,
 }: {
   band: RhythmTimeBand;
   slot: RhythmSlot | null;
@@ -248,12 +270,24 @@ function BandSection({
   resolvingItemId?: string | null;
   onAddItem: (band: RhythmTimeBand) => void;
   slotDone?: boolean;
+  trailingAction?: React.ReactNode;
 }) {
   const hasItems = slot && slot.items.length > 0;
   if (!hasItems) return null;
+  const slotHeld =
+    slotDone === true ||
+    ((slot?.items?.length ?? 0) > 0 &&
+      slot!.items.every((item) => item.completed_today === true));
   return (
-    <div style={{ marginBottom: 28 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+    <div className="rhythm-band-section" style={{ marginBottom: 28 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          marginBottom: 8,
+        }}
+      >
         <div
           style={{
             fontFamily: "var(--kalpx-font-serif)",
@@ -264,7 +298,7 @@ function BandSection({
         >
           {RHYTHM_BAND_LABELS[band]} Practice
         </div>
-        {slotDone && (
+        {slotHeld && (
           <span
             style={{
               fontFamily: "var(--kalpx-font-serif)",
@@ -273,11 +307,7 @@ function BandSection({
               letterSpacing: 0.4,
             }}
           >
-            {band === "morning"
-              ? "Morning rhythm held"
-              : band === "afternoon"
-                ? "Afternoon rhythm held"
-                : "Night rhythm held"}
+            {slotHeldLabel(band)}
           </span>
         )}
       </div>
@@ -306,23 +336,27 @@ function BandSection({
           resolving={resolvingItemId === item.item_id}
         />
       ))}
-      <button
-        onClick={() => onAddItem(band)}
-        style={{
-          background: "transparent",
-          border: "1px dashed  #d4a017",
-          borderRadius: 11,
+      <div className="rhythm-band-actions">
+        <button
+          className="rhythm-band-add-button"
+          onClick={() => onAddItem(band)}
+          style={{
+            background: "transparent",
+            border: "1px dashed  #d4a017",
+            borderRadius: 11,
 
-          fontSize: 16,
-          fontFamily: "var(--kalpx-font-serif)",
-          padding: "10px 18px",
-          cursor: "pointer",
-          marginTop: 8,
-          width: "100%",
-        }}
-      >
-        Add to your {band} rhythm
-      </button>
+            fontSize: 16,
+            fontFamily: "var(--kalpx-font-serif)",
+            padding: "10px 18px",
+            cursor: "pointer",
+            marginTop: 8,
+            width: "100%",
+          }}
+        >
+          Add to your {band} rhythm
+        </button>
+        {trailingAction}
+      </div>
     </div>
   );
 }
@@ -357,6 +391,55 @@ export function RhythmHomePage() {
   }, [homeData, dispatch]);
 
   const rhythm = homeData?.companion_rhythm;
+  const visibleRhythmBands = rhythm
+    ? ([
+        {
+          band: "morning" as const,
+          slot: rhythm.morning,
+          done: (rhythm as any).morning_done === true,
+        },
+        {
+          band: "afternoon" as const,
+          slot: rhythm.afternoon,
+          done: (rhythm as any).afternoon_done === true,
+        },
+        {
+          band: "night" as const,
+          slot: rhythm.night,
+          done: (rhythm as any).night_done === true,
+        },
+      ].filter(({ slot }) => slot && slot.items.length > 0) as Array<{
+        band: RhythmTimeBand;
+        slot: RhythmSlot;
+        done: boolean;
+      }>)
+    : [];
+
+  const editRhythmButton = (
+    <button
+      className="rhythm-edit-button"
+      onClick={() => navigate("/en/mitra/rhythm/edit")}
+      style={{
+        width: "100%",
+        padding: "10px",
+        borderRadius: 11,
+        border: "1px solid rgba(201,168,76,0.55)",
+        background: "rgba(255,252,247,0.6)",
+        color: "#7B6550",
+        fontSize: 16,
+        fontFamily: "var(--kalpx-font-sans, Inter, sans-serif)",
+        cursor: "pointer",
+        marginTop: 8,
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 14,
+      }}
+    >
+      <Pencil size={24} strokeWidth={1.8} color="#C99317" />
+      Edit My Rhythm
+    </button>
+  );
 
   const handleHomePickerAdd = useCallback(
     async (picked: {
@@ -452,6 +535,7 @@ export function RhythmHomePage() {
     <>
       <MitraMobileShell backgroundImage="/beige_bg.png">
         <main
+          className="rhythm-home-main"
           style={{
             flex: 1,
             display: "flex",
@@ -460,7 +544,10 @@ export function RhythmHomePage() {
             padding: "24px 16px calc(92px + env(safe-area-inset-bottom))",
           }}
         >
-          <div style={{ width: "100%", maxWidth: 420, position: "relative" }}>
+          <div
+            className="rhythm-home-content"
+            style={{ width: "100%", maxWidth: 420, position: "relative" }}
+          >
             <img
               src="/leaves-bird.png"
               alt=""
@@ -528,56 +615,23 @@ export function RhythmHomePage() {
 
             {!loading && rhythm && rhythm.has_rhythm && (
               <>
-                <BandSection
-                  band="morning"
-                  slot={rhythm.morning}
-                  slotDone={(rhythm as any).morning_done === true}
-                  onItemAction={(item) =>
-                    void handleItemAction(item, "morning")
-                  }
-                  resolvingItemId={resolvingItemId}
-                  onAddItem={setHomePickerBand}
-                />
-                <BandSection
-                  band="afternoon"
-                  slot={rhythm.afternoon}
-                  slotDone={(rhythm as any).afternoon_done === true}
-                  onItemAction={(item) =>
-                    void handleItemAction(item, "afternoon")
-                  }
-                  resolvingItemId={resolvingItemId}
-                  onAddItem={setHomePickerBand}
-                />
-                <BandSection
-                  band="night"
-                  slot={rhythm.night}
-                  slotDone={(rhythm as any).night_done === true}
-                  onItemAction={(item) => void handleItemAction(item, "night")}
-                  resolvingItemId={resolvingItemId}
-                  onAddItem={setHomePickerBand}
-                />
-                <button
-                  onClick={() => navigate("/en/mitra/rhythm/edit")}
-                  style={{
-                    width: "100%",
-                    padding: "10px",
-                    borderRadius: 11,
-                    border: "1px solid rgba(201,168,76,0.55)",
-                    background: "rgba(255,252,247,0.6)",
-                    color: "#7B6550",
-                    fontSize: 16,
-                    fontFamily: "var(--kalpx-font-sans, Inter, sans-serif)",
-                    cursor: "pointer",
-                    marginTop: 8,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 14,
-                  }}
-                >
-                  <Pencil size={24} strokeWidth={1.8} color="#C99317" />
-                  Edit My Rhythm
-                </button>
+                {visibleRhythmBands.map(({ band, slot, done }, index) => (
+                  <BandSection
+                    key={band}
+                    band={band}
+                    slot={slot}
+                    slotDone={done}
+                    onItemAction={(item) => void handleItemAction(item, band)}
+                    resolvingItemId={resolvingItemId}
+                    onAddItem={setHomePickerBand}
+                    trailingAction={
+                      index === visibleRhythmBands.length - 1
+                        ? editRhythmButton
+                        : undefined
+                    }
+                  />
+                ))}
+                {visibleRhythmBands.length === 0 && editRhythmButton}
               </>
             )}
           </div>

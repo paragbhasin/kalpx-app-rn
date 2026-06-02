@@ -1,7 +1,7 @@
 import { CommunityWebLayout } from "../../components/community/CommunityWebLayout";
 
 const agreementImage = new URL(
-  "../../../../mobile/assets/user-agreement.png",
+  "/mobile-assets/user-agreement.png",
   import.meta.url,
 ).href;
 

@@ -6,12 +6,16 @@
  * accordion editor directly (used by RhythmEditScreen wrapper).
  */
 
+import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 import {
   getMissingSuggestionSlots,
   RHYTHM_BAND_LABELS,
+  RHYTHM_BAND_LABELS_HI,
   RHYTHM_BAND_SUBTITLES,
+  RHYTHM_BAND_SUBTITLES_HI,
   RHYTHM_SUGGEST_COPY,
+  RHYTHM_SUGGEST_COPY_HI,
   rhythmSuggestItemToLocalItem,
   toRhythmSetupPayloadItems,
 } from "@kalpx/contracts";
@@ -117,17 +121,6 @@ const BAND_ART: Record<RhythmTimeBand, React.ComponentType<any>> = {
 };
 const RHYTHM_BG = require("../../../assets/beige_bg.webp");
 
-const MOMENT_COPY: Record<RhythmTimeBand, { label: string; desc: string }> = {
-  morning: {
-    label: "Morning",
-    desc: "Begin the day with steadiness and intention.",
-  },
-  afternoon: {
-    label: "Afternoon",
-    desc: "Pause, reset, and return to yourself.",
-  },
-  night: { label: "Night", desc: "Reflect, release, and close gently." },
-};
 const PURPOSE_ART: Record<RhythmTimeBand, React.ComponentType<any>[]> = {
   morning: [M3Icon, M5Icon, M1Icon, M4Icon, M2Icon, M6Icon],
   afternoon: [A5Icon, A1Icon, A4Icon, A2Icon, A6Icon, A3Icon],
@@ -227,14 +220,6 @@ const PURPOSE_OPTIONS: Record<
     },
   ],
 };
-
-function itemTypeLabel(itemType: string): string {
-  if (itemType === "mantra") return "Mantra";
-  if (itemType === "sankalp") return "Sankalp";
-  if (itemType === "practice") return "Practice";
-  if (itemType === "reflection") return "Reflection";
-  return "Library";
-}
 
 const DEFAULT_REMINDER_TIMES: Record<RhythmTimeBand, string> = {
   morning: "06:00",
@@ -362,10 +347,10 @@ function ReminderTimeRow({
   );
 }
 
-function beginLabel(itemType: string): string {
-  if (itemType === "mantra") return "Begin Chanting";
-  if (itemType === "sankalp") return "Begin Embodying";
-  return "Begin Practice";
+function beginLabel(itemType: string, t: (key: string) => string): string {
+  if (itemType === "mantra") return t("rhythmHome.beginChanting");
+  if (itemType === "sankalp") return t("rhythmHome.beginEmbodying");
+  return t("rhythmHome.beginPractice");
 }
 
 function getConfirmationItems(
@@ -413,6 +398,13 @@ export default function RhythmSetupScreen({
   editMode?: boolean;
   embedded?: boolean;
 }) {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
+  const rhythmSuggestCopy = isHindi ? RHYTHM_SUGGEST_COPY_HI : RHYTHM_SUGGEST_COPY;
+  const rhythmBandLabels = isHindi ? RHYTHM_BAND_LABELS_HI : RHYTHM_BAND_LABELS;
+  const rhythmBandSubtitles = isHindi ? RHYTHM_BAND_SUBTITLES_HI : RHYTHM_BAND_SUBTITLES;
+  const itemTypeLabelLocalized = (type: string) =>
+    t(`rhythmSetup.itemType.${type}`, { defaultValue: "Library" });
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
   const homeData = useSelector((state: any) => state.door?.homeData);
@@ -613,7 +605,7 @@ export default function RhythmSetupScreen({
         selected_moments: selectedMoments,
         purposes,
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        locale: "en",
+        locale: i18n.language,
         source_surface: "rhythm_wizard",
       });
       const newItems: Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>> =
@@ -632,11 +624,47 @@ export default function RhythmSetupScreen({
         );
       }
     } catch {
-      setSuggestError(RHYTHM_SUGGEST_COPY.error);
+      setSuggestError(rhythmSuggestCopy.error);
     } finally {
       setSuggestLoading(false);
     }
-  }, [purposes, selectedMoments]);
+  }, [purposes, selectedMoments, i18n.language]);
+
+  // When locale changes while suggestions are already displayed, re-fetch the
+  // SAME items in the new locale so title/why_this text updates in place.
+  const localeRef = useRef(i18n.language);
+  useEffect(() => {
+    const prevLocale = localeRef.current;
+    localeRef.current = i18n.language;
+    if (wizardStep !== "suggestion" || i18n.language === prevLocale) return;
+    const pinned = Object.entries(wizardItems)
+      .map(([slot, it]) => it ? { slot, item_id: it.item_id, item_type: it.item_type } : null)
+      .filter(Boolean) as { slot: string; item_id: string; item_type: string }[];
+    if (!pinned.length) return;
+    void (async () => {
+      setSuggestLoading(true);
+      try {
+        const resp = await postRhythmSuggest({
+          selected_moments: selectedMoments,
+          purposes,
+          tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          locale: i18n.language,
+          source_surface: "rhythm_wizard",
+          pinned_items: pinned as any,
+        });
+        const newItems: Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>> = {};
+        resp.items.forEach((it, idx) => {
+          newItems[it.slot] = { ...rhythmSuggestItemToLocalItem(it), sort_order: idx };
+        });
+        if (Object.keys(newItems).length) setWizardItems(newItems);
+      } catch {
+        // Silent — keep existing items on failure
+      } finally {
+        setSuggestLoading(false);
+      }
+    })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [i18n.language]);
 
   useEffect(() => {
     if (wizardStep === "suggestion" && !editMode && !suggestionsLoaded) {
@@ -685,7 +713,7 @@ export default function RhythmSetupScreen({
       );
       if (missingReminderBand) {
         setWizardError(
-          `Set a reminder time for ${MOMENT_COPY[missingReminderBand].label.toLowerCase()}.`,
+          `Set a reminder time for ${t(`rhythmSetup.moment.${missingReminderBand}.label`).toLowerCase()}.`,
         );
         return;
       }
@@ -714,7 +742,7 @@ export default function RhythmSetupScreen({
       dispatch(setHomeData(newHomeData));
       setWizardStep("confirmation");
     } catch {
-      setWizardError("Could not save. Please try again.");
+      setWizardError(t("rhythmSetup.saveError"));
     } finally {
       setWizardSaving(false);
     }
@@ -742,6 +770,7 @@ export default function RhythmSetupScreen({
           band,
           item.item_id,
           item.item_type,
+          i18n.language,
         );
         if (resolved?.resolved) {
           enrichedItem = {
@@ -968,7 +997,7 @@ export default function RhythmSetupScreen({
       dispatch(setHomeData(newHomeData));
       openRhythmHome();
     } catch {
-      setErrorMsg("Could not save. Please try again.");
+      setErrorMsg(t("rhythmSetup.saveError"));
     } finally {
       setSaving(false);
     }
@@ -1006,9 +1035,9 @@ export default function RhythmSetupScreen({
           <View style={wStyles.hero}>
 
             {/* {renderStepDots("moments")} */}
-            <Text style={wStyles.buildheading}>Build Your Daily Rhythm</Text>
+            <Text style={wStyles.buildheading}>{t("rhythmSetup.moments.heading")}</Text>
             <Text style={wStyles.subheading}>
-              When would you like Mitra to support you?
+              {t("rhythmSetup.moments.subheading")}
             </Text>
             <View style={{ alignSelf: "center" }}>
               <View style={wStyles.momentDividerRow}>
@@ -1019,10 +1048,10 @@ export default function RhythmSetupScreen({
             </View>
             <View style={wStyles.helperCopyWrap}>
               <Text style={wStyles.helperTitle}>
-                You can select more than one
+                {t("rhythmSetup.moments.helperTitle")}
               </Text>
               <Text style={wStyles.helperBody}>
-                Choose all moments when you&apos;d like Mitra to walk with you.
+                {t("rhythmSetup.moments.helperBody")}
               </Text>
             </View>
           </View>
@@ -1045,7 +1074,7 @@ export default function RhythmSetupScreen({
                 </View>
                 <View style={wStyles.momentCardInner}>
                   <Text style={wStyles.momentLabel}>
-                    {MOMENT_COPY[band].label}
+                    {t(`rhythmSetup.moment.${band}.label`)}
                   </Text>
                   <View style={wStyles.momentDividerRow}>
                     <View style={wStyles.momentDividerLine} />
@@ -1053,7 +1082,7 @@ export default function RhythmSetupScreen({
                     <View style={wStyles.momentDividerLine} />
                   </View>
                   <Text style={wStyles.momentDesc}>
-                    {MOMENT_COPY[band].desc}
+                    {t(`rhythmSetup.moment.${band}.desc`)}
                   </Text>
                 </View>
                 <View
@@ -1074,7 +1103,7 @@ export default function RhythmSetupScreen({
             disabled={selectedMoments.length === 0}
             activeOpacity={0.85}
           >
-            <Text style={wStyles.primaryBtnText}>Continue →</Text>
+            <Text style={wStyles.primaryBtnText}>{t("rhythmSetup.continueCta")}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -1082,7 +1111,7 @@ export default function RhythmSetupScreen({
             activeOpacity={0.7}
             style={[wStyles.secondaryLinkRow, { marginBottom: 32 }]}
           >
-            <Text style={wStyles.secondaryLink}>Set up myself</Text>
+            <Text style={wStyles.secondaryLink}>{t("rhythmSetup.setupMyself")}</Text>
           </TouchableOpacity>
         </ScrollView>
 
@@ -1100,10 +1129,10 @@ export default function RhythmSetupScreen({
           <View style={wStyles.hero}>
 
             <Text style={wStyles.heading}>
-              What should each{"\n"}moment give you?
+              {t("rhythmSetup.purpose.heading")}
             </Text>
             <Text style={[wStyles.subheading, wStyles.purposeIntro]}>
-              Mitra will choose a practice that fits.
+              {t("rhythmSetup.purpose.intro")}
             </Text>
           </View>
 
@@ -1114,7 +1143,7 @@ export default function RhythmSetupScreen({
                 <View style={wStyles.purposeSectionHeader}>
                   <BandIcon width={32} height={32} />
                   <Text style={wStyles.purposeBandLabel}>
-                    {MOMENT_COPY[band].label}
+                    {t(`rhythmSetup.moment.${band}.label`)}
                   </Text>
                   <View style={wStyles.purposeHeaderLine} />
                 </View>
@@ -1147,7 +1176,7 @@ export default function RhythmSetupScreen({
                               active && wStyles.purposeChipLabelActive,
                             ]}
                           >
-                            {opt.label}
+                            {t(`rhythmSetup.purpose.${band}.${opt.value}.label`)}
                           </Text>
                           <Text
                             style={[
@@ -1155,7 +1184,7 @@ export default function RhythmSetupScreen({
                               active && wStyles.purposeChipDescActive,
                             ]}
                           >
-                            {opt.desc}
+                            {t(`rhythmSetup.purpose.${band}.${opt.value}.desc`)}
                           </Text>
                         </View>
                       </TouchableOpacity>
@@ -1177,7 +1206,7 @@ export default function RhythmSetupScreen({
             activeOpacity={0.85}
           >
             <Text style={wStyles.primaryBtnText}>
-              See Mitra&apos;s Suggestion →
+              {t("rhythmSetup.purpose.seeSuggestion")}
             </Text>
           </TouchableOpacity>
         </ScrollView>
@@ -1200,11 +1229,10 @@ export default function RhythmSetupScreen({
           >
             <View style={wStyles.hero}>
               <Text style={[wStyles.heading, wStyles.suggestionHeading]}>
-                Mitra suggests this for you.
+                {t("rhythmSetup.suggestion.heading")}
               </Text>
               <Text style={[wStyles.subheading, wStyles.suggestionSubheading]}>
-                Each practice fits the purpose you chose. You can change any of
-                them.
+                {t("rhythmSetup.suggestion.subheading")}
               </Text>
             </View>
 
@@ -1212,7 +1240,7 @@ export default function RhythmSetupScreen({
               <View style={wStyles.loadingRow}>
                 <ActivityIndicator color="#C99317" />
                 <Text style={wStyles.loadingText}>
-                  {RHYTHM_SUGGEST_COPY.loading}
+                  {rhythmSuggestCopy.loading}
                 </Text>
               </View>
             )}
@@ -1229,7 +1257,7 @@ export default function RhythmSetupScreen({
                   activeOpacity={0.8}
                 >
                   <Text style={wStyles.retryBtnText}>
-                    {RHYTHM_SUGGEST_COPY.tryAgain}
+                    {rhythmSuggestCopy.tryAgain}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -1238,7 +1266,7 @@ export default function RhythmSetupScreen({
                   style={wStyles.secondaryLinkRow}
                 >
                   <Text style={wStyles.secondaryLink}>
-                    {RHYTHM_SUGGEST_COPY.chooseFromLibrary}
+                    {rhythmSuggestCopy.chooseFromLibrary}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -1252,7 +1280,7 @@ export default function RhythmSetupScreen({
                     <View key={band} style={wStyles.missingSlotBox}>
                       <Text style={wStyles.missingSlotText}>
                         Mitra could not suggest a{" "}
-                        {MOMENT_COPY[band].label.toLowerCase()} practice.
+                        {t(`rhythmSetup.moment.${band}.label`).toLowerCase()} practice.
                       </Text>
                       <TouchableOpacity
                         style={wStyles.changeBtn}
@@ -1260,7 +1288,7 @@ export default function RhythmSetupScreen({
                         activeOpacity={0.7}
                       >
                         <Text style={wStyles.changeBtnText}>
-                          {RHYTHM_SUGGEST_COPY.chooseFromLibrary}
+                          {rhythmSuggestCopy.chooseFromLibrary}
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -1271,11 +1299,11 @@ export default function RhythmSetupScreen({
                     <View style={wStyles.suggestionMetaRow}>
                       <View style={wStyles.suggestionTypePill}>
                         <Text style={wStyles.suggestionTypePillText}>
-                          {itemTypeLabel(item.item_type)}
+                          {itemTypeLabelLocalized(item.item_type)}
                         </Text>
                       </View>
                       <Text style={wStyles.suggestionBandMeta}>
-                        {MOMENT_COPY[band].label}
+                        {t(`rhythmSetup.moment.${band}.label`)}
                       </Text>
                       <TouchableOpacity
                         style={wStyles.suggestionChangeBtn}
@@ -1287,7 +1315,7 @@ export default function RhythmSetupScreen({
                           size={15}
                           color="#C89211"
                         />
-                        <Text style={wStyles.suggestionChangeText}>Change</Text>
+                        <Text style={wStyles.suggestionChangeText}>{t("rhythmSetup.change")}</Text>
                       </TouchableOpacity>
                     </View>
                     <Text style={wStyles.suggestionTitle}>
@@ -1330,7 +1358,7 @@ export default function RhythmSetupScreen({
               activeOpacity={0.85}
               disabled={acceptDisabled}
             >
-              <Text style={wStyles.primaryBtnText}>Accept Rhythm →</Text>
+              <Text style={wStyles.primaryBtnText}>{t("rhythmSetup.suggestion.accept")}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -1340,7 +1368,7 @@ export default function RhythmSetupScreen({
               activeOpacity={0.7}
               style={[wStyles.secondaryLinkRow, { marginBottom: 48 }]}
             >
-              <Text style={wStyles.secondaryLink}>Choose My Own</Text>
+              <Text style={wStyles.secondaryLink}>{t("rhythmSetup.suggestion.chooseOwn")}</Text>
             </TouchableOpacity>
           </ScrollView>
 
@@ -1365,18 +1393,18 @@ export default function RhythmSetupScreen({
       >
         {renderStepDots("reminders")}
         <Text style={wStyles.buildheading}>
-          Would you like gentle reminder?
+          {t("rhythmSetup.reminders.heading")}
         </Text>
         <Text style={wStyles.subheading}>
-          Mitra can remind you when each moment arrives.
+          {t("rhythmSetup.reminders.subheading")}
         </Text>
 
         <View style={wStyles.pillRow}>
           {(
             [
-              { label: "Yes, gently remind me", value: "yes" },
-              { label: "No,I will come myself", value: "no" },
-              { label: "Ask me later", value: "later" },
+              { label: t("rhythmSetup.reminders.yes"), value: "yes" },
+              { label: t("rhythmSetup.reminders.no"), value: "no" },
+              { label: t("rhythmSetup.reminders.later"), value: "later" },
             ] as { label: string; value: "yes" | "no" | "later" }[]
           ).map((opt) => (
             <TouchableOpacity
@@ -1407,7 +1435,7 @@ export default function RhythmSetupScreen({
               .map((band) => (
                 <ReminderTimeRow
                   key={band}
-                  label={`${MOMENT_COPY[band].label} reminder time`}
+                  label={`${t(`rhythmSetup.moment.${band}.label`)} reminder time`}
                   value={
                     wizardReminderTimes[band] ??
                     wizardItems[band]?.reminder_time
@@ -1443,7 +1471,7 @@ export default function RhythmSetupScreen({
           {wizardSaving ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={wStyles.primaryBtnText}>Save My Rhythm →</Text>
+            <Text style={wStyles.primaryBtnText}>{t("rhythmSetup.reminders.save")}</Text>
           )}
         </TouchableOpacity>
       </ScrollView>
@@ -1463,10 +1491,10 @@ export default function RhythmSetupScreen({
               <Text style={wStyles.confirmSparkle}>✦</Text>
             </View>
             <Text style={[wStyles.heading, wStyles.confirmHeading]}>
-              Your Daily Companion is ready.
+              {t("rhythmSetup.confirmation.heading")}
             </Text>
             <Text style={[wStyles.subheading, wStyles.confirmSubheading]}>
-              Each moment has its practice. Return to it whenever you need.
+              {t("rhythmSetup.confirmation.subheading")}
             </Text>
           </View>
 
@@ -1480,11 +1508,11 @@ export default function RhythmSetupScreen({
                 <View key={band} style={wStyles.confirmCard}>
                   <View style={wStyles.confirmCardHeader}>
                     <Text style={wStyles.confirmBand}>
-                      {MOMENT_COPY[band].label.toUpperCase()}
+                      {t(`rhythmSetup.moment.${band}.label`).toUpperCase()}
                     </Text>
                     <View style={wStyles.confirmTypePill}>
                       <Text style={wStyles.confirmTypePillText}>
-                        {itemTypeLabel(item.item_type).toUpperCase()}
+                        {itemTypeLabelLocalized(item.item_type).toUpperCase()}
                       </Text>
                     </View>
                   </View>
@@ -1504,7 +1532,7 @@ export default function RhythmSetupScreen({
                     activeOpacity={0.85}
                   >
                     <Text style={wStyles.confirmActionBtnText}>
-                      {beginLabel(item.item_type)}
+                      {beginLabel(item.item_type, t)}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -1518,7 +1546,7 @@ export default function RhythmSetupScreen({
             activeOpacity={0.85}
           >
             <Text style={[wStyles.primaryBtnText, { color: "#7B6550" }]}>
-              Return Home
+              {t("rhythmSetup.returnHome")}
             </Text>
           </TouchableOpacity>
 
@@ -1528,7 +1556,7 @@ export default function RhythmSetupScreen({
             style={wStyles.secondaryLinkRow}
           >
             <Text style={wStyles.secondaryLink}>
-              {hasActiveInnerPath ? "Inner Path →" : "Add Inner Path →"}
+              {hasActiveInnerPath ? t("rhythmSetup.confirmation.innerPath") : t("rhythmSetup.confirmation.addInnerPath")}
             </Text>
           </TouchableOpacity>
         </ScrollView>
@@ -1555,7 +1583,7 @@ export default function RhythmSetupScreen({
           <View style={styles.hero}>
 
             <Text style={styles.headerTitle}>
-              {editMode ? "Edit My Rhythm" : "Set Up My Rhythm"}
+              {editMode ? t("rhythmSetup.editTitle") : t("rhythmSetup.setupTitle")}
             </Text>
           </View>
 
@@ -1580,10 +1608,10 @@ export default function RhythmSetupScreen({
                   </View>
                   <View style={styles.bandCopy}>
                     <Text style={styles.bandLabel}>
-                      {RHYTHM_BAND_LABELS[band]}
+                      {rhythmBandLabels[band]}
                     </Text>
-                    <Text style={styles.bandSubtitle}>
-                      {RHYTHM_BAND_SUBTITLES[band]}
+                    <Text style={[styles.bandSubtitle, isHindi && { letterSpacing: 0 }]}>
+                      {rhythmBandSubtitles[band]}
                     </Text>
                   </View>
                   <Text style={styles.chevron}>{isExpanded ? "⌃" : "⌄"}</Text>
@@ -1629,8 +1657,8 @@ export default function RhythmSetupScreen({
                             >
                               <Text style={styles.reminderToggleText}>
                                 {item.reminder_enabled
-                                  ? "Reminder on ✓"
-                                  : "Remind me"}
+                                  ? t("rhythmSetup.reminderOn")
+                                  : t("rhythmSetup.remindMe")}
                               </Text>
                             </TouchableOpacity>
                             {item.reminder_enabled && (
@@ -1702,7 +1730,7 @@ export default function RhythmSetupScreen({
                                     activeOpacity={0.7}
                                   >
                                     <Text style={styles.moveSlotPillText}>
-                                      Move to {s}
+                                      {t("rhythmSetup.moveTo", { band: s })}
                                     </Text>
                                   </TouchableOpacity>
                                 ))}
@@ -1714,7 +1742,7 @@ export default function RhythmSetupScreen({
                               activeOpacity={0.7}
                               style={styles.removeBtn}
                             >
-                              <Text style={styles.removeBtnText}>Remove</Text>
+                              <Text style={styles.removeBtnText}>{t("rhythmSetup.remove")}</Text>
                             </TouchableOpacity>
                           </View>
                         </View>
@@ -1728,7 +1756,7 @@ export default function RhythmSetupScreen({
                     >
                       <Text style={styles.addFromLibraryPlus}>＋</Text>
                       <Text style={styles.addFromLibraryText}>
-                        Add from library
+                        {t("rhythmSetup.addFromLibrary")}
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -1794,7 +1822,7 @@ export default function RhythmSetupScreen({
             ) : (
               <>
                 <Text style={styles.saveBtnIcon}>✦</Text>
-                <Text style={styles.saveBtnText}>Save My Rhythm</Text>
+                <Text style={styles.saveBtnText}>{t("rhythmSetup.saveRhythm")}</Text>
                 <Text style={styles.saveBtnArrow}>→</Text>
               </>
             )}

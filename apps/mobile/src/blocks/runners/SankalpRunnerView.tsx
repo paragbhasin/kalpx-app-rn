@@ -1,5 +1,6 @@
 import { Audio } from "expo-av";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Image,
   LayoutAnimation,
@@ -106,23 +107,26 @@ const CollapsibleCard: React.FC<{
 const CommunityActionBar: React.FC<{
   addLoading?: boolean;
   onAdd?: () => void;
-}> = ({ addLoading, onAdd }) => (
-  <View style={styles.communityActionBar}>
-    <TouchableOpacity
-      onPress={onAdd}
-      disabled={addLoading}
-      activeOpacity={0.85}
-      style={[
-        styles.communityAddButton,
-        addLoading && styles.communityAddButtonDisabled,
-      ]}
-    >
-      <Text style={styles.communityAddButtonText}>
-        {addLoading ? "Adding..." : "Add to My Practice"}
-      </Text>
-    </TouchableOpacity>
-  </View>
-);
+}> = ({ addLoading, onAdd }) => {
+  const { t } = useTranslation();
+  return (
+    <View style={styles.communityActionBar}>
+      <TouchableOpacity
+        onPress={onAdd}
+        disabled={addLoading}
+        activeOpacity={0.85}
+        style={[
+          styles.communityAddButton,
+          addLoading && styles.communityAddButtonDisabled,
+        ]}
+      >
+        <Text style={styles.communityAddButtonText}>
+          {addLoading ? t("sankalpRunner.adding") : t("sankalpRunner.addToMyPractice")}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
 
 // --- Main Component ---
 
@@ -137,6 +141,7 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
   addLoading,
   onAddToPractice,
 }) => {
+  const { t } = useTranslation();
   const [isSankalpActivating, setIsSankalpActivating] = useState(false);
   const [essenceExpanded, setEssenceExpanded] = useState(true);
   const [benefitsExpanded, setBenefitsExpanded] = useState(false);
@@ -306,7 +311,7 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
 
         {hasContent(item.how_to_live) && (
           <View style={styles.mainCard}>
-            <SectionHeader label="How To Live" />
+            <SectionHeader label={t("sankalpRunner.howToLive")} />
             <View style={{ marginTop: 12 }}>
               {Array.isArray(item.how_to_live) ? (
                 <View style={styles.howToLiveList}>
@@ -332,8 +337,8 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
           <View style={styles.embodySection}>
             <Text style={styles.embodyInstr}>
               {isSankalpActivating
-                ? "Let the vibration settle within..."
-                : "Tap to embody your intention"}
+                ? t("sankalpRunner.vibrationSettle")
+                : t("sankalpRunner.tapToEmbody")}
             </Text>
 
             <TouchableOpacity
@@ -375,7 +380,7 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
         >
           {hasContent(item.insight) && (
             <CollapsibleCard
-              label="Essence"
+              label={t("sankalpRunner.essence")}
               expanded={essenceExpanded}
               onToggle={() => setEssenceExpanded(!essenceExpanded)}
             >
@@ -387,7 +392,7 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
           )}
           {hasContent(item.benefits) && (
             <CollapsibleCard
-              label="Benefits"
+              label={t("sankalpRunner.benefits")}
               expanded={benefitsExpanded}
               onToggle={() => setBenefitsExpanded(!benefitsExpanded)}
             >
@@ -411,7 +416,7 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
         )}
 
         <TouchableOpacity onPress={onBack} style={styles.backLink}>
-          <Text style={styles.backLinkText}>Back</Text>
+          <Text style={styles.backLinkText}>{t("sankalpRunner.back")}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

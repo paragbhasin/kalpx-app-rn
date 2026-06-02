@@ -79,6 +79,7 @@ export interface TellMitraThreadViewProps {
   submitting: boolean;
   composerValue: string;
   composerPlaceholder: string;
+  isDesktop?: boolean;
   composerRef: React.RefObject<HTMLTextAreaElement | null>;
   threadBottomRef: React.RefObject<HTMLDivElement | null>;
   onComposerChange: (val: string) => void;
@@ -99,6 +100,7 @@ export function TellMitraThreadView({
   submitting,
   composerValue,
   composerPlaceholder,
+  isDesktop = false,
   composerRef,
   threadBottomRef,
   onComposerChange,
@@ -111,6 +113,9 @@ export function TellMitraThreadView({
   onWisdomOptionPress,
   error,
 }: TellMitraThreadViewProps) {
+  const contentMaxWidth = isDesktop ? 760 : undefined;
+  const bubbleMaxWidth = isDesktop ? "68%" : "75%";
+  const chipMaxWidth = isDesktop ? "52%" : "60%";
 
   function renderItem(item: TellMitraConversationItem) {
     // ── user_message ─────────────────────────────────────────────────────────
@@ -119,13 +124,14 @@ export function TellMitraThreadView({
         <div key={item.id} style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
           <div style={{
             background: "#F5E9C8",
-            borderRadius: "18px 18px 4px 18px",
-            padding: "12px 18px",
-            maxWidth: "75%",
-            fontSize: 16,
+            borderRadius: isDesktop ? "20px 20px 6px 20px" : "18px 18px 4px 18px",
+            padding: isDesktop ? "14px 20px" : "12px 18px",
+            maxWidth: bubbleMaxWidth,
+            fontSize: isDesktop ? 17 : 16,
             color: "#3B2A1A",
             lineHeight: 1.65,
             fontFamily: "inherit",
+            boxShadow: isDesktop ? "0 10px 24px rgba(67,33,4,0.06)" : "none",
           }}>
             {item.text}
           </div>
@@ -140,9 +146,9 @@ export function TellMitraThreadView({
           <div style={{
             background: "rgba(201,168,76,0.12)",
             border: "1px solid rgba(201,168,76,0.4)",
-            borderRadius: "16px 16px 4px 16px",
-            padding: "7px 14px",
-            maxWidth: "60%",
+            borderRadius: isDesktop ? "18px 18px 6px 18px" : "16px 16px 4px 16px",
+            padding: isDesktop ? "9px 16px" : "7px 14px",
+            maxWidth: chipMaxWidth,
             fontSize: 14,
             color: "#7B6550",
             fontStyle: "italic",
@@ -157,7 +163,7 @@ export function TellMitraThreadView({
     if (item.type === "mitra_response") {
       if (!item.response_copy) return null;
       return (
-        <div key={item.id} style={{ marginBottom: 20, maxWidth: "85%" }}>
+        <div key={item.id} style={{ marginBottom: isDesktop ? 24 : 20, maxWidth: isDesktop ? "80%" : "85%" }}>
           <div style={{ fontSize: 11, color: "#B8963E", marginBottom: 8, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" as const }}>
             Mitra
           </div>
@@ -168,8 +174,8 @@ export function TellMitraThreadView({
           )}
           <div style={{
             fontFamily: "var(--kalpx-font-serif, 'Cormorant Garamond', serif)",
-            fontSize: 18,
-            lineHeight: 1.85,
+            fontSize: isDesktop ? 20 : 18,
+            lineHeight: isDesktop ? 1.9 : 1.85,
             color: "#3B2A1A",
           }}>
             {item.response_copy}
@@ -212,19 +218,21 @@ export function TellMitraThreadView({
         <div key={item.id} style={{ marginBottom: 24 }}>
           <div style={{
             border: "1px solid rgba(201,168,76,0.25)",
-            borderRadius: 20,
+            borderRadius: isDesktop ? 24 : 20,
             background: "rgba(255,253,249,0.98)",
-            padding: "20px 22px",
-            boxShadow: "0 6px 24px rgba(67,33,4,0.07)",
+            padding: isDesktop ? "24px 26px" : "20px 22px",
+            boxShadow: isDesktop
+              ? "0 12px 28px rgba(67,33,4,0.08)"
+              : "0 6px 24px rgba(67,33,4,0.07)",
           }}>
             <div style={{ fontSize: 11, color: "#B8963E", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" as const, marginBottom: 14 }}>
               Recommended next
             </div>
-            <div style={{ fontFamily: "var(--kalpx-font-serif, 'Cormorant Garamond', serif)", fontWeight: 700, fontSize: 20, color: "#3B2A1A", marginBottom: 6 }}>
+            <div style={{ fontFamily: "var(--kalpx-font-serif, 'Cormorant Garamond', serif)", fontWeight: 700, fontSize: isDesktop ? 22 : 20, color: "#3B2A1A", marginBottom: 6 }}>
               {item.room_label}
             </div>
             {item.room_description && (
-              <div style={{ fontSize: 14, color: "#7B6550", marginBottom: 18, lineHeight: 1.6 }}>{item.room_description}</div>
+              <div style={{ fontSize: isDesktop ? 15 : 14, color: "#7B6550", marginBottom: 18, lineHeight: 1.6 }}>{item.room_description}</div>
             )}
             <button onClick={() => onEnterRoom(item)} style={{ ...GOLD_BTN, marginBottom: 10 }}>
               Enter {item.room_label}
@@ -249,11 +257,11 @@ export function TellMitraThreadView({
     if (item.type === "return_card") {
       return (
         <div key={item.id} style={{ marginBottom: 20 }}>
-          <div style={{
+         <div style={{
             background: "rgba(245,240,233,0.85)",
             border: "1px solid rgba(201,168,76,0.2)",
-            borderRadius: 16,
-            padding: "18px 20px",
+            borderRadius: isDesktop ? 20 : 16,
+            padding: isDesktop ? "20px 22px" : "18px 20px",
           }}>
             <div style={{ fontFamily: "var(--kalpx-font-serif, 'Cormorant Garamond', serif)", fontSize: 16, color: "#3B2A1A", fontWeight: 600, marginBottom: 4 }}>
               You're back from {item.room_label}.
@@ -357,7 +365,7 @@ export function TellMitraThreadView({
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       {/* Header bar with Start fresh */}
       {conversation.length > 0 && (
-        <div style={{ padding: "12px 24px 0", display: "flex", justifyContent: "flex-end" }}>
+        <div style={{ padding: isDesktop ? "16px 28px 0" : "12px 24px 0", display: "flex", justifyContent: "flex-end" }}>
           <button
             onClick={onStartFresh}
             style={{ background: "none", border: "none", color: "#A08060", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}
@@ -368,15 +376,16 @@ export function TellMitraThreadView({
       )}
 
       {/* Scrollable thread area */}
-      <div style={{ flex: 1, overflowY: "auto", padding: conversation.length === 0 ? "32px 28px 8px" : "16px 28px 8px" }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: conversation.length === 0 ? (isDesktop ? "40px 40px 12px" : "32px 28px 8px") : (isDesktop ? "20px 40px 12px" : "16px 28px 8px") }}>
+        <div style={{ width: "100%", maxWidth: contentMaxWidth, margin: "0 auto" }}>
 
         {/* Empty state */}
         {conversation.length === 0 && (
           <div>
-            <div style={{ fontFamily: "var(--kalpx-font-serif, 'Cormorant Garamond', serif)", fontSize: 26, fontWeight: 700, color: "#3B2A1A", marginBottom: 8 }}>
+            <div style={{ fontFamily: "var(--kalpx-font-serif, 'Cormorant Garamond', serif)", fontSize: isDesktop ? 34 : 26, fontWeight: 700, color: "#3B2A1A", marginBottom: 8, lineHeight: 1.15 }}>
               Tell Mitra
             </div>
-            <div style={{ fontSize: 15, color: "#7B6550", marginBottom: 4, lineHeight: 1.6 }}>
+            <div style={{ fontSize: isDesktop ? 17 : 15, color: "#7B6550", marginBottom: 4, lineHeight: 1.6, maxWidth: isDesktop ? 620 : undefined }}>
               What would you like Mitra to understand today?
             </div>
             <div style={{ fontSize: 13, color: "#9B8B77", marginBottom: 24 }}>
@@ -400,15 +409,19 @@ export function TellMitraThreadView({
         {/* Conversation items */}
         {conversation.map(item => renderItem(item))}
         <div ref={threadBottomRef} style={{ height: 1 }} />
+        </div>
       </div>
 
       {/* Sticky composer */}
       <div style={{
         borderTop: "1px solid rgba(201,168,76,0.18)",
         background: "#FAF7F2",
-        padding: "14px 20px calc(14px + env(safe-area-inset-bottom))",
+        padding: isDesktop
+          ? "18px 28px calc(18px + env(safe-area-inset-bottom))"
+          : "14px 20px calc(14px + env(safe-area-inset-bottom))",
         flexShrink: 0,
       }}>
+        <div style={{ width: "100%", maxWidth: contentMaxWidth, margin: "0 auto" }}>
         {error && <div style={{ fontSize: 13, color: "#e06060", marginBottom: 6 }}>{error}</div>}
         <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
           <textarea
@@ -422,9 +435,9 @@ export function TellMitraThreadView({
               flex: 1,
               boxSizing: "border-box" as const,
               border: "1px solid rgba(201,168,76,0.35)",
-              borderRadius: 14,
-              padding: "10px 14px",
-              fontSize: 15,
+              borderRadius: isDesktop ? 16 : 14,
+              padding: isDesktop ? "12px 16px" : "10px 14px",
+              fontSize: isDesktop ? 16 : 15,
               fontFamily: "var(--kalpx-font-serif, 'Cormorant Garamond', serif)",
               color: "#3B2A1A",
               background: "rgba(255,253,249,0.98)",
@@ -445,8 +458,8 @@ export function TellMitraThreadView({
             style={{
               ...GOLD_BTN,
               width: "auto",
-              padding: "10px 20px",
-              fontSize: 14,
+              padding: isDesktop ? "12px 24px" : "10px 20px",
+              fontSize: isDesktop ? 15 : 14,
               flexShrink: 0,
               opacity: (submitting || !composerValue.trim()) ? 0.5 : 1,
               cursor: (submitting || !composerValue.trim()) ? "not-allowed" : "pointer",
@@ -458,6 +471,7 @@ export function TellMitraThreadView({
         <p style={{ margin: "8px 0 0", fontSize: 11, color: "#A08060", lineHeight: 1.55, textAlign: "center", fontFamily: "var(--kalpx-font-sans)" }}>
           Mitra is here for reflection and Sanatan-rooted guidance. It is not a substitute for medical, legal, financial, therapy, crisis, or emergency support. Share only what you feel comfortable sharing.
         </p>
+        </div>
       </div>
     </div>
   );

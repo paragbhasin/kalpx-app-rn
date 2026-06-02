@@ -274,5 +274,72 @@
     "spiritualIntent": "आपका आध्यात्मिक उद्देश्य",
     "intentPlaceholder": "अपना उद्देश्य साझा करें…",
     "nextStep": "अगला चरण लें"
+  },
+  "room": {
+    "actions": {
+      "addAnother": "एक और जोड़ें",
+      "returnHome": "घर लौटें",
+      "illGoNow": "मैं अभी जाता/जाती हूँ",
+      "noted": "नोट किया।",
+      "inquiry": "जिज्ञासा",
+      "step": "चरण",
+      "aTeaching": "एक शिक्षा",
+      "beginRoomJourney": "कक्ष यात्रा शुरू करें",
+      "continueToNextStep": "अगले चरण पर जाएं",
+      "mitraBeginsWith": "मित्र की शुरुआत",
+      "begin": "शुरू करें",
+      "tapWhenReady": "तैयार होने पर स्पर्श करें",
+      "whenYouReady": "जब तैयार हों, शुरू करने के लिए स्पर्श करें",
+      "returnToMitraHome": "मित्र होम पर लौटें",
+      "leaveThisRoom": "इस कक्ष से जाएं?",
+      "practiceHeld": "आपका अभ्यास सुरक्षित है। आप कभी भी लौट सकते हैं।",
+      "yesIllGoNow": "हाँ, मैं अभी जाता/जाती हूँ",
+      "stay": "रुकें",
+      "aGentleStep": "एक सौम्य कदम",
+      "mitraIsWithYou": "मित्र इस चरण में आपके साथ है।",
+      "continue": "जारी रखें",
+      "writeWhatYouWouldHaveSpoken": "वह लिखें जो आप बोलते।",
+      "letThisLand": "इसे महसूस करें",
+      "writeAFewWords": "कुछ शब्द लिखें…",
+      "copyAndGo": "कॉपी करें और जाएं",
+      "aThreadOfCare": "देखभाल का एक धागा याद किया गया।",
+      "stayWithTheSound": "ध्वनि के साथ रहें।",
+      "stayWithTheOffering": "संकल्प के साथ रहें।",
+      "letThePracticeHoldYou": "अभ्यास को आपको थामने दें।",
+      "youMadeSpace": "आपने स्थान बनाया।",
+      "whatIsPresentRightNow": "अभी क्या उपस्थित है?",
+      "writeOneWordOrFewLines": "एक शब्द या कुछ पंक्तियाँ लिखें…",
+      "writeShortMessageToSomeone": "किसी खास व्यक्ति के लिए एक छोटा सा संदेश लिखें।",
+      "yourMessage": "आपका संदेश…",
+      "savedToYourPath": "आपके पथ में सहेजा।",
+      "couldntSave": "सहेजा नहीं जा सका। कृपया पुनः प्रयास करें।",
+      "writeAnother": "एक और लिखें",
+      "nameAnother": "एक और नाम लें",
+      "addAnotherItem": "एक और जोड़ें",
+      "youreHereThatIsEnough": "आप यहाँ हैं। बस यही काफ़ी है।",
+      "youStayedWithIt": "आप इसके साथ रहे।",
+      "youCanReturnAnytime": "आप कभी भी इस कक्ष में लौट सकते हैं।",
+      "whatDoesThisBringUp": "यह आपके मन में क्या लाता है?"
+    },
+    "constants": {
+      "lifeContext": {
+        "workCareer": "काम या करियर",
+        "relationships": "एक रिश्ता",
+        "self": "स्वयं",
+        "healthEnergy": "स्वास्थ्य या ऊर्जा",
+        "moneySecurity": "धन या वित्त",
+        "purposeDirection": "आपकी दिशा",
+        "dailyLife": "दैनिक जीवन"
+      },
+      "actionKind": {
+        "runnerMantra": "जप",
+        "runnerSankalp": "संकल्प",
+        "runnerPractice": "अभ्यास",
+        "teaching": "शिक्षा",
+        "inquiry": "चिंतन",
+        "inRoomStep": "चरण",
+        "inRoomCarry": "साथ ले जाएं"
+      }
+    }
   }
 }

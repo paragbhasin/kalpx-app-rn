@@ -6,6 +6,7 @@
  * If has_rhythm === true: morning/afternoon/night band cards.
  */
 
+import { useTranslation } from "react-i18next";
 import { RHYTHM_BAND_LABELS } from "@kalpx/contracts";
 import type { RhythmItem, RhythmTimeBand } from "@kalpx/types";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
@@ -47,26 +48,25 @@ function formatReminderTime(hms: string): string {
   return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${suffix}`;
 }
 
-function beginLabel(itemType: string): string {
-  if (itemType === "mantra") return "Begin Chanting";
-  if (itemType === "sankalp") return "Begin Embodying";
-  return "Begin Practice";
+function beginLabel(itemType: string, t: (key: string) => string): string {
+  if (itemType === "mantra") return t("rhythmHome.beginChanting");
+  if (itemType === "sankalp") return t("rhythmHome.beginEmbodying");
+  return t("rhythmHome.beginPractice");
 }
 
-function itemHeldLabel(itemType: string): string {
-  if (itemType === "mantra") return "Mantra held today · return anytime";
-  if (itemType === "sankalp") return "Sankalp carried today · return anytime";
-  if (itemType === "practice") return "Practice held today · return anytime";
-  if (itemType === "reflection")
-    return "Reflection held today · return anytime";
-  return "Held today · return anytime";
+function itemHeldLabel(itemType: string, t: (key: string) => string): string {
+  if (itemType === "mantra") return t("rhythmHome.heldToday.mantra");
+  if (itemType === "sankalp") return t("rhythmHome.heldToday.sankalp");
+  if (itemType === "practice") return t("rhythmHome.heldToday.practice");
+  if (itemType === "reflection") return t("rhythmHome.heldToday.reflection");
+  return t("rhythmHome.heldToday.default");
 }
 
-function cardLabel(itemType: string): string {
-  if (itemType === "mantra") return "MANTRA";
-  if (itemType === "sankalp") return "SANKALP";
-  if (itemType === "reflection") return "REFLECTION";
-  return "PRACTICE";
+function cardLabel(itemType: string, t: (key: string) => string): string {
+  if (itemType === "mantra") return t("rhythmHome.badge.mantra");
+  if (itemType === "sankalp") return t("rhythmHome.badge.sankalp");
+  if (itemType === "reflection") return t("rhythmHome.badge.reflection");
+  return t("rhythmHome.badge.practice");
 }
 
 function itemDuration(item: RhythmItem): string | null {
@@ -83,17 +83,19 @@ function RhythmItemCard({
   resolving,
   held,
   isTablet,
+  t,
 }: {
   item: RhythmItem;
   onAction: () => void;
   resolving?: boolean;
   held?: boolean;
   isTablet?: boolean;
+  t: (key: string, opts?: Record<string, unknown>) => string;
 }) {
   const cardContent = (
     <>
       <View style={styles.cardTopRow}>
-        <Text style={[styles.itemTypeBadge, isTablet && { fontSize: 13, paddingHorizontal: 10, paddingVertical: 6 }]}>{cardLabel(item.item_type)}</Text>
+        <Text style={[styles.itemTypeBadge, isTablet && { fontSize: 13, paddingHorizontal: 10, paddingVertical: 6 }]}>{cardLabel(item.item_type, t)}</Text>
         {!!itemDuration(item) && (
           <Text style={[styles.durationText, isTablet && { fontSize: 17 }]}>{itemDuration(item)}</Text>
         )}
@@ -110,8 +112,7 @@ function RhythmItemCard({
       </View>
       {item.reminder_enabled && item.reminder_time ? (
         <Text style={styles.reminderLine}>
-          Mitra will gently remind you at{" "}
-          {formatReminderTime(item.reminder_time)}
+          {t("rhythmHome.reminderLine", { time: formatReminderTime(item.reminder_time) })}
         </Text>
       ) : null}
       {/* On mobile: description inside card; on tablet: moved to right panel */}
@@ -119,7 +120,9 @@ function RhythmItemCard({
         <Text style={styles.itemDescription}>{item.description_snapshot}</Text>
       ) : null}
       {!!held && (
-        <Text style={styles.itemHeldLabel}>{itemHeldLabel(item.item_type)}</Text>
+        <Text style={styles.itemHeldLabel}>
+          {itemHeldLabel(item.item_type, t)}
+        </Text>
       )}
       <TouchableOpacity
         style={[styles.actionBtn, resolving && styles.actionBtnResolving, isTablet && { paddingVertical: 14 }]}
@@ -128,7 +131,7 @@ function RhythmItemCard({
       >
         <Text style={[styles.actionBtnSparkle, isTablet && { fontSize: 22 }]}>✦</Text>
         <Text style={[styles.actionBtnText, isTablet && { fontSize: 20 }]}>
-          {resolving ? "Opening…" : beginLabel(item.item_type)}
+          {resolving ? t("rhythmHome.opening") : beginLabel(item.item_type, t)}
         </Text>
       </TouchableOpacity>
     </>
@@ -150,10 +153,10 @@ function RhythmItemCard({
   return <View style={styles.itemCard}>{cardContent}</View>;
 }
 
-function slotHeldLabel(band: RhythmTimeBand): string {
-  if (band === "morning") return "Morning rhythm held";
-  if (band === "afternoon") return "Afternoon rhythm held";
-  return "Night rhythm held";
+function slotHeldLabel(band: RhythmTimeBand, t: (key: string) => string): string {
+  if (band === "morning") return t("rhythmHome.bandHeld.morning");
+  if (band === "afternoon") return t("rhythmHome.bandHeld.afternoon");
+  return t("rhythmHome.bandHeld.night");
 }
 
 function RhythmBand({
@@ -163,6 +166,7 @@ function RhythmBand({
   resolvingItemId,
   onAddItem,
   isTablet,
+  t,
 }: {
   band: RhythmTimeBand;
   items: RhythmItem[];
@@ -170,6 +174,7 @@ function RhythmBand({
   resolvingItemId?: string | null;
   onAddItem: (band: RhythmTimeBand) => void;
   isTablet?: boolean;
+  t: (key: string, opts?: Record<string, unknown>) => string;
 }) {
   if (items.length === 0) return null;
   const slotHeld =
@@ -185,10 +190,10 @@ function RhythmBand({
         }}
       >
         <Text style={[styles.bandLabel, isTablet && { fontSize: 17 }]}>
-          {RHYTHM_BAND_LABELS[band]} Practice
+          {t(`rhythmHome.bandTitle.${band}`, { defaultValue: `${RHYTHM_BAND_LABELS[band]} Practice` })}
         </Text>
         {slotHeld && (
-          <Text style={styles.bandHeldLabel}>{slotHeldLabel(band)}</Text>
+          <Text style={styles.bandHeldLabel}>{slotHeldLabel(band, t)}</Text>
         )}
       </View>
       <View style={styles.bandDivider}>
@@ -204,6 +209,7 @@ function RhythmBand({
           resolving={resolvingItemId === item.item_id}
           held={item.completed_today === true}
           isTablet={isTablet}
+          t={t}
         />
       ))}
       <TouchableOpacity
@@ -211,7 +217,7 @@ function RhythmBand({
         activeOpacity={0.7}
         style={[styles.addToSlotBtn, isTablet && { paddingVertical: 14 }]}
       >
-        <Text style={[styles.addToSlotText, isTablet && { fontSize: 16 }]}>Add to your {band} rhythm</Text>
+        <Text style={[styles.addToSlotText, isTablet && { fontSize: 16 }]}>{t("rhythmHome.addToRhythm", { band })}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -222,6 +228,7 @@ export default function RhythmHomeScreen({
 }: {
   embedded?: boolean;
 }) {
+  const { t, i18n } = useTranslation();
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
   const tabBarHeight = useBottomTabBarHeight();
@@ -246,12 +253,12 @@ export default function RhythmHomeScreen({
     useCallback(() => {
       screenBridgeRef.current.updateBackground(RHYTHM_BG);
       // P0-D: refresh home data on focus so slot completion state is current after runner return
-      mitraJourneyHomeV3({ forceFresh: true })
+      mitraJourneyHomeV3({ forceFresh: true, locale: i18n.language || 'en' })
         .then((fresh) => {
           if (fresh) dispatch(setHomeData(fresh));
         })
         .catch(() => {});
-    }, [dispatch]),
+    }, [dispatch, i18n.language]),
   );
 
   const openRhythmSetup = useCallback(() => {
@@ -262,17 +269,7 @@ export default function RhythmHomeScreen({
     navigation.navigate("RhythmEdit" as any);
   }, [navigation]);
 
-  const handleBack = useCallback(() => {
-    if (embedded) {
-      dispatch(
-        screenActions.setScreenValue({
-          key: "dashboard_entry_surface",
-          value: null,
-        }),
-      );
-    }
-    navigation.goBack();
-  }, [dispatch, embedded, navigation]);
+
 
   const handleHomeBandItemSelected = useCallback(
     async (picked: LibrarySearchItem) => {
@@ -321,6 +318,7 @@ export default function RhythmHomeScreen({
         band,
         item.item_id,
         item.item_type,
+        i18n.language || 'en',
       );
       if (resolved?.resolved) {
         enrichedItem = {
@@ -338,7 +336,7 @@ export default function RhythmHomeScreen({
             "",
         };
       }
-    } catch (_) {
+    } catch {
       // fall through with snapshot item
     } finally {
       setResolvingItemId(null);
@@ -382,19 +380,19 @@ export default function RhythmHomeScreen({
         showsVerticalScrollIndicator={false}
       >
         <View style={[styles.shell, isTablet && { maxWidth: 820 }]}>
-          <Text style={[styles.headerTitle, isTablet && { fontSize: 38, marginBottom: 6 }]}>My Rhythm</Text>
+          <Text style={[styles.headerTitle, isTablet && { fontSize: 38, marginBottom: 6 }]}>{t("rhythmHome.title")}</Text>
 
           {!hasRhythm ? (
             <View style={styles.emptyStateCard}>
               <Text style={styles.emptyTitle}>
-                You haven't set up your rhythm yet.
+                {t("rhythmHome.emptyState")}
               </Text>
               <TouchableOpacity
                 style={styles.setupBtn}
                 onPress={openRhythmSetup}
                 activeOpacity={0.8}
               >
-                <Text style={styles.setupBtnText}>Set up My Rhythm</Text>
+                <Text style={styles.setupBtnText}>{t("rhythmHome.setupCta")}</Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -409,6 +407,7 @@ export default function RhythmHomeScreen({
                     resolvingItemId={resolvingItemId}
                     onAddItem={setHomeBand}
                     isTablet={isTablet}
+                    t={t}
                   />
                 ),
               )}
@@ -418,7 +417,7 @@ export default function RhythmHomeScreen({
                 activeOpacity={0.8}
                 style={[styles.editRhythmBtn, isTablet && { paddingVertical: 16 }]}
               >
-                <Text style={[styles.editRhythmBtnText, isTablet && { fontSize: 19 }]}>Edit My Rhythm</Text>
+                <Text style={[styles.editRhythmBtnText, isTablet && { fontSize: 19 }]}>{t("rhythmHome.editCta")}</Text>
               </TouchableOpacity>
             </>
           )}

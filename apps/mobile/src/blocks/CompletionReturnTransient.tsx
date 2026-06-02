@@ -13,6 +13,7 @@ import * as Haptics from "expo-haptics";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {Image, 
   Animated,
   KeyboardAvoidingView,
@@ -63,6 +64,8 @@ interface CompletionReturnTransientProps {
 const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
   block,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const {
     screenData,
     loadScreen,
@@ -136,7 +139,12 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
   const [communityAddLoading, setCommunityAddLoading] = useState(false);
   const [showWriteInput, setShowWriteInput] = useState(false);
 
-  const REFLECTION_CHIPS = ["A little more calm", "One clear thing", "A softer heart", "I need more time"];
+  const REFLECTION_CHIPS = [
+    t("completion.reflectionChip.moreCalmLabel"),
+    t("completion.reflectionChip.oneClearThingLabel"),
+    t("completion.reflectionChip.softerHeartLabel"),
+    t("completion.reflectionChip.needMoreTimeLabel"),
+  ];
 
   const handleChipTap = (chipLabel: string) => {
     mitraTrackEvent("room_completion_chip_tapped", {
@@ -501,7 +509,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
                       onPress={() => handleChipTap(chip)}
                       testID={`completion_chip_${chip.replace(/\s+/g, "_").toLowerCase()}`}
                     >
-                      <Text style={styles.chipText}>{chip}</Text>
+                      <Text style={[styles.chipText, isHindi && { letterSpacing: 0 }]}>{chip}</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -512,12 +520,12 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
                     style={styles.writeWordsBtn}
                     testID="completion_write_words_btn"
                   >
-                    <Text style={styles.writeWordsBtnText}>Write a few words</Text>
+                    <Text style={[styles.writeWordsBtnText, isHindi && { letterSpacing: 0 }]}>{t("completion.writeAFewWords")}</Text>
                   </TouchableOpacity>
                 ) : (
                   <View style={styles.voiceInputWrap}>
                     <VoiceTextInput
-                      placeholder="Anything to carry from this?"
+                      placeholder={t("completion.carryFromThisPlaceholder")}
                       onSend={(text, type) => handleSubmitReflection(text, type)}
                     />
                   </View>
@@ -560,8 +568,8 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
                 activeOpacity={0.8}
                 disabled={communityAddLoading}
               >
-                <Text style={styles.communityAddCtaText}>
-                  {communityAddLoading ? "Adding..." : "Add to My Practice"}
+                <Text style={[styles.communityAddCtaText, isHindi && { letterSpacing: 0 }]}>
+                  {communityAddLoading ? t("completion.addingLabel") : t("completion.addToMyPractice")}
                 </Text>
               </TouchableOpacity>
             )}
@@ -571,12 +579,12 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
               onPress={() => handleReturnHome(true)}
               activeOpacity={0.8}
             >
-              <Text style={styles.primaryCtaText}>
+              <Text style={[styles.primaryCtaText, isHindi && { letterSpacing: 0 }]}>
                 {isRhythmSource
-                  ? "Return to My Rhythm"
+                  ? t("completion.returnToMyRhythm")
                   : isInnerPathSource
-                    ? "Return to Inner Path"
-                    : slot("return_home_cta") || "Return to Mitra Home"}
+                    ? t("completion.returnToInnerPath")
+                    : slot("return_home_cta") || t("completion.returnToMitraHome")}
               </Text>
             </TouchableOpacity>
 

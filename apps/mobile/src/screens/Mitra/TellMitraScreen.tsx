@@ -5,16 +5,18 @@
  */
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import TellMitraContainer from "../../containers/TellMitraContainer";
 import { Fonts } from "../../theme/fonts";
 import { sfs } from "../../utils/responsive";
 
 export default function TellMitraScreen() {
+  const { t } = useTranslation();
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Tell Mitra</Text>
+        <Text style={styles.headerTitle}>{t("tellMitraThread.title")}</Text>
       </View>
       <View style={styles.body}>
         <TellMitraContainer />

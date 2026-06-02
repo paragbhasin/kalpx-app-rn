@@ -1,5 +1,12 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import {Image,
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  Image,
   LayoutAnimation,
   Platform,
   ScrollView,
@@ -10,6 +17,8 @@ import {Image,
   View,
   useWindowDimensions,
 } from "react-native";
+import { useJapaEngine } from "../../engine/useJapaEngine";
+import type { JapaSourceSurface } from "@kalpx/types";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -19,13 +28,17 @@ import Animated, {
 } from "react-native-reanimated";
 import { ChevronDown, ChevronUp } from "lucide-react-native";
 import Svg, { Circle, Path } from "react-native-svg";
+import { useTranslation } from "react-i18next";
 const RudrakshSvg = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/rudraksh.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import AudioPlayerBlock from "../AudioPlayerBlock";
 import { stopRoomAmbientAudio } from "../../engine/roomAmbientAudio";
 import { Fonts } from "../../theme/fonts";
 import { sfs } from "../../utils/responsive";
 
-if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
@@ -56,6 +69,14 @@ export interface MantraRunnerViewProps {
   isCommunityRunner?: boolean;
   addLoading?: boolean;
   onAddToPractice?: () => void;
+  // Japa engine wiring
+  mantraRef?: string | null;
+  sourceSurface?: JapaSourceSurface;
+  // Called by parent screen's useFocusEffect so the engine syncs on nav events
+  onEngineReady?: (api: {
+    syncNow: () => Promise<void>;
+    refreshStats: () => Promise<void>;
+  }) => void;
 }
 
 const hasContent = (val: any): boolean => {
@@ -101,7 +122,9 @@ const MantraTextCard: React.FC<{
   onToggle: () => void;
 }> = ({ text, isDevanagari, expanded, onToggle }) => {
   const [isTruncated, setIsTruncated] = React.useState(false);
-  const baseTextStyle: any[] = [isDevanagari ? styles.verseDevanagari : styles.verseIast];
+  const baseTextStyle: any[] = [
+    isDevanagari ? styles.verseDevanagari : styles.verseIast,
+  ];
 
   return (
     <View
@@ -143,16 +166,19 @@ const MantraTextCard: React.FC<{
   );
 };
 
-const CommunityActionBar: React.FC<{ addLoading?: boolean; onAdd?: () => void }> = ({
-  addLoading,
-  onAdd,
-}) => (
+const CommunityActionBar: React.FC<{
+  addLoading?: boolean;
+  onAdd?: () => void;
+}> = ({ addLoading, onAdd }) => (
   <View style={styles.communityActionBar}>
     <TouchableOpacity
       onPress={onAdd}
       disabled={addLoading}
       activeOpacity={0.85}
-      style={[styles.communityAddButton, addLoading && styles.communityAddButtonDisabled]}
+      style={[
+        styles.communityAddButton,
+        addLoading && styles.communityAddButtonDisabled,
+      ]}
     >
       <Text style={styles.communityAddButtonText}>
         {addLoading ? "Adding..." : "Add to My Practice"}
@@ -174,8 +200,11 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   isCommunityRunner,
   addLoading,
   onAddToPractice,
+  mantraRef,
+  sourceSurface = "inner_path",
+  onEngineReady,
 }) => {
-  const [chantCount, setChantCount] = useState(0);
+  const { t } = useTranslation();
   const [selectedTarget, setSelectedTarget] = useState(initialReps || 27);
   const [meaningExpanded, setMeaningExpanded] = useState(false);
   const [essenceExpanded, setEssenceExpanded] = useState(true);
@@ -187,6 +216,37 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   const isTablet = width >= 768;
   const interactionSize = isTablet ? 300 : 220;
   const beadOrbitRadius = isTablet ? 100 : 72;
+  const onCompleteRef = useRef(onComplete);
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+
+  // ── Japa engine — only active when mantraRef is provided ──────────────────
+  const japaEngine = useJapaEngine({
+    mantraRef: mantraRef ?? null,
+    sourceSurface,
+    goalType: "count",
+    goalValue: selectedTarget,
+    onGoalReached: useCallback(() => {
+      onCompleteRef.current?.(
+        selectedTarget,
+        Math.round((Date.now() - sessionStartTimeRef.current) / 1000),
+      );
+    }, [selectedTarget]),
+  });
+
+  // chantCount: use engine count when wired, else fallback to local state
+  const [localCount, setLocalCount] = useState(0);
+  const chantCount = mantraRef ? japaEngine.sessionCount : localCount;
+
+  // Expose sync/refresh to parent screen so it can hook into navigation events
+  useEffect(() => {
+    if (!mantraRef || !onEngineReady) return;
+    onEngineReady({
+      syncNow: japaEngine.syncNow,
+      refreshStats: japaEngine.refreshStats,
+    });
+  }, [mantraRef, onEngineReady, japaEngine.syncNow, japaEngine.refreshStats]);
 
   useEffect(() => {
     stopRoomAmbientAudio().catch(() => {});
@@ -194,7 +254,7 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
 
   useEffect(() => {
     isCompletingRef.current = false;
-    setChantCount(0);
+    setLocalCount(0);
     setSelectedTarget(initialReps || 27);
     sessionStartTimeRef.current = Date.now();
   }, [runnerStartTimeKey]);
@@ -237,26 +297,36 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   }, [visualBeadsCount, beadOrbitRadius]);
 
   const isBeadTapped = (index: number) => {
-    if (selectedTarget > MAX_VISUAL_BEADS) return index < chantCount % visualBeadsCount;
+    if (selectedTarget > MAX_VISUAL_BEADS)
+      return index < chantCount % visualBeadsCount;
     return index < chantCount;
   };
   const isBeadActive = (index: number) => {
-    if (selectedTarget > MAX_VISUAL_BEADS) return index === chantCount % visualBeadsCount;
+    if (selectedTarget > MAX_VISUAL_BEADS)
+      return index === chantCount % visualBeadsCount;
     return index === chantCount;
   };
 
-  const handleIncrement = () => {
+  const handleIncrement = useCallback(() => {
     if (chantCount >= selectedTarget || isCompletingRef.current) return;
-    setChantCount((prev) => {
-      const nextCount = prev + 1;
-      if (nextCount >= selectedTarget && !isCompletingRef.current) {
-        isCompletingRef.current = true;
-        const durationSec = Math.round((Date.now() - sessionStartTimeRef.current) / 1000);
-        setTimeout(() => onComplete(nextCount, durationSec), 800);
-      }
-      return nextCount;
-    });
-  };
+    if (mantraRef) {
+      // Engine handles haptics, persistence, sync, and goal detection via onGoalReached
+      japaEngine.increment();
+    } else {
+      // Fallback: legacy local-only counting (no engine wired)
+      setLocalCount((prev) => {
+        const nextCount = prev + 1;
+        if (nextCount >= selectedTarget && !isCompletingRef.current) {
+          isCompletingRef.current = true;
+          const durationSec = Math.round(
+            (Date.now() - sessionStartTimeRef.current) / 1000,
+          );
+          setTimeout(() => onCompleteRef.current(nextCount, durationSec), 800);
+        }
+        return nextCount;
+      });
+    }
+  }, [chantCount, japaEngine, mantraRef, selectedTarget]);
 
   const audioUrl =
     typeof item.audio_url === "string" && item.audio_url.trim().length > 0
@@ -278,7 +348,9 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
           onPress={() => {
             if (isCompletingRef.current) return;
             isCompletingRef.current = true;
-            const durationSec = Math.round((Date.now() - sessionStartTimeRef.current) / 1000);
+            const durationSec = Math.round(
+              (Date.now() - sessionStartTimeRef.current) / 1000,
+            );
             onComplete(selectedTarget, durationSec);
           }}
           style={{
@@ -296,7 +368,9 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
       )}
 
       <View style={[styles.combinedMantraFlow, isTablet && { maxWidth: 640, alignSelf: 'center' }]}>
-        <Text style={[styles.mantraTitle, { marginBottom: 12 }]}>{item.title}</Text>
+        <Text style={[styles.mantraTitle, { marginBottom: 12 }]}>
+          {item.title}
+        </Text>
 
         {(!!item.deity || !!item.source) && (
           <Text style={styles.mantraTraditionLine}>
@@ -312,6 +386,34 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
               <Text style={styles.currentCountText}>{chantCount}</Text>
               <Text style={styles.totalCountText}> / {selectedTarget}</Text>
             </View>
+            {mantraRef &&
+              (japaEngine.todayCount > 0 ||
+                japaEngine.weekCount > 0 ||
+                japaEngine.yearCount > 0 ||
+                japaEngine.lifetimeCount > 0) && (
+                <View style={styles.japaStatsRow}>
+                  {japaEngine.todayCount > 0 && (
+                    <Text style={styles.japaStatItem}>
+                      Today {japaEngine.todayCount.toLocaleString()}
+                    </Text>
+                  )}
+                  {japaEngine.weekCount > 0 && (
+                    <Text style={styles.japaStatItem}>
+                      Week {japaEngine.weekCount.toLocaleString()}
+                    </Text>
+                  )}
+                  {japaEngine.yearCount > 0 && (
+                    <Text style={styles.japaStatItem}>
+                      Year {japaEngine.yearCount.toLocaleString()}
+                    </Text>
+                  )}
+                  {japaEngine.lifetimeCount > 0 && (
+                    <Text style={styles.japaStatItem}>
+                      Lifetime {japaEngine.lifetimeCount.toLocaleString()}
+                    </Text>
+                  )}
+                </View>
+              )}
 
             <View style={[styles.interactionArea, isTablet && { width: interactionSize, height: interactionSize }]}>
               <View style={[styles.glowOuter, isTablet && { width: 290, height: 290, borderRadius: 145 }]}>
@@ -354,7 +456,9 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
                 })}
               </Animated.View>
 
-              <Animated.View style={[styles.centerTapTarget, animatedCenterStyle, isTablet && { width: 140, height: 140, borderRadius: 70 }]}>
+              <Animated.View
+                style={[styles.centerTapTarget, animatedCenterStyle, isTablet && { width: 140, height: 140, borderRadius: 70 }]}
+              >
                 <TouchableOpacity
                   style={styles.tapTouchable}
                   onPress={handleIncrement}
@@ -364,8 +468,19 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
                     <Text style={styles.tapText}>TAP</Text>
                     <Text style={styles.subTap}>HERE</Text>
                     <View style={styles.tapCheck}>
-                      <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                        <Circle cx="12" cy="12" r="10" stroke="#B89450" strokeWidth="1" />
+                      <Svg
+                        width={24}
+                        height={24}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <Circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="#B89450"
+                          strokeWidth="1"
+                        />
                         <Path
                           d="M8 12L11 15L16 9"
                           stroke="#B89450"
@@ -410,10 +525,15 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
                   style={[styles.repPill, isSelected && styles.repPillSelected]}
                   onPress={() => {
                     setSelectedTarget(option);
-                    setChantCount(0);
+                    setLocalCount(0);
                   }}
                 >
-                  <Text style={[styles.repPillText, isSelected && styles.repPillTextSelected]}>
+                  <Text
+                    style={[
+                      styles.repPillText,
+                      isSelected && styles.repPillTextSelected,
+                    ]}
+                  >
                     {option}
                     {isSelected && " ✓"}
                   </Text>
@@ -424,9 +544,14 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
         )}
 
         {!!audioUrl && (
-          <View style={{ width: "100%", marginBottom: 30, paddingHorizontal: 10 }}>
+          <View
+            style={{ width: "100%", marginBottom: 30, paddingHorizontal: 10 }}
+          >
             <AudioPlayerBlock
-              block={{ audio_url: audioUrl, label: item.title || "Mantra Audio" }}
+              block={{
+                audio_url: audioUrl,
+                label: item.title || "Mantra Audio",
+              }}
             />
           </View>
         )}
@@ -434,11 +559,13 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
         <View style={styles.collapsibleSectionsCombined}>
           {hasContent(item.meaning) || hasContent(item.summary) ? (
             <CollapsibleCard
-              label="Meaning"
+              label={t("quickReset.meaning")}
               expanded={meaningExpanded}
               onToggle={() => setMeaningExpanded(!meaningExpanded)}
             >
-              <Text style={styles.cardText}>{item.meaning || item.summary}</Text>
+              <Text style={styles.cardText}>
+                {item.meaning || item.summary}
+              </Text>
             </CollapsibleCard>
           ) : null}
 
@@ -446,7 +573,7 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
 
           {hasContent(item.essence) || hasContent(item.insight) ? (
             <CollapsibleCard
-              label="Essence"
+              label={t("quickReset.essence")}
               expanded={essenceExpanded}
               onToggle={() => setEssenceExpanded(!essenceExpanded)}
             >
@@ -460,7 +587,7 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
         )}
 
         <TouchableOpacity onPress={onBack} style={styles.backLink}>
-          <Text style={styles.backLinkText}>Back</Text>
+          <Text style={styles.backLinkText}>{t("quickReset.back")}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -496,13 +623,14 @@ const styles = StyleSheet.create({
     color: "#B89450",
     textAlign: "center",
     textTransform: "uppercase",
-    marginBottom: 8,
+    marginBottom: 14,
     marginTop: -6,
   },
   progressCounter: {
     flexDirection: "row",
     alignItems: "baseline",
-    marginTop: -20,
+    marginTop: -30,
+    marginBottom:30
   },
   currentCountText: {
     fontSize: sfs(64),
@@ -534,7 +662,8 @@ const styles = StyleSheet.create({
     height: 180,
     borderRadius: 90,
     shadowColor: Platform.OS === "ios" ? "#E8C587" : "transparent",
-    shadowOffset: Platform.OS === "ios" ? { width: 0, height: 0 } : { width: 0, height: 0 },
+    shadowOffset:
+      Platform.OS === "ios" ? { width: 0, height: 0 } : { width: 0, height: 0 },
     shadowOpacity: Platform.OS === "ios" ? 0.8 : 0,
     shadowRadius: Platform.OS === "ios" ? 20 : 0,
     elevation: Platform.OS === "android" ? 0 : 8,
@@ -547,7 +676,8 @@ const styles = StyleSheet.create({
     borderRadius: 70,
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     shadowColor: Platform.OS === "ios" ? "#E8C587" : "transparent",
-    shadowOffset: Platform.OS === "ios" ? { width: 0, height: 0 } : { width: 0, height: 0 },
+    shadowOffset:
+      Platform.OS === "ios" ? { width: 0, height: 0 } : { width: 0, height: 0 },
     shadowOpacity: Platform.OS === "ios" ? 0.8 : 0,
     shadowRadius: Platform.OS === "ios" ? 20 : 0,
     elevation: Platform.OS === "android" ? 0 : 8,
@@ -594,7 +724,8 @@ const styles = StyleSheet.create({
     borderColor: "#e8c587",
     elevation: Platform.OS === "android" ? 0 : 4,
     shadowColor: Platform.OS === "ios" ? "#b89450" : "transparent",
-    shadowOffset: Platform.OS === "ios" ? { width: 0, height: 2 } : { width: 0, height: 0 },
+    shadowOffset:
+      Platform.OS === "ios" ? { width: 0, height: 2 } : { width: 0, height: 0 },
     shadowOpacity: Platform.OS === "ios" ? 0.1 : 0,
     shadowRadius: Platform.OS === "ios" ? 6 : 0,
   },
@@ -786,6 +917,21 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif.regular,
     color: BROWN,
     textDecorationLine: "underline",
+  },
+  japaStatsRow: {
+    flexDirection: "row",
+    gap: 16,
+    justifyContent: "center",
+    flexWrap: "wrap",
+    marginTop: -8,
+    marginBottom: 4,
+  },
+  japaStatItem: {
+    fontSize: 11,
+    color: "#b89450",
+    fontFamily: Fonts.sans.regular,
+    letterSpacing: 0.4,
+    opacity: 0.8,
   },
 });
 

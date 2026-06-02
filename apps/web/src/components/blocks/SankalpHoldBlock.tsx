@@ -102,9 +102,106 @@ interface Props {
   onAction?: (action: any) => void;
 }
 
+function useIsDesktopRunner() {
+  const [isDesktop, setIsDesktop] = useState(() =>
+    typeof window === "undefined" ? true : window.innerWidth >= 1024,
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onResize = () => setIsDesktop(window.innerWidth >= 1024);
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  return isDesktop;
+}
+
+function DesktopInfoSection({
+  label,
+  expanded,
+  onToggle,
+  children,
+}: {
+  label: string;
+  expanded: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        width: "100%",
+        borderRadius: 11,
+        border: "1px solid rgba(184,148,80,0.22)",
+        background: "rgba(255,253,249,0.7)",
+        boxShadow: "0 18px 48px rgba(184,148,80,0.08)",
+        padding: expanded ? "20px 30px" : "26px 38px",
+        boxSizing: "border-box",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+      }}
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        style={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          gap: 18,
+          padding: 0,
+          cursor: "pointer",
+        }}
+      >
+        <span
+          style={{ flex: 1, height: 1, background: "rgba(184,148,80,0.45)" }}
+        />
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 10,
+            fontFamily: "var(--kalpx-font-serif)",
+            fontSize: 26,
+            fontWeight: 700,
+            color: BROWN,
+            lineHeight: 1.1,
+          }}
+        >
+          {label}
+          <span style={{ fontSize: 15, color: GOLD }}>
+            {expanded ? "▲" : "▼"}
+          </span>
+        </span>
+        <span
+          style={{ flex: 1, height: 1, background: "rgba(184,148,80,0.45)" }}
+        />
+      </button>
+
+      {expanded && (
+        <div
+          style={{
+            marginTop: 28,
+            fontFamily: "var(--kalpx-font-serif)",
+            fontSize: 21,
+            lineHeight: 2.05,
+            color: "#5a3c21",
+            textAlign: "left",
+          }}
+        >
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Main component ───────────────────────────────────────────────── */
 export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
   ensureCSS();
+  const isDesktop = useIsDesktopRunner();
   const infoViewOnly = screenData["info_view_only"] === true;
 
   /* ── Data resolution (matches mobile `info` object) ── */
@@ -196,6 +293,292 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
     if (typeof val === "string") return val.trim().length > 0;
     if (Array.isArray(val)) return val.length > 0;
     return false;
+  }
+
+  if (isDesktop) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 1360,
+          margin: "0 auto",
+          padding: "44px 20px 84px",
+          boxSizing: "border-box",
+        }}
+        data-testid="sankalp-hold-block"
+      >
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 1.12fr) minmax(420px, 0.78fr)",
+            gap: 40,
+            alignItems: "start",
+          }}
+        >
+          <div
+            style={{
+              position: "relative",
+              borderRadius: 11,
+              border: "1px solid rgba(184,148,80,0.22)",
+              background:
+                "radial-gradient(circle at 50% 38%, rgba(255,255,255,0.95) 0%, rgba(255,253,249,0.92) 36%, rgba(251,246,238,0.84) 100%)",
+              boxShadow: "0 24px 60px rgba(184,148,80,0.1)",
+              padding: "20px 10px 10px",
+              backdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background:
+                  "radial-gradient(circle at 50% 45%, rgba(233,205,145,0.28), transparent 42%)",
+                pointerEvents: "none",
+              }}
+            />
+
+            <div
+              style={{
+                position: "relative",
+                zIndex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <div style={{ marginBottom: 24 }}>
+                <p
+                  style={{
+                    maxWidth: 640,
+                    fontFamily: "var(--kalpx-font-serif)",
+                    fontSize: 30,
+                    fontWeight: 700,
+                    color: BROWN,
+                    textAlign: "center",
+                    margin: "0 0 10px",
+                    lineHeight: 1.35,
+                  }}
+                >
+                  {title}
+                </p>
+                {bodyText && (
+                  <p
+                    style={{
+                      fontFamily: "var(--kalpx-font-serif)",
+                      fontSize: 21,
+                      color: BROWN,
+                      textAlign: "center",
+                      lineHeight: 1.7,
+                      margin: 0,
+                    }}
+                  >
+                    {bodyText}
+                  </p>
+                )}
+              </div>
+
+              {hasContent(howToLive) && (
+                <div
+                  style={{
+                    width: "100%",
+                    borderRadius: 22,
+                    border: "1px solid rgba(184,148,80,0.2)",
+                    background: "rgba(255,255,255,0.45)",
+                    padding: "24px 28px 26px",
+                    boxSizing: "border-box",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 14,
+                      marginBottom: 18,
+                    }}
+                  >
+                    <div
+                      style={{
+                        flex: 1,
+                        height: 1,
+                        background: "#E8C587",
+                        opacity: 0.6,
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontSize: 18,
+                        letterSpacing: 1.8,
+                        fontWeight: 700,
+                        color: GOLD,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      How To Live
+                    </span>
+                    <div
+                      style={{
+                        flex: 1,
+                        height: 1,
+                        background: "#E8C587",
+                        opacity: 0.6,
+                      }}
+                    />
+                  </div>
+                  {Array.isArray(howToLive) ? (
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 12,
+                      }}
+                    >
+                      {howToLive.map((line: string, i: number) => (
+                        <p
+                          key={i}
+                          style={{
+                            fontFamily: "var(--kalpx-font-serif)",
+                            fontSize: 20,
+                            color: BROWN,
+                            lineHeight: 1.65,
+                            margin: 0,
+                            textAlign: "center",
+                          }}
+                        >
+                          {line}
+                        </p>
+                      ))}
+                    </div>
+                  ) : (
+                    <p
+                      style={{
+                        fontFamily: "var(--kalpx-font-serif)",
+                        fontSize: 18,
+                        color: "#5a3c21",
+                        lineHeight: 1.65,
+                        margin: 0,
+                        textAlign: "center",
+                      }}
+                    >
+                      {howToLive}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {!infoViewOnly && (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 18,
+                    marginTop: 28,
+                    width: "100%",
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: 17,
+                      color: MUTED,
+                      textAlign: "center",
+                      fontFamily: "var(--kalpx-font-serif)",
+                      margin: 0,
+                      transition: "opacity 0.4s",
+                      opacity: activating ? 0.5 : 1,
+                    }}
+                  >
+                    {activating
+                      ? "Let the vibration settle within..."
+                      : "Tap to embody your intention"}
+                  </p>
+
+                  <button
+                    onClick={handleTap}
+                    disabled={activating || done}
+                    data-testid="sankalp-hold-circle"
+                    aria-label="Tap to embody sankalp"
+                  >
+                    <img
+                      src="/namaste.png"
+                      alt="Namaste"
+                      width={280}
+                      height={280}
+                      draggable={false}
+                      style={{
+                        animation: activating
+                          ? "kalpx-coin-spin 4s linear infinite"
+                          : "none",
+                        opacity: done ? 0.3 : 1,
+                        transition: "opacity 0.4s",
+                        objectFit: "contain",
+                      }}
+                    />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 34,
+            }}
+          >
+            {hasContent(insight) && (
+              <DesktopInfoSection
+                label="Essence"
+                expanded={essenceExpanded}
+                onToggle={() => setEssenceExpanded((v) => !v)}
+              >
+                {insight}
+              </DesktopInfoSection>
+            )}
+
+            {hasContent(benefits) && (
+              <DesktopInfoSection
+                label="Benefits"
+                expanded={benefitsExpanded}
+                onToggle={() => setBenefitsExpanded((v) => !v)}
+              >
+                {Array.isArray(benefits) ? (
+                  <ul style={{ margin: 0, paddingLeft: 24 }}>
+                    {benefits.map((b: string, i: number) => (
+                      <li key={i} style={{ marginBottom: 8 }}>
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  benefits
+                )}
+              </DesktopInfoSection>
+            )}
+
+            <button
+              onClick={() => onAction?.({ type: "runner_exit" })}
+              style={{
+                alignSelf: "center",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: 20,
+                fontFamily: "var(--kalpx-font-serif)",
+                color: BROWN,
+                textDecoration: "underline",
+                padding: "4px 0",
+                marginTop: 10,
+              }}
+            >
+              Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   /* ── Render ── */
@@ -387,7 +770,13 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
 
       {/* ── 4. Essence collapsible (info.insight) ── */}
       {hasContent(insight) && (
-        <div style={{ width: "100%", marginBottom: 12, marginTop: infoViewOnly ? 0 : -80 }}>
+        <div
+          style={{
+            width: "100%",
+            marginBottom: 12,
+            marginTop: infoViewOnly ? 0 : -80,
+          }}
+        >
           <CollapsibleCard
             label="Essence"
             expanded={essenceExpanded}

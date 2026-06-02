@@ -18,6 +18,7 @@
 
 import React, { useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useTranslation } from "react-i18next";
 
 import api from "../../../Networks/axios";
 import { executeAction } from "../../../engine/actionExecutor";
@@ -40,6 +41,8 @@ const RoomActionStepPill: React.FC<Props> = ({
   kindLabel,
   isPrimary = false,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const { loadScreen, goBack, screenData } = useScreenStore();
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [confirmed, setConfirmed] = useState(false);
@@ -76,7 +79,7 @@ const RoomActionStepPill: React.FC<Props> = ({
       // telemetry still fires deterministically.
       try {
         Alert.alert(
-          action.label || "Step",
+          action.label || t("room.actions.step"),
           "This step will open an inline panel.",
           [
             { text: "Cancel", style: "cancel" },
@@ -135,7 +138,7 @@ const RoomActionStepPill: React.FC<Props> = ({
       {confirmed ? (
         <View style={[styles.pill, isPrimary ? styles.pillPrimary : null]}>
           {kindLabel ? <Text style={styles.kindLabel}>{kindLabel}</Text> : null}
-          <Text style={styles.confirmedText}>Noted.</Text>
+          <Text style={[styles.confirmedText, isHindi && { letterSpacing: 0 }]}>{t("room.actions.noted")}</Text>
         </View>
       ) : (
         <TouchableOpacity
@@ -159,7 +162,7 @@ const RoomActionStepPill: React.FC<Props> = ({
       <StepModal
         visible={modalVisible}
         stepPayload={action.step_payload}
-        label={action.label || "Step"}
+        label={action.label || t("room.actions.step")}
         onCancel={handleCancel}
         onDone={handleDone}
       />

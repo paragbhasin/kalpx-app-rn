@@ -12,6 +12,7 @@
 
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import { useTranslation } from "react-i18next";
 
 import { executeAction } from "../../../engine/actionExecutor";
 import { trackRoomTelemetry } from "../../../engine/mitraApi";
@@ -27,6 +28,8 @@ interface Props {
 }
 
 const RoomActionExitPill: React.FC<Props> = ({ action, envelope }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const { loadScreen, goBack } = useScreenStore();
 
   const onPress = () => {
@@ -55,7 +58,7 @@ const RoomActionExitPill: React.FC<Props> = ({ action, envelope }) => {
       accessibilityLabel={action.label}
       onPress={onPress}
     >
-      <Text style={styles.label}>{action.label || "I'll go now"}</Text>
+      <Text style={[styles.label, isHindi && { letterSpacing: 0 }]}>{action.label || t("room.actions.illGoNow")}</Text>
     </TouchableOpacity>
   );
 };

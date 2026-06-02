@@ -42,6 +42,45 @@ export const ROOM_REFLECTION_OPTIONS: Record<VerifiedRoomId, RoomReflectionOptio
   ],
 };
 
+export const ROOM_REFLECTION_OPTIONS_HI: Record<VerifiedRoomId, RoomReflectionOption[]> = {
+  room_stillness: [
+    { code: "more_steady",        label: "अधिक स्थिर" },
+    { code: "still_restless",     label: "अभी भी बेचैन" },
+    { code: "a_little_clearer",   label: "थोड़ा स्पष्ट" },
+    { code: "want_to_share_more", label: "मित्र को और बताना है", is_tell_mitra_bridge: true },
+  ],
+  room_clarity: [
+    { code: "one_thing_clearer",  label: "एक बात स्पष्ट हुई" },
+    { code: "know_next_step",     label: "अगला कदम पता है" },
+    { code: "still_unclear",      label: "अभी भी अस्पष्ट" },
+    { code: "want_to_share_more", label: "मित्र को और बताना है", is_tell_mitra_bridge: true },
+  ],
+  room_release: [
+    { code: "lighter",            label: "हल्का" },
+    { code: "still_heavy",        label: "अभी भी भारी" },
+    { code: "released_a_little",  label: "थोड़ा छोड़ा" },
+    { code: "want_to_share_more", label: "मित्र को और बताना है", is_tell_mitra_bridge: true },
+  ],
+  room_connection: [
+    { code: "less_alone",         label: "कम अकेला" },
+    { code: "still_disconnected", label: "अभी भी दूर" },
+    { code: "remembered_someone", label: "किसी को याद किया" },
+    { code: "want_to_share_more", label: "मित्र को और बताना है", is_tell_mitra_bridge: true },
+  ],
+  room_growth: [
+    { code: "i_know_one_step",    label: "एक कदम पता है" },
+    { code: "feel_ready",         label: "तैयार महसूस हो रहा है" },
+    { code: "still_stuck",        label: "अभी भी अटका हूँ" },
+    { code: "want_help_choosing", label: "चुनने में मदद चाहिए" },
+  ],
+  room_joy: [
+    { code: "noticed_something_good", label: "कुछ अच्छा देखा" },
+    { code: "more_steady",            label: "अधिक स्थिर" },
+    { code: "still_restless",         label: "अभी भी बेचैन" },
+    { code: "want_to_share_more",     label: "मित्र को और बताना है", is_tell_mitra_bridge: true },
+  ],
+};
+
 // D-C Surface A: per-room completion acknowledgement header shown in RoomReflectionSheet.
 // COPY STATUS: FROZEN — approved by founder 2026-05-11.
 // PARTIAL OVERRIDE 2026-05-17: room_release + room_clarity headers updated per founder approval.
@@ -52,6 +91,15 @@ export const ROOM_COMPLETION_HEADER: Partial<Record<VerifiedRoomId, string>> = {
   room_clarity:    "Viveka. You made space to see.",
   room_growth:     "Tapasya. You stayed.",
   room_joy:        "Ananda. You noticed.",
+};
+
+export const ROOM_COMPLETION_HEADER_HI: Partial<Record<VerifiedRoomId, string>> = {
+  room_stillness:  "प्रत्याहार। भीतर मुड़ना ही अभ्यास था।",
+  room_connection: "भक्ति। हृदय मुड़ा।",
+  room_release:    "शरणागति। आपने एक चीज़ छोड़ी।",
+  room_clarity:    "विवेक। आपने देखने की जगह बनाई।",
+  room_growth:     "तपस्या। आप रहे।",
+  room_joy:        "आनंद। आपने देखा।",
 };
 
 // §5.2 post-completion next-step suggestion shown in RoomReflectionSheet next_step phase.
@@ -65,6 +113,15 @@ export const ROOM_NEXT_STEP_LINE: Partial<Record<VerifiedRoomId, string>> = {
   room_joy:        "Let the lightness stay simple.",
 };
 
+export const ROOM_NEXT_STEP_LINE_HI: Partial<Record<VerifiedRoomId, string>> = {
+  room_stillness:  "जब शोर लौटे, यह कमरा यहाँ है।",
+  room_connection: "एक नरम भावना साथ ले चलें।",
+  room_release:    "जो छोड़ सकते हैं छोड़ें। धीरे से लौटें।",
+  room_clarity:    "अभी के लिए एक स्पष्ट बात काफी है।",
+  room_growth:     "शुरू करने के लिए एक छोटा कदम काफी है।",
+  room_joy:        "हल्केपन को सरल रहने दें।",
+};
+
 export const ROOM_GUIDED_COPY = {
   begin:            "Begin",
   whyThisLabel:     "Why this was chosen",
@@ -76,5 +133,19 @@ export const ROOM_GUIDED_COPY = {
     tellMitraMore: "Tell Mitra more",
     continueStep:  "Continue with another step",
     returnHome:    "Return home",
+  },
+} as const;
+
+export const ROOM_GUIDED_COPY_HI = {
+  begin:            "शुरू करें",
+  whyThisLabel:     "यह क्यों चुना गया",
+  viewAllSteps:     "सभी चरण देखें",
+  exitLabel:        "अभी जाता हूँ",
+  reflectionPrompt: "क्या थोड़ा बदला?",
+  nextStep: {
+    finishHere:    "यहाँ समाप्त करें",
+    tellMitraMore: "मित्र को और बताएं",
+    continueStep:  "एक और चरण जारी रखें",
+    returnHome:    "होम पर लौटें",
   },
 } as const;

@@ -3,6 +3,7 @@ import Slider from "@react-native-community/slider";
 import { Audio } from "expo-av";
 import { Minus, Plus, RefreshCw } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Image,
   LayoutAnimation,
@@ -132,20 +133,23 @@ const CollapsibleCard: React.FC<{
 const CommunityActionBar: React.FC<{ addLoading?: boolean; onAdd?: () => void }> = ({
   addLoading,
   onAdd,
-}) => (
-  <View style={styles.communityActionBar}>
-    <TouchableOpacity
-      onPress={onAdd}
-      disabled={addLoading}
-      activeOpacity={0.85}
-      style={[styles.communityAddButton, addLoading && styles.communityAddButtonDisabled]}
-    >
-      <Text style={styles.communityAddButtonText}>
-        {addLoading ? "Adding..." : "Add to My Practice"}
-      </Text>
-    </TouchableOpacity>
-  </View>
-);
+}) => {
+  const { t } = useTranslation();
+  return (
+    <View style={styles.communityActionBar}>
+      <TouchableOpacity
+        onPress={onAdd}
+        disabled={addLoading}
+        activeOpacity={0.85}
+        style={[styles.communityAddButton, addLoading && styles.communityAddButtonDisabled]}
+      >
+        <Text style={styles.communityAddButtonText}>
+          {addLoading ? t("practiceRunner.adding") : t("practiceRunner.addToMyPractice")}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
 
 // --- Main Component ---
 
@@ -160,6 +164,7 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
   addLoading,
   onAddToPractice,
 }) => {
+  const { t } = useTranslation();
   const clampMins = (v: number) => Math.max(1, Math.min(10, Math.round(v)));
 
   const resolveInitialMins = (): number => {
@@ -382,7 +387,7 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
         <View style={styles.mainCard}>
           {item.steps && item.steps.length > 0 && (
             <>
-              <SectionHeader label="What this practice asks of you" />
+              <SectionHeader label={t("practiceRunner.whatThisAsks")} />
               <View style={styles.practiceStepsList}>
                 {item.steps.map((step: string, i: number) => (
                   <View key={i} style={styles.practiceStep}>
@@ -404,8 +409,8 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
           >
             {!isPracticeTimerRunning ? (
               <>
-                <Text style={styles.practiceTimerHeading}>How long will you pause?</Text>
-                <Text style={styles.practiceTimerValue}>{selectedPracticeMinutes} min</Text>
+                <Text style={styles.practiceTimerHeading}>{t("practiceRunner.howLongPause")}</Text>
+                <Text style={styles.practiceTimerValue}>{selectedPracticeMinutes} {t("practiceRunner.minLabel")}</Text>
                 <View style={styles.practiceSliderRow}>
                   <TouchableOpacity
                     style={styles.practiceAdjustButton}
@@ -436,16 +441,16 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
                   </TouchableOpacity>
                 </View>
                 <View style={styles.practiceTimerScale}>
-                  <Text style={styles.practiceTimerScaleLabel}>1 min</Text>
-                  <Text style={styles.practiceTimerScaleHint}>Drag to adjust</Text>
-                  <Text style={styles.practiceTimerScaleLabel}>10 min</Text>
+                  <Text style={styles.practiceTimerScaleLabel}>{t("practiceRunner.minMin")}</Text>
+                  <Text style={styles.practiceTimerScaleHint}>{t("practiceRunner.dragToAdjust")}</Text>
+                  <Text style={styles.practiceTimerScaleLabel}>{t("practiceRunner.maxMin")}</Text>
                 </View>
                 <TouchableOpacity
                   style={styles.practicePrimaryButton}
                   onPress={startPracticeTimer}
                   activeOpacity={0.85}
                 >
-                  <Text style={styles.practicePrimaryButtonText}>Begin</Text>
+                  <Text style={styles.practicePrimaryButtonText}>{t("practiceRunner.begin")}</Text>
                 </TouchableOpacity>
               </>
             ) : (
@@ -486,7 +491,7 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
                     <Text style={styles.practiceTimerClock}>
                       {formatTimer(practiceTimeLeft)}
                     </Text>
-                    <Text style={styles.practiceTimerSubtext}>Return to the moment</Text>
+                    <Text style={styles.practiceTimerSubtext}>{t("practiceRunner.returnToMoment")}</Text>
                     <TouchableOpacity
                       style={styles.practiceResetIconButton}
                       onPress={() => resetPracticeTimer().catch(() => {})}
@@ -516,7 +521,7 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
                   onPress={handleBack}
                   activeOpacity={0.85}
                 >
-                  <Text style={styles.practicePrimaryButtonText}>End Practice</Text>
+                  <Text style={styles.practicePrimaryButtonText}>{t("practiceRunner.endPractice")}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.practiceResetButton}
@@ -532,7 +537,7 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
           <>
             {item.steps && item.steps.length > 0 && <View style={{ height: 18 }} />}
             <CollapsibleCard
-              label="Benefits"
+              label={t("practiceRunner.benefits")}
               expanded={benefitsExpanded}
               onToggle={() => setBenefitsExpanded(!benefitsExpanded)}
             >
@@ -557,7 +562,7 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
               <View style={{ height: 18 }} />
             )}
             <CollapsibleCard
-              label="Essence"
+              label={t("practiceRunner.essence")}
               expanded={essenceExpanded}
               onToggle={() => setEssenceExpanded(!essenceExpanded)}
             >
@@ -574,7 +579,7 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
           onPress={handleBack}
           style={[styles.backLink, { marginTop: 20 }]}
         >
-          <Text style={styles.backLinkText}>Back</Text>
+          <Text style={styles.backLinkText}>{t("practiceRunner.back")}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

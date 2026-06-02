@@ -20,6 +20,7 @@ import {
   View,
 } from 'react-native';
 import { Audio } from 'expo-av';
+import { useTranslation } from 'react-i18next';
 import { Colors } from '../../../theme/colors';
 import { Fonts } from '../../../theme/fonts';
 
@@ -38,6 +39,8 @@ function formatElapsed(ms: number): string {
 }
 
 const VoicePhase: React.FC<Props> = ({ companionLine, onSave, onWriteInstead, onSkip }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === 'hi';
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingUri, setRecordingUri] = useState<string | null>(null);
@@ -131,12 +134,12 @@ const VoicePhase: React.FC<Props> = ({ companionLine, onSave, onWriteInstead, on
         <Text style={styles.companion}>{companionLine}</Text>
       ) : null}
 
-      <Text style={styles.instruction}>
+      <Text style={[styles.instruction, isHindi && { letterSpacing: 0 }]}>
         {done
-          ? 'Your voice note is ready.'
+          ? t('room.phases.voice.ready')
           : isRecording
-          ? 'Recording… tap to stop.'
-          : 'When you\'re ready, press and speak.'}
+          ? t('room.phases.voice.recording')
+          : t('room.phases.voice.idle')}
       </Text>
 
       {/* Record circle */}
@@ -162,24 +165,24 @@ const VoicePhase: React.FC<Props> = ({ companionLine, onSave, onWriteInstead, on
       ) : null}
 
       {permissionDenied ? (
-        <Text style={styles.permissionHint}>
-          Microphone access was denied. You can write instead.
+        <Text style={[styles.permissionHint, isHindi && { letterSpacing: 0 }]}>
+          {t('room.phases.voice.permissionDenied')}
         </Text>
       ) : null}
 
       <View style={styles.actions}>
         {done ? (
           <TouchableOpacity style={styles.ctaBtn} onPress={handleDone} activeOpacity={0.7}>
-            <Text style={styles.ctaText}>Done</Text>
+            <Text style={[styles.ctaText, isHindi && { letterSpacing: 0 }]}>{t('room.phases.common.done')}</Text>
           </TouchableOpacity>
         ) : null}
 
         <TouchableOpacity onPress={onWriteInstead} style={styles.secondaryBtn} hitSlop={{ top: 8, bottom: 8 }}>
-          <Text style={styles.secondaryText}>Write instead</Text>
+          <Text style={[styles.secondaryText, isHindi && { letterSpacing: 0 }]}>{t('room.phases.voice.writeInstead')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={onSkip} style={styles.skipBtn} hitSlop={{ top: 8, bottom: 8 }}>
-          <Text style={styles.skipText}>I'll go now</Text>
+          <Text style={[styles.skipText, isHindi && { letterSpacing: 0 }]}>{t('room.phases.common.illGoNow')}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

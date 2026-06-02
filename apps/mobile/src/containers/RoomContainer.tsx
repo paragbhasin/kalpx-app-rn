@@ -33,6 +33,7 @@ import {
   View,
 } from "react-native";
 import api from "../Networks/axios";
+import i18n from "../config/i18n";
 import LifeContextPickerSheet, {
   type LifeContext,
 } from "../blocks/room/LifeContextPickerSheet";
@@ -105,7 +106,7 @@ function buildExitOnlyFallback(roomId: RoomId): RoomRenderV1 {
     actions: [
       {
         action_id: `${roomId}_exit_fallback`,
-        label: "Return",
+        label: i18n.language === 'hi' ? "वापस जाएं" : "Return",
         action_type: "exit",
         action_family: "exit",
         runner_payload: null,
@@ -426,8 +427,8 @@ const RoomRenderBranch: React.FC<RenderBranchProps> = ({
       setLoading(false);
       return;
     }
-    // Fetch key includes life_context + intent_type so switching context re-fetches.
-    const fetchKey = `${roomId}::${lifeContext || ""}::${entryContext?.situation?.intent_type || ""}`;
+    // Fetch key includes life_context + intent_type + locale so switching any re-fetches.
+    const fetchKey = `${roomId}::${lifeContext || ""}::${entryContext?.situation?.intent_type || ""}::${i18n.language || "en"}`;
     if (fetchedRef.current === fetchKey) return;
     fetchedRef.current = fetchKey;
 
@@ -438,6 +439,7 @@ const RoomRenderBranch: React.FC<RenderBranchProps> = ({
         // Build query params: life_context + entry context params (with mismatch guard).
         const ecParams = getRoomRenderParamsFromEntryContext(entryContext, roomId as string);
         const qp = new URLSearchParams();
+        qp.set('locale', i18n.language || 'en');
         if (lifeContext)                       qp.set('life_context',        lifeContext);
         if (ecParams.intent_type)              qp.set('intent_type',         ecParams.intent_type);
         if (ecParams.source_surface)           qp.set('source_surface',      ecParams.source_surface);
@@ -462,9 +464,9 @@ const RoomRenderBranch: React.FC<RenderBranchProps> = ({
         // FIX-4: surface life_context selection outcome when user chose a context
         if (lifeContext && data.provenance) {
           if (data.provenance.life_context_skipped) {
-            showToast("Showing general guidance.", 3000, "info");
+            showToast(i18n.language === 'hi' ? "सामान्य मार्गदर्शन दिखाया जा रहा है।" : "Showing general guidance.", 3000, "info");
           } else if (data.provenance.life_context_applied) {
-            showToast("Personalized for your context.", 2500, "info");
+            showToast(i18n.language === 'hi' ? "आपके संदर्भ के अनुसार।" : "Personalized for your context.", 2500, "info");
           }
         }
       } catch (err: any) {

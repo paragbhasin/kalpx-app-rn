@@ -11,7 +11,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppShell } from "../../components/ui";
-import retreatImg from "../../../../mobile/assets/retreat/retreat1.webp";
+const retreatImg = "/mobile-assets/retreat/retreat1.webp";
 
 export function RetreatBookingPage() {
   const navigate = useNavigate();
@@ -35,7 +35,11 @@ export function RetreatBookingPage() {
     <div style={mobilePageStyle}>
       <header style={mobileHeaderStyle}>
         <div style={mobileHeaderInnerStyle}>
-          <button type="button" onClick={() => navigate(-1)} style={iconButtonStyle}>
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            style={iconButtonStyle}
+          >
             <ArrowLeft size={18} color="#000" />
           </button>
           <h1 style={mobileHeaderTitleStyle}>Booking Details</h1>
@@ -44,7 +48,11 @@ export function RetreatBookingPage() {
 
       <main style={mobileMainStyle}>
         <div style={summaryCardStyle}>
-          <img src={retreat.image} style={summaryImageStyle} alt={retreat.title} />
+          <img
+            src={retreat.image}
+            style={summaryImageStyle}
+            alt={retreat.title}
+          />
           <div style={{ flex: 1 }}>
             <h2 style={summaryTitleStyle}>{retreat.title}</h2>
             <div style={ratingRowStyle}>
@@ -67,7 +75,9 @@ export function RetreatBookingPage() {
           <div style={detailDividerStyle} />
           <div style={detailBlockStyle}>
             <span style={capsLabelStyle}>Dates</span>
-            <p style={detailValueStyle}>From 22 Dec - 24 Dec 2025 ( 3 Days/ 2 Nights)</p>
+            <p style={detailValueStyle}>
+              From 22 Dec - 24 Dec 2025 ( 3 Days/ 2 Nights)
+            </p>
           </div>
         </div>
 
@@ -90,13 +100,21 @@ export function RetreatBookingPage() {
               <div style={subheadStyle}>Price Details</div>
               <div style={miniPriceCardStyle}>
                 <PriceRow label="Total MRP" value="₹2,500" />
-                <PriceRow label="Discount" value="-₹91.65" valueColor="#16a34a" />
+                <PriceRow
+                  label="Discount"
+                  value="-₹91.65"
+                  valueColor="#16a34a"
+                />
                 <PriceRow label="Delivery Charges" value="Free" />
                 <hr style={miniHrStyle} />
                 <PriceRow label="Total Amount" value="₹2,408.35" strong />
               </div>
             </div>
-            <button type="button" style={primaryButtonStyle} onClick={() => setShowSuccess(true)}>
+            <button
+              type="button"
+              style={primaryButtonStyle}
+              onClick={() => setShowSuccess(true)}
+            >
               Buy Now
             </button>
           </div>
@@ -113,7 +131,11 @@ export function RetreatBookingPage() {
                 <AddonRow label="Gluten Free Meal" value="₹2000/-" />
               </div>
               <PriceRow label="Taxes" value="₹330/-" />
-              <PriceRow label="Total Discount" value="-₹200/-" valueColor="#E4405F" />
+              <PriceRow
+                label="Total Discount"
+                value="-₹200/-"
+                valueColor="#E4405F"
+              />
             </div>
             <div style={breakdownFooterStyle}>
               <span style={breakdownFooterLabelStyle}>Total Payment</span>
@@ -126,7 +148,11 @@ export function RetreatBookingPage() {
           <Field label="First Name" placeholder="Enter your first name" />
           <Field label="Last Name" placeholder="Enter your last name" />
           <Field label="Email Id" placeholder="Enter email -id" type="email" />
-          <Field label="Mobile Number" placeholder="Enter your mobile number" type="tel" />
+          <Field
+            label="Mobile Number"
+            placeholder="Enter your mobile number"
+            type="tel"
+          />
         </FormSection>
 
         <section style={sectionStyle}>
@@ -150,7 +176,11 @@ export function RetreatBookingPage() {
         </section>
 
         <FormSection title="Make Payment" white>
-          <Field label="Card No." placeholder="Card number" icon={<CreditCard size={16} color="#9ca3af" />} />
+          <Field
+            label="Card No."
+            placeholder="Card number"
+            icon={<CreditCard size={16} color="#9ca3af" />}
+          />
           <Field label="Expiration Date" placeholder="MM/YY" />
           <Field label="Security Date" placeholder="CVC" />
           <div style={fieldWrapStyle}>
@@ -164,7 +194,11 @@ export function RetreatBookingPage() {
           </div>
         </FormSection>
 
-        <button type="button" onClick={() => setShowSuccess(true)} style={primaryPayButtonStyle}>
+        <button
+          type="button"
+          onClick={() => setShowSuccess(true)}
+          style={primaryPayButtonStyle}
+        >
           Make Payment
         </button>
       </main>
@@ -175,7 +209,11 @@ export function RetreatBookingPage() {
         <div style={desktopGridStyle}>
           <div style={desktopLeftStyle}>
             <div style={desktopBackRowStyle}>
-              <button type="button" onClick={() => navigate(-1)} style={desktopBackButtonStyle}>
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                style={desktopBackButtonStyle}
+              >
                 <ArrowLeft size={24} color="#000" />
               </button>
               <h1 style={desktopPageTitleStyle}>Beginner Friendly Package</h1>
@@ -183,7 +221,11 @@ export function RetreatBookingPage() {
 
             <div style={desktopSectionGapStyle}>
               <div style={desktopImageWrapStyle}>
-                <img src={retreat.image} style={desktopHeroImageStyle} alt={retreat.title} />
+                <img
+                  src={retreat.image}
+                  style={desktopHeroImageStyle}
+                  alt={retreat.title}
+                />
               </div>
               <div style={desktopTitleRatingRowStyle}>
                 <h2 style={desktopRetreatTitleStyle}>{retreat.title}</h2>
@@ -211,7 +253,9 @@ export function RetreatBookingPage() {
               <div style={desktopDetailDividerStyle} />
               <div style={desktopDetailColStyle}>
                 <span style={capsLabelStyle}>Dates</span>
-                <span style={desktopDetailStrongStyle}>From 22 Dec - 24 Dec 2025 ( 3 Days/ 2 Nights)</span>
+                <span style={desktopDetailStrongStyle}>
+                  From 22 Dec - 24 Dec 2025 ( 3 Days/ 2 Nights)
+                </span>
               </div>
             </div>
 
@@ -224,8 +268,12 @@ export function RetreatBookingPage() {
                       <Percent size={18} color="#000" />
                       <span style={desktopCouponCodeStyle}>FVCT</span>
                     </div>
-                    <p style={desktopCouponDescStyle}>10% OFF for First Visitor from 21 dec to 24 dec</p>
-                    <button type="button" style={desktopAppliedButtonStyle}>Applied</button>
+                    <p style={desktopCouponDescStyle}>
+                      10% OFF for First Visitor from 21 dec to 24 dec
+                    </p>
+                    <button type="button" style={desktopAppliedButtonStyle}>
+                      Applied
+                    </button>
                   </div>
                   <span style={desktopCouponAmountStyle}>-₹200</span>
                 </div>
@@ -283,10 +331,18 @@ export function RetreatBookingPage() {
                 <Field label="First Name" placeholder="Enter your first name" />
                 <Field label="Last Name" placeholder="Enter your last name" />
                 <div style={{ gridColumn: "1 / -1" }}>
-                  <Field label="Email Id" placeholder="Enter your E-mail ID" type="email" />
+                  <Field
+                    label="Email Id"
+                    placeholder="Enter your E-mail ID"
+                    type="email"
+                  />
                 </div>
                 <div style={{ gridColumn: "1 / -1" }}>
-                  <Field label="Mobile Number" placeholder="Enter your mobile number" type="tel" />
+                  <Field
+                    label="Mobile Number"
+                    placeholder="Enter your mobile number"
+                    type="tel"
+                  />
                 </div>
               </div>
             </FormSection>
@@ -294,7 +350,11 @@ export function RetreatBookingPage() {
             <section style={desktopFormSectionStyle}>
               <h3 style={desktopSectionTitleStyle}>Make Payment</h3>
               <div style={desktopPaymentCardStyle}>
-                <Field label="Card No." placeholder="Card number" icon={<CreditCard size={16} color="#9ca3af" />} />
+                <Field
+                  label="Card No."
+                  placeholder="Card number"
+                  icon={<CreditCard size={16} color="#9ca3af" />}
+                />
                 <Field label="Expiration Date" placeholder="MM/YY" />
                 <Field label="Security Code" placeholder="CVC" />
                 <div style={fieldWrapStyle}>
@@ -304,10 +364,18 @@ export function RetreatBookingPage() {
                       <option>Select country</option>
                       <option>India</option>
                     </select>
-                    <ChevronDown size={10} color="#9ca3af" style={selectIconStyle} />
+                    <ChevronDown
+                      size={10}
+                      color="#9ca3af"
+                      style={selectIconStyle}
+                    />
                   </div>
                 </div>
-                <button type="button" onClick={() => setShowSuccess(true)} style={desktopPayNowStyle}>
+                <button
+                  type="button"
+                  onClick={() => setShowSuccess(true)}
+                  style={desktopPayNowStyle}
+                >
                   Pay Now
                 </button>
               </div>
@@ -324,7 +392,11 @@ export function RetreatBookingPage() {
       {showSuccess ? (
         <div style={modalOverlayStyle} onClick={() => setShowSuccess(false)}>
           <div style={successModalStyle} onClick={(e) => e.stopPropagation()}>
-            <button type="button" onClick={() => setShowSuccess(false)} style={modalCloseStyle}>
+            <button
+              type="button"
+              onClick={() => setShowSuccess(false)}
+              style={modalCloseStyle}
+            >
               <X size={20} color="#9ca3af" />
             </button>
             <div style={successIconWrapStyle}>
@@ -338,15 +410,21 @@ export function RetreatBookingPage() {
             {paymentType === "deposit" ? (
               <div style={successInfoCardStyle}>
                 <p style={successInfoLineStyle}>
-                  Next Payment Due : <span style={successInfoMutedStyle}>27 Dec 2026</span>
+                  Next Payment Due :{" "}
+                  <span style={successInfoMutedStyle}>27 Dec 2026</span>
                 </p>
                 <p style={successInfoLineStyle}>
-                  Total Payment Left : <span style={successInfoAccentStyle}>₹8,430/-</span>
+                  Total Payment Left :{" "}
+                  <span style={successInfoAccentStyle}>₹8,430/-</span>
                 </p>
-                <p style={successReminderStyle}>We will send you reminder 3 day before the due date</p>
+                <p style={successReminderStyle}>
+                  We will send you reminder 3 day before the due date
+                </p>
               </div>
             ) : null}
-            <p style={successFooterStyle}>Confirmation mail has sent you please check your mail</p>
+            <p style={successFooterStyle}>
+              Confirmation mail has sent you please check your mail
+            </p>
           </div>
         </div>
       ) : null}
@@ -354,13 +432,7 @@ export function RetreatBookingPage() {
   );
 }
 
-function InfoCard({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) {
+function InfoCard({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div style={infoCardStyle}>
       <h3 style={sectionTitleStyle}>{title}</h3>
@@ -391,8 +463,15 @@ function PriceRow({
 }) {
   return (
     <div style={rowBetweenStyle}>
-      <div style={strong ? priceStrongLabelStyle : priceLabelStyle}>{label}</div>
-      <div style={{ ...(strong ? priceStrongValueStyle : priceValueStyle), color: valueColor ?? "#000" }}>
+      <div style={strong ? priceStrongLabelStyle : priceLabelStyle}>
+        {label}
+      </div>
+      <div
+        style={{
+          ...(strong ? priceStrongValueStyle : priceValueStyle),
+          color: valueColor ?? "#000",
+        }}
+      >
         {value}
       </div>
     </div>
@@ -448,7 +527,9 @@ function FormSection({
 }) {
   return (
     <section style={desktop ? desktopFormSectionStyle : sectionStyle}>
-      <h3 style={desktop ? desktopSectionTitleStyle : sectionTitleStyle}>{title}</h3>
+      <h3 style={desktop ? desktopSectionTitleStyle : sectionTitleStyle}>
+        {title}
+      </h3>
       <div
         style={{
           ...formShellStyle,
@@ -485,7 +566,8 @@ function PaymentOption({
       style={{
         ...paymentOptionStyle,
         borderColor: active ? "#D4A017" : "#f3f4f6",
-        boxShadow: active && desktop ? "0 0 0 4px rgba(212,160,23,0.05)" : "none",
+        boxShadow:
+          active && desktop ? "0 0 0 4px rgba(212,160,23,0.05)" : "none",
       }}
     >
       <div style={paymentTopStyle}>
@@ -498,9 +580,13 @@ function PaymentOption({
           >
             {active ? <div style={paymentRadioDotStyle} /> : null}
           </div>
-          <span style={desktop ? paymentTitleDesktopStyle : paymentTitleStyle}>{title}</span>
+          <span style={desktop ? paymentTitleDesktopStyle : paymentTitleStyle}>
+            {title}
+          </span>
         </div>
-        <span style={desktop ? paymentValueDesktopStyle : paymentValueStyle}>{value}</span>
+        <span style={desktop ? paymentValueDesktopStyle : paymentValueStyle}>
+          {value}
+        </span>
       </div>
       <p style={paymentBodyStyle}>{body}</p>
     </button>

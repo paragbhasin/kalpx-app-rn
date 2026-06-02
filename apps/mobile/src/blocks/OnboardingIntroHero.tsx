@@ -8,6 +8,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { interpolate } from "../engine/utils/interpolation";
@@ -40,6 +41,8 @@ interface Props {
 const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
   const { width } = useWindowDimensions();
   const isTablet = useTablet();
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const replyAnim = useRef(new Animated.Value(0)).current;
@@ -98,7 +101,14 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
     }
   };
 
-  const headlineLines = (block.headline || "").split("\n").filter(Boolean);
+  const headline = t("mitraPathSelect.headline", { defaultValue: block.headline || "" });
+  const subtext = t("mitraPathSelect.subtext", { defaultValue: block.subtext || "" });
+  const chipLabel = (chip: { id: string; label: string }) => {
+    if (chip.id === "support") return t("mitraPathSelect.chipSupport", { defaultValue: chip.label });
+    if (chip.id === "growth") return t("mitraPathSelect.chipGrowth", { defaultValue: chip.label });
+    return chip.label;
+  };
+  const headlineLines = headline.split("\n").filter(Boolean);
   // `screenData.onboarding_turn` is a state-id string (e.g. "turn_2",
   // "turn_3_support") after the first turn response; extract digits.
   const rawTurn = screenData.onboarding_turn;
@@ -125,6 +135,7 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
               lineHeight: rs(38, 46, width),
               paddingHorizontal: rs(20, 60, width),
             },
+            isHindi && { letterSpacing: 0 },
           ]}
         >
           {headlineLines.join("\n")}
@@ -139,9 +150,10 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
                 paddingHorizontal: rs(30, 80, width),
                 marginBottom: rs(40, 48, width),
               },
+              isHindi && { letterSpacing: 0 },
             ]}
           >
-            {interpolate(block.subtext, screenData)}
+            {interpolate(subtext, screenData)}
           </Text>
         )}
 
@@ -186,9 +198,10 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
                     style={[
                       styles.premiumChipLabel,
                       { fontSize: rfs(16, width) },
+                      isHindi && { letterSpacing: 0 },
                     ]}
                   >
-                    {chip.label}
+                    {chipLabel(chip)}
                   </Text>
                 </View>
               </TouchableOpacity>

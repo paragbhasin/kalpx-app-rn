@@ -16,6 +16,7 @@
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert, Linking } from "react-native";
+import i18n from "../config/i18n";
 import api from "../Networks/axios";
 import { navigate as rootNavigate, navigationRef } from "../Shared/Routes/NavigationService";
 import { cleanupFlowState, GUARDED_ACTIONS, hasTellMitraRoomEntryContext } from "@kalpx/contracts";
@@ -1149,10 +1150,32 @@ export async function executeAction(
           }
 
           // checkin_ack copy per prana type
+          const _isHi = i18n.language === "hi";
           const checkinAckCopy: Record<
             string,
             { headline: string; body: string; accent?: string }
-          > = {
+          > = _isHi ? {
+            balanced: {
+              headline: "आप ठीक वहाँ हैं जहाँ आपको होना चाहिए।",
+              body: "आपके भीतर एक शांत स्थिरता है।\nयहाँ रहें। इसे गहरा होने दें।",
+              accent: "अभी कुछ भी बदलने की ज़रूरत नहीं।",
+            },
+            energized: {
+              headline: "आपकी ऊर्जा उपस्थित और जीवंत है।",
+              body: "इस ऊर्जा के साथ चलें, इसके विरुद्ध नहीं।\nइसे अपना संकल्प आगे ले जाने दें।",
+              accent: "यह अपना संकल्प आगे ले जाने का अच्छा पल है।",
+            },
+            agitated: {
+              headline: "एक कोमल अगला कदम इसे शांत करने में मदद कर सकता है।",
+              body: "इस अवस्था से धक्का मारकर गुज़रने की ज़रूरत नहीं। एक छोटा सहारा चुनें जो ऊर्जा को स्थिरता में वापस लाए।",
+              accent: "",
+            },
+            drained: {
+              headline: "एक पोषण देने वाला अगला कदम आपको बहाल कर सकता है।",
+              body: "अभी और प्रयास की ज़रूरत नहीं। एक छोटा सहारा चुनें जो कोमलता और स्थिरता के साथ वापस लाए।",
+              accent: "",
+            },
+          } : {
             balanced: {
               headline: "You are exactly where you need to be.",
               body: "There is a quiet steadiness within you.\nStay here. Let it deepen.",
@@ -1294,14 +1317,20 @@ export async function executeAction(
         }
 
         // Start label
-        const startLabelMap: Record<string, string> = {
+        const _startIsHi = i18n.language === "hi";
+        const startLabelMap: Record<string, string> = _startIsHi ? {
+          practice: infoData.is_action ? "अभ्यास करें" : "मैं यह करूँगा",
+          mantra: "जप करें",
+          sankalp: "आत्मसात करें",
+          sankalpa: "आत्मसात करें",
+        } : {
           practice: infoData.is_action ? "Practice" : "I Will Do This",
           mantra: "Chant",
           sankalp: "Embody",
           sankalpa: "Embody",
         };
         setScreenValue(
-          payload.start_label || startLabelMap[infoType] || "Begin",
+          payload.start_label || startLabelMap[infoType] || (_startIsHi ? "शुरू करें" : "Begin"),
           "info_start_label",
         );
 
@@ -1310,8 +1339,8 @@ export async function executeAction(
         const backLabel =
           payload.back_label ||
           (currentContainerId === "companion_dashboard"
-            ? "Return to Mitra Home"
-            : "Back");
+            ? (i18n.language === "hi" ? "मित्र होम पर लौटें" : "Return to Mitra Home")
+            : (i18n.language === "hi" ? "वापस" : "Back"));
         setScreenValue(backLabel, "info_back_label");
 
         // Dynamic back target
@@ -1722,7 +1751,14 @@ export async function executeAction(
         });
 
         setScreenValue(
-          {
+          i18n.language === "hi" ? {
+            title: "इस स्थिरता को साथ रखें",
+            body: [
+              "आप अपने केंद्र पर लौटे।",
+              "दिन के बाकी हिस्से में एक सरल आधार पास रखें।",
+            ],
+            cta_label: "बंद करें",
+          } : {
             title: "Carry this steadiness",
             body: [
               "You returned to your center.",
@@ -1734,8 +1770,9 @@ export async function executeAction(
         );
         setScreenValue(
           {
-            message:
-              "You returned to your center. Carry this steadiness with you.",
+            message: i18n.language === "hi"
+              ? "आप अपने केंद्र पर लौटे। इस स्थिरता को अपने साथ रखें।"
+              : "You returned to your center. Carry this steadiness with you.",
             type: "calmer",
           },
           "_trigger_resolution_toast",
@@ -1942,20 +1979,37 @@ export async function executeAction(
             },
           });
 
+          const _modalIsHi = i18n.language === "hi";
           const finalModal =
             stillFeeling === "agitated"
-              ? {
+              ? _modalIsHi ? {
+                  title: "अपनी श्वास के साथ रहें",
+                  body: ["एक कोमल लय आपके तंत्र को शांत करने में मदद कर सकती है।"],
+                  cta_label: "बंद करें",
+                } : {
                   title: "Stay with your breath",
                   body: ["A softer rhythm may help your system settle."],
                   cta_label: "Close",
                 }
               : stillFeeling === "drained"
-                ? {
+                ? _modalIsHi ? {
+                    title: "कोमल स्थिरता के साथ रहें",
+                    body: ["अभी आपको बल से अधिक कोमलता की ज़रूरत हो सकती है।"],
+                    cta_label: "बंद करें",
+                  } : {
                     title: "Stay with gentle steadiness",
                     body: ["You may need softness more than force right now."],
                     cta_label: "Close",
                   }
-                : {
+                : _modalIsHi ? {
+                    title: "अपने संकल्प के साथ रहें",
+                    body: [
+                      "ईमानदारी से उठाए छोटे कदम गहरा बदलाव लाते हैं।",
+                      "आपका संकल्प आपका आंतरिक दिशा-सूचक है।",
+                      "निरंतर रहें, यह मदद करेगा।",
+                    ],
+                    cta_label: "बंद करें",
+                  } : {
                     title: "Stay with your Sankalp",
                     body: [
                       "Small steps with sincerity create deep change.",
@@ -1967,8 +2021,9 @@ export async function executeAction(
           setScreenValue(finalModal, "dashboard_return_modal");
           setScreenValue(
             {
-              message:
-                "Stay close to your sankalp, mantra, and practice — they are your anchors.",
+              message: _modalIsHi
+                ? "अपने संकल्प, मंत्र और अभ्यास के करीब रहें — वे आपके आधार हैं।"
+                : "Stay close to your sankalp, mantra, and practice — they are your anchors.",
               type: "encourage",
             },
             "_trigger_resolution_toast",
@@ -3335,6 +3390,14 @@ export async function executeAction(
             draft.stage0_choice = path;
             setScreenValue(null, "stage2_data");
             setScreenValue(null, "stage3_data");
+            // Pre-fetch stage1 chips with locale so turn_3_life_context renders translated labels
+            const stage1 = await mitraFetchOnboardingChips({
+              stage: 1,
+              lane: path,
+              guidance_mode: "hybrid",
+              locale: i18n.language || "en",
+            });
+            setScreenValue(stage1 || null, "stage1_data");
             nextStateId = path === "growth"
               ? "turn_3_life_context_growth"
               : "turn_3_life_context_support";
@@ -3352,6 +3415,7 @@ export async function executeAction(
               lane: draft.path,
               guidance_mode: "hybrid",
               stage1_choice: draft.stage1_choice,
+              locale: i18n.language || "en",
             });
             setScreenValue(stage2 || null, "stage2_data");
             setScreenValue(stage2?.mitra_message || "", "stage2_mitra_message");
@@ -3376,6 +3440,7 @@ export async function executeAction(
               stage3_choice: null as unknown as string,
               guidance_mode: "hybrid",
               life_context: draft.life_context || null,
+              locale: i18n.language || "en",
               freeforms: {
                 stage1: draft.freeforms?.stage1 || null,
                 stage2: draft.freeforms?.stage2 || null,
@@ -3416,6 +3481,7 @@ export async function executeAction(
                   guidance_mode: "hybrid",
                   stage1_choice: draft.stage1_choice,
                   stage2_choice: draft.stage2_choice,
+                  locale: i18n.language || "en",
                 });
                 setScreenValue(stage3 || null, "stage3_data");
                 setScreenValue(stage3?.mitra_message || "", "stage3_mitra_message");
@@ -3443,6 +3509,7 @@ export async function executeAction(
               stage3_choice: draft.stage3_choice,
               guidance_mode: "hybrid",
               life_context: draft.life_context || null,
+              locale: i18n.language || "en",
               freeforms: {
                 stage1: draft.freeforms?.stage1 || null,
                 stage2: draft.freeforms?.stage2 || null,
@@ -3554,7 +3621,7 @@ export async function executeAction(
                 confidence: inf.confidence || 0.0,
               },
               guidance_mode: draft.guidance_mode || "hybrid",
-              locale: "en",
+              locale: i18n.language.split("-")[0] || "en",
               tz:
                 Intl.DateTimeFormat().resolvedOptions().timeZone ||
                 "Asia/Kolkata",

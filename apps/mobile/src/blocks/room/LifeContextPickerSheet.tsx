@@ -28,6 +28,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
@@ -43,7 +44,7 @@ export type LifeContext =
 
 interface LifeContextOption {
   slug: LifeContext;
-  label: string;
+  labelKey: string;
   testID: string;
 }
 
@@ -54,33 +55,33 @@ interface LifeContextOption {
 const LIFE_CONTEXT_OPTIONS: LifeContextOption[] = [
   {
     slug: "work_career",
-    label: "Work & career",
+    labelKey: "room.lifeContext.workCareer",
     testID: "life_context_picker_work_career",
   },
   {
     slug: "relationships",
-    label: "Relationships",
+    labelKey: "room.lifeContext.relationships",
     testID: "life_context_picker_relationships",
   },
-  { slug: "self", label: "Myself", testID: "life_context_picker_self" },
+  { slug: "self", labelKey: "room.lifeContext.myself", testID: "life_context_picker_self" },
   {
     slug: "health_energy",
-    label: "Health & energy",
+    labelKey: "room.lifeContext.healthEnergy",
     testID: "life_context_picker_health_energy",
   },
   {
     slug: "money_security",
-    label: "Money & security",
+    labelKey: "room.lifeContext.moneySecurity",
     testID: "life_context_picker_money_security",
   },
   {
     slug: "purpose_direction",
-    label: "Purpose & direction",
+    labelKey: "room.lifeContext.purposeDirection",
     testID: "life_context_picker_purpose_direction",
   },
   {
     slug: "daily_life",
-    label: "Daily life",
+    labelKey: "room.lifeContext.dailyLife",
     testID: "life_context_picker_daily_life",
   },
 ];
@@ -115,6 +116,8 @@ const LifeContextPickerSheet: React.FC<LifeContextPickerSheetProps> = ({
   allowedContexts,
   defaultValue,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const options = allowedContexts
     ? LIFE_CONTEXT_OPTIONS.filter((o) => allowedContexts.includes(o.slug))
     : LIFE_CONTEXT_OPTIONS;
@@ -162,8 +165,8 @@ const LifeContextPickerSheet: React.FC<LifeContextPickerSheetProps> = ({
           >
             <View style={styles.sheetContent}>
               <View style={styles.handle} />
-              <Text style={styles.header} testID="life_context_picker_header">
-                What part of life is this touching most right now?
+              <Text style={[styles.header, isHindi && { letterSpacing: 0 }]} testID="life_context_picker_header">
+                {t("room.lifeContext.header")}
               </Text>
 
               <View style={styles.optionsBlock}>
@@ -176,14 +179,14 @@ const LifeContextPickerSheet: React.FC<LifeContextPickerSheetProps> = ({
                     testID={opt.testID}
                     accessible={true}
                     accessibilityRole="button"
-                    accessibilityLabel={opt.label}
+                    accessibilityLabel={t(opt.labelKey)}
                   >
                     <Text
-                      style={styles.rowLabel}
+                      style={[styles.rowLabel, isHindi && { letterSpacing: 0 }]}
                       accessible={false}
                       importantForAccessibility="no"
                     >
-                      {opt.label}
+                      {t(opt.labelKey)}
                     </Text>
                     <Ionicons
                       name={opt.slug === defaultValue ? "checkmark" : "chevron-forward"}
@@ -203,9 +206,9 @@ const LifeContextPickerSheet: React.FC<LifeContextPickerSheetProps> = ({
                 testID="life_context_picker_skip"
                 accessible={true}
                 accessibilityRole="button"
-                accessibilityLabel="Skip for now"
+                accessibilityLabel={t("room.lifeContext.skipForNow")}
               >
-                <Text style={styles.skipLabel}>Skip for now</Text>
+                <Text style={[styles.skipLabel, isHindi && { letterSpacing: 0 }]}>{t("room.lifeContext.skipForNow")}</Text>
               </TouchableOpacity>
             </View>
           </ImageBackground>

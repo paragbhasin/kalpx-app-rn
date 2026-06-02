@@ -18,6 +18,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { rfs, TABLET_MAX_CARD_WIDTH } from "../utils/responsive";
+import { useTranslation } from "react-i18next";
 import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
 import appStore from "../store";
@@ -101,6 +102,8 @@ interface Props {
 }
 
 const PathEmergesBlock: React.FC<Props> = () => {
+  const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === "hi";
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
@@ -161,7 +164,7 @@ const PathEmergesBlock: React.FC<Props> = () => {
       {!!screenData.v3_start_failed && (
         <View style={styles.errorBanner}>
           <Text style={[styles.errorText, { fontSize: rfs(14, width) }]}>
-            Something went wrong. Please try again.
+            {t("errors.somethingWentWrong")}
           </Text>
         </View>
       )}
@@ -199,8 +202,8 @@ const PathEmergesBlock: React.FC<Props> = () => {
               </View>
 
               <View style={styles.textWrap}>
-                <Text style={[styles.label, { color: theme.accent, fontSize: rfs(13, width) }]}>
-                  {LABELS[card.kind].toUpperCase()}
+                <Text style={[styles.label, { color: theme.accent, fontSize: rfs(13, width) }, isHindi && { letterSpacing: 0 }]}>
+                  {t(`turn8.labels.${card.kind}`)}
                 </Text>
                 <Text style={[styles.title, { fontSize: rfs(18, width) }]}>{title}</Text>
               </View>
@@ -243,11 +246,10 @@ const PathEmergesBlock: React.FC<Props> = () => {
               />
             </View>
             <View style={styles.whyHeaderTextWrap}>
-              <Text style={[styles.whyHeaderTitle, { fontSize: rfs(18, width) }]}>Why these were chosen</Text>
+              <Text style={[styles.whyHeaderTitle, { fontSize: rfs(18, width) }, isHindi && { letterSpacing: 0 }]}>{t("turn8.why.header")}</Text>
               {!whyOpen && (
-                <Text style={[styles.whyHeaderSubtitle, { fontSize: rfs(14, width) }]}>
-                  Understand why Mitra selected this mantra, sankalp, and
-                  practice.
+                <Text style={[styles.whyHeaderSubtitle, { fontSize: rfs(14, width) }, isHindi && { letterSpacing: 0 }]}>
+                  {t("turn8.why.subheader")}
                 </Text>
               )}
             </View>
@@ -261,8 +263,8 @@ const PathEmergesBlock: React.FC<Props> = () => {
           {whyOpen && (
             <View style={styles.whyBody}>
               <View style={styles.whyBodyHeader}>
-                <Text style={[styles.whyEyebrow, { fontSize: rfs(11, width) }]}>Chosen with care</Text>
-                <Text style={[styles.whyBodyTitle, { fontSize: rfs(18, width) }]}>Why this supports today</Text>
+                <Text style={[styles.whyEyebrow, { fontSize: rfs(11, width) }, isHindi && { letterSpacing: 0 }]}>{t("turn8.why.chosenWith")}</Text>
+                <Text style={[styles.whyBodyTitle, { fontSize: rfs(18, width) }, isHindi && { letterSpacing: 0 }]}>{t("turn8.why.whySupports")}</Text>
               </View>
 
               <View style={styles.tabRow}>
@@ -292,11 +294,7 @@ const PathEmergesBlock: React.FC<Props> = () => {
                           },
                         ]}
                       >
-                        {tab.kind === "sankalp"
-                          ? "Sankalp"
-                          : tab.kind === "mantra"
-                            ? "Mantra"
-                            : "Practice"}
+                        {t(`turn8.tabs.${tab.kind}`)}
                       </Text>
                     </TouchableOpacity>
                   );
@@ -308,13 +306,10 @@ const PathEmergesBlock: React.FC<Props> = () => {
                   style={[
                     styles.whyDetailLabel,
                     { color: THEME[activeWhyKind].accent, fontSize: rfs(11, width) },
+                    isHindi && { letterSpacing: 0 },
                   ]}
                 >
-                  {activeWhyKind === "sankalp"
-                    ? "Sankalp"
-                    : activeWhyKind === "mantra"
-                      ? "Mantra"
-                      : "Practice"}
+                  {t(`turn8.tabs.${activeWhyKind}`)}
                 </Text>
                 <Text style={[styles.whyDetailTitle, { fontSize: rfs(18, width) }]}>
                   {activeWhyKind === "sankalp"
@@ -324,12 +319,12 @@ const PathEmergesBlock: React.FC<Props> = () => {
 
                 {!!activeWhyContext.mitra_frame_through && (
                   <View style={styles.primaryReasonCard}>
-                    <Text style={[styles.reasonLabel, { fontSize: rfs(11, width) }]}>Essence</Text>
-                    <Text style={[styles.reasonBody, { fontSize: rfs(15, width) }]}>
+                    <Text style={[styles.reasonLabel, { fontSize: rfs(11, width) }, isHindi && { letterSpacing: 0 }]}>{t("turn8.why.essence")}</Text>
+                    <Text style={[styles.reasonBody, { fontSize: rfs(15, width) }, isHindi && { letterSpacing: 0 }]}>
                       {sentence(
                         activeWhyKind === "sankalp"
-                          ? `This is ${activeWhyContext.mitra_frame_through}`
-                          : `${activeWhyItem.title || "This"} is ${activeWhyContext.mitra_frame_through}`,
+                          ? t("turn8.why.frameSankalp", { frame: activeWhyContext.mitra_frame_through })
+                          : t("turn8.why.frameItem", { title: activeWhyItem.title || "", frame: activeWhyContext.mitra_frame_through }),
                       )}
                     </Text>
                   </View>
@@ -337,11 +332,9 @@ const PathEmergesBlock: React.FC<Props> = () => {
 
                 {!!activeShift && (
                   <View style={styles.primaryReasonCard}>
-                    <Text style={[styles.reasonLabel, { fontSize: rfs(11, width) }]}>Shift</Text>
-                    <Text style={[styles.reasonBody, { fontSize: rfs(15, width) }]}>
-                      {sentence(
-                        `Mitra chose this to guide you from ${activeShift}`,
-                      )}
+                    <Text style={[styles.reasonLabel, { fontSize: rfs(11, width) }, isHindi && { letterSpacing: 0 }]}>{t("turn8.why.shift")}</Text>
+                    <Text style={[styles.reasonBody, { fontSize: rfs(15, width) }, isHindi && { letterSpacing: 0 }]}>
+                      {sentence(t("turn8.why.shiftLabel", { shift: activeShift }))}
                     </Text>
                   </View>
                 )}
@@ -349,8 +342,8 @@ const PathEmergesBlock: React.FC<Props> = () => {
                 <View style={styles.secondaryReasonGrid}>
                   {!!activeWhyContext.mitra_use_for && (
                     <View style={styles.secondaryReasonCard}>
-                      <Text style={[styles.reasonLabel, { fontSize: rfs(11, width) }]}>Useful for</Text>
-                      <Text style={[styles.reasonBody, { fontSize: rfs(15, width) }]}>
+                      <Text style={[styles.reasonLabel, { fontSize: rfs(11, width) }, isHindi && { letterSpacing: 0 }]}>{t("turn8.why.usefulFor")}</Text>
+                      <Text style={[styles.reasonBody, { fontSize: rfs(15, width) }, isHindi && { letterSpacing: 0 }]}>
                         {sentence(activeWhyContext.mitra_use_for)}
                       </Text>
                     </View>
@@ -358,8 +351,8 @@ const PathEmergesBlock: React.FC<Props> = () => {
 
                   {!!activeWhyContext.commentary_lineage && (
                     <View style={styles.secondaryReasonCard}>
-                      <Text style={[styles.reasonLabel, { fontSize: rfs(11, width) }]}>Rooted in</Text>
-                      <Text style={[styles.reasonBody, { fontSize: rfs(15, width) }]}>
+                      <Text style={[styles.reasonLabel, { fontSize: rfs(11, width) }, isHindi && { letterSpacing: 0 }]}>{t("turn8.why.rootedIn")}</Text>
+                      <Text style={[styles.reasonBody, { fontSize: rfs(15, width) }, isHindi && { letterSpacing: 0 }]}>
                         {sentence(activeWhyContext.commentary_lineage)}
                       </Text>
                     </View>
@@ -380,9 +373,8 @@ const PathEmergesBlock: React.FC<Props> = () => {
         <View style={styles.footerLine} />
       </View>
 
-      <Text style={[styles.footer, { fontSize: rfs(17, width) }]}>
-        This isn&apos;t homework. It&apos;s sadhana — a daily practice that
-        builds something real over time.
+      <Text style={[styles.footer, { fontSize: rfs(17, width) }, isHindi && { letterSpacing: 0 }]}>
+        {t("turn8.footer")}
       </Text>
     </View>
   );

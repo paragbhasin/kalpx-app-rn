@@ -18,6 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { executeAction } from '../../engine/actionExecutor';
 import { postQuickCheckin } from '../../engine/mitraApi';
@@ -34,38 +35,16 @@ const DOOR_ROUTES: Record<string, string> = {
   tell_mitra: 'TellMitra',
 };
 
-const ROOM_CTA_LABELS: Record<string, string> = {
-  room_stillness: 'Go to Find Calm',
-  room_release: 'Set It Down',
-  room_joy: "Notice What's Good",
-  room_growth: 'Take the Next Step',
-  room_clarity: 'Go to Find Clarity',
-  room_connection: 'Open Connection',
-};
-
-const DOOR_CTA_LABELS: Record<string, string> = {
-  my_rhythm: 'Go to My Rhythm',
-  inner_path: 'Continue Your Path',
-  quick_reset: 'Quick Reset',
-  tell_mitra: 'Tell Mitra more',
-};
-
-const ENERGY_OPTIONS: {
-  label: string;
+const ENERGY_OPTION_VALUES: {
   value: QuickCheckinEnergyState;
-  desc: string;
   icon: React.ReactNode;
 }[] = [
   {
-    label: 'Energized',
     value: 'energized',
-    desc: 'Ready and moving',
     icon: <Ionicons name="sunny-outline" size={30} color="#D4A017" />,
   },
   {
-    label: 'Balanced',
     value: 'balanced',
-    desc: 'Steady and clear',
     icon: (
       <MaterialCommunityIcons
         name="flower-outline"
@@ -75,15 +54,11 @@ const ENERGY_OPTIONS: {
     ),
   },
   {
-    label: 'Agitated',
     value: 'agitated',
-    desc: 'Restless or tense',
     icon: <Ionicons name="flash-outline" size={30} color="#D4A017" />,
   },
   {
-    label: 'Drained',
     value: 'drained',
-    desc: 'Low or heavy',
     icon: <Ionicons name="rainy-outline" size={30} color="#D4A017" />,
   },
 ];
@@ -105,6 +80,7 @@ function getSuggestedRoomDescription(result: QuickCheckinResponse): string | nul
 }
 
 export default function QuickCheckinScreen() {
+  const { t } = useTranslation();
   const navigation = useNavigation<any>();
   const dispatch = useDispatch();
   const screenData = useScreenStore((state) => state.screenData);
@@ -124,22 +100,40 @@ export default function QuickCheckinScreen() {
     null,
   );
 
+  const ROOM_CTA_KEYS: Record<string, string> = {
+    room_stillness: 'quickCheckin.roomCta.room_stillness',
+    room_release: 'quickCheckin.roomCta.room_release',
+    room_joy: 'quickCheckin.roomCta.room_joy',
+    room_growth: 'quickCheckin.roomCta.room_growth',
+    room_clarity: 'quickCheckin.roomCta.room_clarity',
+    room_connection: 'quickCheckin.roomCta.room_connection',
+  };
+
+  const DOOR_CTA_KEYS: Record<string, string> = {
+    my_rhythm: 'quickCheckin.doorCta.my_rhythm',
+    inner_path: 'quickCheckin.doorCta.inner_path',
+    quick_reset: 'quickCheckin.doorCta.quick_reset',
+    tell_mitra: 'quickCheckin.doorCta.tell_mitra',
+  };
+
   const ctaLabel = useMemo(() => {
-    if (!result) return 'Continue';
+    if (!result) return t('quickCheckin.continue');
     if (
       result.suggested_action === 'navigate_to_room' &&
       result.suggested_room_id
     ) {
-      return ROOM_CTA_LABELS[result.suggested_room_id] ?? 'Go to Practice';
+      const key = ROOM_CTA_KEYS[result.suggested_room_id];
+      return key ? t(key) : t('quickCheckin.goToPractice');
     }
     if (
       result.suggested_action === 'navigate_to_door' &&
       result.suggested_door
     ) {
-      return DOOR_CTA_LABELS[result.suggested_door] ?? 'Continue';
+      const key = DOOR_CTA_KEYS[result.suggested_door];
+      return key ? t(key) : t('quickCheckin.continue');
     }
-    return 'Return Home';
-  }, [result]);
+    return t('quickCheckin.returnHome');
+  }, [result, t]);
 
   const handleProceed = useCallback(async () => {
     if (!selected) return;
@@ -149,11 +143,11 @@ export default function QuickCheckinScreen() {
       const res = await postQuickCheckin(selected);
       setResult(res);
     } catch {
-      setError('Something went wrong. Please try again.');
+      setError(t('quickCheckin.errorMessage'));
     } finally {
       setLoading(false);
     }
-  }, [selected]);
+  }, [selected, t]);
 
   const handleCTA = useCallback(() => {
     if (!result) return;
@@ -210,19 +204,18 @@ export default function QuickCheckinScreen() {
                     <View style={styles.sparkleLine} />
                   </View>
 
-                  <Text style={styles.heading}>Quick Check-in</Text>
+                  <Text style={styles.heading}>{t('quickCheckin.title')}</Text>
                   <Text style={styles.subheading}>
-                    Share how you&apos;re feeling.{'\n'}
-                    Mitra will find a practice that fits.
+                    {t('quickCheckin.subheading')}
                   </Text>
                 </View>
 
                 {loading ? (
-                  <Text style={styles.loadingText}>Checking in…</Text>
+                  <Text style={styles.loadingText}>{t('quickCheckin.checkingIn')}</Text>
                 ) : (
                   <>
                     <View style={styles.optionGrid}>
-                      {ENERGY_OPTIONS.map((opt) => {
+                      {ENERGY_OPTION_VALUES.map((opt) => {
                         const active = selected === opt.value;
                         return (
                           <TouchableOpacity
@@ -235,8 +228,8 @@ export default function QuickCheckinScreen() {
                             ]}
                           >
                             <View style={styles.optionIconWrap}>{opt.icon}</View>
-                            <Text style={styles.optionLabel}>{opt.label}</Text>
-                            <Text style={styles.optionDesc}>{opt.desc}</Text>
+                            <Text style={styles.optionLabel}>{t(`quickCheckin.energy.${opt.value}.label`)}</Text>
+                            <Text style={styles.optionDesc}>{t(`quickCheckin.energy.${opt.value}.desc`)}</Text>
                           </TouchableOpacity>
                         );
                       })}
@@ -245,7 +238,7 @@ export default function QuickCheckinScreen() {
                     <View style={styles.helperRow}>
                       <Text style={styles.helperFlower}>❦</Text>
                       <Text style={styles.helperText}>
-                        Select your energy to continue.
+                        {t('quickCheckin.selectEnergy')}
                       </Text>
                       <Text style={styles.helperFlower}>❦</Text>
                     </View>
@@ -259,7 +252,7 @@ export default function QuickCheckinScreen() {
                         selected === null && styles.goldBtnDisabled,
                       ]}
                     >
-                      <Text style={styles.goldBtnText}>Proceed →</Text>
+                      <Text style={styles.goldBtnText}>{t('quickCheckin.proceed')}</Text>
                     </TouchableOpacity>
                   </>
                 )}
@@ -268,7 +261,7 @@ export default function QuickCheckinScreen() {
               </>
             ) : (
               <View style={styles.resultCard}>
-                <Text style={styles.resultTitle}>Mitra heard you.</Text>
+                <Text style={styles.resultTitle}>{t('quickCheckin.mitraHeard')}</Text>
 
                 <View style={styles.copyCard}>
                   <Text style={styles.copyText}>{result.copy}</Text>
@@ -300,7 +293,7 @@ export default function QuickCheckinScreen() {
                   activeOpacity={0.8}
                   style={styles.secondaryFullBtn}
                 >
-                  <Text style={styles.secondaryFullBtnText}>Tell Mitra more</Text>
+                  <Text style={styles.secondaryFullBtnText}>{t('quickCheckin.tellMitraMore')}</Text>
                 </TouchableOpacity>
 
                 <View style={styles.resultGrid}>
@@ -313,7 +306,7 @@ export default function QuickCheckinScreen() {
                     activeOpacity={0.8}
                     style={styles.resultSmallBtn}
                   >
-                    <Text style={styles.resultSmallBtnText}>Quick Check-in</Text>
+                    <Text style={styles.resultSmallBtnText}>{t('quickCheckin.title')}</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -321,7 +314,7 @@ export default function QuickCheckinScreen() {
                     activeOpacity={0.8}
                     style={styles.resultSmallBtn}
                   >
-                    <Text style={styles.resultSmallBtnText}>Quick Reset</Text>
+                    <Text style={styles.resultSmallBtnText}>{t('quickCheckin.quickReset')}</Text>
                   </TouchableOpacity>
                 </View>
 
@@ -330,7 +323,7 @@ export default function QuickCheckinScreen() {
                   activeOpacity={0.7}
                   style={styles.returnHomeBtn}
                 >
-                  <Text style={styles.returnHomeText}>Return Home</Text>
+                  <Text style={styles.returnHomeText}>{t('quickCheckin.returnHome')}</Text>
                 </TouchableOpacity>
               </View>
             )}

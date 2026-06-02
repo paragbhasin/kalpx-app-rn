@@ -582,7 +582,7 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
         )}
 
         <TouchableOpacity onPress={onBack} style={styles.backLink}>
-          <Text style={styles.backLinkText}>Back</Text>
+          <Text style={styles.backLinkText}>{t("quickReset.back")}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

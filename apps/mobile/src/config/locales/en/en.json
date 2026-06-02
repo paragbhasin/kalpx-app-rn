@@ -2093,7 +2093,8 @@
     "mantraSetTitle": "Quick Reset Mantra Set ✦",
     "mantraSetMessage": "Your mantra has been set for future Quick Reset moments.",
     "tap": "TAP",
-    "here": "HERE"
+    "here": "HERE",
+    "back": "Back"
   },
   "innerPath": {
     "heldToday": {

@@ -303,6 +303,7 @@ export default function RhythmHomeScreen({
         band,
         item.item_id,
         item.item_type,
+        i18n.language || 'en',
       );
       if (resolved?.resolved) {
         enrichedItem = {

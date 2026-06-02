@@ -205,7 +205,7 @@ export default function RhythmHomeScreen({
 }: {
   embedded?: boolean;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
   const tabBarHeight = useBottomTabBarHeight();
@@ -228,12 +228,12 @@ export default function RhythmHomeScreen({
     useCallback(() => {
       screenBridgeRef.current.updateBackground(RHYTHM_BG);
       // P0-D: refresh home data on focus so slot completion state is current after runner return
-      mitraJourneyHomeV3({ forceFresh: true })
+      mitraJourneyHomeV3({ forceFresh: true, locale: i18n.language || 'en' })
         .then((fresh) => {
           if (fresh) dispatch(setHomeData(fresh));
         })
         .catch(() => {});
-    }, [dispatch]),
+    }, [dispatch, i18n.language]),
   );
 
   const openRhythmSetup = useCallback(() => {

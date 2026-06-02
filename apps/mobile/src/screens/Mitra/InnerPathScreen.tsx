@@ -167,7 +167,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
           }
         })
         .catch(() => {});
-    }, [dispatch]),
+    }, [dispatch, i18n.language]),
   );
   const currentContainerId = useSelector(
     (state: RootState) => state.screen.currentContainerId,
@@ -452,7 +452,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     return () => {
       cancelled = true;
     };
-  }, [dispatch, embedded, navigation]);
+  }, [dispatch, embedded, navigation, i18n.language]);
 
   useEffect(() => {
     apiGetJourneyReminders()

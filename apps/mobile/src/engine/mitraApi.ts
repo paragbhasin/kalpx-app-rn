@@ -2344,3 +2344,19 @@ export async function apiPatchJourneyReminders(
   const resp = await api.patch<JourneyTriadReminders>('mitra/v3/journey/reminders/', patch);
   return resp.data;
 }
+
+export type LiveActivityState =
+  | { type: 'quick_chant'; mantra_name: string; devanagari: string; today_count: number; week_count: number; lifetime_count: number }
+  | { type: 'sankalp'; title: string; line: string; source: 'inner_path' }
+  | { type: 'none' };
+
+/** GET mitra/live-activity/state/ — what iOS Live Activity should display right now. */
+export async function getLiveActivityState(locale?: string): Promise<LiveActivityState> {
+  try {
+    const params = locale ? { locale } : {};
+    const resp = await api.get<LiveActivityState>('mitra/live-activity/state/', { params });
+    return resp.data;
+  } catch {
+    return { type: 'none' };
+  }
+}

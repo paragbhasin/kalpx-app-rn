@@ -45,6 +45,23 @@ export const liveActivity = {
     });
   },
 
+  startSankalp(title: string, line: string): Promise<string | null> {
+    if (!supported) {
+      console.warn("[LiveActivity] startSankalp skipped — module not found");
+      return Promise.resolve(null);
+    }
+    console.log("[LiveActivity] calling startSankalp", { title, line });
+    return KalpxLiveActivityModule.startSankalpActivity(title, line)
+      .then((id: string) => {
+        console.log("[LiveActivity] startSankalp OK, id:", id);
+        return id;
+      })
+      .catch((err: any) => {
+        console.error("[LiveActivity] startSankalp FAILED:", err);
+        return null;
+      });
+  },
+
   end(): Promise<void> {
     if (!supported) return Promise.resolve();
     return KalpxLiveActivityModule.endActivity().catch(() => {});

@@ -40,6 +40,7 @@ import React, {
 } from "react";
 import {
   ActivityIndicator,
+  AppState,
   Image,
   LayoutAnimation,
   Platform,
@@ -72,11 +73,13 @@ import { TimePickerModal } from "../../components/TimePickerModal";
 import {
   apiGetJourneyReminders,
   apiPatchJourneyReminders,
+  getLiveActivityState,
   mitraJourneyDailyView,
   mitraJourneyDay14View,
   mitraJourneyDay7View,
   mitraJourneyEntryView,
 } from "../../engine/mitraApi";
+import { liveActivity } from "../../native/liveActivity";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import {
   ingestDailyView,
@@ -123,6 +126,18 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
       updateBackground(require("../../../assets/beige_bg.webp"));
       return () => updateBackground(null);
     }, [updateBackground]),
+  );
+
+  // Start Sankalp Live Activity while this screen is in foreground
+  useFocusEffect(
+    useCallback(() => {
+      getLiveActivityState(i18n.language || 'en').then((state) => {
+        if (AppState.currentState !== 'active') return;
+        if (state.type === 'sankalp') {
+          liveActivity.startSankalp(state.title, state.line);
+        }
+      }).catch(() => {});
+    }, []),
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

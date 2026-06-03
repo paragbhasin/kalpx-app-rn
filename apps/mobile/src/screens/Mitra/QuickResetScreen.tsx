@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Animated,
+  AppState,
   Easing,
   Image,
   ImageBackground,
@@ -37,6 +38,7 @@ import AudioPlayerBlock, {
 } from "../../blocks/AudioPlayerBlock";
 import type { MantraTextCardProps } from "../../containers/CycleTransitionsContainer";
 import {
+  getLiveActivityState,
   getQuickResetOpening,
   postBrowseMantras,
   postQuickChantComplete,
@@ -414,26 +416,25 @@ export default function QuickResetScreen({
   const handleTapBead = useCallback(() => {
     if (!activeMantra) return;
     // Compute next counts BEFORE increment (React state won't update synchronously)
-    const nextSession = beadCount + 1;
-    const nextWeek  = japaEngine.weekCount + 1;
-    const nextYear  = japaEngine.yearCount + 1;
-    const nextTotal = japaEngine.lifetimeCount + 1;
+    const nextToday    = japaEngine.todayCount + 1;
+    const nextWeek     = japaEngine.weekCount + 1;
+    const nextLifetime = japaEngine.lifetimeCount + 1;
     if (!isChantingActive) {
       runnerStartedAt.current = Date.now();
       setIsChantingActive(true);
       liveActivity.start(
         activeMantra.title,
         activeMantra.devanagari ?? "",
-        nextSession,
+        nextToday,
         nextWeek,
-        nextYear,
-        nextTotal
+        nextLifetime,
+        nextLifetime,
       );
     } else {
-      liveActivity.update(nextSession, nextWeek, nextYear, nextTotal);
+      liveActivity.update(nextToday, nextWeek, nextLifetime, nextLifetime);
     }
     japaEngine.increment();
-  }, [activeMantra, isChantingActive, japaEngine, beadCount]);
+  }, [activeMantra, isChantingActive, japaEngine]);
 
   // ── Done chanting ──────────────────────────────────────────────────────────
   // Keep ref in sync so goal-reached callback always calls the latest version
@@ -446,6 +447,15 @@ export default function QuickResetScreen({
       : 0;
     // Flush the japa engine (sync final count + mark session complete on backend)
     await japaEngine.completeSession();
+
+    // After quick chant ends, auto-start Sankalp Live Activity if still in foreground
+    getLiveActivityState(i18n.language || 'en').then((state) => {
+      if (AppState.currentState !== 'active') return;
+      if (state.type === 'sankalp') {
+        liveActivity.startSankalp(state.title, state.line);
+      }
+    }).catch(() => {});
+
     const result = await postQuickChantComplete({
       mantra_ref: activeMantra.item_id,
       duration_ms,
@@ -464,7 +474,7 @@ export default function QuickResetScreen({
         navigation.goBack();
       }
     }
-  }, [activeMantra, embedded, goBack, isChantingActive, navigation]);
+  }, [activeMantra, embedded, goBack, i18n.language, isChantingActive, navigation]);
 
   // Wire onGoalReached ref to the latest handleDoneChanting
   useEffect(() => {

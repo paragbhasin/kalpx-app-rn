@@ -25,6 +25,8 @@ import React, { useEffect, useRef, useState } from "react";
 
 import {
   ActivityIndicator,
+  AppState,
+  AppStateStatus,
   Image,
   SafeAreaView,
   ScrollView,
@@ -38,6 +40,8 @@ import { useTranslation } from "react-i18next";
 import i18n from "../../config/i18n";
 import { useDispatch, useSelector } from "react-redux";
 import FourDoorHomeContainer from "../../containers/FourDoorHomeContainer";
+import { getLiveActivityState } from "../../engine/mitraApi";
+import { liveActivity } from "../../native/liveActivity";
 import { stopRoomAmbientAudio } from "../../engine/roomAmbientAudio";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import api from "../../Networks/axios";
@@ -117,6 +121,50 @@ export default function Home() {
   const CONTINUE_BG = require("../../../assets/beige_bg.webp");
   const isLandingHome =
     !hasPartialState && !(isLoggedIn && checkingJourney) && !mitraJourneyId;
+
+  // Auto-start Live Activity on home focus: Quick Chant if active, else Sankalp
+  useFocusEffect(
+    React.useCallback(() => {
+      getLiveActivityState(i18n.language || 'en').then((state) => {
+        if (AppState.currentState !== 'active') return; // app went to background while fetching
+        if (state.type === 'quick_chant') {
+          liveActivity.start(
+            state.mantra_name,
+            state.devanagari,
+            state.today_count,
+            state.week_count,
+            state.lifetime_count,
+            state.lifetime_count,
+          );
+        } else if (state.type === 'sankalp') {
+          liveActivity.startSankalp(state.title, state.line);
+        }
+      }).catch(() => {});
+    }, []),
+  );
+
+  // Trigger on foreground return from ANY screen (Home stays mounted in the stack).
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (nextState: AppStateStatus) => {
+      if (nextState !== 'active') return;
+      getLiveActivityState(i18n.language || 'en').then((state) => {
+        if (AppState.currentState !== 'active') return;
+        if (state.type === 'quick_chant') {
+          liveActivity.start(
+            state.mantra_name,
+            state.devanagari,
+            state.today_count,
+            state.week_count,
+            state.lifetime_count,
+            state.lifetime_count,
+          );
+        } else if (state.type === 'sankalp') {
+          liveActivity.startSankalp(state.title, state.line);
+        }
+      }).catch(() => {});
+    });
+    return () => sub.remove();
+  }, []);
 
   useFocusEffect(
     React.useCallback(() => {

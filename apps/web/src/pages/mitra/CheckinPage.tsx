@@ -10,9 +10,11 @@ import { loadScreenWithData, useScreenState } from '../../store/screenSlice';
 import { executeAction } from '../../engine/actionExecutor';
 import { MitraMobileShell } from '../../components/layout/MitraMobileShell';
 import type { AppDispatch } from '../../store';
+import { useTranslation } from '../../lib/i18n';
 
 export function CheckinPage() {
   const dispatch = useDispatch<AppDispatch>();
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const screenState = useScreenState();
@@ -54,7 +56,7 @@ export function CheckinPage() {
             data-testid="checkin-exit-btn"
             style={{ background: 'none', border: 'none', color: 'var(--kalpx-text-muted)', fontSize: 13, cursor: 'pointer' }}
           >
-            ✕ Return home
+            {t('mitra.checkin.returnHome')}
           </button>
         </div>
       )}

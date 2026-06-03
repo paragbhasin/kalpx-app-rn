@@ -1,6 +1,7 @@
 import { ArrowRight, Cloud, Leaf, Sparkles, Sun } from "lucide-react";
 import { useState } from "react";
 import { VoiceTextInput } from "../VoiceTextInput";
+import { useTranslation } from "../../lib/i18n";
 
 interface Chip {
   id: string;
@@ -36,6 +37,8 @@ export function OnboardingConversationTurnBlock({
 }: Props) {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
+  const { t } = useTranslation();
+  const reflectionPlaceholder = t("mitra.tellMitra.placeholder");
 
   const messages: string[] = Array.isArray(block.mitra_message)
     ? block.mitra_message
@@ -109,7 +112,7 @@ export function OnboardingConversationTurnBlock({
                 whiteSpace: "pre-line",
               }}
             >
-              {"I'm Mitra.\nI'm here with you."}
+              {t('mitra.start.title')}
             </div>
 
             <div
@@ -277,7 +280,7 @@ export function OnboardingConversationTurnBlock({
           <div style={{ marginTop: 18 }}>
             <VoiceTextInput
               placeholder={
-                block.open_input?.placeholder || "Share your reflection"
+                block.open_input?.placeholder || reflectionPlaceholder
               }
               voiceAvailable={false}
               disabled={busy}
@@ -738,7 +741,7 @@ export function OnboardingConversationTurnBlock({
           <VoiceTextInput
             initialValue={text}
             placeholder={
-              block.open_input?.placeholder || "Share your reflection"
+              block.open_input?.placeholder || reflectionPlaceholder
             }
             voiceAvailable={false}
             disabled={busy}

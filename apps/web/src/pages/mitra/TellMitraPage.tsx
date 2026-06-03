@@ -20,6 +20,7 @@ import { TellMitraThreadView } from "../../components/mitra/TellMitraThreadView"
 import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
 import { executeAction } from "../../engine/actionExecutor";
 import { postTellMitraV3 } from "../../engine/mitraApi";
+import { useTranslation } from '../../lib/i18n';
 import { WEB_ENV } from "../../lib/env";
 import type { AppDispatch } from "../../store";
 import { useScreenState } from "../../store/screenSlice";
@@ -52,6 +53,7 @@ function _id() {
 export function TellMitraPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  const { t } = useTranslation();
   const [isDesktop, setIsDesktop] = useState(
     typeof window === "undefined" ? true : window.innerWidth >= 1024,
   );
@@ -73,7 +75,7 @@ export function TellMitraPage() {
     [],
   );
   const [composerPlaceholder, setComposerPlaceholder] = useState(
-    "What's on your mind…",
+    t('mitra.tellMitra.placeholder'),
   );
   const composerRef = useRef<HTMLTextAreaElement>(null);
   const threadBottomRef = useRef<HTMLDivElement>(null);
@@ -191,11 +193,11 @@ export function TellMitraPage() {
     const inputText = (override?.text ?? text).trim();
     const inputSource = override?.sourceSurface ?? "tell_mitra_page_web";
     if (!inputText) {
-      setError("Please share what's on your mind");
+      setError(t('mitra.tellMitra.errorEmpty'));
       return;
     }
     if (inputText.length > 1000) {
-      setError("Please keep it under 1000 characters");
+      setError(t('mitra.tellMitra.errorTooLong'));
       return;
     }
     setError(null);
@@ -225,7 +227,7 @@ export function TellMitraPage() {
         setScreen("fallback");
       }
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(t('mitra.tellMitra.errorGeneric'));
     } finally {
       setSubmitting(false);
     }
@@ -331,7 +333,7 @@ export function TellMitraPage() {
           type: "safety",
           response_copy:
             resp.response_copy ||
-            "You are not alone. Please speak to someone you trust right now.",
+            t('mitra.tellMitra.notAlone'),
         });
       } else {
         if (resp.response_copy) {
@@ -389,7 +391,7 @@ export function TellMitraPage() {
         {
           id: _id(),
           type: "error",
-          message: "Something went wrong. Please try again.",
+          message: t('mitra.tellMitra.errorGeneric'),
         },
       ]);
     } finally {
@@ -526,7 +528,7 @@ export function TellMitraPage() {
   function handleStartFresh() {
     setConversation([]);
     setText("");
-    setComposerPlaceholder("What's on your mind…");
+    setComposerPlaceholder(t('mitra.tellMitra.placeholder'));
     freshResetPendingRef.current = true;
     activeContextRef.current = {
       parentEventId: null,
@@ -776,7 +778,7 @@ export function TellMitraPage() {
             marginBottom: 2,
           }}
         >
-          Or try
+          {t('mitra.tellMitra.orTry')}
         </div>
         {result.next_options.map((opt: TellMitraNextOption, i: number) => (
           <button
@@ -837,7 +839,7 @@ export function TellMitraPage() {
                 style={BACK_BTN}
               >
                 <ArrowLeft size={22} strokeWidth={2} />
-                Back
+                {t('mitra.tellMitra.back')}
               </button>
             </div>
             <div
@@ -936,7 +938,7 @@ export function TellMitraPage() {
               style={BACK_BTN}
             >
               <ArrowLeft size={22} strokeWidth={2} />
-              Back
+              {t('mitra.tellMitra.back')}
             </button>
 
           {/* Input section — always visible unless a result screen is shown */}
@@ -991,7 +993,7 @@ export function TellMitraPage() {
                       marginBottom: 6,
                     }}
                   >
-                    Tell Mitra
+                    {t('mitra.tellMitra.tellMitraCta')}
                   </div>
                   <div
                     style={{
@@ -1029,7 +1031,7 @@ export function TellMitraPage() {
                   marginBottom: 18,
                 }}
               >
-                Share what you're carrying right now.
+                {t('mitra.tellMitra.shareCarrying')}
               </div>
               <textarea
                 value={text}
@@ -1039,7 +1041,7 @@ export function TellMitraPage() {
                 }}
                 maxLength={1000}
                 rows={5}
-                placeholder="What's on your mind…"
+                placeholder={t('mitra.tellMitra.placeholder')}
                 style={TELL_MITRA_TEXTAREA}
               />
               <img
@@ -1094,7 +1096,7 @@ export function TellMitraPage() {
                     gap: 10,
                   }}
                 >
-                  {submitting ? "Sending…" : "Tell Mitra"}
+                  {submitting ? t('mitra.tellMitra.sending') : t('mitra.tellMitra.tellMitraCta')}
                   {!submitting && <Sparkles size={18} strokeWidth={2} />}
                 </span>
               </button>
@@ -1120,9 +1122,7 @@ export function TellMitraPage() {
                   fontFamily: "var(--kalpx-font-sans)",
                 }}
               >
-                Mitra is here for reflection and Sanatan-rooted guidance. It is not a substitute
-                for medical, legal, financial, therapy, crisis, or emergency support. Share only
-                what you feel comfortable sharing.
+                {t('mitra.tellMitra.disclaimer')}
               </p>
             </div>
             </>
@@ -1140,7 +1140,7 @@ export function TellMitraPage() {
                   marginBottom: 16,
                 }}
               >
-                Mitra heard you.
+                {t('mitra.tellMitra.mitraHeard')}
               </div>
               <ConversationSummary />
               <PriorContextCard />
@@ -1209,7 +1209,7 @@ export function TellMitraPage() {
                 style={{ ...GOLD_BTN, opacity: submitting ? 0.6 : 1 }}
               >
                 {submitting
-                  ? "Sending…"
+                  ? t('mitra.tellMitra.sending')
                   : `Go to ${result.suggested_room_label || "Room"}`}
               </button>
               {result.secondary_room_id &&
@@ -1243,20 +1243,20 @@ export function TellMitraPage() {
                 }}
                 style={{ ...GHOST_BTN, marginTop: 10 }}
               >
-                Tell Mitra more
+                {t('mitra.tellMitra.tellMitraMore')}
               </button>
               <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
                 <button
                   onClick={() => navigate("/en/mitra/checkin-quick")}
                   style={{ ...GHOST_BTN, fontSize: 13 }}
                 >
-                  Quick Check-in
+                  {t('mitra.tellMitra.quickCheckin')}
                 </button>
                 <button
                   onClick={() => navigate("/en/mitra/quick-reset")}
                   style={{ ...GHOST_BTN, fontSize: 13 }}
                 >
-                  Quick Reset
+                  {t('mitra.tellMitra.quickReset')}
                 </button>
               </div>
               <button
@@ -1271,7 +1271,7 @@ export function TellMitraPage() {
                   width: "100%",
                 }}
               >
-                Return Home
+                {t('mitra.tellMitra.returnHome')}
               </button>
             </div>
           )}
@@ -1288,7 +1288,7 @@ export function TellMitraPage() {
                   marginBottom: 16,
                 }}
               >
-                Mitra heard you.
+                {t('mitra.tellMitra.mitraHeard')}
               </div>
               <ConversationSummary />
               <PriorContextCard />
@@ -1326,20 +1326,20 @@ export function TellMitraPage() {
                 }}
                 style={{ ...GHOST_BTN, marginTop: 10 }}
               >
-                Tell Mitra more
+                {t('mitra.tellMitra.tellMitraMore')}
               </button>
               <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
                 <button
                   onClick={() => navigate("/en/mitra/checkin-quick")}
                   style={{ ...GHOST_BTN, fontSize: 13 }}
                 >
-                  Quick Check-in
+                  {t('mitra.tellMitra.quickCheckin')}
                 </button>
                 <button
                   onClick={() => navigate("/en/mitra/quick-reset")}
                   style={{ ...GHOST_BTN, fontSize: 13 }}
                 >
-                  Quick Reset
+                  {t('mitra.tellMitra.quickReset')}
                 </button>
               </div>
               <button
@@ -1354,7 +1354,7 @@ export function TellMitraPage() {
                   width: "100%",
                 }}
               >
-                Return Home
+                {t('mitra.tellMitra.returnHome')}
               </button>
             </div>
           )}
@@ -1371,7 +1371,7 @@ export function TellMitraPage() {
                   marginBottom: 16,
                 }}
               >
-                Mitra heard you.
+                {t('mitra.tellMitra.mitraHeard')}
               </div>
               <ConversationSummary />
               <PriorContextCard />
@@ -1399,13 +1399,13 @@ export function TellMitraPage() {
                 }}
                 style={GOLD_BTN}
               >
-                Tell Mitra more
+                {t('mitra.tellMitra.tellMitraMore')}
               </button>
               <button
                 onClick={() => navigate("/en/mitra")}
                 style={{ ...GHOST_BTN, marginTop: 8 }}
               >
-                Return Home
+                {t('mitra.tellMitra.returnHome')}
               </button>
             </div>
           )}
@@ -1422,7 +1422,7 @@ export function TellMitraPage() {
                   marginBottom: 16,
                 }}
               >
-                Mitra is listening.
+                {t('mitra.tellMitra.mitraListening')}
               </div>
               <ConversationSummary />
               {result.response_copy && (
@@ -1451,13 +1451,13 @@ export function TellMitraPage() {
                 }}
                 style={GOLD_BTN}
               >
-                Tell Mitra more
+                {t('mitra.tellMitra.tellMitraMore')}
               </button>
               <button
                 onClick={() => navigate("/en/mitra")}
                 style={{ ...GHOST_BTN, marginTop: 10 }}
               >
-                Return Home
+                {t('mitra.tellMitra.returnHome')}
               </button>
             </div>
           )}
@@ -1474,7 +1474,7 @@ export function TellMitraPage() {
                   marginBottom: 16,
                 }}
               >
-                Mitra hears you.
+                {t('mitra.tellMitra.mitraHearsYou')}
               </div>
               <div
                 style={{
@@ -1485,7 +1485,7 @@ export function TellMitraPage() {
                 }}
               >
                 {result.response_copy ||
-                  "You are not alone. Please speak to someone you trust right now."}
+                  t('mitra.tellMitra.notAlone')}
               </div>
               <button
                 onClick={() => {
@@ -1494,13 +1494,13 @@ export function TellMitraPage() {
                 }}
                 style={GOLD_BTN}
               >
-                Tell Mitra more
+                {t('mitra.tellMitra.tellMitraMore')}
               </button>
               <button
                 onClick={() => navigate("/en/mitra")}
                 style={{ ...GHOST_BTN, marginTop: 10 }}
               >
-                Return Home
+                {t('mitra.tellMitra.returnHome')}
               </button>
             </div>
           )}
@@ -1517,7 +1517,7 @@ export function TellMitraPage() {
                   marginBottom: 16,
                 }}
               >
-                Mitra heard you.
+                {t('mitra.tellMitra.mitraHeard')}
               </div>
               <ConversationSummary />
               <PriorContextCard />
@@ -1549,7 +1549,7 @@ export function TellMitraPage() {
                     lineHeight: 1.7,
                   }}
                 >
-                  I'm here with you. Let me help you find where to go next.
+                  {t('mitra.tellMitra.imHereHelp')}
                 </p>
               )}
               <NextOptionsTiles />
@@ -1560,13 +1560,13 @@ export function TellMitraPage() {
                 }}
                 style={GOLD_BTN}
               >
-                Tell Mitra more
+                {t('mitra.tellMitra.tellMitraMore')}
               </button>
               <button
                 onClick={() => navigate("/en/mitra")}
                 style={{ ...GHOST_BTN, marginTop: 8 }}
               >
-                Return Home
+                {t('mitra.tellMitra.returnHome')}
               </button>
             </div>
           )}

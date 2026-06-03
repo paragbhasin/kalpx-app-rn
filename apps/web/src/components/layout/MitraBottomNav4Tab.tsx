@@ -1,12 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Home, Bell, User, Menu } from 'lucide-react';
-
-const LINK_TABS = [
-  { label: 'Home',          Icon: Home, to: '/en/mitra', end: true },
-  { label: 'Notifications', Icon: Bell, to: '/en/notifications',   end: false },
-  { label: 'Profile',       Icon: User, to: '/en/profile',         end: false },
-] as const;
+import { useTranslation } from '../../lib/i18n';
 
 interface Props {
   onMenuOpen: () => void;
@@ -30,6 +25,14 @@ const tabStyle: React.CSSProperties = {
 };
 
 export function MitraBottomNav4Tab({ onMenuOpen, transparent = false }: Props) {
+  const { t } = useTranslation();
+
+  const LINK_TABS = [
+    { label: t('nav.home'), Icon: Home, to: '/en/mitra', end: true },
+    { label: t('nav.notifications'), Icon: Bell, to: '/en/notifications', end: false },
+    { label: t('nav.profile'), Icon: User, to: '/en/profile', end: false },
+  ] as const;
+
   return (
     <nav
       style={{
@@ -64,14 +67,14 @@ export function MitraBottomNav4Tab({ onMenuOpen, transparent = false }: Props) {
         </NavLink>
       ))}
 
-      {/* Menu tab — opens drawer instead of navigating */}
+      {/* Menu tab */}
       <button
         onClick={onMenuOpen}
         aria-label="Open menu"
         style={{ ...tabStyle, color: 'var(--kalpx-text-muted)' }}
       >
         <Menu size={20} strokeWidth={1.8} />
-        Menu
+        {t('nav.menu')}
       </button>
     </nav>
   );

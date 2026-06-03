@@ -12,6 +12,7 @@ import {
   UserRound
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "../../lib/i18n";
 import {
   ANALYTICS_CONSENT_KEY,
   MARKETING_CONSENT_KEY,
@@ -48,15 +49,6 @@ const BORDER = "1px solid rgba(184, 134, 75, 0.26)";
 const BORDER_SOFT = "1px solid rgba(184, 134, 75, 0.14)";
 const CTA = "#b8864b";
 
-const ROOM_LABELS: Record<string, string> = {
-  room_joy: "Joy",
-  room_connection: "Connection",
-  room_release: "Release",
-  room_clarity: "Clarity",
-  room_growth: "Growth",
-  room_stillness: "Stillness",
-};
-
 const ROOM_BADGE_COLOR: Record<string, string> = {
   room_joy: "#D4A017",
   room_connection: "#9B7FA8",
@@ -64,27 +56,6 @@ const ROOM_BADGE_COLOR: Record<string, string> = {
   room_clarity: "#5B8FA8",
   room_growth: "#7A9E6F",
   room_stillness: "#9EABBA",
-};
-
-const EVENT_LABELS: Record<string, string> = {
-  joy_named: "What felt good",
-  joy_carry: "Held joy",
-  connection_named: "Named connection",
-  connection_reach_out: "Message drafted",
-  growth_journal: "Growth note",
-  clarity_journal: "Honest question",
-  release_named: "Set down",
-  stillness_named: "What became still",
-};
-
-const CONTEXT_LABELS: Record<string, string> = {
-  work_career: "Work",
-  relationships: "Relationships",
-  self: "Self",
-  health_energy: "Health & energy",
-  money_security: "Money & security",
-  purpose_direction: "Purpose",
-  daily_life: "Daily life",
 };
 
 function itemRowStyle(): React.CSSProperties {
@@ -127,6 +98,7 @@ function getInitialForm(profile: UserProfile | null): ProfileFormState {
 export function ProfilePage() {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [view, setView] = useState<ViewKey>("root");
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [options, setOptions] = useState<UserProfileOptions | null>(null);
@@ -289,64 +261,58 @@ export function ProfilePage() {
     const menuItems = [
       {
         key: "my-profile",
-        label: "My Profile",
+        label: t("profile.myProfile"),
         icon: UserRound,
         onClick: () => setView("profile"),
       },
       {
         key: "saved-reflections",
-        label: "Saved reflections",
+        label: t("profile.savedReflections"),
         icon: Bookmark,
         onClick: () => {
           setView("saved");
           void loadSavedReflections();
         },
       },
-      // {
-      //   key: "language",
-      //   label: "Language",
-      //   icon: Globe,
-      //   onClick: () => setView("language"),
-      // },
       {
         key: "notification-preferences",
-        label: "Notification Preferences",
+        label: t("profile.notificationPreferences"),
         icon: Bell,
         onClick: () => navigate("/en/settings/notifications"),
       },
       {
         key: "reminders",
-        label: "Reminders",
+        label: t("profile.reminders"),
         icon: Clock,
         onClick: () => navigate("/en/settings/reminders"),
       },
       {
         key: "privacy",
-        label: "Privacy Policy",
+        label: t("profile.privacyPolicy"),
         icon: KeyRound,
         onClick: () => navigate("/en/privacy"),
       },
       {
         key: "terms",
-        label: "Terms of Service",
+        label: t("profile.termsOfService"),
         icon: FileText,
         onClick: () => navigate("/en/terms"),
       },
       {
         key: "data-deletion",
-        label: "Data Deletion",
+        label: t("profile.dataDeletion"),
         icon: Trash2,
         onClick: () => navigate("/en/data-deletion"),
       },
       {
         key: "delete-account",
-        label: "Delete Account",
+        label: t("profile.deleteAccount"),
         icon: Trash2,
         onClick: () => setDeleteOpen(true),
       },
       {
         key: "logout",
-        label: "LogOut",
+        label: t("profile.logout"),
         icon: LogOut,
         onClick: () => setLogoutOpen(true),
       },
@@ -362,7 +328,7 @@ export function ProfilePage() {
 
     return (
       <>
-        {renderTopBar("Profile")}
+        {renderTopBar(t("profile.title"))}
         <div style={sectionShellStyle()}>
           {menuItems.map(({ key, label, icon: Icon, onClick }) => (
             <button
@@ -396,39 +362,39 @@ export function ProfilePage() {
             }}
           >
             <p style={{ margin: "0 0 12px", fontSize: 13, fontWeight: 700, color: "#373737", fontFamily: "var(--kalpx-font-sans)" }}>
-              Privacy preferences
+              {t("profile.privacyPreferences")}
             </p>
             {(
               [
                 {
                   key: ANALYTICS_CONSENT_KEY,
-                  label: "Product analytics",
-                  description: "Allow product analytics so we can understand what feels helpful, where people get stuck, and how to make Mitra easier to use.",
+                  labelKey: "profile.analytics",
+                  descKey: "profile.analyticsDesc",
                   value: analyticsConsent,
                 },
                 {
                   key: MARKETING_CONSENT_KEY,
-                  label: "Marketing & advertising",
-                  description: "Allow marketing cookies so we can measure campaigns and reach people who may benefit from KalpX.",
+                  labelKey: "profile.marketing",
+                  descKey: "profile.marketingDesc",
                   value: marketingConsent,
                 },
-              ] as const
-            ).map(({ key: consentKey, label, description, value }) => (
+              ]
+            ).map(({ key: consentKey, labelKey, descKey, value }) => (
               <div
                 key={consentKey}
                 style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}
               >
                 <div style={{ flex: 1, paddingRight: 12 }}>
                   <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#373737", fontFamily: "var(--kalpx-font-sans)" }}>
-                    {label}
+                    {t(labelKey)}
                   </p>
                   <p style={{ margin: 0, fontSize: 12, color: "#888", fontFamily: "var(--kalpx-font-sans)" }}>
-                    {description}
+                    {t(descKey)}
                   </p>
                 </div>
                 <button
                   type="button"
-                  aria-label={`${value === 'granted' ? 'Disable' : 'Enable'} ${label}`}
+                  aria-label={`${value === 'granted' ? 'Disable' : 'Enable'} ${t(labelKey)}`}
                   onClick={() => updateConsent(consentKey, value === 'granted' ? 'denied' : 'granted')}
                   style={{
                     background: value === 'granted' ? '#b8864b' : '#e0d6c8',
@@ -443,7 +409,7 @@ export function ProfilePage() {
                     minWidth: 44,
                   }}
                 >
-                  {value === 'granted' ? 'On' : 'Off'}
+                  {value === 'granted' ? t("profile.on") : t("profile.off")}
                 </button>
               </div>
             ))}
@@ -459,32 +425,32 @@ export function ProfilePage() {
 
     return (
       <>
-        {renderTopBar("My Profile")}
+        {renderTopBar(t("profile.myProfile"))}
         <div style={{ ...sectionShellStyle(), paddingBottom: 120 }}>
           <div style={{ padding: "20px 20px 0" }}>
-            <FieldLabel required>Profile Name</FieldLabel>
+            <FieldLabel required>{t("profile.profileName")}</FieldLabel>
             <TextField
               value={form.profileName}
-              placeholder="Enter your profile name"
+              placeholder={t("profile.profileNamePlaceholder")}
               onChange={(value) =>
                 setForm((prev) => ({ ...prev, profileName: value }))
               }
             />
 
-            <FieldLabel>Age Group</FieldLabel>
+            <FieldLabel>{t("profile.ageGroup")}</FieldLabel>
             <SelectField
               value={form.ageGroup}
-              placeholder="Select Your Age Group"
+              placeholder={t("profile.ageGroupPlaceholder")}
               options={ageGroups}
               onChange={(value) =>
                 setForm((prev) => ({ ...prev, ageGroup: value }))
               }
             />
 
-            <FieldLabel required>Notification Language</FieldLabel>
+            <FieldLabel required>{t("profile.notificationLanguage")}</FieldLabel>
             <SelectField
               value={form.language}
-              placeholder="Select Language"
+              placeholder={t("profile.notificationLanguagePlaceholder")}
               options={languages}
               onChange={(value) =>
                 setForm((prev) => ({ ...prev, language: value }))
@@ -500,7 +466,7 @@ export function ProfilePage() {
                 fontWeight: 600,
               }}
             >
-              All notifications will be sent in chosen language
+              {t("profile.notificationLanguageNote")}
             </p>
           </div>
 
@@ -515,13 +481,13 @@ export function ProfilePage() {
               fullWidth
               onClick={() => void handleSaveProfile()}
               loading={savingProfile}
-              loadingText="Updating..."
+              loadingText={t("profile.updatingProfile")}
               disabled={
                 !form.profileName.trim() || !form.language
               }
               data-testid="profile-save-btn"
             >
-              UPDATE PROFILE
+              {t("profile.updateProfile")}
             </KalpXButton>
           </div>
         </div>
@@ -534,7 +500,7 @@ export function ProfilePage() {
 
     return (
       <>
-        {renderTopBar("Language")}
+        {renderTopBar(t("profile.language"))}
         <div style={sectionShellStyle()}>
           {languages.map((language) => {
             const isSelected = form.language === String(language.id);
@@ -585,20 +551,20 @@ export function ProfilePage() {
 
     return (
       <>
-        {renderTopBar("Saved reflections")}
+        {renderTopBar(t("profile.savedReflections"))}
         <div style={{ ...sectionShellStyle(), padding: "16px 16px 120px" }}>
           {savedLoading ? (
-            <CenteredState text="Loading saved reflections..." />
+            <CenteredState text={t("profile.loadingSaved")} />
           ) : savedError ? (
             <CenteredState
-              text={savedError}
-              actionLabel="Try again"
+              text={t("profile.savedError")}
+              actionLabel={t("profile.tryAgain")}
               onAction={() => void loadSavedReflections()}
             />
           ) : savedReflections.length === 0 ? (
             <CenteredState
-              text="Nothing saved yet."
-              subtext="When you name something, write it down, or set it down in a room, it will appear here."
+              text={t("profile.savedEmpty")}
+              subtext={t("profile.savedEmptySubtext")}
             />
           ) : (
             sections.map((section) => (
@@ -614,7 +580,7 @@ export function ProfilePage() {
                     color: CTA,
                   }}
                 >
-                  {ROOM_LABELS[section.room_id] ??
+                  {t("rooms." + section.room_id) ||
                     section.room_id.replace("room_", "")}
                 </div>
                 {section.items.map((entry) => (
@@ -647,7 +613,7 @@ export function ProfilePage() {
             fontSize: 14,
           }}
         >
-          Loading profile...
+          {t("profile.loadingProfile")}
         </div>
       </AppShell>
     );
@@ -671,7 +637,7 @@ export function ProfilePage() {
       <ModalSheet
         isOpen={logoutOpen}
         onClose={() => setLogoutOpen(false)}
-        title="LogOut"
+        title={t("logoutModal.title")}
         height="auto"
       >
         <p
@@ -682,7 +648,7 @@ export function ProfilePage() {
             color: "var(--kalpx-text-soft)",
           }}
         >
-          Are you sure you want to log out of your account?
+          {t("logoutModal.message")}
         </p>
         <div style={{ display: "flex", gap: 12 }}>
           <KalpXButton
@@ -690,14 +656,14 @@ export function ProfilePage() {
             fullWidth
             onClick={() => setLogoutOpen(false)}
           >
-            Cancel
+            {t("logoutModal.cancel")}
           </KalpXButton>
           <KalpXButton
             variant="destructive"
             fullWidth
             onClick={() => void handleLogout()}
           >
-            Yes
+            {t("logoutModal.confirm")}
           </KalpXButton>
         </div>
       </ModalSheet>
@@ -705,7 +671,7 @@ export function ProfilePage() {
       <ModalSheet
         isOpen={deleteOpen}
         onClose={() => setDeleteOpen(false)}
-        title="Delete Account"
+        title={t("deleteModal.title")}
         height="auto"
       >
         <p
@@ -716,7 +682,7 @@ export function ProfilePage() {
             color: "var(--kalpx-text-soft)",
           }}
         >
-          This action is permanent. Do you really want to delete your account?
+          {t("deleteModal.message")}
         </p>
         <div style={{ display: "flex", gap: 12 }}>
           <KalpXButton
@@ -724,14 +690,14 @@ export function ProfilePage() {
             fullWidth
             onClick={() => setDeleteOpen(false)}
           >
-            Cancel
+            {t("deleteModal.cancel")}
           </KalpXButton>
           <KalpXButton
             variant="destructive"
             fullWidth
             onClick={() => void handleDeleteAccount()}
           >
-            Delete
+            {t("deleteModal.confirm")}
           </KalpXButton>
         </div>
       </ModalSheet>
@@ -968,10 +934,11 @@ function SavedReflectionCard({
   entry: SavedReflection;
   onDelete: () => void;
 }) {
+  const { t } = useTranslation();
   const badgeColor = ROOM_BADGE_COLOR[entry.room_id] ?? CTA;
-  const eventLabel = EVENT_LABELS[entry.event_type] ?? entry.event_type;
+  const eventLabel = t("events." + entry.event_type) || entry.event_type;
   const contextLabel = entry.life_context
-    ? (CONTEXT_LABELS[entry.life_context] ?? entry.life_context)
+    ? (t("contexts." + entry.life_context) || entry.life_context)
     : null;
   const dateLabel = formatSavedReflectionDate(entry.captured_at);
 

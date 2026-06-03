@@ -1,18 +1,10 @@
 import { clearTokens } from "@kalpx/auth";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Globe } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
+import { useTranslation, type Locale } from "../../lib/i18n";
 import { webStorage } from "../../lib/webStorage";
-
-const NAV_LINKS = [
-  { to: "/en", label: "Home", match: "/en", mobileOnly: true },
-  // { to: "/en/mitra", label: "Mitra", match: "/en/mitra" },
-  // { to: "/en/haat", label: "Kalpx Haat", match: "/en/haat" },
-  // { to: "/en/retreats", label: "Retreats", match: "/en/retreats" },
-  { to: "/en/classes", label: "Classes", match: "/en/classes" },
-  { to: "/en/community", label: "Community", match: "/en/community" },
-];
 
 export function Header({
   transparent = false,
@@ -30,29 +22,38 @@ export function Header({
   const navigate = useNavigate();
   const location = useLocation();
   const { authed, userInitial, refresh } = useCurrentUser();
+  const { t, locale, setLocale } = useTranslation();
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const langRef = useRef<HTMLDivElement>(null);
 
   const [isScrolled, setIsScrolled] = useState(false);
   const useTransparentChrome = transparent && !isScrolled;
+
+  const NAV_LINKS = [
+    { to: "/en", label: t("nav.home"), match: "/en", mobileOnly: true },
+    { to: "/en/classes", label: t("nav.classes"), match: "/en/classes" },
+    { to: "/en/community", label: t("nav.community"), match: "/en/community" },
+  ];
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // Initial check
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close dropdown on outside click
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
+      }
+      if (langRef.current && !langRef.current.contains(e.target as Node)) {
+        setLangOpen(false);
       }
     }
     document.addEventListener("mousedown", onClickOutside);
@@ -76,6 +77,11 @@ export function Header({
       return;
     }
     navigate(backTo);
+  }
+
+  function handleLangSelect(lang: Locale) {
+    setLocale(lang);
+    setLangOpen(false);
   }
 
   const navItemStyle = (active: boolean): React.CSSProperties => ({
@@ -150,11 +156,9 @@ export function Header({
               style={{
                 width: 36,
                 height: 36,
-
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-
                 padding: 0,
                 flexShrink: 0,
               }}
@@ -181,7 +185,7 @@ export function Header({
           </Link>
         </div>
 
-        {/* Desktop nav — hidden on mobile via CSS class */}
+        {/* Desktop nav */}
         <nav
           className="kalpx-desktop-nav"
           style={{ display: "flex", alignItems: "center", gap: 24 }}
@@ -191,29 +195,89 @@ export function Header({
               key={to}
               to={to}
               style={({ isActive }) => navItemStyle(isActive)}
-              data-testid={`header-nav-${label.toLowerCase()}`}
+              data-testid={`header-nav-${match.replace("/en/", "").replace("/en", "home")}`}
             >
               {label}
             </NavLink>
           ))}
 
+          {/* Language switcher */}
+          <div ref={langRef} style={{ position: "relative" }}>
+            <button
+              onClick={() => setLangOpen((o) => !o)}
+              aria-label="Switch language"
+              data-testid="header-lang-btn"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                fontSize: 12,
+                fontWeight: 600,
+                color: "var(--kalpx-text-muted)",
+                letterSpacing: 0.5,
+                padding: "4px 10px",
+                border: "1px solid var(--kalpx-border-gold)",
+                borderRadius: 20,
+                background: "transparent",
+                cursor: "pointer",
+              }}
+            >
+              <Globe size={13} strokeWidth={2} />
+              {locale === 'hi' ? 'हि' : 'EN'}
+            </button>
+
+            {langOpen && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 36,
+                  right: 0,
+                  background: "#fff",
+                  border: "1px solid var(--kalpx-border-gold)",
+                  borderRadius: 10,
+                  boxShadow: "var(--kalpx-shadow-card)",
+                  minWidth: 120,
+                  zIndex: 70,
+                  overflow: "hidden",
+                }}
+              >
+                {(
+                  [
+                    { code: 'en' as Locale, label: 'English' },
+                    { code: 'hi' as Locale, label: 'हिंदी' },
+                  ] as const
+                ).map(({ code, label }) => (
+                  <button
+                    key={code}
+                    onClick={() => handleLangSelect(code)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      width: "100%",
+                      padding: "11px 16px",
+                      fontSize: 13,
+                      fontWeight: locale === code ? 700 : 500,
+                      color: locale === code ? "var(--kalpx-cta)" : "var(--kalpx-text)",
+                      background: locale === code ? "rgba(184,134,75,0.07)" : "none",
+                      border: "none",
+                      borderBottom: code === 'en' ? "1px solid var(--kalpx-border-gold)" : "none",
+                      cursor: "pointer",
+                      textAlign: "left",
+                    }}
+                  >
+                    {label}
+                    {locale === code && (
+                      <span style={{ fontSize: 10, color: "var(--kalpx-cta)" }}>✓</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           {authed ? (
             <>
-              {/* Notifications bell */}
-              {/* <Link
-                to="/en/notifications"
-                data-testid="header-notifications-link"
-                style={{
-                  fontSize: 18,
-                  textDecoration: "none",
-                  lineHeight: 1,
-                  color: "var(--kalpx-text-soft)",
-                }}
-                title="Notifications"
-              >
-                🔔
-              </Link> */}
-
               {/* Avatar dropdown */}
               <div ref={dropdownRef} style={{ position: "relative" }}>
                 <button
@@ -253,25 +317,20 @@ export function Header({
                       overflow: "hidden",
                     }}
                   >
-                    {[{ label: "Profile", to: "/en/profile" }].map(
-                      ({ label, to }) => (
-                        <Link
-                          key={to}
-                          to={to}
-                          onClick={() => setDropdownOpen(false)}
-                          style={{
-                            display: "block",
-                            padding: "12px 16px",
-                            fontSize: 13,
-                            color: "var(--kalpx-text)",
-                            textDecoration: "none",
-                            borderBottom: "1px solid var(--kalpx-border-gold)",
-                          }}
-                        >
-                          {label}
-                        </Link>
-                      ),
-                    )}
+                    <Link
+                      to="/en/profile"
+                      onClick={() => setDropdownOpen(false)}
+                      style={{
+                        display: "block",
+                        padding: "12px 16px",
+                        fontSize: 13,
+                        color: "var(--kalpx-text)",
+                        textDecoration: "none",
+                        borderBottom: "1px solid var(--kalpx-border-gold)",
+                      }}
+                    >
+                      {t("nav.profile")}
+                    </Link>
                     <button
                       onClick={handleLogout}
                       data-testid="header-logout-btn"
@@ -287,7 +346,7 @@ export function Header({
                         textAlign: "left",
                       }}
                     >
-                      Logout
+                      {t("nav.logout")}
                     </button>
                   </div>
                 )}
@@ -307,40 +366,11 @@ export function Header({
                 borderRadius: "var(--kalpx-r-lg)",
               }}
             >
-              Sign in
+              {t("nav.signIn")}
             </Link>
           )}
         </nav>
-
-        {false && (
-          <div
-            className="kalpx-mobile-only"
-            style={{ alignItems: "center", gap: 10 }}
-          >
-            <button
-              onClick={() => {}}
-              aria-label="Open menu"
-              data-testid="header-hamburger-btn"
-              style={{
-                width: 38,
-                height: 38,
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                color: "var(--kalpx-text)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: 0,
-              }}
-            >
-              <span />
-            </button>
-          </div>
-        )}
       </header>
-
-      {false && <div />}
     </>
   );
 }

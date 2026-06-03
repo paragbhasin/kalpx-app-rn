@@ -88,6 +88,12 @@ export const QUICK_CHANT_HISTORY_ONLY_SUBTITLE =
 export const QUICK_CHANT_NO_STATE_SUBTITLE =
   "Choose a mantra for quick return.";
 
+export const QUICK_CHANT_HAS_MANTRA_SUBTITLE_HI = "आपका चुना हुआ मंत्र यहाँ है।";
+export const QUICK_CHANT_HISTORY_ONLY_SUBTITLE_HI =
+  "आपका त्वरित जप जब चाहें वापस आने के लिए यहाँ है।";
+export const QUICK_CHANT_NO_STATE_SUBTITLE_HI =
+  "त्वरित वापसी के लिए एक मंत्र चुनें।";
+
 /**
  * Tell Mitra card subtitle (conditional on state).
  */
@@ -96,6 +102,45 @@ export const TELL_MITRA_HAS_HISTORY_SUBTITLE =
 export const TELL_MITRA_ACTIVE_PATH_SUBTITLE =
   "What is on your mind right now?";
 export const TELL_MITRA_DEFAULT_SUBTITLE = "Share what is moving today.";
+
+export const TELL_MITRA_HAS_HISTORY_SUBTITLE_HI =
+  "मित्र को बताते रहें जो मन में चल रहा है।";
+export const TELL_MITRA_ACTIVE_PATH_SUBTITLE_HI =
+  "अभी आपके मन में क्या है?";
+export const TELL_MITRA_DEFAULT_SUBTITLE_HI = "आज जो मन में चल रहा है वो साझा करें।";
+
+/** Hindi — My Rhythm no-state subtitle by segment */
+export const SEGMENT_RHYTHM_NO_STATE_SUBTITLE_HI: Record<MitraHomeSegment, string> = {
+  new: "एक सौम्य सुबह, दोपहर और रात की लय बनाएं।",
+  rhythm_only: "",
+  quick_chant_only: "एक सौम्य दैनिक लय बनाएं।",
+  tell_mitra_only: "अपने दिन के लिए एक सौम्य लय बनाएं।",
+  inner_path_only: "एक सौम्य सुबह, दोपहर या रात की लय जोड़ें।",
+  rhythm_and_path: "",
+  mixed_partial: "एक सौम्य दैनिक लय बनाएं।",
+};
+
+/** Hindi — Inner Path no-state subtitle by segment */
+export const SEGMENT_INNER_PATH_NO_STATE_SUBTITLE_HI: Record<MitraHomeSegment, string> = {
+  new: "जो आप अभी से गुज़र रहे हैं उसके लिए 14 दिन का पथ शुरू करें।",
+  rhythm_only: "जो बार-बार आता है उसके लिए 14 दिन का पथ शुरू करें।",
+  quick_chant_only: "जो बार-बार आता है उसके लिए 14 दिन का पथ शुरू करें।",
+  tell_mitra_only: "एक बार-बार आने वाले पैटर्न को 14 दिन के पथ में बदलें।",
+  inner_path_only: "",
+  rhythm_and_path: "",
+  mixed_partial: "जो बार-बार आता है उसके लिए 14 दिन का पथ शुरू करें।",
+};
+
+/** Hindi — Rhythm time-band labels for greeting (e.g. "Begin with your morning rhythm") */
+export const RHYTHM_BAND_LABEL_HI: Record<string, string> = {
+  allDone: "आज आपकी लय बनी रही",
+  beginMorning: "अपनी सुबह की लय से शुरुआत करें",
+  morningHeldAfternoon: "सुबह हो गई · दोपहर में लौटें",
+  returnAfternoon: "अपनी दोपहर की लय के साथ लौटें",
+  afternoonHeldNight: "दोपहर हो गई · आज रात शांति से बंद करें",
+  closeNight: "रात की लय के साथ दिन समाप्त करें",
+  noStateFallback: "एक सौम्य दैनिक लय बनाएं",
+};
 
 /**
  * Entry intention screen copy (founder-frozen).

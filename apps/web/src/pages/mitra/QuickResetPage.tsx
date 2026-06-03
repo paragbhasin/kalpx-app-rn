@@ -12,6 +12,7 @@ import { RotateCw, SlidersHorizontal } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "../../lib/i18n";
 import { AudioPlayerBlock } from "../../components/blocks/AudioPlayerBlock";
 import {
   CollapsibleCard,
@@ -315,6 +316,7 @@ export function QuickResetPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const isDesktop = useIsDesktopQuickReset();
+  const { t } = useTranslation();
 
   const [phase, setPhase] = useState<Phase>("loading");
   const [openingState, setOpeningState] =
@@ -597,7 +599,7 @@ export function QuickResetPage() {
                     margin: "0 0 22px",
                   }}
                 >
-                  Quick Reset Mantra
+                  {t('mitra.quickReset.subtitle')}
                 </p>
 
                 <div
@@ -786,7 +788,7 @@ export function QuickResetPage() {
               >
                 {isRunning ? (
                   <button style={S.primaryBtn} onClick={handleDoneChanting}>
-                    Done chanting
+                    {t('mitra.quickReset.doneChanting')}
                   </button>
                 ) : (
                   <button style={S.primaryBtn} onClick={handleBeginChanting}>
@@ -795,7 +797,7 @@ export function QuickResetPage() {
                 )}
                 {isRunning && (
                   <button style={S.endEarlyBtn} onClick={handleEndEarly}>
-                    End early
+                    {t('mitra.quickReset.endEarly')}
                   </button>
                 )}
                 {secondaryActions.map((action) => (
@@ -873,7 +875,7 @@ export function QuickResetPage() {
         {/* {renderBackBtn()} */}
         <div style={{ height: 18 }} />
         <p style={S.openingHeading}>{mantra.title}</p>
-        <p style={S.openingSubhead}>Quick Reset Mantra</p>
+        <p style={S.openingSubhead}>{t('mitra.quickReset.subtitle')}</p>
 
         <div style={S.progressWrap}>
           <span style={S.progressMain}>{beadCount}</span>
@@ -1022,7 +1024,7 @@ export function QuickResetPage() {
         <div style={S.openingActions}>
           {isRunning ? (
             <button style={S.primaryBtn} onClick={handleDoneChanting}>
-              Done chanting
+              {t('mitra.quickReset.doneChanting')}
             </button>
           ) : (
             <button style={S.primaryBtn} onClick={handleBeginChanting}>
@@ -1031,7 +1033,7 @@ export function QuickResetPage() {
           )}
           {isRunning && (
             <button style={S.endEarlyBtn} onClick={handleEndEarly}>
-              End early
+              {t('mitra.quickReset.endEarly')}
             </button>
           )}
           {secondaryActions.map((action) => (
@@ -1144,7 +1146,7 @@ export function QuickResetPage() {
       <>
         <main style={S.main}>
           <div style={S.container}>
-            <p style={{ color: "#C99317", fontSize: 15 }}>Loading…</p>
+            <p style={{ color: "#C99317", fontSize: 15 }}>{t('mitra.quickReset.loading')}</p>
           </div>
         </main>
       </>,
@@ -1158,10 +1160,10 @@ export function QuickResetPage() {
         <main style={S.main}>
           <div style={S.container}>
             {/* {renderBackBtn()} */}
-            <p style={S.copyHeadline}>Unable to open Quick Reset</p>
-            <p style={S.subtleText}>Please try again.</p>
+            <p style={S.copyHeadline}>{t('mitra.quickReset.unableToOpen')}</p>
+            <p style={S.subtleText}>{t('mitra.quickReset.pleaseRetry')}</p>
             <button style={S.primaryBtn} onClick={loadOpening}>
-              Retry
+              {t('mitra.quickReset.retry')}
             </button>
           </div>
         </main>
@@ -1198,7 +1200,7 @@ export function QuickResetPage() {
         >
           {renderOpeningMantraSurface(
             selectedMantra,
-            "Begin chanting",
+            t('mitra.quickReset.beginChanting'),
             ["set_as_default", "change_mantra"],
             false,
           )}
@@ -1226,7 +1228,7 @@ export function QuickResetPage() {
         >
           {renderOpeningMantraSurface(
             activeMantra,
-            openingState?.primary_cta || "Begin chanting",
+            openingState?.primary_cta || t('mitra.quickReset.beginChanting'),
             [],
             true,
           )}
@@ -1260,14 +1262,14 @@ export function QuickResetPage() {
                 style={S.secondaryBtn}
                 onClick={() => handleSetDefault(selectedMantra)}
               >
-                Set as my Quick Reset mantra
+                {t('mitra.quickReset.setAsMantra')}
               </button>
             )}
             {defaultSetConfirmed && (
               <p style={S.subtleText}>Set as your Quick Reset mantra.</p>
             )}
             <button style={S.primaryBtn} onClick={handleReturn}>
-              Close
+              {t('mitra.quickReset.close')}
             </button>
           </div>
         </main>
@@ -1280,7 +1282,7 @@ export function QuickResetPage() {
     <>
       <main style={S.main}>
         <div style={S.container}>
-          <p style={{ color: "#C99317", fontSize: 15 }}>Loading…</p>
+          <p style={{ color: "#C99317", fontSize: 15 }}>{t('mitra.quickReset.loading')}</p>
         </div>
       </main>
     </>,
@@ -1363,7 +1365,7 @@ export function QuickResetPage() {
               </button>
               <div style={{ textAlign: "center", paddingTop: 8 }}>
                 <p style={{ ...S.pageTitle, margin: "0 0 12px", fontSize: 24 }}>
-                  Choose a Mantra
+                  {t('mitra.quickReset.chooseMantra')}
                 </p>
                 <div
                   style={{
@@ -1410,7 +1412,7 @@ export function QuickResetPage() {
                     marginTop: 32,
                   }}
                 >
-                  Loading…
+                  {t('mitra.quickReset.loading')}
                 </p>
               ) : (
                 pickerMantras.map((mantra) => (
@@ -1486,7 +1488,7 @@ export function QuickResetPage() {
           </button> */}
           <div style={{ textAlign: "center" }}>
             <p style={{ ...S.pageTitle, margin: "0 0 12px", fontSize: 22 }}>
-              Choose a Mantra
+              {t('mitra.quickReset.chooseMantra')}
             </p>
             <div
               style={{
@@ -1534,7 +1536,7 @@ export function QuickResetPage() {
                 marginTop: 32,
               }}
             >
-              Loading…
+              {t('mitra.quickReset.loading')}
             </p>
           ) : (
             pickerMantras.map((mantra) => (

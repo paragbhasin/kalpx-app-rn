@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "../../lib/i18n";
 
 type GuidanceMode = "universal" | "hybrid" | "rooted";
 
@@ -14,42 +15,7 @@ interface ModeConfig {
   exampleColor: string;
 }
 
-const MODES: ModeConfig[] = [
-  {
-    id: "universal",
-    title: "Keep it simple and modern",
-    desc: "Clear, accessible language. No unfamiliar terms.",
-    example: '"Today calls for slower pacing."',
-    accent: "#7D9A62",
-    cardBg: "rgba(255, 255, 255, 0.82)",
-    cardBorder: "rgba(237, 222, 180, 0.65)",
-    iconBg: "rgba(234, 240, 223, 0.6)",
-    exampleColor: "#8A7656",
-  },
-  {
-    id: "hybrid",
-    title: "A blend — modern clarity with spiritual depth",
-    desc: "Familiar terms, occasional Sanatan language where it fits.",
-    example: '"Today is a Tamas-leaning day. Slow pacing helps."',
-    accent: "#C79A2B",
-    cardBg: "rgba(255, 252, 246, 0.95)",
-    cardBorder: "rgba(199, 154, 43, 0.7)",
-    iconBg: "rgba(255, 245, 220, 0.7)",
-    exampleColor: "#A07835",
-  },
-  {
-    id: "rooted",
-    title: "I am drawn to the deeper roots",
-    desc: "Sanatan vocabulary visible. Gunas, doshas, panchang context.",
-    example:
-      '"Tamas rising. Your Kapha-pitta body is asking for sattvic rhythm."',
-    accent: "#8673B5",
-    cardBg: "rgba(248, 246, 255, 0.9)",
-    cardBorder: "rgba(183, 170, 219, 0.65)",
-    iconBg: "rgba(237, 233, 255, 0.7)",
-    exampleColor: "#7D6AAE",
-  },
-];
+// MODES array is now built inside GuidanceModePickerBlock with useTranslation
 
 function LeafIcon({ color }: { color: string }) {
   return (
@@ -259,6 +225,43 @@ export function GuidanceModePickerBlock({ block, onAction }: Props) {
   const [selected, setSelected] = useState<GuidanceMode | null>(null);
   const [busy, setBusy] = useState(false);
   const onResponse = block.on_response;
+  const { t } = useTranslation();
+
+  const MODES: ModeConfig[] = [
+    {
+      id: "universal",
+      title: t("guidanceMode.universalTitle"),
+      desc: t("guidanceMode.universalDesc"),
+      example: t("guidanceMode.universalExample"),
+      accent: "#7D9A62",
+      cardBg: "rgba(255, 255, 255, 0.82)",
+      cardBorder: "rgba(237, 222, 180, 0.65)",
+      iconBg: "rgba(234, 240, 223, 0.6)",
+      exampleColor: "#8A7656",
+    },
+    {
+      id: "hybrid",
+      title: t("guidanceMode.hybridTitle"),
+      desc: t("guidanceMode.hybridDesc"),
+      example: t("guidanceMode.hybridExample"),
+      accent: "#C79A2B",
+      cardBg: "rgba(255, 252, 246, 0.95)",
+      cardBorder: "rgba(199, 154, 43, 0.7)",
+      iconBg: "rgba(255, 245, 220, 0.7)",
+      exampleColor: "#A07835",
+    },
+    {
+      id: "rooted",
+      title: t("guidanceMode.rootedTitle"),
+      desc: t("guidanceMode.rootedDesc"),
+      example: t("guidanceMode.rootedExample"),
+      accent: "#8673B5",
+      cardBg: "rgba(248, 246, 255, 0.9)",
+      cardBorder: "rgba(183, 170, 219, 0.65)",
+      iconBg: "rgba(237, 233, 255, 0.7)",
+      exampleColor: "#7D6AAE",
+    },
+  ];
 
   async function handleSelect(mode: GuidanceMode) {
     if (busy) return;
@@ -354,7 +357,7 @@ export function GuidanceModePickerBlock({ block, onAction }: Props) {
                   borderRadius: "0 24px 0 14px",
                 }}
               >
-                MOST CHOSEN
+                {t("guidanceMode.mostChosen")}
               </span>
             )}
 

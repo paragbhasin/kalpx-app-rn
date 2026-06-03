@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "../../lib/i18n";
 
 export function Footer({ transparent = false }: { transparent?: boolean }) {
+  const { t } = useTranslation();
+
   return (
     <footer
       className="kalpx-desktop-only"
@@ -19,7 +22,7 @@ export function Footer({ transparent = false }: { transparent?: boolean }) {
       }}
     >
       <p style={{ fontSize: 12, color: "var(--kalpx-text-muted)", margin: 0 }}>
-        © 2026 KalpX. All rights reserved.
+        {t("footer.copyright")}
       </p>
       <div
         style={{
@@ -37,7 +40,7 @@ export function Footer({ transparent = false }: { transparent?: boolean }) {
             textDecoration: "none",
           }}
         >
-          Privacy Policy
+          {t("footer.privacyPolicy")}
         </Link>
         <Link
           to="/en/terms"
@@ -47,7 +50,7 @@ export function Footer({ transparent = false }: { transparent?: boolean }) {
             textDecoration: "none",
           }}
         >
-          Terms of Service
+          {t("footer.termsOfService")}
         </Link>
         <Link
           to="/en/data-deletion"
@@ -57,10 +60,10 @@ export function Footer({ transparent = false }: { transparent?: boolean }) {
             textDecoration: "none",
           }}
         >
-          Data Deletion
+          {t("footer.dataDeletion")}
         </Link>
         <span style={{ fontSize: 12, color: "var(--kalpx-text-muted)" }}>
-          Follow us:
+          {t("footer.followUs")}
         </span>
         <a
           href="https://www.instagram.com/kalpxofficial"

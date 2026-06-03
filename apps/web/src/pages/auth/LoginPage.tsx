@@ -7,6 +7,7 @@ import { WEB_ENV } from "../../lib/env";
 import { useRecaptcha } from "../../hooks/useRecaptcha";
 import { useAppDispatch } from "../../store/hooks";
 import { showSnackBar } from "../../store/snackBarSlice";
+import { useTranslation } from "../../lib/i18n";
 import "./Auth.css";
 
 /**
@@ -89,6 +90,7 @@ function ConfiguredGoogleLoginButton({
 }
 
 function GoogleButtonContent({ loading }: { loading: boolean }) {
+  const { t } = useTranslation();
   if (loading) {
     return <Loader2 className="spinner" size={20} />;
   }
@@ -113,7 +115,7 @@ function GoogleButtonContent({ loading }: { loading: boolean }) {
           d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
         />
       </svg>
-      <span>Continue with Google</span>
+      <span>{t('auth.signInWithGoogle')}</span>
     </>
   );
 }
@@ -125,8 +127,8 @@ export function LoginPage() {
   const [searchParams] = useSearchParams();
   const returnTo = searchParams.get("returnTo") || "/en/mitra";
   const { login, socialLoginGoogle } = useAuth();
+  const { t } = useTranslation();
 
-  // Form State
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -137,7 +139,7 @@ export function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      setError("Please enter both email and password");
+      setError(t("auth.validationBothRequired"));
       return;
     }
 
@@ -147,9 +149,9 @@ export function LoginPage() {
     setLoading(false);
 
     if (!result.success) {
-      setError(result.error || "Login failed. Please check your credentials.");
+      setError(result.error || t("auth.loginFailed"));
     } else {
-      dispatch(showSnackBar("Successfully signed in!"));
+      dispatch(showSnackBar(t("auth.loginSuccess")));
     }
   };
 
@@ -168,31 +170,25 @@ export function LoginPage() {
                 style={{ height: "40px", marginBottom: "1.5rem" }}
               />
               <h1 className="auth-hero-title text-center">
-                Get Started with KalpX
+                {t("auth.getStarted")}
               </h1>
               <p className="auth-hero-sub">
-                Your portal to spiritual growth, daily dharma, and sacred
-                wisdom. Sign in to continue your journey.
+                {t("auth.tagline")}
               </p>
             </div>
             <section>
               <div className="auth-header">
-                <h2 className="auth-title">Login to KalpX</h2>
-                <div className="auth-badge">
-                  <span>Member</span>
-                </div>
+                <h2 className="auth-title">{t("auth.signIn")}</h2>
               </div>
 
               <GoogleLoginButton
                 disabled={isAnyLoading}
                 loading={googleLoading}
                 onMissingConfig={() => {
-                  setError(
-                    "Google sign-in is unavailable right now. Missing VITE_GOOGLE_CLIENT_ID.",
-                  );
+                  setError(t("auth.googleUnavailable"));
                 }}
                 onError={() => {
-                  setError("Google sign-in was cancelled or failed.");
+                  setError(t("auth.googleFailed"));
                 }}
                 onSuccess={async (accessToken) => {
                   setGoogleLoading(true);
@@ -206,13 +202,12 @@ export function LoginPage() {
               />
 
               <div className="auth-divider">
-                <span>or sign in with email</span>
+                <span>{t("auth.orSignInWithEmail")}</span>
               </div>
 
               <form onSubmit={handleSubmit} className="auth-form">
-                {/* Email */}
                 <div className="form-group">
-                  <label htmlFor="email">Email Address</label>
+                  <label htmlFor="email">{t("auth.emailAddress")}</label>
                   <div className="input-wrapper">
                     <Mail className="input-icon" size={18} />
                     <input
@@ -220,17 +215,16 @@ export function LoginPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Enter your email"
+                      placeholder={t("auth.emailPlaceholder")}
                       required
                       autoComplete="email"
                     />
                   </div>
                 </div>
 
-                {/* Password */}
                 <div className="form-group">
                   <div className="label-row">
-                    <label htmlFor="password">Password</label>
+                    <label htmlFor="password">{t("auth.password")}</label>
                     <Link
                       to="/forgot-password"
                       style={{
@@ -239,7 +233,7 @@ export function LoginPage() {
                         fontWeight: 600,
                       }}
                     >
-                      Forgot password?
+                      {t("auth.forgotPassword")}
                     </Link>
                   </div>
                   <div className="input-wrapper">
@@ -249,7 +243,7 @@ export function LoginPage() {
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter your password"
+                      placeholder={t("auth.passwordPlaceholder")}
                       required
                       autoComplete="current-password"
                       style={{ paddingRight: "3rem" }}
@@ -286,12 +280,12 @@ export function LoginPage() {
                   {loading ? (
                     <Loader2 className="spinner" size={20} />
                   ) : (
-                    "Sign In"
+                    t("auth.signInBtn")
                   )}
                 </button>
 
                 <div className="auth-footer">
-                  New to KalpX? <Link to="/signup">Create account</Link>
+                  <Link to="/signup">{t("auth.newToKalpX")}</Link>
                 </div>
               </form>
             </section>

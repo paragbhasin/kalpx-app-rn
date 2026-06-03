@@ -14,43 +14,13 @@ import {
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "../../lib/i18n";
 import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
 import { executeAction } from "../../engine/actionExecutor";
 import { postQuickCheckin } from "../../engine/mitraApi";
 import type { AppDispatch } from "../../store";
 import { useScreenState } from "../../store/screenSlice";
 
-const ENERGY_OPTIONS: {
-  label: string;
-  value: QuickCheckinEnergyState;
-  desc: string;
-  icon: React.ReactNode;
-}[] = [
-  {
-    label: "Energized",
-    value: "energized",
-    desc: "Ready and moving",
-    icon: <SunMedium size={34} strokeWidth={1.8} />,
-  },
-  {
-    label: "Balanced",
-    value: "balanced",
-    desc: "Steady and clear",
-    icon: <Flower size={34} strokeWidth={1.8} />,
-  },
-  {
-    label: "Agitated",
-    value: "agitated",
-    desc: "Restless or tense",
-    icon: <Zap size={34} strokeWidth={1.8} />,
-  },
-  {
-    label: "Drained",
-    value: "drained",
-    desc: "Low or heavy",
-    icon: <CloudRain size={34} strokeWidth={1.8} />,
-  },
-];
 
 const DOOR_ROUTES: Record<string, string> = {
   my_rhythm: "/en/mitra/rhythm",
@@ -79,12 +49,45 @@ export function QuickCheckinPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const screenState = useScreenState();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<QuickCheckinResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<QuickCheckinEnergyState | null>(
     null,
   );
+
+  const ENERGY_OPTIONS: {
+    label: string;
+    value: QuickCheckinEnergyState;
+    desc: string;
+    icon: React.ReactNode;
+  }[] = [
+    {
+      label: "Energized",
+      value: "energized",
+      desc: t('mitra.quickCheckin.energyReady'),
+      icon: <SunMedium size={34} strokeWidth={1.8} />,
+    },
+    {
+      label: "Balanced",
+      value: "balanced",
+      desc: t('mitra.quickCheckin.energySteady'),
+      icon: <Flower size={34} strokeWidth={1.8} />,
+    },
+    {
+      label: "Agitated",
+      value: "agitated",
+      desc: t('mitra.quickCheckin.energyAgitated'),
+      icon: <Zap size={34} strokeWidth={1.8} />,
+    },
+    {
+      label: "Drained",
+      value: "drained",
+      desc: t('mitra.quickCheckin.energyDrained'),
+      icon: <CloudRain size={34} strokeWidth={1.8} />,
+    },
+  ];
 
   async function handleProceed() {
     if (!selected) return;
@@ -114,7 +117,7 @@ export function QuickCheckinPage() {
     ) {
       return DOOR_CTA_LABELS[result.suggested_door] ?? "Continue";
     }
-    return "Return Home";
+    return t('mitra.quickCheckin.returnHome');
   }
 
   function handleCTA() {
@@ -244,7 +247,7 @@ export function QuickCheckinPage() {
                     margin: "0 0 12px",
                   }}
                 >
-                  Quick Check-in
+                  {t('mitra.quickCheckin.title')}
                 </h1>
                 <p
                   style={{
@@ -254,15 +257,13 @@ export function QuickCheckinPage() {
                     margin: 0,
                   }}
                 >
-                  Share how you’re feeling.
-                  <br />
-                  Mitra will find a practice that fits.
+                  {t('mitra.quickCheckin.subheading')}
                 </p>
               </div>
 
               {loading ? (
                 <p style={{ color: "#A08060", textAlign: "center" }}>
-                  Checking in…
+                  {t('mitra.quickCheckin.checkingIn')}
                 </p>
               ) : (
                 <>
@@ -353,7 +354,7 @@ export function QuickCheckinPage() {
                     }}
                   >
                     <span style={{ color: "#E2C37F" }}>❦</span>
-                    Select your energy to continue.
+                    {t('mitra.quickCheckin.selectEnergy')}
                     <span style={{ color: "#E2C37F" }}>❦</span>
                   </p>
 
@@ -366,7 +367,7 @@ export function QuickCheckinPage() {
                       cursor: selected === null ? "not-allowed" : "pointer",
                     }}
                   >
-                    Proceed →
+                    {t('mitra.quickCheckin.proceed')}
                   </button>
                 </>
               )}
@@ -403,7 +404,7 @@ export function QuickCheckinPage() {
                   margin: "0 0 18px",
                 }}
               >
-                Mitra heard you.
+                {t('mitra.quickCheckin.mitraHeard')}
               </p>
 
               <div
@@ -479,7 +480,7 @@ export function QuickCheckinPage() {
                   marginBottom: 16,
                 }}
               >
-                Tell Mitra more
+                {t('mitra.quickCheckin.tellMitraMore')}
               </button>
 
               <div
@@ -506,7 +507,7 @@ export function QuickCheckinPage() {
                     cursor: "pointer",
                   }}
                 >
-                  Quick Check-in
+                  {t('mitra.quickCheckin.title')}
                 </button>
                 <button
                   onClick={() => navigate("/en/mitra/quick-reset")}
@@ -520,7 +521,7 @@ export function QuickCheckinPage() {
                     cursor: "pointer",
                   }}
                 >
-                  Quick Reset
+                  {t('mitra.quickCheckin.quickReset')}
                 </button>
               </div>
 
@@ -535,7 +536,7 @@ export function QuickCheckinPage() {
                   cursor: "pointer",
                 }}
               >
-                Return Home
+                {t('mitra.quickCheckin.returnHome')}
               </button>
             </div>
           )}

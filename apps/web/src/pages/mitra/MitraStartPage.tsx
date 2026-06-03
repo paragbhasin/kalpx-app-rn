@@ -1,19 +1,21 @@
 import { useNavigate } from "react-router-dom";
 import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
 import { useGuestIdentity } from "../../hooks/useGuestIdentity";
+import { useTranslation } from "../../lib/i18n";
 
 const SCREEN_STATE_KEY = "kalpx_journey_state";
 const PENDING_INTENTION_KEY = "mitra_intention_pending";
 
-const INTRO_LINES = [
-  "Hi. I am Mitra.",
-  "I am here to help you feel more calm, steady, and clear — on hard days and good days.",
-  "I notice small things, like your mood and the shape of your day.",
-];
-
 export function MitraStartPage() {
   useGuestIdentity();
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const INTRO_LINES = [
+    t('mitra.start.line1'),
+    t('mitra.start.line2'),
+    t('mitra.start.line3'),
+  ];
 
   function handleBegin() {
     sessionStorage.removeItem(PENDING_INTENTION_KEY);
@@ -73,9 +75,9 @@ export function MitraStartPage() {
                 textAlign: "center",
               }}
             >
-              I&apos;m Mitra.
+              {t('mitra.start.title').split('\n')[0]}
               <br />
-              I&apos;m here with you.
+              {t('mitra.start.title').split('\n')[1]}
             </h1>
 
             <div
@@ -191,7 +193,7 @@ export function MitraStartPage() {
                 boxShadow: "0 12px 24px rgba(132, 91, 10, 0.22)",
               }}
             >
-              Yes, let&apos;s begin →
+              {t('mitra.start.beginCta')}
             </button>
 
           </div>

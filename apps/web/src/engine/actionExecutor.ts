@@ -6,6 +6,7 @@
 
 import { hasTellMitraRoomEntryContext } from '@kalpx/contracts';
 import type { AppDispatch } from '../store';
+import { getActiveLocale } from '../lib/locale';
 import { loadScreen, setScreenValue, updateScreenData, setSubmitting, goBack } from '../store/screenSlice';
 import { sanitizeBackendMeta } from '../lib/webAnalytics';
 import {
@@ -996,7 +997,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
           dayNumber: screenData.day_number || 1,
           journeyId: screenData.journey_id || null,
           round: 2,
-          locale: (screenData.locale as string) || 'en',
+          locale: getActiveLocale(),
           tz,
         });
 
@@ -1048,7 +1049,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
             subFocus: (screenData.prana_baseline_selection as string) || '',
             depth: (screenData.routine_depth as string) || (screenData.routine_setup as string) || 'standard',
             round: 1,
-            locale: (screenData.locale as string) || 'en',
+            locale: getActiveLocale(),
             tz,
           });
           const suggestions = triggerRes?.suggestions || [];
@@ -1453,7 +1454,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
               confidence: inf.confidence || 0.0,
             },
             guidance_mode: draft.guidance_mode || 'hybrid',
-            locale: 'en',
+            locale: getActiveLocale(),
             tz: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata',
             stage0_choice: draft.stage0_choice || draft.path,
             stage1_choice: draft.stage1_choice,
@@ -1603,7 +1604,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
     case 'trigger_still_feeling': {
       const stillStep = Number(screenData.trigger_step || 2);
       const stillFeeling = (screenData.trigger_feeling as string) || 'triggered';
-      const locale = (screenData.locale as string) || 'en';
+      const locale = getActiveLocale();
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
 
       const fetchSuggestions = async (round: number) =>
@@ -1865,7 +1866,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
         meta: { noticed: draft.noticed, named: draft.named, settled: draft.settled },
       });
       // Best-effort prana acknowledge
-      void postPranaAcknowledge({ pranaType: draft.named, focus: draft.noticed, locale: 'en' });
+      void postPranaAcknowledge({ pranaType: draft.named, focus: draft.noticed, locale: getActiveLocale() });
       dispatch(loadScreen({ containerId: 'support_checkin', stateId: 'balanced_ack' }));
       webNavigate(_containerToPath('support_checkin', 'balanced_ack'));
       break;

@@ -1,15 +1,24 @@
 import { AUTH_KEYS } from "@kalpx/api-client";
 import {
   DOOR_LABELS,
+  DOOR_LABELS_HI,
   type MitraHomeSegment,
   QUICK_CHANT_HAS_MANTRA_SUBTITLE,
+  QUICK_CHANT_HAS_MANTRA_SUBTITLE_HI,
   QUICK_CHANT_HISTORY_ONLY_SUBTITLE,
+  QUICK_CHANT_HISTORY_ONLY_SUBTITLE_HI,
   QUICK_CHANT_NO_STATE_SUBTITLE,
+  QUICK_CHANT_NO_STATE_SUBTITLE_HI,
   SEGMENT_INNER_PATH_NO_STATE_SUBTITLE,
+  SEGMENT_INNER_PATH_NO_STATE_SUBTITLE_HI,
   SEGMENT_RHYTHM_NO_STATE_SUBTITLE,
+  SEGMENT_RHYTHM_NO_STATE_SUBTITLE_HI,
   TELL_MITRA_ACTIVE_PATH_SUBTITLE,
+  TELL_MITRA_ACTIVE_PATH_SUBTITLE_HI,
   TELL_MITRA_DEFAULT_SUBTITLE,
+  TELL_MITRA_DEFAULT_SUBTITLE_HI,
   TELL_MITRA_HAS_HISTORY_SUBTITLE,
+  TELL_MITRA_HAS_HISTORY_SUBTITLE_HI,
 } from "@kalpx/contracts";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -29,6 +38,8 @@ import {
 } from "../../hooks/useJourneyEntryView";
 import { useJourneyStatus } from "../../hooks/useJourneyStatus";
 import { useScrollDirection } from "../../hooks/useScrollDirection";
+import { useTranslation } from "../../lib/i18n";
+import { getActiveLocale } from "../../lib/locale";
 import { WEB_ENV } from "../../lib/env";
 import type { AppDispatch, RootState } from "../../store";
 import { setHomeData } from "../../store/doorSlice";
@@ -44,9 +55,7 @@ function getRhythmTimeBand(): "morning" | "afternoon" | "night" {
   return "night";
 }
 
-const FEELING_OPTIONS = ["Agitated", "Drained", "Steady", "Open"] as const;
-
-type FeelingOption = (typeof FEELING_OPTIONS)[number];
+type FeelingOption = "Agitated" | "Drained" | "Steady" | "Open";
 
 function mapFeelingToPranaType(feeling: FeelingOption): string {
   if (feeling === "Open") return "energized";
@@ -82,13 +91,26 @@ function LoadingScreen() {
 
 export function MitraHomePage() {
   useGuestIdentity();
+  const { t, locale } = useTranslation();
+  const isHindi = locale === 'hi';
+  const DOORS = isHindi ? DOOR_LABELS_HI : DOOR_LABELS;
+  const RHYTHM_NO_STATE = isHindi ? SEGMENT_RHYTHM_NO_STATE_SUBTITLE_HI : SEGMENT_RHYTHM_NO_STATE_SUBTITLE;
+  const INNER_PATH_NO_STATE = isHindi ? SEGMENT_INNER_PATH_NO_STATE_SUBTITLE_HI : SEGMENT_INNER_PATH_NO_STATE_SUBTITLE;
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const screenState = useScreenState();
   const { shouldHideChrome } = useScrollDirection();
-  const [selectedFeeling, setSelectedFeeling] = useState<
-    (typeof FEELING_OPTIONS)[number] | null
-  >(null);
+
+  const FEELING_OPTIONS: { key: FeelingOption; label: string }[] = [
+    { key: "Agitated", label: t('mitra.home.feelingAgitated') },
+    { key: "Drained", label: t('mitra.home.feelingDrained') },
+    { key: "Steady", label: t('mitra.home.feelingSteady') },
+    { key: "Open", label: t('mitra.home.feelingOpen') },
+  ];
+
+  const [selectedFeeling, setSelectedFeeling] = useState<FeelingOption | null>(
+    null,
+  );
   const [feelingLoading, setFeelingLoading] = useState(false);
   const [dismissingCheckin, setDismissingCheckin] = useState(false);
   const [pendingPranaMessage, setPendingPranaMessage] = useState<string | null>(
@@ -139,7 +161,7 @@ export function MitraHomePage() {
       })
       .catch(() => {
         if (!cancelled)
-          setFourDoorError("Could not load your home. Please try again.");
+          setFourDoorError(t('mitra.home.loadError'));
       })
       .finally(() => {
         if (!cancelled) setFourDoorLoading(false);
@@ -189,7 +211,7 @@ export function MitraHomePage() {
         dayNumber: screenState.screenData.day_number || 1,
         journeyId: screenState.screenData.journey_id || null,
         round: 2,
-        locale: (screenState.screenData.locale as string) || "en",
+        locale: getActiveLocale(),
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
       });
       if (pranaType === "agitated" || pranaType === "drained") {
@@ -295,21 +317,20 @@ export function MitraHomePage() {
     let rhythmSubtitle: string;
     if (!hasRhythm) {
       rhythmSubtitle = segment
-        ? SEGMENT_RHYTHM_NO_STATE_SUBTITLE[segment]
-        : "Build a gentle daily rhythm";
+        ? RHYTHM_NO_STATE[segment]
+        : isHindi ? "एक सौम्य दैनिक लय बनाएं" : "Build a gentle daily rhythm";
     } else if (allRhythmDone && (hasMorning || hasAfternoon || hasNight)) {
-      rhythmSubtitle = "Your rhythm has been held today";
+      rhythmSubtitle = isHindi ? "आज आपकी लय बनी रही" : "Your rhythm has been held today";
     } else if (hasMorning && !morningDone) {
-      rhythmSubtitle = "Begin with your morning rhythm";
+      rhythmSubtitle = isHindi ? "अपनी सुबह की लय से शुरुआत करें" : "Begin with your morning rhythm";
     } else if (hasAfternoon && !afternoonDone) {
-      rhythmSubtitle =
-        hasMorning && morningDone
-          ? "Morning held · return at midday"
-          : "Return with your afternoon rhythm";
+      rhythmSubtitle = hasMorning && morningDone
+        ? (isHindi ? "सुबह हो गई · दोपहर में लौटें" : "Morning held · return at midday")
+        : (isHindi ? "अपनी दोपहर की लय के साथ लौटें" : "Return with your afternoon rhythm");
     } else if (hasNight && !nightDone) {
       rhythmSubtitle = hasAfternoon
-        ? "Afternoon held · close gently tonight"
-        : "Close the day with your night rhythm";
+        ? (isHindi ? "दोपहर हो गई · आज रात शांति से बंद करें" : "Afternoon held · close gently tonight")
+        : (isHindi ? "रात की लय के साथ दिन समाप्त करें" : "Close the day with your night rhythm");
     } else {
       rhythmSubtitle =
         homeData?.my_rhythm_summary?.next_practice_label ??
@@ -320,36 +341,43 @@ export function MitraHomePage() {
     // Inner Path: day progress + triad held count
     let innerPathSubtitle: string;
     if (innerPathSummary?.has_active_path) {
-      const dayLine = `Day ${innerPathSummary.day_number} of ${innerPathSummary.total_days}`;
+      const n = innerPathSummary.day_number;
+      const m = innerPathSummary.total_days;
+      const dayLine = isHindi ? `दिन ${n} में से ${m}` : `Day ${n} of ${m}`;
       const heldCount = (innerPathSummary as any).today_held_count ?? 0;
-      const practiceHeld =
-        (innerPathSummary as any).today_practice_held ?? false;
+      const practiceHeld = (innerPathSummary as any).today_practice_held ?? false;
       if (practiceHeld || heldCount >= 3) {
-        innerPathSubtitle = `${dayLine} · today's practice is held`;
+        innerPathSubtitle = isHindi
+          ? `${dayLine} · आज का अभ्यास हो गया`
+          : `${dayLine} · today's practice is held`;
       } else if (heldCount > 0) {
-        innerPathSubtitle = `${dayLine} · today's step has begun`;
+        innerPathSubtitle = isHindi
+          ? `${dayLine} · आज का कदम शुरू हो गया`
+          : `${dayLine} · today's step has begun`;
       } else {
         innerPathSubtitle = dayLine;
       }
     } else {
       innerPathSubtitle = segment
-        ? SEGMENT_INNER_PATH_NO_STATE_SUBTITLE[segment]
-        : "Begin a 14-day path for what you are moving through.";
+        ? INNER_PATH_NO_STATE[segment]
+        : isHindi
+          ? "जो आप अभी से गुज़र रहे हैं उसके लिए 14 दिन का पथ शुरू करें।"
+          : "Begin a 14-day path for what you are moving through.";
     }
 
     // Quick Chant subtitle — 3-way conditional (CRITICAL: only show "chosen mantra" if has_quick_chant_mantra)
     const quickChantSubtitle = hasMantra
-      ? QUICK_CHANT_HAS_MANTRA_SUBTITLE
+      ? (isHindi ? QUICK_CHANT_HAS_MANTRA_SUBTITLE_HI : QUICK_CHANT_HAS_MANTRA_SUBTITLE)
       : hasQuickChantHistory
-        ? QUICK_CHANT_HISTORY_ONLY_SUBTITLE
-        : QUICK_CHANT_NO_STATE_SUBTITLE;
+        ? (isHindi ? QUICK_CHANT_HISTORY_ONLY_SUBTITLE_HI : QUICK_CHANT_HISTORY_ONLY_SUBTITLE)
+        : (isHindi ? QUICK_CHANT_NO_STATE_SUBTITLE_HI : QUICK_CHANT_NO_STATE_SUBTITLE);
 
     // Tell Mitra subtitle — conditional on state
     const tellMitraSubtitle = hasTMHistory
-      ? TELL_MITRA_HAS_HISTORY_SUBTITLE
+      ? (isHindi ? TELL_MITRA_HAS_HISTORY_SUBTITLE_HI : TELL_MITRA_HAS_HISTORY_SUBTITLE)
       : hasIP || segment === "rhythm_and_path"
-        ? TELL_MITRA_ACTIVE_PATH_SUBTITLE
-        : TELL_MITRA_DEFAULT_SUBTITLE;
+        ? (isHindi ? TELL_MITRA_ACTIVE_PATH_SUBTITLE_HI : TELL_MITRA_ACTIVE_PATH_SUBTITLE)
+        : (isHindi ? TELL_MITRA_DEFAULT_SUBTITLE_HI : TELL_MITRA_DEFAULT_SUBTITLE);
 
     return (
       <div
@@ -577,7 +605,7 @@ export function MitraHomePage() {
                         marginBottom: 4,
                       }}
                     >
-                      {DOOR_LABELS.my_rhythm}
+                      {DOORS.my_rhythm}
                     </div>
                     <div
                       style={{ color: "rgba(67, 33, 4, 0.6)", fontSize: 14 }}
@@ -593,7 +621,7 @@ export function MitraHomePage() {
                           marginTop: 3,
                         }}
                       >
-                        Shape the day with a simple rhythm.
+                        {t('mitra.home.rhythmDesc')}
                       </div>
                     )}
                   </div>
@@ -656,7 +684,7 @@ export function MitraHomePage() {
                         marginBottom: 4,
                       }}
                     >
-                      {DOOR_LABELS.inner_path}
+                      {DOORS.inner_path}
                     </div>
                     <div
                       style={{ color: "rgba(67, 33, 4, 0.6)", fontSize: 14 }}
@@ -672,7 +700,7 @@ export function MitraHomePage() {
                           marginTop: 3,
                         }}
                       >
-                        Walk a 14-day path with Mitra beside you.
+                        {t('mitra.home.innerPathDesc')}
                       </div>
                     )}
                   </div>
@@ -724,7 +752,7 @@ export function MitraHomePage() {
                         marginBottom: 4,
                       }}
                     >
-                      {DOOR_LABELS.quick_reset}
+                      {DOORS.quick_reset}
                     </div>
                     <div
                       style={{ color: "rgba(67, 33, 4, 0.6)", fontSize: 14 }}
@@ -740,7 +768,7 @@ export function MitraHomePage() {
                           marginTop: 3,
                         }}
                       >
-                        Return through mantra, in a single moment.
+                        {t('mitra.home.quickChantDesc')}
                       </div>
                     )}
                   </div>
@@ -792,7 +820,7 @@ export function MitraHomePage() {
                         marginBottom: 4,
                       }}
                     >
-                      {DOOR_LABELS.tell_mitra}
+                      {DOORS.tell_mitra}
                     </div>
                     <div
                       style={{ color: "rgba(67, 33, 4, 0.6)", fontSize: 14 }}
@@ -808,7 +836,7 @@ export function MitraHomePage() {
                           marginTop: 3,
                         }}
                       >
-                        Share what is moving. Mitra will listen.
+                        {t('mitra.home.tellMitraDesc')}
                       </div>
                     )}
                   </div>
@@ -940,7 +968,7 @@ export function MitraHomePage() {
                                 marginTop: 12,
                               }}
                             >
-                              Tell Mitra →
+                              {t('mitra.home.tellMitraCta')} →
                             </button>
                           )}
                           {acw!.suggestion && (
@@ -988,7 +1016,7 @@ export function MitraHomePage() {
                                     fontFamily: "var(--kalpx-font-sans)",
                                   }}
                                 >
-                                  If this feels heavy to carry,{" "}
+                                  {t('mitra.home.boundaryBefore')}{" "}
                                   <button
                                     type="button"
                                     onClick={() =>
@@ -1004,9 +1032,9 @@ export function MitraHomePage() {
                                       textDecoration: "underline",
                                     }}
                                   >
-                                    Tell Mitra
+                                    {t('mitra.home.tellMitraCta')}
                                   </button>{" "}
-                                  is here.
+                                  {t('mitra.home.boundaryAfter')}
                                 </div>
                               )}
                             </>
@@ -1023,7 +1051,7 @@ export function MitraHomePage() {
                               marginBottom: 6,
                             }}
                           >
-                            How are you landing?
+                            {t('mitra.home.checkinHeading')}
                           </div>
                           <div
                             style={{
@@ -1033,7 +1061,7 @@ export function MitraHomePage() {
                               marginBottom: 14,
                             }}
                           >
-                            One tap. Mitra meets you where you are.
+                            {t('mitra.home.checkinSubtext')}
                           </div>
                           <div
                             className="mitra-home-feeling-grid"
@@ -1043,14 +1071,14 @@ export function MitraHomePage() {
                               gap: 10,
                             }}
                           >
-                            {FEELING_OPTIONS.map((feeling) => {
-                              const isSelected = selectedFeeling === feeling;
+                            {FEELING_OPTIONS.map(({ key, label }) => {
+                              const isSelected = selectedFeeling === key;
                               return (
                                 <button
-                                  key={feeling}
+                                  key={key}
                                   type="button"
                                   onClick={() =>
-                                    void handleFeelingSelect(feeling)
+                                    void handleFeelingSelect(key)
                                   }
                                   aria-pressed={isSelected}
                                   disabled={checkinActionLoading}
@@ -1077,7 +1105,7 @@ export function MitraHomePage() {
                                     opacity: checkinActionLoading ? 0.7 : 1,
                                   }}
                                 >
-                                  {feeling}
+                                  {label}
                                 </button>
                               );
                             })}
@@ -1162,7 +1190,7 @@ export function MitraHomePage() {
                 fontFamily: "var(--kalpx-font-serif)",
               }}
             >
-              "In this path, no effort is ever lost."
+              {t('mitra.home.heroQuote')}
             </div>
             <div
               style={{
@@ -1172,7 +1200,7 @@ export function MitraHomePage() {
                 fontFamily: "var(--kalpx-font-serif)",
               }}
             >
-              — Bhagavad Gita 2.40
+              {t('mitra.home.heroSource')}
             </div>
             <div
               style={{
@@ -1211,7 +1239,7 @@ export function MitraHomePage() {
                 fontFamily: "var(--kalpx-font-serif)",
               }}
             >
-              KalpX Mitra
+              {t('mitra.home.heroTitle')}
             </h1>
             <p
               style={{
@@ -1222,7 +1250,7 @@ export function MitraHomePage() {
                 fontSize: 20,
               }}
             >
-              Your daily companion for life
+              {t('mitra.home.companionTitle')}
             </p>
             <p
               style={{
@@ -1231,7 +1259,7 @@ export function MitraHomePage() {
                 lineHeight: 1.6,
               }}
             >
-              Grounded in timeless Sanatan wisdom.
+              {t('mitra.home.companionDesc1')}
             </p>
             <p
               style={{
@@ -1242,8 +1270,7 @@ export function MitraHomePage() {
                 marginBottom: 0,
               }}
             >
-              support what you carry, strengthen what is growing, and walk one
-              day at a time
+              {t('mitra.home.companionDesc2')}
             </p>
 
             {error && (
@@ -1255,7 +1282,7 @@ export function MitraHomePage() {
                   marginTop: 12,
                 }}
               >
-                Could not check status.{" "}
+                {t('mitra.home.statusError')}{" "}
                 <button
                   onClick={refetch}
                   style={{
@@ -1265,7 +1292,7 @@ export function MitraHomePage() {
                     fontSize: 15,
                   }}
                 >
-                  Retry
+                  {t('mitra.common.retry')}
                 </button>
               </p>
             )}
@@ -1310,7 +1337,7 @@ export function MitraHomePage() {
               }}
               className="shadow-2xl flex justify-center align"
             >
-              Begin with Mitra →
+              {t('mitra.home.beginCta')}
             </Link>
           </div>
         </div>

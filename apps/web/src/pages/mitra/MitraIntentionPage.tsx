@@ -1,12 +1,8 @@
 import { AUTH_KEYS } from "@kalpx/api-client";
-import {
-  ENTRY_INTENTION_HEADING,
-  ENTRY_INTENTION_OPTIONS,
-  ENTRY_INTENTION_SUBTEXT,
-} from "@kalpx/contracts";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
+import { useTranslation } from "../../lib/i18n";
 
 const PENDING_KEY = "mitra_intention_pending";
 
@@ -49,8 +45,36 @@ const OPTION_ACCENTS = {
 
 export function MitraIntentionPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const isDesktop =
     typeof window === "undefined" ? true : window.innerWidth >= 1024;
+
+  const INTENTION_OPTIONS = [
+    {
+      id: "daily_rhythm" as const,
+      title: t("intention.dailyRhythmTitle"),
+      body: t("intention.dailyRhythmBody"),
+      cta: t("intention.dailyRhythmCta"),
+    },
+    {
+      id: "inner_path" as const,
+      title: t("intention.innerPathTitle"),
+      body: t("intention.innerPathBody"),
+      cta: t("intention.innerPathCta"),
+    },
+    {
+      id: "quick_chant" as const,
+      title: t("intention.quickChantTitle"),
+      body: t("intention.quickChantBody"),
+      cta: t("intention.quickChantCta"),
+    },
+    {
+      id: "tell_mitra" as const,
+      title: t("intention.tellMitraTitle"),
+      body: t("intention.tellMitraBody"),
+      cta: t("intention.tellMitraCta"),
+    },
+  ];
 
   // After login redirects back here, pick up the door the guest originally selected.
   useEffect(() => {
@@ -145,7 +169,7 @@ export function MitraIntentionPage() {
               textAlign: "center",
             }}
           >
-            {ENTRY_INTENTION_HEADING}
+            {t("intention.heading")}
           </h1>
           <div
             style={{
@@ -158,7 +182,7 @@ export function MitraIntentionPage() {
               textAlign: "center",
             }}
           >
-            {ENTRY_INTENTION_SUBTEXT}
+            {t("intention.subtext")}
           </div>
 
           <div
@@ -218,7 +242,7 @@ export function MitraIntentionPage() {
                 alignItems: "stretch",
               }}
             >
-            {ENTRY_INTENTION_OPTIONS.map((opt) => {
+            {INTENTION_OPTIONS.map((opt) => {
               const accent = OPTION_ACCENTS[opt.id];
 
               return (

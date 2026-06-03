@@ -17,10 +17,12 @@ import { executeAction } from '../../engine/actionExecutor';
 import { useGuestIdentity } from '../../hooks/useGuestIdentity';
 import { WEB_ENV } from '../../lib/env';
 import { MitraMobileShell } from '../../components/layout/MitraMobileShell';
+import { useTranslation } from '../../lib/i18n';
 import type { AppDispatch } from '../../store';
 
 export function DashboardPage() {
   useGuestIdentity();
+  const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const screenState = useScreenState();
   const [loading, setLoading] = useState(true);
@@ -34,14 +36,14 @@ export function DashboardPage() {
       const envelope = await getDashboardView();
 
       if (!envelope) {
-        setError('Your path is preparing — try again in a moment.');
+        setError(t('mitra.dashboard.pathPreparing'));
         return;
       }
 
       // Legacy fallback: v3 endpoint returned 404 (feature flag off).
       // mitra/today/ response is not v3Ingest-compatible; show safe error.
       if (envelope._isLegacyFallback) {
-        setError('Dashboard is updating — please try again shortly.');
+        setError(t('mitra.dashboard.updating'));
         return;
       }
 
@@ -60,7 +62,7 @@ export function DashboardPage() {
       await dispatch(loadScreenWithData({ containerId: 'companion_dashboard_v3', stateId: 'day_active' }));
 
     } catch (err: any) {
-      const msg = err?.response?.data?.detail || err?.message || 'Could not load your practice.';
+      const msg = err?.response?.data?.detail || err?.message || t('mitra.dashboard.loadError');
       if (WEB_ENV.isDev) console.error('[Dashboard] load error:', err);
       setError(msg);
     } finally {
@@ -110,7 +112,7 @@ export function DashboardPage() {
                   cursor: 'pointer',
                 }}
               >
-                Retry
+                {t('mitra.dashboard.retry')}
               </button>
             </div>
           </div>

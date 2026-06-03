@@ -1,6 +1,7 @@
 import { Bell, ChevronLeft } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "../../lib/i18n";
 import { useDispatch, useSelector } from "react-redux";
 import type { RhythmItem, RhythmTimeBand, JourneyTriadReminders, JourneyTriadRemindersPatch } from "@kalpx/types";
 import {
@@ -27,17 +28,7 @@ const TRIAD_DEFAULTS: Record<string, string> = {
   practice: "18:00:00",
 };
 
-const TRIAD_LABELS: Record<string, string> = {
-  mantra: "Mantra",
-  sankalp: "Sankalp",
-  practice: "Practice",
-};
-
-const BAND_LABELS: Record<RhythmTimeBand, string> = {
-  morning: "Morning",
-  afternoon: "Afternoon",
-  night: "Night",
-};
+// TRIAD_LABELS and BAND_LABELS are now computed inside component using useTranslation
 
 function formatTime(hms: string | null): string {
   if (!hms) return "";
@@ -201,6 +192,19 @@ export function RemindersPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const homeData = useSelector((s: RootState) => s.door.homeData);
+  const { t } = useTranslation();
+
+  const TRIAD_LABELS: Record<string, string> = {
+    mantra: t("reminders.mantra"),
+    sankalp: t("reminders.sankalp"),
+    practice: t("reminders.practice"),
+  };
+
+  const BAND_LABELS: Record<string, string> = {
+    morning: t("reminders.morning"),
+    afternoon: t("reminders.afternoon"),
+    night: t("reminders.night"),
+  };
 
   const [reminders, setReminders] = useState<JourneyTriadReminders | null>(null);
   const [remindersLoading, setRemindersLoading] = useState(true);
@@ -347,10 +351,9 @@ export function RemindersPage() {
           }}
         >
           <ChevronLeft size={16} strokeWidth={2} />
-          Profile
+          {t("reminders.back")}
         </button>
 
-        {/* Title */}
         <h1
           style={{
             fontFamily: FONT_SERIF,
@@ -361,7 +364,7 @@ export function RemindersPage() {
             lineHeight: 1.15,
           }}
         >
-          Reminders
+          {t("reminders.title")}
         </h1>
         <p
           style={{
@@ -372,13 +375,13 @@ export function RemindersPage() {
             fontStyle: "italic",
           }}
         >
-          Mitra will gently remind you at your chosen times.
+          {t("reminders.subtitle")}
         </p>
 
         {/* ── Inner Path section ── */}
         {!remindersLoading && hasJourney && (
           <>
-            <SectionHeader label="Inner Path" />
+            <SectionHeader label={t("reminders.innerPath")} />
             {(["mantra", "sankalp", "practice"] as const).map((key) => (
               <ReminderRow
                 key={key}
@@ -396,7 +399,7 @@ export function RemindersPage() {
         {/* ── Daily Rhythm section ── */}
         {hasRhythm && allRhythmItems.length > 0 && (
           <>
-            <SectionHeader label="Daily Rhythm" />
+            <SectionHeader label={t("reminders.dailyRhythm")} />
             {rhythmBands.map((band) => {
               const items = homeData?.companion_rhythm?.[band]?.items ?? [];
               if (items.length === 0) return null;
@@ -454,7 +457,7 @@ export function RemindersPage() {
                 margin: "0 0 8px",
               }}
             >
-              Your practice awaits
+              {t("reminders.emptyTitle")}
             </p>
             <p
               style={{
@@ -464,7 +467,7 @@ export function RemindersPage() {
                 lineHeight: 1.6,
               }}
             >
-              Set up your Inner Path or Daily Rhythm to enable gentle reminders.
+              {t("reminders.emptySubtitle")}
             </p>
           </div>
         )}
@@ -481,7 +484,7 @@ export function RemindersPage() {
             }}
           >
             <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: TEXT_MUTED, margin: 0 }}>
-              Begin your Inner Path to also set gentle reminders for your mantra, sankalp, and practice.
+              {t("reminders.beginInnerPath")}
             </p>
           </div>
         )}

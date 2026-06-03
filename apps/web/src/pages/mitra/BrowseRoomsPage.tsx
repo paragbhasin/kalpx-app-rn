@@ -1,25 +1,24 @@
 import { ROOM_DESCRIPTIONS, ROOM_LABELS } from "@kalpx/contracts";
 import { useNavigate } from "react-router-dom";
 import { useJourneyStatus } from "../../hooks/useJourneyStatus";
+import { useTranslation } from '../../lib/i18n';
 
-const ROOM_GROUPS = [
-  {
-    label: "Settle",
-    rooms: ["room_stillness", "room_release"] as const,
-  },
-  {
-    label: "Understand",
-    rooms: ["room_clarity", "room_connection"] as const,
-  },
-  {
-    label: "Grow",
-    rooms: ["room_growth", "room_joy"] as const,
-  },
+const ROOM_GROUP_ROOMS = [
+  ["room_stillness", "room_release"] as const,
+  ["room_clarity", "room_connection"] as const,
+  ["room_growth", "room_joy"] as const,
 ];
 
 export function BrowseRoomsPage() {
   const navigate = useNavigate();
   const { hasActiveJourney } = useJourneyStatus();
+  const { t } = useTranslation();
+
+  const ROOM_GROUPS = [
+    { label: t('mitra.browseRooms.settle'), rooms: ROOM_GROUP_ROOMS[0] },
+    { label: t('mitra.browseRooms.understand'), rooms: ROOM_GROUP_ROOMS[1] },
+    { label: t('mitra.browseRooms.grow'), rooms: ROOM_GROUP_ROOMS[2] },
+  ];
 
   function handleRoom(roomId: string) {
     if (hasActiveJourney) {
@@ -37,10 +36,10 @@ export function BrowseRoomsPage() {
             onClick={() => navigate(-1)}
             style={{ background: "none", border: "none", color: "#C99317", fontSize: 14, cursor: "pointer", marginBottom: 16, padding: 0 }}
           >
-            ← Back
+            {t('mitra.browseRooms.back')}
           </button>
           <h2 style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 24, color: "#432104", margin: "0 0 24px" }}>
-            Browse Rooms
+            {t('mitra.browseRooms.title')}
           </h2>
 
           {ROOM_GROUPS.map((group) => (

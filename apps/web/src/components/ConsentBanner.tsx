@@ -5,14 +5,15 @@ import {
   CONSENT_VERSION_KEY,
   CONSENT_UPDATED_AT_KEY,
 } from '../lib/webAnalytics';
+import { useTranslation } from '../lib/i18n';
 
 export const CONSENT_VERSION = 'privacy_banner_v1_2026_05';
 
 type ConsentChoice = 'granted' | 'denied';
 
 export function ConsentBanner() {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
-  // Both default visually to "Allow" — nothing is written to localStorage until Save.
   const [analyticsChoice, setAnalyticsChoice] = useState<ConsentChoice>('granted');
   const [marketingChoice, setMarketingChoice] = useState<ConsentChoice>('granted');
 
@@ -50,10 +51,9 @@ export function ConsentBanner() {
         boxShadow: '0 -4px 20px rgba(67, 33, 4, 0.08)',
       }}
     >
-      {/* COPY PENDING LEGAL APPROVAL — DO NOT SHIP TO PROD AS-IS */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 3 }}>
         <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#2d1f0f', fontFamily: 'var(--kalpx-font-sans)', letterSpacing: '-0.01em' }}>
-          Privacy preferences
+          {t('consent.title')}
         </p>
         <button
           type="button"
@@ -71,33 +71,35 @@ export function ConsentBanner() {
             fontFamily: 'var(--kalpx-font-sans)',
           }}
         >
-          Save preferences
+          {t('consent.save')}
         </button>
       </div>
       <p style={{ margin: '0 0 16px', fontSize: 13, color: '#7d6b5d', fontFamily: 'var(--kalpx-font-sans)', lineHeight: 1.5 }}>
-        Choose how KalpX can use data to improve Mitra and reach people who may benefit from it.
+        {t('consent.intro')}
       </p>
 
       <ConsentRow
-        title="Help us improve Mitra"
-        description="Allow product analytics so we can understand what feels helpful, where people get stuck, and how to make Mitra easier to use."
+        title={t('consent.analyticsTitle')}
+        description={t('consent.analyticsDesc')}
         choice={analyticsChoice}
-        allowLabel="Allow analytics"
+        allowLabel={t('consent.analyticsAllow')}
+        notNowLabel={t('consent.notNow')}
         onAllow={() => setAnalyticsChoice('granted')}
         onDecline={() => setAnalyticsChoice('denied')}
       />
 
       <ConsentRow
-        title="Personalized ads"
-        description="Allow marketing cookies so we can measure campaigns and reach people who may benefit from KalpX."
+        title={t('consent.marketingTitle')}
+        description={t('consent.marketingDesc')}
         choice={marketingChoice}
-        allowLabel="Allow marketing"
+        allowLabel={t('consent.marketingAllow')}
+        notNowLabel={t('consent.notNow')}
         onAllow={() => setMarketingChoice('granted')}
         onDecline={() => setMarketingChoice('denied')}
       />
 
       <p style={{ margin: '12px 0 0', fontSize: 11, color: '#a89880', textAlign: 'right', fontFamily: 'var(--kalpx-font-sans)' }}>
-        You can change this anytime in Privacy preferences.
+        {t('consent.changeAnytime')}
       </p>
     </div>
   );
@@ -108,6 +110,7 @@ function ConsentRow({
   description,
   choice,
   allowLabel,
+  notNowLabel,
   onAllow,
   onDecline,
 }: {
@@ -115,6 +118,7 @@ function ConsentRow({
   description: string;
   choice: ConsentChoice;
   allowLabel: string;
+  notNowLabel: string;
   onAllow: () => void;
   onDecline: () => void;
 }) {
@@ -151,7 +155,7 @@ function ConsentRow({
             transition: 'background 0.15s, color 0.15s',
           }}
         >
-          Not now
+          {notNowLabel}
         </button>
         <button
           type="button"

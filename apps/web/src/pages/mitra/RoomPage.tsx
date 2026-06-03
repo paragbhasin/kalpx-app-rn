@@ -18,6 +18,7 @@ import {
   ensureRoomAmbientPlaying,
   stopRoomAmbient,
 } from "../../lib/audio/calmMusic";
+import { useTranslation } from '../../lib/i18n';
 import { webNavigate } from "../../lib/webRouter";
 import type { AppDispatch } from "../../store";
 import { updateScreenData, useScreenState } from "../../store/screenSlice";
@@ -29,32 +30,34 @@ const ROOMS_WITH_CONTEXT_PICKER = [
   "room_stillness",
 ];
 
-function buildExitOnlyFallback(roomId: string) {
-  return {
-    schema_version: "room.render.v1",
-    room_id: roomId,
-    opening_line: "",
-    second_beat_line: null,
-    ready_hint: "",
-    section_prompt: "",
-    dashboard_chip_label: null,
-    principle_banner: null,
-    opening_experience: {} as any,
-    actions: [
-      {
-        action_id: `${roomId}_exit_fallback`,
-        label: "Return to Mitra Home",
-        action_type: "exit",
-        action_family: "exit",
-        exit_payload: { returns_to: "dashboard" },
-      },
-    ],
-  };
-}
 
 export function RoomPage() {
   const { roomId } = useParams<{ roomId: string }>();
+  const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
+
+  function buildExitOnlyFallback(roomId: string) {
+    return {
+      schema_version: "room.render.v1",
+      room_id: roomId,
+      opening_line: "",
+      second_beat_line: null,
+      ready_hint: "",
+      section_prompt: "",
+      dashboard_chip_label: null,
+      principle_banner: null,
+      opening_experience: {} as any,
+      actions: [
+        {
+          action_id: `${roomId}_exit_fallback`,
+          label: t('mitra.room.returnMitraHome'),
+          action_type: "exit",
+          action_family: "exit",
+          exit_payload: { returns_to: "dashboard" },
+        },
+      ],
+    };
+  }
   const screenState = useScreenState();
   const sd = screenState.screenData;
   const [isDesktop, setIsDesktop] = useState(
@@ -301,7 +304,7 @@ export function RoomPage() {
               margin: "0 auto 12px",
             }}
           />
-          <p style={{ fontSize: 13 }}>Entering {roomName}…</p>
+          <p style={{ fontSize: 13 }}>{t('mitra.room.entering')}</p>
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
       </div>
@@ -335,7 +338,7 @@ export function RoomPage() {
       ) : (
         <div style={{ padding: 24, textAlign: "center" }}>
           <p style={{ color: "var(--kalpx-text-muted)" }}>
-            This space is not available right now.
+            {t('mitra.room.notAvailable')}
           </p>
           <button
             onClick={() =>
@@ -355,7 +358,7 @@ export function RoomPage() {
             }}
             data-testid="room-unavailable-return"
           >
-            Return to dashboard
+            {t('mitra.room.returnDashboard')}
           </button>
         </div>
       )}

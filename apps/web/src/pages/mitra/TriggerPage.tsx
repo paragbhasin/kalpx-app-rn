@@ -9,9 +9,11 @@ import { ScreenRenderer } from '../../engine/ScreenRenderer';
 import { loadScreenWithData, useScreenState } from '../../store/screenSlice';
 import { executeAction } from '../../engine/actionExecutor';
 import { MitraMobileShell } from '../../components/layout/MitraMobileShell';
+import { useTranslation } from '../../lib/i18n';
 import type { AppDispatch } from '../../store';
 
 export function TriggerPage() {
+  const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const [searchParams] = useSearchParams();
   const location = useLocation();
@@ -60,7 +62,7 @@ export function TriggerPage() {
               data-testid="trigger-exit-btn"
               style={{ background: 'none', border: 'none', color: 'var(--kalpx-text-muted)', fontSize: 13, cursor: 'pointer' }}
             >
-              ✕ Return home
+              {t('mitra.trigger.returnHome')}
             </button>
           </div>
         )}

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "../../lib/i18n";
 
 interface Props {
   block?: Record<string, any>;
@@ -31,12 +32,6 @@ const CARDS: CardDef[] = [
     whyKey: "companion_practice_one_line",
   },
 ];
-
-const LABELS: Record<Kind, string> = {
-  mantra: "Your Mantra",
-  sankalp: "Your Intention",
-  practice: "Your Practice",
-};
 
 const THEME: Record<Kind, { accent: string; bg: string; border: string }> = {
   mantra: {
@@ -115,8 +110,15 @@ function sentence(value: string | null | undefined, fallback = ""): string {
 export function PathEmergesBlock({ screenData, onAction }: Props) {
   const [whyOpen, setWhyOpen] = React.useState(false);
   const [activeWhyTab, setActiveWhyTab] = React.useState<Kind>("mantra");
+  const { t } = useTranslation();
   const sd = screenData || {};
   const triad = sd.onboarding_triad_data?.triad || {};
+
+  const LABELS: Record<Kind, string> = {
+    mantra: t("turn8.labelMantra"),
+    sankalp: t("turn8.labelSankalp"),
+    practice: t("turn8.labelPractice"),
+  };
 
   const hasData = CARDS.some((c) => !!sd[c.titleKey]);
   const whyTabs = CARDS.filter((c) => {
@@ -409,7 +411,7 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
                   lineHeight: 1.3,
                 }}
               >
-                Why these were chosen
+                {t("turn8.whyChosen")}
               </div>
               {!whyOpen && (
                 <p
@@ -420,8 +422,7 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
                     color: "var(--kalpx-text-soft)",
                   }}
                 >
-                  Understand why Mitra selected this mantra, sankalp, and
-                  practice.
+                  {t("turn8.whySubtitle")}
                 </p>
               )}
             </div>
@@ -476,7 +477,7 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
                       fontWeight: 700,
                     }}
                   >
-                    Chosen with care
+                    {t("turn8.chosenWith")}
                   </p>
                   <p
                     style={{
@@ -487,7 +488,7 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
                       color: "#432104",
                     }}
                   >
-                    Why this supports today
+                    {t("turn8.whySupports")}
                   </p>
                 </div>
               </div>
@@ -531,10 +532,10 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
                       }}
                     >
                       {tab.kind === "sankalp"
-                        ? "Sankalp"
+                        ? t("turn8.tabSankalp")
                         : tab.kind === "mantra"
-                          ? "Mantra"
-                          : "Practice"}
+                          ? t("turn8.tabMantra")
+                          : t("turn8.tabPractice")}
                     </button>
                   );
                 })}
@@ -559,10 +560,10 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
                   }}
                 >
                   {activeWhyTab === "sankalp"
-                    ? "Sankalp"
+                    ? t("turn8.tabSankalp")
                     : activeWhyTab === "mantra"
-                      ? "Mantra"
-                      : "Practice"}
+                      ? t("turn8.tabMantra")
+                      : t("turn8.tabPractice")}
                 </p>
                 <p
                   style={{
@@ -602,7 +603,7 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
                             fontWeight: 700,
                           }}
                         >
-                          Essence
+                          {t("turn8.essence")}
                         </p>
                         <p
                           style={{
@@ -613,7 +614,7 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
                           }}
                         >
                           {sentence(
-                            `This is ${activeWhyContext.mitra_frame_through}`,
+                            t("turn8.frameSankalp").replace("{frame}", activeWhyContext.mitra_frame_through),
                           )}
                         </p>
                       </div>
@@ -641,7 +642,7 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
                           fontWeight: 700,
                         }}
                       >
-                        Essence
+                        {t("turn8.essence")}
                       </p>
                       <p
                         style={{
@@ -652,7 +653,9 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
                         }}
                       >
                         {sentence(
-                          `${activeWhyItem.title || "This"} is ${activeWhyContext.mitra_frame_through}`,
+                          t("turn8.frameItem")
+                            .replace("{title}", activeWhyItem.title || "This")
+                            .replace("{frame}", activeWhyContext.mitra_frame_through),
                         )}
                       </p>
                     </div>
@@ -680,7 +683,7 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
                         fontWeight: 700,
                       }}
                     >
-                      Shift
+                      {t("turn8.shift")}
                     </p>
                     <p
                       style={{
@@ -691,7 +694,7 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
                       }}
                     >
                       {sentence(
-                        `Mitra chose this to guide you from ${activeShift}`,
+                        t("turn8.shiftLabel").replace("{shift}", activeShift),
                       )}
                     </p>
                   </div>
@@ -723,7 +726,7 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
                           fontWeight: 700,
                         }}
                       >
-                        Useful for
+                        {t("turn8.usefulFor")}
                       </p>
                       <p
                         style={{
@@ -757,7 +760,7 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
                           fontWeight: 700,
                         }}
                       >
-                        Rooted in
+                        {t("turn8.rootedIn")}
                       </p>
                       <p
                         style={{
@@ -813,8 +816,7 @@ export function PathEmergesBlock({ screenData, onAction }: Props) {
           textWrap: "balance",
         }}
       >
-        This isn't homework. It's sadhana — a daily practice that builds
-        something real over time.
+        {t("turn8.footer")}
       </p>
     </div>
   );

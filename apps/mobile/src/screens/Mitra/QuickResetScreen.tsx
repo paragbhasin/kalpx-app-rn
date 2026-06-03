@@ -10,6 +10,7 @@ import type {
   QuickResetOpeningState,
 } from "@kalpx/types";
 import { useJapaEngine } from "../../engine/useJapaEngine";
+import { liveActivity } from "../../native/liveActivity";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -246,10 +247,12 @@ export default function QuickResetScreen({
   // clearing the global background applied by the first useFocusEffect above.
   const japaRefreshRef = useRef(japaEngine.refreshStats);
   const japaSyncRef = useRef(japaEngine.syncNow);
+  const japaIncrementRef = useRef(japaEngine.increment);
   useEffect(() => {
     japaRefreshRef.current = japaEngine.refreshStats;
     japaSyncRef.current = japaEngine.syncNow;
-  }, [japaEngine.refreshStats, japaEngine.syncNow]);
+    japaIncrementRef.current = japaEngine.increment;
+  }, [japaEngine.refreshStats, japaEngine.syncNow, japaEngine.increment]);
 
   // Sync on leave, refresh on enter — empty deps = stable, fires once on focus
   useFocusEffect(
@@ -258,6 +261,17 @@ export default function QuickResetScreen({
       return () => {
         japaSyncRef.current?.();
       };
+    }, []),
+  );
+
+  // Consume any chant taps done from the iOS Lock Screen Live Activity button
+  useFocusEffect(
+    useCallback(() => {
+      liveActivity.consumePendingIncrements().then((n) => {
+        for (let i = 0; i < n; i++) {
+          japaIncrementRef.current();
+        }
+      });
     }, []),
   );
 
@@ -399,18 +413,34 @@ export default function QuickResetScreen({
   // ── Runner start ───────────────────────────────────────────────────────────
   const handleTapBead = useCallback(() => {
     if (!activeMantra) return;
+    // Compute next counts BEFORE increment (React state won't update synchronously)
+    const nextSession = beadCount + 1;
+    const nextWeek  = japaEngine.weekCount + 1;
+    const nextYear  = japaEngine.yearCount + 1;
+    const nextTotal = japaEngine.lifetimeCount + 1;
     if (!isChantingActive) {
       runnerStartedAt.current = Date.now();
       setIsChantingActive(true);
+      liveActivity.start(
+        activeMantra.title,
+        activeMantra.devanagari ?? "",
+        nextSession,
+        nextWeek,
+        nextYear,
+        nextTotal
+      );
+    } else {
+      liveActivity.update(nextSession, nextWeek, nextYear, nextTotal);
     }
     japaEngine.increment();
-  }, [activeMantra, isChantingActive, japaEngine]);
+  }, [activeMantra, isChantingActive, japaEngine, beadCount]);
 
   // ── Done chanting ──────────────────────────────────────────────────────────
   // Keep ref in sync so goal-reached callback always calls the latest version
   const handleDoneChanting = useCallback(async () => {
     onGoalReachedRef.current = null; // prevent double-fire after manual done
     if (!activeMantra) return;
+    liveActivity.end();
     const duration_ms = isChantingActive
       ? Date.now() - runnerStartedAt.current
       : 0;

@@ -13,6 +13,7 @@ import {
   type GlobalConsent,
 } from '../../store/preferencesSlice';
 import { getUserProfile, updateUserProfile } from '../../lib/userApi';
+import { useWebPush } from '../../hooks/useWebPush';
 
 const PAGE_BG = '#fffaf5';
 const SECTION_BG = '#fff8f0';
@@ -165,6 +166,8 @@ export function NotificationPreferencesPage() {
   const frequency = useSelector((s: RootState) => s.preferences.recommended_frequency);
   const globalConsent = useSelector((s: RootState) => s.preferences.global_consent);
   const loaded = useSelector((s: RootState) => s.preferences.loaded);
+
+  const webPush = useWebPush();
 
   const [quietStart, setQuietStart] = useState(quietHours.start);
   const [quietEnd, setQuietEnd] = useState(quietHours.end);
@@ -385,6 +388,14 @@ export function NotificationPreferencesPage() {
             />
           </Section>
 
+          {/* Browser notifications (web push) */}
+          <Section
+            title="Browser Notifications"
+            subtitle="Receive reminders directly in this browser, even when the tab is in the background."
+          >
+            <BrowserPushRow webPush={webPush} />
+          </Section>
+
           {/* Core companion rhythm */}
           <Section title="Companion Rhythm" subtitle="Core companion notifications.">
             {COMPANION_CATEGORIES.map((cat) => (
@@ -513,6 +524,76 @@ export function NotificationPreferencesPage() {
       )}
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
+
+function BrowserPushRow({ webPush }: { webPush: ReturnType<typeof useWebPush> }) {
+  const { state, error, subscribe, unsubscribe } = webPush;
+
+  if (state === 'unsupported') {
+    return (
+      <div style={{ padding: '10px 0', borderTop: `1px solid ${BORDER}` }}>
+        <p style={{ margin: 0, fontSize: 13, color: TEXT_SECONDARY }}>
+          Browser notifications are not supported in this browser. Use Chrome or Firefox for the best experience.
+        </p>
+      </div>
+    );
+  }
+
+  if (state === 'denied') {
+    return (
+      <div style={{ padding: '10px 0', borderTop: `1px solid ${BORDER}` }}>
+        <p style={{ margin: 0, fontSize: 13, color: TEXT_SECONDARY }}>
+          Notifications are blocked. To enable, open your browser's site settings for this page and allow notifications.
+        </p>
+      </div>
+    );
+  }
+
+  const isSubscribed = state === 'subscribed';
+  const isLoading = state === 'checking' || state === 'subscribing';
+
+  return (
+    <div style={{ padding: '10px 0', borderTop: `1px solid ${BORDER}` }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ flex: 1, paddingRight: 16 }}>
+          <div style={{ fontSize: 14, fontWeight: 500, color: TEXT }}>
+            {isSubscribed ? 'Browser notifications on' : 'Browser notifications off'}
+          </div>
+          <div style={{ fontSize: 12, color: TEXT_SECONDARY, marginTop: 2 }}>
+            {isSubscribed
+              ? 'This browser will receive reminders from Mitra.'
+              : 'Turn on to receive reminders in this browser.'}
+          </div>
+        </div>
+        <label style={{ position: 'relative', display: 'inline-block', width: 44, height: 24, flexShrink: 0 }}>
+          <input
+            type="checkbox"
+            checked={isSubscribed}
+            disabled={isLoading}
+            onChange={(e) => { void (e.target.checked ? subscribe() : unsubscribe()); }}
+            style={{ opacity: 0, width: 0, height: 0 }}
+          />
+          <span style={{
+            position: 'absolute', cursor: isLoading ? 'not-allowed' : 'pointer', inset: 0,
+            borderRadius: 24, backgroundColor: isSubscribed ? GOLD : '#e0d8cc',
+            transition: 'background-color 0.2s', opacity: isLoading ? 0.5 : 1,
+          }}>
+            <span style={{
+              position: 'absolute', height: 18, width: 18,
+              left: isSubscribed ? 22 : 3, bottom: 3,
+              backgroundColor: '#fff', borderRadius: '50%', transition: 'left 0.2s',
+            }} />
+          </span>
+        </label>
+      </div>
+      {state === 'subscribing' && (
+        <p style={{ margin: '6px 0 0', fontSize: 12, color: GOLD }}>Enabling browser notifications…</p>
+      )}
+      {error && (
+        <p style={{ margin: '6px 0 0', fontSize: 12, color: '#c0392b' }}>{error}</p>
+      )}
     </div>
   );
 }

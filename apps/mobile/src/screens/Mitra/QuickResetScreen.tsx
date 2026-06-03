@@ -419,6 +419,7 @@ export default function QuickResetScreen({
     const nextToday    = japaEngine.todayCount + 1;
     const nextWeek     = japaEngine.weekCount + 1;
     const nextLifetime = japaEngine.lifetimeCount + 1;
+    const elapsedSec   = Math.floor(japaEngine.elapsedMs / 1000);
     if (!isChantingActive) {
       runnerStartedAt.current = Date.now();
       setIsChantingActive(true);
@@ -429,9 +430,10 @@ export default function QuickResetScreen({
         nextWeek,
         nextLifetime,
         nextLifetime,
+        elapsedSec,
       );
     } else {
-      liveActivity.update(nextToday, nextWeek, nextLifetime, nextLifetime);
+      liveActivity.update(nextToday, nextWeek, nextLifetime, nextLifetime, elapsedSec);
     }
     japaEngine.increment();
   }, [activeMantra, isChantingActive, japaEngine]);
@@ -441,20 +443,27 @@ export default function QuickResetScreen({
   const handleDoneChanting = useCallback(async () => {
     onGoalReachedRef.current = null; // prevent double-fire after manual done
     if (!activeMantra) return;
-    liveActivity.end();
     const duration_ms = isChantingActive
       ? Date.now() - runnerStartedAt.current
       : 0;
+    const finalElapsedSec = Math.floor(duration_ms / 1000);
+
+    // Show "Practice complete" state on Live Activity for 20s, then restore Sankalp
+    if (isChantingActive) {
+      liveActivity.completeChant(japaEngine.todayCount, finalElapsedSec);
+      setTimeout(async () => {
+        liveActivity.end();
+        const state = await getLiveActivityState(i18n.language || 'en').catch(() => ({ type: 'none' as const }));
+        if (AppState.currentState === 'active' && state.type === 'sankalp') {
+          liveActivity.startSankalp(state.title, state.line);
+        }
+      }, 20_000);
+    } else {
+      liveActivity.end();
+    }
+
     // Flush the japa engine (sync final count + mark session complete on backend)
     await japaEngine.completeSession();
-
-    // After quick chant ends, auto-start Sankalp Live Activity if still in foreground
-    getLiveActivityState(i18n.language || 'en').then((state) => {
-      if (AppState.currentState !== 'active') return;
-      if (state.type === 'sankalp') {
-        liveActivity.startSankalp(state.title, state.line);
-      }
-    }).catch(() => {});
 
     const result = await postQuickChantComplete({
       mantra_ref: activeMantra.item_id,

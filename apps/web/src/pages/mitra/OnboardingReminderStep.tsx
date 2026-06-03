@@ -5,18 +5,13 @@
  */
 import { useState } from "react";
 import { webNavigate } from "../../lib/webRouter";
+import { useTranslation } from "../../lib/i18n";
 import type { JourneyTriadRemindersPatch } from "@kalpx/types";
 
 const SERIF = "var(--kalpx-font-serif)";
 const GOLD = "#C99317";
 const DARK = "#432104";
 const MID = "#7B6545";
-
-const TRIAD_ITEMS = [
-  { key: "mantra" as const, label: "Mantra", defaultTime: "07:00" },
-  { key: "sankalp" as const, label: "Sankalp", defaultTime: "08:00" },
-  { key: "practice" as const, label: "Practice", defaultTime: "18:00" },
-];
 
 type TriadKey = "mantra" | "sankalp" | "practice";
 
@@ -31,6 +26,14 @@ interface Props {
 }
 
 export function OnboardingReminderStep({ destination, patchReminders }: Props) {
+  const { t } = useTranslation();
+
+  const TRIAD_ITEMS: { key: TriadKey; labelKey: string; defaultTime: string }[] = [
+    { key: "mantra", labelKey: "onboarding.remindForMantra", defaultTime: "07:00" },
+    { key: "sankalp", labelKey: "onboarding.remindForSankalp", defaultTime: "08:00" },
+    { key: "practice", labelKey: "onboarding.remindForPractice", defaultTime: "18:00" },
+  ];
+
   const [reminders, setReminders] = useState<Record<TriadKey, ReminderState>>(
     () => Object.fromEntries(
       TRIAD_ITEMS.map((item) => [item.key, { enabled: false, time: item.defaultTime }])
@@ -86,7 +89,7 @@ export function OnboardingReminderStep({ destination, patchReminders }: Props) {
           lineHeight: 1.3,
         }}
       >
-        Want gentle reminders?
+        {t("onboarding.reminderTitle")}
       </h2>
       <p
         style={{
@@ -96,7 +99,7 @@ export function OnboardingReminderStep({ destination, patchReminders }: Props) {
           lineHeight: 1.6,
         }}
       >
-        Mitra will gently remind you at the times you choose.
+        {t("onboarding.reminderSubtitle")}
       </p>
 
       {TRIAD_ITEMS.map((item) => {
@@ -125,7 +128,7 @@ export function OnboardingReminderStep({ destination, patchReminders }: Props) {
                 fontWeight: 600,
               }}
             >
-              Remind me for {item.label.toLowerCase()}
+              {t(item.labelKey)}
             </span>
             {r.enabled && (
               <input
@@ -192,7 +195,7 @@ export function OnboardingReminderStep({ destination, patchReminders }: Props) {
           opacity: saving ? 0.7 : 1,
         }}
       >
-        {saving ? "Setting…" : "Set reminders"}
+        {saving ? t("onboarding.setting") : t("onboarding.setReminders")}
       </button>
 
       <button
@@ -212,7 +215,7 @@ export function OnboardingReminderStep({ destination, patchReminders }: Props) {
           cursor: saving ? "not-allowed" : "pointer",
         }}
       >
-        Skip for now
+        {t("onboarding.skipForNow")}
       </button>
     </div>
   );

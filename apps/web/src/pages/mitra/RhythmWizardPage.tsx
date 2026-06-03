@@ -17,6 +17,7 @@ import {
   postRhythmSetup,
   postRhythmSuggest,
 } from "../../engine/mitraApi";
+import { useTranslation } from '../../lib/i18n';
 import type { AppDispatch, RootState } from "../../store";
 import { setHomeData } from "../../store/doorSlice";
 import { useScreenState } from "../../store/screenSlice";
@@ -241,6 +242,7 @@ function StepDots({ step }: { step: WizardStep }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function RhythmWizardPage() {
+  const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -256,6 +258,48 @@ export function RhythmWizardPage() {
     homeData?.user_surface_state?.has_inner_path === true;
   const wizardBackTarget =
     isEditMode || hasExistingRhythm ? "/en/mitra/rhythm" : "/en/mitra";
+
+  const MOMENT_LABEL: Record<RhythmTimeBand, string> = {
+    morning: t('mitra.rhythmWizard.morning'),
+    afternoon: t('mitra.rhythmWizard.afternoon'),
+    night: t('mitra.rhythmWizard.night'),
+  };
+
+  const MOMENT_DESC: Record<RhythmTimeBand, string> = {
+    morning: MOMENT_COPY.morning.desc,
+    afternoon: MOMENT_COPY.afternoon.desc,
+    night: MOMENT_COPY.night.desc,
+  };
+
+  const PURPOSE_OPTIONS_T: Record<
+    RhythmTimeBand,
+    { value: string; label: string; desc: string }[]
+  > = {
+    morning: [
+      { value: "calm_start", label: t('mitra.rhythmWizard.purposeCalmStart'), desc: t('mitra.rhythmWizard.purposeCalmStartDesc') },
+      { value: "focus", label: t('mitra.rhythmWizard.purposeFocus'), desc: t('mitra.rhythmWizard.purposeFocusDesc') },
+      { value: "devotion", label: t('mitra.rhythmWizard.purposeDevotion'), desc: t('mitra.rhythmWizard.purposeDevotionDesc') },
+      { value: "discipline", label: t('mitra.rhythmWizard.purposeDiscipline'), desc: t('mitra.rhythmWizard.purposeDisciplineDesc') },
+      { value: "gratitude", label: t('mitra.rhythmWizard.purposeGratitude'), desc: t('mitra.rhythmWizard.purposeGratitudeDesc') },
+      { value: "clarity", label: t('mitra.rhythmWizard.purposeClarity'), desc: t('mitra.rhythmWizard.purposeClarityDesc') },
+    ],
+    afternoon: [
+      { value: "reset", label: t('mitra.rhythmWizard.purposeReset'), desc: t('mitra.rhythmWizard.purposeResetDesc') },
+      { value: "patience", label: t('mitra.rhythmWizard.purposePatience'), desc: t('mitra.rhythmWizard.purposePatienceDesc') },
+      { value: "sankalp_reminder", label: t('mitra.rhythmWizard.purposeSankalpReminder'), desc: t('mitra.rhythmWizard.purposeSankalpReminderDesc') },
+      { value: "energy_check", label: t('mitra.rhythmWizard.purposeEnergyCheck'), desc: t('mitra.rhythmWizard.purposeEnergyCheckDesc') },
+      { value: "mindful_action", label: t('mitra.rhythmWizard.purposeMindfulAction'), desc: t('mitra.rhythmWizard.purposeMindfulActionDesc') },
+      { value: "emotional_balance", label: t('mitra.rhythmWizard.purposeEmotionalBalance'), desc: t('mitra.rhythmWizard.purposeEmotionalBalanceDesc') },
+    ],
+    night: [
+      { value: "release", label: t('mitra.rhythmWizard.purposeRelease'), desc: t('mitra.rhythmWizard.purposeReleaseDesc') },
+      { value: "gratitude", label: t('mitra.rhythmWizard.purposeGratitudeNight'), desc: t('mitra.rhythmWizard.purposeGratitudeNightDesc') },
+      { value: "reflection", label: t('mitra.rhythmWizard.purposeReflection'), desc: t('mitra.rhythmWizard.purposeReflectionDesc') },
+      { value: "forgiveness", label: t('mitra.rhythmWizard.purposeForgiveness'), desc: t('mitra.rhythmWizard.purposeForgivenessDesc') },
+      { value: "sleep_calm", label: t('mitra.rhythmWizard.purposeSleepCalm'), desc: t('mitra.rhythmWizard.purposeSleepCalmDesc') },
+      { value: "self_review", label: t('mitra.rhythmWizard.purposeSelfReview'), desc: t('mitra.rhythmWizard.purposeSelfReviewDesc') },
+    ],
+  };
 
   const [step, setStep] = useState<WizardStep>(
     isEditMode ? "suggestion" : "moments",
@@ -545,7 +589,7 @@ export function RhythmWizardPage() {
                   textAlign: "center",
                 }}
               >
-                Build Your Daily Rhythm
+                {t('mitra.rhythmWizard.buildTitle')}
               </h2>
               <p
                 style={{
@@ -556,7 +600,7 @@ export function RhythmWizardPage() {
                   textAlign: "center",
                 }}
               >
-                When would you like Mitra to support you?
+                {t('mitra.rhythmWizard.whenSupport')}
               </p>
 
               <div
@@ -608,7 +652,7 @@ export function RhythmWizardPage() {
                     marginBottom: isDesktop ? 8 : 4,
                   }}
                 >
-                  You can select more than one
+                  {t('mitra.rhythmWizard.selectMore')}
                 </div>
                 <div
                   style={{
@@ -617,8 +661,7 @@ export function RhythmWizardPage() {
                     lineHeight: 1.5,
                   }}
                 >
-                  Choose all moments when you&apos;d like Mitra to walk with
-                  you.
+                  {t('mitra.rhythmWizard.chooseMoments')}
                 </div>
               </div>
 
@@ -712,7 +755,7 @@ export function RhythmWizardPage() {
                                 color: DARK,
                               }}
                             >
-                              {MOMENT_COPY[band].label}
+                              {MOMENT_LABEL[band]}
                             </div>
                             {isDesktop && (
                               <div
@@ -774,7 +817,7 @@ export function RhythmWizardPage() {
                               maxWidth: isDesktop ? 290 : 220,
                             }}
                           >
-                            {MOMENT_COPY[band].desc}
+                            {MOMENT_DESC[band]}
                           </div>
                         </div>
                         {!isDesktop && (
@@ -828,7 +871,7 @@ export function RhythmWizardPage() {
                   boxShadow: "0 16px 34px rgba(222,184,97,0.22)",
                 }}
               >
-                Continue →
+                {t('mitra.rhythmWizard.continueCta')}
               </button>
               <button
                 onClick={() => navigate("/en/mitra/rhythm/edit")}
@@ -845,7 +888,7 @@ export function RhythmWizardPage() {
                   letterSpacing: 0.3,
                 }}
               >
-                Set up myself
+                {t('mitra.rhythmWizard.setupMyself')}
               </button>
             </>
           )}
@@ -881,7 +924,7 @@ export function RhythmWizardPage() {
                   marginRight: isDesktop ? "auto" : undefined,
                 }}
               >
-                What should each moment give you?
+                {t('mitra.rhythmWizard.whatGive')}
               </h2>
               <p
                 style={{
@@ -895,7 +938,7 @@ export function RhythmWizardPage() {
                   marginRight: isDesktop ? "auto" : undefined,
                 }}
               >
-                Mitra will choose a practice that fits.
+                {t('mitra.rhythmWizard.mitraChoose')}
               </p>
 
               {selectedMoments.map((band) => (
@@ -935,7 +978,7 @@ export function RhythmWizardPage() {
                         color: DARK,
                       }}
                     >
-                      {MOMENT_COPY[band].label}
+                      {MOMENT_LABEL[band]}
                     </div>
                     <div
                       style={{
@@ -954,7 +997,7 @@ export function RhythmWizardPage() {
                       gap: isDesktop ? 16 : 8,
                     }}
                   >
-                    {PURPOSE_OPTIONS[band].map((opt, idx) => {
+                    {PURPOSE_OPTIONS_T[band].map((opt, idx) => {
                       const sel = purposes[band] === opt.value;
                       const purposeIcon =
                         PURPOSE_ART[band][idx] ?? MOMENT_ART[band];
@@ -1051,7 +1094,7 @@ export function RhythmWizardPage() {
                       cursor: allSelected ? "pointer" : "not-allowed",
                     }}
                   >
-                    See Mitra's Suggestion →
+                    {t('mitra.rhythmWizard.seeSuggestion')}
                   </button>
                 );
               })()}
@@ -1097,8 +1140,8 @@ export function RhythmWizardPage() {
                     }}
                   >
                     {isEditMode
-                      ? "Your Rhythm"
-                      : "Mitra suggests this for you."}
+                      ? t('mitra.rhythmWizard.yourRhythm')
+                      : t('mitra.rhythmWizard.mitraSuggests')}
                   </h2>
                   <p
                     style={{
@@ -1201,7 +1244,7 @@ export function RhythmWizardPage() {
                                   }}
                                 >
                                   Mitra could not suggest a{" "}
-                                  {MOMENT_COPY[band].label.toLowerCase()} practice.
+                                  {MOMENT_LABEL[band].toLowerCase()} practice.
                                 </p>
                                 <button
                                   onClick={() => setPickerBand(band)}
@@ -1263,7 +1306,7 @@ export function RhythmWizardPage() {
                                   {itemTypeLabel(item.item_type)}
                                 </span>
                                 <span style={{ fontSize: 16, color: LIGHT }}>
-                                  {MOMENT_COPY[band].label}
+                                  {MOMENT_LABEL[band]}
                                 </span>
                                 <button
                                   onClick={() => setPickerBand(band)}
@@ -1284,7 +1327,7 @@ export function RhythmWizardPage() {
                                   }}
                                 >
                                   <Pencil size={14} strokeWidth={1.8} />
-                                  Change
+                                  {t('mitra.rhythmWizard.change')}
                                 </button>
                               </div>
 
@@ -1364,7 +1407,7 @@ export function RhythmWizardPage() {
                                 }}
                               >
                                 Mitra could not suggest a{" "}
-                                {MOMENT_COPY[band].label.toLowerCase()} practice.
+                                {MOMENT_LABEL[band].toLowerCase()} practice.
                               </p>
                               <button
                                 onClick={() => setPickerBand(band)}
@@ -1419,7 +1462,7 @@ export function RhythmWizardPage() {
                                 {itemTypeLabel(item.item_type)}
                               </span>
                               <span style={{ fontSize: 13, color: LIGHT }}>
-                                {MOMENT_COPY[band].label}
+                                {MOMENT_LABEL[band]}
                               </span>
                               <button
                                 onClick={() => setPickerBand(band)}
@@ -1442,7 +1485,7 @@ export function RhythmWizardPage() {
                                 }}
                               >
                                 <Pencil size={14} strokeWidth={1.8} />
-                                Change
+                                {t('mitra.rhythmWizard.change')}
                               </button>
                             </div>
                             <div
@@ -1552,7 +1595,7 @@ export function RhythmWizardPage() {
                     }}
                     disabled={acceptDisabled}
                   >
-                    Accept Rhythm →
+                    {t('mitra.rhythmWizard.acceptRhythm')}
                   </button>
                   {!isEditMode && (
                     <button
@@ -1573,7 +1616,7 @@ export function RhythmWizardPage() {
                         color: "#8B6914",
                       }}
                     >
-                      Choose My Own
+                      {t('mitra.rhythmWizard.chooseOwn')}
                     </button>
                   )}
                 </>
@@ -1592,7 +1635,7 @@ export function RhythmWizardPage() {
                   margin: "0 0 8px",
                 }}
               >
-                Would you like a gentle reminder?
+                {t('mitra.rhythmWizard.gentleReminder')}
               </h2>
               <p
                 style={{
@@ -1608,9 +1651,9 @@ export function RhythmWizardPage() {
               <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
                 {(
                   [
-                    { label: "Yes, gently remind me", value: "yes" as const },
-                    { label: "No, I will come myself", value: "no" as const },
-                    { label: "Ask me later", value: "later" as const },
+                    { label: t('mitra.rhythmWizard.remindYes'), value: "yes" as const },
+                    { label: t('mitra.rhythmWizard.remindNo'), value: "no" as const },
+                    { label: t('mitra.rhythmWizard.remindLater'), value: "later" as const },
                   ] satisfies { label: string; value: "yes" | "no" | "later" }[]
                 ).map((opt) => (
                   <button
@@ -1658,7 +1701,7 @@ export function RhythmWizardPage() {
                         flex: 1,
                       }}
                     >
-                      {MOMENT_COPY[band].label}
+                      {MOMENT_LABEL[band]}
                     </span>
                     <input
                       type="time"
@@ -1705,7 +1748,7 @@ export function RhythmWizardPage() {
                   background: saving ? "rgba(201,147,23,0.5)" : GOLD_BTN,
                 }}
               >
-                {saving ? "Saving…" : "Save My Rhythm →"}
+                {saving ? t('mitra.rhythmWizard.savingRhythm') : t('mitra.rhythmWizard.saveRhythm')}
               </button>
             </>
           )}
@@ -1742,10 +1785,10 @@ export function RhythmWizardPage() {
                     margin: "0 0 8px",
                   }}
                 >
-                  Your Daily Companion is ready.
+                  {t('mitra.rhythmWizard.companionReady')}
                 </h2>
                 <p style={{ color: MID, fontSize: 15, lineHeight: 1.6 }}>
-                  Each moment has its practice. Return to it whenever you need.
+                  {t('mitra.rhythmWizard.eachMoment')}
                 </p>
               </div>
 
@@ -1783,7 +1826,7 @@ export function RhythmWizardPage() {
                             fontWeight: 700,
                           }}
                         >
-                          {MOMENT_COPY[band].label}
+                          {MOMENT_LABEL[band]}
                         </div>
                         <div
                           style={{
@@ -1841,7 +1884,7 @@ export function RhythmWizardPage() {
                 );
               })}
               <button onClick={() => navigate("/en/mitra")} style={ghostBtn}>
-                Return Home
+                {t('mitra.rhythmWizard.returnHome')}
               </button>
               {!hasActiveInnerPath && (
                 <div style={{ textAlign: "center", marginTop: 16 }}>
@@ -1855,7 +1898,7 @@ export function RhythmWizardPage() {
                       cursor: "pointer",
                     }}
                   >
-                    Add Inner Path →
+                    {t('mitra.rhythmWizard.addInnerPath')}
                   </button>
                 </div>
               )}

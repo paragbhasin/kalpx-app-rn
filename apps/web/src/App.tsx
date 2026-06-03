@@ -8,6 +8,7 @@ import { SnackBar } from './components/SnackBar';
 import { setWebNavigate } from './lib/webRouter';
 import { AppLayout } from './components/layout/AppLayout';
 import { ConsentBanner } from './components/ConsentBanner';
+import { I18nProvider } from './lib/i18n';
 
 function NavigateInjector() {
   const navigate = useNavigate();
@@ -30,17 +31,19 @@ function ScrollToTop() {
 export function App() {
   return (
     <ErrorBoundary>
-      <Provider store={store}>
-        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <NavigateInjector />
-          <ScrollToTop />
-          <AppLayout>
-            <AppRoutes />
-          </AppLayout>
-          <SnackBar />
-          <ConsentBanner />
-        </BrowserRouter>
-      </Provider>
+      <I18nProvider>
+        <Provider store={store}>
+          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <NavigateInjector />
+            <ScrollToTop />
+            <AppLayout>
+              <AppRoutes />
+            </AppLayout>
+            <SnackBar />
+            <ConsentBanner />
+          </BrowserRouter>
+        </Provider>
+      </I18nProvider>
     </ErrorBoundary>
   );
 }

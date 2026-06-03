@@ -5,6 +5,8 @@
  */
 
 import * as contracts from '@kalpx/contracts';
+import { localizeScreenSchema } from './screenTranslations';
+import { getActiveLocale } from '../lib/locale';
 
 const containerMap: Record<string, any> = contracts as any;
 
@@ -19,7 +21,9 @@ export async function getScreen(containerId: string, stateId: string): Promise<a
     if (!container) return null;
     const state = container.states?.[stateId];
     if (!state) return null;
-    return { ...state, container_id: containerId, state_id: stateId };
+    const schema = { ...state, container_id: containerId, state_id: stateId };
+    // Apply Hindi translations for contract-local screens
+    return localizeScreenSchema(schema, getActiveLocale());
   } catch {
     return null;
   }

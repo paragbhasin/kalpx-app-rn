@@ -35,7 +35,7 @@ let _entryViewInflight: Promise<{
 let _journeyHomeCache: { data: any; ts: number } | null = null;
 let _journeyHomeInflight: Promise<any | null> | null = null;
 const MITRA_HOME_TTL_MS = 30_000;
-let _mitraHomeCache: { data: MitraHomeV3Response; ts: number } | null = null;
+let _mitraHomeCache: { data: MitraHomeV3Response; ts: number; locale: string } | null = null;
 let _mitraHomeInflight: Promise<MitraHomeV3Response> | null = null;
 
 export function invalidateDashboardViewCache(): void {
@@ -289,7 +289,10 @@ export async function onboardingComplete(payload: {
   locale?: string;
 }): Promise<any> {
   try {
-    const res = await api.post('mitra/onboarding/complete/', payload);
+    const res = await api.post('mitra/onboarding/complete/', {
+      locale: getActiveLocale(),
+      ...payload,
+    });
     return res.data;
   } catch (err: any) {
     console.warn('[mitraApi] onboardingComplete failed:', err?.message);
@@ -313,7 +316,10 @@ export async function startJourneyV3(payload: {
   stage3_choice?: string;
 }): Promise<any> {
   try {
-    const res = await api.post('mitra/journey/start-v3/', payload);
+    const res = await api.post('mitra/journey/start-v3/', {
+      locale: getActiveLocale(),
+      ...payload,
+    });
     return res.data;
   } catch (err: any) {
     const status = err?.response?.status;
@@ -782,8 +788,11 @@ export async function acceptPredictiveAlert(id: string | number): Promise<any> {
  * Returns MitraHomeV3Response with door_states, inner_path_summary, etc.
  */
 export async function getMitraHomeV3(opts?: { forceFresh?: boolean; locale?: string }): Promise<MitraHomeV3Response> {
+  const locale = opts?.locale ?? getActiveLocale();
+
   if (!opts?.forceFresh) {
-    if (_mitraHomeCache && Date.now() - _mitraHomeCache.ts < MITRA_HOME_TTL_MS) {
+    // Cache is only valid for the same locale
+    if (_mitraHomeCache && _mitraHomeCache.locale === locale && Date.now() - _mitraHomeCache.ts < MITRA_HOME_TTL_MS) {
       return _mitraHomeCache.data;
     }
     if (_mitraHomeInflight) {
@@ -791,13 +800,12 @@ export async function getMitraHomeV3(opts?: { forceFresh?: boolean; locale?: str
     }
   }
 
-  const params: Record<string, string | number> = { tz: getTz() };
-  if (opts?.locale) params['locale'] = opts.locale;
+  const params: Record<string, string | number> = { tz: getTz(), locale };
   if (opts?.forceFresh) params['_t'] = Date.now();
   const request = (async () => {
     try {
       const resp = await api.get<MitraHomeV3Response>('mitra/v3/journey/home/', { params });
-      _mitraHomeCache = { data: resp.data, ts: Date.now() };
+      _mitraHomeCache = { data: resp.data, ts: Date.now(), locale };
       return resp.data;
     } finally {
       _mitraHomeInflight = null;
@@ -815,6 +823,7 @@ export interface TellMitraV3Payload {
   text: string;
   energy_state?: string;
   tz?: string;
+  locale?: string;
   source_surface?: string;
   followup?: TellMitraFollowupMeta;
   reset_context?: boolean;
@@ -825,12 +834,18 @@ export interface TellMitraV3Payload {
  * Raw response is normalized via normalizeTellMitraResult before returning.
  */
 export async function postTellMitraV3(payload: TellMitraV3Payload): Promise<TellMitraV3Response> {
-  const resp = await api.post<unknown>('mitra/v3/tell-mitra/', payload);
+  const resp = await api.post<unknown>('mitra/v3/tell-mitra/', {
+    locale: getActiveLocale(),
+    ...payload,
+  });
   return normalizeTellMitraResult(resp.data);
 }
 
 export async function postRhythmSetup(payload: RhythmSetupPayload): Promise<{ status: string; reminder_preference: string; slots_set: string[]; item_count: number }> {
-  const resp = await api.post<{ status: string; reminder_preference: string; slots_set: string[]; item_count: number }>('mitra/v3/rhythm/setup/', payload);
+  const resp = await api.post<{ status: string; reminder_preference: string; slots_set: string[]; item_count: number }>('mitra/v3/rhythm/setup/', {
+    locale: getActiveLocale(),
+    ...payload,
+  });
   invalidateMitraHomeV3Cache();
   return resp.data;
 }
@@ -886,7 +901,10 @@ export async function postRhythmResolveItem(
 }
 
 export async function postRhythmSuggest(payload: RhythmSuggestRequest): Promise<RhythmSuggestResponse> {
-  const resp = await api.post<unknown>('mitra/v3/rhythm/suggest/', payload);
+  const resp = await api.post<unknown>('mitra/v3/rhythm/suggest/', {
+    locale: getActiveLocale(),
+    ...payload,
+  });
   return normalizeRhythmSuggestResponse(resp.data);
 }
 
@@ -894,6 +912,7 @@ export async function postQuickCheckin(energy_state: QuickCheckinEnergyState): P
   const resp = await api.post<QuickCheckinResponse>('mitra/v3/checkin/', {
     energy_state,
     tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    locale: getActiveLocale(),
     source_surface: 'quick_checkin_page_web',
   });
   return resp.data;

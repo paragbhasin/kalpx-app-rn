@@ -4,6 +4,7 @@
  * REG-015: navigate only, does not touch runner_* fields.
  */
 import React, { useEffect, useRef } from 'react';
+import { useTranslation } from '../../lib/i18n';
 
 interface Props {
   block?: { [key: string]: any };
@@ -15,6 +16,7 @@ const AUTO_DISMISS_MS = 4000;
 
 export function BalancedAckOverlayBlock({ onAction }: Props) {
   const dismissedRef = useRef(false);
+  const { t } = useTranslation();
 
   const dismiss = () => {
     if (dismissedRef.current) return;
@@ -52,7 +54,7 @@ export function BalancedAckOverlayBlock({ onAction }: Props) {
         }}
       >
         <p style={{ fontSize: 18, color: 'var(--kalpx-text)', lineHeight: 1.6, fontStyle: 'italic' }}>
-          You named it. That's already part of settling.
+          {t('mitra.engine.quietSteadiness')}
         </p>
       </div>
 
@@ -70,7 +72,7 @@ export function BalancedAckOverlayBlock({ onAction }: Props) {
           cursor: 'pointer',
         }}
       >
-        Return to Mitra Home
+        {t('mitra.engine.returnMitraHome')}
       </button>
 
       <style>{`@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }`}</style>

@@ -9,25 +9,27 @@ import {
 } from "lucide-react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
+import { useTranslation } from "../../lib/i18n";
 import { webStorage } from "../../lib/webStorage";
 
 interface Props {
   onClose: () => void;
 }
 
-const NAV_ITEMS = [
-  { label: "Mitra", Icon: LayoutDashboard, to: "/en/mitra" },
-  { label: "Community", Icon: Users, to: "/en/community" },
-  { label: "Classes", Icon: BookOpen, to: "/en/classes" },
-  { label: "Profile", Icon: User, to: "/en/profile" },
-];
-
 export function MitraMenuDrawer({ onClose }: Props) {
   const navigate = useNavigate();
   const { authed, userInitial, refresh } = useCurrentUser();
+  const { t } = useTranslation();
   const isLoggedIn =
     typeof localStorage !== "undefined" &&
     !!localStorage.getItem(AUTH_KEYS.accessToken);
+
+  const NAV_ITEMS = [
+    { label: t("nav.mitra"), Icon: LayoutDashboard, to: "/en/mitra" },
+    { label: t("nav.community"), Icon: Users, to: "/en/community" },
+    { label: t("nav.classes"), Icon: BookOpen, to: "/en/classes" },
+    { label: t("nav.profile"), Icon: User, to: "/en/profile" },
+  ];
 
   async function handleLogout() {
     await clearTokens(webStorage);
@@ -167,7 +169,7 @@ export function MitraMenuDrawer({ onClose }: Props) {
                   cursor: "pointer",
                 }}
               >
-                Logout
+                {t("nav.logout")}
               </button>
             ) : (
               <Link
@@ -180,7 +182,7 @@ export function MitraMenuDrawer({ onClose }: Props) {
                   textDecoration: "none",
                 }}
               >
-                Login
+                {t("nav.login")}
               </Link>
             )}
           </div>
@@ -201,7 +203,7 @@ export function MitraMenuDrawer({ onClose }: Props) {
                 color: "#2f3135",
               }}
             >
-              Download App now
+              {t("drawer.downloadApp")}
             </p>
             <a
               href="#"
@@ -245,7 +247,7 @@ export function MitraMenuDrawer({ onClose }: Props) {
                 color: "#3b3d42",
               }}
             >
-              Follow Us
+              {t("drawer.followUs")}
             </p>
             <div
               style={{

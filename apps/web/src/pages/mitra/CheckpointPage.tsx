@@ -7,6 +7,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import { useTranslation } from '../../lib/i18n';
 import { MitraMobileShell } from '../../components/layout/MitraMobileShell';
 import { ScreenRenderer } from '../../engine/ScreenRenderer';
 import { loadScreenWithData } from '../../store/screenSlice';
@@ -32,6 +33,7 @@ export function CheckpointPage() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const screenState = useScreenState();
+  const { t } = useTranslation();
   const [loadState, setLoadState] = useState<LoadState>('loading');
 
   useEffect(() => {
@@ -110,7 +112,7 @@ export function CheckpointPage() {
     return (
       <MitraMobileShell>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60dvh' }}>
-          <p style={{ color: 'var(--kalpx-text-muted)', fontSize: 14 }}>Loading your checkpoint…</p>
+          <p style={{ color: 'var(--kalpx-text-muted)', fontSize: 14 }}>{t('mitra.checkpoint.loading')}</p>
         </div>
       </MitraMobileShell>
     );
@@ -124,10 +126,10 @@ export function CheckpointPage() {
           style={{ maxWidth: 480, margin: '0 auto', padding: '48px 24px', textAlign: 'center' }}
         >
           <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--kalpx-text)', marginBottom: 12 }}>
-            Not yet
+            {t('mitra.checkpoint.notYet')}
           </p>
           <p style={{ fontSize: 15, color: 'var(--kalpx-text-muted)', marginBottom: 32, lineHeight: 1.6 }}>
-            Your Day {dayNum} checkpoint isn't ready yet. Keep your practice going.
+            {t('mitra.checkpoint.notYetBody')}
           </p>
           <button
             data-testid="checkpoint-back-btn"
@@ -143,7 +145,7 @@ export function CheckpointPage() {
               cursor: 'pointer',
             }}
           >
-            Back to Dashboard
+            {t('mitra.checkpoint.backDashboard')}
           </button>
         </div>
       </MitraMobileShell>
@@ -158,10 +160,10 @@ export function CheckpointPage() {
           style={{ maxWidth: 480, margin: '0 auto', padding: '48px 24px', textAlign: 'center' }}
         >
           <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--kalpx-text)', marginBottom: 12 }}>
-            Something went wrong
+            {t('mitra.checkpoint.error')}
           </p>
           <p style={{ fontSize: 15, color: 'var(--kalpx-text-muted)', marginBottom: 32 }}>
-            Could not load your checkpoint. Please try again.
+            {t('mitra.checkpoint.loadError')}
           </p>
           <button
             data-testid="checkpoint-retry-btn"
@@ -178,7 +180,7 @@ export function CheckpointPage() {
               marginRight: 12,
             }}
           >
-            Try Again
+            {t('mitra.checkpoint.tryAgain')}
           </button>
           <button
             onClick={() => navigate('/en/mitra/dashboard', { replace: true })}
@@ -192,7 +194,7 @@ export function CheckpointPage() {
               cursor: 'pointer',
             }}
           >
-            Back to Dashboard
+            {t('mitra.checkpoint.backDashboard')}
           </button>
         </div>
       </MitraMobileShell>

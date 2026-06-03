@@ -10,12 +10,14 @@ import type {
   QuickResetOpeningState,
 } from "@kalpx/types";
 import { useJapaEngine } from "../../engine/useJapaEngine";
+import { liveActivity } from "../../native/liveActivity";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Animated,
+  AppState,
   Easing,
   Image,
   ImageBackground,
@@ -37,6 +39,7 @@ import AudioPlayerBlock, {
 } from "../../blocks/AudioPlayerBlock";
 import type { MantraTextCardProps } from "../../containers/CycleTransitionsContainer";
 import {
+  getLiveActivityState,
   getQuickResetOpening,
   postBrowseMantras,
   postQuickChantComplete,
@@ -248,10 +251,12 @@ export default function QuickResetScreen({
   // clearing the global background applied by the first useFocusEffect above.
   const japaRefreshRef = useRef(japaEngine.refreshStats);
   const japaSyncRef = useRef(japaEngine.syncNow);
+  const japaIncrementRef = useRef(japaEngine.increment);
   useEffect(() => {
     japaRefreshRef.current = japaEngine.refreshStats;
     japaSyncRef.current = japaEngine.syncNow;
-  }, [japaEngine.refreshStats, japaEngine.syncNow]);
+    japaIncrementRef.current = japaEngine.increment;
+  }, [japaEngine.refreshStats, japaEngine.syncNow, japaEngine.increment]);
 
   // Sync on leave, refresh on enter — empty deps = stable, fires once on focus
   useFocusEffect(
@@ -260,6 +265,17 @@ export default function QuickResetScreen({
       return () => {
         japaSyncRef.current?.();
       };
+    }, []),
+  );
+
+  // Consume any chant taps done from the iOS Lock Screen Live Activity button
+  useFocusEffect(
+    useCallback(() => {
+      liveActivity.consumePendingIncrements().then((n) => {
+        for (let i = 0; i < n; i++) {
+          japaIncrementRef.current();
+        }
+      });
     }, []),
   );
 
@@ -406,9 +422,23 @@ export default function QuickResetScreen({
   // ── Runner start ───────────────────────────────────────────────────────────
   const handleTapBead = useCallback(() => {
     if (!activeMantra) return;
+    // Compute next counts BEFORE increment (React state won't update synchronously)
+    const nextToday    = japaEngine.todayCount + 1;
+    const nextWeek     = japaEngine.weekCount + 1;
+    const nextLifetime = japaEngine.lifetimeCount + 1;
     if (!isChantingActive) {
       runnerStartedAt.current = Date.now();
       setIsChantingActive(true);
+      liveActivity.start(
+        activeMantra.title,
+        activeMantra.devanagari ?? "",
+        nextToday,
+        nextWeek,
+        nextLifetime,
+        nextLifetime,
+      );
+    } else {
+      liveActivity.update(nextToday, nextWeek, nextLifetime, nextLifetime);
     }
     japaEngine.increment();
   }, [activeMantra, isChantingActive, japaEngine]);
@@ -418,11 +448,21 @@ export default function QuickResetScreen({
   const handleDoneChanting = useCallback(async () => {
     onGoalReachedRef.current = null; // prevent double-fire after manual done
     if (!activeMantra) return;
+    liveActivity.end();
     const duration_ms = isChantingActive
       ? Date.now() - runnerStartedAt.current
       : 0;
     // Flush the japa engine (sync final count + mark session complete on backend)
     await japaEngine.completeSession();
+
+    // After quick chant ends, auto-start Sankalp Live Activity if still in foreground
+    getLiveActivityState(i18n.language || 'en').then((state) => {
+      if (AppState.currentState !== 'active') return;
+      if (state.type === 'sankalp') {
+        liveActivity.startSankalp(state.title, state.line);
+      }
+    }).catch(() => {});
+
     const result = await postQuickChantComplete({
       mantra_ref: activeMantra.item_id,
       duration_ms,
@@ -441,7 +481,7 @@ export default function QuickResetScreen({
         navigation.goBack();
       }
     }
-  }, [activeMantra, embedded, goBack, isChantingActive, navigation]);
+  }, [activeMantra, embedded, goBack, i18n.language, isChantingActive, navigation]);
 
   // Wire onGoalReached ref to the latest handleDoneChanting
   useEffect(() => {

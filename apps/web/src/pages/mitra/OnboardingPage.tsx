@@ -20,6 +20,8 @@ import {
   invalidateJourneyStatusCache,
   useJourneyStatus,
 } from "../../hooks/useJourneyStatus";
+import { useTranslation } from '../../lib/i18n';
+import { getActiveLocale } from '../../lib/locale';
 import { WEB_ENV } from "../../lib/env";
 import { webNavigate } from "../../lib/webRouter";
 import type { AppDispatch } from "../../store";
@@ -33,6 +35,7 @@ import {
 
 export function OnboardingPage() {
   useGuestIdentity();
+  const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -113,7 +116,7 @@ export function OnboardingPage() {
             confidence: inf.confidence || 0.0,
           },
           guidance_mode: guidanceMode,
-          locale: "en",
+          locale: getActiveLocale(),
           tz:
             Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
           stage0_choice: draft.stage0_choice || draft.path,
@@ -205,7 +208,7 @@ export function OnboardingPage() {
           }}
         >
           <p style={{ color: "var(--kalpx-text-muted)", fontSize: 14 }}>
-            Loading…
+            {t('mitra.common.loading')}
           </p>
         </div>
       </MitraMobileShell>
@@ -241,7 +244,7 @@ export function OnboardingPage() {
                   color: "var(--kalpx-text-muted)",
                 }}
               >
-                Loading…
+                {t('mitra.common.loading')}
               </div>
             )}
             {!resolving && (

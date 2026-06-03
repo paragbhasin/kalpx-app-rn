@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
+import { useTranslation } from '../../lib/i18n';
 import { RhythmLibraryPickerModal } from "../../components/mitra/RhythmLibraryPickerModal";
 import {
   deleteRhythmItem,
@@ -77,6 +78,7 @@ function seedBandItems(homeData: any): Record<RhythmTimeBand, LocalItem[]> {
 }
 
 export function RhythmSetupPage() {
+  const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const homeData = useSelector((s: RootState) => s.door.homeData);
@@ -290,7 +292,7 @@ export function RhythmSetupPage() {
       dispatch(setHomeData(fresh));
       navigate("/en/mitra/rhythm");
     } catch {
-      setError("Could not save. Please try again.");
+      setError(t('mitra.rhythmSetup.saveError'));
     } finally {
       setSaving(false);
     }
@@ -351,7 +353,7 @@ export function RhythmSetupPage() {
               margin: "0 0 26px",
             }}
           >
-            Set Up My Rhythm
+            {t('mitra.rhythmSetup.setupTitle')}
           </h2>
 
           {BANDS.map((band) => (
@@ -410,7 +412,7 @@ export function RhythmSetupPage() {
                       marginBottom: 4,
                     }}
                   >
-                    {RHYTHM_BAND_LABELS[band]}
+                    {band === 'morning' ? t('mitra.rhythmSetup.morning') : band === 'afternoon' ? t('mitra.rhythmSetup.afternoon') : t('mitra.rhythmSetup.night')}
                   </div>
                   <div className="rhythm-setup-band-subtitle" style={{ fontSize: 14, color: "#7B6550" }}>
                     {RHYTHM_BAND_SUBTITLES[band]}
@@ -573,7 +575,7 @@ export function RhythmSetupPage() {
                                 }}
                               />
                             </span>
-                            <span>Gentle reminder</span>
+                            <span>{t('mitra.rhythmSetup.gentleReminder')}</span>
                           </button>
                           {item.reminder_enabled && (
                             <input
@@ -680,7 +682,7 @@ export function RhythmSetupPage() {
                                   fontFamily: Fonts.sans.medium,
                                 }}
                               >
-                                Move to {s}
+                                {s === 'morning' ? t('mitra.rhythmSetup.moveMorning') : s === 'afternoon' ? t('mitra.rhythmSetup.moveAfternoon') : t('mitra.rhythmSetup.moveNight')}
                               </button>
                             ))}
                         </div>
@@ -707,7 +709,7 @@ export function RhythmSetupPage() {
                     }}
                   >
                     <Plus size={22} strokeWidth={2} />
-                    Add from library
+                    {t('mitra.rhythmSetup.addFromLibrary')}
                   </button>
                 </div>
               )}
@@ -798,11 +800,11 @@ export function RhythmSetupPage() {
             }}
           >
             {saving ? (
-              "Saving…"
+              t('mitra.rhythmSetup.saving')
             ) : (
               <>
                 <Sparkles size={22} strokeWidth={2} />
-                Save My Rhythm
+                {t('mitra.rhythmSetup.saveRhythm')}
                 <span style={{ fontSize: 24, lineHeight: 1 }}>→</span>
               </>
             )}

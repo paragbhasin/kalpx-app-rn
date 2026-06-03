@@ -15,6 +15,7 @@ import {
 import type { AppDispatch, RootState } from "../../store";
 import { setHomeData } from "../../store/doorSlice";
 import { useScreenState } from "../../store/screenSlice";
+import { useTranslation } from "../../lib/i18n";
 
 function actionLabel(itemType: string): string {
   if (itemType === "mantra") return "Chant";
@@ -22,10 +23,10 @@ function actionLabel(itemType: string): string {
   return "Practice";
 }
 
-function beginLabel(itemType: string): string {
-  if (itemType === "mantra") return "Begin Chanting";
-  if (itemType === "sankalp") return "Begin Embodying";
-  return "Begin Practice";
+function beginLabel(itemType: string, t: (key: string) => string): string {
+  if (itemType === "mantra") return t("mitra.rhythmHome.beginChanting");
+  if (itemType === "sankalp") return t("mitra.rhythmHome.beginEmbodying");
+  return t("mitra.rhythmHome.beginPractice");
 }
 
 function cardLabel(itemType: string): string {
@@ -49,29 +50,30 @@ function itemDuration(item: RhythmItem): string | null {
   return null;
 }
 
-function heldLabel(itemType: string): string {
-  if (itemType === "mantra") return "Mantra held today · return anytime";
-  if (itemType === "sankalp") return "Sankalp carried today · return anytime";
-  if (itemType === "practice") return "Practice held today · return anytime";
-  if (itemType === "reflection")
-    return "Reflection held today · return anytime";
+function heldLabel(itemType: string, t: (key: string) => string): string {
+  if (itemType === "mantra") return t("mitra.rhythmHome.heldMantra");
+  if (itemType === "sankalp") return t("mitra.rhythmHome.heldSankalp");
+  if (itemType === "practice") return t("mitra.rhythmHome.heldPractice");
+  if (itemType === "reflection") return t("mitra.rhythmHome.heldReflection");
   return "Held today · return anytime";
 }
 
-function slotHeldLabel(band: RhythmTimeBand): string {
-  if (band === "morning") return "Morning rhythm held";
-  if (band === "afternoon") return "Afternoon rhythm held";
-  return "Night rhythm held";
+function slotHeldLabel(band: RhythmTimeBand, t: (key: string) => string): string {
+  if (band === "morning") return t("mitra.rhythmHome.morningHeld");
+  if (band === "afternoon") return t("mitra.rhythmHome.afternoonHeld");
+  return t("mitra.rhythmHome.nightHeld");
 }
 
 function RhythmItemCard({
   item,
   onAction,
   resolving,
+  t,
 }: {
   item: RhythmItem;
   onAction: () => void;
   resolving?: boolean;
+  t: (key: string) => string;
 }) {
   return (
     <div
@@ -216,7 +218,7 @@ function RhythmItemCard({
             fontWeight: 700,
           }}
         >
-          {heldLabel(item.item_type)}
+          {heldLabel(item.item_type, t)}
         </p>
       )}
       <div
@@ -248,7 +250,7 @@ function RhythmItemCard({
           }}
         >
           <Sparkles size={22} strokeWidth={1.8} />
-          {resolving ? "Opening…" : beginLabel(item.item_type)}
+          {resolving ? t("mitra.rhythmHome.opening") : beginLabel(item.item_type, t)}
         </button>
       </div>
     </div>
@@ -263,6 +265,7 @@ function BandSection({
   onAddItem,
   slotDone,
   trailingAction,
+  t,
 }: {
   band: RhythmTimeBand;
   slot: RhythmSlot | null;
@@ -271,6 +274,7 @@ function BandSection({
   onAddItem: (band: RhythmTimeBand) => void;
   slotDone?: boolean;
   trailingAction?: React.ReactNode;
+  t: (key: string) => string;
 }) {
   const hasItems = slot && slot.items.length > 0;
   if (!hasItems) return null;
@@ -296,7 +300,11 @@ function BandSection({
             color: "#432104",
           }}
         >
-          {RHYTHM_BAND_LABELS[band]} Practice
+          {band === "morning"
+            ? t("mitra.rhythmHome.morningPractice")
+            : band === "afternoon"
+              ? t("mitra.rhythmHome.afternoonPractice")
+              : t("mitra.rhythmHome.nightPractice")}
         </div>
         {slotHeld && (
           <span
@@ -307,7 +315,7 @@ function BandSection({
               letterSpacing: 0.4,
             }}
           >
-            {slotHeldLabel(band)}
+            {slotHeldLabel(band, t)}
           </span>
         )}
       </div>
@@ -334,6 +342,7 @@ function BandSection({
           item={item}
           onAction={() => onItemAction(item)}
           resolving={resolvingItemId === item.item_id}
+          t={t}
         />
       ))}
       <div className="rhythm-band-actions">
@@ -353,7 +362,11 @@ function BandSection({
             width: "100%",
           }}
         >
-          Add to your {band} rhythm
+          {band === "morning"
+            ? t("mitra.rhythmHome.addMorning")
+            : band === "afternoon"
+              ? t("mitra.rhythmHome.addAfternoon")
+              : t("mitra.rhythmHome.addNight")}
         </button>
         {trailingAction}
       </div>
@@ -370,6 +383,7 @@ const CARD_STYLE: React.CSSProperties = {
 };
 
 export function RhythmHomePage() {
+  const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const homeData = useSelector((s: RootState) => s.door.homeData);
@@ -437,7 +451,7 @@ export function RhythmHomePage() {
       }}
     >
       <Pencil size={24} strokeWidth={1.8} color="#C99317" />
-      Edit My Rhythm
+      {t("mitra.rhythmHome.editCta")}
     </button>
   );
 
@@ -571,11 +585,11 @@ export function RhythmHomePage() {
                 // margin: "0 0 24px",
               }}
             >
-              My Rhythm
+              {t("mitra.rhythmHome.title")}
             </h2>
 
             {loading && (
-              <p style={{ color: "#A08060", textAlign: "center" }}>Loading…</p>
+              <p style={{ color: "#A08060", textAlign: "center" }}>{t("mitra.common.loading")}</p>
             )}
             {error && (
               <p style={{ color: "#e06060", textAlign: "center" }}>{error}</p>
@@ -591,7 +605,7 @@ export function RhythmHomePage() {
                     marginBottom: 20,
                   }}
                 >
-                  You haven't set up your rhythm yet.
+                  {t("mitra.rhythmHome.empty")}
                 </p>
                 <button
                   onClick={() => navigate("/en/mitra/rhythm/setup")}
@@ -608,7 +622,7 @@ export function RhythmHomePage() {
                     cursor: "pointer",
                   }}
                 >
-                  Set up My Rhythm
+                  {t("mitra.rhythmHome.setupCta")}
                 </button>
               </div>
             )}
@@ -629,6 +643,7 @@ export function RhythmHomePage() {
                         ? editRhythmButton
                         : undefined
                     }
+                    t={t}
                   />
                 ))}
                 {visibleRhythmBands.length === 0 && editRhythmButton}

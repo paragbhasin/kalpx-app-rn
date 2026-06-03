@@ -1,6 +1,7 @@
 import { Volume2, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
+import { useTranslation } from "../../lib/i18n";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { CompletionReturnBlock } from "../../components/blocks/CompletionReturnBlock";
 import { PracticeTimerBlock } from "../../components/blocks/PracticeTimerBlock";
@@ -38,6 +39,7 @@ function CommunityRunnerActionBar({
   addLoading: boolean;
   onAdd: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div
       style={{
@@ -64,7 +66,7 @@ function CommunityRunnerActionBar({
           opacity: addLoading ? 0.65 : 1,
         }}
       >
-        {addLoading ? "Adding..." : "Add to My Practice"}
+        {addLoading ? t('mitra.engine.adding') : t('mitra.engine.addToPractice')}
       </button>
     </div>
   );
@@ -98,6 +100,7 @@ function TriggerMantraSupportScreen({
   onAction: (action: any) => void;
   mode?: "trigger" | "checkin";
 }) {
+  const { t } = useTranslation();
   const activeItem: any = screenData.runner_active_item || {};
   const reps = Number(screenData.runner_reps_completed || 0);
   const pranaType = (screenData.current_prana_type as string) || "";
@@ -119,13 +122,13 @@ function TriggerMantraSupportScreen({
     (screenData.om_audio_url as string) ||
     "/sankalp_om.mp3";
   const headline =
-    mode === "checkin" ? "Pause and breathe." : "Pause before this grows.";
+    mode === "checkin" ? t('mitra.engine.pauseBreathe') : t('mitra.engine.pauseBeforeGrows');
   const subtext =
     mode === "checkin"
       ? pranaType === "drained"
-        ? "Your system may need a gentler moment before the next step."
-        : "Your energy may need settling before you move forward."
-      : "You do not need to solve everything right now. Stay here for a few breaths and let the intensity soften first.";
+        ? t('mitra.engine.systemNeedsGentle')
+        : t('mitra.engine.energyNeedsSettling')
+      : t('mitra.engine.dontSolveNow');
   const meaning =
     (activeItem.meaning as string) || (activeItem.summary as string) || "";
   const essence =
@@ -398,7 +401,7 @@ function TriggerMantraSupportScreen({
                   lineHeight: 1,
                 }}
               >
-                TAP
+                {t('mitra.engine.tap')}
               </span>
               <span
                 style={{
@@ -409,7 +412,7 @@ function TriggerMantraSupportScreen({
                   marginTop: 1,
                 }}
               >
-                HERE
+                {t('mitra.engine.here')}
               </span>
               <span
                 style={{
@@ -454,7 +457,7 @@ function TriggerMantraSupportScreen({
               margin: "0 0 18px",
             }}
           >
-            Tap the bead after each mantra.
+            {t('mitra.engine.tapBead')}
           </p>
 
           <div
@@ -528,7 +531,7 @@ function TriggerMantraSupportScreen({
               marginBottom: 16,
             }}
           >
-            I feel calmer now
+            {t('mitra.engine.feelCalmer')}
           </button>
 
           <button
@@ -554,7 +557,7 @@ function TriggerMantraSupportScreen({
           {meaning && (
             <div style={{ width: "100%", marginBottom: 12 }}>
               <CollapsibleCard
-                label="Meaning"
+                label={t('mitra.engine.meaning')}
                 expanded={meaningExpanded}
                 onToggle={() => setMeaningExpanded((v) => !v)}
               >
@@ -566,7 +569,7 @@ function TriggerMantraSupportScreen({
           {essence && (
             <div style={{ width: "100%", marginBottom: 24 }}>
               <CollapsibleCard
-                label="Essence"
+                label={t('mitra.engine.essence')}
                 expanded={essenceExpanded}
                 onToggle={() => setEssenceExpanded((v) => !v)}
               >
@@ -587,7 +590,7 @@ function TriggerMantraSupportScreen({
               marginBottom: 40,
             }}
           >
-            Return to Mitra Home
+            {t('mitra.engine.returnMitraHome')}
           </button>
         </div>
       </div>
@@ -596,12 +599,13 @@ function TriggerMantraSupportScreen({
 }
 
 function QuickCheckinScreen({ onAction }: { onAction: (action: any) => void }) {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState<string | null>(null);
   const options = [
-    { id: "energized", title: "Energized", icon: Quick1Icon, color: "#EAB308" },
-    { id: "balanced", title: "Balanced", icon: Quick2Icon, color: "#10B981" },
-    { id: "agitated", title: "Agitated", icon: Quick4Icon, color: "#8B5CF6" },
-    { id: "drained", title: "Drained", icon: Quick3Icon, color: "#64748B" },
+    { id: "energized", title: t('mitra.engine.energized'), icon: Quick1Icon, color: "#EAB308" },
+    { id: "balanced", title: t('mitra.engine.balanced'), icon: Quick2Icon, color: "#10B981" },
+    { id: "agitated", title: t('mitra.engine.agitated'), icon: Quick4Icon, color: "#8B5CF6" },
+    { id: "drained", title: t('mitra.engine.drained'), icon: Quick3Icon, color: "#64748B" },
   ];
 
   return (
@@ -627,7 +631,7 @@ function QuickCheckinScreen({ onAction }: { onAction: (action: any) => void }) {
             lineHeight: 1.35,
           }}
         >
-          How is your energy right now?
+          {t('mitra.engine.howEnergy')}
         </h2>
 
         <div
@@ -708,7 +712,7 @@ function QuickCheckinScreen({ onAction }: { onAction: (action: any) => void }) {
             alignSelf: "center",
           }}
         >
-          Share how you’re feeling right now.KalpX will guide you with a
+          Share how you're feeling right now.KalpX will guide you with a
           practice that fits your current energy
         </p>
 
@@ -755,7 +759,7 @@ function QuickCheckinScreen({ onAction }: { onAction: (action: any) => void }) {
             cursor: "pointer",
           }}
         >
-          Return to Mitra Home
+          {t('mitra.engine.returnMitraHome')}
         </button>
       </div>
     </MitraMobileShell>
@@ -769,6 +773,7 @@ function QuickCheckinAckScreen({
   screenData: Record<string, any>;
   onAction: (action: any) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <MitraMobileShell backgroundImage="/beige_bg.png">
       <div
@@ -796,7 +801,7 @@ function QuickCheckinAckScreen({
           }}
         >
           {(screenData.checkin_ack_headline as string) ||
-            "You are exactly where you need to be."}
+            t('mitra.engine.exactlyWhere')}
         </h2>
 
         <p
@@ -809,7 +814,7 @@ function QuickCheckinAckScreen({
           }}
         >
           {(screenData.checkin_ack_body as string) ||
-            "There is a quiet steadiness within you.\nStay here. Let it deepen."}
+            t('mitra.engine.quietSteadiness')}
         </p>
 
         {!!screenData.checkin_ack_accent && (
@@ -843,7 +848,7 @@ function QuickCheckinAckScreen({
           }}
           className="shadow-2xl"
         >
-          Return to your path →
+          {t('mitra.engine.returnPath')}
         </button>
       </div>
     </MitraMobileShell>
@@ -851,6 +856,7 @@ function QuickCheckinAckScreen({
 }
 
 export function MitraEnginePage() {
+  const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const [searchParams] = useSearchParams();
   const location = useLocation();
@@ -1014,7 +1020,7 @@ export function MitraEnginePage() {
             style={{ color: "var(--kalpx-text-muted)", marginBottom: 16 }}
             data-testid="engine-not-found"
           >
-            This screen is not available.
+            {t('mitra.engine.notAvailable')}
           </p>
           <button
             onClick={() => webNavigate("/en/mitra/dashboard")}
@@ -1028,7 +1034,7 @@ export function MitraEnginePage() {
               cursor: "pointer",
             }}
           >
-            Return to dashboard
+            {t('mitra.engine.returnDashboard')}
           </button>
         </div>
       </MitraMobileShell>
@@ -1234,7 +1240,7 @@ export function MitraEnginePage() {
                   opacity: communityAddLoading ? 0.65 : 1,
                 }}
               >
-                {communityAddLoading ? "Adding..." : "Add to My Practice"}
+                {communityAddLoading ? t('mitra.engine.adding') : t('mitra.engine.addToPractice')}
               </button>
             </div>
           )}

@@ -470,54 +470,60 @@ export function useJapaEngine({
     setElapsedMs(0);
     setCanUndo(false);
 
-    // Load cached baselines. Session counter then starts from today's existing count
-    // so the big number shows today's running total, not just this session's count.
-    AsyncStorage.getItem(statsKey(mantraRef))
-      .then((raw) => {
-        // Guard: mantra switched while AsyncStorage was loading — don't overwrite
-        // the new mantra's already-reset refs with this stale read.
-        if (mantraRef !== currentMantraRef.current) return;
+    // Load cached baselines + any in-progress session (taps before first sync).
+    // statsKey = synced baseline (updated every sync).
+    // sessionKey = every-tap crash-safe state — may have unsynced taps above the baseline.
+    Promise.all([
+      AsyncStorage.getItem(statsKey(mantraRef)),
+      AsyncStorage.getItem(sessionKey(mantraRef)),
+    ]).then(([statsRaw, sessionRaw]) => {
+      if (mantraRef !== currentMantraRef.current) return;
 
-        const todayBase = (() => {
-          if (!raw) return 0;
-          try {
-            const parsed: JapaLocalStats = JSON.parse(raw);
-            return parsed.mantraRef === mantraRef ? (parsed.todayCount ?? 0) : 0;
-          } catch { return 0; }
-        })();
-        const weekBase = (() => {
-          if (!raw) return 0;
-          try {
-            const parsed: JapaLocalStats = JSON.parse(raw);
-            return parsed.mantraRef === mantraRef ? (parsed.weekCount ?? 0) : 0;
-          } catch { return 0; }
-        })();
-        const yearBase = (() => {
-          if (!raw) return 0;
-          try {
-            const parsed: JapaLocalStats = JSON.parse(raw);
-            return parsed.mantraRef === mantraRef ? (parsed.yearCount ?? 0) : 0;
-          } catch { return 0; }
-        })();
-        const lifetimeBase = (() => {
-          if (!raw) return 0;
-          try {
-            const parsed: JapaLocalStats = JSON.parse(raw);
-            return parsed.mantraRef === mantraRef ? (parsed.lifetimeCount ?? 0) : 0;
-          } catch { return 0; }
-        })();
+      let todayBase = 0, weekBase = 0, yearBase = 0, lifetimeBase = 0;
+      if (statsRaw) {
+        try {
+          const s: JapaLocalStats = JSON.parse(statsRaw);
+          if (s.mantraRef === mantraRef) {
+            todayBase    = s.todayCount    ?? 0;
+            weekBase     = s.weekCount     ?? 0;
+            yearBase     = s.yearCount     ?? 0;
+            lifetimeBase = s.lifetimeCount ?? 0;
+          }
+        } catch { /* ignore */ }
+      }
 
-        cachedTodayBase.current = todayBase;
-        cachedWeekBase.current = weekBase;
-        cachedYearBase.current = yearBase;
-        cachedLifetimeBase.current = lifetimeBase;
-        sessionInitialCount.current = todayBase;
-        // Session counter starts at today's existing count
-        sessionCountRef.current = todayBase;
+      // Recover in-progress session: if the persisted sessionCount is higher than the
+      // synced baseline, the user had unsynced taps — restore them so the count
+      // doesn't reset to 0 on re-mount.
+      let resumeCount = todayBase;
+      if (sessionRaw) {
+        try {
+          const sess: JapaLocalSession = JSON.parse(sessionRaw);
+          if (sess.mantraRef === mantraRef && sess.sessionCount > todayBase) {
+            resumeCount = sess.sessionCount;
+            // Restore server session ID so the next sync goes to the right session
+            if (typeof sess.serverSessionId === 'number') {
+              serverSessionId.current = sess.serverSessionId;
+            }
+            if (typeof sess.localSessionId === 'string') {
+              localSessionId.current = sess.localSessionId;
+            }
+            lastSyncedCount.current = sess.lastSyncedCount ?? todayBase;
+          }
+        } catch { /* ignore */ }
+      }
+
+      cachedTodayBase.current    = todayBase;
+      cachedWeekBase.current     = weekBase;
+      cachedYearBase.current     = yearBase;
+      cachedLifetimeBase.current = lifetimeBase;
+      sessionInitialCount.current = todayBase;
+      sessionCountRef.current    = resumeCount;
+      if (resumeCount === todayBase) {
         lastSyncedCount.current = todayBase;
-        setSessionCount(todayBase);
-      })
-      .catch(() => {});
+      }
+      setSessionCount(resumeCount);
+    }).catch(() => {});
 
     ensureSessionStarted();
 

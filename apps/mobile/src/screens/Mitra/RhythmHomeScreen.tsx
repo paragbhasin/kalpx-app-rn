@@ -13,6 +13,7 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  AppState,
   Image,
   SafeAreaView,
   ScrollView,
@@ -28,10 +29,12 @@ import LibrarySearchModal, {
   type LibrarySearchItem,
 } from "../../components/LibrarySearchModal";
 import {
+  getLiveActivityState,
   mitraJourneyHomeV3,
   mitraRhythmResolveItem,
   postRhythmItemAdd,
 } from "../../engine/mitraApi";
+import { liveActivity } from "../../native/liveActivity";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import { setHomeData } from "../../store/doorSlice";
 import { screenActions } from "../../store/screenSlice";
@@ -258,6 +261,13 @@ export default function RhythmHomeScreen({
           if (fresh) dispatch(setHomeData(fresh));
         })
         .catch(() => {});
+      // Start Sankalp Live Activity while this screen is in foreground
+      getLiveActivityState(i18n.language || 'en').then((state) => {
+        if (AppState.currentState !== 'active') return;
+        if (state.type === 'sankalp') {
+          liveActivity.startSankalp(state.title, state.line);
+        }
+      }).catch(() => {});
     }, [dispatch, i18n.language]),
   );
 

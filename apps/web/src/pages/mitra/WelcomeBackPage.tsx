@@ -21,6 +21,7 @@ import {
   mapJourneyEntryViewPath,
 } from "../../hooks/useJourneyEntryView";
 import { invalidateJourneyStatusCache } from "../../hooks/useJourneyStatus";
+import { useTranslation } from '../../lib/i18n';
 
 type ChipKey = "reentry_continue" | "reentry_fresh";
 
@@ -77,6 +78,7 @@ function parseReentryData(envelope: any, fallbackName?: string): ReentryData {
 
 export function WelcomeBackPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reentry, setReentry] = useState<ReentryData | null>(null);
@@ -121,7 +123,7 @@ export function WelcomeBackPage() {
       } catch (err: any) {
         if (!cancelled) {
           setError(
-            err?.message ?? "Could not load your journey. Please try again.",
+            err?.message ?? t('mitra.welcomeBack.error'),
           );
           setLoading(false);
         }
@@ -155,7 +157,7 @@ export function WelcomeBackPage() {
         navigate("/en/mitra/dashboard", { replace: true });
       }
     } catch (err: any) {
-      setError("Could not submit. Please try again.");
+      setError(t('mitra.common.error'));
       setSubmitting(false);
     }
   }
@@ -190,7 +192,7 @@ export function WelcomeBackPage() {
                 textAlign: "center",
               }}
             >
-              Loading…
+              {t('mitra.common.loading')}
             </p>
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
@@ -218,7 +220,7 @@ export function WelcomeBackPage() {
                 marginBottom: 20,
               }}
             >
-              {error || "Something went wrong."}
+              {error || t('mitra.welcomeBack.error')}
             </p>
             <button
               onClick={() => window.location.reload()}
@@ -233,7 +235,7 @@ export function WelcomeBackPage() {
                 cursor: "pointer",
               }}
             >
-              Try again
+              {t('mitra.welcomeBack.tryAgain')}
             </button>
           </div>
         </div>
@@ -438,7 +440,7 @@ export function WelcomeBackPage() {
                       margin: 0,
                     }}
                   >
-                    Resume your journey
+                    {t('mitra.welcomeBack.resumeJourney')}
                   </p>
                 </div>
                 <ChevronRight
@@ -506,7 +508,7 @@ export function WelcomeBackPage() {
                       margin: 0,
                     }}
                   >
-                    Start a new journey
+                    {t('mitra.welcomeBack.startNew')}
                   </p>
                 </div>
                 <ChevronRight
@@ -634,7 +636,7 @@ export function WelcomeBackPage() {
                     letterSpacing: 0.5,
                   }}
                 >
-                  Days practiced
+                  {t('mitra.welcomeBack.daysPracticed')}
                 </span>
                 <span
                   style={{
@@ -665,7 +667,7 @@ export function WelcomeBackPage() {
                       letterSpacing: 0.5,
                     }}
                   >
-                    Full cycles
+                    {t('mitra.welcomeBack.fullCycles')}
                   </span>
                   <span
                     style={{
@@ -695,7 +697,7 @@ export function WelcomeBackPage() {
                     letterSpacing: 0.5,
                   }}
                 >
-                  Strongest anchor
+                  {t('mitra.welcomeBack.strongestAnchor')}
                 </span>
                 <span
                   style={{

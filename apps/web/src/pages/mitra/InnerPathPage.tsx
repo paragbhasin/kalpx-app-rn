@@ -1,4 +1,5 @@
 import { normalizeDashboardWhyThisState } from "@kalpx/contracts";
+import { useTranslation } from "../../lib/i18n";
 import type {
   DashboardWhyThis,
   JourneyTriadReminders,
@@ -23,17 +24,18 @@ import { ingestDailyView } from "../../engine/v3Ingest";
 import type { AppDispatch } from "../../store";
 import { updateScreenData, useScreenState } from "../../store/screenSlice";
 
-function innerPathHeldLabel(slot: string): string {
-  if (slot === "mantra") return "Mantra held today · return anytime";
-  if (slot === "sankalp") return "Sankalp carried today · return anytime";
-  if (slot === "practice") return "Practice held today · return anytime";
-  return "Held today · return anytime";
-}
-
 export function InnerPathPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  const { t } = useTranslation();
   const screenState = useScreenState();
+
+  function innerPathHeldLabel(slot: string): string {
+    if (slot === "mantra") return t('mitra.innerPath.heldMantra');
+    if (slot === "sankalp") return t('mitra.innerPath.heldSankalp');
+    if (slot === "practice") return t('mitra.innerPath.heldPractice');
+    return t('mitra.innerPath.heldDefault');
+  }
   const [isDesktop, setIsDesktop] = useState(
     typeof window === "undefined" ? true : window.innerWidth >= 1024,
   );
@@ -168,9 +170,9 @@ export function InnerPathPage() {
       )
     : [];
   const L1_DISPLAY_LABELS: Record<string, string> = {
-    mantra: "Mantra",
-    sankalp: "Sankalp",
-    practice: "Practice",
+    mantra: t('mitra.innerPath.mantra'),
+    sankalp: t('mitra.innerPath.sankalp'),
+    practice: t('mitra.innerPath.practice'),
   };
   const whyThis = sd.why_this || {};
   const triadArr: any[] = Array.isArray(sd.today?.triad) ? sd.today.triad : [];
@@ -192,7 +194,7 @@ export function InnerPathPage() {
         triadArr.find((t: any) => t?.slot === "mantra")?.title ||
         sd.card_mantra_title ||
         "",
-      subtitle: "Return through sound",
+      subtitle: t('mitra.innerPath.returnThrough'),
       completedToday:
         triadArr.find((t: any) => t?.slot === "mantra")?.completed_today ===
         true,
@@ -211,7 +213,7 @@ export function InnerPathPage() {
         triadArr.find((t: any) => t?.slot === "sankalp")?.title ||
         sd.card_sankalpa_title ||
         "",
-      subtitle: "Hold today's intention",
+      subtitle: t('mitra.innerPath.holdIntention'),
       completedToday:
         triadArr.find((t: any) => t?.slot === "sankalp")?.completed_today ===
         true,
@@ -230,7 +232,7 @@ export function InnerPathPage() {
         triadArr.find((t: any) => t?.slot === "practice")?.title ||
         sd.card_ritual_title ||
         "",
-      subtitle: "Move through the body",
+      subtitle: t('mitra.innerPath.moveThrough'),
       completedToday:
         triadArr.find((t: any) => t?.slot === "practice")?.completed_today ===
         true,
@@ -446,7 +448,7 @@ export function InnerPathPage() {
                 textAlign: "center",
               }}
             >
-              Loading…
+              {t('mitra.common.loading')}
             </p>
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
@@ -489,7 +491,7 @@ export function InnerPathPage() {
                 cursor: "pointer",
               }}
             >
-              Try again
+              {t('mitra.innerPath.tryAgain')}
             </button>
           </div>
         </div>
@@ -544,7 +546,7 @@ export function InnerPathPage() {
                     fontWeight: 700,
                   }}
                 >
-                  Chosen with care
+                  {t('mitra.innerPath.chosenWith')}
                 </p>
                 <p
                   style={{
@@ -555,7 +557,7 @@ export function InnerPathPage() {
                     color: "#432104",
                   }}
                 >
-                  Why this supports today
+                  {t('mitra.innerPath.whySupports')}
                 </p>
               </div>
             </div>
@@ -656,7 +658,7 @@ export function InnerPathPage() {
                         fontWeight: 700,
                       }}
                     >
-                      Essence
+                      {t('mitra.innerPath.essence')}
                     </p>
                     <p
                       style={{
@@ -696,7 +698,7 @@ export function InnerPathPage() {
                         fontWeight: 700,
                       }}
                     >
-                      Shift
+                      {t('mitra.innerPath.shift')}
                     </p>
                     <p
                       style={{
@@ -739,7 +741,7 @@ export function InnerPathPage() {
                           fontWeight: 700,
                         }}
                       >
-                        Useful for
+                        {t('mitra.innerPath.usefulFor')}
                       </p>
                       <p
                         style={{
@@ -773,7 +775,7 @@ export function InnerPathPage() {
                           fontWeight: 700,
                         }}
                       >
-                        Rooted in
+                        {t('mitra.innerPath.rootedIn')}
                       </p>
                       <p
                         style={{
@@ -827,7 +829,7 @@ export function InnerPathPage() {
                   flex: 1,
                 }}
               >
-                Remind me for {label.toLowerCase()}
+                {t(`mitra.innerPath.remindFor${label}`)}
               </span>
               {enabled && (
                 <input
@@ -893,7 +895,7 @@ export function InnerPathPage() {
               margin: "4px 0 0",
             }}
           >
-            Saving…
+            {t('mitra.innerPath.saving')}
           </p>
         )}
       </div>
@@ -928,10 +930,10 @@ export function InnerPathPage() {
                 marginBottom: 4,
               }}
             >
-              All three held today
+              {t('mitra.innerPath.allComplete')}
             </div>
             <div style={{ fontSize: 13, color: "#5A6B5A", lineHeight: 1.5 }}>
-              Mantra, Sankalp, Practice — the cycle is complete.
+              {t('mitra.innerPath.allCompleteBody')}
             </div>
           </div>
         )}
@@ -975,7 +977,7 @@ export function InnerPathPage() {
             {sd.headline_text ||
               sd.greeting?.headline ||
               sd.focus_phrase ||
-              "Steady progress, without pressure."}
+              t('mitra.innerPath.steadyProgress')}
           </h1>
           {!!sd.greeting_context && (
             <p
@@ -1207,7 +1209,7 @@ export function InnerPathPage() {
                     icon={
                       <Sparkles size={18} strokeWidth={1.7} color="#8C6BC6" />
                     }
-                    title="Today's guidance"
+                    title={t('mitra.innerPath.todayGuidance')}
                     open={guidanceOpen}
                     onClick={() => setGuidanceOpen((value) => !value)}
                   />
@@ -1229,7 +1231,7 @@ export function InnerPathPage() {
                         style={{ width: 18, height: 14, opacity: 0.8 }}
                       />
                     }
-                    title="Why these were chosen"
+                    title={t('mitra.innerPath.whyChosen')}
                     open={whyChosenOpen}
                     onClick={() => setWhyChosenOpen((value) => !value)}
                   />
@@ -1248,7 +1250,7 @@ export function InnerPathPage() {
                         style={{ width: 18, height: 14, opacity: 0.8 }}
                       />
                     }
-                    title="Why these were chosen"
+                    title={t('mitra.innerPath.whyChosen')}
                     open={whyChosenOpen}
                     onClick={() => setWhyChosenOpen((value) => !value)}
                   />
@@ -1260,15 +1262,15 @@ export function InnerPathPage() {
                 <div>
                   <AccordionRow
                     icon={<Bell size={16} color="#C99317" />}
-                    title="Reminders"
+                    title={t('mitra.innerPath.reminders')}
                     subtitle={
                       [
-                        reminders.mantra_reminder_enabled && "Mantra",
-                        reminders.sankalp_reminder_enabled && "Sankalp",
-                        reminders.practice_reminder_enabled && "Practice",
+                        reminders.mantra_reminder_enabled && t('mitra.innerPath.mantra'),
+                        reminders.sankalp_reminder_enabled && t('mitra.innerPath.sankalp'),
+                        reminders.practice_reminder_enabled && t('mitra.innerPath.practice'),
                       ]
                         .filter(Boolean)
-                        .join(", ") || "None set"
+                        .join(", ") || t('mitra.innerPath.noneSet')
                     }
                     open={remindersOpen}
                     onClick={() => setRemindersOpen((o) => !o)}
@@ -1444,7 +1446,7 @@ export function InnerPathPage() {
                   icon={
                     <Sparkles size={18} strokeWidth={1.7} color="#8C6BC6" />
                   }
-                  title="Today's guidance"
+                  title={t('mitra.innerPath.todayGuidance')}
                   open={guidanceOpen}
                   onClick={() => setGuidanceOpen((value) => !value)}
                 />
@@ -1467,8 +1469,8 @@ export function InnerPathPage() {
                       style={{ width: 18, height: 14, opacity: 0.8 }}
                     />
                   }
-                  title="Why these were chosen"
-                  subtitle="Understand why Mitra selected this mantra, sankalp, and practice."
+                  title={t('mitra.innerPath.whyChosen')}
+                  subtitle={t('mitra.innerPath.whySubtitle')}
                   open={whyChosenOpen}
                   onClick={() => setWhyChosenOpen((value) => !value)}
                 />
@@ -1539,7 +1541,7 @@ export function InnerPathPage() {
                                 fontWeight: 700,
                               }}
                             >
-                              Chosen with care
+                              {t('mitra.innerPath.chosenWith')}
                             </p>
                             <p
                               style={{
@@ -1550,7 +1552,7 @@ export function InnerPathPage() {
                                 color: "#432104",
                               }}
                             >
-                              Why this supports today
+                              {t('mitra.innerPath.whySupports')}
                             </p>
                           </div>
                         </div>
@@ -1655,7 +1657,7 @@ export function InnerPathPage() {
                                         fontWeight: 700,
                                       }}
                                     >
-                                      Essence
+                                      {t('mitra.innerPath.essence')}
                                     </p>
                                     <p
                                       style={{
@@ -1694,7 +1696,7 @@ export function InnerPathPage() {
                                         fontWeight: 700,
                                       }}
                                     >
-                                      Essence
+                                      {t('mitra.innerPath.essence')}
                                     </p>
                                     <p
                                       style={{
@@ -1732,7 +1734,7 @@ export function InnerPathPage() {
                                     fontWeight: 700,
                                   }}
                                 >
-                                  Shift
+                                  {t('mitra.innerPath.shift')}
                                 </p>
                                 <p
                                   style={{
@@ -1777,7 +1779,7 @@ export function InnerPathPage() {
                                       fontWeight: 700,
                                     }}
                                   >
-                                    Useful for
+                                    {t('mitra.innerPath.usefulFor')}
                                   </p>
                                   <p
                                     style={{
@@ -1814,7 +1816,7 @@ export function InnerPathPage() {
                                       fontWeight: 700,
                                     }}
                                   >
-                                    Rooted in
+                                    {t('mitra.innerPath.rootedIn')}
                                   </p>
                                   <p
                                     style={{
@@ -1923,15 +1925,15 @@ export function InnerPathPage() {
               <div style={{ marginTop: 16 }}>
                 <AccordionRow
                   icon={<Bell size={16} color="#C99317" />}
-                  title="Reminders"
+                  title={t('mitra.innerPath.reminders')}
                   subtitle={
                     [
-                      reminders.mantra_reminder_enabled && "Mantra",
-                      reminders.sankalp_reminder_enabled && "Sankalp",
-                      reminders.practice_reminder_enabled && "Practice",
+                      reminders.mantra_reminder_enabled && t('mitra.innerPath.mantra'),
+                      reminders.sankalp_reminder_enabled && t('mitra.innerPath.sankalp'),
+                      reminders.practice_reminder_enabled && t('mitra.innerPath.practice'),
                     ]
                       .filter(Boolean)
-                      .join(", ") || "None set"
+                      .join(", ") || t('mitra.innerPath.noneSet')
                   }
                   open={remindersOpen}
                   onClick={() => setRemindersOpen((o) => !o)}

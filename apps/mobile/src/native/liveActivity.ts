@@ -11,7 +11,8 @@ export const liveActivity = {
     sessionCount: number,
     weekCount: number,
     yearCount: number,
-    totalCount: number
+    totalCount: number,
+    elapsedSeconds: number = 0,
   ): Promise<string | null> {
     if (!supported) {
       console.warn("[LiveActivity] start skipped — module not found");
@@ -21,7 +22,7 @@ export const liveActivity = {
     return KalpxLiveActivityModule.startActivity(
       mantraName,
       devanagari,
-      { sessionCount, weekCount, yearCount, totalCount }
+      { sessionCount, weekCount, yearCount, totalCount, elapsedSeconds }
     ).then((id: string) => {
       console.log("[LiveActivity] started OK, id:", id);
       return id;
@@ -35,14 +36,23 @@ export const liveActivity = {
     sessionCount: number,
     weekCount: number,
     yearCount: number,
-    totalCount: number
+    totalCount: number,
+    elapsedSeconds: number = 0,
   ): Promise<void> {
     if (!supported) return Promise.resolve();
     return KalpxLiveActivityModule.updateActivity(
-      { sessionCount, weekCount, yearCount, totalCount }
+      { sessionCount, weekCount, yearCount, totalCount, elapsedSeconds }
     ).catch((err: any) => {
       console.error("[LiveActivity] update FAILED:", err);
     });
+  },
+
+  completeChant(finalCount: number, elapsedSeconds: number): Promise<void> {
+    if (!supported) return Promise.resolve();
+    return KalpxLiveActivityModule.completeChantActivity(finalCount, elapsedSeconds)
+      .catch((err: any) => {
+        console.error("[LiveActivity] completeChant FAILED:", err);
+      });
   },
 
   startSankalp(title: string, line: string): Promise<string | null> {

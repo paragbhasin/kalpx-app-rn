@@ -6,6 +6,7 @@ import React, {
   useState,
 } from "react";
 import {
+  AppState,
   Image,
   LayoutAnimation,
   Platform,
@@ -19,6 +20,9 @@ import {
 } from "react-native";
 import { useJapaEngine } from "../../engine/useJapaEngine";
 import type { JapaSourceSurface } from "@kalpx/types";
+import { getLiveActivityState } from "../../engine/mitraApi";
+import { liveActivity } from "../../native/liveActivity";
+import i18n from "../../config/i18n";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -217,9 +221,17 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   const interactionSize = isTablet ? 300 : 220;
   const beadOrbitRadius = isTablet ? 100 : 72;
   const onCompleteRef = useRef(onComplete);
+  const isLAActiveRef = useRef(false);
+  const laCompleteCalledRef = useRef(false);
   useEffect(() => {
     onCompleteRef.current = onComplete;
   }, [onComplete]);
+
+  // Reset LA tracking on new session
+  useEffect(() => {
+    isLAActiveRef.current = false;
+    laCompleteCalledRef.current = false;
+  }, [mantraRef]);
 
   // ── Japa engine — only active when mantraRef is provided ──────────────────
   const japaEngine = useJapaEngine({
@@ -228,10 +240,20 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
     goalType: "count",
     goalValue: selectedTarget,
     onGoalReached: useCallback(() => {
-      onCompleteRef.current?.(
-        selectedTarget,
-        Math.round((Date.now() - sessionStartTimeRef.current) / 1000),
-      );
+      const durationSec = Math.round((Date.now() - sessionStartTimeRef.current) / 1000);
+      if (isLAActiveRef.current && !laCompleteCalledRef.current) {
+        laCompleteCalledRef.current = true;
+        liveActivity.completeChant(selectedTarget, durationSec);
+        setTimeout(async () => {
+          liveActivity.end();
+          isLAActiveRef.current = false;
+          const state = await getLiveActivityState(i18n.language || 'en').catch(() => ({ type: 'none' as const }));
+          if (AppState.currentState === 'active' && state.type === 'sankalp') {
+            liveActivity.startSankalp(state.title, state.line);
+          }
+        }, 20_000);
+      }
+      onCompleteRef.current?.(selectedTarget, durationSec);
     }, [selectedTarget]),
   });
 
@@ -310,6 +332,22 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   const handleIncrement = useCallback(() => {
     if (chantCount >= selectedTarget || isCompletingRef.current) return;
     if (mantraRef) {
+      const nextToday    = japaEngine.todayCount + 1;
+      const nextWeek     = japaEngine.weekCount + 1;
+      const nextLifetime = japaEngine.lifetimeCount + 1;
+      const elapsedSec   = Math.floor(japaEngine.elapsedMs / 1000);
+      if (!isLAActiveRef.current) {
+        if (AppState.currentState === 'active') {
+          isLAActiveRef.current = true;
+          liveActivity.start(
+            item.title ?? '',
+            item.devanagari ?? '',
+            nextToday, nextWeek, nextLifetime, nextLifetime, elapsedSec,
+          );
+        }
+      } else {
+        liveActivity.update(nextToday, nextWeek, nextLifetime, nextLifetime, elapsedSec);
+      }
       // Engine handles haptics, persistence, sync, and goal detection via onGoalReached
       japaEngine.increment();
     } else {

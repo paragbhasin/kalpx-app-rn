@@ -101,10 +101,12 @@ export async function japaCompleteSession(
 }
 
 /** GET /api/mitra/japa/stats/?mantra_ref= */
-export async function japaGetStats(mantraRef?: string): Promise<JapaStatsResponse | null> {
+export async function japaGetStats(mantraRef?: string, sourceSurface?: string): Promise<JapaStatsResponse | null> {
   try {
-    const params = mantraRef ? { mantra_ref: mantraRef } : undefined;
-    const resp = await api.get<JapaStatsResponse>(`${BASE}/stats/`, { params });
+    const params: Record<string, string> = {};
+    if (mantraRef) params.mantra_ref = mantraRef;
+    if (sourceSurface) params.source_surface = sourceSurface;
+    const resp = await api.get<JapaStatsResponse>(`${BASE}/stats/`, { params: Object.keys(params).length ? params : undefined });
     return resp.data;
   } catch (err: any) {
     console.warn('[JapaApi] getStats failed:', err?.message);

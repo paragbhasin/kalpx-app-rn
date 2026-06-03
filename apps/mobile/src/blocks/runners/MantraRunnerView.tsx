@@ -215,13 +215,13 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   const sessionStartTimeRef = useRef(Date.now());
   const isCompletingRef = useRef(false);
   const onCompleteRef = useRef(onComplete);
-  const isLAActiveRef = useRef(false);  // tracks if we started a Live Activity this session
+  const isLAActiveRef = useRef(false);
   const laCompleteCalledRef = useRef(false);
   useEffect(() => {
     onCompleteRef.current = onComplete;
   }, [onComplete]);
 
-  // Reset LA tracking when mantraRef changes (new session)
+  // Reset LA tracking on new session
   useEffect(() => {
     isLAActiveRef.current = false;
     laCompleteCalledRef.current = false;
@@ -235,7 +235,6 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
     goalValue: selectedTarget,
     onGoalReached: useCallback(() => {
       const durationSec = Math.round((Date.now() - sessionStartTimeRef.current) / 1000);
-      // Show "Practice complete" on Live Activity for 20s then restore Sankalp
       if (isLAActiveRef.current && !laCompleteCalledRef.current) {
         laCompleteCalledRef.current = true;
         liveActivity.completeChant(selectedTarget, durationSec);

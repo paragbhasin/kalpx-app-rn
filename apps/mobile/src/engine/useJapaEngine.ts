@@ -386,7 +386,7 @@ export function useJapaEngine({
   const refreshStats = useCallback(async () => {
     if (!mantraRef) return;
     try {
-      const statsResp = await japaGetStats(mantraRef);
+      const statsResp = await japaGetStats(mantraRef, sourceSurface);
 
       // Guard: mantra switched while request was in-flight — don't touch shared refs.
       if (mantraRef !== currentMantraRef.current) return;
@@ -662,7 +662,7 @@ export function useJapaEngine({
       });
 
       // Refresh stats — next session will start from server's confirmed today_count
-      const statsResp = await japaGetStats(mantraRef ?? undefined);
+      const statsResp = await japaGetStats(mantraRef ?? undefined, sourceSurface);
       if (statsResp?.stats?.length) {
         const row = statsResp.stats.find((s) => s.mantra_ref === mantraRef);
         if (row) {

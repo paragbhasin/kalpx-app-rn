@@ -457,7 +457,7 @@ export default function QuickResetScreen({
         if (AppState.currentState === 'active' && state.type === 'sankalp') {
           liveActivity.startSankalp(state.title, state.line);
         }
-      }, 20_000);
+      }, 5_000);
     } else {
       liveActivity.end();
     }

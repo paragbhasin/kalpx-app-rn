@@ -231,6 +231,12 @@ export function useJapaEngine({
 
       const remaining: JapaPendingBatch[] = [];
       for (const batch of queue) {
+        // Skip batches without a server session ID (Watch offline-start batches
+        // waiting for phone to relay session start). They stay in queue until resolved.
+        if (batch.sessionId === null) {
+          remaining.push(batch);
+          continue;
+        }
         const result = await japaSyncSession(batch.sessionId, {
           delta_count: batch.deltaCount,
           cumulative_count: batch.cumulativeCount,
@@ -354,6 +360,7 @@ export function useJapaEngine({
         // Network failure — enqueue for retry
         await enqueuePendingBatch({
           sessionId: serverSessionId.current,
+          localSessionId: localSessionId.current,
           deltaCount: delta,
           cumulativeCount: currentCount,
           idempotencyKey,
@@ -366,7 +373,8 @@ export function useJapaEngine({
       }
     } catch {
       await enqueuePendingBatch({
-        sessionId: serverSessionId.current as number,
+        sessionId: serverSessionId.current,
+        localSessionId: localSessionId.current,
         deltaCount: delta,
         cumulativeCount: currentCount,
         idempotencyKey,

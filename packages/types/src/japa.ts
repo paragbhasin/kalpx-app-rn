@@ -127,9 +127,12 @@ export interface JapaLocalStats {
   lastUpdated: number;              // unix ms
 }
 
-// Queued sync batch waiting to be sent when connectivity returns
+// Queued sync batch waiting to be sent when connectivity returns.
+// sessionId is null when the Watch creates a batch before the phone has relayed
+// a server session ID — the batch is held locally until sessionId is known.
 export interface JapaPendingBatch {
-  sessionId: number;
+  sessionId: number | null;
+  localSessionId: string;
   deltaCount: number;
   cumulativeCount: number;
   idempotencyKey: string;

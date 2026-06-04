@@ -451,12 +451,6 @@ importers:
       autoprefixer:
         specifier: ^10.4.21
         version: 10.5.0(postcss@8.5.12)
-      dotenv:
-        specifier: ^17.4.2
-        version: 17.4.2
-      dotenv-cli:
-        specifier: ^11.0.0
-        version: 11.0.0
       jsdom:
         specifier: ^29.1.0
         version: 29.1.0

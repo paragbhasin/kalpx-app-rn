@@ -202,18 +202,212 @@ export const SCREEN_STRINGS_HI: Record<string, string> = {
     "यह गृहकार्य नहीं है। यह साधना है — एक दैनिक अभ्यास जो समय के साथ कुछ वास्तविक बनाता है।",
 };
 
-/** Recursively walk a plain object/array and replace known English strings with Hindi. */
-function walkAndTranslate(node: unknown): unknown {
+export const SCREEN_STRINGS_TE: Record<string, string> = {
+  // ── turn_1 ──────────────────────────────────────────────────────────────────
+  "I'm Mitra.\nI'm here with you.":
+    "నేను మిత్ర.\nనేను మీతో ఉన్నాను.",
+  "Hi. I am Mitra.":
+    "నమస్కారం. నేను మిత్ర.",
+  "I am here to help you feel more calm, steady, and clear — on hard days and good days.":
+    "కష్టమైన మరియు మంచి — రెండు రోజులలో మీరు మరింత శాంతంగా, స్థిరంగా మరియు స్పష్టంగా అనిపించడానికి నేను ఇక్కడ ఉన్నాను.",
+  "I notice small things, like your mood and the shape of your day.":
+    "మీ మూడ్ మరియు మీ రోజు నిర్మాణం వంటి చిన్న విషయాలను నేను గమనిస్తాను.",
+  "Yes,let's begin":
+    "అవును, మొదలుపెట్టాం →",
+  "I'm returning":
+    "నేను తిరిగి వచ్చాను",
+
+  // ── turn_2 ──────────────────────────────────────────────────────────────────
+  "Do you need support in some area of life right now?":
+    "మీకు ఇప్పుడు జీవితంలో ఏదైనా మద్దతు అవసరమా?",
+  "Or are you feeling balanced and ready to grow?":
+    "లేదా మీరు సమతుల్యంగా ఉన్నారా మరియు ముందుకు వెళ్ళడానికి సిద్ధంగా ఉన్నారా?",
+  "I need help with something in life right now":
+    "నాకు ఇప్పుడు జీవితంలో కొంత మద్దతు కావాలి",
+  "I feel balanced and want to grow":
+    "నేను సమతుల్యంగా ఉన్నాను మరియు ముందుకు వెళ్ళాలనుకుంటున్నాను",
+
+  // ── turn_3_life_context / turn_5_life_context ────────────────────────────────
+  "What part of life is this touching?":
+    "జీవితంలో ఏ భాగాన్ని ఇది తాకుతోంది?",
+  "Pick one that feels most alive right now.":
+    "ఇప్పుడు అత్యంత జీవంతంగా అనిపించేదాన్ని ఎంచుకోండి.",
+  "Work & Career": "పని & వృత్తి",
+  "Relationships": "సంబంధాలు",
+  "Myself": "నేను",
+  "Health & Energy": "ఆరోగ్యం & శక్తి",
+  "Money & Security": "డబ్బు & భద్రత",
+  "Purpose & Direction": "లక్ష్యం & దిశ",
+  "Studies & Exams": "చదువులు & పరీక్షలు",
+  "Daily Life": "రోజువారీ జీవితం",
+
+  // ── turn_3_life_context_support ─────────────────────────────────────────────
+  "What part of life feels heaviest right now?":
+    "ఇప్పుడు జీవితంలో ఏ భాగం అత్యంత భారంగా అనిపిస్తోంది?",
+  "Pick what feels closest.":
+    "అత్యంత దగ్గరగా అనిపించేది ఎంచుకోండి.",
+  "Work feels heavy": "పని భారంగా అనిపిస్తోంది",
+  "Relationships feel heavy": "సంబంధాలు భారంగా అనిపిస్తున్నాయి",
+  "I feel unsettled within myself": "నేను నా లోపల అస్థిరంగా అనిపిస్తున్నాను",
+  "Health or energy feels difficult": "ఆరోగ్యం లేదా శక్తి కష్టంగా అనిపిస్తోంది",
+  "Money or security feels stressful": "డబ్బు లేదా భద్రత ఒత్తిడిగా అనిపిస్తోంది",
+  "I feel unclear about direction": "దిశ గురించి అస్పష్టంగా అనిపిస్తోంది",
+  "Studies or exams feel stressful": "చదువులు లేదా పరీక్షలు ఒత్తిడిగా అనిపిస్తున్నాయి",
+  "Daily life feels hard": "రోజువారీ జీవితం కష్టంగా అనిపిస్తోంది",
+  "Spiritual life feels distant": "ఆధ్యాత్మిక జీవితం దూరంగా అనిపిస్తోంది",
+
+  // ── turn_3_life_context_growth ─────────────────────────────────────────────
+  "What do you want to strengthen?": "మీరు ఏమి బలపరచుకోవాలనుకుంటున్నారు?",
+  "Pick what feels most alive right now.": "ఇప్పుడు అత్యంత జీవంతంగా అనిపించేది ఎంచుకోండి.",
+  "Work with purpose": "లక్ష్యంతో పని",
+  "Deepen connection at home": "ఇంట్లో అనుబంధాన్ని లోతుగా చేయండి",
+  "See more clearly": "మరింత స్పష్టంగా చూడండి",
+  "Carry steadiness outward": "స్థిరత్వాన్ని బాహ్యంగా తీసుకెళ్ళండి",
+  "Deepen gratitude": "కృతజ్ఞతను లోతుగా చేయండి",
+  "Move through what's changing": "మారుతున్న దాన్ని దాటి వెళ్ళండి",
+  "Grow through studies": "చదువుల ద్వారా ఎదగండి",
+  "Strengthen myself": "నన్ను నేను బలపరచుకోండి",
+  "Care for my energy": "నా శక్తిని జాగ్రత్తగా ఉంచుకోండి",
+  "Build trust around money": "డబ్బు చుట్టూ నమ్మకం పెంచుకోండి",
+  "Steadiness in daily life": "రోజువారీ జీవితంలో స్థిరత్వం",
+  "Return to devotion": "భక్తికి తిరిగి వెళ్ళండి",
+
+  // ── turn_3_support ──────────────────────────────────────────────────────────
+  "What feels strongest right now?": "ఇప్పుడు అత్యంత బలంగా ఏది అనిపిస్తోంది?",
+  "Pick where you feel it most.": "ఎక్కడ అత్యంత తీవ్రంగా అనిపిస్తోందో ఎంచుకోండి.",
+  "My body feels tight": "నా శరీరం బిగుసుకుపోయినట్లు అనిపిస్తోంది",
+  "My breathing feels off": "నా శ్వాస సరిగా అనిపించడం లేదు",
+  "My mind won't settle": "నా మనసు స్థిరపడడం లేదు",
+  "I don't know what to do": "నాకు ఏమి చేయాలో తెలియడం లేదు",
+  "Something feels heavy inside": "లోపల ఏదో భారంగా అనిపిస్తోంది",
+
+  // ── turn_3_growth ───────────────────────────────────────────────────────────
+  "What feels present right now?": "ఇప్పుడు ఏది ఉన్నట్లు అనిపిస్తోంది?",
+  "Pick whichever fits today.": "ఈ రోజు ఏది సరిగా అనిపిస్తుందో ఎంచుకోండి.",
+  "I feel steady": "నేను స్థిరంగా అనిపిస్తున్నాను",
+  "I feel thankful": "నేను కృతజ్ఞంగా అనిపిస్తున్నాను",
+  "Something is changing": "ఏదో మారుతోంది",
+  "I feel better today": "ఈ రోజు నేను మెరుగ్గా అనిపిస్తున్నాను",
+  "I want to grow": "నేను ఎదగాలనుకుంటున్నాను",
+  "I want more meaning": "నాకు మరింత అర్థం కావాలి",
+
+  // ── turn_4_support ──────────────────────────────────────────────────────────
+  "What is your mind doing?": "మీ మనసు ఏమి చేస్తోంది?",
+  "This helps me see the movement.": "ఇది నాకు కదలికను చూడడంలో సహాయపడుతుంది.",
+  "It keeps replaying": "అది పదే పదే పునరావృతమవుతూ ఉంది",
+  "It keeps worrying ahead": "అది ముందు గురించి ఆందోళన పడుతూ ఉంది",
+  "It keeps comparing": "అది పోల్చుతూ ఉంది",
+  "It keeps arguing inside": "అది లోపల వాదిస్తూ ఉంది",
+  "It goes blank": "అది నిర్లిప్తంగా అయిపోతోంది",
+  "It keeps holding on": "అది పట్టుకుంటూ ఉంది",
+  "It keeps pushing away": "అది వెళ్ళగొడుతూ ఉంది",
+
+  // ── turn_4_growth ───────────────────────────────────────────────────────────
+  "What do you want more of right now?": "ఇప్పుడు మీకు మరింత ఏమి కావాలి?",
+  "The one that pulls you most.": "మిమ్మల్ని అత్యంత ఆకర్షించేది.",
+  "More clarity": "మరింత స్పష్టత",
+  "More peace": "మరింత శాంతి",
+  "More strength": "మరింత శక్తి",
+  "More devotion": "మరింత భక్తి",
+  "More purpose": "మరింత లక్ష్యం",
+  "More steadiness": "మరింత స్థిరత్వం",
+
+  // ── turn_5_support ──────────────────────────────────────────────────────────
+  "What feels underneath it most?": "దాని కింద అత్యంత ఏముంది?",
+  "Pick what feels truest, even if small.": "చిన్నదైనా సరే, అత్యంత నిజమైనదాన్ని ఎంచుకోండి.",
+  "Fear": "భయం",
+  "Holding on too tightly": "చాలా గట్టిగా పట్టుకోవడం",
+  "Not wanting this at all": "ఇది అస్సలు వద్దని అనిపించడం",
+  "Feeling hurt": "గాయపడినట్లు అనిపించడం",
+  "Confusion": "గందరగోళం",
+  "I'm not sure": "నాకు తెలియడం లేదు",
+
+  // ── turn_5_growth ───────────────────────────────────────────────────────────
+  "What would help most today?": "ఈ రోజు అత్యంత ఏది సహాయపడుతుంది?",
+  "Pick whichever feels right.": "సరిగా అనిపించేది ఎంచుకోండి.",
+  "Something quiet": "ఏదో నిశ్శబ్దంగా",
+  "Something practical": "ఏదో ఆచరణాత్మకంగా",
+  "Something uplifting": "ఏదో ఉత్తేజకరంగా",
+  "Something devotional": "ఏదో భక్తిపూర్వకంగా",
+  "Something grounding": "ఏదో స్థిరంగా",
+  "Something to think through": "ఏదో ఆలోచించడానికి",
+
+  // ── turn_6 (guidance mode) ──────────────────────────────────────────────────
+  "How would you like this guidance to sound?":
+    "ఈ మార్గదర్శనం ఎలా వినాలని అనిపిస్తోంది?",
+  "Some people prefer simple, modern language. Some like a blend. Some want the deeper roots visible.":
+    "కొంతమంది సరళమైన, ఆధునిక భాషను ఇష్టపడతారు. కొంతమంది మిశ్రమాన్ని ఇష్టపడతారు. కొంతమంది లోతైన వేర్లు కనిపించాలనుకుంటారు.",
+
+  // ── turn_7 ──────────────────────────────────────────────────────────────────
+  "RECOGNITION": "గుర్తింపు",
+  "Show me my path": "నాకు నా మార్గం చూపించండి",
+
+  // ── turn_8 ──────────────────────────────────────────────────────────────────
+  "This is what I'm holding for you today:":
+    "ఈ రోజు నేను మీ కోసం ఇది తీసుకొచ్చాను:",
+  "Begin my journey": "నా ప్రయాణం మొదలుపెట్టండి",
+
+  // ── turn_3 (dynamic friction / legacy) ─────────────────────────────────────
+  "Or describe it...": "లేదా వివరించండి...",
+  "Racing — mind moving too fast": "పరుగెడుతోంది — మనసు చాలా వేగంగా కదులుతోంది",
+  "Drained — low energy, nothing left": "అలసిపోయింది — శక్తి తక్కువగా, ఏమీ మిగలలేదు",
+  "Foggy — can't see clearly": "మబ్బుగా ఉంది — స్పష్టంగా కనిపించడం లేదు",
+  "Heavy — everything weighs": "భారంగా ఉంది — అంతా బరువుగా అనిపిస్తోంది",
+  "Restless — moving but going nowhere": "అశాంతిగా ఉంది — కదులుతున్నాను కానీ ఎక్కడికీ చేరడం లేదు",
+  "Actually clear — but there's a lot to hold": "నిజంగా స్పష్టంగా ఉంది — కానీ చాలా నిలువ ఉంది",
+
+  // ── turn_2_legacy ───────────────────────────────────────────────────────────
+  "Where would you like support right now?": "ఇప్పుడు మీకు ఎక్కడ సహాయం కావాలి?",
+  "Choose what feels closest. We can take it from there.":
+    "అత్యంత దగ్గరగా అనిపించేది ఎంచుకోండి. మేము అక్కడ నుండి తీసుకెళ్తాం.",
+  "Work feels unclear": "పని అస్పష్టంగా అనిపిస్తోంది",
+  "A relationship needs care": "ఒక సంబంధానికి శ్రద్ధ అవసరం",
+  "My mind needs quiet": "నా మనసుకు నిశ్శబ్దం కావాలి",
+  "I'm moving through uncertainty": "నేను అనిశ్చితత్వం గుండా వెళ్తున్నాను",
+  "My energy feels low": "నా శక్తి తక్కువగా అనిపిస్తోంది",
+  "I'm trying to understand myself": "నేను నన్ను నేను అర్థం చేసుకోవడానికి ప్రయత్నిస్తున్నాను",
+  "I want to grow spiritually": "నేను ఆధ్యాత్మికంగా ఎదగాలనుకుంటున్నాను",
+  "Or tell me in your own words...": "లేదా మీ మాటల్లో చెప్పండి...",
+
+  // ── turn_4 voice / text ──────────────────────────────────────────────────────
+  "How would you like me to be with you?":
+    "మీరు నన్ను ఎలా మీతో ఉండాలనుకుంటున్నారు?",
+  "I can speak with you, or keep things quiet and written.":
+    "నేను మీతో మాట్లాడగలను, లేదా అన్నీ నిశ్శబ్దంగా మరియు రాతపూర్వకంగా ఉంచగలను.",
+
+  // ── misc placeholders ───────────────────────────────────────────────────────
+  "Or share in your own words": "లేదా మీ మాటల్లో పంచుకోండి",
+  "Share your reflection": "మీ మననం పంచుకోండి",
+
+  // ── PathEmergesBlock (turn_8) ────────────────────────────────────────────────
+  "Your Mantra": "మీ మంత్రం",
+  "Your Intention": "మీ సంకల్పం",
+  "Your Practice": "మీ అభ్యాసం",
+  "Why these were chosen": "ఇవి ఎందుకు ఎంచుకోబడ్డాయి",
+  "Understand why Mitra selected this mantra, sankalp, and practice.":
+    "మిత్ర ఈ మంత్రం, సంకల్పం మరియు అభ్యాసం ఎందుకు ఎంచుకున్నారో అర్థం చేసుకోండి.",
+  "Chosen with care": "జాగ్రత్తగా ఎంచుకోబడింది",
+  "Why this supports today": "ఇది ఈ రోజు ఎందుకు సహాయపడుతుంది",
+  "Essence": "సారాంశం",
+  "Shift": "మార్పు",
+  "Useful for": "ఉపయోగపడుతుంది",
+  "Rooted in": "ఆధారితమైంది",
+  "This isn't homework. It's sadhana — a daily practice that builds something real over time.":
+    "ఇది హోంవర్క్ కాదు. ఇది సాధన — కాలక్రమేణా నిజమైనది నిర్మించే రోజువారీ అభ్యాసం.",
+};
+
+/** Recursively walk a plain object/array and replace known English strings. */
+function walkAndTranslate(map: Record<string, string>, node: unknown): unknown {
   if (typeof node === "string") {
-    return SCREEN_STRINGS_HI[node] ?? node;
+    return map[node] ?? node;
   }
   if (Array.isArray(node)) {
-    return node.map(walkAndTranslate);
+    return node.map((item) => walkAndTranslate(map, item));
   }
   if (node !== null && typeof node === "object") {
     const result: Record<string, unknown> = {};
     for (const [key, val] of Object.entries(node as Record<string, unknown>)) {
-      result[key] = walkAndTranslate(val);
+      result[key] = walkAndTranslate(map, val);
     }
     return result;
   }
@@ -221,10 +415,11 @@ function walkAndTranslate(node: unknown): unknown {
 }
 
 /**
- * Return a deep copy of `schema` with all known strings replaced by Hindi.
- * If locale is 'en', returns the schema unchanged.
+ * Return a deep copy of `schema` with all known strings replaced by the
+ * target-locale equivalent. Returns schema unchanged for 'en'.
  */
 export function localizeScreenSchema(schema: unknown, locale: string): unknown {
-  if (locale !== "hi") return schema;
-  return walkAndTranslate(schema);
+  if (locale === "hi") return walkAndTranslate(SCREEN_STRINGS_HI, schema);
+  if (locale === "te") return walkAndTranslate(SCREEN_STRINGS_TE, schema);
+  return schema;
 }

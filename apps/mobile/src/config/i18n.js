@@ -5,10 +5,54 @@ import moment from "moment";
 
 // Supported locales at startup. To re-enable a language: add its code here,
 // restore its imports and resource block below, and filter Language.tsx list.
-const ENABLED_LOCALES = ["en", "hi"];
+const ENABLED_LOCALES = ["en", "hi", "te"];
 
 // Hindi imports
 import hi from "./locales/hi/hi.json";
+
+// Telugu imports
+import {
+  CARRER_ABUNDANCE_MANTRAS as CARRER_ABUNDANCE_MANTRAS_TE,
+  CARRER_ABUNDANCE_PRACTICES as CARRER_ABUNDANCE_PRACTICES_TE,
+  CARRER_ABUNDANCE_SANKALPS as CARRER_ABUNDANCE_SANKALPS_TE,
+} from "./locales/te/CareerProsperity-te";
+import {
+  EMOTIONAL_HEALING_MANTRAS as EMOTIONAL_HEALING_MANTRAS_TE,
+  EMOTIONAL_HEALING_PRACTICES as EMOTIONAL_HEALING_PRACTICES_TE,
+  EMOTIONAL_HEALING_SANKALPS as EMOTIONAL_HEALING_SANKALPS_TE,
+} from "./locales/te/EmotionalHealing-te";
+import te from "./locales/te/te.json";
+import festivalsTe from "./locales/te/festivals-te.json";
+import {
+  FOCUS_MOTIVATION_MANTRAS as FOCUS_MOTIVATION_MANTRAS_TE,
+  FOCUS_MOTIVATION_PRACTICES as FOCUS_MOTIVATION_PRACTICES_TE,
+  FOCUS_MOTIVATION_SANKALPS as FOCUS_MOTIVATION_SANKALPS_TE,
+} from "./locales/te/FocusMotivation-te";
+import {
+  GRATITUDE_POSTIVITY_MANTRAS as GRATITUDE_POSTIVITY_MANTRAS_TE,
+  GRATITUDE_POSTIVITY_PRACTICES as GRATITUDE_POSTIVITY_PRACTICES_TE,
+  GRATITUDE_POSTIVITY_SANKALPS as GRATITUDE_POSTIVITY_SANKALPS_TE,
+} from "./locales/te/GratitudePositivity-te";
+import {
+  HEALTH_WELL_BEING_MANTRASS as HEALTH_WELL_BEING_MANTRASS_TE,
+  HEALTH_WELL_BEING_PRACTICES as HEALTH_WELL_BEING_PRACTICES_TE,
+  HEALTH_WELL_BEING_SANKALPS as HEALTH_WELL_BEING_SANKALPS_TE,
+} from "./locales/te/HealthWellbeing-te";
+import mantrasTE from "./locales/te/mantras-te.json";
+import {
+  PEACE_CALM_MANTRAS as PEACE_CALM_MANTRAS_TE,
+  PEACE_CALM_PRACTICES as PEACE_CALM_PRACTICES_TE,
+  PEACE_CALM_SANKALPS as PEACE_CALM_SANKALPS_TE,
+} from "./locales/te/PeaceClam-te";
+import practicesTe from "./locales/te/practices-te.json";
+import sankalpsTe from "./locales/te/sankalps-te.json";
+import {
+  SPIRITUAL_GROWTH_MANTRAS as SPIRITUAL_GROWTH_MANTRAS_TE,
+  SPIRITUAL_GROWTH_PRACTICES as SPIRITUAL_GROWTH_PRACTICES_TE,
+  SPIRITUAL_GROWTH_SANKALPS as SPIRITUAL_GROWTH_SANKALPS_TE,
+} from "./locales/te/SpiritualGrowth-te";
+import templesTe from "./locales/te/temples_te.json";
+import wisdomTe from "./locales/te/wisdom-te.json";
 
 // English imports
 import {
@@ -113,6 +157,39 @@ const getCategoryTranslations = (
 
 // ✅ Deep merge translations to avoid overwriting nested objects
 const translations = {
+  te: merge(
+    {},
+    te,
+    templesTe,
+    mantrasTE,
+    festivalsTe,
+    sankalpsTe,
+    wisdomTe,
+    practicesTe,
+    getCategoryTranslations(
+      PEACE_CALM_PRACTICES_TE,
+      PEACE_CALM_MANTRAS_TE,
+      PEACE_CALM_SANKALPS_TE,
+      SPIRITUAL_GROWTH_PRACTICES_TE,
+      SPIRITUAL_GROWTH_MANTRAS_TE,
+      SPIRITUAL_GROWTH_SANKALPS_TE,
+      CARRER_ABUNDANCE_PRACTICES_TE,
+      CARRER_ABUNDANCE_MANTRAS_TE,
+      CARRER_ABUNDANCE_SANKALPS_TE,
+      FOCUS_MOTIVATION_PRACTICES_TE,
+      FOCUS_MOTIVATION_MANTRAS_TE,
+      FOCUS_MOTIVATION_SANKALPS_TE,
+      EMOTIONAL_HEALING_PRACTICES_TE,
+      EMOTIONAL_HEALING_MANTRAS_TE,
+      EMOTIONAL_HEALING_SANKALPS_TE,
+      GRATITUDE_POSTIVITY_PRACTICES_TE,
+      GRATITUDE_POSTIVITY_MANTRAS_TE,
+      GRATITUDE_POSTIVITY_SANKALPS_TE,
+      HEALTH_WELL_BEING_PRACTICES_TE,
+      HEALTH_WELL_BEING_MANTRASS_TE,
+      HEALTH_WELL_BEING_SANKALPS_TE
+    )
+  ),
   en: merge(
     {},
     en,
@@ -156,6 +233,7 @@ i18n.use(initReactI18next).init({
   resources: {
     en: { translation: translations.en },
     hi: { translation: hi },
+    te: { translation: translations.te },
   },
   interpolation: {
     escapeValue: false,

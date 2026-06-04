@@ -7,15 +7,17 @@ import React, {
 } from 'react';
 import { en } from '../locales/en';
 import { hi } from '../locales/hi';
+import { te } from '../locales/te';
 import { invalidateMitraHomeV3Cache } from '../engine/mitraApi';
 
-export type Locale = 'en' | 'hi';
+export type Locale = 'en' | 'hi' | 'te';
 
 const LOCALE_STORAGE_KEY = 'kalpx_lang';
 
 const translations: Record<Locale, Record<string, unknown>> = {
   en: en as Record<string, unknown>,
   hi: hi as Record<string, unknown>,
+  te: te as Record<string, unknown>,
 };
 
 interface I18nContextValue {
@@ -33,11 +35,12 @@ const I18nContext = createContext<I18nContextValue>({
 function detectInitialLocale(): Locale {
   try {
     const stored = localStorage.getItem(LOCALE_STORAGE_KEY);
-    if (stored === 'en' || stored === 'hi') return stored;
+    if (stored === 'en' || stored === 'hi' || stored === 'te') return stored;
   } catch {}
   if (typeof navigator !== 'undefined') {
     const lang = navigator.language?.split('-')[0];
     if (lang === 'hi') return 'hi';
+    if (lang === 'te') return 'te';
   }
   return 'en';
 }

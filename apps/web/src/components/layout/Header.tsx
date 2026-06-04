@@ -223,7 +223,7 @@ export function Header({
               }}
             >
               <Globe size={13} strokeWidth={2} />
-              {locale === 'hi' ? 'हि' : 'EN'}
+              {locale === 'hi' ? 'हि' : locale === 'te' ? 'తె' : 'EN'}
             </button>
 
             {langOpen && (
@@ -245,6 +245,7 @@ export function Header({
                   [
                     { code: 'en' as Locale, label: 'English' },
                     { code: 'hi' as Locale, label: 'हिंदी' },
+                    { code: 'te' as Locale, label: 'తెలుగు' },
                   ] as const
                 ).map(({ code, label }) => (
                   <button
@@ -261,7 +262,7 @@ export function Header({
                       color: locale === code ? "var(--kalpx-cta)" : "var(--kalpx-text)",
                       background: locale === code ? "rgba(184,134,75,0.07)" : "none",
                       border: "none",
-                      borderBottom: code === 'en' ? "1px solid var(--kalpx-border-gold)" : "none",
+                      borderBottom: code !== 'te' ? "1px solid var(--kalpx-border-gold)" : "none",
                       cursor: "pointer",
                       textAlign: "left",
                     }}

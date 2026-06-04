@@ -10,6 +10,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { useScrollContext } from "../context/ScrollContext";
 import { useScreenStore } from "../engine/useScreenBridge";
@@ -20,14 +21,18 @@ import { store } from "../store";
 import Header from "./Header";
 
 // Total header height including status bar safe area on Android
-const HEADER_HEIGHT =
+const MOBILE_HEADER_HEIGHT =
   Platform.OS === "android" ? 10 + (StatusBar.currentHeight || 0) : 45;
+const TABLET_HEADER_HEIGHT =
+  Platform.OS === "android" ? 14 + (StatusBar.currentHeight || 0) : 64;
 const DEFAULT_SURFACE = "#FAF7F2";
 
 const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
   const { headerY, toggleVisibility } = useScrollContext();
   const currentBackground = useScreenStore((state) => state.currentBackground);
   const isHeaderHidden = useScreenStore((state) => state.isHeaderHidden);
+  const { width } = useWindowDimensions();
+  const HEADER_HEIGHT = width >= 768 ? TABLET_HEADER_HEIGHT : MOBILE_HEADER_HEIGHT;
 
   // Back button logic — lives here so it rides the headerY animation for free
   const {
@@ -289,7 +294,7 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
         <Animated.View
           style={[
             styles.headerContainer,
-            { transform: [{ translateY: headerY }] },
+            { height: HEADER_HEIGHT, transform: [{ translateY: headerY }] },
             !hasBg &&
               (shouldUseDefaultSurface
                 ? styles.defaultSurface
@@ -306,7 +311,7 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
               >
                 <Ionicons
                   name="chevron-back"
-                  size={24}
+                  size={width >= 768 ? 30 : 24}
                   color={backArrowColor}
                 />
               </TouchableOpacity>
@@ -345,7 +350,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 1000,
-    height: HEADER_HEIGHT,
+    height: MOBILE_HEADER_HEIGHT,
     justifyContent: "center",
   },
   // Match KalpX logo header background so the back arrow blends in

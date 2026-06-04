@@ -7,7 +7,7 @@ import {
 } from "@react-navigation/native";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Platform, StyleSheet, TouchableOpacity, View, useWindowDimensions } from "react-native";
 import { Ionicons as Icon } from "@expo/vector-icons";
 
 import FontSize from "../../components/FontSize";
@@ -32,6 +32,10 @@ const BottomMenuContent = () => {
   const navigation = useNavigation();
   const { isVisible } = useScrollContext();
   const currentBackground = useScreenStore((state) => state.currentBackground);
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+  const tabIconSize = isTablet ? 30 : 24;
+  const tabBarHeight = isTablet ? 80 : FontSize.CONSTS.DEVICE_HEIGHT * 0.07;
 
   return (
     <GlobalScrollLayout>
@@ -65,7 +69,7 @@ const BottomMenuContent = () => {
               elevation: 0,
               shadowOpacity: 0,
               shadowColor: "transparent",
-              height: FontSize.CONSTS.DEVICE_HEIGHT * 0.07,
+              height: tabBarHeight,
               paddingBottom: Platform.OS === "ios" ? 10 : 6,
               position: "relative",
             },
@@ -74,7 +78,7 @@ const BottomMenuContent = () => {
             tabBarInactiveTintColor: "#000",
             tabBarAllowFontScaling: false,
             tabBarLabelStyle: {
-              fontSize: 12,
+              fontSize: isTablet ? 15 : 12,
             },
             tabBarButton: TabBarButton,
           };
@@ -88,7 +92,7 @@ const BottomMenuContent = () => {
             tabBarIcon: ({ color, focused }) => (
               <Icon
                 name={focused ? "home" : "home-outline"}
-                size={24}
+                size={tabIconSize}
                 color={color}
               />
             ),
@@ -117,7 +121,7 @@ const BottomMenuContent = () => {
             tabBarIcon: ({ color, focused }) => (
               <Icon
                 name={focused ? "notifications" : "notifications-outline"}
-                size={24}
+                size={tabIconSize}
                 color={color}
               />
             ),
@@ -131,7 +135,7 @@ const BottomMenuContent = () => {
             tabBarIcon: ({ color, focused }) => (
               <Icon
                 name={focused ? "person" : "person-outline"}
-                size={24}
+                size={tabIconSize}
                 color={color}
               />
             ),
@@ -149,7 +153,7 @@ const BottomMenuContent = () => {
           options={{
             tabBarLabel: t("tabs.Menu"),
             tabBarIcon: ({ color, focused }) => (
-              <Icon name="menu" size={24} color={color} />
+              <Icon name="menu" size={tabIconSize} color={color} />
             ),
           }}
         />

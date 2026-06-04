@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, TouchableOpacity, View, useWindowDimensions } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../store";
@@ -18,6 +18,8 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ isTransparent, backgroundColor }) => {
   const navigation = useNavigation<any>();
   const { i18n } = useTranslation();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   const dispatch = useDispatch<any>();
   const runnerActiveItem = useSelector((state: RootState) => (state.screen as any).screenData?.runner_active_item ?? null);
   const [selectedLang, setSelectedLang] = useState(i18n.language);
@@ -97,7 +99,7 @@ const Header: React.FC<HeaderProps> = ({ isTransparent, backgroundColor }) => {
         <Image
           source={require("../../assets/KalpXlogo.png")}
           resizeMode="contain"
-          style={styles.logo}
+          style={[styles.logo, isTablet && { width: 148, height: 54 }]}
         />
       </TouchableOpacity>
 

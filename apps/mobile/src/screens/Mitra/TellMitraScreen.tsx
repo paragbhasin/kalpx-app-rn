@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import TellMitraContainer from "../../containers/TellMitraContainer";
 import { Fonts } from "../../theme/fonts";
+import { sfs } from "../../utils/responsive";
 
 export default function TellMitraScreen() {
   const { t } = useTranslation();
@@ -41,7 +42,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FAF7F2",
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: sfs(22),
     fontFamily: Fonts.serif.bold,
     color: "#432104",
     fontWeight: "700",

@@ -11,10 +11,11 @@
  */
 
 import React, { useEffect, useRef } from "react";
-import { Animated, Easing, StyleSheet, Text, View } from "react-native";
+import { Animated, Easing, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Fonts } from "../theme/fonts";
 import { useScreenStore } from "../engine/useScreenBridge";
+import { rfs, TABLET_MAX_CARD_WIDTH } from "../utils/responsive";
 
 interface Props {
   block?: any;
@@ -26,6 +27,8 @@ const CompanionedChant: React.FC<Props> = ({ block, mantra, transliteration }) =
   const { t, i18n } = useTranslation();
   const isHindi = i18n.language === "hi";
   const { screenData } = useScreenStore();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   const reducedMotion = !!(screenData as any).reduced_motion_preference;
   const userPulse = useRef(new Animated.Value(0.9)).current;
   const mitraPulse = useRef(new Animated.Value(0.8)).current;
@@ -68,11 +71,12 @@ const CompanionedChant: React.FC<Props> = ({ block, mantra, transliteration }) =
     "Om saha nāvavatu";
 
   return (
-    <View style={styles.wrap}>
-      <View style={styles.orbs}>
+    <View style={[styles.wrap, isTablet && { maxWidth: TABLET_MAX_CARD_WIDTH, alignSelf: 'center', width: '100%' }]}>
+      <View style={[styles.orbs, isTablet && { gap: 32, marginBottom: 28 }]}>
         <Animated.View
           style={[
             styles.orb,
+            isTablet && { width: 92, height: 92, borderRadius: 46 },
             styles.userOrb,
             !reducedMotion && { transform: [{ scale: userPulse }] },
           ]}
@@ -81,6 +85,7 @@ const CompanionedChant: React.FC<Props> = ({ block, mantra, transliteration }) =
         <Animated.View
           style={[
             styles.orb,
+            isTablet && { width: 92, height: 92, borderRadius: 46 },
             styles.mitraOrb,
             !reducedMotion && { transform: [{ scale: mitraPulse }] },
           ]}
@@ -98,6 +103,7 @@ const styles = StyleSheet.create({
   wrap: {
     alignItems: "center",
     paddingVertical: 18,
+    paddingHorizontal: 16,
   },
   orbs: {
     flexDirection: "row",

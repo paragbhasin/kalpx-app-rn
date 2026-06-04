@@ -15,7 +15,9 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
+import { rfs, TABLET_MAX_CARD_WIDTH } from "../utils/responsive";
 import { useTranslation } from "react-i18next";
 import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
@@ -103,6 +105,8 @@ const PathEmergesBlock: React.FC<Props> = () => {
   const { t, i18n } = useTranslation();
   const isHindi = i18n.language === "hi";
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   const [whyOpen, setWhyOpen] = useState(false);
   const triad = screenData.onboarding_triad_data?.triad || {};
 
@@ -156,10 +160,10 @@ const PathEmergesBlock: React.FC<Props> = () => {
   };
 
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, isTablet && { maxWidth: TABLET_MAX_CARD_WIDTH, alignSelf: 'center', width: '100%' }]}>
       {!!screenData.v3_start_failed && (
         <View style={styles.errorBanner}>
-          <Text style={styles.errorText}>
+          <Text style={[styles.errorText, { fontSize: rfs(14, width) }]}>
             {t("errors.somethingWentWrong")}
           </Text>
         </View>
@@ -181,6 +185,7 @@ const PathEmergesBlock: React.FC<Props> = () => {
             style={[
               styles.card,
               { backgroundColor: theme.bg, borderColor: theme.border },
+              isTablet && { paddingHorizontal: 24, paddingVertical: 22, marginBottom: 18 },
             ]}
             testID={`triad-${card.kind}`}
             accessibilityLabel={`triad-${card.kind}`}
@@ -190,21 +195,22 @@ const PathEmergesBlock: React.FC<Props> = () => {
                 style={[
                   styles.iconCircle,
                   { borderColor: `${theme.accent}33` },
+                  isTablet && { width: 48, height: 48, borderRadius: 24 },
                 ]}
               >
                 <ThemeIcon kind={card.kind} accent={theme.accent} />
               </View>
 
               <View style={styles.textWrap}>
-                <Text style={[styles.label, { color: theme.accent }, isHindi && { letterSpacing: 0 }]}>
+                <Text style={[styles.label, { color: theme.accent, fontSize: rfs(13, width) }, isHindi && { letterSpacing: 0 }]}>
                   {t(`turn8.labels.${card.kind}`)}
                 </Text>
-                <Text style={styles.title}>{title}</Text>
+                <Text style={[styles.title, { fontSize: rfs(18, width) }]}>{title}</Text>
               </View>
 
               <Ionicons
                 name="chevron-forward"
-                size={20}
+                size={isTablet ? 24 : 20}
                 color={theme.accent}
               />
             </View>
@@ -240,9 +246,9 @@ const PathEmergesBlock: React.FC<Props> = () => {
               />
             </View>
             <View style={styles.whyHeaderTextWrap}>
-              <Text style={[styles.whyHeaderTitle, isHindi && { letterSpacing: 0 }]}>{t("turn8.why.header")}</Text>
+              <Text style={[styles.whyHeaderTitle, { fontSize: rfs(18, width) }, isHindi && { letterSpacing: 0 }]}>{t("turn8.why.header")}</Text>
               {!whyOpen && (
-                <Text style={[styles.whyHeaderSubtitle, isHindi && { letterSpacing: 0 }]}>
+                <Text style={[styles.whyHeaderSubtitle, { fontSize: rfs(14, width) }, isHindi && { letterSpacing: 0 }]}>
                   {t("turn8.why.subheader")}
                 </Text>
               )}
@@ -257,8 +263,8 @@ const PathEmergesBlock: React.FC<Props> = () => {
           {whyOpen && (
             <View style={styles.whyBody}>
               <View style={styles.whyBodyHeader}>
-                <Text style={[styles.whyEyebrow, isHindi && { letterSpacing: 0 }]}>{t("turn8.why.chosenWith")}</Text>
-                <Text style={[styles.whyBodyTitle, isHindi && { letterSpacing: 0 }]}>{t("turn8.why.whySupports")}</Text>
+                <Text style={[styles.whyEyebrow, { fontSize: rfs(11, width) }, isHindi && { letterSpacing: 0 }]}>{t("turn8.why.chosenWith")}</Text>
+                <Text style={[styles.whyBodyTitle, { fontSize: rfs(18, width) }, isHindi && { letterSpacing: 0 }]}>{t("turn8.why.whySupports")}</Text>
               </View>
 
               <View style={styles.tabRow}>
@@ -284,6 +290,7 @@ const PathEmergesBlock: React.FC<Props> = () => {
                             color: selected
                               ? THEME[tab.kind].accent
                               : "#7A6A58",
+                            fontSize: rfs(11, width),
                           },
                         ]}
                       >
@@ -298,13 +305,13 @@ const PathEmergesBlock: React.FC<Props> = () => {
                 <Text
                   style={[
                     styles.whyDetailLabel,
-                    { color: THEME[activeWhyKind].accent },
+                    { color: THEME[activeWhyKind].accent, fontSize: rfs(11, width) },
                     isHindi && { letterSpacing: 0 },
                   ]}
                 >
                   {t(`turn8.tabs.${activeWhyKind}`)}
                 </Text>
-                <Text style={styles.whyDetailTitle}>
+                <Text style={[styles.whyDetailTitle, { fontSize: rfs(18, width) }]}>
                   {activeWhyKind === "sankalp"
                     ? activeWhyItem.title || ""
                     : `${activeWhyItem.title || ""}`}
@@ -312,8 +319,8 @@ const PathEmergesBlock: React.FC<Props> = () => {
 
                 {!!activeWhyContext.mitra_frame_through && (
                   <View style={styles.primaryReasonCard}>
-                    <Text style={[styles.reasonLabel, isHindi && { letterSpacing: 0 }]}>{t("turn8.why.essence")}</Text>
-                    <Text style={[styles.reasonBody, isHindi && { letterSpacing: 0 }]}>
+                    <Text style={[styles.reasonLabel, { fontSize: rfs(11, width) }, isHindi && { letterSpacing: 0 }]}>{t("turn8.why.essence")}</Text>
+                    <Text style={[styles.reasonBody, { fontSize: rfs(15, width) }, isHindi && { letterSpacing: 0 }]}>
                       {sentence(
                         activeWhyKind === "sankalp"
                           ? t("turn8.why.frameSankalp", { frame: activeWhyContext.mitra_frame_through })
@@ -325,8 +332,8 @@ const PathEmergesBlock: React.FC<Props> = () => {
 
                 {!!activeShift && (
                   <View style={styles.primaryReasonCard}>
-                    <Text style={[styles.reasonLabel, isHindi && { letterSpacing: 0 }]}>{t("turn8.why.shift")}</Text>
-                    <Text style={[styles.reasonBody, isHindi && { letterSpacing: 0 }]}>
+                    <Text style={[styles.reasonLabel, { fontSize: rfs(11, width) }, isHindi && { letterSpacing: 0 }]}>{t("turn8.why.shift")}</Text>
+                    <Text style={[styles.reasonBody, { fontSize: rfs(15, width) }, isHindi && { letterSpacing: 0 }]}>
                       {sentence(t("turn8.why.shiftLabel", { shift: activeShift }))}
                     </Text>
                   </View>
@@ -335,8 +342,8 @@ const PathEmergesBlock: React.FC<Props> = () => {
                 <View style={styles.secondaryReasonGrid}>
                   {!!activeWhyContext.mitra_use_for && (
                     <View style={styles.secondaryReasonCard}>
-                      <Text style={[styles.reasonLabel, isHindi && { letterSpacing: 0 }]}>{t("turn8.why.usefulFor")}</Text>
-                      <Text style={[styles.reasonBody, isHindi && { letterSpacing: 0 }]}>
+                      <Text style={[styles.reasonLabel, { fontSize: rfs(11, width) }, isHindi && { letterSpacing: 0 }]}>{t("turn8.why.usefulFor")}</Text>
+                      <Text style={[styles.reasonBody, { fontSize: rfs(15, width) }, isHindi && { letterSpacing: 0 }]}>
                         {sentence(activeWhyContext.mitra_use_for)}
                       </Text>
                     </View>
@@ -344,8 +351,8 @@ const PathEmergesBlock: React.FC<Props> = () => {
 
                   {!!activeWhyContext.commentary_lineage && (
                     <View style={styles.secondaryReasonCard}>
-                      <Text style={[styles.reasonLabel, isHindi && { letterSpacing: 0 }]}>{t("turn8.why.rootedIn")}</Text>
-                      <Text style={[styles.reasonBody, isHindi && { letterSpacing: 0 }]}>
+                      <Text style={[styles.reasonLabel, { fontSize: rfs(11, width) }, isHindi && { letterSpacing: 0 }]}>{t("turn8.why.rootedIn")}</Text>
+                      <Text style={[styles.reasonBody, { fontSize: rfs(15, width) }, isHindi && { letterSpacing: 0 }]}>
                         {sentence(activeWhyContext.commentary_lineage)}
                       </Text>
                     </View>
@@ -366,7 +373,7 @@ const PathEmergesBlock: React.FC<Props> = () => {
         <View style={styles.footerLine} />
       </View>
 
-      <Text style={[styles.footer, isHindi && { letterSpacing: 0 }]}>
+      <Text style={[styles.footer, { fontSize: rfs(17, width) }, isHindi && { letterSpacing: 0 }]}>
         {t("turn8.footer")}
       </Text>
     </View>

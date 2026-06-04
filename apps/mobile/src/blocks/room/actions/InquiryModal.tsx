@@ -29,11 +29,13 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { sfs } from "../../../utils/responsive";
 import type { InquiryCategory, InquiryPayload } from "../types";
 
 interface Props {
@@ -71,6 +73,8 @@ const InquiryModal: React.FC<Props> = ({
   const { t, i18n } = useTranslation();
   const isHindi = i18n.language === "hi";
   const insets = useSafeAreaInsets();
+  const { width: windowWidth } = useWindowDimensions();
+  const isTablet = windowWidth >= 768;
   const [selected, setSelected] = useState<InquiryCategory | null>(null);
   const [journalOpen, setJournalOpen] = useState<boolean>(false);
   const [journalText, setJournalText] = useState<string>("");
@@ -154,6 +158,7 @@ const InquiryModal: React.FC<Props> = ({
           style={[
             styles.sheet,
             presentation === "screen" ? styles.screenSheet : null,
+            presentation === "sheet" && isTablet ? styles.tabletSheet : null,
           ]}
         >
           <ImageBackground
@@ -447,6 +452,11 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
   },
+  tabletSheet: {
+    maxWidth: 620,
+    alignSelf: "center",
+    width: "100%",
+  },
   sheetBackground: {
     width: "100%",
     flex: 1,
@@ -485,13 +495,13 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   headerCancel: {
-    fontSize: 15,
+    fontSize: sfs(15),
     color: "#6E6E73",
   },
   headerTitle: {
     flex: 1,
     textAlign: "center",
-    fontSize: 16,
+    fontSize: sfs(16),
     fontWeight: "600",
     color: "#432104",
     alignSelf: "center",
@@ -520,7 +530,7 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   screenHeroTitle: {
-    fontSize: 22,
+    fontSize: sfs(22),
     lineHeight: 42,
     fontWeight: "700",
     color: "#432104",
@@ -541,12 +551,12 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(212,166,74,0.42)",
   },
   screenDividerDiamond: {
-    fontSize: 16,
+    fontSize: sfs(16),
     color: "#D4A64A",
     lineHeight: 16,
   },
   screenHeroBody: {
-    fontSize: 16,
+    fontSize: sfs(16),
     lineHeight: 30,
     color: "#7A6A58",
     textAlign: "center",
@@ -563,12 +573,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
   },
   screenBackButtonText: {
-    fontSize: 16,
+    fontSize: sfs(16),
     color: "#6E6E73",
   },
 
   emptyHint: {
-    fontSize: 14,
+    fontSize: sfs(14),
     color: "#8E8E93",
     textAlign: "center",
     paddingVertical: 40,
@@ -598,17 +608,17 @@ const styles = StyleSheet.create({
     marginVertical: 7,
   },
   categoryLabel: {
-    fontSize: 15,
+    fontSize: sfs(15),
     fontWeight: "600",
     color: "#432104",
   },
   screenCategoryLabel: {
-    fontSize: 14,
+    fontSize: sfs(14),
     lineHeight: 24,
   },
 
   anchorLine: {
-    fontSize: 16,
+    fontSize: sfs(16),
     color: "#432104",
     textAlign: "center",
     lineHeight: 28,
@@ -617,7 +627,7 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
   },
   screenAnchorLine: {
-    fontSize: 15,
+    fontSize: sfs(15),
     lineHeight: 24,
     color: "#B67912",
     fontStyle: "italic",
@@ -626,7 +636,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   reflectivePrompt: {
-    fontSize: 15,
+    fontSize: sfs(15),
     color: "#432104",
     textAlign: "center",
 
@@ -634,7 +644,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   screenReflectivePrompt: {
-    fontSize: 16,
+    fontSize: sfs(16),
     lineHeight: 32,
     color: "#4A3B2F",
     textAlign: "center",
@@ -659,7 +669,7 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   actionBtnLabel: {
-    fontSize: 15,
+    fontSize: sfs(15),
     color: "#432104",
   },
   doneBtn: {
@@ -716,7 +726,7 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   primaryActionLabel: {
-    fontSize: 17,
+    fontSize: sfs(17),
     fontWeight: "600",
     color: "#ffffff",
     textAlign: "center",
@@ -738,7 +748,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    fontSize: 15,
+    fontSize: sfs(15),
     color: "#432104",
     lineHeight: 23,
     backgroundColor: "rgba(255,255,255,0.52)",
@@ -750,18 +760,18 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.76)",
     paddingHorizontal: 20,
     paddingVertical: 18,
-    fontSize: 16,
+    fontSize: sfs(16),
     lineHeight: 26,
   },
   textCounter: {
-    fontSize: 12,
+    fontSize: sfs(12),
     color: "#8B6A43",
     textAlign: "right",
     marginTop: 6,
     marginBottom: 10,
   },
   screenTextCounter: {
-    fontSize: 13,
+    fontSize: sfs(13),
     marginTop: 10,
     marginBottom: 18,
   },

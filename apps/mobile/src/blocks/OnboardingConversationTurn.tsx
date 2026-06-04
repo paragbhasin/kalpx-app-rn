@@ -17,7 +17,7 @@
 
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   Animated,
   Image,
@@ -25,16 +25,21 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import { useSelector } from "react-redux";
 import { VoiceTextInput } from "../components/VoiceTextInput";
 import { executeAction } from "../engine/actionExecutor";
 import { mitraCompleteOnboarding } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { interpolate } from "../engine/utils/interpolation";
-import { RootState } from "../store";
 import { Fonts } from "../theme/fonts";
+import {
+  TABLET_MAX_CARD_WIDTH,
+  rfs,
+  rs,
+  useTablet,
+} from "../utils/responsive";
 
 interface Props {
   block: {
@@ -71,7 +76,6 @@ interface Props {
 const GOLD_BORDER = "#9f9f9f"; // subtle gold border / card accent
 const AMBER_CTA = "#c89a47"; // primary CTA fill (matches "Begin Chanting")
 const DEEP_BROWN = "#432104"; // primary text
-const WARM_SUBTEXT = "#6b5a45"; // secondary text
 const CREAM = "#FEFDF9A1"; // card surface
 const CHIP_BG = "#FBF5F5"; // secondary chip fill
 
@@ -102,15 +106,11 @@ const turnOneMessageIcons: (keyof typeof Ionicons.glyphMap)[] = [
 const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
   const { t, i18n } = useTranslation();
   const isHindi = i18n.language === "hi";
+  const { width } = useWindowDimensions();
+  const isTablet = useTablet();
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
-  const user = useSelector(
-    (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
-  );
-  const isLoggedIn = !!user;
-
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const replyAnim = useRef(new Animated.Value(0)).current;
-  const [text, setText] = useState("");
   // `screenData.onboarding_turn` is a state-id string (e.g. "turn_2",
   // "turn_3_support") after the first turn response; extract digits so
   // testIDs like `onboarding_turn_<n>_root` get a real number, not NaN.
@@ -219,7 +219,6 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
 
   const inlineImageSource = resolveBlockImage(block.image?.url);
   const headlineLines = (block.headline || "").split("\n").filter(Boolean);
-  const featureMessages = messages.slice(0, 3);
   const closingMessage = messages[3] || "";
 
   const fire = async (payload: Record<string, any>) => {
@@ -301,12 +300,29 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
 
     return (
       <View
-        style={styles.turnOneWrap}
+        style={[
+          styles.turnOneWrap,
+          isTablet && {
+            maxWidth: TABLET_MAX_CARD_WIDTH,
+            alignSelf: "center",
+            width: "100%",
+          },
+        ]}
         testID={`onboarding_turn_${turn}_root`}
         accessibilityLabel={`onboarding_turn_${turn}_root`}
       >
         <View style={styles.turnOneCard}>
-          <Text style={styles.turnOneHeadline}>{t1HeadlineLines.join("\n")}</Text>
+          <Text
+            style={[
+              styles.turnOneHeadline,
+              {
+                fontSize: rfs(28, width),
+                lineHeight: rs(38, 46, width),
+              },
+            ]}
+          >
+            {t1HeadlineLines.join("\n")}
+          </Text>
 
           <View style={styles.turnOneHeadlineDivider}>
             <View style={styles.turnOneDividerLine} />
@@ -324,7 +340,12 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                     color="#c7a258"
                   />
                 </View>
-                <Text style={styles.turnOneMessageText}>
+                <Text
+                  style={[
+                    styles.turnOneMessageText,
+                    { fontSize: rfs(18, width) },
+                  ]}
+                >
                   {interpolate(message, screenData)}
                 </Text>
               </View>
@@ -338,7 +359,12 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                 <View style={styles.turnOneIconBubble}>
                   <Ionicons name="heart-outline" size={22} color="#c7a258" />
                 </View>
-                <Text style={styles.turnOneClosingText}>
+                <Text
+                  style={[
+                    styles.turnOneClosingText,
+                    { fontSize: rfs(17, width) },
+                  ]}
+                >
                   {interpolate(closingMessage, screenData).replace(
                     "alone.",
                     "",
@@ -361,7 +387,15 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
         )}
 
         <Animated.View
-          style={[styles.turnOneResponseWrap, { opacity: replyAnim }]}
+          style={[
+            styles.turnOneResponseWrap,
+            { opacity: replyAnim },
+            isTablet && {
+              maxWidth: TABLET_MAX_CARD_WIDTH,
+              alignSelf: "center",
+              width: "100%",
+            },
+          ]}
         >
           {(block.reply_chips || []).map((chip) => {
             const chipTestID = `onboarding_turn_${turn}_chip_${chip.id}`;
@@ -387,7 +421,12 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                       size={20}
                       color="#fff9ec"
                     />
-                    <Text style={styles.turnOnePrimaryButtonText}>
+                    <Text
+                      style={[
+                        styles.turnOnePrimaryButtonText,
+                        { fontSize: rfs(17, width) },
+                      ]}
+                    >
                       {t1ChipLabel(chip).replace(" →", "")}
                     </Text>
                     <Ionicons name="arrow-forward" size={22} color="#fff9ec" />
@@ -399,7 +438,12 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                       styles.turnOneSecondaryButton,
                     ]}
                   >
-                    <Text style={styles.turnOneSecondaryButtonText}>
+                    <Text
+                      style={[
+                        styles.turnOneSecondaryButtonText,
+                        { fontSize: rfs(17, width) },
+                      ]}
+                    >
                       {t1ChipLabel(chip)}
                     </Text>
                   </View>
@@ -434,7 +478,14 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
 
     return (
       <View
-        style={styles.wrap}
+        style={[
+          styles.wrap,
+          isTablet && {
+            maxWidth: TABLET_MAX_CARD_WIDTH,
+            alignSelf: "center",
+            width: "100%",
+          },
+        ]}
         testID="onboarding_recognition_root"
         accessibilityLabel="onboarding_recognition_root"
       >
@@ -449,13 +500,24 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
             <View style={styles.turnOneDividerLine} />
           </View>
 
-          <Text style={styles.recognitionEmphasized}>
+          <Text
+            style={[
+              styles.recognitionEmphasized,
+              { fontSize: rfs(20, width), lineHeight: rs(30, 34, width) },
+            ]}
+          >
             {interpolate(rec.emphasized_line, screenData)}
           </Text>
 
           <View style={styles.recognitionBodyList}>
             {paras.map((p: string, i: number) => (
-              <Text key={i} style={styles.recognitionBodyText}>
+              <Text
+                key={i}
+                style={[
+                  styles.recognitionBodyText,
+                  { fontSize: rfs(18, width) },
+                ]}
+              >
                 {interpolate(p, screenData)}
               </Text>
             ))}
@@ -465,6 +527,11 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
             style={[
               styles.turnOneResponseWrap,
               { opacity: replyAnim, marginTop: 20 },
+              isTablet && {
+                maxWidth: TABLET_MAX_CARD_WIDTH,
+                alignSelf: "center",
+                width: "100%",
+              },
             ]}
           >
             {(block.reply_chips || []).map((chip) => {
@@ -490,7 +557,13 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                     end={{ x: 1, y: 0.5 }}
                     style={[styles.turnOneButton, styles.turnOnePrimaryButton]}
                   >
-                    <Text style={[styles.turnOnePrimaryButtonText, isHindi && { letterSpacing: 0 }]}>
+                    <Text
+                      style={[
+                        styles.turnOnePrimaryButtonText,
+                        { fontSize: rfs(17, width) },
+                        isHindi && { letterSpacing: 0 },
+                      ]}
+                    >
                       {t7ChipLabel(chip)}
                     </Text>
                   </LinearGradient>
@@ -512,7 +585,14 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
     : `onboarding_turn_${turn}_root`;
   return (
     <View
-      style={styles.wrap}
+      style={[
+        styles.wrap,
+        isTablet && {
+          maxWidth: TABLET_MAX_CARD_WIDTH,
+          alignSelf: "center",
+          width: "100%",
+        },
+      ]}
       testID={rootTestID}
       accessibilityLabel={rootTestID}
     >
@@ -541,6 +621,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
               style={[
                 styles.unifiedHeadline,
                 isGuidanceModeTurn ? styles.guidanceHeadline : null,
+                { fontSize: rfs(24, width), lineHeight: rs(34, 40, width) },
               ]}
             >
               {headlineLines.join("\n")}
@@ -563,6 +644,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                 style={[
                   styles.unifiedSubtext,
                   isGuidanceModeTurn ? styles.guidanceSubtext : null,
+                  { fontSize: rfs(15, width) },
                 ]}
               >
                 {interpolate(block.subtext, screenData)}
@@ -582,7 +664,14 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                 para && String(para).trim().length > 0 ? (
                   <Text
                     key={i}
-                    style={[styles.mitraMsg, i > 0 && { marginTop: 12 }]}
+                    style={[
+                      styles.mitraMsg,
+                      i > 0 && { marginTop: 12 },
+                      {
+                        fontSize: rfs(20, width),
+                        lineHeight: rs(28, 34, width),
+                      },
+                    ]}
                   >
                     {interpolate(para, screenData)}
                   </Text>
@@ -648,7 +737,14 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                 {isPathButtonBlock && chip.style === "primary" ? (
                   <View style={styles.pathBeginButton}>
                     <View style={styles.pathBeginLeaf}></View>
-                    <Text style={styles.pathBeginLabel}>{t8ChipLabel(chip)}</Text>
+                    <Text
+                      style={[
+                        styles.pathBeginLabel,
+                        { fontSize: rfs(22, width) },
+                      ]}
+                    >
+                      {t8ChipLabel(chip)}
+                    </Text>
                   </View>
                 ) : isIntroTurn && chip.style !== "primary" ? (
                   <LinearGradient
@@ -657,7 +753,14 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                     end={{ x: 1, y: 0 }}
                     style={[styles.heroChip, styles.heroChipSecondary]}
                   >
-                    <Text style={styles.heroChipLabel}>{chip.label}</Text>
+                    <Text
+                      style={[
+                        styles.heroChipLabel,
+                        { fontSize: rfs(16, width) },
+                      ]}
+                    >
+                      {chip.label}
+                    </Text>
                   </LinearGradient>
                 ) : (
                   <View
@@ -679,6 +782,11 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                           (isIntroTurn
                             ? styles.heroChipLabelPrimary
                             : styles.chipLabelPrimary),
+                        {
+                          fontSize: isIntroTurn
+                            ? rfs(16, width)
+                            : rfs(15, width),
+                        },
                       ]}
                     >
                       {t8ChipLabel(chip)}

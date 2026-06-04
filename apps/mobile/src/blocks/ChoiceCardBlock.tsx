@@ -2,17 +2,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  Dimensions,
   Image,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { Fonts } from "../theme/fonts";
-
-const { width } = Dimensions.get("window");
+import { rfs, TABLET_MAX_CARD_WIDTH } from "../utils/responsive";
 
 interface Option {
   id: string;
@@ -193,6 +192,8 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
     updateScreenData,
     currentScreen,
   } = useScreenStore();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
 
   const options = useMemo(() => {
     if (block.options) return block.options;
@@ -299,6 +300,7 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
                   : "100%",
                 marginBottom: isGrid ? 12 : 0,
               },
+              !isGrid && isTablet && { maxWidth: TABLET_MAX_CARD_WIDTH, alignSelf: 'center' },
             ]}
           >
             {/* Gold Accent Line for List View */}
@@ -421,6 +423,7 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
                         isGrid && styles.gridTitle,
                         isPremiumGrid && styles.premiumTitle,
                         isDisciplineGrid && styles.disciplineTitle,
+                        { fontSize: rfs(16, width) },
                       ]}
                     >
                       {option.title || option.label}
@@ -452,6 +455,7 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
                             styles.tagText,
                             isPremiumGrid && styles.premiumTagText,
                             isDisciplineGrid && styles.disciplineTagText,
+                            { fontSize: rfs(13, width) },
                           ]}
                         >
                           {tag}
@@ -466,6 +470,7 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
                       style={[
                         styles.description,
                         (isGrid || isPremiumGrid) && styles.gridDescription,
+                        { fontSize: rfs(15, width) },
                       ]}
                     >
                       {option.description}
@@ -507,6 +512,7 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
                       styles.miniBtnText,
                       option.button_style === "outline" &&
                         styles.miniBtnTextOutline,
+                      { fontSize: rfs(13, width) },
                     ]}
                   >
                     {option.button_label}

@@ -50,6 +50,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { sfs } from "../../../utils/responsive";
 import type { StepPayload } from "../types";
 
 export type StepModalKind =
@@ -128,7 +129,8 @@ const StepModal: React.FC<Props> = ({
   const isHindi = i18n.language === "hi";
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [sheetHeight, setSheetHeight] = useState(0);
-  const { height: windowHeight } = useWindowDimensions();
+  const { height: windowHeight, width: windowWidth } = useWindowDimensions();
+  const isTablet = windowWidth >= 768;
   const insets = useSafeAreaInsets();
   const kind = useMemo(
     () => classifyStep(stepPayload?.template_id),
@@ -211,6 +213,7 @@ const StepModal: React.FC<Props> = ({
           style={[
             styles.sheet,
             presentation === "screen" ? styles.screenSheet : null,
+            presentation === "sheet" && isTablet ? styles.tabletSheet : null,
             sheetBottomOffset > 0 && { marginBottom: sheetBottomOffset },
           ]}
         >
@@ -727,7 +730,7 @@ const TimerBody: React.FC<TimerBodyProps> = ({
           testID="step_modal_timer_done"
           accessibilityState={{ disabled: false }}
         >
-          <Text style={[styles.primaryActionLabel, { fontSize: 15 }, isHindi && { letterSpacing: 0 }]}>
+          <Text style={[styles.primaryActionLabel, { fontSize: sfs(15) }, isHindi && { letterSpacing: 0 }]}>
             {t('room.phases.common.done')}
           </Text>
         </TouchableOpacity>
@@ -1388,7 +1391,7 @@ const UnknownBody: React.FC<{ onDone: (extra: StepModalResult) => void }> = ({
         onPress={() => onDone({})}
         testID="step_modal_unknown_done"
       >
-        <Text style={[styles.primaryActionLabel, { fontSize: 15 }, isHindi && { letterSpacing: 0 }]}>{t('room.phases.common.done')}</Text>
+        <Text style={[styles.primaryActionLabel, { fontSize: sfs(15) }, isHindi && { letterSpacing: 0 }]}>{t('room.phases.common.done')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -1417,6 +1420,11 @@ const styles = StyleSheet.create({
     maxHeight: "100%",
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
+  },
+  tabletSheet: {
+    maxWidth: 620,
+    alignSelf: "center",
+    width: "100%",
   },
   sheetBackground: {
     width: "100%",
@@ -1455,11 +1463,11 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   headerCancel: {
-    fontSize: 15,
+    fontSize: sfs(15),
     color: "#6E6E73",
   },
   headerTitle: {
-    fontSize: 15,
+    fontSize: sfs(15),
     fontWeight: "600",
     color: "#1C1C1E",
     textAlign: "center",
@@ -1501,13 +1509,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   immersiveBackIcon: {
-    fontSize: 30,
+    fontSize: sfs(30),
     lineHeight: 32,
     color: "#A7792E",
     marginTop: -2,
   },
   immersiveCancel: {
-    fontSize: 16,
+    fontSize: sfs(16),
     color: "#45403A",
   },
   immersiveHero: {
@@ -1522,7 +1530,7 @@ const styles = StyleSheet.create({
     opacity: 0.95,
   },
   immersiveTitle: {
-    fontSize: 22,
+    fontSize: sfs(22),
     lineHeight: Platform.OS === "android" ? 32 : 38,
     color: "#2C1C11",
     textAlign: "center",
@@ -1544,12 +1552,12 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(184,134,50,0.42)",
   },
   immersiveDividerDiamond: {
-    fontSize: 16,
+    fontSize: sfs(16),
     lineHeight: 16,
     color: "#B88632",
   },
   immersiveDescription: {
-    fontSize: 14,
+    fontSize: sfs(14),
     lineHeight: Platform.OS === "android" ? 22 : 28,
     color: "#35302B",
     textAlign: "center",
@@ -1558,7 +1566,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   immersiveSanatan: {
-    fontSize: 14,
+    fontSize: sfs(14),
     lineHeight: Platform.OS === "android" ? 22 : 28,
     color: "#A97817",
     fontStyle: "italic",
@@ -1567,7 +1575,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   immersivePrompt: {
-    fontSize: 14,
+    fontSize: sfs(14),
     lineHeight: Platform.OS === "android" ? 22 : 24,
     color: "#2E241B",
     textAlign: "center",
@@ -1599,7 +1607,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     paddingTop: Platform.OS === "android" ? 18 : 5,
     paddingBottom: 54,
-    fontSize: 13,
+    fontSize: sfs(13),
     lineHeight: 27,
     color: "#1C1C1E",
     backgroundColor: "transparent",
@@ -1611,7 +1619,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 22,
     bottom: 18,
-    fontSize: 13,
+    fontSize: sfs(13),
     color: "#75706A",
   },
   immersivePrimaryAction: {
@@ -1642,13 +1650,13 @@ const styles = StyleSheet.create({
     tintColor: "#F1D089",
   },
   immersivePrimaryLabel: {
-    fontSize: 14,
+    fontSize: sfs(14),
     fontWeight: "600",
     color: "#FFF7EF",
   },
   immersiveSecondaryAction: {
     alignSelf: "center",
-    fontSize: 14,
+    fontSize: sfs(14),
     color: "#4A433C",
     borderBottomWidth: 1,
     borderBottomColor: "rgba(72,57,41,0.45)",
@@ -1665,28 +1673,28 @@ const styles = StyleSheet.create({
     paddingTop: 36,
   },
   timerCue: {
-    fontSize: 16,
+    fontSize: sfs(16),
     color: "#3C3C43",
     textAlign: "center",
     marginBottom: 24,
   },
   timerCueRoom: {
     fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
-    fontSize: 18,
+    fontSize: sfs(18),
     color: "#4a3a20",
     textAlign: "center",
     marginBottom: 20,
     lineHeight: 26,
   },
   timerDigits: {
-    fontSize: 64,
+    fontSize: sfs(64),
     fontVariant: ["tabular-nums"],
     color: "#1C1C1E",
     marginBottom: 32,
     marginTop: 24,
   },
   timerDigitsRoom: {
-    fontSize: 13,
+    fontSize: sfs(13),
     fontVariant: ["tabular-nums"],
     color: "#8b7a55",
     marginBottom: 24,
@@ -1701,7 +1709,7 @@ const styles = StyleSheet.create({
   },
   timerCompletionLine: {
     fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
-    fontSize: 20,
+    fontSize: sfs(20),
     fontStyle: "italic",
     color: "#432104",
     textAlign: "center",
@@ -1717,7 +1725,7 @@ const styles = StyleSheet.create({
   },
   timerContinueBtnText: {
     fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
-    fontSize: 16,
+    fontSize: sfs(16),
     color: "#FBF6EF",
     letterSpacing: 0.5,
   },
@@ -1787,7 +1795,7 @@ const styles = StyleSheet.create({
   },
   circleText: {
     fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
-    fontSize: 24,
+    fontSize: sfs(24),
     fontWeight: "500",
     color: "#4A3B2F",
     letterSpacing: 0.5,
@@ -1801,7 +1809,7 @@ const styles = StyleSheet.create({
   },
 
   modalSanatanContext: {
-    fontSize: 13,
+    fontSize: sfs(13),
     color: "#8B6914",
     fontStyle: "italic",
     textAlign: "center",
@@ -1810,7 +1818,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   modalWhyWeAsk: {
-    fontSize: 13,
+    fontSize: sfs(13),
     color: "#5C5C5C",
     textAlign: "center",
     marginBottom: 14,
@@ -1825,13 +1833,13 @@ const styles = StyleSheet.create({
     paddingBottom: 28,
   },
   textPrompt: {
-    fontSize: 16,
+    fontSize: sfs(16),
     color: "#3C3C43",
     marginBottom: 16,
     lineHeight: 22,
   },
   screenTextPrompt: {
-    fontSize: 18,
+    fontSize: sfs(18),
     color: "#4A3B2F",
     textAlign: "center",
     lineHeight: 32,
@@ -1839,14 +1847,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
   },
   textInput: {
-    minHeight: 160, // Increased minHeight
+    minHeight: 160,
     borderWidth: 1,
     borderColor: "#D8D8D8",
     borderRadius: 12,
     padding: 12,
-    fontSize: 15,
+    fontSize: sfs(15),
     color: "#1C1C1E",
-    backgroundColor: "rgba(255,255,255,0.5)", // Slight backing for readability
+    backgroundColor: "rgba(255,255,255,0.5)",
   },
   screenTextInput: {
     minHeight: 220,
@@ -1855,11 +1863,11 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.76)",
     paddingHorizontal: 20,
     paddingVertical: 18,
-    fontSize: 16,
+    fontSize: sfs(16),
     lineHeight: 26,
   },
   textCounter: {
-    fontSize: 12,
+    fontSize: sfs(12),
     color: "#8E8E93",
     textAlign: "right",
     marginTop: 6,
@@ -1867,21 +1875,21 @@ const styles = StyleSheet.create({
   },
   screenTextCounter: {
     color: "#8B6A43",
-    fontSize: 13,
+    fontSize: sfs(13),
     marginTop: 10,
     marginBottom: 22,
   },
 
   // Grounding
   groundingProgress: {
-    fontSize: 12,
+    fontSize: sfs(12),
     color: "#8E8E93",
     textAlign: "center",
     marginBottom: 8,
   },
   groundingOpeningLine: {
     fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
-    fontSize: 15,
+    fontSize: sfs(15),
     fontStyle: "italic",
     color: "#8b7a55",
     textAlign: "center",
@@ -1889,7 +1897,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   groundingContextLine: {
-    fontSize: 13,
+    fontSize: sfs(13),
     color: "#8b7a55",
     fontStyle: "italic",
     textAlign: "center",
@@ -1899,7 +1907,7 @@ const styles = StyleSheet.create({
     lineHeight: 19,
   },
   timerContextLine: {
-    fontSize: 13,
+    fontSize: sfs(13),
     color: "#8b7a55",
     fontStyle: "italic",
     textAlign: "center",
@@ -1909,7 +1917,7 @@ const styles = StyleSheet.create({
     lineHeight: 19,
   },
   groundingHint: {
-    fontSize: 13,
+    fontSize: sfs(13),
     color: "#8b7a55",
     textAlign: "center",
     marginTop: 8,
@@ -1920,7 +1928,7 @@ const styles = StyleSheet.create({
     paddingBottom: 28,
   },
   screenGroundingTitle: {
-    fontSize: 18,
+    fontSize: sfs(18),
     fontWeight: "700",
     color: "#1C1C1E",
     textAlign: "center",
@@ -1929,11 +1937,11 @@ const styles = StyleSheet.create({
   },
   screenGroundingProgress: {
     color: "#A57A2B",
-    fontSize: 14,
+    fontSize: sfs(14),
     marginBottom: 18,
   },
   screenGroundingPrompt: {
-    fontSize: 18,
+    fontSize: sfs(18),
     color: "#432104",
     textAlign: "center",
     lineHeight: 30,
@@ -1950,7 +1958,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     paddingHorizontal: 24,
     paddingVertical: 24,
-    fontSize: 16,
+    fontSize: sfs(16),
     color: "#1C1C1E",
     backgroundColor: "rgba(255,255,255,0.56)",
     lineHeight: 26,
@@ -1965,7 +1973,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   screenGroundingActionLabel: {
-    fontSize: 17,
+    fontSize: sfs(17),
     fontWeight: "600",
     color: "#ffffff",
   },
@@ -1982,7 +1990,7 @@ const styles = StyleSheet.create({
     minWidth: 92,
   },
   ctrlBtnLabel: {
-    fontSize: 15,
+    fontSize: sfs(15),
     color: "#432104",
   },
   ctrlDone: {
@@ -2024,19 +2032,19 @@ const styles = StyleSheet.create({
   },
   primaryActionLabel: {
     fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
-    fontSize: 17,
+    fontSize: sfs(17),
     fontWeight: "600",
     color: "#432104",
   },
   screenModalSanatanContext: {
-    fontSize: 18,
+    fontSize: sfs(18),
     lineHeight: 30,
     color: "#A57A2B",
     marginBottom: 14,
     paddingHorizontal: 14,
   },
   screenModalWhyWeAsk: {
-    fontSize: 16,
+    fontSize: sfs(16),
     lineHeight: 28,
     color: "#6E6357",
     marginBottom: 24,
@@ -2045,7 +2053,7 @@ const styles = StyleSheet.create({
 
   // Voice note
   voiceNoteStatus: {
-    fontSize: 13,
+    fontSize: sfs(13),
     color: "#6E6E73",
     textAlign: "center",
     marginBottom: 24,
@@ -2085,7 +2093,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    fontSize: 15,
+    fontSize: sfs(15),
     color: "#1C1C1E",
     marginBottom: 12,
   },
@@ -2109,7 +2117,7 @@ const styles = StyleSheet.create({
   },
   modalError: {
     color: "#C0392B",
-    fontSize: 13,
+    fontSize: sfs(13),
     textAlign: "center",
     marginTop: 4,
     marginBottom: 12,

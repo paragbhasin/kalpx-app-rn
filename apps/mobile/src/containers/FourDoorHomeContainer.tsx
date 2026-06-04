@@ -3,7 +3,10 @@ import {
 } from "@kalpx/contracts";
 import { useTranslation } from "react-i18next";
 import i18n from "../config/i18n";
-import type { JourneyTriadRemindersPatch, QuickCheckinPranaLabel } from "@kalpx/types";
+import type {
+  JourneyTriadRemindersPatch,
+  QuickCheckinPranaLabel,
+} from "@kalpx/types";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, {
   useCallback,
@@ -25,14 +28,67 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
-const M3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/door_rhythm.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
-const Mp2Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/door_chant.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
-const Mp3Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/door_path.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
-const Mp4Icon = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../assets/door_mitra.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
-import AsyncStorage from '@react-native-async-storage/async-storage';
+const M3Icon = ({
+  width,
+  height,
+  style,
+}: {
+  width?: number;
+  height?: number;
+  style?: any;
+}) => (
+  <Image
+    source={require("../../assets/door_rhythm.webp")}
+    style={[{ width, height, resizeMode: "contain" }, style]}
+  />
+);
+const Mp2Icon = ({
+  width,
+  height,
+  style,
+}: {
+  width?: number;
+  height?: number;
+  style?: any;
+}) => (
+  <Image
+    source={require("../../assets/door_chant.webp")}
+    style={[{ width, height, resizeMode: "contain" }, style]}
+  />
+);
+const Mp3Icon = ({
+  width,
+  height,
+  style,
+}: {
+  width?: number;
+  height?: number;
+  style?: any;
+}) => (
+  <Image
+    source={require("../../assets/door_path.webp")}
+    style={[{ width, height, resizeMode: "contain" }, style]}
+  />
+);
+const Mp4Icon = ({
+  width,
+  height,
+  style,
+}: {
+  width?: number;
+  height?: number;
+  style?: any;
+}) => (
+  <Image
+    source={require("../../assets/door_mitra.webp")}
+    style={[{ width, height, resizeMode: "contain" }, style]}
+  />
+);
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   apiPatchJourneyReminders,
   mitraJourneyHomeV3,
@@ -44,6 +100,13 @@ import { setHomeData } from "../store/doorSlice";
 import { Fonts } from "../theme/fonts";
 import { TimePickerModal } from "../components/TimePickerModal";
 import { platformShadow } from "../theme/shadows";
+import {
+  rfs,
+  rhPad,
+  rs,
+  sfs,
+  TABLET_MAX_CARD_WIDTH,
+} from "../utils/responsive";
 
 type FeelingOption = "Agitated" | "Drained" | "Steady" | "Open";
 
@@ -54,7 +117,7 @@ const FEELING_OPTIONS: FeelingOption[] = [
   "Open",
 ];
 
-const FOUR_DOOR_BG = "#FBF4EF";
+const FOUR_DOOR_BG = require("../../assets/beige_bg.webp");
 const HERO_DAY = require("../../assets/imgsun.webp");
 const HERO_NIGHT = require("../../assets/night-home.webp");
 const SHELL_HEADER_HEIGHT = 45;
@@ -96,6 +159,7 @@ function DoorCard({
   orientationLine,
   highlighted,
   onPress,
+  screenWidth,
 }: {
   Icon: any;
   label: string;
@@ -103,7 +167,10 @@ function DoorCard({
   orientationLine?: string | null;
   highlighted?: boolean;
   onPress: () => void;
+  screenWidth: number;
 }) {
+  const isTablet = screenWidth >= 768;
+  const iconSize = rs(40, 48, screenWidth);
   return (
     <TouchableOpacity
       activeOpacity={0.86}
@@ -111,19 +178,40 @@ function DoorCard({
       style={[
         styles.doorCard,
         highlighted && styles.doorCardHighlighted,
+        isTablet && {
+          maxWidth: TABLET_MAX_CARD_WIDTH,
+          alignSelf: "center",
+          width: "100%",
+          paddingVertical: 20,
+          paddingHorizontal: 22,
+        },
       ]}
     >
-      <View style={styles.doorIconWrap}>
-        <Icon width={40} height={40} />
+      <View
+        style={[styles.doorIconWrap, isTablet && { width: 60, height: 60 }]}
+      >
+        <Icon width={iconSize} height={iconSize} />
       </View>
       <View style={styles.doorBody}>
-        <Text style={styles.doorLabel}>{label}</Text>
-        {!!subtitle && <Text style={styles.doorSubtitle}>{subtitle}</Text>}
+        <Text style={[styles.doorLabel, { fontSize: rs(18, 22, screenWidth) }]}>
+          {label}
+        </Text>
+        {!!subtitle && (
+          <Text
+            style={[styles.doorSubtitle, { fontSize: rs(14, 17, screenWidth) }]}
+          >
+            {subtitle}
+          </Text>
+        )}
         {!!orientationLine && (
           <Text style={styles.doorOrientationLine}>{orientationLine}</Text>
         )}
       </View>
-      <Text style={styles.doorArrow}>→</Text>
+      <Text
+        style={[styles.doorArrow, isTablet && { fontSize: 30, lineHeight: 30 }]}
+      >
+        →
+      </Text>
     </TouchableOpacity>
   );
 }
@@ -135,6 +223,8 @@ export default function FourDoorHomeContainer({
   userName?: string;
   forceInnerPathReentry?: boolean;
 }) {
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch();
@@ -169,12 +259,21 @@ export default function FourDoorHomeContainer({
 
   // Post-onboarding reminder step (embedded via screenData flag)
   const showReminderModal = !!screenData?.onboarding_reminder_show;
-  const reminderDestination = (screenData?.onboarding_reminder_destination as string) || "Home";
-  const [reminderToggles, setReminderToggles] = useState<Record<"mantra" | "sankalp" | "practice", boolean>>({ mantra: false, sankalp: false, practice: false });
-  const [reminderTimes, setReminderTimes] = useState<Record<"mantra" | "sankalp" | "practice", string>>({ mantra: "07:00", sankalp: "08:00", practice: "18:00" });
-  const [reminderPickerKey, setReminderPickerKey] = useState<"mantra" | "sankalp" | "practice" | null>(null);
+  const reminderDestination =
+    (screenData?.onboarding_reminder_destination as string) || "Home";
+  const [reminderToggles, setReminderToggles] = useState<
+    Record<"mantra" | "sankalp" | "practice", boolean>
+  >({ mantra: false, sankalp: false, practice: false });
+  const [reminderTimes, setReminderTimes] = useState<
+    Record<"mantra" | "sankalp" | "practice", string>
+  >({ mantra: "07:00", sankalp: "08:00", practice: "18:00" });
+  const [reminderPickerKey, setReminderPickerKey] = useState<
+    "mantra" | "sankalp" | "practice" | null
+  >(null);
   const [reminderSaving, setReminderSaving] = useState(false);
-  const [pendingPranaMessage, setPendingPranaMessage] = useState<string | null>(null);
+  const [pendingPranaMessage, setPendingPranaMessage] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     homeDataRef.current = homeData;
@@ -259,7 +358,8 @@ export default function FourDoorHomeContainer({
             Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
         });
         if (pranaType === "agitated" || pranaType === "drained") {
-          const msg = pranaType === "agitated" ? "I am agitated" : "I am drained";
+          const msg =
+            pranaType === "agitated" ? "I am agitated" : "I am drained";
           setPendingPranaMessage(msg);
           await loadHome(true, true);
         } else {
@@ -280,19 +380,28 @@ export default function FourDoorHomeContainer({
 
   const openQuickResetSurface = useCallback(async () => {
     const token = await AsyncStorage.getItem("access_token");
-    if (!token) { navigation.navigate("Login" as any); return; }
+    if (!token) {
+      navigation.navigate("Login" as any);
+      return;
+    }
     navigation.navigate("QuickReset" as any);
   }, [navigation]);
 
   const openTellMitraSurface = useCallback(async () => {
     const token = await AsyncStorage.getItem("access_token");
-    if (!token) { navigation.navigate("Login" as any); return; }
+    if (!token) {
+      navigation.navigate("Login" as any);
+      return;
+    }
     navigation.navigate("TellMitra" as any);
   }, [navigation]);
 
   const openMyRhythmSurface = useCallback(async () => {
     const token = await AsyncStorage.getItem("access_token");
-    if (!token) { navigation.navigate("Login" as any); return; }
+    if (!token) {
+      navigation.navigate("Login" as any);
+      return;
+    }
     const hasRhythmInState =
       homeData?.companion_rhythm?.has_rhythm === true ||
       homeData?.my_rhythm_summary?.has_rhythm === true ||
@@ -313,7 +422,9 @@ export default function FourDoorHomeContainer({
         fresh?.user_surface_state?.has_rhythm === true ||
         fresh?.door_states?.my_rhythm?.state === "active";
 
-      navigation.navigate((hasRhythmFresh ? "RhythmHome" : "RhythmSetup") as any);
+      navigation.navigate(
+        (hasRhythmFresh ? "RhythmHome" : "RhythmSetup") as any,
+      );
     } catch {
       navigation.navigate("RhythmSetup" as any);
     }
@@ -450,7 +561,8 @@ export default function FourDoorHomeContainer({
       const patch: JourneyTriadRemindersPatch = {};
       for (const key of ["mantra", "sankalp", "practice"] as const) {
         (patch as any)[`${key}_reminder_enabled`] = reminderToggles[key];
-        if (reminderToggles[key]) (patch as any)[`${key}_reminder_time`] = reminderTimes[key];
+        if (reminderToggles[key])
+          (patch as any)[`${key}_reminder_time`] = reminderTimes[key];
       }
       await apiPatchJourneyReminders(patch);
     } catch {
@@ -483,7 +595,10 @@ export default function FourDoorHomeContainer({
     ?.routes?.slice(-1)?.[0]?.name;
   const openInnerPathSurface = async () => {
     const token = await AsyncStorage.getItem("access_token");
-    if (!token) { navigation.navigate("Login" as any); return; }
+    if (!token) {
+      navigation.navigate("Login" as any);
+      return;
+    }
     const hasExistingInnerPath =
       forceInnerPathReentry ||
       homeData?.inner_path_summary?.has_active_path === true ||
@@ -513,7 +628,14 @@ export default function FourDoorHomeContainer({
     <View style={styles.screen}>
       <ScrollView
         style={styles.root}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 100 },
+          isTablet && {
+            alignItems: "center",
+            paddingBottom: insets.bottom + 60,
+          },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         <View
@@ -522,12 +644,13 @@ export default function FourDoorHomeContainer({
             {
               marginTop: -SHELL_HEADER_HEIGHT,
             },
+            isTablet && { width: "100%" },
           ]}
         >
           <ImageBackground
             source={greetingVisual.image}
             resizeMode="cover"
-            style={styles.heroImage}
+            style={[styles.heroImage, isTablet && { minHeight: 420 }]}
           >
             <View
               style={[
@@ -538,6 +661,7 @@ export default function FourDoorHomeContainer({
                     92,
                   ),
                 },
+                isTablet && { paddingHorizontal: rhPad(18, width) },
               ]}
             >
               <View style={styles.heroCopy}>
@@ -546,7 +670,10 @@ export default function FourDoorHomeContainer({
                     <Text
                       style={[
                         styles.heroHeadline,
-                        { color: greetingVisual.textColor },
+                        {
+                          color: greetingVisual.textColor,
+                          fontSize: rs(22, 32, width),
+                        },
                       ]}
                       numberOfLines={2}
                     >
@@ -556,7 +683,10 @@ export default function FourDoorHomeContainer({
                       <Text
                         style={[
                           styles.heroSubtext,
-                          { color: greetingVisual.textColor },
+                          {
+                            color: greetingVisual.textColor,
+                            fontSize: rs(16, 22, width),
+                          },
                         ]}
                       >
                         {greetingSubtext}
@@ -574,7 +704,18 @@ export default function FourDoorHomeContainer({
           </ImageBackground>
         </View>
 
-        <View style={styles.content}>
+        <View
+          style={[
+            styles.content,
+            isTablet && {
+              paddingHorizontal: rhPad(16, width),
+              width: "100%",
+              gap: 20,
+              paddingTop: 16,
+              paddingBottom: 32,
+            },
+          ]}
+        >
           {!!error && <Text style={styles.inlineError}>{error}</Text>}
 
           <DoorCard
@@ -583,6 +724,7 @@ export default function FourDoorHomeContainer({
             subtitle={rhythmSubtitle}
             orientationLine={seg === "new" && isFirstVisit ? t("mitraFourDoor.orientation.myRhythm") : null}
             onPress={() => void openMyRhythmSurface()}
+            screenWidth={width}
           />
           <DoorCard
             Icon={Mp3Icon}
@@ -591,6 +733,7 @@ export default function FourDoorHomeContainer({
             orientationLine={seg === "new" && isFirstVisit ? t("mitraFourDoor.orientation.innerPath") : null}
             highlighted={seg === "rhythm_only"}
             onPress={() => void openInnerPathSurface()}
+            screenWidth={width}
           />
           <DoorCard
             Icon={Mp2Icon}
@@ -598,6 +741,7 @@ export default function FourDoorHomeContainer({
             subtitle={quickResetSubtitle}
             orientationLine={seg === "new" && isFirstVisit ? t("mitraFourDoor.orientation.quickChant") : null}
             onPress={() => void openQuickResetSurface()}
+            screenWidth={width}
           />
           <DoorCard
             Icon={Mp4Icon}
@@ -605,13 +749,30 @@ export default function FourDoorHomeContainer({
             subtitle={tellMitraSubtitle}
             orientationLine={seg === "new" && isFirstVisit ? t("mitraFourDoor.orientation.tellMitra") : null}
             onPress={() => void openTellMitraSurface()}
+            screenWidth={width}
           />
 
-          <View style={styles.checkinCard}>
+          <View
+            style={[
+              styles.checkinCard,
+              isTablet && {
+                maxWidth: TABLET_MAX_CARD_WIDTH,
+                alignSelf: "center",
+                width: "100%",
+                paddingVertical: 24,
+                paddingHorizontal: 24,
+              },
+            ]}
+          >
             {windowActive ? (
               <>
                 <View style={styles.checkinHeaderRow}>
-                  <Text style={styles.checkinTitle}>
+                  <Text
+                    style={[
+                      styles.checkinTitle,
+                      { fontSize: rs(18, 24, width) },
+                    ]}
+                  >
                     {(acw?.prana_label as QuickCheckinPranaLabel) ||
                       t("mitraFourDoor.checkin.heading")}
                   </Text>
@@ -637,7 +798,9 @@ export default function FourDoorHomeContainer({
                     style={styles.suggestionButton}
                     activeOpacity={0.82}
                     onPress={() => {
-                      navigation.navigate("TellMitra" as any, { initialMessage: pendingPranaMessage });
+                      navigation.navigate("TellMitra" as any, {
+                        initialMessage: pendingPranaMessage,
+                      });
                       setPendingPranaMessage(null);
                     }}
                   >
@@ -679,7 +842,7 @@ export default function FourDoorHomeContainer({
                 {!acw?.suggestion && !!acw?.prana_label && (
                   <View style={{ flexDirection: "row", gap: 12, marginTop: 12, flexWrap: "wrap" }}>
                     <TouchableOpacity onPress={() => void openInnerPathSurface()}>
-                                 <Text style={styles.softCtaLink}>{t("mitraFourDoor.checkin.ctaInnerPath")}</Text>
+                      <Text style={styles.softCtaLink}>{t("mitraFourDoor.checkin.ctaInnerPath")}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => void openMyRhythmSurface()}>
                       <Text style={styles.softCtaLink}>{t("mitraFourDoor.checkin.ctaMyRhythm")}</Text>
@@ -689,8 +852,17 @@ export default function FourDoorHomeContainer({
               </>
             ) : (
               <>
-                <Text style={styles.checkinTitle}>{t("mitraFourDoor.checkin.heading")}</Text>
-                <Text style={styles.checkinSubtitle}>
+                <Text
+                  style={[styles.checkinTitle, { fontSize: rs(18, 24, width) }]}
+                >
+                  {t("mitraFourDoor.checkin.heading")}
+                </Text>
+                <Text
+                  style={[
+                    styles.checkinSubtitle,
+                    { fontSize: rs(14, 18, width) },
+                  ]}
+                >
                   {t("mitraFourDoor.checkin.subtext")}
                 </Text>
                 <View style={styles.feelingGrid}>
@@ -707,12 +879,14 @@ export default function FourDoorHomeContainer({
                           styles.feelingChip,
                           isSelected && styles.feelingChipSelected,
                           feelingLoading && styles.feelingChipDisabled,
+                          isTablet && { paddingVertical: 14 },
                         ]}
                       >
                         <View style={styles.feelingChipContent}>
                           <Text
                             style={[
                               styles.feelingChipText,
+                              { fontSize: rs(14, 18, width) },
                               isSelected && styles.feelingChipTextSelected,
                             ]}
                           >
@@ -753,7 +927,13 @@ export default function FourDoorHomeContainer({
             {(["mantra", "sankalp", "practice"] as const).map((key) => {
               const enabled = reminderToggles[key];
               return (
-                <View key={key} style={[styles.reminderRow, enabled && styles.reminderRowEnabled]}>
+                <View
+                  key={key}
+                  style={[
+                    styles.reminderRow,
+                    enabled && styles.reminderRowEnabled,
+                  ]}
+                >
                   <Text style={styles.reminderRowLabel}>{t("mitraFourDoor.reminders.rowLabel", { label: t(`mitraFourDoor.reminders.${key}`) })}</Text>
                   <View style={styles.reminderRowRight}>
                     {enabled && (
@@ -769,8 +949,13 @@ export default function FourDoorHomeContainer({
                     )}
                     <Switch
                       value={enabled}
-                      onValueChange={(val) => setReminderToggles((prev) => ({ ...prev, [key]: val }))}
-                      trackColor={{ false: "rgba(0,0,0,0.12)", true: "#C99317" }}
+                      onValueChange={(val) =>
+                        setReminderToggles((prev) => ({ ...prev, [key]: val }))
+                      }
+                      trackColor={{
+                        false: "rgba(0,0,0,0.12)",
+                        true: "#C99317",
+                      }}
                       thumbColor="#fff"
                     />
                   </View>
@@ -780,11 +965,18 @@ export default function FourDoorHomeContainer({
 
             <TimePickerModal
               visible={!!reminderPickerKey}
-              initialTime={reminderPickerKey ? (reminderTimes[reminderPickerKey] + ":00") : null}
+              initialTime={
+                reminderPickerKey
+                  ? reminderTimes[reminderPickerKey] + ":00"
+                  : null
+              }
               onConfirm={(timeStr) => {
                 if (reminderPickerKey) {
                   // store as HH:MM for display; strip seconds
-                  setReminderTimes((prev) => ({ ...prev, [reminderPickerKey]: timeStr.slice(0, 5) }));
+                  setReminderTimes((prev) => ({
+                    ...prev,
+                    [reminderPickerKey]: timeStr.slice(0, 5),
+                  }));
                   setReminderPickerKey(null);
                 }
               }}
@@ -794,7 +986,10 @@ export default function FourDoorHomeContainer({
             <TouchableOpacity
               onPress={() => void handleSaveReminders()}
               disabled={reminderSaving}
-              style={[styles.reminderPrimaryBtn, reminderSaving && styles.reminderBtnDisabled]}
+              style={[
+                styles.reminderPrimaryBtn,
+                reminderSaving && styles.reminderBtnDisabled,
+              ]}
               activeOpacity={0.85}
             >
               {reminderSaving ? (
@@ -822,7 +1017,7 @@ export default function FourDoorHomeContainer({
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: FOUR_DOOR_BG,
+    backgroundColor: "transparent",
   },
   screenBackground: {
     opacity: 1,
@@ -830,8 +1025,7 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
   },
-  scrollContent: {
-  },
+  scrollContent: {},
   centeredWrap: {
     flex: 1,
     alignItems: "center",
@@ -839,7 +1033,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   errorText: {
-    fontSize: 16,
+    fontSize: sfs(16),
     color: "#6b5a45",
     textAlign: "center",
     marginBottom: 16,
@@ -853,7 +1047,7 @@ const styles = StyleSheet.create({
   },
   retryButtonText: {
     color: "#fff",
-    fontSize: 15,
+    fontSize: sfs(15),
     fontFamily: Fonts.sans.semiBold,
   },
   heroWrap: {
@@ -879,13 +1073,11 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   heroHeadline: {
-    fontSize: 22,
-
+    fontSize: sfs(22),
     fontFamily: Fonts.serif.bold,
   },
   heroSubtext: {
-    fontSize: 16,
-
+    fontSize: sfs(16),
     fontFamily: Fonts.serif.regular,
     maxWidth: "92%",
   },
@@ -902,7 +1094,7 @@ const styles = StyleSheet.create({
   },
   heroDividerIcon: {
     color: "#C9A84C",
-    fontSize: 14,
+    fontSize: sfs(14),
     marginHorizontal: 10,
   },
   content: {
@@ -912,7 +1104,7 @@ const styles = StyleSheet.create({
   inlineError: {
     color: "#c0392b",
     textAlign: "center",
-    fontSize: 13,
+    fontSize: sfs(13),
     fontFamily: Fonts.sans.regular,
     marginBottom: 4,
   },
@@ -923,7 +1115,8 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     borderWidth: 1,
     borderColor: "rgba(201,168,76,0.28)",
-    backgroundColor: Platform.OS === "android" ? "#FEFAF4" : "rgba(255,255,255,0.72)",
+    backgroundColor:
+      Platform.OS === "android" ? "#FEFAF4" : "rgba(255,255,255,0.72)",
     paddingHorizontal: 16,
     paddingVertical: 14,
 
@@ -942,15 +1135,15 @@ const styles = StyleSheet.create({
   },
   doorLabel: {
     color: "#432104",
-    fontSize: 18,
-    lineHeight: 22,
+    fontSize: sfs(18),
+    lineHeight: sfs(22),
     fontFamily: Fonts.serif.bold,
     marginBottom: 4,
   },
   doorSubtitle: {
     color: "rgba(67,33,4,0.62)",
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: sfs(14),
+    lineHeight: sfs(20),
     fontFamily: Fonts.sans.regular,
   },
   doorCardHighlighted: {
@@ -959,16 +1152,16 @@ const styles = StyleSheet.create({
   },
   doorOrientationLine: {
     color: "rgba(67,33,4,0.38)",
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: sfs(12),
+    lineHeight: sfs(16),
     fontFamily: Fonts.sans.regular,
     fontStyle: "italic",
     marginTop: 3,
   },
   doorArrow: {
     color: "#C9A84C",
-    fontSize: 24,
-    lineHeight: 24,
+    fontSize: sfs(24),
+    lineHeight: sfs(24),
     opacity: 0.7,
     marginLeft: 8,
   },
@@ -976,7 +1169,8 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     borderWidth: 1,
     borderColor: "rgba(201,168,76,0.28)",
-    backgroundColor: Platform.OS === "android" ? "#FFF9F2" : "rgba(255,251,245,0.9)",
+    backgroundColor:
+      Platform.OS === "android" ? "#FFF9F2" : "rgba(255,251,245,0.9)",
     paddingHorizontal: 16,
     paddingVertical: 18,
     ...platformShadow("#432104", 8, 0.08, 18, 4),
@@ -990,8 +1184,8 @@ const styles = StyleSheet.create({
   },
   checkinTitle: {
     color: "#432104",
-    fontSize: 18,
-    lineHeight: 24,
+    fontSize: sfs(18),
+    lineHeight: sfs(24),
     fontFamily: Fonts.serif.bold,
     flex: 1,
   },
@@ -1001,22 +1195,22 @@ const styles = StyleSheet.create({
   },
   dismissButtonText: {
     color: "rgba(67,33,4,0.45)",
-    fontSize: 24,
-    lineHeight: 24,
+    fontSize: sfs(24),
+    lineHeight: sfs(24),
     fontFamily: Fonts.sans.regular,
   },
   checkinAcknowledgment: {
     color: "rgba(67,33,4,0.8)",
-    fontSize: 15,
-    lineHeight: 24,
+    fontSize: sfs(15),
+    lineHeight: sfs(24),
     fontFamily: Fonts.serif.regular,
     fontStyle: "italic",
     marginBottom: 12,
   },
   suggestionHeader: {
     color: "rgba(67,33,4,0.5)",
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: sfs(13),
+    lineHeight: sfs(18),
     fontFamily: Fonts.sans.regular,
     marginBottom: 8,
   },
@@ -1024,21 +1218,22 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     borderColor: "rgba(201,168,76,0.38)",
-    backgroundColor: Platform.OS === "android" ? "#FEFAF4" : "rgba(255,255,255,0.82)",
+    backgroundColor:
+      Platform.OS === "android" ? "#FEFAF4" : "rgba(255,255,255,0.82)",
     paddingHorizontal: 16,
     paddingVertical: 14,
     ...platformShadow("#C9A84C", 6, 0.12, 14, 2),
   },
   suggestionButtonText: {
     color: "#432104",
-    fontSize: 15,
-    lineHeight: 20,
+    fontSize: sfs(15),
+    lineHeight: sfs(20),
     fontFamily: Fonts.serif.bold,
   },
   boundaryText: {
     color: "rgba(67,33,4,0.5)",
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: sfs(13),
+    lineHeight: sfs(18),
     fontFamily: Fonts.sans.regular,
     textAlign: "center",
     marginTop: 10,
@@ -1048,14 +1243,14 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
   softCtaLink: {
-    fontSize: 13,
+    fontSize: sfs(13),
     color: "#8A651B",
     textDecorationLine: "underline",
   },
   checkinSubtitle: {
     color: "rgba(67,33,4,0.62)",
-    fontSize: 14,
-    lineHeight: 21,
+    fontSize: sfs(14),
+    lineHeight: sfs(21),
     fontFamily: Fonts.sans.regular,
     marginTop: 4,
     marginBottom: 14,
@@ -1071,7 +1266,8 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 1,
     borderColor: "rgba(201,168,76,0.38)",
-    backgroundColor: Platform.OS === "android" ? "#FEFAF4" : "rgba(255,255,255,0.78)",
+    backgroundColor:
+      Platform.OS === "android" ? "#FEFAF4" : "rgba(255,255,255,0.78)",
     paddingVertical: 8,
     paddingHorizontal: 8,
     alignItems: "center",
@@ -1092,8 +1288,8 @@ const styles = StyleSheet.create({
   },
   feelingChipText: {
     color: "#432104",
-    fontSize: 14,
-    lineHeight: 18,
+    fontSize: sfs(14),
+    lineHeight: sfs(18),
     fontFamily: Fonts.sans.medium,
   },
   feelingChipLoader: {

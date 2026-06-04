@@ -22,9 +22,11 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Fonts } from "../../theme/fonts";
+import { sfs } from "../../utils/responsive";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -96,6 +98,8 @@ export default function TellMitraThreadView({
 }: TellMitraThreadViewProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   const [keyboardHeight, setKeyboardHeight] = React.useState(0);
   const androidKeyboardOffset =
     Platform.OS === "android" ? Math.max(0, keyboardHeight - insets.bottom) : 0;
@@ -233,7 +237,7 @@ export default function TellMitraThreadView({
               }
               activeOpacity={0.7}
             >
-              <Text style={[s.ghostLinkText, { fontSize: 12 }]}>
+              <Text style={[s.ghostLinkText, { fontSize: sfs(12) }]}>
                 {t('tellMitraThread.orTryRoom', { room: getRoomLabel(item.secondary_room_id as any) })}
               </Text>
             </TouchableOpacity>
@@ -327,7 +331,7 @@ export default function TellMitraThreadView({
   }
 
   return (
-    <View style={s.root}>
+    <View style={[s.root, isTablet && { maxWidth: 720, alignSelf: 'center', width: '100%' }]}>
       {/* Start fresh button — only when thread has items */}
       {conversation.length > 0 && (
         <View style={s.startFreshRow}>
@@ -437,7 +441,7 @@ const s = StyleSheet.create({
     alignItems: "flex-end",
   },
   startFreshText: {
-    fontSize: 12,
+    fontSize: sfs(12),
     color: "#A08060",
     fontFamily: Fonts.sans.regular,
   },
@@ -449,18 +453,18 @@ const s = StyleSheet.create({
   emptyState: { paddingBottom: 24 },
   emptyTitle: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 24,
+    fontSize: sfs(24),
     fontWeight: "700",
     color: "#3B2A1A",
     marginBottom: 6,
   },
   emptySubtext: {
-    fontSize: 15,
+    fontSize: sfs(15),
     color: "#7B6550",
-    lineHeight: 22,
+    lineHeight: sfs(22),
     marginBottom: 4,
   },
-  emptyHint: { fontSize: 13, color: "#9B8B77", lineHeight: 20 },
+  emptyHint: { fontSize: sfs(13), color: "#9B8B77", lineHeight: sfs(20) },
 
   // User bubbles
   userRow: { alignItems: "flex-end", marginBottom: 12 },
@@ -472,7 +476,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 16,
     maxWidth: "78%",
   },
-  userBubbleText: { fontSize: 16, color: "#3B2A1A", lineHeight: 24 },
+  userBubbleText: { fontSize: sfs(16), color: "#3B2A1A", lineHeight: sfs(24) },
   userChipBubble: {
     backgroundColor: "rgba(201,168,76,0.12)",
     borderWidth: 1,
@@ -484,7 +488,7 @@ const s = StyleSheet.create({
     maxWidth: "65%",
   },
   userChipText: {
-    fontSize: 14,
+    fontSize: sfs(14),
     color: "#7B6550",
     fontStyle: "italic",
     fontFamily: Fonts.sans.regular,
@@ -493,7 +497,7 @@ const s = StyleSheet.create({
   // Mitra response
   mitraBlock: { marginBottom: 18 },
   mitraLabel: {
-    fontSize: 10,
+    fontSize: sfs(10),
     color: "#B8963E",
     fontWeight: "700",
     letterSpacing: 0.8,
@@ -501,7 +505,7 @@ const s = StyleSheet.create({
     fontFamily: Fonts.sans.regular,
   },
   priorContextText: {
-    fontSize: 12,
+    fontSize: sfs(12),
     color: "#9B8B77",
     fontStyle: "italic",
     marginBottom: 8,
@@ -512,16 +516,16 @@ const s = StyleSheet.create({
   },
   mitraResponseText: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 18,
-    lineHeight: 30,
+    fontSize: sfs(18),
+    lineHeight: sfs(30),
     color: "#3B2A1A",
   },
-  loadingDots: { fontSize: 20, color: "#C9A84C", letterSpacing: 6 },
+  loadingDots: { fontSize: sfs(20), color: "#C9A84C", letterSpacing: 6 },
 
   // Chips
   chipsBlock: { marginBottom: 18 },
   chipsPrompt: {
-    fontSize: 13,
+    fontSize: sfs(13),
     color: "#7B6550",
     marginBottom: 8,
     fontFamily: Fonts.sans.regular,
@@ -536,7 +540,7 @@ const s = StyleSheet.create({
     backgroundColor: "rgba(255,250,243,0.95)",
   },
   chipDisabled: { opacity: 0.4 },
-  chipText: { fontSize: 14, color: "#5C4B35", fontFamily: Fonts.sans.regular },
+  chipText: { fontSize: sfs(14), color: "#5C4B35", fontFamily: Fonts.sans.regular },
   chipTextDisabled: { color: "#BBAA99" },
 
   // Room recommendation card
@@ -554,7 +558,7 @@ const s = StyleSheet.create({
     elevation: 3,
   },
   roomCardLabel: {
-    fontSize: 10,
+    fontSize: sfs(10),
     color: "#B8963E",
     fontWeight: "700",
     letterSpacing: 0.9,
@@ -563,16 +567,16 @@ const s = StyleSheet.create({
   },
   roomCardTitle: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 20,
+    fontSize: sfs(20),
     fontWeight: "700",
     color: "#3B2A1A",
     marginBottom: 6,
   },
   roomCardDesc: {
-    fontSize: 14,
+    fontSize: sfs(14),
     color: "#7B6550",
     marginBottom: 16,
-    lineHeight: 22,
+    lineHeight: sfs(22),
   },
   goldBtn: {
     backgroundColor: "#C99317",
@@ -583,13 +587,13 @@ const s = StyleSheet.create({
   },
   goldBtnText: {
     color: "#ffffff",
-    fontSize: 15,
+    fontSize: sfs(15),
     fontWeight: "700",
     letterSpacing: 0.2,
   },
   ghostLink: { paddingVertical: 8, alignItems: "center" },
   ghostLinkText: {
-    fontSize: 13,
+    fontSize: sfs(13),
     color: "#9b8b77",
     fontFamily: Fonts.sans.regular,
     textDecorationLine: "underline",
@@ -606,17 +610,17 @@ const s = StyleSheet.create({
   },
   returnCardTitle: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 16,
+    fontSize: sfs(16),
     fontWeight: "600",
     color: "#3B2A1A",
     marginBottom: 4,
   },
-  returnCardSubtitle: { fontSize: 13, color: "#7B6550", marginBottom: 14 },
+  returnCardSubtitle: { fontSize: sfs(13), color: "#7B6550", marginBottom: 14 },
 
   // Wisdom options
   wisdomBlock: { marginBottom: 18 },
   wisdomLabel: {
-    fontSize: 10,
+    fontSize: sfs(10),
     color: "#B8963E",
     fontWeight: "700",
     letterSpacing: 0.8,
@@ -631,7 +635,7 @@ const s = StyleSheet.create({
     marginBottom: 6,
   },
   ghostBtnText: {
-    fontSize: 14,
+    fontSize: sfs(14),
     color: "#7B6550",
     fontFamily: Fonts.sans.regular,
   },
@@ -647,12 +651,12 @@ const s = StyleSheet.create({
   },
   safetyTitle: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 17,
+    fontSize: sfs(17),
     fontWeight: "700",
     color: "#3B2A1A",
     marginBottom: 8,
   },
-  safetyText: { fontSize: 16, lineHeight: 28, color: "#3B2A1A" },
+  safetyText: { fontSize: sfs(16), lineHeight: sfs(28), color: "#3B2A1A" },
 
   // Error
   errorCard: {
@@ -663,9 +667,9 @@ const s = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
   },
-  errorCardText: { fontSize: 13, color: "#c0392b" },
+  errorCardText: { fontSize: sfs(13), color: "#c0392b" },
   errorText: {
-    fontSize: 13,
+    fontSize: sfs(13),
     color: "#c0392b",
     paddingHorizontal: 12,
     paddingBottom: 4,
@@ -692,7 +696,7 @@ const s = StyleSheet.create({
     borderColor: "rgba(201,168,76,0.35)",
     borderRadius: 14,
     padding: 10,
-    fontSize: 15,
+    fontSize: sfs(15),
     color: "#3B2A1A",
     minHeight: 44,
     maxHeight: 120,
@@ -708,12 +712,12 @@ const s = StyleSheet.create({
     justifyContent: "center",
   },
   sendBtnDisabled: { opacity: 0.5 },
-  sendBtnText: { color: "#ffffff", fontSize: 15, fontWeight: "700" },
+  sendBtnText: { color: "#ffffff", fontSize: sfs(15), fontWeight: "700" },
   disclaimerText: {
-    fontSize: 11,
+    fontSize: sfs(11),
     color: "#A08060",
     textAlign: "center",
-    lineHeight: 16,
+    lineHeight: sfs(16),
     paddingHorizontal: 20,
     paddingVertical: 6,
     fontFamily: Fonts.sans.regular,

@@ -14,12 +14,14 @@ import {
   TouchableOpacity,
   UIManager,
   View,
+  useWindowDimensions,
 } from "react-native";
 import Svg, { Circle , SvgUri } from "react-native-svg";
 const MantraLotus3d = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/mantra-lotus-3d.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
 import { REMOTE_AUDIO_SOURCES } from "../../config/audioAssets";
 import { stopRoomAmbientAudio } from "../../engine/roomAmbientAudio";
 import { Fonts } from "../../theme/fonts";
+import { sfs } from "../../utils/responsive";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -191,6 +193,12 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
   const timerCompletionQueuedRef = useRef(false);
   const sessionStartTimeRef = useRef<number>(Date.now());
   const isCompletingRef = useRef(false);
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+  const timerSize = isTablet ? 320 : PRACTICE_TIMER_SIZE;
+  const timerCenter = timerSize / 2;
+  const timerRadius = isTablet ? 132 : PRACTICE_TIMER_RADIUS;
+  const timerStroke = isTablet ? 13 : PRACTICE_TIMER_STROKE;
 
   useEffect(() => {
     stopRoomAmbientAudio().catch(() => {});
@@ -326,7 +334,7 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
   return (
     <ScrollView
       style={styles.scroll}
-      contentContainerStyle={styles.scrollContent}
+      contentContainerStyle={[styles.scrollContent, isTablet && { paddingHorizontal: 40 }]}
       showsVerticalScrollIndicator={false}
     >
       {isDevMode && (
@@ -358,7 +366,7 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
         </TouchableOpacity>
       )}
 
-      <View style={styles.visualContainer}>
+      <View style={[styles.visualContainer, isTablet && { maxWidth: 640, alignSelf: 'center', width: '100%' }]}>
         <View style={styles.mantraMainContainer}>
           <Text style={[styles.deityTitle, { textAlign: "center" }]}>{item.title}</Text>
           {(item.summary || item.subtitle || item.line) && (
@@ -447,36 +455,36 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
               </>
             ) : (
               <>
-                <View style={styles.practiceTimerVisual}>
+                <View style={[styles.practiceTimerVisual, isTablet && { width: timerSize + 40, height: timerSize + 40 }]}>
                   <Svg
-                    width={PRACTICE_TIMER_SIZE}
-                    height={PRACTICE_TIMER_SIZE}
-                    viewBox={`0 0 ${PRACTICE_TIMER_SIZE} ${PRACTICE_TIMER_SIZE}`}
+                    width={timerSize}
+                    height={timerSize}
+                    viewBox={`0 0 ${timerSize} ${timerSize}`}
                   >
                     <Circle
-                      cx={PRACTICE_TIMER_CENTER}
-                      cy={PRACTICE_TIMER_CENTER}
-                      r={PRACTICE_TIMER_RADIUS}
+                      cx={timerCenter}
+                      cy={timerCenter}
+                      r={timerRadius}
                       stroke="rgba(212,160,23,0.2)"
-                      strokeWidth={PRACTICE_TIMER_STROKE}
+                      strokeWidth={timerStroke}
                       fill="none"
                     />
                     <Circle
-                      cx={PRACTICE_TIMER_CENTER}
-                      cy={PRACTICE_TIMER_CENTER}
-                      r={PRACTICE_TIMER_RADIUS}
+                      cx={timerCenter}
+                      cy={timerCenter}
+                      r={timerRadius}
                       stroke="#D4A017"
-                      strokeWidth={PRACTICE_TIMER_STROKE}
+                      strokeWidth={timerStroke}
                       fill="none"
-                      strokeDasharray={`${2 * Math.PI * PRACTICE_TIMER_RADIUS}`}
+                      strokeDasharray={`${2 * Math.PI * timerRadius}`}
                       strokeDashoffset={
                         2 *
                         Math.PI *
-                        PRACTICE_TIMER_RADIUS *
+                        timerRadius *
                         (1 - practiceTimeLeft / practiceInitialSeconds)
                       }
                       strokeLinecap="round"
-                      transform={`rotate(-90 ${PRACTICE_TIMER_CENTER} ${PRACTICE_TIMER_CENTER})`}
+                      transform={`rotate(-90 ${timerCenter} ${timerCenter})`}
                     />
                   </Svg>
                   <View style={styles.practiceTimerCenter}>
@@ -599,14 +607,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   deityTitle: {
-    fontSize: 26,
+    fontSize: sfs(26),
     fontFamily: Fonts.serif.bold,
     color: BROWN,
     textAlign: "center",
     marginTop: -40,
   },
   sankalpMainText: {
-    fontSize: 24,
+    fontSize: sfs(24),
     fontFamily: Fonts.serif.regular,
     color: BROWN,
     textAlign: "center",
@@ -614,7 +622,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
   },
   practiceDurationLine: {
-    fontSize: 11,
+    fontSize: sfs(11),
     letterSpacing: 1.3,
     fontFamily: Fonts.sans.medium,
     color: "#B89450",
@@ -645,7 +653,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 14,
+    fontSize: sfs(14),
     color: "#B89450",
     textTransform: "uppercase",
     letterSpacing: 1.5,
@@ -659,7 +667,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   stepNum: {
-    fontSize: 18,
+    fontSize: sfs(18),
     fontFamily: Fonts.serif.bold,
     color: BROWN,
     marginRight: 8,
@@ -667,8 +675,8 @@ const styles = StyleSheet.create({
   },
   stepText: {
     flex: 1,
-    fontSize: 17,
-    lineHeight: 24,
+    fontSize: sfs(17),
+    lineHeight: sfs(24),
     color: BROWN,
     fontFamily: Fonts.serif.regular,
   },
@@ -683,14 +691,14 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.35)",
   },
   practiceTimerHeading: {
-    fontSize: 20,
-    lineHeight: 30,
+    fontSize: sfs(20),
+    lineHeight: sfs(30),
     color: BROWN,
     fontFamily: Fonts.serif.bold,
     textAlign: "center",
   },
   practiceTimerValue: {
-    fontSize: 18,
+    fontSize: sfs(18),
     color: BROWN,
     fontFamily: Fonts.sans.semiBold,
     marginTop: 18,
@@ -730,12 +738,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   practiceTimerScaleLabel: {
-    fontSize: 13,
+    fontSize: sfs(13),
     color: "#6a4d28",
     fontFamily: Fonts.sans.medium,
   },
   practiceTimerScaleHint: {
-    fontSize: 12,
+    fontSize: sfs(12),
     color: "#8A7A5A",
     fontFamily: Fonts.sans.regular,
   },
@@ -756,7 +764,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   practicePrimaryButtonText: {
-    fontSize: 18,
+    fontSize: sfs(18),
     color: BROWN,
     fontFamily: Fonts.serif.bold,
   },
@@ -778,13 +786,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   practiceTimerClock: {
-    fontSize: Platform.OS === "android" ? 42 : 46,
-    lineHeight: Platform.OS === "android" ? 48 : 52,
+    fontSize: Platform.OS === "android" ? sfs(42) : sfs(46),
+    lineHeight: Platform.OS === "android" ? sfs(48) : sfs(52),
     color: BROWN,
     fontFamily: Fonts.serif.bold,
   },
   practiceTimerSubtext: {
-    fontSize: Platform.OS === "android" ? 13 : 14,
+    fontSize: Platform.OS === "android" ? sfs(13) : sfs(14),
     color: "#7B6A55",
     fontFamily: Fonts.sans.regular,
     marginTop: 6,
@@ -818,13 +826,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cardLabel: {
-    fontSize: 18,
+    fontSize: sfs(18),
     fontFamily: Fonts.serif.bold,
     color: BROWN,
     marginHorizontal: 12,
   },
   toggleIcon: {
-    fontSize: 12,
+    fontSize: sfs(12),
     color: "#D4A017",
     display: "flex",
     alignItems: "center",
@@ -834,8 +842,8 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   cardText: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: sfs(16),
+    lineHeight: sfs(24),
     color: "#5a3c21",
     fontFamily: Fonts.serif.regular,
     textAlign: "center",
@@ -844,8 +852,8 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   benefitItem: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: sfs(16),
+    lineHeight: sfs(24),
     color: "#5a3c21",
     fontFamily: Fonts.serif.regular,
   },
@@ -871,13 +879,13 @@ const styles = StyleSheet.create({
   communityAddButtonText: {
     color: "#B88413",
     fontFamily: Fonts.sans.bold,
-    fontSize: 14,
+    fontSize: sfs(14),
   },
   backLink: {
     paddingVertical: 1,
   },
   backLinkText: {
-    fontSize: 16,
+    fontSize: sfs(16),
     fontFamily: Fonts.serif.regular,
     color: BROWN,
     textDecorationLine: "underline",

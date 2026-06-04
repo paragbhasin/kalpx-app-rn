@@ -13,10 +13,12 @@ import {
   TouchableOpacity,
   UIManager,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { REMOTE_AUDIO_SOURCES } from "../../config/audioAssets";
 import { stopRoomAmbientAudio } from "../../engine/roomAmbientAudio";
 import { Fonts } from "../../theme/fonts";
+import { sfs } from "../../utils/responsive";
 
 if (
   Platform.OS === "android" &&
@@ -148,6 +150,8 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
   const sankalpSpinLoopRef = useRef<RNAnimated.CompositeAnimation | null>(null);
   const sessionStartTimeRef = useRef(Date.now());
   const isCompletingRef = useRef(false);
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
 
   useEffect(() => {
     stopRoomAmbientAudio().catch(() => {});
@@ -259,7 +263,7 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
   return (
     <ScrollView
       style={styles.scroll}
-      contentContainerStyle={styles.scrollContent}
+      contentContainerStyle={[styles.scrollContent, isTablet && { paddingHorizontal: 40 }]}
       showsVerticalScrollIndicator={false}
     >
       {isDevMode && (
@@ -297,7 +301,7 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
         </TouchableOpacity>
       )}
 
-      <View style={styles.combinedSankalpFlow}>
+      <View style={[styles.combinedSankalpFlow, isTablet && { maxWidth: 640, alignSelf: 'center' }]}>
         <View style={styles.mantraInfoCard}>
           <Text style={styles.sankalpTitle}>{item.title || "Intention"}</Text>
           {showBodyText && (
@@ -341,7 +345,7 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
               activeOpacity={0.9}
               onPress={runSankalpActivation}
               disabled={isSankalpActivating}
-              style={styles.holdTarget}
+              style={[styles.holdTarget, isTablet && { width: 300, height: 300 }]}
             >
               <RNAnimated.View
                 style={{
@@ -362,7 +366,7 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
                   ],
                 }}
               >
-                <Image source={NamasteIcon} style={styles.embodyImg} />
+                <Image source={NamasteIcon} style={[styles.embodyImg, isTablet && { width: 340, height: 340 }]} />
               </RNAnimated.View>
             </TouchableOpacity>
           </View>
@@ -442,8 +446,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   sankalpTitle: {
-    fontSize: 24,
-    lineHeight: 34,
+    fontSize: sfs(24),
+    lineHeight: sfs(34),
     fontFamily: Fonts.serif.bold,
     color: BROWN,
     textAlign: "center",
@@ -452,8 +456,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sankalpMainTextInline: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: sfs(16),
+    lineHeight: sfs(24),
     fontFamily: Fonts.serif.regular,
     color: BROWN,
     textAlign: "center",
@@ -483,7 +487,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 14,
+    fontSize: sfs(14),
     color: "#B89450",
     textTransform: "uppercase",
     letterSpacing: 1.5,
@@ -493,11 +497,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   howToLiveText: {
-    fontSize: 18,
+    fontSize: sfs(18),
     fontFamily: Fonts.serif.regular,
     fontStyle: "italic",
     color: "#4A4A4A",
-    lineHeight: 28,
+    lineHeight: sfs(28),
     textAlign: "center",
     paddingHorizontal: 10,
   },
@@ -508,7 +512,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   embodyInstr: {
-    fontSize: 16,
+    fontSize: sfs(16),
     fontFamily: Fonts.serif.regular,
     color: "#8a7a5a",
     marginBottom: 24,
@@ -551,13 +555,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cardLabel: {
-    fontSize: 18,
+    fontSize: sfs(18),
     fontFamily: Fonts.serif.bold,
     color: BROWN,
     marginHorizontal: 12,
   },
   toggleIcon: {
-    fontSize: 12,
+    fontSize: sfs(12),
     color: "#D4A017",
     display: "flex",
     alignItems: "center",
@@ -567,8 +571,8 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   cardText: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: sfs(16),
+    lineHeight: sfs(24),
     color: "#5a3c21",
     fontFamily: Fonts.serif.regular,
     textAlign: "center",
@@ -577,8 +581,8 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   benefitItem: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: sfs(16),
+    lineHeight: sfs(24),
     color: "#5a3c21",
     fontFamily: Fonts.serif.regular,
   },
@@ -604,13 +608,13 @@ const styles = StyleSheet.create({
   communityAddButtonText: {
     color: "#B88413",
     fontFamily: Fonts.sans.bold,
-    fontSize: 14,
+    fontSize: sfs(14),
   },
   backLink: {
     paddingVertical: 1,
   },
   backLinkText: {
-    fontSize: 16,
+    fontSize: sfs(16),
     fontFamily: Fonts.serif.regular,
     color: BROWN,
     textDecorationLine: "underline",

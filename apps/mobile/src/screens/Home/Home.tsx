@@ -35,6 +35,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import i18n from "../../config/i18n";
@@ -51,6 +52,7 @@ import { Fonts } from "../../theme/fonts";
 import { registerDeviceToBackend } from "../../utils/registerDevice";
 import { consumeSkipMitraStart } from "../../utils/postLoginGuard";
 import { fetchProfileDetails } from "../Profile/actions";
+import { rfs, rhPad, rs, TABLET_MAX_CARD_WIDTH } from "../../utils/responsive";
 
 const FEATURE_ITEMS = [
   {
@@ -79,6 +81,8 @@ const FEATURE_ITEMS = [
 export const collapseControl = { avoidCollapse: false };
 
 export default function Home() {
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   const { t } = useTranslation();
   const navigation: any = useNavigation();
   const isFocused = useIsFocused();
@@ -963,55 +967,81 @@ export default function Home() {
           contentContainerStyle={[
             styles.scrollContent,
             { paddingBottom: tabBarHeight + 24 },
+            isTablet && {
+              paddingHorizontal: rhPad(20, width),
+              alignItems: 'center',
+              flexGrow: 1,
+              justifyContent: 'flex-start',
+              paddingTop: 48,
+              paddingBottom: tabBarHeight + 60,
+            },
           ]}
           showsVerticalScrollIndicator={false}
         >
           {/* ── Hero Section ── */}
-          <View style={styles.heroSection}>
-            <Text style={styles.heroQuote}>
+          <View style={[
+            styles.heroSection,
+            isTablet && { maxWidth: TABLET_MAX_CARD_WIDTH, width: '100%', marginBottom: rs(24, 40, width) },
+          ]}>
+            <Text style={[styles.heroQuote, { fontSize: rs(18, 26, width) }]}>
               {t("mitraHome.heroQuote")}
             </Text>
-            <Text style={styles.heroSource}>{t("mitraHome.heroSource")}</Text>
-            <View style={styles.turnOneHeadlineDivider}>
+            <Text style={[styles.heroSource, { fontSize: rs(14, 19, width) }]}>{t("mitraHome.heroSource")}</Text>
+            <View style={[styles.turnOneHeadlineDivider, isTablet && { marginVertical: 16 }]}>
               <View style={styles.turnOneDividerLine} />
-              <Ionicons name="diamond" size={10} color="#c7a258" />
+              <Ionicons name="diamond" size={isTablet ? 14 : 10} color="#c7a258" />
               <View style={styles.turnOneDividerLine} />
             </View>
-            <Text style={[styles.heroTitle, { marginTop: 20 }]}>
+            <Text style={[styles.heroTitle, {
+              marginTop: rs(20, 28, width),
+              fontSize: rs(28, 44, width),
+              lineHeight: rs(36, 54, width),
+            }]}>
               {t("mitraHome.heroTitle")}
             </Text>
-            <Text style={[styles.companionTitle, { marginTop: 5 }]}>
+            <Text style={[styles.companionTitle, {
+              marginTop: rs(5, 10, width),
+              fontSize: rs(18, 26, width),
+              lineHeight: rs(24, 34, width),
+            }]}>
               {t("mitraHome.companionTitle")}
             </Text>
           </View>
 
-          {/* ── Journey CTA ── */}
-
           {/* ── Companion Preview ── */}
-          <View style={styles.companionSection}>
-            <Text style={styles.companionDesc}>
+          <View style={[
+            styles.companionSection,
+            isTablet && { maxWidth: TABLET_MAX_CARD_WIDTH, width: '100%', marginTop: 0, marginBottom: rs(32, 48, width) },
+          ]}>
+            <Text style={[styles.companionDesc, { fontSize: rs(16, 22, width), lineHeight: rs(24, 32, width) }]}>
               {t("mitraHome.companionDesc1")}
             </Text>
-            <Text style={styles.companionDesc}>
+            <Text style={[styles.companionDesc, { fontSize: rs(16, 22, width), lineHeight: rs(24, 32, width) }]}>
               {t("mitraHome.companionDesc2")}
             </Text>
           </View>
 
-          {/* {!isLoggedIn && (
-            <TouchableOpacity
-              style={styles.loginCta}
-              onPress={() => navigation.navigate("Login")}
-            >
-              <Ionicons name="person-outline" size={18} color="#D4A017" />
-              <Text style={styles.loginText}>Sign in to save your journey</Text>
-            </TouchableOpacity>
-          )} */}
-          <Image source={require("../../../assets/new_home_lotus.webp")} />
-          {/* <View style={{ height: 220 }} /> */}
+          {/* Tablet spacer: pushes lotus + button to the lower portion of the screen */}
+          {isTablet && <View style={{ flex: 1, minHeight: 60 }} />}
+
+          <Image
+            source={require("../../../assets/new_home_lotus.webp")}
+            style={isTablet
+              ? { width: 360, height: 360, resizeMode: 'contain', marginBottom: 8 }
+              : { resizeMode: 'contain' }
+            }
+          />
           <TouchableOpacity
             onPress={handleBeginJourney}
             activeOpacity={0.85}
-            style={{ borderRadius: 28 }}
+            style={[
+              { borderRadius: 28 },
+              isTablet && {
+                alignSelf: 'center',
+                width: '88%',
+                maxWidth: 480,
+              },
+            ]}
             testID="onboarding_begin_journey_cta"
             accessibilityLabel="onboarding_begin_journey_cta"
           >
@@ -1019,9 +1049,12 @@ export default function Home() {
               colors={["#E5D4CA", "#F5EDEA"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              style={styles.ctaButton}
+              style={[
+                styles.ctaButton,
+                isTablet && { paddingVertical: 20, width: '100%' },
+              ]}
             >
-              <Text style={styles.ctaText}>{t("mitraHome.beginCta")}</Text>
+              <Text style={[styles.ctaText, { fontSize: rs(16, 22, width) }]}>{t("mitraHome.beginCta")}</Text>
             </LinearGradient>
           </TouchableOpacity>
         </ScrollView>
@@ -1159,6 +1192,7 @@ const styles = StyleSheet.create({
     elevation: 6,
     alignSelf: "center",
   },
+  // Tablet width override applied inline via isTablet && { paddingVertical: 20, width: '100%' }
 
   ctaText: {
     fontSize: 16,

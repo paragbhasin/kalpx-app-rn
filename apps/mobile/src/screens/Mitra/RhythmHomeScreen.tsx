@@ -22,6 +22,7 @@ import {
   TouchableOpacity,
   View,
   Platform,
+  useWindowDimensions,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import LibrarySearchModal, {
@@ -40,6 +41,7 @@ import { screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
 import { platformShadow } from "../../theme/shadows";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { sfs } from "../../utils/responsive";
 
 const RHYTHM_BG = require("../../../assets/beige_bg.webp");
 
@@ -83,28 +85,30 @@ function RhythmItemCard({
   onAction,
   resolving,
   held,
+  isTablet,
   t,
 }: {
   item: RhythmItem;
   onAction: () => void;
   resolving?: boolean;
   held?: boolean;
+  isTablet?: boolean;
   t: (key: string, opts?: Record<string, unknown>) => string;
 }) {
-  return (
-    <View style={styles.itemCard}>
+  const cardContent = (
+    <>
       <View style={styles.cardTopRow}>
-        <Text style={styles.itemTypeBadge}>{cardLabel(item.item_type, t)}</Text>
+        <Text style={[styles.itemTypeBadge, isTablet && { fontSize: 13, paddingHorizontal: 10, paddingVertical: 6 }]}>{cardLabel(item.item_type, t)}</Text>
         {!!itemDuration(item) && (
-          <Text style={styles.durationText}>{itemDuration(item)}</Text>
+          <Text style={[styles.durationText, isTablet && { fontSize: 17 }]}>{itemDuration(item)}</Text>
         )}
       </View>
-      <Text style={styles.itemTitle}>{item.title_snapshot}</Text>
+      <Text style={[styles.itemTitle, isTablet && { fontSize: 22, marginBottom: 28 }]}>{item.title_snapshot}</Text>
       <View style={styles.cardDivider}>
         <View style={styles.cardDividerLine} />
         <Image
           source={require("../../../assets/lotus_icon.png")}
-          style={styles.cardDividerLotus}
+          style={[styles.cardDividerLotus, isTablet && { width: 28, height: 22 }]}
           resizeMode="contain"
         />
         <View style={styles.cardDividerLine} />
@@ -114,7 +118,8 @@ function RhythmItemCard({
           {t("rhythmHome.reminderLine", { time: formatReminderTime(item.reminder_time) })}
         </Text>
       ) : null}
-      {item.description_snapshot ? (
+      {/* On mobile: description inside card; on tablet: moved to right panel */}
+      {!isTablet && item.description_snapshot ? (
         <Text style={styles.itemDescription}>{item.description_snapshot}</Text>
       ) : null}
       {!!held && (
@@ -123,17 +128,32 @@ function RhythmItemCard({
         </Text>
       )}
       <TouchableOpacity
-        style={[styles.actionBtn, resolving && styles.actionBtnResolving]}
+        style={[styles.actionBtn, resolving && styles.actionBtnResolving, isTablet && { paddingVertical: 14 }]}
         onPress={resolving ? undefined : onAction}
         activeOpacity={resolving ? 1 : 0.8}
       >
-        <Text style={styles.actionBtnSparkle}>✦</Text>
-        <Text style={styles.actionBtnText}>
+        <Text style={[styles.actionBtnSparkle, isTablet && { fontSize: 22 }]}>✦</Text>
+        <Text style={[styles.actionBtnText, isTablet && { fontSize: 20 }]}>
           {resolving ? t("rhythmHome.opening") : beginLabel(item.item_type, t)}
         </Text>
       </TouchableOpacity>
-    </View>
+    </>
   );
+
+  if (isTablet && item.description_snapshot) {
+    return (
+      <View style={[styles.itemCard, styles.itemCardTablet]}>
+        <View style={styles.tabletLeftPanel}>{cardContent}</View>
+        <View style={styles.tabletPanelDivider} />
+        <View style={styles.tabletRightPanel}>
+          <Text style={styles.tabletMeaningLabel}>MEANING</Text>
+          <Text style={styles.tabletMeaningText}>{item.description_snapshot}</Text>
+        </View>
+      </View>
+    );
+  }
+
+  return <View style={styles.itemCard}>{cardContent}</View>;
 }
 
 function slotHeldLabel(band: RhythmTimeBand, t: (key: string) => string): string {
@@ -148,6 +168,7 @@ function RhythmBand({
   onItemAction,
   resolvingItemId,
   onAddItem,
+  isTablet,
   t,
 }: {
   band: RhythmTimeBand;
@@ -155,6 +176,7 @@ function RhythmBand({
   onItemAction: (item: RhythmItem) => void;
   resolvingItemId?: string | null;
   onAddItem: (band: RhythmTimeBand) => void;
+  isTablet?: boolean;
   t: (key: string, opts?: Record<string, unknown>) => string;
 }) {
   if (items.length === 0) return null;
@@ -170,7 +192,7 @@ function RhythmBand({
           marginBottom: 8,
         }}
       >
-        <Text style={styles.bandLabel}>
+        <Text style={[styles.bandLabel, isTablet && { fontSize: 17 }]}>
           {t(`rhythmHome.bandTitle.${band}`, { defaultValue: `${RHYTHM_BAND_LABELS[band]} Practice` })}
         </Text>
         {slotHeld && (
@@ -189,15 +211,16 @@ function RhythmBand({
           onAction={() => onItemAction(item)}
           resolving={resolvingItemId === item.item_id}
           held={item.completed_today === true}
+          isTablet={isTablet}
           t={t}
         />
       ))}
       <TouchableOpacity
         onPress={() => onAddItem(band)}
         activeOpacity={0.7}
-        style={styles.addToSlotBtn}
+        style={[styles.addToSlotBtn, isTablet && { paddingVertical: 14 }]}
       >
-        <Text style={styles.addToSlotText}>{t("rhythmHome.addToRhythm", { band })}</Text>
+        <Text style={[styles.addToSlotText, isTablet && { fontSize: 16 }]}>{t("rhythmHome.addToRhythm", { band })}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -213,6 +236,8 @@ export default function RhythmHomeScreen({
   const navigation = useNavigation<any>();
   const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   const homeData = useSelector((state: any) => state.door?.homeData);
   const rhythm = homeData?.companion_rhythm;
 
@@ -254,17 +279,7 @@ export default function RhythmHomeScreen({
     navigation.navigate("RhythmEdit" as any);
   }, [navigation]);
 
-  const handleBack = useCallback(() => {
-    if (embedded) {
-      dispatch(
-        screenActions.setScreenValue({
-          key: "dashboard_entry_surface",
-          value: null,
-        }),
-      );
-    }
-    navigation.goBack();
-  }, [dispatch, embedded, navigation]);
+
 
   const handleHomeBandItemSelected = useCallback(
     async (picked: LibrarySearchItem) => {
@@ -331,7 +346,7 @@ export default function RhythmHomeScreen({
             "",
         };
       }
-    } catch (_) {
+    } catch {
       // fall through with snapshot item
     } finally {
       setResolvingItemId(null);
@@ -367,11 +382,15 @@ export default function RhythmHomeScreen({
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: tabBarHeight + insets.bottom + 16 }]}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: tabBarHeight + insets.bottom + 16 },
+          isTablet && { paddingHorizontal: 32, paddingTop: 36 },
+        ]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.shell}>
-          <Text style={styles.headerTitle}>{t("rhythmHome.title")}</Text>
+        <View style={[styles.shell, isTablet && { maxWidth: 820 }]}>
+          <Text style={[styles.headerTitle, isTablet && { fontSize: 38, marginBottom: 6 }]}>{t("rhythmHome.title")}</Text>
 
           {!hasRhythm ? (
             <View style={styles.emptyStateCard}>
@@ -397,6 +416,7 @@ export default function RhythmHomeScreen({
                     onItemAction={(item) => void handleItemAction(item, band)}
                     resolvingItemId={resolvingItemId}
                     onAddItem={setHomeBand}
+                    isTablet={isTablet}
                     t={t}
                   />
                 ),
@@ -405,9 +425,9 @@ export default function RhythmHomeScreen({
               <TouchableOpacity
                 onPress={openRhythmEdit}
                 activeOpacity={0.8}
-                style={styles.editRhythmBtn}
+                style={[styles.editRhythmBtn, isTablet && { paddingVertical: 16 }]}
               >
-                <Text style={styles.editRhythmBtnText}>{t("rhythmHome.editCta")}</Text>
+                <Text style={[styles.editRhythmBtnText, isTablet && { fontSize: 19 }]}>{t("rhythmHome.editCta")}</Text>
               </TouchableOpacity>
             </>
           )}
@@ -429,7 +449,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: sfs(28),
     fontFamily: Fonts.serif.bold,
     color: "#432104",
     marginBottom: 8,
@@ -455,7 +475,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   emptyTitle: {
-    fontSize: 17,
+    fontSize: sfs(17),
     fontFamily: Fonts.serif.regular,
     color: "#432104",
     textAlign: "center",
@@ -468,7 +488,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#C99317",
   },
   setupBtnText: {
-    fontSize: 16,
+    fontSize: sfs(16),
     fontFamily: Fonts.serif.bold,
     color: "#fff",
   },
@@ -476,12 +496,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   bandLabel: {
-    fontSize: 14,
+    fontSize: sfs(14),
     fontFamily: Fonts.serif.regular,
     color: "#432104",
   },
   bandHeldLabel: {
-    fontSize: 11,
+    fontSize: sfs(11),
     fontFamily: Fonts.serif.bold,
     color: "#7A9E7E",
     marginBottom: 2,
@@ -500,7 +520,7 @@ const styles = StyleSheet.create({
   },
   itemHeldLabel: {
     fontFamily: Fonts.serif.bold,
-    fontSize: 13,
+    fontSize: sfs(13),
     color: "#7A9E7E",
     textAlign: "center",
     marginTop: 4,
@@ -513,7 +533,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(210,166,61,0.45)",
   },
   bandDividerDiamond: {
-    fontSize: 14,
+    fontSize: sfs(14),
     color: "#D2A63D",
   },
   itemCard: {
@@ -533,7 +553,7 @@ const styles = StyleSheet.create({
     marginBottom: 22,
   },
   itemTypeBadge: {
-    fontSize: 12,
+    fontSize: sfs(12),
     fontFamily: Fonts.sans.bold,
     letterSpacing: 1.4,
     color: "#A97C14",
@@ -545,12 +565,12 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   durationText: {
-    fontSize: 15,
+    fontSize: sfs(15),
     color: "#8B6A43",
     fontFamily: Fonts.sans.regular,
   },
   itemTitle: {
-    fontSize: 18,
+    fontSize: sfs(18),
     fontFamily: Fonts.serif.bold,
     color: "#432104",
     textAlign: "center",
@@ -574,11 +594,11 @@ const styles = StyleSheet.create({
     tintColor: "#D2A63D",
   },
   itemDescription: {
-    fontSize: 16,
+    fontSize: sfs(16),
     fontFamily: Fonts.serif.regular,
     textAlign: "center",
     color: "#7A6040",
-    lineHeight: 30,
+    lineHeight: sfs(30),
     marginBottom: 28,
   },
   actionBtn: {
@@ -594,15 +614,15 @@ const styles = StyleSheet.create({
     ...platformShadow("#C99317", 18, 0.24, 20, 4),
   },
   actionBtnSparkle: {
-    fontSize: 20,
-    lineHeight: 20,
+    fontSize: sfs(20),
+    lineHeight: sfs(20),
     color: "#fff",
   },
   actionBtnResolving: {
     opacity: 0.7,
   },
   actionBtnText: {
-    fontSize: 18,
+    fontSize: sfs(18),
     fontFamily: Fonts.serif.bold,
     color: "#fff",
   },
@@ -619,12 +639,12 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   editRhythmBtnText: {
-    fontSize: 17,
+    fontSize: sfs(17),
     fontFamily: Fonts.sans.regular,
     color: "#7B6550",
   },
   reminderLine: {
-    fontSize: 11,
+    fontSize: sfs(11),
     color: "rgba(67,33,4,0.5)",
     fontStyle: "italic",
     textAlign: "center",
@@ -642,9 +662,52 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   addToSlotText: {
-    fontSize: 13,
+    fontSize: sfs(13),
     fontStyle: "italic",
     color: "#432104",
     fontFamily: Fonts.sans.regular,
+  },
+
+  // ── Tablet two-column card layout ──────────────────────────────────────
+  itemCardTablet: {
+    flexDirection: "row",
+    alignItems: "stretch",
+    padding: 0,
+    overflow: "hidden",
+  },
+  tabletLeftPanel: {
+    flex: 1,
+    padding: 24,
+    justifyContent: "space-between",
+  },
+  tabletPanelDivider: {
+    width: 1,
+    backgroundColor: "rgba(201,168,76,0.28)",
+    marginVertical: 20,
+  },
+  tabletRightPanel: {
+    flex: 1,
+    padding: 24,
+    justifyContent: "flex-start",
+  },
+  tabletMeaningLabel: {
+    fontSize: sfs(12),
+    fontFamily: Fonts.sans.bold,
+    letterSpacing: 1.6,
+    color: "#A97C14",
+    textTransform: "uppercase",
+    backgroundColor: "#F6EED8",
+    borderRadius: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    overflow: "hidden",
+    alignSelf: "flex-start",
+    marginBottom: 18,
+  },
+  tabletMeaningText: {
+    fontSize: sfs(17),
+    fontFamily: Fonts.serif.regular,
+    color: "#7A6040",
+    lineHeight: sfs(30),
   },
 });

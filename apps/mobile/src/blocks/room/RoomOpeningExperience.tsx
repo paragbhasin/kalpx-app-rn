@@ -13,6 +13,7 @@ import React, { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { Fonts } from "../../theme/fonts";
+import { sfs } from "../../utils/responsive";
 import type { RoomRenderV1 } from "./types";
 
 interface Props {
@@ -58,7 +59,7 @@ const styles = StyleSheet.create({
   },
   openingLine: {
     fontFamily: Fonts.sans.bold,
-    fontSize: 20,
+    fontSize: sfs(20),
     lineHeight: 28,
     textAlign: "center",
     color: "#432104",
@@ -67,7 +68,7 @@ const styles = StyleSheet.create({
     // paddingVertical: 24,
   },
   secondBeat: {
-    fontSize: 16,
+    fontSize: sfs(16),
     lineHeight: 22,
     textAlign: "center",
     color: "#432104",
@@ -75,7 +76,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   memoryEchoLine: {
-    fontSize: 13,
+    fontSize: sfs(13),
     lineHeight: 19,
     textAlign: "center",
     color: "#8B6914",

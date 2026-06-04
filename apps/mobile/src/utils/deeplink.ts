@@ -78,6 +78,7 @@ const DIRECT_ROUTE_CONTAINERS: Record<string, string> = {
   rhythm_home: "RhythmHome",
   quick_checkin: "QuickCheckin",
   browse_rooms: "BrowseRooms",
+  quick_chant: "QuickReset",
 };
 
 // Safe room IDs that may be routed to RoomContainer via deeplink.

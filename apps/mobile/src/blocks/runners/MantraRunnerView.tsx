@@ -20,6 +20,15 @@ import {
 } from "react-native";
 import { useJapaEngine } from "../../engine/useJapaEngine";
 import type { JapaSourceSurface } from "@kalpx/types";
+
+function deepLinkFromSurface(surface?: JapaSourceSurface): string {
+  switch (surface) {
+    case 'inner_path':   return 'kalpx://mitra/inner_path/home';
+    case 'daily_rhythm': return 'kalpx://mitra/rhythm_home/morning';
+    case 'quick_reset':  return 'kalpx://mitra/quick_reset/home';
+    default:             return 'kalpx://mitra/quick_chant/home'; // routes to QuickReset
+  }
+}
 import { getLiveActivityState } from "../../engine/mitraApi";
 import { liveActivity } from "../../native/liveActivity";
 import i18n from "../../config/i18n";
@@ -243,15 +252,13 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
       const durationSec = Math.round((Date.now() - sessionStartTimeRef.current) / 1000);
       if (isLAActiveRef.current && !laCompleteCalledRef.current) {
         laCompleteCalledRef.current = true;
-        liveActivity.completeChant(selectedTarget, durationSec);
-        setTimeout(async () => {
-          liveActivity.end();
-          isLAActiveRef.current = false;
-          const state = await getLiveActivityState(i18n.language || 'en').catch(() => ({ type: 'none' as const }));
+        liveActivity.end();
+        isLAActiveRef.current = false;
+        getLiveActivityState(i18n.language || 'en').then((state) => {
           if (AppState.currentState === 'active' && state.type === 'sankalp') {
             liveActivity.startSankalp(state.title, state.line);
           }
-        }, 20_000);
+        }).catch(() => {});
       }
       onCompleteRef.current?.(selectedTarget, durationSec);
     }, [selectedTarget]),
@@ -332,24 +339,25 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   const handleIncrement = useCallback(() => {
     if (chantCount >= selectedTarget || isCompletingRef.current) return;
     if (mantraRef) {
-      const nextToday    = japaEngine.todayCount + 1;
-      const nextWeek     = japaEngine.weekCount + 1;
-      const nextLifetime = japaEngine.lifetimeCount + 1;
-      const elapsedSec   = Math.floor(japaEngine.elapsedMs / 1000);
+      // Increment first so engine counts match what we send to live activity
+      japaEngine.increment();
+      const curToday    = japaEngine.todayCount;
+      const curWeek     = japaEngine.weekCount;
+      const curLifetime = japaEngine.lifetimeCount;
+      const elapsedSec  = Math.floor(japaEngine.elapsedMs / 1000);
       if (!isLAActiveRef.current) {
         if (AppState.currentState === 'active') {
           isLAActiveRef.current = true;
           liveActivity.start(
             item.title ?? '',
             item.devanagari ?? '',
-            nextToday, nextWeek, nextLifetime, nextLifetime, elapsedSec,
+            curToday, curWeek, curLifetime, curLifetime, elapsedSec,
+            deepLinkFromSurface(sourceSurface),
           );
         }
       } else {
-        liveActivity.update(nextToday, nextWeek, nextLifetime, nextLifetime, elapsedSec);
+        liveActivity.update(curToday, curWeek, curLifetime, curLifetime, elapsedSec);
       }
-      // Engine handles haptics, persistence, sync, and goal detection via onGoalReached
-      japaEngine.increment();
     } else {
       // Fallback: legacy local-only counting (no engine wired)
       setLocalCount((prev) => {

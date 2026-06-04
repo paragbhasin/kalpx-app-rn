@@ -1,0 +1,24 @@
+{
+  "name": "KalpX Mitra",
+  "short_name": "KalpX",
+  "description": "KalpX — Your spiritual companion",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a0a00",
+  "theme_color": "#b5541a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/kalpx-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/kalpx-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

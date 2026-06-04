@@ -13,16 +13,17 @@ export const liveActivity = {
     yearCount: number,
     totalCount: number,
     elapsedSeconds: number = 0,
+    deepLinkURL: string = 'kalpx://mitra/quick_chant/home',
   ): Promise<string | null> {
     if (!supported) {
       console.warn("[LiveActivity] start skipped — module not found");
       return Promise.resolve(null);
     }
-    console.log("[LiveActivity] calling start", { mantraName, sessionCount, weekCount, yearCount, totalCount });
+    console.log("[LiveActivity] calling start", { mantraName, sessionCount, weekCount, yearCount, totalCount, deepLinkURL });
     return KalpxLiveActivityModule.startActivity(
       mantraName,
       devanagari,
-      { sessionCount, weekCount, yearCount, totalCount, elapsedSeconds }
+      { sessionCount, weekCount, yearCount, totalCount, elapsedSeconds, deepLinkURL }
     ).then((id: string) => {
       console.log("[LiveActivity] started OK, id:", id);
       return id;

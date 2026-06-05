@@ -23,6 +23,456 @@ type CarryModalCopy = {
 };
 
 // Generic fallback copy for carry types (RN source: CARRY_MEMORY_MODAL)
+const CARRY_MEMORY_MODAL_HI: Record<string, CarryModalCopy> = {
+  joy_carry: {
+    prompt: "इस पल से आप क्या अपने साथ ले जाना चाहते हैं?",
+    placeholder: "जो आपने देखा, महसूस किया, या थामना चाहते हैं...",
+    primary_label: "इसे थाम लें",
+    sanatan_context: "जागरूकता के साथ थामा गया आनंद प्रकाश का स्रोत बन जाता है।",
+  },
+  release_capture: {
+    prompt: "अभी आप क्या रख जा रहे हैं?",
+    placeholder: "जो आप छोड़ रहे हैं उसे नाम दें...",
+    primary_label: "इसे रख दें",
+  },
+  growth_reflect: {
+    prompt: "कौन सी अंतर्दृष्टि या संकल्प आप अपने साथ ले जाना चाहते हैं?",
+    placeholder: "आपका मनन...",
+    primary_label: "इसे थाम लें",
+  },
+  clarity_note: {
+    prompt: "आपके लिए क्या स्पष्ट हो गया?",
+    placeholder: "स्पष्टता का नोट...",
+    primary_label: "इसे याद रखें",
+  },
+  stillness_note: {
+    title: "जो शांत हुआ उसे लिखें",
+    prompt: "आज स्थिरता ने आपको क्या दिया?",
+    placeholder: "मौन में जो उभरा...",
+    primary_label: "इसे रखें",
+  },
+  stillness_named: {
+    title: "जो शांत हुआ उसे लिखें",
+    sanatan_context: "जब ध्यान एक स्थिर आधार पर लौटता है तब स्थिरता शुरू होती है।",
+    why_we_ask: "जो स्थिर हुआ उसे नाम देने से शोर के नीचे की ज़मीन पहचानी जाती है।",
+    prompt: "अभी क्या शांत लग रहा है?",
+    placeholder: "एक शब्द या कुछ पंक्तियाँ लिखें...",
+    primary_label: "इस स्थिरता को सहेजें",
+    confirmation: "सहेजा गया।",
+    add_another_label: "और लिखें",
+  },
+  clarity_journal: {
+    title: "एक ईमानदार प्रश्न लिखें",
+    sanatan_context: "स्पष्टता तब आती है जब हम भ्रम का अनुसरण करना बंद कर देते हैं और जो वास्तव में यहाँ है उसे देखते हैं।",
+    why_we_ask: "प्रश्न लिखना वास्तविक निर्णय को उसके चारों ओर के शोर से अलग कर देता है।",
+    prompt: "वह प्रश्न क्या है जिसके साथ आप वास्तव में बैठे हैं?",
+    placeholder: "अपना ईमानदार प्रश्न लिखें...",
+    primary_label: "यह प्रश्न सहेजें",
+    confirmation: "सहेजा गया। आप और लिख सकते हैं।",
+    add_another_label: "और लिखें",
+  },
+  connection_named: {
+    title: "किसी अपने का नाम लें",
+    sanatan_context: "किसी का नाम लेने से आप अकेलेपन से उस एक धागे की ओर लौटते हैं जो आपकी परवाह करता है।",
+    why_we_ask: "संबंध हमें याद दिलाता है कि एक सच्चा बंधन भी हमें थाम सकता है।",
+    prompt: "अभी आपके दिल के करीब कौन है?",
+    placeholder: "नाम, रिश्ता, या कुछ शब्द लिखें...",
+    primary_label: "यह संबंध सहेजें",
+    confirmation: "सहेजा गया। आप और नाम ले सकते हैं।",
+    add_another_label: "और नाम लें",
+  },
+  joy_named: {
+    title: "अभी जो अच्छा है वो लिखें",
+    sanatan_context: "संतोष वहाँ से शुरू होता है जहाँ हम देखते हैं कि क्या पहले से पर्याप्त है।",
+    why_we_ask: "एक अच्छी बात लिखने से मन उसके साथ रुकता है, आगे दौड़ने की बजाय।",
+    prompt: "अभी क्या अच्छा, स्थिर, या चुपचाप पर्याप्त लगता है?",
+    placeholder: "एक अच्छी बात लिखें...",
+    primary_label: "यह आनंद सहेजें",
+    confirmation: "सहेजा गया। आप और लिख सकते हैं।",
+    add_another_label: "और लिखें",
+  },
+  growth_journal: {
+    title: "जो आपने देखा वो लिखें",
+    sanatan_context: "विकास गति से नहीं, एक सही कर्म की जागरूकता से पकता है।",
+    why_we_ask: "जो आपने देखा उसे नाम देना अवलोकन को अगले कदम का बीज बना देता है।",
+    prompt: "आपने क्या देखा, या क्या आकार ले रहा है?",
+    placeholder: "जो उभरा वो लिखें...",
+    primary_label: "इसे सहेजें",
+    confirmation: "सहेजा गया। आप और लिख सकते हैं।",
+    add_another_label: "और लिखें",
+  },
+  connection_reach_out: {
+    title: "किसी एक व्यक्ति तक पहुँचें",
+    sanatan_context: "पहुँचने का एक छोटा कर्म स्वयं ही संबंध का अभ्यास है।",
+    why_we_ask: "संदेश लिखना — भेजे बिना भी — संबंध को करीब लाता है।",
+    prompt: "किसी अपने को एक छोटा संदेश लिखें।",
+    placeholder: "आपका संदेश...",
+    primary_label: "सहेजें और संदेश कॉपी करें",
+    confirmation: "सहेजा गया। आप और जोड़ सकते हैं।",
+    add_another_label: "और जोड़ें",
+  },
+  release_named: {
+    title: "जो आप रख जा रहे हैं उसे नाम दें",
+    sanatan_context: "भार का नाम लेने से आप उससे अलग हो पाते हैं जिसे आप ढो रहे हैं।",
+    why_we_ask: "छोड़ना हार नहीं है। यह पकड़ ढीली करना है ताकि जीवन फिर से बह सके।",
+    prompt: "अभी के लिए क्या रखने के लिए तैयार है?",
+    placeholder: "एक शब्द या कुछ पंक्तियाँ लिखें...",
+    primary_label: "यह विसर्जन सहेजें",
+    confirmation: "सहेजा गया। आपने इसे रख दिया।",
+    add_another_label: "और नाम लें",
+  },
+  connection_note: {
+    prompt: "इस जुड़ाव की भावना से आप क्या अपने साथ ले जाना चाहते हैं?",
+    placeholder: "आपका नोट...",
+    primary_label: "इसे सहेजें",
+  },
+  generic: {
+    prompt: "इससे आप क्या याद रखना चाहते हैं?",
+    placeholder: "आपका मनन...",
+    primary_label: "सहेजें",
+  },
+};
+
+const CARRY_MODAL_BY_CONTEXT_HI: Record<string, Record<string, CarryModalCopy>> = {
+  clarity_journal: {
+    money_security: {
+      title: "पैसे का प्रश्न स्पष्ट रूप से लिखें",
+      sanatan_context: "प्रश्न का नाम लेना स्वयं ही स्पष्टता का पहला कदम है।",
+      why_we_ask: "पैसे की उलझन अक्सर एक साथ बहुत सारे प्रश्नों से आती है। एक लिखना बाकी से अलग कर देता है।",
+      prompt: "जो पैसे का प्रश्न आप थामे हैं वो वास्तव में क्या है?",
+      placeholder: "एक स्पष्ट प्रश्न लिखें...",
+      primary_label: "यह प्रश्न सहेजें",
+      confirmation: "सहेजा गया। आप और लिख सकते हैं।",
+      add_another_label: "और लिखें",
+    },
+    work_career: {
+      title: "लिखें कि आपका काम वास्तव में क्या माँग रहा है",
+      sanatan_context: "जब कर्म और धर्म एक हो जाते हैं तो स्पष्टता आती है। पहले देखें कि वास्तव में क्या माँगा जा रहा है।",
+      why_we_ask: "काम में अक्सर शोर के नीचे एक असली प्रश्न होता है। उसे लिखना दिखाता है कि वास्तव में क्या उत्तर चाहिए।",
+      prompt: "अभी आपका काम आपसे वास्तव में क्या माँग रहा है?",
+      placeholder: "असली प्रश्न लिखें...",
+      primary_label: "इसे सहेजें",
+      confirmation: "सहेजा गया। आप और लिख सकते हैं।",
+      add_another_label: "और लिखें",
+    },
+  },
+  release_named: {
+    money_security: {
+      title: "नाम दें जो आप अभी के लिए रख जा रहे हैं",
+      sanatan_context: "भार तभी भारी होता है जब हम भूल जाते हैं कि हम उसे रख सकते हैं।",
+      why_we_ask: "पैसे की चिंता शरीर में बंध जाती है। जो आप रख जा रहे हैं उसे नाम देना, थोड़े समय के लिए भी, पकड़ ढीली करता है।",
+      prompt: "कौन सी पैसे की चिंता अभी के लिए रखने के लिए तैयार है?",
+      placeholder: "एक शब्द या कुछ पंक्तियाँ लिखें...",
+      primary_label: "यह विसर्जन सहेजें",
+      confirmation: "सहेजा गया। आपने इसे रख दिया।",
+      add_another_label: "और नाम लें",
+    },
+    relationships: {
+      title: "नाम दें जो आप इस रिश्ते में छोड़ रहे हैं",
+      sanatan_context: "संबंध हमें याद दिलाता है कि एक सच्चा बंधन भी हमें थाम सकता है।",
+      why_we_ask: "किसी का नाम लेना आपको अकेलेपन से उस देखभाल के एक धागे की ओर वापस लाता है।",
+      prompt: "इस रिश्ते में आप अभी के लिए क्या छोड़ने के लिए तैयार हैं?",
+      placeholder: "एक शब्द या कुछ पंक्तियाँ लिखें...",
+      primary_label: "यह विसर्जन सहेजें",
+      confirmation: "सहेजा गया। आपने इसे रख दिया।",
+      add_another_label: "और नाम लें",
+    },
+  },
+  growth_journal: {
+    work_career: {
+      title: "काम का अगला कदम लिखें",
+      sanatan_context: "गति से नहीं, ध्यान से किया कर्म असली विकास में पकता है।",
+      why_we_ask: "काम में अगला सही कदम अक्सर हम सोचते हैं उससे छोटा होता है। लिखना उसे वास्तविक बना देता है।",
+      prompt: "आपका काम एक अगले कदम के लिए क्या माँग रहा है?",
+      placeholder: "एक स्पष्ट कदम लिखें...",
+      primary_label: "यह कदम सहेजें",
+      confirmation: "सहेजा गया। आप और लिख सकते हैं।",
+      add_another_label: "और लिखें",
+    },
+    purpose_direction: {
+      title: "लिखें जो आपको आगे करना है",
+      sanatan_context: "धर्म जीवन की योजना नहीं है — यह अगला सही कर्म है, श्रद्धा से किया गया।",
+      why_we_ask: "जब मार्ग अस्पष्ट हो तब जो आपका लगता है वो लिखना सुनने का कर्म है।",
+      prompt: "क्या आपका लगता है जो आपको करना है, भले ही पूरा मार्ग अभी स्पष्ट न हो?",
+      placeholder: "जो आए वो लिखें...",
+      primary_label: "इसे सहेजें",
+      confirmation: "सहेजा गया। आप और लिख सकते हैं।",
+      add_another_label: "और लिखें",
+    },
+  },
+  joy_named: {
+    health_energy: {
+      title: "आज के शरीर से एक अच्छी बात लिखें",
+      sanatan_context: "शरीर एक उपहार है। उसके लिए कृतज्ञता, चाहे छोटी सी हो, कुछ वापस करती है।",
+      why_we_ask: "जब शरीर कठिन लगे तब उसमें एक अच्छी चीज़ खोजना देखभाल का एक कोमल कर्म है।",
+      prompt: "अभी आपका शरीर क्या अच्छे से कर रहा है या कैसा महसूस कर रहा है?",
+      placeholder: "एक अच्छी बात लिखें...",
+      primary_label: "यह आनंद सहेजें",
+      confirmation: "सहेजा गया। आप और लिख सकते हैं।",
+      add_another_label: "और लिखें",
+    },
+  },
+  connection_named: {
+    relationships: {
+      title: "उस व्यक्ति का नाम लें जिसके पास लौटना है",
+      sanatan_context: "संबंध कहता है — स्मृति में थामा बंधन देखभाल करता रहता है।",
+      why_we_ask: "जब कोई रिश्ता दूर या तनावपूर्ण लगे, नाम लेना उस धागे को जीवित रखता है।",
+      prompt: "वह कौन है जिसके करीब आप रहना चाहते हैं?",
+      placeholder: "नाम या कुछ शब्द लिखें...",
+      primary_label: "यह संबंध सहेजें",
+      confirmation: "सहेजा गया। आप और नाम ले सकते हैं।",
+      add_another_label: "और नाम लें",
+    },
+    health_energy: {
+      title: "किसी अपने का नाम लें जो अभी करीब है",
+      sanatan_context: "देखभाल करने वाली संगत स्वयं एक औषधि है। करीब के व्यक्ति का नाम लेना भी कुछ बदल देता है।",
+      why_we_ask: "जब शरीर संघर्ष कर रहा हो तब जो करीब है उसका नाम लेना असली सांत्वना लाता है।",
+      prompt: "इसमें आपके साथ कौन है, दूरी से भी?",
+      placeholder: "नाम या कुछ शब्द लिखें...",
+      primary_label: "यह संबंध सहेजें",
+      confirmation: "सहेजा गया। आप और नाम ले सकते हैं।",
+      add_another_label: "और नाम लें",
+    },
+  },
+  stillness_named: {
+    money_security: {
+      title: "चिंता के नीचे जो शांत हुआ उसे लिखें",
+      sanatan_context: "शोर के नीचे जो है वो हमेशा से शांत रहा है। वो अभी भी है।",
+      why_we_ask: "पैसे का दबाव तेज़ होता है। उसके नीचे जो शांत रहा उसे लिखने से आपकी स्थिरता मिलती है।",
+      prompt: "पैसे की चिंता के नीचे क्या शांत या स्थिर लगता है, थोड़ा भी?",
+      placeholder: "एक शब्द या कुछ पंक्तियाँ लिखें...",
+      primary_label: "यह स्थिरता सहेजें",
+      confirmation: "सहेजा गया।",
+      add_another_label: "और लिखें",
+    },
+  },
+};
+
+const CARRY_MEMORY_MODAL_TE: Record<string, CarryModalCopy> = {
+  joy_carry: {
+    prompt: "ఈ క్షణం నుండి మీరు ఏమి మీతో తీసుకెళ్ళాలనుకుంటున్నారు?",
+    placeholder: "మీరు గమనించింది, అనుభవించింది, లేదా పట్టుకోవాలనుకున్నది...",
+    primary_label: "దీన్ని తీసుకెళ్ళండి",
+    sanatan_context: "జాగరూకతగా నిలుపుకున్న ఆనందం వెలుతురు మూలం అవుతుంది.",
+  },
+  release_capture: {
+    prompt: "మీరు ఇప్పుడు ఏమి వదులుకుంటున్నారు?",
+    placeholder: "మీరు విడిచిపెడుతున్నదాన్ని పేర్కొనండి...",
+    primary_label: "దీన్ని వదిలివేయండి",
+  },
+  growth_reflect: {
+    prompt: "ఏ అంతర్దృష్టి లేదా సంకల్పం మీతో తీసుకెళ్ళాలనుకుంటున్నారు?",
+    placeholder: "మీ ధ్యానం...",
+    primary_label: "దీన్ని పట్టుకోండి",
+  },
+  clarity_note: {
+    prompt: "మీకు ఏమి స్పష్టమైంది?",
+    placeholder: "మీ స్పష్టత నోట్...",
+    primary_label: "దీన్ని గుర్తుంచుకోండి",
+  },
+  stillness_note: {
+    title: "ఏమి శాంతించిందో రాయండి",
+    prompt: "ఈరోజు శాంతి మీకు ఏమి ఇచ్చింది?",
+    placeholder: "నిశ్శబ్దంలో ఏమి వచ్చిందో...",
+    primary_label: "దీన్ని ఉంచండి",
+  },
+  stillness_named: {
+    title: "ఏమి శాంతించిందో రాయండి",
+    sanatan_context: "ధ్యానం ఒక స్థిరమైన ఆధారానికి తిరిగి వచ్చినప్పుడు శాంతి మొదలవుతుంది.",
+    why_we_ask: "ఏమి స్థిరపడిందో పేర్కొనడం వల్ల శబ్దానికి అడుగున ఉన్న నేలను గుర్తించగలం.",
+    prompt: "ఇప్పుడు ఏమి శాంతంగా అనిపిస్తోంది?",
+    placeholder: "ఒక మాట లేదా కొన్ని వాక్యాలు రాయండి...",
+    primary_label: "ఈ శాంతిని సేవ్ చేయండి",
+    confirmation: "సేవ్ అయింది.",
+    add_another_label: "మరొకటి రాయండి",
+  },
+  clarity_journal: {
+    title: "ఒక నిజాయితీ ప్రశ్న రాయండి",
+    sanatan_context: "గందరగోళాన్ని అనుసరించడం ఆపి నిజంగా ఇక్కడ ఏమి ఉందో చూసినప్పుడు స్పష్టత వస్తుంది.",
+    why_we_ask: "ప్రశ్న రాయడం వల్ల నిజమైన నిర్ణయం దాని చుట్టూ ఉన్న శబ్దం నుండి వేరవుతుంది.",
+    prompt: "మీరు నిజంగా ఏ ప్రశ్నతో కూర్చున్నారు?",
+    placeholder: "మీ నిజాయితీ ప్రశ్న రాయండి...",
+    primary_label: "ఈ ప్రశ్నను సేవ్ చేయండి",
+    confirmation: "సేవ్ అయింది. మీరు మరొకటి రాయవచ్చు.",
+    add_another_label: "మరొకటి రాయండి",
+  },
+  connection_named: {
+    title: "మీకు ముఖ్యమైన వ్యక్తి పేరు చెప్పండి",
+    sanatan_context: "పేరు చెప్పడం వల్ల మీరు ఒంటరితనం నుండి సంరక్షణ దారానికి తిరిగి వస్తారు.",
+    why_we_ask: "సంబంధం మనకు గుర్తు చేస్తుంది — ఒక నిజమైన బంధం కూడా మనల్ని నిలబెట్టగలదు.",
+    prompt: "ఇప్పుడు మీ హృదయానికి సమీపంగా ఎవరు ఉన్నారు?",
+    placeholder: "పేరు, సంబంధం, లేదా కొన్ని మాటలు రాయండి...",
+    primary_label: "ఈ అనుబంధాన్ని సేవ్ చేయండి",
+    confirmation: "సేవ్ అయింది. మీరు మరొకరి పేరు చెప్పవచ్చు.",
+    add_another_label: "మరొకరి పేరు చెప్పండి",
+  },
+  joy_named: {
+    title: "ఇప్పుడు ఏమి మంచిగా ఉందో రాయండి",
+    sanatan_context: "సంతోషం అక్కడ నుండి మొదలవుతుంది — ఏమి ఇప్పటికే సరిపోతుందో గమనించడం నుండి.",
+    why_we_ask: "ఒక మంచి విషయం రాయడం వల్ల మనసు దాని వద్ద ఆగుతుంది, ముందుకు పరిగెత్తే బదులు.",
+    prompt: "ఇప్పుడు ఏమి మంచిగా, స్థిరంగా, లేదా నిశ్శబ్దంగా సరిపోతున్నట్లు అనిపిస్తోంది?",
+    placeholder: "ఒక మంచి విషయం రాయండి...",
+    primary_label: "ఈ ఆనందాన్ని సేవ్ చేయండి",
+    confirmation: "సేవ్ అయింది. మీరు మరొకటి రాయవచ్చు.",
+    add_another_label: "మరొకటి రాయండి",
+  },
+  growth_journal: {
+    title: "మీరు గమనించింది రాయండి",
+    sanatan_context: "వేగంతో కాదు — జాగ్రత్తగా చేసిన ఒక సరైన కర్మ నిజమైన వికాసంగా పండుతుంది.",
+    why_we_ask: "మీరు గమనించింది పేర్కొనడం పరిశీలనను తదుపరి అడుగుకు విత్తనంగా మారుస్తుంది.",
+    prompt: "మీరు ఏమి గమనించారు, లేదా ఏమి రూపుదిద్దుకుంటోంది?",
+    placeholder: "వచ్చింది రాయండి...",
+    primary_label: "దీన్ని సేవ్ చేయండి",
+    confirmation: "సేవ్ అయింది. మీరు మరొకటి రాయవచ్చు.",
+    add_another_label: "మరొకటి రాయండి",
+  },
+  connection_reach_out: {
+    title: "ఒక వ్యక్తికి చేరండి",
+    sanatan_context: "చేరడానికి ఒక చిన్న కర్మ స్వయంగా సంబంధం యొక్క అభ్యాసం.",
+    why_we_ask: "సందేశం రాయడం — పంపకుండా అయినా — అనుబంధాన్ని దగ్గరగా తెస్తుంది.",
+    prompt: "మీకు ముఖ్యమైన వ్యక్తికి ఒక చిన్న సందేశం రాయండి.",
+    placeholder: "మీ సందేశం...",
+    primary_label: "సేవ్ చేసి సందేశం కాపీ చేయండి",
+    confirmation: "సేవ్ అయింది. మీరు మరొకటి జోడించవచ్చు.",
+    add_another_label: "మరొకటి జోడించండి",
+  },
+  release_named: {
+    title: "మీరు ఏమి వదులుతున్నారో పేర్కొనండి",
+    sanatan_context: "భారానికి పేరు పెట్టడం వల్ల మీరు మీరు మోస్తున్నదాని నుండి వేరవుతారు.",
+    why_we_ask: "వదులుకోవడం ఓటమి కాదు. జీవితం మళ్ళీ కదలడానికి పట్టు వదలడం.",
+    prompt: "ఇప్పుడు ఏమి వదులుకోవడానికి సిద్ధంగా ఉంది?",
+    placeholder: "ఒక మాట లేదా కొన్ని వాక్యాలు రాయండి...",
+    primary_label: "ఈ విడుదలను సేవ్ చేయండి",
+    confirmation: "సేవ్ అయింది. మీరు దాన్ని వదిలారు.",
+    add_another_label: "మరొకటి పేర్కొనండి",
+  },
+  connection_note: {
+    prompt: "ఈ అనుబంధ భావన నుండి మీరు ఏమి తీసుకెళ్ళాలనుకుంటున్నారు?",
+    placeholder: "మీ నోట్...",
+    primary_label: "దీన్ని సేవ్ చేయండి",
+  },
+  generic: {
+    prompt: "దీని నుండి మీరు ఏమి గుర్తుంచుకోవాలనుకుంటున్నారు?",
+    placeholder: "మీ ధ్యానం...",
+    primary_label: "సేవ్ చేయండి",
+  },
+};
+
+const CARRY_MODAL_BY_CONTEXT_TE: Record<string, Record<string, CarryModalCopy>> = {
+  clarity_journal: {
+    money_security: {
+      title: "డబ్బు ప్రశ్నను స్పష్టంగా రాయండి",
+      sanatan_context: "ప్రశ్నను పేర్కొనడం స్వయంగా స్పష్టత యొక్క మొదటి అడుగు.",
+      why_we_ask: "డబ్బు గందరగోళం తరచుగా చాలా ప్రశ్నలు కలిసిపోవడం వల్ల వస్తుంది. ఒకటి రాయడం మిగతా వాటి నుండి వేరుచేస్తుంది.",
+      prompt: "మీరు నిలుపుకున్న డబ్బు ప్రశ్న నిజంగా ఏమిటి?",
+      placeholder: "ఒక స్పష్టమైన ప్రశ్న రాయండి...",
+      primary_label: "ఈ ప్రశ్నను సేవ్ చేయండి",
+      confirmation: "సేవ్ అయింది. మీరు మరొకటి రాయవచ్చు.",
+      add_another_label: "మరొకటి రాయండి",
+    },
+    work_career: {
+      title: "మీ పని నిజంగా ఏమి అడుగుతుందో రాయండి",
+      sanatan_context: "కర్మ మరియు ధర్మం ఒక్కటైనప్పుడు స్పష్టత వస్తుంది. ముందుగా నిజంగా ఏమి అడుగుతుందో చూడండి.",
+      why_we_ask: "పనిలో తరచుగా శబ్దానికి అడుగున ఒక నిజమైన ప్రశ్న ఉంటుంది. రాయడం వల్ల నిజంగా ఏమి జవాబు కావాలో తెలుస్తుంది.",
+      prompt: "ఇప్పుడు మీ పని మీ నుండి నిజంగా ఏమి అడుగుతోంది?",
+      placeholder: "నిజమైన ప్రశ్న రాయండి...",
+      primary_label: "దీన్ని సేవ్ చేయండి",
+      confirmation: "సేవ్ అయింది. మీరు మరొకటి రాయవచ్చు.",
+      add_another_label: "మరొకటి రాయండి",
+    },
+  },
+  release_named: {
+    money_security: {
+      title: "మీరు ఇప్పుడు ఏమి వదులుతున్నారో పేర్కొనండి",
+      sanatan_context: "మనం దాన్ని వదలగలమని మర్చిపోయినప్పుడే భారం భారంగా అవుతుంది.",
+      why_we_ask: "డబ్బు ఆందోళన శరీరంలో బంధమవుతుంది. మీరు వదులుతున్నదాన్ని పేర్కొనడం, కొంత సమయానికైనా, పట్టు వదులుస్తుంది.",
+      prompt: "ఏ డబ్బు ఆందోళన ఇప్పుడు వదులుకోవడానికి సిద్ధంగా ఉంది?",
+      placeholder: "ఒక మాట లేదా కొన్ని వాక్యాలు రాయండి...",
+      primary_label: "ఈ విడుదలను సేవ్ చేయండి",
+      confirmation: "సేవ్ అయింది. మీరు దాన్ని వదిలారు.",
+      add_another_label: "మరొకటి పేర్కొనండి",
+    },
+    relationships: {
+      title: "ఈ సంబంధంలో మీరు ఏమి వదిలిపెడుతున్నారో పేర్కొనండి",
+      sanatan_context: "సంబంధం మనకు గుర్తు చేస్తుంది — ఒక నిజమైన బంధం కూడా మనల్ని నిలబెట్టగలదు.",
+      why_we_ask: "పేరు చెప్పడం వల్ల మీరు ఒంటరితనం నుండి సంరక్షణ దారానికి తిరిగి వస్తారు.",
+      prompt: "ఈ సంబంధంలో మీరు ఇప్పుడు ఏమి వదులుకోవడానికి సిద్ధంగా ఉన్నారు?",
+      placeholder: "ఒక మాట లేదా కొన్ని వాక్యాలు రాయండి...",
+      primary_label: "ఈ విడుదలను సేవ్ చేయండి",
+      confirmation: "సేవ్ అయింది. మీరు దాన్ని వదిలారు.",
+      add_another_label: "మరొకటి పేర్కొనండి",
+    },
+  },
+  growth_journal: {
+    work_career: {
+      title: "పని యొక్క తదుపరి అడుగు రాయండి",
+      sanatan_context: "వేగంతో కాదు — జాగ్రత్తగా చేసిన కర్మ నిజమైన వికాసంగా పండుతుంది.",
+      why_we_ask: "పనిలో తదుపరి సరైన అడుగు తరచుగా మనం అనుకున్నదానికంటే చిన్నది. రాయడం వల్ల అది నిజమవుతుంది.",
+      prompt: "మీ పని ఒక తదుపరి అడుగు కోసం ఏమి అడుగుతోంది?",
+      placeholder: "ఒక స్పష్టమైన అడుగు రాయండి...",
+      primary_label: "ఈ అడుగును సేవ్ చేయండి",
+      confirmation: "సేవ్ అయింది. మీరు మరొకటి రాయవచ్చు.",
+      add_another_label: "మరొకటి రాయండి",
+    },
+    purpose_direction: {
+      title: "మీరు తదుపరి ఏమి చేయాలో రాయండి",
+      sanatan_context: "ధర్మం జీవిత ప్రణాళిక కాదు — ఇది తదుపరి సరైన కర్మ, విశ్వాసంతో చేయబడింది.",
+      why_we_ask: "మార్గం అస్పష్టంగా ఉన్నప్పుడు, మీకు చేయాలని అనిపించేది రాయడం వినడానికి చేసే కర్మ.",
+      prompt: "మీకు చేయాలని అనిపించేది ఏమిటి, పూర్తి మార్గం ఇంకా స్పష్టంగా లేకపోయినా?",
+      placeholder: "వచ్చింది రాయండి...",
+      primary_label: "దీన్ని సేవ్ చేయండి",
+      confirmation: "సేవ్ అయింది. మీరు మరొకటి రాయవచ్చు.",
+      add_another_label: "మరొకటి రాయండి",
+    },
+  },
+  joy_named: {
+    health_energy: {
+      title: "ఈరోజు శరీరం నుండి ఒక మంచి విషయం రాయండి",
+      sanatan_context: "శరీరం ఒక బహుమతి. దానికి కృతజ్ఞత, చిన్నదైనా, ఏదో ఒకటి తిరిగి ఇస్తుంది.",
+      why_we_ask: "శరీరం కష్టంగా అనిపించినప్పుడు, దానిలో ఒక మంచి విషయం కనుగొనడం సంరక్షణ యొక్క కోమలమైన కర్మ.",
+      prompt: "ఇప్పుడు మీ శరీరం ఏమి బాగా చేస్తోంది లేదా ఎలా అనిపిస్తోంది?",
+      placeholder: "ఒక మంచి విషయం రాయండి...",
+      primary_label: "ఈ ఆనందాన్ని సేవ్ చేయండి",
+      confirmation: "సేవ్ అయింది. మీరు మరొకటి రాయవచ్చు.",
+      add_another_label: "మరొకటి రాయండి",
+    },
+  },
+  connection_named: {
+    relationships: {
+      title: "తిరిగి చేరుకోవాలనుకుంటున్న వ్యక్తి పేరు చెప్పండి",
+      sanatan_context: "సంబంధం చెప్తుంది — జ్ఞాపకంలో నిలుపుకున్న బంధం సంరక్షణ కొనసాగిస్తుంది.",
+      why_we_ask: "సంబంధం దూరంగా లేదా ఒత్తిడిగా అనిపించినప్పుడు, పేరు చెప్పడం ఆ దారాన్ని సజీవంగా ఉంచుతుంది.",
+      prompt: "మీరు దగ్గరగా ఉండాలనుకుంటున్న వ్యక్తి ఎవరు?",
+      placeholder: "పేరు లేదా కొన్ని మాటలు రాయండి...",
+      primary_label: "ఈ అనుబంధాన్ని సేవ్ చేయండి",
+      confirmation: "సేవ్ అయింది. మీరు మరొకరి పేరు చెప్పవచ్చు.",
+      add_another_label: "మరొకరి పేరు చెప్పండి",
+    },
+    health_energy: {
+      title: "ఇప్పుడు దగ్గరగా ఉన్న వ్యక్తి పేరు చెప్పండి",
+      sanatan_context: "సంరక్షించే సంగతి స్వయంగా ఒక ఔషధం. దగ్గరలో ఉన్న వ్యక్తి పేరు చెప్పడమే ఏదో మారుస్తుంది.",
+      why_we_ask: "శరీరం కష్టపడుతున్నప్పుడు, దగ్గరలో ఉన్నవారి పేరు చెప్పడం నిజమైన ఓదార్పు ఇస్తుంది.",
+      prompt: "దూరం నుండైనా ఇందులో మీతో ఎవరు ఉన్నారు?",
+      placeholder: "పేరు లేదా కొన్ని మాటలు రాయండి...",
+      primary_label: "ఈ అనుబంధాన్ని సేవ్ చేయండి",
+      confirmation: "సేవ్ అయింది. మీరు మరొకరి పేరు చెప్పవచ్చు.",
+      add_another_label: "మరొకరి పేరు చెప్పండి",
+    },
+  },
+  stillness_named: {
+    money_security: {
+      title: "ఆందోళన కింద ఏమి శాంతించిందో రాయండి",
+      sanatan_context: "శబ్దానికి అడుగున ఉన్నది ఎప్పుడూ శాంతంగా ఉంది. అది ఇంకా ఉంది.",
+      why_we_ask: "డబ్బు ఒత్తిడి గట్టిగా ఉంటుంది. దాని కింద శాంతంగా ఉన్నది రాయడం మీ స్థిరత్వాన్ని కనుగొనడంలో సహాయపడుతుంది.",
+      prompt: "డబ్బు ఆందోళన కింద ఏమి శాంతంగా లేదా స్థిరంగా అనిపిస్తోంది, కొంచెమైనా?",
+      placeholder: "ఒక మాట లేదా కొన్ని వాక్యాలు రాయండి...",
+      primary_label: "ఈ శాంతిని సేవ్ చేయండి",
+      confirmation: "సేవ్ అయింది.",
+      add_another_label: "మరొకటి రాయండి",
+    },
+  },
+};
+
 const CARRY_MEMORY_MODAL: Record<string, CarryModalCopy> = {
   joy_carry: {
     prompt: "What do you want to carry with you from this moment?",
@@ -286,6 +736,7 @@ function getCarryCopy(
   writesEvent?: string | null,
   carryPayload?: any,
   lifeContext?: string | null,
+  locale?: string,
 ) {
   const mm = carryPayload?.memory_modal;
   if (mm) {
@@ -300,12 +751,14 @@ function getCarryCopy(
       add_another_label: mm.add_another_label,
     };
   }
+  const modalMap = locale === 'hi' ? CARRY_MEMORY_MODAL_HI : locale === 'te' ? CARRY_MEMORY_MODAL_TE : CARRY_MEMORY_MODAL;
+  const ctxMap = locale === 'hi' ? CARRY_MODAL_BY_CONTEXT_HI : locale === 'te' ? CARRY_MODAL_BY_CONTEXT_TE : CARRY_MODAL_BY_CONTEXT;
   if (lifeContext) {
-    const ctxCopy = CARRY_MODAL_BY_CONTEXT[writesEvent || ""]?.[lifeContext];
+    const ctxCopy = ctxMap[writesEvent || ""]?.[lifeContext];
     if (ctxCopy) return ctxCopy;
   }
   const key = writesEvent || "generic";
-  return CARRY_MEMORY_MODAL[key] ?? CARRY_MEMORY_MODAL.generic;
+  return modalMap[key] ?? modalMap.generic;
 }
 
 interface ConfirmationState {
@@ -351,7 +804,7 @@ export function CarryCaptureModal({
   showConfirmationTray = true,
   presentation = "modal",
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [text, setText] = useState("");
   const [confirmation, setConfirmation] = useState<ConfirmationState>({
     visible: false,
@@ -359,7 +812,7 @@ export function CarryCaptureModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const copy = getCarryCopy(writesEvent, carryPayload, lifeContext);
+  const copy = getCarryCopy(writesEvent, carryPayload, lifeContext, locale);
   const trimmed = text.trim();
   const enabled = trimmed.length >= 1 && !isSubmitting;
   const isScreen = presentation === "screen";
@@ -484,7 +937,7 @@ export function CarryCaptureModal({
                 margin: "0 0 18px",
               }}
             >
-              {copy.confirmation || "Saved."}
+              {copy.confirmation || t('common.saved')}
             </p>
             <div
               style={{
@@ -513,7 +966,7 @@ export function CarryCaptureModal({
                     cursor: "pointer",
                   }}
                 >
-                  {copy.add_another_label || "Write another"}
+                  {copy.add_another_label || t('common.writeAnother')}
                 </button>
               )}
               {onReturnHome && (

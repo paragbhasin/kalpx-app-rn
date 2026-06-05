@@ -17,6 +17,7 @@
 
 import React, { useEffect, useState } from "react";
 import { VoiceTextInput } from "../VoiceTextInput";
+import { useTranslation } from "../../lib/i18n";
 
 /* ── Colour tokens (match mobile styles) ─────────────────────────── */
 const BROWN       = "#5C3A12";
@@ -70,6 +71,7 @@ interface Props {
 /* ── Component ────────────────────────────────────────────────────── */
 export function CompletionReturnBlock({ block, screenData = {}, onAction }: Props) {
   ensureCSS();
+  const { t } = useTranslation();
 
   /* ── Variant ── */
   const variantKey = block.variant_key || "runner_variant";
@@ -98,11 +100,16 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
     ? (_rhythmResult!.copy.subtext ?? "")
     : (slots.wisdom_anchor_line || "");
 
-  // CTA labels — API-driven; fall back to static English
-  const returnHomeLabel: string = _isRhythmCompletion ? "Return to My Rhythm" : (slots.return_home_cta || "Return to Mitra Home");
-  const repeatLabel: string = slots.repeat_cta || "Repeat";
+  // CTA labels — API-driven; fall back to localized strings
+  const returnHomeLabel: string = _isRhythmCompletion ? t('mitra.room.returnToMyRhythm') : (slots.return_home_cta || t('mitra.room.returnMitraHome'));
+  const repeatLabel: string = slots.repeat_cta || t('mitra.room.repeat');
 
-  const REFLECTION_CHIPS = ["A little more calm", "One clear thing", "A softer heart", "I need more time"];
+  const REFLECTION_CHIPS = [
+    t('mitra.room.chip.aLittleMoreCalm'),
+    t('mitra.room.chip.oneClearThing'),
+    t('mitra.room.chip.aSofterHeart'),
+    t('mitra.room.chip.iNeedMoreTime'),
+  ];
 
   /* ── Return action (G17 / G27 parity) ── */
   const SUPPORT_SOURCES = new Set(["support_room", "support_trigger"]);
@@ -326,12 +333,12 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
                     padding: "4px 0",
                   }}
                 >
-                  Write a few words
+                  {t('mitra.room.writeAFewWords')}
                 </button>
               ) : (
                 <div style={{ marginTop: 8 }}>
                   <VoiceTextInput
-                    placeholder="Anything to carry from this?"
+                    placeholder={t('mitra.room.anythingToCarry')}
                     onSend={handleSubmitReflection}
                   />
                 </div>
@@ -343,7 +350,7 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
               data-testid="completion-reflection-placeholder"
             >
               <VoiceTextInput
-                placeholder={slots.reflection_prompt || "Anything to carry from this?"}
+                placeholder={slots.reflection_prompt || t('mitra.room.anythingToCarry')}
                 onSend={handleSubmitReflection}
               />
             </div>

@@ -97,12 +97,96 @@ const COMPLETION_FALLBACK = {
   subtext: "You can return to this room anytime.",
 };
 
+const ROOM_COMPLETION_LINES_HI: Record<
+  string,
+  { message: string; subtext: string }
+> = {
+  room_stillness: {
+    message: "आपने जगह बनाई।",
+    subtext: "यह शांति थोड़ी देर के लिए आपके साथ रहने दें।",
+  },
+  room_release: {
+    message: "आपने कुछ रख दिया।",
+    subtext: "अब आपको इसे उसी तरह नहीं उठाना है।",
+  },
+  room_clarity: {
+    message: "आप प्रश्न के साथ बैठे।",
+    subtext: "एक स्पष्ट दृष्टि अभी के लिए काफी है।",
+  },
+  room_growth: {
+    message: "आप उस दिशा में बढ़े जो मायने रखती है।",
+    subtext: "छोटी सच्ची कोशिश भी कोशिश है।",
+  },
+  room_connection: {
+    message: "आप जुड़ाव की ओर नरम हुए।",
+    subtext: "हृदय को धीरे खुला रहने दें।",
+  },
+  room_joy: {
+    message: "आपने जो अच्छा है उसे देखा।",
+    subtext: "इसे अपने दिन का हिस्सा बनने दें।",
+  },
+};
+const COMPLETION_FALLBACK_HI = {
+  message: "आप उसके साथ रहे।",
+  subtext: "आप इस कमरे में कभी भी वापस आ सकते हैं।",
+};
+
+const ROOM_COMPLETION_LINES_TE: Record<
+  string,
+  { message: string; subtext: string }
+> = {
+  room_stillness: {
+    message: "మీరు స్థలం చేసుకున్నారు.",
+    subtext: "ఈ నిశ్శబ్దాన్ని కొంత సేపు మీతో ఉండనివ్వండి.",
+  },
+  room_release: {
+    message: "మీరు ఏదో వదిలిపెట్టారు.",
+    subtext: "ఇప్పుడు దాన్ని అదే విధంగా మోయాల్సిన అవసరం లేదు.",
+  },
+  room_clarity: {
+    message: "మీరు ప్రశ్నతో కూర్చున్నారు.",
+    subtext: "ఒక స్పష్టమైన చూపు ఇప్పటికి చాలు.",
+  },
+  room_growth: {
+    message: "మీరు ముఖ్యమైన దిశలో ముందుకు వెళ్ళారు.",
+    subtext: "చిన్న నిజాయితీ గల చర్య కూడా చర్యే.",
+  },
+  room_connection: {
+    message: "మీరు అనుబంధం వైపు మెత్తబడ్డారు.",
+    subtext: "హృదయాన్ని మెల్లగా తెరిచి ఉండనివ్వండి.",
+  },
+  room_joy: {
+    message: "మీరు మంచిని గమనించారు.",
+    subtext: "ఇది మీ రోజులో భాగం కానివ్వండి.",
+  },
+};
+const COMPLETION_FALLBACK_TE = {
+  message: "మీరు దానితో ఉన్నారు.",
+  subtext: "మీరు ఎప్పుడైనా ఈ గదికి తిరిగి రావచ్చు.",
+};
+
 const BETWEEN_STEP_LINES = [
   "Good. Take one breath.",
   "You stayed with that.",
   "Let this settle for a moment.",
   "One step is complete.",
   "Now, gently, the next step.",
+];
+
+const BETWEEN_STEP_LINES_HI = [
+  "अच्छा। एक सांस लें।",
+  "आप उसके साथ रहे।",
+  "इसे थोड़ा रुकने दें।",
+  "एक कदम पूरा हुआ।",
+  "अब, धीरे, अगला कदम।",
+];
+
+const BETWEEN_STEP_LINES_TE = [
+  "మంచిది. ఒక శ్వాస తీసుకోండి.",
+  "మీరు దానితో ఉన్నారు.",
+  "ఇది కొంచెం స్థిరపడనివ్వండి.",
+  "ఒక అడుగు పూర్తయింది.",
+  "ఇప్పుడు, మెల్లగా, తదుపరి అడుగు.",
 ];
 
 export function RoomGuidedSection({
@@ -116,6 +200,9 @@ export function RoomGuidedSection({
   const { t, locale } = useTranslation();
   const isHindi = locale === 'hi';
   const copy = isHindi ? ROOM_GUIDED_COPY_HI : ROOM_GUIDED_COPY;
+  const completionLinesMap = locale === 'hi' ? ROOM_COMPLETION_LINES_HI : locale === 'te' ? ROOM_COMPLETION_LINES_TE : ROOM_COMPLETION_LINES;
+  const completionFallback = locale === 'hi' ? COMPLETION_FALLBACK_HI : locale === 'te' ? COMPLETION_FALLBACK_TE : COMPLETION_FALLBACK;
+  const betweenStepLines = locale === 'hi' ? BETWEEN_STEP_LINES_HI : locale === 'te' ? BETWEEN_STEP_LINES_TE : BETWEEN_STEP_LINES;
   const ctx = envelope.room_context?.entry_context ?? {};
   const roomCtx = envelope.room_context ?? {};
   const recId: string | null = ctx.recommended_first_action_id ?? null;
@@ -178,7 +265,7 @@ export function RoomGuidedSection({
   const openingLine = envelope.opening_line ?? "";
   const secondBeatLine = envelope.second_beat_line ?? "";
   const memoryEchoLine = envelope.memory_echo_line ?? null;
-  const completionCopy = ROOM_COMPLETION_LINES[roomId] ?? COMPLETION_FALLBACK;
+  const completionCopy = completionLinesMap[roomId] ?? completionFallback;
   const completionWisdom =
     roomCtx.bridge_line || roomCtx.sanatan_insight_line || "";
 
@@ -220,15 +307,15 @@ export function RoomGuidedSection({
             message: completionCopy.message,
             subtext: completionCopy.subtext,
             wisdom_anchor_line: completionWisdom,
-            return_home_cta: "Return to Mitra Home",
+            return_home_cta: t('mitra.room.returnMitraHome'),
           },
         },
       });
       return;
     }
-    const lineIndex = interstitialIndexRef.current % BETWEEN_STEP_LINES.length;
+    const lineIndex = interstitialIndexRef.current % betweenStepLines.length;
     interstitialIndexRef.current += 1;
-    setInterstitialLine(BETWEEN_STEP_LINES[lineIndex]);
+    setInterstitialLine(betweenStepLines[lineIndex]);
     setPendingNextAction(nextAction);
   }
 

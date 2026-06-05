@@ -372,6 +372,7 @@ export async function getRoomRender(
     if (params?.intent_type)                 qp.set('intent_type',         params.intent_type);
     if (params?.source_surface)              qp.set('source_surface',      params.source_surface);
     if (params?.tell_mitra_event_id != null) qp.set('tell_mitra_event_id', String(params.tell_mitra_event_id));
+    qp.set('locale', getActiveLocale());
     const qs = qp.toString();
     const url = `mitra/rooms/${encodeURIComponent(roomId)}/render/${qs ? `?${qs}` : ''}`;
     const res = await api.get(url);

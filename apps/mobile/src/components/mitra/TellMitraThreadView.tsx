@@ -37,12 +37,7 @@ const QUICK_START_CHIPS = [
   { value: "calm_now" },
 ] as const;
 
-const RETURN_CARD_CHIPS: TellMitraFollowupOption[] = [
-  { label: "More steady", value: "more_steady" },
-  { label: "Still heavy", value: "still_heavy" },
-  { label: "I need clarity", value: "need_clarity" },
-  { label: "Tell Mitra more", value: "tell_mitra_more" },
-];
+// RETURN_CARD_CHIPS is built inside the component using t() so labels are localized.
 
 const ROBOTIC_PATTERNS =
   /scattered|agitated|drained|energized|balanced|state_tag|spl_pattern/i;
@@ -97,6 +92,12 @@ export default function TellMitraThreadView({
   errorMsg,
 }: TellMitraThreadViewProps) {
   const { t } = useTranslation();
+  const RETURN_CARD_CHIPS: TellMitraFollowupOption[] = [
+    { label: t("tellMitraThread.returnCard.more_steady"),    value: "more_steady"    },
+    { label: t("tellMitraThread.returnCard.still_heavy"),    value: "still_heavy"    },
+    { label: t("tellMitraThread.returnCard.need_clarity"),   value: "need_clarity"   },
+    { label: t("tellMitraThread.returnCard.tell_mitra_more"), value: "tell_mitra_more" },
+  ];
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;

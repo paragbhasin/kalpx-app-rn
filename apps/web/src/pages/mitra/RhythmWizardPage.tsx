@@ -266,9 +266,9 @@ export function RhythmWizardPage() {
   };
 
   const MOMENT_DESC: Record<RhythmTimeBand, string> = {
-    morning: MOMENT_COPY.morning.desc,
-    afternoon: MOMENT_COPY.afternoon.desc,
-    night: MOMENT_COPY.night.desc,
+    morning: t('mitra.rhythmWizard.morningDesc'),
+    afternoon: t('mitra.rhythmWizard.afternoonDesc'),
+    night: t('mitra.rhythmWizard.nightDesc'),
   };
 
   const PURPOSE_OPTIONS_T: Record<
@@ -286,10 +286,10 @@ export function RhythmWizardPage() {
     afternoon: [
       { value: "reset", label: t('mitra.rhythmWizard.purposeReset'), desc: t('mitra.rhythmWizard.purposeResetDesc') },
       { value: "patience", label: t('mitra.rhythmWizard.purposePatience'), desc: t('mitra.rhythmWizard.purposePatienceDesc') },
-      { value: "sankalp_reminder", label: t('mitra.rhythmWizard.purposeSankalpReminder'), desc: t('mitra.rhythmWizard.purposeSankalpReminderDesc') },
-      { value: "energy_check", label: t('mitra.rhythmWizard.purposeEnergyCheck'), desc: t('mitra.rhythmWizard.purposeEnergyCheckDesc') },
-      { value: "mindful_action", label: t('mitra.rhythmWizard.purposeMindfulAction'), desc: t('mitra.rhythmWizard.purposeMindfulActionDesc') },
-      { value: "emotional_balance", label: t('mitra.rhythmWizard.purposeEmotionalBalance'), desc: t('mitra.rhythmWizard.purposeEmotionalBalanceDesc') },
+      { value: "sankalp_reminder", label: t('mitra.rhythmWizard.purposeSankalp'), desc: t('mitra.rhythmWizard.purposeSankalpDesc') },
+      { value: "energy_check", label: t('mitra.rhythmWizard.purposeEnergy'), desc: t('mitra.rhythmWizard.purposeEnergyDesc') },
+      { value: "mindful_action", label: t('mitra.rhythmWizard.purposeMindful'), desc: t('mitra.rhythmWizard.purposeMindfulDesc') },
+      { value: "emotional_balance", label: t('mitra.rhythmWizard.purposeEmotional'), desc: t('mitra.rhythmWizard.purposeEmotionalDesc') },
     ],
     night: [
       { value: "release", label: t('mitra.rhythmWizard.purposeRelease'), desc: t('mitra.rhythmWizard.purposeReleaseDesc') },

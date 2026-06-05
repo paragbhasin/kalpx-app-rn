@@ -582,6 +582,15 @@ export const te = {
       shareCarrying: 'ఇప్పుడు మోస్తున్నది పంచుకోండి.',
       orTry: 'లేదా ప్రయత్నించండి',
       imHereHelp: 'నేను మీతో ఉన్నాను. తదుపరి ఎక్కడ వెళ్ళాలో కనుగొనడానికి సహాయపడతాను.',
+      threadSubtitle: 'మీరు మిత్రకు నేడు ఏమి అర్థం చేయించాలనుకుంటున్నారు?',
+      threadHint: 'స్వేచ్ఛగా రాయండి — ఒక వాక్యం చాలు.',
+      send: 'పంపండి',
+      startFresh: 'కొత్తగా ప్రారంభించండి',
+      recommendedNext: 'సిఫారసు చేసిన తదుపరి',
+      enterRoom: '{{roomLabel}}లోకి వెళ్ళండి',
+      orTryRoom: 'లేదా {{room}} ప్రయత్నించండి →',
+      composerPlaceholderLetMeTell: 'మీరు మిత్రకు ఏమి చెప్పాలనుకుంటున్నారు?',
+      composerPlaceholderMore: 'మిత్రకు అర్థం కావలసిన మరొకటి జోడించండి…',
       quickStart: {
         overwhelmed: 'నేను అభిభవించబడినట్లు అనిపిస్తున్నాను',
         needClarity: 'నాకు స్పష్టత కావాలి',
@@ -590,6 +599,7 @@ export const te = {
       },
       returnCard: {
         prompt: 'ఇప్పుడు ఏమి భిన్నంగా అనిపిస్తోంది?',
+        backFrom: 'మీరు {{roomLabel}} నుండి తిరిగి వచ్చారు.',
         moreSteady: 'కొద్దిగా స్థిరంగా',
         stillHeavy: 'ఇంకా భారంగా',
         needClarity: 'నాకు స్పష్టత కావాలి',

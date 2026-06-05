@@ -539,6 +539,7 @@ export interface TellMitraV3Response {
   primary_specific_context: string | null;
   support_need: string;
   secondary_room_id: string | null;
+  secondary_room_label: string | null;
 }
 
 // ── Tell Mitra Conversation Thread (S17-D4B) ──────────────────────────────────
@@ -569,6 +570,7 @@ export type TellMitraConversationItem =
       room_label: string;
       room_description?: string | null;
       secondary_room_id?: string | null;
+      secondary_room_label?: string | null;
       tell_mitra_event_id: string | number | null;
       room_entry_context: TellMitraRoomEntryContext | null;
       response_copy?: string | null;

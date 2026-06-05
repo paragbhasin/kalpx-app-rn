@@ -582,6 +582,15 @@ export const en = {
       shareCarrying: 'Share what you\'re carrying right now.',
       orTry: 'Or try',
       imHereHelp: 'I\'m here with you. Let me help you find where to go next.',
+      threadSubtitle: 'What would you like Mitra to understand today?',
+      threadHint: 'You can write freely — one line is enough.',
+      send: 'Send',
+      startFresh: 'Start fresh',
+      recommendedNext: 'Recommended next',
+      enterRoom: 'Enter {{roomLabel}}',
+      orTryRoom: 'Or try {{room}} →',
+      composerPlaceholderLetMeTell: 'What would you like Mitra to know?',
+      composerPlaceholderMore: 'Add anything else Mitra should understand…',
       quickStart: {
         overwhelmed: 'I feel overwhelmed',
         needClarity: 'I need clarity',
@@ -590,6 +599,7 @@ export const en = {
       },
       returnCard: {
         prompt: 'What feels different now?',
+        backFrom: 'You\'re back from {{roomLabel}}.',
         moreSteady: 'More steady',
         stillHeavy: 'Still heavy',
         needClarity: 'I need clarity',

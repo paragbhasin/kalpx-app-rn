@@ -230,7 +230,7 @@ export default function TellMitraThreadView({
               onPress={() =>
                 onChipClick(
                   {
-                    label: `Or try ${getRoomLabel(item.secondary_room_id as any)}`,
+                    label: t('tellMitraThread.orTryRoom', { room: item.secondary_room_label || getRoomLabel(item.secondary_room_id as any) }),
                     value: `secondary_room_${item.secondary_room_id}`,
                   },
                   item.id,
@@ -239,7 +239,7 @@ export default function TellMitraThreadView({
               activeOpacity={0.7}
             >
               <Text style={[s.ghostLinkText, { fontSize: sfs(12) }]}>
-                {t('tellMitraThread.orTryRoom', { room: getRoomLabel(item.secondary_room_id as any) })}
+                {t('tellMitraThread.orTryRoom', { room: item.secondary_room_label || getRoomLabel(item.secondary_room_id as any) })}
               </Text>
             </TouchableOpacity>
           ) : null}

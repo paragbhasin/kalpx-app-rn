@@ -369,6 +369,7 @@ export function TellMitraPage() {
               resp.suggested_room_label ?? getRoomLabel(resp.suggested_room_id),
             room_description: resp.suggested_room_description,
             secondary_room_id: resp.secondary_room_id,
+            secondary_room_label: resp.secondary_room_label,
             tell_mitra_event_id: resp.tell_mitra_event_id,
             room_entry_context: resp.room_entry_context,
             response_copy: resp.response_copy,
@@ -435,7 +436,7 @@ export function TellMitraPage() {
             : item,
         ),
       );
-      setComposerPlaceholder("What would you like Mitra to know?");
+      setComposerPlaceholder(t('mitra.tellMitra.composerPlaceholderLetMeTell'));
       setTimeout(() => composerRef.current?.focus(), 50);
       return;
     }
@@ -504,7 +505,7 @@ export function TellMitraPage() {
   }
 
   function handleTellMitraMoreThread() {
-    setComposerPlaceholder("Add anything else Mitra should understand…");
+    setComposerPlaceholder(t('mitra.tellMitra.composerPlaceholderMore'));
     setTimeout(() => composerRef.current?.focus(), 50);
   }
 
@@ -1233,7 +1234,7 @@ export function TellMitraPage() {
                     }
                     style={{ ...GHOST_BTN, marginTop: 6 }}
                   >
-                    Or try {getRoomLabel(result.secondary_room_id as any)} →
+                    {t('mitra.tellMitra.orTryRoom').replace('{{room}}', result.secondary_room_label || getRoomLabel(result.secondary_room_id as any))}
                   </button>
                 )}
               <button

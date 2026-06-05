@@ -582,6 +582,15 @@ export const hi = {
       shareCarrying: 'अभी जो वहन कर रहे हैं वह साझा करें।',
       orTry: 'या आज़माएं',
       imHereHelp: 'मैं आपके साथ हूँ। आगे कहाँ जाना है, यह खोजने में मदद करता हूँ।',
+      threadSubtitle: 'आप मित्र को आज क्या समझाना चाहते हैं?',
+      threadHint: 'स्वतंत्र रूप से लिखें — एक पंक्ति पर्याप्त है।',
+      send: 'भेजें',
+      startFresh: 'नए सिरे से शुरू करें',
+      recommendedNext: 'अनुशंसित अगला कदम',
+      enterRoom: '{{roomLabel}} में प्रवेश करें',
+      orTryRoom: 'या {{room}} आज़माएं →',
+      composerPlaceholderLetMeTell: 'आप मित्र को क्या बताना चाहते हैं?',
+      composerPlaceholderMore: 'कुछ और जोड़ें जो मित्र को समझना चाहिए…',
       quickStart: {
         overwhelmed: 'मैं अभिभूत महसूस कर रहा हूँ',
         needClarity: 'मुझे स्पष्टता चाहिए',
@@ -590,6 +599,7 @@ export const hi = {
       },
       returnCard: {
         prompt: 'अब क्या अलग लग रहा है?',
+        backFrom: 'आप {{roomLabel}} से वापस आए।',
         moreSteady: 'थोड़ा स्थिर',
         stillHeavy: 'अभी भी भारी',
         needClarity: 'मुझे स्पष्टता चाहिए',

@@ -226,7 +226,7 @@ export function TellMitraThreadView({
               : "0 6px 24px rgba(67,33,4,0.07)",
           }}>
             <div style={{ fontSize: 11, color: "#B8963E", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" as const, marginBottom: 14 }}>
-              Recommended next
+              {t('mitra.tellMitra.recommendedNext')}
             </div>
             <div style={{ fontFamily: "var(--kalpx-font-serif, 'Cormorant Garamond', serif)", fontWeight: 700, fontSize: isDesktop ? 22 : 20, color: "#3B2A1A", marginBottom: 6 }}>
               {item.room_label}
@@ -235,17 +235,17 @@ export function TellMitraThreadView({
               <div style={{ fontSize: isDesktop ? 15 : 14, color: "#7B6550", marginBottom: 18, lineHeight: 1.6 }}>{item.room_description}</div>
             )}
             <button onClick={() => onEnterRoom(item)} style={{ ...GOLD_BTN, marginBottom: 10 }}>
-              Enter {item.room_label}
+              {t('mitra.tellMitra.enterRoom').replace('{{roomLabel}}', item.room_label)}
             </button>
             <button onClick={onTellMitraMore} style={GHOST_BTN}>
-              Tell Mitra more
+              {t('mitra.tellMitra.tellMitraMore')}
             </button>
             {item.secondary_room_id && isValidRoomId(item.secondary_room_id) && item.secondary_room_id !== item.room_id && (
               <button
-                onClick={() => onChipClick({ label: `Or try ${getRoomLabel(item.secondary_room_id as any)}`, value: `secondary_room_${item.secondary_room_id}` }, item.id)}
+                onClick={() => onChipClick({ label: t('mitra.tellMitra.orTryRoom').replace('{{room}}', item.secondary_room_label || getRoomLabel(item.secondary_room_id as any)), value: `secondary_room_${item.secondary_room_id}` }, item.id)}
                 style={{ background: "none", border: "none", color: "#9B7B55", fontSize: 13, cursor: "pointer", marginTop: 10, width: "100%", fontFamily: "inherit" }}
               >
-                Or try {getRoomLabel(item.secondary_room_id as any)} →
+                {t('mitra.tellMitra.orTryRoom').replace('{{room}}', item.secondary_room_label || getRoomLabel(item.secondary_room_id as any))}
               </button>
             )}
           </div>
@@ -264,10 +264,10 @@ export function TellMitraThreadView({
             padding: isDesktop ? "20px 22px" : "18px 20px",
           }}>
             <div style={{ fontFamily: "var(--kalpx-font-serif, 'Cormorant Garamond', serif)", fontSize: 16, color: "#3B2A1A", fontWeight: 600, marginBottom: 4 }}>
-              You're back from {item.room_label}.
+              {t('mitra.tellMitra.returnCard.backFrom').replace('{{roomLabel}}', item.room_label)}
             </div>
             <div style={{ fontSize: 13, color: "#7B6550", marginBottom: 14 }}>
-              What feels different now?
+              {t('mitra.tellMitra.returnCard.prompt')}
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {RETURN_CARD_CHIPS.map(opt => (
@@ -294,7 +294,7 @@ export function TellMitraThreadView({
       return (
         <div key={item.id} style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 11, color: "#B8963E", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" as const, marginBottom: 10 }}>
-            Or try
+            {t('mitra.tellMitra.orTry')}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {item.next_options.map((opt, i) => (
@@ -316,7 +316,7 @@ export function TellMitraThreadView({
       return (
         <div key={item.id} style={{ marginBottom: 20, background: "rgba(240,236,230,0.9)", border: "1px solid rgba(201,168,76,0.2)", borderRadius: 12, padding: "18px 20px" }}>
           <div style={{ fontFamily: "var(--kalpx-font-serif, 'Cormorant Garamond', serif)", fontWeight: 700, fontSize: 17, color: "#3B2A1A", marginBottom: 10 }}>
-            Mitra hears you.
+            {t('mitra.tellMitra.mitraHearsYou')}
           </div>
           <div style={{ fontSize: 16, lineHeight: 1.8, color: "#3B2A1A" }}>{item.response_copy}</div>
         </div>
@@ -370,7 +370,7 @@ export function TellMitraThreadView({
             onClick={onStartFresh}
             style={{ background: "none", border: "none", color: "#A08060", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}
           >
-            Start fresh
+            {t('mitra.tellMitra.startFresh')}
           </button>
         </div>
       )}
@@ -383,13 +383,13 @@ export function TellMitraThreadView({
         {conversation.length === 0 && (
           <div>
             <div style={{ fontFamily: "var(--kalpx-font-serif, 'Cormorant Garamond', serif)", fontSize: isDesktop ? 34 : 26, fontWeight: 700, color: "#3B2A1A", marginBottom: 8, lineHeight: 1.15 }}>
-              Tell Mitra
+              {t('mitra.tellMitra.tellMitraCta')}
             </div>
             <div style={{ fontSize: isDesktop ? 17 : 15, color: "#7B6550", marginBottom: 4, lineHeight: 1.6, maxWidth: isDesktop ? 620 : undefined }}>
-              What would you like Mitra to understand today?
+              {t('mitra.tellMitra.threadSubtitle')}
             </div>
             <div style={{ fontSize: 13, color: "#9B8B77", marginBottom: 24 }}>
-              You can write freely — one line is enough.
+              {t('mitra.tellMitra.threadHint')}
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {QUICK_START_CHIPS.map(chip => (
@@ -465,7 +465,7 @@ export function TellMitraThreadView({
               cursor: (submitting || !composerValue.trim()) ? "not-allowed" : "pointer",
             }}
           >
-            {submitting ? "…" : "Send"}
+            {submitting ? "…" : t('mitra.tellMitra.send')}
           </button>
         </div>
         <p style={{ margin: "8px 0 0", fontSize: 11, color: "#A08060", lineHeight: 1.55, textAlign: "center", fontFamily: "var(--kalpx-font-sans)" }}>

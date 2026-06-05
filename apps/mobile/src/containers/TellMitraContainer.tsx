@@ -59,7 +59,7 @@ async function persistTellMitraThread(
 }
 
 export default function TellMitraContainer() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
@@ -271,6 +271,7 @@ export default function TellMitraContainer() {
     try {
       const result = await postTellMitraV3({
         text: inputText,
+        locale: i18n.language,
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
         source_surface: override?.sourceSurface ?? 'tell_mitra_door',
         ...(override?.followup ? { followup: override.followup } : {}),
@@ -385,6 +386,7 @@ export default function TellMitraContainer() {
       });
       const result = await postTellMitraV3({
         text: inputText.trim(),
+        locale: i18n.language,
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
         source_surface: effectiveSource,
         ...(followupMeta ? { followup: followupMeta } : {}),

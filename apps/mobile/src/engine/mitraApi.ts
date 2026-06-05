@@ -2185,6 +2185,7 @@ export async function mitraJourneyHomeV3(opts?: {
 // ---------------------------------------------------------------------------
 export interface TellMitraV3Payload {
   text: string;
+  locale?: string;
   energy_state?: string;
   tz?: string;
   source_surface?: string;

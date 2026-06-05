@@ -1,6 +1,7 @@
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { AudioPlayerBlock } from "./AudioPlayerBlock";
+import { useTranslation } from "../../lib/i18n";
 
 /* ── Constants ────────────────────────────────────────────────────── */
 const BEAD_COUNT = 18;
@@ -498,6 +499,7 @@ function DesktopInfoSection({
 /* ── Main export ──────────────────────────────────────────────────── */
 export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
   ensureCSS();
+  const { t } = useTranslation();
   const isDesktop = useIsDesktopRunner();
   const infoViewOnly = screenData["info_view_only"] === true;
 
@@ -800,7 +802,7 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
 
             {meaning && (
               <DesktopInfoSection
-                label="Meaning"
+                label={t('mitra.engine.meaning')}
                 expanded={meanExp}
                 onToggle={() => setMeanExp((v) => !v)}
               >
@@ -810,7 +812,7 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
 
             {essence && (
               <DesktopInfoSection
-                label="Essence"
+                label={t('mitra.engine.essence')}
                 expanded={essExp}
                 onToggle={() => setEssExp((v) => !v)}
               >
@@ -1020,7 +1022,7 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
       {meaning && (
         <div style={{ width: "100%", marginBottom: 12 }}>
           <CollapsibleCard
-            label="Meaning"
+            label={t('mitra.engine.meaning')}
             expanded={meanExp}
             onToggle={() => setMeanExp((v) => !v)}
           >
@@ -1033,7 +1035,7 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
       {essence && (
         <div style={{ width: "100%", marginBottom: 32 }}>
           <CollapsibleCard
-            label="Essence"
+            label={t('mitra.engine.essence')}
             expanded={essExp}
             onToggle={() => setEssExp((v) => !v)}
           >

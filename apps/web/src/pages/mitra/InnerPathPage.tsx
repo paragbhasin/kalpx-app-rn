@@ -29,7 +29,8 @@ import { updateScreenData, useScreenState } from "../../store/screenSlice";
 export function InnerPathPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const isIndic = locale === 'hi' || locale === 'te';
   const screenState = useScreenState();
 
   function innerPathHeldLabel(slot: string): string {
@@ -209,7 +210,7 @@ export function InnerPathPage() {
   const triadItems = [
     {
       slot: "mantra",
-      label: "MANTRA",
+      label: t('mitra.innerPath.mantra').toUpperCase(),
       title:
         triadArr.find((t: any) => t?.slot === "mantra")?.title ||
         sd.card_mantra_title ||
@@ -228,7 +229,7 @@ export function InnerPathPage() {
     },
     {
       slot: "sankalp",
-      label: "SANKALP",
+      label: t('mitra.innerPath.sankalp').toUpperCase(),
       title:
         triadArr.find((t: any) => t?.slot === "sankalp")?.title ||
         sd.card_sankalpa_title ||
@@ -247,7 +248,7 @@ export function InnerPathPage() {
     },
     {
       slot: "practice",
-      label: "PRACTICE",
+      label: t('mitra.innerPath.practice').toUpperCase(),
       title:
         triadArr.find((t: any) => t?.slot === "practice")?.title ||
         sd.card_ritual_title ||
@@ -1038,7 +1039,7 @@ export function InnerPathPage() {
               fontWeight: "700",
             }}
           >
-            <span>{`Day ${sd.day_number} of ${sd.total_days}`}</span>
+            <span>{t('mitra.innerPath.dayPill').replace('{n}', String(sd.day_number)).replace('{m}', String(sd.total_days))}</span>
             <svg
               width="18"
               height="18"
@@ -1153,7 +1154,7 @@ export function InnerPathPage() {
                             margin: "0 0 10px",
                             fontSize: 14,
                             fontWeight: 700,
-                            letterSpacing: 3.2,
+                            letterSpacing: isIndic ? 0 : 3.2,
                             color: item.accent,
                           }}
                         >
@@ -1379,7 +1380,7 @@ export function InnerPathPage() {
                           margin: "0 0 8px",
                           fontSize: 14,
                           fontWeight: 700,
-                          letterSpacing: 3.2,
+                          letterSpacing: isIndic ? 0 : 3.2,
                           color: item.accent,
                         }}
                       >

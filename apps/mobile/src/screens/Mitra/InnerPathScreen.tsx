@@ -1134,7 +1134,6 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                   const time = reminders[`${key}_reminder_time`] as
                     | string
                     | null;
-                  const label = key.charAt(0).toUpperCase() + key.slice(1);
                   const displayTime = time
                     ? (() => {
                         const hms = time.slice(0, 5);
@@ -1154,7 +1153,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
                       ]}
                     >
                       <Text style={styles.reminderRowLabel}>
-                        {t("innerPath.reminders.row", { label: label.toLowerCase() })}
+                        {t("innerPath.reminders.row", { label: t(`innerPath.reminders.${key}`) })}
                       </Text>
                       <View style={styles.reminderRowRight}>
                         {enabled && displayTime && (

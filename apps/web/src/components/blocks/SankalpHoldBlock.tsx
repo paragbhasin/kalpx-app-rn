@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "../../lib/i18n";
 
 /* ── Colour tokens ────────────────────────────────────────────────── */
 const BROWN = "#432104";
@@ -201,6 +202,7 @@ function DesktopInfoSection({
 /* ── Main component ───────────────────────────────────────────────── */
 export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
   ensureCSS();
+  const { t } = useTranslation();
   const isDesktop = useIsDesktopRunner();
   const infoViewOnly = screenData["info_view_only"] === true;
 
@@ -415,7 +417,7 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
                         textTransform: "uppercase",
                       }}
                     >
-                      How To Live
+                      {t("mitra.engine.howToLive")}
                     </span>
                     <div
                       style={{
@@ -490,8 +492,8 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
                     }}
                   >
                     {activating
-                      ? "Let the vibration settle within..."
-                      : "Tap to embody your intention"}
+                      ? t("mitra.engine.vibrateSettle")
+                      : t("mitra.engine.tapToEmbody")}
                   </p>
 
                   <button
@@ -530,7 +532,7 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
           >
             {hasContent(insight) && (
               <DesktopInfoSection
-                label="Essence"
+                label={t("mitra.engine.essence")}
                 expanded={essenceExpanded}
                 onToggle={() => setEssenceExpanded((v) => !v)}
               >
@@ -540,7 +542,7 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
 
             {hasContent(benefits) && (
               <DesktopInfoSection
-                label="Benefits"
+                label={t("mitra.engine.benefits")}
                 expanded={benefitsExpanded}
                 onToggle={() => setBenefitsExpanded((v) => !v)}
               >
@@ -573,7 +575,7 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
                 marginTop: 10,
               }}
             >
-              Back
+              {t('mitra.engine.back')}
             </button>
           </div>
         </div>
@@ -670,7 +672,7 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
                 textTransform: "uppercase",
               }}
             >
-              How To Live
+              {t('mitra.engine.howToLive')}
             </span>
             <div
               style={{
@@ -738,8 +740,8 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
             }}
           >
             {activating
-              ? "Let the vibration settle within..."
-              : "Tap to embody your intention"}
+              ? t('mitra.engine.vibrateSettle')
+              : t('mitra.engine.tapToEmbody')}
           </p>
 
           <button
@@ -778,7 +780,7 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
           }}
         >
           <CollapsibleCard
-            label="Essence"
+            label={t('mitra.engine.essence')}
             expanded={essenceExpanded}
             onToggle={() => setEssenceExpanded((v) => !v)}
           >
@@ -791,7 +793,7 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
       {hasContent(benefits) && (
         <div style={{ width: "100%", marginBottom: 32 }}>
           <CollapsibleCard
-            label="Benefits"
+            label={t('mitra.engine.benefits')}
             expanded={benefitsExpanded}
             onToggle={() => setBenefitsExpanded((v) => !v)}
           >

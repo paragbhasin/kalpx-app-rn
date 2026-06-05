@@ -563,6 +563,18 @@ export const hi = {
       shareCarrying: 'अभी जो वहन कर रहे हैं वह साझा करें।',
       orTry: 'या आज़माएं',
       imHereHelp: 'मैं आपके साथ हूँ। आगे कहाँ जाना है, यह खोजने में मदद करता हूँ।',
+      quickStart: {
+        overwhelmed: 'मैं अभिभूत महसूस कर रहा हूँ',
+        needClarity: 'मुझे स्पष्टता चाहिए',
+        disconnected: 'मैं अलगाव महसूस कर रहा हूँ',
+        calmDown: 'बस मुझे शांत करो',
+      },
+      returnCard: {
+        prompt: 'अब क्या अलग लग रहा है?',
+        moreSteady: 'थोड़ा स्थिर',
+        stillHeavy: 'अभी भी भारी',
+        needClarity: 'मुझे स्पष्टता चाहिए',
+      },
     },
     trigger: {
       returnHome: '✕ घर वापस जाएं',

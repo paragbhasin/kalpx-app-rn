@@ -18,6 +18,7 @@ import {
   postRhythmSuggest,
 } from "../../engine/mitraApi";
 import { useTranslation } from '../../lib/i18n';
+import { getActiveLocale } from '../../lib/locale';
 import type { AppDispatch, RootState } from "../../store";
 import { setHomeData } from "../../store/doorSlice";
 import { useScreenState } from "../../store/screenSlice";
@@ -396,7 +397,7 @@ export function RhythmWizardPage() {
         selected_moments: selectedMoments,
         purposes,
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        locale: "en",
+        locale: getActiveLocale(),
         source_surface: "rhythm_wizard",
       });
       const newItems: Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>> =

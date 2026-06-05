@@ -5,22 +5,7 @@ import type {
   TellMitraNextOption,
 } from "@kalpx/types";
 import React from "react";
-
-// ── Constants ────────────────────────────────────────────────────────────────
-
-const QUICK_START_CHIPS = [
-  { label: "I feel overwhelmed",     value: "overwhelmed"  },
-  { label: "I need clarity",         value: "need_clarity" },
-  { label: "I feel disconnected",    value: "disconnected" },
-  { label: "Just help me calm down", value: "calm_now"     },
-] as const;
-
-const RETURN_CARD_CHIPS: TellMitraFollowupOption[] = [
-  { label: "More steady",          value: "more_steady"    },
-  { label: "Still heavy",          value: "still_heavy"    },
-  { label: "I need clarity",       value: "need_clarity"   },
-  { label: "Tell Mitra more",      value: "tell_mitra_more" },
-];
+import { useTranslation } from "../../lib/i18n";
 
 const ROBOTIC_PATTERNS = /scattered|agitated|drained|energized|balanced|state_tag|spl_pattern/i;
 
@@ -113,9 +98,24 @@ export function TellMitraThreadView({
   onWisdomOptionPress,
   error,
 }: TellMitraThreadViewProps) {
+  const { t } = useTranslation();
   const contentMaxWidth = isDesktop ? 760 : undefined;
   const bubbleMaxWidth = isDesktop ? "68%" : "75%";
   const chipMaxWidth = isDesktop ? "52%" : "60%";
+
+  const QUICK_START_CHIPS = [
+    { label: t("mitra.tellMitra.quickStart.overwhelmed"), value: "overwhelmed"  },
+    { label: t("mitra.tellMitra.quickStart.needClarity"), value: "need_clarity" },
+    { label: t("mitra.tellMitra.quickStart.disconnected"), value: "disconnected" },
+    { label: t("mitra.tellMitra.quickStart.calmDown"),    value: "calm_now"     },
+  ];
+
+  const RETURN_CARD_CHIPS: TellMitraFollowupOption[] = [
+    { label: t("mitra.tellMitra.returnCard.moreSteady"), value: "more_steady"    },
+    { label: t("mitra.tellMitra.returnCard.stillHeavy"), value: "still_heavy"    },
+    { label: t("mitra.tellMitra.returnCard.needClarity"), value: "need_clarity"  },
+    { label: t("mitra.tellMitra.tellMitraMore"),         value: "tell_mitra_more" },
+  ];
 
   function renderItem(item: TellMitraConversationItem) {
     // ── user_message ─────────────────────────────────────────────────────────

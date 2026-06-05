@@ -563,6 +563,18 @@ export const en = {
       shareCarrying: 'Share what you\'re carrying right now.',
       orTry: 'Or try',
       imHereHelp: 'I\'m here with you. Let me help you find where to go next.',
+      quickStart: {
+        overwhelmed: 'I feel overwhelmed',
+        needClarity: 'I need clarity',
+        disconnected: 'I feel disconnected',
+        calmDown: 'Just help me calm down',
+      },
+      returnCard: {
+        prompt: 'What feels different now?',
+        moreSteady: 'More steady',
+        stillHeavy: 'Still heavy',
+        needClarity: 'I need clarity',
+      },
     },
     trigger: {
       returnHome: '✕ Return home',

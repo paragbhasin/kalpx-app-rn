@@ -15,6 +15,8 @@ import {
   japaSyncSession,
   japaCompleteSession,
 } from './japaApi';
+import { mitraPranaAcknowledge } from './mitraApi';
+import store from '../store';
 
 export async function handleWatchMessage(msg: Record<string, unknown>): Promise<void> {
   const type = msg.type as string;
@@ -85,11 +87,50 @@ export async function handleWatchMessage(msg: Record<string, unknown>): Promise<
       break;
     }
 
-    // Watch launched with no mantras — push them now
-    case 'request_mantras': {
-      console.log('[WatchSync] Watch requested mantras — pushing now');
-      const { pushMantrasToWatch } = await import('./watchMantraSync');
-      await pushMantrasToWatch();
+    // Watch launched with no mantras / path data — push everything now
+    case 'request_mantras':
+    case 'request_path_data': {
+      console.log('[WatchSync] Watch requested data — pushing now');
+      const { pushMantrasToWatch, pushPathDataToWatch } = await import('./watchMantraSync');
+      await Promise.all([pushMantrasToWatch(), pushPathDataToWatch()]);
+      break;
+    }
+
+    // Watch user held their sankalp
+    case 'sankalp_held': {
+      console.log('[WatchSync] sankalp held from Watch, source:', msg.source);
+      // TODO: call the sankalp-held endpoint when it's available
+      break;
+    }
+
+    // Watch user marked a practice as done
+    case 'practice_done': {
+      console.log('[WatchSync] practice done from Watch, source:', msg.source);
+      // TODO: call the practice-done endpoint when it's available
+      break;
+    }
+
+    // Watch user recorded a check-in state
+    case 'checkin_recorded': {
+      const pranaType = msg.pranaType as string;
+      if (!pranaType) break;
+      try {
+        const screenData = store.getState().screen?.screenData ?? {};
+        await mitraPranaAcknowledge({
+          pranaType,
+          focus:      (screenData.scan_focus as string)  || (screenData.active_focus as string) || 'peacecalm',
+          subFocus:   (screenData.prana_baseline_selection as string) || '',
+          depth:      (screenData.routine_depth as string) || 'standard',
+          dayNumber:  (screenData.day_number as number)   || 1,
+          journeyId:  (screenData.journey_id as string)   || null,
+          round:      2,
+          locale:     'en',
+          tz:         Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata',
+        });
+        console.log('[WatchSync] check-in recorded, pranaType:', pranaType);
+      } catch (err) {
+        console.warn('[WatchSync] checkin_recorded failed:', err);
+      }
       break;
     }
 

@@ -25,4 +25,7 @@ export const AppGroupKeys = {
   // token or use Keychain with app group access (kSecAttrAccessGroup).
   // Left empty for Phase 1 — Watch sync goes through iPhone RN bridge.
   watchSessionToken: 'kalpx_watch_session_token',
+
+  // Written by iPhone on homeData load — Watch reads on launch to render home list
+  watchPathData: 'kalpx_watch_path_data',
 } as const;

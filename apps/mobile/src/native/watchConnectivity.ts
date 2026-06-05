@@ -65,4 +65,22 @@ export const watchConnectivity = {
       .then(() => console.log('[WatchConnectivity] writeMantrasToAppGroup SUCCESS'))
       .catch((e: any) => console.error('[WatchConnectivity] writeMantrasToAppGroup FAILED:', e));
   },
+
+  // Push pathData via WCSession applicationContext — merges with mantras key, survives app restart.
+  // Most reliable for simulator; complement to writePathDataToAppGroup.
+  pushPathDataViaContext(pathData: object): Promise<void> {
+    if (!supported) return Promise.resolve();
+    return KalpxWatchConnectivityModule.pushPathDataViaContext(pathData)
+      .then(() => console.log('[WatchConnectivity] pushPathDataViaContext SUCCESS'))
+      .catch((e: any) => console.error('[WatchConnectivity] pushPathDataViaContext FAILED:', e));
+  },
+
+  // Writes structured path data (inner path + rhythm + checkin) to shared app group.
+  // Watch reads this on every launch to render the home list.
+  writePathDataToAppGroup(pathData: object): Promise<void> {
+    if (!supported) return Promise.resolve();
+    return KalpxWatchConnectivityModule.writePathDataToAppGroup(pathData)
+      .then(() => console.log('[WatchConnectivity] writePathDataToAppGroup SUCCESS'))
+      .catch((e: any) => console.error('[WatchConnectivity] writePathDataToAppGroup FAILED:', e));
+  },
 };

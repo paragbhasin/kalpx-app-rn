@@ -45,6 +45,7 @@ import { getLiveActivityState, getQuickResetOpening } from "../../engine/mitraAp
 import { liveActivity } from "../../native/liveActivity";
 import { watchConnectivity } from "../../native/watchConnectivity";
 import { handleWatchMessage } from "../../engine/watchSyncHandler";
+import { pushPathDataToWatch } from "../../engine/watchMantraSync";
 import { stopRoomAmbientAudio } from "../../engine/roomAmbientAudio";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import api from "../../Networks/axios";
@@ -194,14 +195,14 @@ export default function Home() {
     return () => sub.remove();
   }, []);
 
-  // Push mantras to Watch when login state changes
+  // Push mantras + path data to Watch when login state changes
   useEffect(() => {
-    if (isLoggedIn) pushMantrasToWatch();
+    if (isLoggedIn) { pushMantrasToWatch(); void pushPathDataToWatch(); }
   }, [isLoggedIn]);
 
-  // Push mantras to Watch when homeData loads (rhythm + inner path now available)
+  // Push mantras + path data to Watch when homeData loads (rhythm + inner path now available)
   useEffect(() => {
-    if (isLoggedIn && homeData) pushMantrasToWatch();
+    if (isLoggedIn && homeData) { pushMantrasToWatch(); void pushPathDataToWatch(); }
   }, [homeData]);
 
   const HOME_BACKGROUND = require("../../../assets/new_home.webp");

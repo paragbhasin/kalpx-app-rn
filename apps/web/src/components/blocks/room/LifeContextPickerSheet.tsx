@@ -3,6 +3,7 @@
  */
 import { ChevronRight } from "lucide-react";
 import { useEffect } from "react";
+import { useTranslation } from "../../../lib/i18n";
 import { LIFE_CONTEXT_OPTIONS } from "./roomConstants";
 
 interface Props {
@@ -20,21 +21,15 @@ export function LifeContextPickerSheet({
   onSkip,
   onBack,
 }: Props) {
+  const { t } = useTranslation();
   const options = allowedContexts
     ? LIFE_CONTEXT_OPTIONS.filter((o) => allowedContexts.includes(o.id))
     : LIFE_CONTEXT_OPTIONS;
 
   const getPickerLabel = (id: string, label: string) => {
-    if (id === "self") return "Myself";
-    const copy: Record<string, string> = {
-      work_career: "Work & career",
-      relationships: "Relationships",
-      health_energy: "Health & energy",
-      money_security: "Money & security",
-      purpose_direction: "Purpose & direction",
-      daily_life: "Daily life",
-    };
-    return copy[id] || label;
+    const key = `mitra.room.lifeContext.${id}`;
+    const translated = t(key as any);
+    return translated !== key ? translated : label;
   };
 
   useEffect(() => {
@@ -112,7 +107,7 @@ export function LifeContextPickerSheet({
             letterSpacing: 0.15,
           }}
         >
-          What part of life is this touching most right now?
+          {t('mitra.room.lifeContextHeader')}
         </h2>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -175,7 +170,7 @@ export function LifeContextPickerSheet({
               marginBottom: 12,
             }}
           >
-            Skip for now
+            {t('mitra.room.skipForNow')}
           </button>
         </div>
       </div>

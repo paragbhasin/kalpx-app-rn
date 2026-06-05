@@ -5,7 +5,12 @@
  */
 import React, { useState } from 'react';
 import { useTranslation } from '../../../lib/i18n';
-import { ROOM_REFLECTION_OPTIONS, ROOM_GUIDED_COPY, ROOM_COMPLETION_HEADER, ROOM_NEXT_STEP_LINE } from '@kalpx/contracts';
+import {
+  ROOM_REFLECTION_OPTIONS, ROOM_REFLECTION_OPTIONS_HI, ROOM_REFLECTION_OPTIONS_TE,
+  ROOM_GUIDED_COPY, ROOM_GUIDED_COPY_HI, ROOM_GUIDED_COPY_TE,
+  ROOM_COMPLETION_HEADER, ROOM_COMPLETION_HEADER_HI, ROOM_COMPLETION_HEADER_TE,
+  ROOM_NEXT_STEP_LINE, ROOM_NEXT_STEP_LINE_HI, ROOM_NEXT_STEP_LINE_TE,
+} from '@kalpx/contracts';
 import type { VerifiedRoomId } from '@kalpx/types';
 import { postRoomReflection, postRoomTelemetry } from '../../../engine/mitraApi';
 
@@ -30,10 +35,15 @@ export function RoomReflectionSheet({
   onViewAllSteps,
   onReturnHome,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [phase, setPhase] = useState<Phase>('reflection');
 
-  const options = ROOM_REFLECTION_OPTIONS[roomId as VerifiedRoomId] ?? [];
+  const reflectOptions = locale === 'hi' ? ROOM_REFLECTION_OPTIONS_HI : locale === 'te' ? ROOM_REFLECTION_OPTIONS_TE : ROOM_REFLECTION_OPTIONS;
+  const copy = locale === 'hi' ? ROOM_GUIDED_COPY_HI : locale === 'te' ? ROOM_GUIDED_COPY_TE : ROOM_GUIDED_COPY;
+  const completionHeader = locale === 'hi' ? ROOM_COMPLETION_HEADER_HI : locale === 'te' ? ROOM_COMPLETION_HEADER_TE : ROOM_COMPLETION_HEADER;
+  const nextStepLine = locale === 'hi' ? ROOM_NEXT_STEP_LINE_HI : locale === 'te' ? ROOM_NEXT_STEP_LINE_TE : ROOM_NEXT_STEP_LINE;
+
+  const options = reflectOptions[roomId as VerifiedRoomId] ?? [];
 
   async function handleOption(code: string, isBridge: boolean) {
     void postRoomReflection(roomId, {
@@ -85,7 +95,7 @@ export function RoomReflectionSheet({
       >
         {phase === 'reflection' ? (
           <>
-            {ROOM_COMPLETION_HEADER[roomId as VerifiedRoomId] && (
+            {completionHeader[roomId as VerifiedRoomId] && (
               <p
                 style={{
                   fontSize: 14,
@@ -96,7 +106,7 @@ export function RoomReflectionSheet({
                   fontStyle: 'italic',
                 }}
               >
-                {ROOM_COMPLETION_HEADER[roomId as VerifiedRoomId]}
+                {completionHeader[roomId as VerifiedRoomId]}
               </p>
             )}
             <p
@@ -108,7 +118,7 @@ export function RoomReflectionSheet({
                 margin: '0 0 20px',
               }}
             >
-              {ROOM_GUIDED_COPY.reflectionPrompt}
+              {copy.reflectionPrompt}
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {options.map((opt) => (
@@ -146,7 +156,7 @@ export function RoomReflectionSheet({
             >
               {t('mitra.room.youCanStay')}
             </p>
-            {ROOM_NEXT_STEP_LINE[roomId as VerifiedRoomId] && (
+            {nextStepLine[roomId as VerifiedRoomId] && (
               <p
                 style={{
                   fontSize: 14,
@@ -157,15 +167,15 @@ export function RoomReflectionSheet({
                   lineHeight: 1.5,
                 }}
               >
-                {ROOM_NEXT_STEP_LINE[roomId as VerifiedRoomId]}
+                {nextStepLine[roomId as VerifiedRoomId]}
               </p>
             )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[
-                { key: 'finish_here',  label: ROOM_GUIDED_COPY.nextStep.finishHere },
-                { key: 'tell_mitra',   label: ROOM_GUIDED_COPY.nextStep.tellMitraMore },
-                { key: 'continue',     label: ROOM_GUIDED_COPY.nextStep.continueStep },
-                { key: 'return_home',  label: ROOM_GUIDED_COPY.nextStep.returnHome },
+                { key: 'finish_here',  label: copy.nextStep.finishHere },
+                { key: 'tell_mitra',   label: copy.nextStep.tellMitraMore },
+                { key: 'continue',     label: copy.nextStep.continueStep },
+                { key: 'return_home',  label: copy.nextStep.returnHome },
               ].map(({ key, label }) => (
                 <button
                   key={key}

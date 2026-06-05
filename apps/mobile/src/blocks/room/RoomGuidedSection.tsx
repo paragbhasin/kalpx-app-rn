@@ -2,7 +2,7 @@
  * RoomGuidedSection — mobile guided room surface aligned to the web layout.
  */
 import { Ionicons } from "@expo/vector-icons";
-import { ROOM_GUIDED_COPY, ROOM_GUIDED_COPY_HI, ROOM_LABELS, ROOM_LABELS_HI } from "@kalpx/contracts";
+import { ROOM_GUIDED_COPY, ROOM_GUIDED_COPY_HI, ROOM_GUIDED_COPY_TE, ROOM_LABELS, ROOM_LABELS_HI, ROOM_LABELS_TE } from "@kalpx/contracts";
 import React, {
   useCallback,
   useEffect,
@@ -128,8 +128,9 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   const isTablet = width >= 768;
   const { t, i18n } = useTranslation();
   const isHindi = i18n.language === "hi";
-  const copy = isHindi ? ROOM_GUIDED_COPY_HI : ROOM_GUIDED_COPY;
-  const roomLabels = isHindi ? ROOM_LABELS_HI : ROOM_LABELS;
+  const isTE = i18n.language === "te";
+  const copy = isHindi ? ROOM_GUIDED_COPY_HI : isTE ? ROOM_GUIDED_COPY_TE : ROOM_GUIDED_COPY;
+  const roomLabels = isHindi ? ROOM_LABELS_HI : isTE ? ROOM_LABELS_TE : ROOM_LABELS;
   const { loadScreen, goBack, screenData } = useScreenStore();
   const actionCtx = buildActionCtx({ loadScreen, goBack });
 

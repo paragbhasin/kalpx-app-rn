@@ -628,6 +628,17 @@ export const te = {
       letsBeginGently: 'మెల్లగా ప్రారంభిద్దాం…',
       illGoNow: 'నేను ఇప్పుడు వెళ్తాను',
       noCategories: 'వర్గాలు లేవు.',
+      lifeContextHeader: 'ఇప్పుడు జీవితంలో ఏ భాగం అత్యధికంగా ప్రభావితమవుతోంది?',
+      skipForNow: 'ఇప్పటికి వదిలేయండి',
+      lifeContext: {
+        self: 'నాకు నేను',
+        work_career: 'పని మరియు కెరీర్',
+        relationships: 'సంబంధాలు',
+        health_energy: 'ఆరోగ్యం మరియు శక్తి',
+        money_security: 'డబ్బు మరియు ఆర్థికం',
+        purpose_direction: 'లక్ష్యం మరియు దిశ',
+        daily_life: 'రోజువారీ జీవితం',
+      },
     },
     tellMitra: {
       placeholder: 'మీ మనసులో ఏముంది?',

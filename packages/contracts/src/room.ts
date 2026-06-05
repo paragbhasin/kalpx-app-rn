@@ -149,3 +149,74 @@ export const ROOM_GUIDED_COPY_HI = {
     returnHome:    "होम पर लौटें",
   },
 } as const;
+
+export const ROOM_REFLECTION_OPTIONS_TE: Record<VerifiedRoomId, RoomReflectionOption[]> = {
+  room_stillness: [
+    { code: "more_steady",        label: "మరింత స్థిరంగా" },
+    { code: "still_restless",     label: "ఇంకా అశాంతిగా" },
+    { code: "a_little_clearer",   label: "కొద్దిగా స్పష్టంగా" },
+    { code: "want_to_share_more", label: "మిత్రకు మరింత చెప్పాలి", is_tell_mitra_bridge: true },
+  ],
+  room_clarity: [
+    { code: "one_thing_clearer",  label: "ఒక విషయం స్పష్టమైంది" },
+    { code: "know_next_step",     label: "తదుపరి అడుగు తెలుసు" },
+    { code: "still_unclear",      label: "ఇంకా అస్పష్టంగా" },
+    { code: "want_to_share_more", label: "మిత్రకు మరింత చెప్పాలి", is_tell_mitra_bridge: true },
+  ],
+  room_release: [
+    { code: "lighter",            label: "తేలికగా" },
+    { code: "still_heavy",        label: "ఇంకా భారంగా" },
+    { code: "released_a_little",  label: "కొద్దిగా వదిలిపెట్టాను" },
+    { code: "want_to_share_more", label: "మిత్రకు మరింత చెప్పాలి", is_tell_mitra_bridge: true },
+  ],
+  room_connection: [
+    { code: "less_alone",         label: "తక్కువ ఒంటరిగా" },
+    { code: "still_disconnected", label: "ఇంకా దూరంగా" },
+    { code: "remembered_someone", label: "ఒకరిని గుర్తుచేసుకున్నాను" },
+    { code: "want_to_share_more", label: "మిత్రకు మరింత చెప్పాలి", is_tell_mitra_bridge: true },
+  ],
+  room_growth: [
+    { code: "i_know_one_step",    label: "ఒక అడుగు తెలుసు" },
+    { code: "feel_ready",         label: "సిద్ధంగా అనిపిస్తోంది" },
+    { code: "still_stuck",        label: "ఇంకా నిలబడ్డాను" },
+    { code: "want_help_choosing", label: "ఎంచుకోవడంలో సహాయం కావాలి" },
+  ],
+  room_joy: [
+    { code: "noticed_something_good", label: "మంచిది గమనించాను" },
+    { code: "more_steady",            label: "మరింత స్థిరంగా" },
+    { code: "still_restless",         label: "ఇంకా అశాంతిగా" },
+    { code: "want_to_share_more",     label: "మిత్రకు మరింత చెప్పాలి", is_tell_mitra_bridge: true },
+  ],
+};
+
+export const ROOM_COMPLETION_HEADER_TE: Partial<Record<VerifiedRoomId, string>> = {
+  room_stillness:  "ప్రత్యాహారం. లోపలికి తిరగడమే అభ్యాసం.",
+  room_connection: "భక్తి. హృదయం తిరిగింది.",
+  room_release:    "శరణాగతి. మీరు ఒక విషయం వదిలిపెట్టారు.",
+  room_clarity:    "వివేకం. మీరు చూసే స్థలం తయారు చేశారు.",
+  room_growth:     "తపస్య. మీరు నిలిచారు.",
+  room_joy:        "ఆనందం. మీరు గమనించారు.",
+};
+
+export const ROOM_NEXT_STEP_LINE_TE: Partial<Record<VerifiedRoomId, string>> = {
+  room_stillness:  "శబ్దం తిరిగొచ్చినప్పుడు, ఈ గది ఇక్కడే ఉంది.",
+  room_connection: "ఒక మృదువైన అనుభూతిని వెంట తీసుకెళ్ళండి.",
+  room_release:    "వదిలించుకోగలిగేది వదిలించుకోండి. నెమ్మదిగా తిరిగి రండి.",
+  room_clarity:    "ఇప్పటికి ఒక స్పష్టమైన విషయం చాలు.",
+  room_growth:     "ప్రారంభించడానికి ఒక చిన్న అడుగు చాలు.",
+  room_joy:        "తేలికదనాన్ని సరళంగా ఉండనివ్వండి.",
+};
+
+export const ROOM_GUIDED_COPY_TE = {
+  begin:            "ప్రారంభించండి",
+  whyThisLabel:     "ఇది ఎందుకు ఎంచుకోబడింది",
+  viewAllSteps:     "అన్ని దశలు చూడండి",
+  exitLabel:        "నేను ఇప్పుడు వెళ్తాను",
+  reflectionPrompt: "కొద్దిగా ఏమి మారింది?",
+  nextStep: {
+    finishHere:    "ఇక్కడ ముగించండి",
+    tellMitraMore: "మిత్రకు మరింత చెప్పండి",
+    continueStep:  "మరొక దశ కొనసాగించండి",
+    returnHome:    "హోమ్‌కు తిరిగి వెళ్ళండి",
+  },
+} as const;

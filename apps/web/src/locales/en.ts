@@ -628,6 +628,17 @@ export const en = {
       letsBeginGently: "Let's begin gently…",
       illGoNow: "I'll go now",
       noCategories: 'No categories.',
+      lifeContextHeader: 'What part of life is this touching most right now?',
+      skipForNow: 'Skip for now',
+      lifeContext: {
+        self: 'Myself',
+        work_career: 'Work & career',
+        relationships: 'Relationships',
+        health_energy: 'Health & energy',
+        money_security: 'Money & security',
+        purpose_direction: 'Purpose & direction',
+        daily_life: 'Daily life',
+      },
     },
     tellMitra: {
       placeholder: 'What\'s on your mind…',

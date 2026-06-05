@@ -2,7 +2,7 @@
  * RoomGuidedSection — guided room layout with hero content, begin CTA,
  * expandable wisdom card, and access to the full room step list.
  */
-import { ROOM_GUIDED_COPY, ROOM_GUIDED_COPY_HI } from "@kalpx/contracts";
+import { ROOM_GUIDED_COPY, ROOM_GUIDED_COPY_HI, ROOM_GUIDED_COPY_TE } from "@kalpx/contracts";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { postRoomSacred, postRoomTelemetry } from "../../../engine/mitraApi";
@@ -198,8 +198,7 @@ export function RoomGuidedSection({
   isDesktop = false,
 }: Props) {
   const { t, locale } = useTranslation();
-  const isHindi = locale === 'hi';
-  const copy = isHindi ? ROOM_GUIDED_COPY_HI : ROOM_GUIDED_COPY;
+  const copy = locale === 'hi' ? ROOM_GUIDED_COPY_HI : locale === 'te' ? ROOM_GUIDED_COPY_TE : ROOM_GUIDED_COPY;
   const completionLinesMap = locale === 'hi' ? ROOM_COMPLETION_LINES_HI : locale === 'te' ? ROOM_COMPLETION_LINES_TE : ROOM_COMPLETION_LINES;
   const completionFallback = locale === 'hi' ? COMPLETION_FALLBACK_HI : locale === 'te' ? COMPLETION_FALLBACK_TE : COMPLETION_FALLBACK;
   const betweenStepLines = locale === 'hi' ? BETWEEN_STEP_LINES_HI : locale === 'te' ? BETWEEN_STEP_LINES_TE : BETWEEN_STEP_LINES;

@@ -13,7 +13,7 @@ import {
   View,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import { ROOM_REFLECTION_OPTIONS, ROOM_REFLECTION_OPTIONS_HI, ROOM_GUIDED_COPY, ROOM_GUIDED_COPY_HI, ROOM_COMPLETION_HEADER, ROOM_COMPLETION_HEADER_HI, ROOM_NEXT_STEP_LINE, ROOM_NEXT_STEP_LINE_HI } from "@kalpx/contracts";
+import { ROOM_REFLECTION_OPTIONS, ROOM_REFLECTION_OPTIONS_HI, ROOM_REFLECTION_OPTIONS_TE, ROOM_GUIDED_COPY, ROOM_GUIDED_COPY_HI, ROOM_GUIDED_COPY_TE, ROOM_COMPLETION_HEADER, ROOM_COMPLETION_HEADER_HI, ROOM_COMPLETION_HEADER_TE, ROOM_NEXT_STEP_LINE, ROOM_NEXT_STEP_LINE_HI, ROOM_NEXT_STEP_LINE_TE } from "@kalpx/contracts";
 import type { VerifiedRoomId } from "@kalpx/types";
 import { postRoomReflection, trackRoomTelemetry } from "../../engine/mitraApi";
 
@@ -38,11 +38,12 @@ const RoomReflectionSheet: React.FC<Props> = ({
 }) => {
   const { t, i18n } = useTranslation();
   const isHindi = i18n.language === "hi";
+  const isTE = i18n.language === "te";
   const [phase, setPhase] = useState<Phase>("reflection");
-  const reflectOptions = isHindi ? ROOM_REFLECTION_OPTIONS_HI : ROOM_REFLECTION_OPTIONS;
-  const guidedCopy = isHindi ? ROOM_GUIDED_COPY_HI : ROOM_GUIDED_COPY;
-  const completionHeader = isHindi ? ROOM_COMPLETION_HEADER_HI : ROOM_COMPLETION_HEADER;
-  const nextStepLine = isHindi ? ROOM_NEXT_STEP_LINE_HI : ROOM_NEXT_STEP_LINE;
+  const reflectOptions = isHindi ? ROOM_REFLECTION_OPTIONS_HI : isTE ? ROOM_REFLECTION_OPTIONS_TE : ROOM_REFLECTION_OPTIONS;
+  const guidedCopy = isHindi ? ROOM_GUIDED_COPY_HI : isTE ? ROOM_GUIDED_COPY_TE : ROOM_GUIDED_COPY;
+  const completionHeader = isHindi ? ROOM_COMPLETION_HEADER_HI : isTE ? ROOM_COMPLETION_HEADER_TE : ROOM_COMPLETION_HEADER;
+  const nextStepLine = isHindi ? ROOM_NEXT_STEP_LINE_HI : isTE ? ROOM_NEXT_STEP_LINE_TE : ROOM_NEXT_STEP_LINE;
   const options = reflectOptions[roomId as VerifiedRoomId] ?? [];
 
   async function handleOption(code: string, isBridge: boolean) {

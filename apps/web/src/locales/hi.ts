@@ -628,6 +628,17 @@ export const hi = {
       letsBeginGently: 'धीरे से शुरू करते हैं…',
       illGoNow: 'मैं अभी जाऊँगा',
       noCategories: 'कोई श्रेणी नहीं।',
+      lifeContextHeader: 'अभी जीवन का कौन-सा हिस्सा सबसे अधिक प्रभावित हो रहा है?',
+      skipForNow: 'अभी के लिए छोड़ें',
+      lifeContext: {
+        self: 'स्वयं',
+        work_career: 'काम और करियर',
+        relationships: 'रिश्ते',
+        health_energy: 'स्वास्थ्य और ऊर्जा',
+        money_security: 'पैसा और वित्त',
+        purpose_direction: 'उद्देश्य और दिशा',
+        daily_life: 'दैनिक जीवन',
+      },
     },
     tellMitra: {
       placeholder: 'आपके मन में क्या है?',

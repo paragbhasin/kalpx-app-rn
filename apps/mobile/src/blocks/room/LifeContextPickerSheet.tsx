@@ -55,33 +55,33 @@ interface LifeContextOption {
 const LIFE_CONTEXT_OPTIONS: LifeContextOption[] = [
   {
     slug: "work_career",
-    labelKey: "room.lifeContext.workCareer",
+    labelKey: "room.constants.lifeContext.workCareer",
     testID: "life_context_picker_work_career",
   },
   {
     slug: "relationships",
-    labelKey: "room.lifeContext.relationships",
+    labelKey: "room.constants.lifeContext.relationships",
     testID: "life_context_picker_relationships",
   },
-  { slug: "self", labelKey: "room.lifeContext.myself", testID: "life_context_picker_self" },
+  { slug: "self", labelKey: "room.constants.lifeContext.myself", testID: "life_context_picker_self" },
   {
     slug: "health_energy",
-    labelKey: "room.lifeContext.healthEnergy",
+    labelKey: "room.constants.lifeContext.healthEnergy",
     testID: "life_context_picker_health_energy",
   },
   {
     slug: "money_security",
-    labelKey: "room.lifeContext.moneySecurity",
+    labelKey: "room.constants.lifeContext.moneySecurity",
     testID: "life_context_picker_money_security",
   },
   {
     slug: "purpose_direction",
-    labelKey: "room.lifeContext.purposeDirection",
+    labelKey: "room.constants.lifeContext.purposeDirection",
     testID: "life_context_picker_purpose_direction",
   },
   {
     slug: "daily_life",
-    labelKey: "room.lifeContext.dailyLife",
+    labelKey: "room.constants.lifeContext.dailyLife",
     testID: "life_context_picker_daily_life",
   },
 ];
@@ -166,7 +166,7 @@ const LifeContextPickerSheet: React.FC<LifeContextPickerSheetProps> = ({
             <View style={styles.sheetContent}>
               <View style={styles.handle} />
               <Text style={[styles.header, isHindi && { letterSpacing: 0 }]} testID="life_context_picker_header">
-                {t("room.lifeContext.header")}
+                {t("room.constants.lifeContext.header")}
               </Text>
 
               <View style={styles.optionsBlock}>
@@ -206,9 +206,9 @@ const LifeContextPickerSheet: React.FC<LifeContextPickerSheetProps> = ({
                 testID="life_context_picker_skip"
                 accessible={true}
                 accessibilityRole="button"
-                accessibilityLabel={t("room.lifeContext.skipForNow")}
+                accessibilityLabel={t("room.constants.lifeContext.skipForNow")}
               >
-                <Text style={[styles.skipLabel, isHindi && { letterSpacing: 0 }]}>{t("room.lifeContext.skipForNow")}</Text>
+                <Text style={[styles.skipLabel, isHindi && { letterSpacing: 0 }]}>{t("room.constants.lifeContext.skipForNow")}</Text>
               </TouchableOpacity>
             </View>
           </ImageBackground>

@@ -325,6 +325,12 @@ export function RhythmWizardPage() {
   const [suggestError, setSuggestError] = useState<string | null>(null);
   const [suggestionsLoaded, setSuggestionsLoaded] = useState(false);
 
+  // On mount: refresh homeData so edit mode seeds from current locale.
+  // Cache returns instantly for same locale; different locale triggers a fresh fetch.
+  useEffect(() => {
+    getMitraHomeV3().then((d) => { if (d) dispatch(setHomeData(d)); }).catch(() => {});
+  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Pre-populate from existing rhythm when in edit mode
   useEffect(() => {
     if (!isEditMode) return;

@@ -394,14 +394,15 @@ export function RhythmHomePage() {
     null,
   );
 
+  // Always fetch on mount — getMitraHomeV3's locale-keyed cache returns instantly
+  // for same locale (no API call), but makes a fresh fetch if locale changed since last visit.
   useEffect(() => {
-    if (homeData) return;
     setLoading(true);
     void getMitraHomeV3()
-      .then((d) => dispatch(setHomeData(d)))
+      .then((d) => { if (d) dispatch(setHomeData(d)); })
       .catch(() => setError("Could not load your rhythm."))
       .finally(() => setLoading(false));
-  }, [homeData, dispatch]);
+  }, [dispatch]);
 
   // Re-fetch with new locale so item title_snapshots update when language changes
   useEffect(() => {

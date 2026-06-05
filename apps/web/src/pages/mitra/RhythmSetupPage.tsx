@@ -107,6 +107,25 @@ export function RhythmSetupPage() {
     [],
   );
 
+  // On mount: re-fetch with current locale in case locale changed while on another page.
+  // getMitraHomeV3's cache returns instantly for same locale (no API call).
+  useEffect(() => {
+    getMitraHomeV3().then((data) => {
+      if (data) {
+        dispatch(setHomeData(data));
+        setBandItems((prev) => {
+          const fresh = seedBandItems(data);
+          for (const band of BANDS) {
+            const freshIds = new Set(fresh[band].map((i) => i.item_id));
+            const newlyAdded = prev[band].filter((i) => !freshIds.has(i.item_id));
+            if (newlyAdded.length > 0) fresh[band] = [...fresh[band], ...newlyAdded];
+          }
+          return fresh;
+        });
+      }
+    }).catch(() => {});
+  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Re-fetch homeData and re-seed bandItems when locale changes
   useEffect(() => {
     function onLocaleChange() {

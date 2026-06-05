@@ -427,8 +427,15 @@ export default function RhythmSetupScreen({
   useFocusEffect(
     useCallback(() => {
       updateBackground(RHYTHM_BG);
+      // In edit mode: re-fetch homeData on every focus so locale changes from
+      // other screens are picked up. Wizard mode manages its own data flow.
+      if (editMode) {
+        mitraJourneyHomeV3({ forceFresh: true, locale: i18n.language || 'en' })
+          .then((fresh) => { if (fresh) dispatch(setHomeData(fresh)); })
+          .catch(() => {});
+      }
       return () => updateBackground(null);
-    }, [updateBackground]),
+    }, [updateBackground, editMode, i18n.language, dispatch]),
   );
 
   const buildActionContext = useCallback(

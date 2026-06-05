@@ -371,15 +371,34 @@ export function RhythmWizardPage() {
     }
   }, [step, suggestionsLoaded]);
 
-  // Re-fetch suggestions in the new locale when locale changes mid-session
+  // Re-fetch suggestions with pinned_items when locale changes mid-session,
+  // so the backend returns the SAME items translated, not freshly selected ones.
   const localeRef = useRef(locale);
   useEffect(() => {
     const prev = localeRef.current;
     localeRef.current = locale;
     if (prev === locale) return;
-    if (step === "suggestion" && !isEditMode && suggestionsLoaded) {
-      setSuggestionsLoaded(false); // triggers the load effect above
-    }
+    if (step !== "suggestion" || isEditMode || !suggestionsLoaded) return;
+    const pinned = (Object.entries(items) as [RhythmTimeBand, RhythmWizardLocalItem | undefined][])
+      .filter(([, it]) => it)
+      .map(([slot, it]) => ({ slot, item_id: it!.item_id, item_type: it!.item_type }));
+    if (!pinned.length) { setSuggestionsLoaded(false); return; }
+    setSuggestLoading(true);
+    setSuggestError(null);
+    postRhythmSuggest({
+      selected_moments: selectedMoments,
+      purposes,
+      tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      locale,
+      source_surface: "rhythm_wizard",
+      pinned_items: pinned as any,
+    }).then((resp) => {
+      const newItems: Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>> = {};
+      resp.items.forEach((it, idx) => {
+        newItems[it.slot] = { ...rhythmSuggestItemToLocalItem(it), sort_order: idx };
+      });
+      if (Object.keys(newItems).length) setItems(newItems);
+    }).catch(() => {}).finally(() => setSuggestLoading(false));
   }, [locale]);
 
   // ── Navigation helpers ───────────────────────────────────────────────────────

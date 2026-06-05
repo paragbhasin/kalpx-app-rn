@@ -498,6 +498,10 @@ export function normalizeTellMitraResult(raw: unknown): TellMitraV3Response {
       typeof r["secondary_room_id"] === "string"
         ? r["secondary_room_id"]
         : null,
+    secondary_room_label:
+      typeof r["secondary_room_label"] === "string"
+        ? r["secondary_room_label"]
+        : null,
   };
 }
 
@@ -536,6 +540,7 @@ function _safeTellMitraResponse(): TellMitraV3Response {
     primary_specific_context: null,
     support_need: "understand_context_first",
     secondary_room_id: null,
+    secondary_room_label: null,
   };
 }
 

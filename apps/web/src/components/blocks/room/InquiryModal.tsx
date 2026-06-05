@@ -3,6 +3,7 @@
  * Two-screen flow: category list → category detail with journal/practice actions.
  */
 import { useEffect, useState } from "react";
+import { useTranslation } from "../../../lib/i18n";
 
 interface InquiryCategory {
   id: string;
@@ -49,6 +50,7 @@ export function InquiryModal({
   presentation = "modal",
   isRoomGuided = false,
 }: Props) {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState<InquiryCategory | null>(null);
   const [journalOpen, setJournalOpen] = useState(false);
   const [journalText, setJournalText] = useState("");
@@ -207,7 +209,7 @@ export function InquiryModal({
                     }
               }
             >
-              {showImmersiveJournal || showImmersiveDetail ? "‹" : "Back"}
+              {showImmersiveJournal || showImmersiveDetail ? "‹" : t('common.back')}
             </button>
           ) : (
             <button
@@ -223,7 +225,7 @@ export function InquiryModal({
                 flexShrink: 0,
               }}
             >
-              Cancel
+              {t('common.cancel')}
             </button>
           )}
           <p
@@ -299,7 +301,7 @@ export function InquiryModal({
                     padding: "40px 0",
                   }}
                 >
-                  No categories.
+                  {t('mitra.room.noCategories')}
                 </p>
               ) : (
                 <div
@@ -558,7 +560,7 @@ export function InquiryModal({
                           : "0 3px 8px rgba(0,0,0,0.1)",
                       }}
                     >
-                      {selected.practice_label || "Try a practice"}
+                      {selected.practice_label || t('mitra.room.tryAPractice')}
                     </button>
                   )}
                   <button
@@ -582,7 +584,7 @@ export function InquiryModal({
                         : "0 3px 8px rgba(0,0,0,0.1)",
                     }}
                   >
-                    {isRoomGuided ? "Write a few words" : "Journal on this"}
+                    {isRoomGuided ? t('mitra.room.writeAFewWords') : t('mitra.room.journalOnThis')}
                   </button>
                 </div>
               ) : (
@@ -742,7 +744,7 @@ export function InquiryModal({
                         : undefined,
                     }}
                   >
-                    Done
+                    {t('common.done')}
                   </button>
                   {showImmersiveJournal && (
                     <button
@@ -760,7 +762,7 @@ export function InquiryModal({
                         textUnderlineOffset: 6,
                       }}
                     >
-                      I'll go now
+                      {t('mitra.room.illGoNow')}
                     </button>
                   )}
                 </div>

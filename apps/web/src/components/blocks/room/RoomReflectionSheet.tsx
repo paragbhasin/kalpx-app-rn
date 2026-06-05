@@ -4,6 +4,7 @@
  * Triggered by RoomPage when show_room_reflection=true in screenData.
  */
 import React, { useState } from 'react';
+import { useTranslation } from '../../../lib/i18n';
 import { ROOM_REFLECTION_OPTIONS, ROOM_GUIDED_COPY, ROOM_COMPLETION_HEADER, ROOM_NEXT_STEP_LINE } from '@kalpx/contracts';
 import type { VerifiedRoomId } from '@kalpx/types';
 import { postRoomReflection, postRoomTelemetry } from '../../../engine/mitraApi';
@@ -29,6 +30,7 @@ export function RoomReflectionSheet({
   onViewAllSteps,
   onReturnHome,
 }: Props) {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<Phase>('reflection');
 
   const options = ROOM_REFLECTION_OPTIONS[roomId as VerifiedRoomId] ?? [];
@@ -142,7 +144,7 @@ export function RoomReflectionSheet({
                 margin: '0 0 20px',
               }}
             >
-              You can stay, continue, or come back when you're ready.
+              {t('mitra.room.youCanStay')}
             </p>
             {ROOM_NEXT_STEP_LINE[roomId as VerifiedRoomId] && (
               <p

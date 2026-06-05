@@ -152,6 +152,15 @@ export const ROOM_LABELS_HI: Record<VerifiedRoomId, string> = {
   room_growth: "अगला कदम उठाएं",
 };
 
+export const ROOM_LABELS_TE: Record<VerifiedRoomId, string> = {
+  room_stillness: "శాంతి కనుగొనండి",
+  room_release: "వదిలివేయండి",
+  room_clarity: "స్పష్టత కనుగొనండి",
+  room_joy: "మంచిని గమనించండి",
+  room_connection: "అనుబంధం అనుభవించండి",
+  room_growth: "తదుపరి అడుగు వేయండి",
+};
+
 // Descriptions verified against core/tell_mitra_view.py _ROOM_LABELS on origin/dev.
 export const ROOM_DESCRIPTIONS: Record<VerifiedRoomId, string> = {
   room_stillness: "A room to steady the mind when things feel too much.",

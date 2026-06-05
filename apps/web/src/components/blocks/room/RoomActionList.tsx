@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from '../../../lib/i18n';
 import { RoomActionPill } from './RoomActionPill';
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export function RoomActionList({ envelope, screenData, onAction }: Props) {
+  const { t } = useTranslation();
   const actions: any[] = Array.isArray(envelope.actions) ? envelope.actions : [];
 
   // B8: Empty actions fallback
@@ -15,7 +17,7 @@ export function RoomActionList({ envelope, screenData, onAction }: Props) {
     return (
       <div style={{ padding: '32px 20px', textAlign: 'center' }} data-testid="room-action-list-empty">
         <p style={{ color: '#9A8C78', fontSize: 14, marginBottom: 20 }}>
-          This space is resting — check back shortly.
+          {t('mitra.room.spaceResting')}
         </p>
         <button
           data-testid="room-empty-return"
@@ -30,7 +32,7 @@ export function RoomActionList({ envelope, screenData, onAction }: Props) {
             cursor: 'pointer',
           }}
         >
-          Return to home
+          {t('common.returnHome')}
         </button>
       </div>
     );

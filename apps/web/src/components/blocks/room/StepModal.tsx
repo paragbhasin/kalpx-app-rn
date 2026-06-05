@@ -4,6 +4,7 @@
  * Voice-note and reach-out are stub-only on web (same as RN MVP).
  */
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "../../../lib/i18n";
 
 declare global {
   interface Window {
@@ -58,34 +59,7 @@ export function classifyStep(templateId?: string | null): StepModalKind {
   return "unknown";
 }
 
-const GROUNDING_PROMPTS = [
-  "Name 5 things you can see",
-  "Name 4 things you can hear",
-  "Name 3 things you can feel",
-  "Name 2 things you can smell",
-  "Name 1 thing you can taste",
-];
-
-const GROUNDING_PROMPTS_ROOM = [
-  "What do you see around you?",
-  "What sounds do you notice?",
-  "What do you feel against your skin?",
-  "Is there a scent nearby?",
-  "What taste is in your mouth?",
-];
-
-const TIMER_COMPLETION_LINES: Record<string, string> = {
-  timer_breathe: "You made space.",
-  timer_sit: "You sat with it.",
-  timer_heart: "Your heart has steadied.",
-  timer_walk: "You moved through it.",
-};
-
-const HEART_PHASES = [
-  "Rest your hand on your heart.",
-  "Feel the warmth.",
-  "Breathe slowly.",
-];
+const HEART_PHASE_COUNT = 3;
 
 const MAX_TEXT = 1000;
 
@@ -120,6 +94,7 @@ export function StepModal({
   isRoomGuided = false,
   helperLine = null,
 }: Props) {
+  const { t } = useTranslation();
   const kind = classifyStep(stepPayload?.template_id);
   const isScreen = presentation === "screen";
   const contextLine: string | null =
@@ -207,7 +182,7 @@ export function StepModal({
               padding: 0,
             }}
           >
-            Cancel
+            {t('common.cancel')}
           </button>
         </div>
         <p
@@ -524,6 +499,18 @@ interface TimerBodyProps {
 }
 
 function TimerBody({ kind, stepPayload, onDone, isRoomGuided = false, contextLine = null }: TimerBodyProps) {
+  const { t: tr } = useTranslation();
+  const heartPhases = [
+    tr('mitra.innerPath.heartPhase.rest'),
+    tr('mitra.innerPath.heartPhase.warmth'),
+    tr('mitra.innerPath.heartPhase.breathe'),
+  ];
+  const timerCompletionLines: Record<string, string> = {
+    timer_breathe: tr('mitra.innerPath.timerCompletion.breathe'),
+    timer_sit: tr('mitra.innerPath.timerCompletion.sit'),
+    timer_heart: tr('mitra.innerPath.timerCompletion.heart'),
+    timer_walk: tr('mitra.innerPath.timerCompletion.walk'),
+  };
   const totalSec = (() => {
     const raw = stepPayload?.duration_sec;
     if (typeof raw === "number" && raw > 0 && raw <= 3600) return raw;
@@ -567,7 +554,7 @@ function TimerBody({ kind, stepPayload, onDone, isRoomGuided = false, contextLin
   useEffect(() => {
     if (kind !== "timer_heart" || !running || !isRoomGuided) return;
     const t = setInterval(() => {
-      setHeartPhase((p) => Math.min(p + 1, HEART_PHASES.length - 1));
+      setHeartPhase((p) => Math.min(p + 1, HEART_PHASE_COUNT - 1));
     }, 10000);
     return () => clearInterval(t);
   }, [kind, running, isRoomGuided]);
@@ -596,7 +583,7 @@ function TimerBody({ kind, stepPayload, onDone, isRoomGuided = false, contextLin
   useEffect(() => {
     if (!atZero || !isRoomGuided || hasCompletedRef.current) return;
     hasCompletedRef.current = true;
-    const line = TIMER_COMPLETION_LINES[kind] ?? null;
+    const line = timerCompletionLines[kind] ?? null;
     if (line) setCompletionLineText(line);
   }, [atZero, isRoomGuided, kind]);
 
@@ -607,7 +594,7 @@ function TimerBody({ kind, stepPayload, onDone, isRoomGuided = false, contextLin
   const exhaleSec = Number(stepPayload?.step_config?.exhale ?? 6) || 6;
 
   const displayCue = (kind === "timer_heart" && isRoomGuided)
-    ? HEART_PHASES[heartPhase]
+    ? heartPhases[heartPhase]
     : baseCueText;
 
   return (
@@ -646,7 +633,7 @@ function TimerBody({ kind, stepPayload, onDone, isRoomGuided = false, contextLin
               cursor: "pointer",
             }}
           >
-            Continue
+            {tr('common.continue')}
           </button>
         </div>
       )}
@@ -660,7 +647,7 @@ function TimerBody({ kind, stepPayload, onDone, isRoomGuided = false, contextLin
         }}
         data-testid="step-modal-timer-cue"
       >
-        {preStartVisible ? "Let's begin gently…" : displayCue}
+        {preStartVisible ? tr('mitra.room.letsBeginGently') : displayCue}
       </p>
 
       {kind === "timer_breathe" ? (
@@ -742,7 +729,7 @@ function TimerBody({ kind, stepPayload, onDone, isRoomGuided = false, contextLin
               cursor: "pointer",
             }}
           >
-            Start
+            {tr('common.start')}
           </button>
         )}
         {running && (
@@ -760,7 +747,7 @@ function TimerBody({ kind, stepPayload, onDone, isRoomGuided = false, contextLin
               cursor: "pointer",
             }}
           >
-            {isRoomGuided ? "Rest" : "Pause"}
+            {isRoomGuided ? tr('common.rest') : tr('common.pause')}
           </button>
         )}
         <button
@@ -781,7 +768,7 @@ function TimerBody({ kind, stepPayload, onDone, isRoomGuided = false, contextLin
             cursor: "pointer",
           }}
         >
-          Done
+          {tr('common.done')}
         </button>
       </div>
     </div>
@@ -801,6 +788,7 @@ interface TextInputBodyProps {
 }
 
 function TextInputBody({ stepPayload, onDone }: TextInputBodyProps) {
+  const { t } = useTranslation();
   const mm = stepPayload?.memory_modal;
   const [text, setText] = useState("");
   const promptSlot = stepPayload?.step_config?.prompt_slot;
@@ -809,8 +797,8 @@ function TextInputBody({ stepPayload, onDone }: TextInputBodyProps) {
     (stepPayload?.prompt && String(stepPayload.prompt)) ||
     (typeof promptSlot === "string" && PROMPT_SLOT_TEXT[promptSlot]) ||
     "Take a moment and write what comes.";
-  const placeholderText = mm?.placeholder || "Type what you feel..";
-  const doneLabel = mm?.primary_label || "Done";
+  const placeholderText = mm?.placeholder || t('mitra.innerPath.typeWhatYouFeel');
+  const doneLabel = mm?.primary_label || t('common.done');
   const trimmed = text.trim();
   const enabled = trimmed.length >= 1;
 
@@ -923,7 +911,22 @@ function GroundingBody({
   isRoomGuided?: boolean;
   contextLine?: string | null;
 }) {
-  const prompts = isRoomGuided ? GROUNDING_PROMPTS_ROOM : GROUNDING_PROMPTS;
+  const { t } = useTranslation();
+  const groundingPrompts = [
+    t('mitra.innerPath.grounding.see5'),
+    t('mitra.innerPath.grounding.hear4'),
+    t('mitra.innerPath.grounding.feel3'),
+    t('mitra.innerPath.grounding.smell2'),
+    t('mitra.innerPath.grounding.taste1'),
+  ];
+  const groundingPromptsRoom = [
+    t('mitra.innerPath.grounding.roomSee'),
+    t('mitra.innerPath.grounding.roomHear'),
+    t('mitra.innerPath.grounding.roomFeel'),
+    t('mitra.innerPath.grounding.roomSmell'),
+    t('mitra.innerPath.grounding.roomTaste'),
+  ];
+  const prompts = isRoomGuided ? groundingPromptsRoom : groundingPrompts;
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<string[]>(["", "", "", "", ""]);
   const [closingText, setClosingText] = useState<string | null>(null);
@@ -947,7 +950,7 @@ function GroundingBody({
     if (isLast) {
       if (isRoomGuided && !hasCompletedRef.current) {
         hasCompletedRef.current = true;
-        setClosingText("Good. You are here.");
+        setClosingText(t('mitra.innerPath.goodYouAreHere'));
       } else if (!isRoomGuided) {
         onDone({ grounding: answers.map((a) => a.trim()) });
       }
@@ -980,7 +983,7 @@ function GroundingBody({
             cursor: "pointer",
           }}
         >
-          Continue
+          {t('common.continue')}
         </button>
       </div>
     );
@@ -994,7 +997,7 @@ function GroundingBody({
           fontSize: 15, fontStyle: "italic", color: "#8b7a55",
           textAlign: "center", marginBottom: 16, lineHeight: 1.5,
         }}>
-          Let us return to the room around you.
+          {t('mitra.innerPath.returnToRoom')}
         </p>
       )}
       {isRoomGuided && index === 0 && contextLine ? (
@@ -1011,7 +1014,9 @@ function GroundingBody({
           marginBottom: isScreen ? 18 : 8,
         }}
       >
-        {index + 1} of {prompts.length}
+        {t('mitra.innerPath.progressOf')
+          .replace('{current}', String(index + 1))
+          .replace('{total}', String(prompts.length))}
       </p>
       <p
         style={{
@@ -1031,7 +1036,7 @@ function GroundingBody({
         <textarea
           value={current}
           onChange={(e) => setCurrent(e.target.value)}
-          placeholder="Type what you feel.."
+          placeholder={t('mitra.innerPath.typeWhatYouFeel')}
           data-testid="step-modal-grounding-input"
           maxLength={MAX_TEXT}
           style={{
@@ -1074,7 +1079,7 @@ function GroundingBody({
           fontSize: 13, color: "#8b7a55", textAlign: "center",
           marginTop: 8, marginBottom: 4, fontStyle: "italic",
         }}>
-          or just notice quietly.
+          {t('mitra.innerPath.orNoticeQuietly')}
         </p>
       )}
       <button
@@ -1102,7 +1107,7 @@ function GroundingBody({
             : undefined,
         }}
       >
-        {isLast ? "Done" : "Next"}
+        {isLast ? t('common.done') : t('common.next')}
       </button>
     </div>
   );
@@ -1115,6 +1120,7 @@ function VoiceNoteBody({
 }: {
   onDone: (extra: StepModalResult) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div style={{ textAlign: "center", paddingTop: 20 }}>
       <p style={{ fontSize: 24, marginBottom: 12 }}>🎙</p>
@@ -1152,7 +1158,7 @@ function VoiceNoteBody({
           cursor: "pointer",
         }}
       >
-        Done
+        {t('common.done')}
       </button>
     </div>
   );
@@ -1165,6 +1171,7 @@ function ReachOutBody({
 }: {
   onDone: (extra: StepModalResult) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div style={{ textAlign: "center", paddingTop: 20 }}>
       <p style={{ fontSize: 24, marginBottom: 12 }}>🤝</p>
@@ -1202,7 +1209,7 @@ function ReachOutBody({
           cursor: "pointer",
         }}
       >
-        Done
+        {t('common.done')}
       </button>
     </div>
   );
@@ -1211,6 +1218,7 @@ function ReachOutBody({
 // ── Unknown / fallback body ───────────────────────────────────────────────────
 
 function UnknownBody({ onDone }: { onDone: (extra: StepModalResult) => void }) {
+  const { t } = useTranslation();
   return (
     <div style={{ textAlign: "center", paddingTop: 20 }}>
       <p style={{ fontSize: 16, color: "#3C3C43", marginBottom: 24 }}>
@@ -1230,7 +1238,7 @@ function UnknownBody({ onDone }: { onDone: (extra: StepModalResult) => void }) {
           cursor: "pointer",
         }}
       >
-        Done
+        {t('common.done')}
       </button>
     </div>
   );

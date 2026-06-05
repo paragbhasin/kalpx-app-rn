@@ -6,6 +6,7 @@
  *          in_room_step, in_room_carry, exit.
  */
 import React, { useState } from "react";
+import { useTranslation } from "../../../lib/i18n";
 import { postRoomSacred } from "../../../engine/mitraApi";
 import { CarryCaptureModal } from "./CarryCaptureModal";
 import { InquiryModal } from "./InquiryModal";
@@ -61,6 +62,7 @@ export function RoomActionPill({
   screenData = {},
   onAction,
 }: Props) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [done, setDone] = useState(false);
   const [stepSaved, setStepSaved] = useState(false);
@@ -313,7 +315,7 @@ export function RoomActionPill({
           color: "#D4A017",
         }}
       >
-        Carry with you
+        {t('common.carryWithYou')}
       </p>
       <p
         style={{
@@ -366,7 +368,7 @@ export function RoomActionPill({
             cursor: "pointer",
           }}
         >
-          Return home
+          {t('common.returnHome')}
         </button>
       </div>
     </div>
@@ -385,7 +387,7 @@ export function RoomActionPill({
         textAlign: "center",
       }}
     >
-      <p style={{ fontSize: 12, color: "#D4A017" }}>Carry with you</p>
+      <p style={{ fontSize: 12, color: "#D4A017" }}>{t('common.carryWithYou')}</p>
       <p
         style={{
           margin: "0 0 16px",
@@ -436,7 +438,7 @@ export function RoomActionPill({
             cursor: "pointer",
           }}
         >
-          Return home
+          {t('common.returnHome')}
         </button>
       </div>
     </div>
@@ -537,7 +539,7 @@ export function RoomActionPill({
                 textAlign: "center",
               }}
             >
-              Start here →
+              {t('common.startHere')}
             </span>
           )}
         </button>

@@ -6,6 +6,7 @@
  * apps/mobile/src/blocks/room/actions/RoomActionCarryPill.tsx
  */
 import { useEffect, useState } from "react";
+import { useTranslation } from "../../../lib/i18n";
 import { postRoomSacred } from "../../../engine/mitraApi";
 
 const MAX_TEXT = 1000;
@@ -350,6 +351,7 @@ export function CarryCaptureModal({
   showConfirmationTray = true,
   presentation = "modal",
 }: Props) {
+  const { t } = useTranslation();
   const [text, setText] = useState("");
   const [confirmation, setConfirmation] = useState<ConfirmationState>({
     visible: false,
@@ -472,7 +474,7 @@ export function CarryCaptureModal({
             data-testid="carry-capture-confirmation"
           >
             <p style={{ fontSize: 12, color: "#D4A017", margin: "0 0 4px" }}>
-              Carry with you
+              {t('common.carryWithYou')}
             </p>
             <p
               style={{
@@ -532,7 +534,7 @@ export function CarryCaptureModal({
                     cursor: "pointer",
                   }}
                 >
-                  Return home
+                  {t('common.returnHome')}
                 </button>
               )}
             </div>
@@ -582,7 +584,7 @@ export function CarryCaptureModal({
                     padding: 0,
                   }}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
               </div>
 
@@ -769,7 +771,7 @@ export function CarryCaptureModal({
                 }}
               >
                 <img src="/lotus_icon.png" alt="" width={22} height={18} />
-                {isSubmitting ? "Saving…" : copy.primary_label}
+                {isSubmitting ? t('common.saving') : copy.primary_label}
               </span>
             </button>
             <button
@@ -787,7 +789,7 @@ export function CarryCaptureModal({
                 cursor: "pointer",
               }}
             >
-              I&apos;ll go now
+              {t('mitra.room.illGoNow')}
             </button>
           </div>
         )}

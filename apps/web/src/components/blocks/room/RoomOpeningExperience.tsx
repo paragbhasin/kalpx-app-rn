@@ -1,3 +1,5 @@
+import { useTranslation } from '../../../lib/i18n';
+
 interface RoomContext {
   room_purpose_line?: string | null;
   sanatan_insight_line?: string | null;
@@ -25,6 +27,7 @@ export function RoomOpeningExperience({
   roomName,
   lifeContextLabel,
 }: Props) {
+  const { t } = useTranslation();
   const ctx = envelope.room_context;
   const hasHeader = !!(
     roomName ||
@@ -90,7 +93,7 @@ export function RoomOpeningExperience({
             marginTop: 10,
           }}
         >
-          {`You chose: ${lifeContextLabel}`}
+          {`${t('mitra.room.youChose')} ${lifeContextLabel}`}
         </p>
       )}
 

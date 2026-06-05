@@ -4,6 +4,7 @@
  */
 import React, { useEffect } from 'react';
 import { ChevronRight } from 'lucide-react';
+import { useTranslation } from '../../../lib/i18n';
 
 interface RoomRow {
   room_id: string;
@@ -29,6 +30,7 @@ interface Props {
 }
 
 export function RoomEntrySheet({ onEnterRoom, onClose }: Props) {
+  const { t } = useTranslation();
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -76,7 +78,7 @@ export function RoomEntrySheet({ onEnterRoom, onClose }: Props) {
           letterSpacing: 0.2,
           marginBottom: 14,
         }}>
-          More ways to be supported
+          {t('mitra.room.moreWaysToBeSupported')}
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -128,7 +130,7 @@ export function RoomEntrySheet({ onEnterRoom, onClose }: Props) {
             padding: '8px 0',
           }}
         >
-          Close
+          {t('common.close')}
         </button>
       </div>
     </div>

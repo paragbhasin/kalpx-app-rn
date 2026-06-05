@@ -2768,5 +2768,27 @@
   "voiceFork": {
     "speakWithMe": "నాతో మాట్లాడండి",
     "keepItWritten": "రాసి ఉంచండి"
+  },
+  "libraryModal": {
+    "title": "గ్రంథాలయం నుండి జోడించండి",
+    "typeAll": "అన్నీ",
+    "typeMantra": "మంత్రం",
+    "typeSankalp": "సంకల్పం",
+    "typePractice": "అభ్యాసం",
+    "searchPlaceholder": "వెతకండి...",
+    "searchBtn": "వెతకండి",
+    "searching": "వెతుకుతోంది...",
+    "emptyHint": "వెతకడానికి కనీసం 2 అక్షరాలు టైప్ చేయండి.",
+    "noResults": "ఫలితాలు కనుగొనలేదు. వేరే విధంగా వెతకండి.",
+    "inCore": "ప్రధానంలో ఉంది",
+    "added": "జోడించబడింది",
+    "add": "జోడించు",
+    "select": "ఎంచుకోండి",
+    "badgeMantra": "మంత్రం",
+    "badgeSankalp": "సంకల్పం",
+    "badgePractice": "అభ్యాసం",
+    "levelBeginner": "ప్రారంభ",
+    "levelIntermediate": "మధ్యస్థ",
+    "levelAdvanced": "అధునాతన"
   }
 }

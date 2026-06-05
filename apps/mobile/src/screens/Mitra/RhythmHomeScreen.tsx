@@ -248,6 +248,17 @@ export default function RhythmHomeScreen({
 
   const screenBridge = useScreenStore();
   const screenBridgeRef = useRef(screenBridge);
+
+  // Re-fetch homeData when locale changes so item titles update in the new language
+  const homeLocaleRef = useRef(i18n.language);
+  useEffect(() => {
+    const prev = homeLocaleRef.current;
+    homeLocaleRef.current = i18n.language;
+    if (i18n.language === prev) return;
+    mitraJourneyHomeV3({ forceFresh: true, locale: i18n.language || 'en' })
+      .then((fresh) => { if (fresh) dispatch(setHomeData(fresh)); })
+      .catch(() => {});
+  }, [i18n.language, dispatch]);
   useEffect(() => {
     screenBridgeRef.current = screenBridge;
   });

@@ -1,4 +1,3 @@
-import { RHYTHM_BAND_LABELS } from "@kalpx/contracts";
 import type { RhythmItem, RhythmSlot, RhythmTimeBand } from "@kalpx/types";
 import { Clock3, Pencil, Sparkles } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
@@ -403,6 +402,17 @@ export function RhythmHomePage() {
       .catch(() => setError("Could not load your rhythm."))
       .finally(() => setLoading(false));
   }, [homeData, dispatch]);
+
+  // Re-fetch with new locale so item title_snapshots update when language changes
+  useEffect(() => {
+    function onLocaleChange() {
+      getMitraHomeV3({ forceFresh: true })
+        .then((d) => { if (d) dispatch(setHomeData(d)); })
+        .catch(() => {});
+    }
+    window.addEventListener('kalpx:locale-changed', onLocaleChange);
+    return () => window.removeEventListener('kalpx:locale-changed', onLocaleChange);
+  }, [dispatch]);
 
   const rhythm = homeData?.companion_rhythm;
   const visibleRhythmBands = rhythm

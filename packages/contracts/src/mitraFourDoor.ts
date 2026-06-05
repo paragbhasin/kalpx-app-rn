@@ -70,6 +70,18 @@ export const RHYTHM_BAND_SUBTITLES_HI: Record<RhythmTimeBand, string> = {
   night: "शरणागति — दिन ने जो थामा उसे अर्पित करना",
 };
 
+export const RHYTHM_BAND_LABELS_TE: Record<RhythmTimeBand, string> = {
+  morning: "ఉదయం",
+  afternoon: "మధ్యాహ్నం",
+  night: "రాత్రి",
+};
+
+export const RHYTHM_BAND_SUBTITLES_TE: Record<RhythmTimeBand, string> = {
+  morning: "స్మృతి — రోజు మొదలు కాకముందే తనను తాను గుర్తు చేసుకోవడం",
+  afternoon: "కర్మ యోగం — అన్నిటి మధ్య ఒక చిన్న తిరుగుదల",
+  night: "శరణాగతి — రోజు ఏమి కలిగించిందో అది సమర్పించడం",
+};
+
 export const RHYTHM_ITEM_TYPE_LABELS: Record<RhythmItemType, string> = {
   mantra: "Mantra",
   sankalp: "Sankalp",

@@ -1,8 +1,7 @@
-import { RHYTHM_BAND_LABELS, RHYTHM_BAND_SUBTITLES } from "@kalpx/contracts";
 import { Fonts } from "@kalpx/design-tokens/src/fonts";
 import type { RhythmTimeBand } from "@kalpx/types";
 import { ChevronDown, ChevronUp, Plus, Sparkles } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
@@ -107,6 +106,31 @@ export function RhythmSetupPage() {
         | "later") ?? null,
     [],
   );
+
+  // Re-fetch homeData and re-seed bandItems when locale changes
+  useEffect(() => {
+    function onLocaleChange() {
+      getMitraHomeV3({ forceFresh: true }).then((data) => {
+        if (data) {
+          dispatch(setHomeData(data));
+          // Preserve items added this session that haven't been saved to DB yet
+          setBandItems((prev) => {
+            const fresh = seedBandItems(data);
+            for (const band of BANDS) {
+              const freshIds = new Set(fresh[band].map((i) => i.item_id));
+              const newlyAdded = prev[band].filter((i) => !freshIds.has(i.item_id));
+              if (newlyAdded.length > 0) {
+                fresh[band] = [...fresh[band], ...newlyAdded];
+              }
+            }
+            return fresh;
+          });
+        }
+      }).catch(() => {});
+    }
+    window.addEventListener('kalpx:locale-changed', onLocaleChange);
+    return () => window.removeEventListener('kalpx:locale-changed', onLocaleChange);
+  }, [dispatch]);
 
   function updateItemField(
     band: RhythmTimeBand,
@@ -415,7 +439,7 @@ export function RhythmSetupPage() {
                     {band === 'morning' ? t('mitra.rhythmSetup.morning') : band === 'afternoon' ? t('mitra.rhythmSetup.afternoon') : t('mitra.rhythmSetup.night')}
                   </div>
                   <div className="rhythm-setup-band-subtitle" style={{ fontSize: 14, color: "#7B6550" }}>
-                    {RHYTHM_BAND_SUBTITLES[band]}
+                    {band === 'morning' ? t('mitra.rhythmSetup.morningSubtitle') : band === 'afternoon' ? t('mitra.rhythmSetup.afternoonSubtitle') : t('mitra.rhythmSetup.nightSubtitle')}
                   </div>
                 </div>
                 <span
@@ -475,7 +499,7 @@ export function RhythmSetupPage() {
                               {item.title_snapshot}
                             </div>
                             <div className="rhythm-setup-item-type" style={{ fontSize: 12, color: "#432104" }}>
-                              {item.item_type}
+                              {item.item_type === 'mantra' ? t('mitra.innerPath.mantra') : item.item_type === 'sankalp' ? t('mitra.innerPath.sankalp') : item.item_type === 'practice' ? t('mitra.innerPath.practice') : item.item_type}
                             </div>
                           </div>
                           <button

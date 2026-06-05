@@ -1,5 +1,6 @@
 import type { RhythmTimeBand, RhythmItemType } from "@kalpx/types";
 import { useCallback, useState } from "react";
+import { useTranslation } from "../../lib/i18n";
 import { searchLibraryItems } from "../../engine/mitraApi";
 
 interface LibraryItem {
@@ -27,15 +28,10 @@ interface Props {
   nextSortOrder: number;
 }
 
-const ITEM_TYPES: { label: string; value: RhythmItemType }[] = [
-  { label: "Mantra", value: "mantra" },
-  { label: "Sankalp", value: "sankalp" },
-  { label: "Practice", value: "practice" },
-  { label: "Reflection", value: "reflection" },
-  { label: "Library", value: "library" },
-];
+const ITEM_TYPE_VALUES: RhythmItemType[] = ["mantra", "sankalp", "practice", "reflection", "library"];
 
 export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder }: Props) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<RhythmItemType>("mantra");
   const [results, setResults] = useState<LibraryItem[]>([]);
@@ -95,27 +91,27 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
           <span style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 18, color: "#432104" }}>
-            Add from Library
+            {t("mitra.rhythmSetup.libraryModal.title")}
           </span>
           <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#7B6550" }}>✕</button>
         </div>
 
         <div style={{ display: "flex", gap: 6, marginBottom: 12, flexWrap: "wrap" }}>
-          {ITEM_TYPES.map((t) => (
+          {ITEM_TYPE_VALUES.map((val) => (
             <button
-              key={t.value}
-              onClick={() => setTypeFilter(t.value)}
+              key={val}
+              onClick={() => setTypeFilter(val)}
               style={{
                 padding: "4px 12px",
                 borderRadius: 20,
                 border: "1px solid rgba(201,168,76,0.4)",
-                background: typeFilter === t.value ? "rgba(201,168,76,0.2)" : "transparent",
+                background: typeFilter === val ? "rgba(201,168,76,0.2)" : "transparent",
                 color: "#432104",
                 fontSize: 13,
                 cursor: "pointer",
               }}
             >
-              {t.label}
+              {t(`mitra.rhythmSetup.libraryModal.type_${val}`)}
             </button>
           ))}
         </div>
@@ -125,7 +121,7 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") void search(); }}
-            placeholder="Search…"
+            placeholder={t("mitra.rhythmSetup.libraryModal.searchPlaceholder")}
             style={{
               flex: 1,
               padding: "10px 14px",
@@ -152,12 +148,12 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
               cursor: "pointer",
             }}
           >
-            {searching ? "…" : "Search"}
+            {searching ? "…" : t("mitra.rhythmSetup.libraryModal.searchBtn")}
           </button>
         </div>
 
         {results.length === 0 && !searching && query && (
-          <p style={{ color: "#A08060", textAlign: "center", fontSize: 14 }}>No results</p>
+          <p style={{ color: "#A08060", textAlign: "center", fontSize: 14 }}>{t("mitra.rhythmSetup.libraryModal.noResults")}</p>
         )}
 
         {results.map((item) => (

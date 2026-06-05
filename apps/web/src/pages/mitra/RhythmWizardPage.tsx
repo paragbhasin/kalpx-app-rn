@@ -163,20 +163,6 @@ function getRhythmTimeBand(): RhythmTimeBand {
   return "night";
 }
 
-function itemTypeLabel(t: string): string {
-  if (t === "mantra") return "Mantra";
-  if (t === "sankalp") return "Sankalp";
-  if (t === "practice") return "Practice";
-  if (t === "reflection") return "Reflection";
-  return "Library";
-}
-
-function beginLabel(itemType: string): string {
-  if (itemType === "mantra") return "Begin Chanting";
-  if (itemType === "sankalp") return "Begin Embodying";
-  return "Begin Practice";
-}
-
 function sortBands(bands: RhythmTimeBand[]): RhythmTimeBand[] {
   return BANDS.filter((band) => bands.includes(band));
 }
@@ -259,6 +245,20 @@ export function RhythmWizardPage() {
     homeData?.user_surface_state?.has_inner_path === true;
   const wizardBackTarget =
     isEditMode || hasExistingRhythm ? "/en/mitra/rhythm" : "/en/mitra";
+
+  function itemTypeLabel(type: string): string {
+    if (type === "mantra") return t('mitra.innerPath.mantra');
+    if (type === "sankalp") return t('mitra.innerPath.sankalp');
+    if (type === "practice") return t('mitra.innerPath.practice');
+    if (type === "reflection") return t('mitra.rhythmWizard.purposeReflection');
+    return type;
+  }
+
+  function beginLabel(itemType: string): string {
+    if (itemType === "mantra") return t('mitra.rhythmHome.beginChanting');
+    if (itemType === "sankalp") return t('mitra.rhythmHome.beginEmbodying');
+    return t('mitra.rhythmHome.beginPractice');
+  }
 
   const MOMENT_LABEL: Record<RhythmTimeBand, string> = {
     morning: t('mitra.rhythmWizard.morning'),
@@ -1187,8 +1187,8 @@ export function RhythmWizardPage() {
                     }}
                   >
                     {isEditMode
-                      ? "Change any item or keep it as it is."
-                      : "Each practice fits the purpose you chose. You can change any of them."}
+                      ? t('mitra.rhythmWizard.changeAny')
+                      : t('mitra.rhythmWizard.eachFits')}
                   </p>
 
                   {suggestLoading && (

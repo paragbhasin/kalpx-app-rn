@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   FlatList,
@@ -45,6 +46,7 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
   mode,
   onItemSelected,
 }) => {
+  const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState<LibraryItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -61,11 +63,12 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
 
       setLoading(true);
       try {
+        const lang = i18n.language || "en";
         if (selectedType === "all") {
           const [mantras, sankalps, practices] = await Promise.allSettled([
-            mitraLibrarySearch(query, "mantra"),
-            mitraLibrarySearch(query, "sankalp"),
-            mitraLibrarySearch(query, "practice"),
+            mitraLibrarySearch(query, "mantra", lang),
+            mitraLibrarySearch(query, "sankalp", lang),
+            mitraLibrarySearch(query, "practice", lang),
           ]);
           const merged: LibraryItem[] = [
             ...(mantras.status === "fulfilled"
@@ -83,7 +86,7 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
           const effectiveType = ["mantra", "sankalp", "practice"].includes(selectedType)
             ? selectedType
             : "practice";
-          const res = await mitraLibrarySearch(query, effectiveType);
+          const res = await mitraLibrarySearch(query, effectiveType, lang);
           setResults(
             (res?.results || []).map((item: any) => ({ ...item, _type: effectiveType })),
           );
@@ -155,14 +158,20 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
     }
   };
 
+  const TYPE_BADGE_LABELS: Record<string, string> = {
+    mantra: t("libraryModal.badgeMantra"),
+    sankalp: t("libraryModal.badgeSankalp"),
+    practice: t("libraryModal.badgePractice"),
+  };
+
   const getLevelLabel = (item: any) => {
     const level = String(item.level || "")
       .trim()
       .toLowerCase();
-    if (level === "beginner") return "Beginner";
-    if (level === "intermediate") return "Intermediate";
-    if (level === "advanced") return "Advanced";
-    return item.beginnerSafe ? "Beginner" : "";
+    if (level === "beginner") return t("libraryModal.levelBeginner");
+    if (level === "intermediate") return t("libraryModal.levelIntermediate");
+    if (level === "advanced") return t("libraryModal.levelAdvanced");
+    return item.beginnerSafe ? t("libraryModal.levelBeginner") : "";
   };
 
   const getLevelStyle = (item: any) => {
@@ -192,7 +201,7 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
             <View style={styles.handle} />
 
             <View style={styles.header}>
-              <Text style={styles.headerTitle}>Add from Library</Text>
+              <Text style={styles.headerTitle}>{t("libraryModal.title")}</Text>
               <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
                 <Ionicons name="close" size={28} color="#958b80" />
               </TouchableOpacity>
@@ -200,10 +209,10 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
 
             <View style={styles.typeWrap}>
               {[
-                { label: "All", value: "all" },
-                { label: "Mantra", value: "mantra" },
-                { label: "Sankalp", value: "sankalp" },
-                { label: "Practice", value: "practice" },
+                { label: t("libraryModal.typeAll"), value: "all" },
+                { label: t("libraryModal.typeMantra"), value: "mantra" },
+                { label: t("libraryModal.typeSankalp"), value: "sankalp" },
+                { label: t("libraryModal.typePractice"), value: "practice" },
               ].map((type) => {
                 const active = selectedType === type.value;
                 return (
@@ -231,7 +240,7 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
                 <TextInput
                   ref={inputRef}
                   style={styles.searchInput}
-                  placeholder="Search..."
+                  placeholder={t("libraryModal.searchPlaceholder")}
                   placeholderTextColor="#a39b93"
                   value={searchQuery}
                   onChangeText={setSearchQuery}
@@ -246,14 +255,14 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
                 activeOpacity={0.85}
                 style={styles.searchBtn}
               >
-                <Text style={styles.searchBtnText}>Search</Text>
+                <Text style={styles.searchBtnText}>{t("libraryModal.searchBtn")}</Text>
               </TouchableOpacity>
             </View>
 
             {loading ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#d4a017" />
-                <Text style={styles.searchingText}>Searching...</Text>
+                <Text style={styles.searchingText}>{t("libraryModal.searching")}</Text>
               </View>
             ) : (
               <FlatList
@@ -266,11 +275,11 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
                 ListEmptyComponent={
                   searchQuery.length >= 2 ? (
                     <Text style={styles.emptyText}>
-                      No results found. Try a different search.
+                      {t("libraryModal.noResults")}
                     </Text>
                   ) : (
                     <Text style={styles.emptyText}>
-                      Type at least 2 characters to search.
+                      {t("libraryModal.emptyHint")}
                     </Text>
                   )
                 }
@@ -285,7 +294,7 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
                     <View style={styles.itemInfo}>
                       <View style={styles.badgeRow}>
                         <Text style={styles.itemTypeBadge}>
-                          {item._type || item.itemType}
+                          {TYPE_BADGE_LABELS[item._type || item.itemType] || (item._type || item.itemType)}
                         </Text>
                         {Boolean(getLevelLabel(item)) && (
                           <Text
@@ -316,9 +325,9 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
 
                     <View style={styles.actionWrap}>
                       {item.alreadyInCore ? (
-                        <Text style={styles.statusText}>In core</Text>
+                        <Text style={styles.statusText}>{t("libraryModal.inCore")}</Text>
                       ) : item.alreadyAdded ? (
-                        <Text style={styles.statusText}>Added</Text>
+                        <Text style={styles.statusText}>{t("libraryModal.added")}</Text>
                       ) : (
                         <TouchableOpacity
                           style={styles.addBtn}
@@ -329,7 +338,7 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
                             <ActivityIndicator size="small" color="#d4a017" />
                           ) : (
                             <Text style={styles.addBtnText}>
-                              {mode === "select_for_rhythm" ? "Select" : "Add"}
+                              {mode === "select_for_rhythm" ? t("libraryModal.select") : t("libraryModal.add")}
                             </Text>
                           )}
                         </TouchableOpacity>

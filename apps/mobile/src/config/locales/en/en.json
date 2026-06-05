@@ -2768,5 +2768,27 @@
     "back": "Back",
     "adding": "Adding...",
     "addToMyPractice": "Add to My Practice"
+  },
+  "libraryModal": {
+    "title": "Add from Library",
+    "typeAll": "All",
+    "typeMantra": "Mantra",
+    "typeSankalp": "Sankalp",
+    "typePractice": "Practice",
+    "searchPlaceholder": "Search...",
+    "searchBtn": "Search",
+    "searching": "Searching...",
+    "emptyHint": "Type at least 2 characters to search.",
+    "noResults": "No results found. Try a different search.",
+    "inCore": "In core",
+    "added": "Added",
+    "add": "Add",
+    "select": "Select",
+    "badgeMantra": "Mantra",
+    "badgeSankalp": "Sankalp",
+    "badgePractice": "Practice",
+    "levelBeginner": "Beginner",
+    "levelIntermediate": "Intermediate",
+    "levelAdvanced": "Advanced"
   }
 }

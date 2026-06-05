@@ -2740,5 +2740,27 @@
     "back": "वापस",
     "adding": "जोड़ रहे हैं...",
     "addToMyPractice": "मेरे अभ्यास में जोड़ें"
+  },
+  "libraryModal": {
+    "title": "पुस्तकालय से जोड़ें",
+    "typeAll": "सभी",
+    "typeMantra": "मंत्र",
+    "typeSankalp": "संकल्प",
+    "typePractice": "अभ्यास",
+    "searchPlaceholder": "खोजें...",
+    "searchBtn": "खोजें",
+    "searching": "खोज रहे हैं...",
+    "emptyHint": "खोजने के लिए कम से कम 2 अक्षर टाइप करें।",
+    "noResults": "कोई परिणाम नहीं मिला। कुछ और खोजें।",
+    "inCore": "मूल में है",
+    "added": "जोड़ा गया",
+    "add": "जोड़ें",
+    "select": "चुनें",
+    "badgeMantra": "मंत्र",
+    "badgeSankalp": "संकल्प",
+    "badgePractice": "अभ्यास",
+    "levelBeginner": "शुरुआती",
+    "levelIntermediate": "मध्यम",
+    "levelAdvanced": "उन्नत"
   }
 }

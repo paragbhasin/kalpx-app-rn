@@ -603,10 +603,11 @@ export async function mitraRemoveAdditionalItem(
 export async function mitraLibrarySearch(
   query: string,
   itemType?: string,
+  locale?: string,
 ): Promise<any> {
   try {
     const res = await api.get("mitra/library/search/", {
-      params: { q: query, itemType, limit: 5 },
+      params: { q: query, itemType, limit: 5, locale: locale || "en" },
     });
     return res.data;
   } catch (err: any) {

@@ -12,8 +12,10 @@ import {
   getMissingSuggestionSlots,
   RHYTHM_BAND_LABELS,
   RHYTHM_BAND_LABELS_HI,
+  RHYTHM_BAND_LABELS_TE,
   RHYTHM_BAND_SUBTITLES,
   RHYTHM_BAND_SUBTITLES_HI,
+  RHYTHM_BAND_SUBTITLES_TE,
   RHYTHM_SUGGEST_COPY,
   RHYTHM_SUGGEST_COPY_HI,
   rhythmSuggestItemToLocalItem,
@@ -400,9 +402,11 @@ export default function RhythmSetupScreen({
 }) {
   const { t, i18n } = useTranslation();
   const isHindi = i18n.language === "hi";
+  const isTelugu = i18n.language === "te";
+  const isIndic = isHindi || isTelugu;
   const rhythmSuggestCopy = isHindi ? RHYTHM_SUGGEST_COPY_HI : RHYTHM_SUGGEST_COPY;
-  const rhythmBandLabels = isHindi ? RHYTHM_BAND_LABELS_HI : RHYTHM_BAND_LABELS;
-  const rhythmBandSubtitles = isHindi ? RHYTHM_BAND_SUBTITLES_HI : RHYTHM_BAND_SUBTITLES;
+  const rhythmBandLabels = isHindi ? RHYTHM_BAND_LABELS_HI : isTelugu ? RHYTHM_BAND_LABELS_TE : RHYTHM_BAND_LABELS;
+  const rhythmBandSubtitles = isHindi ? RHYTHM_BAND_SUBTITLES_HI : isTelugu ? RHYTHM_BAND_SUBTITLES_TE : RHYTHM_BAND_SUBTITLES;
   const itemTypeLabelLocalized = (type: string) =>
     t(`rhythmSetup.itemType.${type}`, { defaultValue: "Library" });
   const dispatch = useDispatch();
@@ -1610,7 +1614,7 @@ export default function RhythmSetupScreen({
                     <Text style={styles.bandLabel}>
                       {rhythmBandLabels[band]}
                     </Text>
-                    <Text style={[styles.bandSubtitle, isHindi && { letterSpacing: 0 }]}>
+                    <Text style={[styles.bandSubtitle, isIndic && { letterSpacing: 0 }]}>
                       {rhythmBandSubtitles[band]}
                     </Text>
                   </View>
@@ -1630,7 +1634,7 @@ export default function RhythmSetupScreen({
                           {/* Item info */}
                           <View style={styles.addedItemInfo}>
                             <Text style={styles.addedItemType}>
-                              {item.item_type}
+                              {itemTypeLabelLocalized(item.item_type)}
                             </Text>
                             <Text style={styles.addedItemTitle}>
                               {item.title}
@@ -1730,7 +1734,7 @@ export default function RhythmSetupScreen({
                                     activeOpacity={0.7}
                                   >
                                     <Text style={styles.moveSlotPillText}>
-                                      {t("rhythmSetup.moveTo", { band: s })}
+                                      {t("rhythmSetup.moveTo", { band: rhythmBandLabels[s] })}
                                     </Text>
                                   </TouchableOpacity>
                                 ))}

@@ -469,7 +469,7 @@ export function TellMitraThreadView({
           </button>
         </div>
         <p style={{ margin: "8px 0 0", fontSize: 11, color: "#A08060", lineHeight: 1.55, textAlign: "center", fontFamily: "var(--kalpx-font-sans)" }}>
-          Mitra is here for reflection and Sanatan-rooted guidance. It is not a substitute for medical, legal, financial, therapy, crisis, or emergency support. Share only what you feel comfortable sharing.
+          {t('mitra.tellMitra.disclaimer')}
         </p>
         </div>
       </div>

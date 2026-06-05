@@ -41,8 +41,10 @@ import { useTranslation } from "react-i18next";
 import i18n from "../../config/i18n";
 import { useDispatch, useSelector } from "react-redux";
 import FourDoorHomeContainer from "../../containers/FourDoorHomeContainer";
-import { getLiveActivityState } from "../../engine/mitraApi";
+import { getLiveActivityState, getQuickResetOpening } from "../../engine/mitraApi";
 import { liveActivity } from "../../native/liveActivity";
+import { watchConnectivity } from "../../native/watchConnectivity";
+import { handleWatchMessage } from "../../engine/watchSyncHandler";
 import { stopRoomAmbientAudio } from "../../engine/roomAmbientAudio";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import api from "../../Networks/axios";
@@ -53,6 +55,63 @@ import { registerDeviceToBackend } from "../../utils/registerDevice";
 import { consumeSkipMitraStart } from "../../utils/postLoginGuard";
 import { fetchProfileDetails } from "../Profile/actions";
 import { rfs, rhPad, rs, TABLET_MAX_CARD_WIDTH } from "../../utils/responsive";
+
+// Collects Inner Path mantra + Rhythm mantras + default Quick Reset mantra
+// and pushes them to Watch via WatchConnectivity.
+async function pushMantrasToWatch() {
+  try {
+    const homeData = store.getState().door?.homeData;
+    const mantras: { ref: string; name: string; devanagari: string; label?: string }[] = [];
+
+    // 1. Inner Path mantra — from quick reset opening (user's current default)
+    const opening = await getQuickResetOpening();
+    if (opening?.mantra) {
+      mantras.push({
+        ref:        opening.mantra.item_id,
+        name:       opening.mantra.title,
+        devanagari: opening.mantra.devanagari,
+        label:      'inner_path',
+      });
+    }
+
+    // 2. Daily Rhythm mantras — morning / afternoon / night
+    const rhythm = homeData?.companion_rhythm;
+    if (rhythm) {
+      const slots = [
+        { slot: rhythm.morning,   label: 'Morning' },
+        { slot: rhythm.afternoon, label: 'Afternoon' },
+        { slot: rhythm.night,     label: 'Night' },
+      ];
+      for (const { slot, label } of slots) {
+        const mantraItems = (slot?.items ?? []).filter(
+          (item: any) => item.item_type === 'mantra'
+        );
+        for (const item of mantraItems) {
+          if (!mantras.find((m) => m.ref === item.item_id)) {
+            mantras.push({
+              ref:        item.item_id,
+              name:       item.title_snapshot,
+              devanagari: '',   // Rhythm items don't carry devanagari — Watch shows name only
+              label,
+            });
+          }
+        }
+      }
+    }
+
+    if (mantras.length > 0) {
+      // applicationContext: works without isWatchAppInstalled, simulator + device
+      watchConnectivity.pushMantrasViaContext(mantras);
+      // app group: for device (shared container) + Watch reads on every launch
+      watchConnectivity.writeMantrasToAppGroup(mantras);
+      // live message if Watch is open and reachable
+      watchConnectivity.sendToWatch({ type: 'mantra_list', mantras });
+      console.log('[WatchMantra] pushed', mantras.length, 'mantras to Watch');
+    }
+  } catch (err) {
+    console.warn('[WatchMantra] push failed:', err);
+  }
+}
 
 const FEATURE_ITEMS = [
   {
@@ -92,6 +151,7 @@ export default function Home() {
     (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
   );
   const isLoggedIn = !!user;
+  const homeData = useSelector((state: RootState) => (state as any).door?.homeData);
   const profileNameFromRedux = useSelector(
     (state: RootState) =>
       state.profileDetailsReducer?.data?.profile?.profile_name,
@@ -120,6 +180,29 @@ export default function Home() {
       if (name) setProfileNameFromStorage(name);
     });
   }, []);
+
+  // Activate WCSession once on mount so Watch messages are received
+  // even when the app is backgrounded.
+  useEffect(() => {
+    watchConnectivity.setup();
+    const sub = watchConnectivity.onWatchMessage((msg) => {
+      console.log('[Watch→iPhone]', msg);
+      handleWatchMessage(msg).catch((err) =>
+        console.warn('[WatchSync] handler error:', err)
+      );
+    });
+    return () => sub.remove();
+  }, []);
+
+  // Push mantras to Watch when login state changes
+  useEffect(() => {
+    if (isLoggedIn) pushMantrasToWatch();
+  }, [isLoggedIn]);
+
+  // Push mantras to Watch when homeData loads (rhythm + inner path now available)
+  useEffect(() => {
+    if (isLoggedIn && homeData) pushMantrasToWatch();
+  }, [homeData]);
 
   const HOME_BACKGROUND = require("../../../assets/new_home.webp");
   const CONTINUE_BG = require("../../../assets/beige_bg.webp");

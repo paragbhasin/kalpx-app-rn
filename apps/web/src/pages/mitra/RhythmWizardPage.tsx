@@ -378,6 +378,36 @@ export function RhythmWizardPage() {
     const prev = localeRef.current;
     localeRef.current = locale;
     if (prev === locale) return;
+
+    if (step === "confirmation") {
+      getMitraHomeV3({ forceFresh: true }).then((fresh) => {
+        if (!fresh) return;
+        dispatch(setHomeData(fresh));
+        const cr = fresh.companion_rhythm;
+        if (!cr?.has_rhythm) return;
+        const newItems: Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>> = {};
+        BANDS.forEach((band, idx) => {
+          const slot = cr[band];
+          if (slot?.items?.length) {
+            const itm = slot.items[0];
+            newItems[band] = {
+              slot: band,
+              item_type: itm.item_type as RhythmWizardLocalItem["item_type"],
+              item_id: itm.item_id,
+              title_snapshot: itm.title_snapshot,
+              description_snapshot: itm.description_snapshot ?? null,
+              source: (itm.source as RhythmWizardLocalItem["source"]) ?? "user_chosen",
+              sort_order: itm.sort_order ?? idx,
+              reminder_enabled: itm.reminder_enabled ?? false,
+              reminder_time: itm.reminder_time ?? null,
+            };
+          }
+        });
+        if (Object.keys(newItems).length) setItems(newItems);
+      }).catch(() => {});
+      return;
+    }
+
     if (step !== "suggestion" || isEditMode || !suggestionsLoaded) return;
     const pinned = (Object.entries(items) as [RhythmTimeBand, RhythmWizardLocalItem | undefined][])
       .filter(([, it]) => it)

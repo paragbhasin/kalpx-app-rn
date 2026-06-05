@@ -640,7 +640,39 @@ export default function RhythmSetupScreen({
   useEffect(() => {
     const prevLocale = localeRef.current;
     localeRef.current = i18n.language;
-    if (wizardStep !== "suggestion" || i18n.language === prevLocale) return;
+    if (i18n.language === prevLocale) return;
+
+    if (wizardStep === "confirmation") {
+      mitraJourneyHomeV3({ forceFresh: true, locale: i18n.language || 'en' })
+        .then((fresh) => {
+          if (!fresh) return;
+          dispatch(setHomeData(fresh));
+          const cr = fresh.companion_rhythm;
+          if (!cr?.has_rhythm) return;
+          const newItems: Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>> = {};
+          BANDS.forEach((band, idx) => {
+            const slot = (cr as any)[band];
+            if (slot?.items?.length) {
+              const itm = slot.items[0];
+              newItems[band as RhythmTimeBand] = {
+                slot: band as RhythmTimeBand,
+                item_type: itm.item_type as RhythmWizardLocalItem["item_type"],
+                item_id: itm.item_id,
+                title_snapshot: itm.title_snapshot,
+                description_snapshot: itm.description_snapshot ?? null,
+                source: (itm.source as RhythmWizardLocalItem["source"]) ?? "user_chosen",
+                sort_order: itm.sort_order ?? idx,
+                reminder_enabled: itm.reminder_enabled ?? false,
+                reminder_time: itm.reminder_time ?? null,
+              };
+            }
+          });
+          if (Object.keys(newItems).length) setWizardItems(newItems);
+        }).catch(() => {});
+      return;
+    }
+
+    if (wizardStep !== "suggestion") return;
     const pinned = Object.entries(wizardItems)
       .map(([slot, it]) => it ? { slot, item_id: it.item_id, item_type: it.item_type } : null)
       .filter(Boolean) as { slot: string; item_id: string; item_type: string }[];

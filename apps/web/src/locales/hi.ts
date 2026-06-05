@@ -561,6 +561,7 @@ export const hi = {
       notAvailable: 'यह स्थान अभी उपलब्ध नहीं है।',
       returnDashboard: 'डैशबोर्ड पर लौटें',
       returnMitraHome: 'मित्र होम पर लौटें',
+      mitraSuggestsBeginningWith: 'मित्र इससे शुरू करने का सुझाव देता है',
     },
     tellMitra: {
       placeholder: 'आपके मन में क्या है?',

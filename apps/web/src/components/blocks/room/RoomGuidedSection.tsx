@@ -2,10 +2,11 @@
  * RoomGuidedSection — guided room layout with hero content, begin CTA,
  * expandable wisdom card, and access to the full room step list.
  */
-import { ROOM_GUIDED_COPY } from "@kalpx/contracts";
+import { ROOM_GUIDED_COPY, ROOM_GUIDED_COPY_HI } from "@kalpx/contracts";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { postRoomSacred, postRoomTelemetry } from "../../../engine/mitraApi";
+import { useTranslation } from "../../../lib/i18n";
 import { WEB_ENV } from "../../../lib/env";
 import { CarryCaptureModal } from "./CarryCaptureModal";
 import { InquiryModal } from "./InquiryModal";
@@ -112,6 +113,9 @@ export function RoomGuidedSection({
   onAction,
   isDesktop = false,
 }: Props) {
+  const { t, locale } = useTranslation();
+  const isHindi = locale === 'hi';
+  const copy = isHindi ? ROOM_GUIDED_COPY_HI : ROOM_GUIDED_COPY;
   const ctx = envelope.room_context?.entry_context ?? {};
   const roomCtx = envelope.room_context ?? {};
   const recId: string | null = ctx.recommended_first_action_id ?? null;
@@ -746,7 +750,7 @@ export function RoomGuidedSection({
                       marginBottom: 10,
                     }}
                   >
-                    Mitra suggests beginning with
+                    {t('mitra.room.mitraSuggestsBeginningWith')}
                   </p>
                   <p
                     style={{
@@ -799,7 +803,7 @@ export function RoomGuidedSection({
                 boxShadow: "0 18px 34px rgba(82,44,10,0.22)",
               }}
             >
-              <span>{ROOM_GUIDED_COPY.begin}</span>
+              <span>{copy.begin}</span>
               <span style={{ fontSize: 36, lineHeight: 1, marginTop: -2 }}>
                 →
               </span>
@@ -885,7 +889,7 @@ export function RoomGuidedSection({
                   textDecoration: "underline",
                 }}
               >
-                {ROOM_GUIDED_COPY.viewAllSteps}
+                {copy.viewAllSteps}
               </button>
 
               <button
@@ -899,7 +903,7 @@ export function RoomGuidedSection({
                   color: "#b0a090",
                 }}
               >
-                {ROOM_GUIDED_COPY.exitLabel}
+                {copy.exitLabel}
               </button>
             </div>
           </div>
@@ -1449,7 +1453,7 @@ export function RoomGuidedSection({
               margin: "0 0 6px",
             }}
           >
-            Mitra suggests beginning with
+            {t('mitra.room.mitraSuggestsBeginningWith')}
           </p>
           <p
             style={{
@@ -1500,7 +1504,7 @@ export function RoomGuidedSection({
           boxShadow: "0 14px 30px rgba(82,44,10,0.22)",
         }}
       >
-        <span>{ROOM_GUIDED_COPY.begin}</span>
+        <span>{copy.begin}</span>
         <span style={{ fontSize: 24, lineHeight: 1, marginTop: -2 }}>→</span>
       </button>
 
@@ -1760,7 +1764,7 @@ export function RoomGuidedSection({
               textDecoration: "underline",
             }}
           >
-            {ROOM_GUIDED_COPY.viewAllSteps}
+            {copy.viewAllSteps}
           </button>
         </div>
 
@@ -1776,7 +1780,7 @@ export function RoomGuidedSection({
               color: "#b0a090",
             }}
           >
-            {ROOM_GUIDED_COPY.exitLabel}
+            {copy.exitLabel}
           </button>
         </div>
       </div>

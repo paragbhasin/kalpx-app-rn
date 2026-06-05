@@ -60,6 +60,7 @@ async function persistTellMitraThread(
 
 export default function TellMitraContainer() {
   const { t, i18n } = useTranslation();
+  const isHindi = i18n.language === 'hi';
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
@@ -82,6 +83,7 @@ export default function TellMitraContainer() {
   const [parentEventId, setParentEventId] = useState<string | number | null>(null);
   const [parentIntentType, setParentIntentType] = useState<string | null>(null);
   const [secondaryRoomId, setSecondaryRoomId] = useState<string | null>(null);
+  const [secondaryRoomLabel, setSecondaryRoomLabel] = useState<string | null>(null);
 
   // ── Flag-on state ─────────────────────────────────────────────────────────
   const [conversation, setConversation] = useState<TellMitraConversationItem[]>([]);
@@ -295,6 +297,7 @@ export default function TellMitraContainer() {
       setParentEventId(result.tell_mitra_event_id ?? null);
       setParentIntentType(result.intent_type ?? null);
       setSecondaryRoomId(result.secondary_room_id ?? null);
+      setSecondaryRoomLabel(result.secondary_room_label ?? null);
 
       if (
         result.suggested_action === 'navigate_to_room' &&
@@ -451,6 +454,7 @@ export default function TellMitraContainer() {
             room_label: result.suggested_room_label ?? getRoomLabel(result.suggested_room_id),
             room_description: result.suggested_room_description,
             secondary_room_id: result.secondary_room_id,
+            secondary_room_label: result.secondary_room_label ?? null,
             tell_mitra_event_id: result.tell_mitra_event_id,
             room_entry_context: result.room_entry_context,
             response_copy: result.response_copy,
@@ -694,7 +698,7 @@ export default function TellMitraContainer() {
           style={styles.ghostLink}
           disabled={isSubmitting}
         >
-          <Text style={styles.ghostLinkText}>Or try {getRoomLabel(secondaryRoomId as any)} →</Text>
+          <Text style={[styles.ghostLinkText, isHindi && { letterSpacing: 0 }]}>{t('tellMitraThread.orTryRoom', { room: secondaryRoomLabel || getRoomLabel(secondaryRoomId as any) })}</Text>
         </TouchableOpacity>
       )}
       {!!resultCopy && (

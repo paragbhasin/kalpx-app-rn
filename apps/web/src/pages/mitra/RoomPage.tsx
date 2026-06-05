@@ -12,7 +12,7 @@ import { RoomReflectionSheet } from "../../components/blocks/room/RoomReflection
 import { ROOM_DISPLAY_NAMES } from "../../components/blocks/room/roomConstants";
 import { executeAction } from "../../engine/actionExecutor";
 import { getRoomRender, trackEvent, trackRoomTelemetry } from "../../engine/mitraApi";
-import { normalizeRoomWhyThisState, getRoomRenderParamsFromEntryContext, hasTellMitraRoomEntryContext, ROOM_LABELS } from "@kalpx/contracts";
+import { normalizeRoomWhyThisState, getRoomRenderParamsFromEntryContext, hasTellMitraRoomEntryContext, ROOM_LABELS, ROOM_LABELS_HI } from "@kalpx/contracts";
 import type { TellMitraRoomEntryContext } from "@kalpx/types";
 import {
   ensureRoomAmbientPlaying,
@@ -33,7 +33,8 @@ const ROOMS_WITH_CONTEXT_PICKER = [
 
 export function RoomPage() {
   const { roomId } = useParams<{ roomId: string }>();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const isHindi = locale === 'hi';
   const dispatch = useDispatch<AppDispatch>();
 
   function buildExitOnlyFallback(roomId: string) {
@@ -204,7 +205,8 @@ export function RoomPage() {
     dispatch(updateScreenData({ room_id: fullRoomId }));
   }, [fullRoomId, storedEnvelope, hasTellMitraRoomContext]);
 
-  const roomName = ROOM_LABELS[fullRoomId as keyof typeof ROOM_LABELS] ?? ROOM_DISPLAY_NAMES[fullRoomId] ?? fullRoomId;
+  const roomLabels = isHindi ? ROOM_LABELS_HI : ROOM_LABELS;
+  const roomName = roomLabels[fullRoomId as keyof typeof ROOM_LABELS] ?? ROOM_DISPLAY_NAMES[fullRoomId] ?? fullRoomId;
 
   // Guard browser back: intercept popstate and navigate to dashboard instead
   const handleActionRef = useRef<(action: any) => void>(() => {});

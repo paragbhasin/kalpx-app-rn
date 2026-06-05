@@ -561,6 +561,7 @@ export const te = {
       notAvailable: 'ఈ స్థలం ఇప్పుడు అందుబాటులో లేదు.',
       returnDashboard: 'డాష్‌బోర్డ్‌కు తిరిగి వెళ్ళండి',
       returnMitraHome: 'మిత్ర హోమ్‌కు తిరిగి వెళ్ళండి',
+      mitraSuggestsBeginningWith: 'మిత్ర దీంతో మొదలు పెట్టమని సూచిస్తున్నాడు',
     },
     tellMitra: {
       placeholder: 'మీ మనసులో ఏముంది?',

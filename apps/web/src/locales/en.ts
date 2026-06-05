@@ -561,6 +561,7 @@ export const en = {
       notAvailable: 'This space is not available right now.',
       returnDashboard: 'Return to dashboard',
       returnMitraHome: 'Return to Mitra Home',
+      mitraSuggestsBeginningWith: 'Mitra suggests beginning with',
     },
     tellMitra: {
       placeholder: 'What\'s on your mind…',

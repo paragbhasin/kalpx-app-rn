@@ -172,6 +172,26 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
   // Tracks whether the initial load has completed; subsequent focuses trigger a silent refetch.
   const hasFocusedOnce = useRef(false);
 
+  // Re-fetch inner path content when locale changes so titles update immediately.
+  // Uses mitraJourneyDailyView directly (bypasses entry-view payload caching).
+  const innerPathLocaleRef = useRef(i18n.language);
+  useEffect(() => {
+    const prev = innerPathLocaleRef.current;
+    innerPathLocaleRef.current = i18n.language;
+    if (i18n.language === prev) return;
+    mitraJourneyDailyView(null, i18n.language || 'en')
+      .then((result) => {
+        if (!result?.envelope) return;
+        const flat = ingestDailyView(result.envelope);
+        for (const [k, v] of Object.entries(flat)) {
+          if (v !== undefined) {
+            dispatch(screenActions.setScreenValue({ key: k, value: v }));
+          }
+        }
+      })
+      .catch(() => {});
+  }, [i18n.language, dispatch]);
+
   useFocusEffect(
     useCallback(() => {
       if (!hasFocusedOnce.current) {

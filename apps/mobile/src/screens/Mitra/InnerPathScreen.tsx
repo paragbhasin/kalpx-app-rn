@@ -120,7 +120,7 @@ function innerPathHeldLabel(slot: string, t: (key: string) => string): string {
 
 export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
   const { t, i18n } = useTranslation();
-  const isHindi = i18n.language === "hi";
+  const isHindi = i18n.language !== "en";
   const navigation = useNavigation<any>();
   const dispatch = useDispatch<any>();
   const tabBarHeight = useBottomTabBarHeight();

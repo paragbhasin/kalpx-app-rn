@@ -83,7 +83,21 @@ export function WelcomeBackPage() {
   const [error, setError] = useState<string | null>(null);
   const [reentry, setReentry] = useState<ReentryData | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [fetchTick, setFetchTick] = useState(0);
   const routedRef = useRef(false);
+
+  // Re-fetch when locale changes
+  useEffect(() => {
+    function onLocaleChange() {
+      invalidateJourneyEntryViewCache();
+      setReentry(null);
+      setLoading(true);
+      setError(null);
+      setFetchTick((n) => n + 1);
+    }
+    window.addEventListener('kalpx:locale-changed', onLocaleChange);
+    return () => window.removeEventListener('kalpx:locale-changed', onLocaleChange);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -132,7 +146,7 @@ export function WelcomeBackPage() {
     return () => {
       cancelled = true;
     };
-  }, [navigate]);
+  }, [navigate, fetchTick]);
 
   async function handleChip(chipId: ChipKey) {
     if (submitting) return;

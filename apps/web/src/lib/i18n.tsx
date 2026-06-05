@@ -52,9 +52,9 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     try {
       localStorage.setItem(LOCALE_STORAGE_KEY, next);
     } catch {}
-    // Bust the home cache so the next page load fetches in the new language
     invalidateMitraHomeV3Cache();
     setLocaleState(next);
+    window.dispatchEvent(new CustomEvent('kalpx:locale-changed', { detail: next }));
   }, []);
 
   const t = useCallback(

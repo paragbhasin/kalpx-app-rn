@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { invalidateEntryViewApiCache, mitraJourneyEntryView, seedDashboardViewFromEntryPayload } from '../engine/mitraApi';
 
 export type JourneyEntryViewKey =
@@ -60,10 +60,23 @@ export function useJourneyEntryView(enabled: boolean): UseJourneyEntryViewResult
   const [error, setError] = useState<string | null>(null);
   const [viewKey, setViewKey] = useState<JourneyEntryViewKey | null>(null);
   const [tick, setTick] = useState(0);
+  const enabledRef = useRef(enabled);
+  enabledRef.current = enabled;
 
   const refetch = useCallback(() => {
     invalidateJourneyEntryViewCache();
     setTick((t) => t + 1);
+  }, []);
+
+  // Invalidate and re-fetch when locale changes
+  useEffect(() => {
+    function onLocaleChange() {
+      if (!enabledRef.current) return;
+      invalidateJourneyEntryViewCache();
+      setTick((t) => t + 1);
+    }
+    window.addEventListener('kalpx:locale-changed', onLocaleChange);
+    return () => window.removeEventListener('kalpx:locale-changed', onLocaleChange);
   }, []);
 
   useEffect(() => {

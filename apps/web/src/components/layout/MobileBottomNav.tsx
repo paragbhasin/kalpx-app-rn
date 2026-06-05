@@ -2,19 +2,20 @@ import { Menu, User } from "lucide-react";
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
+import { useTranslation } from "../../lib/i18n";
 import { MitraMenuDrawer } from "./MitraMenuDrawer";
 
 const TABS = [
   {
     to: "/en",
-    label: "Home",
+    labelKey: "nav.home" as const,
     icon: "/new-home.svg",
     activeIcon: "/sel-home.svg",
     exact: true,
   },
   {
     to: "/en/profile",
-    label: "Profile",
+    labelKey: "nav.profile" as const,
     exact: false,
   },
   // {
@@ -55,6 +56,7 @@ export function MobileBottomNav({
   hidden?: boolean;
 }) {
   const { authed, userInitial } = useCurrentUser();
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -85,7 +87,7 @@ export function MobileBottomNav({
           pointerEvents: hidden ? "none" : "auto",
         }}
       >
-        {TABS.map(({ to, label, exact }) => (
+        {TABS.map(({ to, labelKey, exact }) => (
           <NavLink
             key={to}
             to={to}
@@ -106,7 +108,7 @@ export function MobileBottomNav({
             })}
           >
             {({ isActive }) =>
-              label === "Home" ? (
+              labelKey === "nav.home" ? (
                 <>
                   <img
                     src={isActive ? "/sel-home.svg" : "/new-home.svg"}
@@ -114,7 +116,7 @@ export function MobileBottomNav({
                     aria-hidden="true"
                     style={{ width: 24, height: 24, objectFit: "contain" }}
                   />
-                  <span>{label}</span>
+                  <span>{t(labelKey)}</span>
                 </>
               ) : (
                 <>
@@ -136,7 +138,7 @@ export function MobileBottomNav({
                   >
                     <User size={20} fill="black" stroke="none" />
                   </div>
-                  <span>{label}</span>
+                  <span>{t(labelKey)}</span>
                 </>
               )
             }
@@ -163,7 +165,7 @@ export function MobileBottomNav({
           }}
         >
           <Menu size={24} strokeWidth={2.1} />
-          <span>Menu</span>
+          <span>{t('nav.menu')}</span>
         </button>
       </nav>
 

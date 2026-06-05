@@ -196,6 +196,19 @@ export function OnboardingPage() {
     ).finally(() => setResolving(false));
   }, [stateId, dispatch]);
 
+  // Reload current screen immediately when locale changes
+  useEffect(() => {
+    function onLocaleChange() {
+      if (stateId === "turn_9_reminders") return;
+      setResolving(true);
+      dispatch(
+        loadScreenWithData({ containerId: "welcome_onboarding", stateId }),
+      ).finally(() => setResolving(false));
+    }
+    window.addEventListener('kalpx:locale-changed', onLocaleChange);
+    return () => window.removeEventListener('kalpx:locale-changed', onLocaleChange);
+  }, [stateId, dispatch]);
+
   if (statusLoading) {
     return (
       <MitraMobileShell>

@@ -62,7 +62,7 @@ export function MitraTopBar({ transparent = false }: Props) {
           }}
         >
           <Globe size={12} strokeWidth={2} />
-          {locale === "hi" ? "हि" : locale === "te" ? "తె" : "EN"}
+          {locale === "hi" ? "हिंदी" : locale === "te" ? "తెలుగు" : "English"}
         </button>
 
         {langOpen && (

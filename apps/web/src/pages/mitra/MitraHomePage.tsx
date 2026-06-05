@@ -42,7 +42,7 @@ import { useTranslation } from "../../lib/i18n";
 import { getActiveLocale } from "../../lib/locale";
 import { WEB_ENV } from "../../lib/env";
 import type { AppDispatch, RootState } from "../../store";
-import { setHomeData } from "../../store/doorSlice";
+import { clearHomeData, setHomeData } from "../../store/doorSlice";
 import { useScreenState } from "../../store/screenSlice";
 
 const ONBOARDING_TURN_1_PATH =
@@ -190,6 +190,19 @@ export function MitraHomePage() {
       dispatch(setHomeData(data));
     } catch {}
   }
+
+  // Re-fetch home data immediately when locale changes
+  useEffect(() => {
+    function onLocaleChange() {
+      if (!isAuthed) return;
+      dispatch(clearHomeData());
+      void getMitraHomeV3({ forceFresh: true }).then((data) => {
+        dispatch(setHomeData(data));
+      }).catch(() => {});
+    }
+    window.addEventListener('kalpx:locale-changed', onLocaleChange);
+    return () => window.removeEventListener('kalpx:locale-changed', onLocaleChange);
+  }, [isAuthed, dispatch]);
 
   async function handleFeelingSelect(feeling: FeelingOption) {
     const pranaType = mapFeelingToPranaType(feeling);

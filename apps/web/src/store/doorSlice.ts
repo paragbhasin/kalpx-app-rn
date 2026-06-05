@@ -21,6 +21,10 @@ const doorSlice = createSlice({
       state.homeData = action.payload;
       state.hydratedAt = new Date().toISOString();
     },
+    clearHomeData(state) {
+      state.homeData = null;
+      state.hydratedAt = null;
+    },
     setActiveDoor(state, action: PayloadAction<DoorId | null>) {
       state.activeDoor = action.payload;
     },
@@ -30,5 +34,5 @@ const doorSlice = createSlice({
   },
 });
 
-export const { setHomeData, setActiveDoor, clearDoorState } = doorSlice.actions;
+export const { setHomeData, clearHomeData, setActiveDoor, clearDoorState } = doorSlice.actions;
 export default doorSlice.reducer;

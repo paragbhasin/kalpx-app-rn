@@ -8,7 +8,7 @@ const DASHBOARD_VIEW_TTL_MS = 30_000;
 const ADDITIONAL_ITEMS_TTL_MS = 30_000;
 const ENTRY_VIEW_TTL_MS = 30_000;
 
-let _dashboardViewCache: { data: any; ts: number } | null = null;
+let _dashboardViewCache: { data: any; ts: number; locale: string } | null = null;
 let _dashboardViewInflight: Promise<any> | null = null;
 
 let _additionalItemsCache:
@@ -45,7 +45,7 @@ export function invalidateDashboardViewCache(): void {
 
 export function seedDashboardViewFromEntryPayload(payload: any): void {
   if (!payload || typeof payload !== 'object') return;
-  _dashboardViewCache = { data: payload, ts: Date.now() };
+  _dashboardViewCache = { data: payload, ts: Date.now(), locale: getActiveLocale() };
 }
 
 export function invalidateAdditionalItemsCache(): void {
@@ -133,7 +133,8 @@ export async function getDailyView(): Promise<any> {
  * The today/ response is NOT v3Ingest-compatible; caller must handle _isLegacyFallback.
  */
 export async function getDashboardView(): Promise<any> {
-  if (_dashboardViewCache && Date.now() - _dashboardViewCache.ts < DASHBOARD_VIEW_TTL_MS) {
+  const locale = getActiveLocale();
+  if (_dashboardViewCache && _dashboardViewCache.locale === locale && Date.now() - _dashboardViewCache.ts < DASHBOARD_VIEW_TTL_MS) {
     return _dashboardViewCache.data;
   }
 
@@ -155,7 +156,7 @@ export async function getDashboardView(): Promise<any> {
 
   _dashboardViewInflight = request;
   const data = await request;
-  _dashboardViewCache = { data, ts: Date.now() };
+  _dashboardViewCache = { data, ts: Date.now(), locale };
   return data;
 }
 

@@ -18,6 +18,8 @@ import {
   apiGetJourneyReminders,
   apiPatchJourneyReminders,
   getDashboardView,
+  invalidateDashboardViewCache,
+  invalidateEntryViewApiCache,
   mitraJourneyEntryView,
 } from "../../engine/mitraApi";
 import { ingestDailyView } from "../../engine/v3Ingest";
@@ -147,6 +149,24 @@ export function InnerPathPage() {
       .then(setReminders)
       .catch(() => {});
   }, []);
+
+  // Re-fetch inner path content when locale changes so titles update in the new language.
+  // getDashboardView's locale-keyed cache misses on locale change → fresh API call.
+  useEffect(() => {
+    function onLocaleChange() {
+      invalidateDashboardViewCache();
+      invalidateEntryViewApiCache();
+      getDashboardView()
+        .then((envelope) => {
+          if (!envelope || envelope._isLegacyFallback) return;
+          const flat = ingestDailyView(envelope);
+          dispatch(updateScreenData(flat));
+        })
+        .catch(() => {});
+    }
+    window.addEventListener('kalpx:locale-changed', onLocaleChange);
+    return () => window.removeEventListener('kalpx:locale-changed', onLocaleChange);
+  }, [dispatch]);
 
   const sd = screenState.screenData;
   const hasSankalpCarry =

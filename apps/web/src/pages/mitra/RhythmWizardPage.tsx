@@ -6,7 +6,7 @@ import {
 } from "@kalpx/contracts";
 import type { RhythmTimeBand, RhythmWizardLocalItem } from "@kalpx/types";
 import { Pencil } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
@@ -243,7 +243,7 @@ function StepDots({ step }: { step: WizardStep }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function RhythmWizardPage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -371,6 +371,17 @@ export function RhythmWizardPage() {
     }
   }, [step, suggestionsLoaded]);
 
+  // Re-fetch suggestions in the new locale when locale changes mid-session
+  const localeRef = useRef(locale);
+  useEffect(() => {
+    const prev = localeRef.current;
+    localeRef.current = locale;
+    if (prev === locale) return;
+    if (step === "suggestion" && !isEditMode && suggestionsLoaded) {
+      setSuggestionsLoaded(false); // triggers the load effect above
+    }
+  }, [locale]);
+
   // ── Navigation helpers ───────────────────────────────────────────────────────
 
   function toggleMoment(band: RhythmTimeBand) {
@@ -397,7 +408,7 @@ export function RhythmWizardPage() {
         selected_moments: selectedMoments,
         purposes,
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        locale: getActiveLocale(),
+        locale,
         source_surface: "rhythm_wizard",
       });
       const newItems: Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>> =

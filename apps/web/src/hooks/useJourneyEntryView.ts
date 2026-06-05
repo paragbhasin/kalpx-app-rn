@@ -68,16 +68,10 @@ export function useJourneyEntryView(enabled: boolean): UseJourneyEntryViewResult
     setTick((t) => t + 1);
   }, []);
 
-  // Invalidate and re-fetch when locale changes
-  useEffect(() => {
-    function onLocaleChange() {
-      if (!enabledRef.current) return;
-      invalidateJourneyEntryViewCache();
-      setTick((t) => t + 1);
-    }
-    window.addEventListener('kalpx:locale-changed', onLocaleChange);
-    return () => window.removeEventListener('kalpx:locale-changed', onLocaleChange);
-  }, []);
+  // NOTE: locale changes are intentionally NOT re-fetching entry view here.
+  // The view_key (routing decision) is based on journey progress, not language.
+  // Re-fetching on locale change caused RequiresJourney to redirect mid-session.
+  // Localized home content is refreshed separately by MitraHomePage.
 
   useEffect(() => {
     let cancelled = false;

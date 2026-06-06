@@ -50,7 +50,8 @@ class WatchAppGroupStorage {
                 ref:        ref,
                 name:       name,
                 devanagari: dict["devanagari"] ?? "",
-                label:      dict["label"]
+                label:      dict["label"],
+                audioUrl:   dict["audioUrl"]
             )
         }
         return result.isEmpty ? nil : result

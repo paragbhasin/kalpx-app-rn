@@ -22,74 +22,75 @@ struct QuickChantView: View {
     }
 
     private var chantView: some View {
-        VStack(spacing: 2) {
-            // Count — the hero
-            Text("\(engine.sessionCount)")
-                .font(.system(size: 54, weight: .bold, design: .rounded))
-                .foregroundColor(.primary)
-                .contentTransition(.numericText())
-                .animation(.spring(duration: 0.12), value: engine.sessionCount)
-                .accessibilityLabel("Session count: \(engine.sessionCount) beads")
+        VStack(spacing: 0) {
+            // Whole upper section is the tap target — no "TAP" button
+            VStack(spacing: 6) {
+                Spacer(minLength: 4)
 
-            // Mala rounds indicator — appears after first complete mala (108 beads)
-            if engine.malaRoundsCompleted > 0 {
-                Text("Round \(engine.malaRoundsCompleted)")
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(.accentColor)
-                    .transition(.opacity)
-            }
+                Text("\(engine.sessionCount)")
+                    .font(.system(size: 56, weight: .bold, design: .rounded))
+                    .foregroundColor(.primary)
+                    .contentTransition(.numericText())
+                    .animation(.spring(duration: 0.12), value: engine.sessionCount)
 
-            BeadRingView(beadInRound: engine.beadInRound)
-                .padding(.horizontal, 4)
-
-            // Tap button — full width, generous target
-            Button {
-                engine.increment()
-            } label: {
-                Text("TAP")
-                    .font(.system(size: 16, weight: .semibold))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
-            }
-            .buttonStyle(.borderedProminent)
-            .accessibilityLabel("Count one bead. Current count: \(engine.sessionCount)")
-
-            // Controls: cancel (always) | undo | complete
-            HStack {
-                Button {
-                    engine.discardSession()
-                } label: {
-                    Image(systemName: "xmark")
+                if engine.malaRoundsCompleted > 0 {
+                    Text("Round \(engine.malaRoundsCompleted)")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundColor(.accentColor)
+                        .transition(.opacity)
                 }
-                .foregroundColor(.secondary)
-                .accessibilityLabel("Discard and return home")
+
+                BeadRingView(beadInRound: engine.beadInRound)
+                    .padding(.horizontal, 8)
+                    .padding(.top, 2)
+
+                Text("tap to chant")
+                    .font(.system(size: 10, weight: .regular))
+                    .foregroundColor(.secondary)
+                    .opacity(engine.sessionCount == 0 ? 1 : 0)
+
+                Spacer(minLength: 4)
+            }
+            .frame(maxWidth: .infinity)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                engine.increment()
+            }
+            .accessibilityAddTraits(.isButton)
+            .accessibilityLabel("Count one bead. \(engine.sessionCount) counted")
+
+            // Small icon controls at the bottom
+            HStack {
+                Button { engine.discardSession() } label: {
+                    Image(systemName: "xmark.circle")
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Discard session")
 
                 Spacer()
 
                 if engine.sessionCount > 0 {
-                    Button {
-                        engine.undo()
-                    } label: {
-                        Image(systemName: "arrow.uturn.backward")
+                    Button { engine.undo() } label: {
+                        Image(systemName: "arrow.uturn.backward.circle")
+                            .foregroundStyle(.secondary)
                     }
+                    .buttonStyle(.plain)
                     .disabled(!engine.canUndo)
-                    .foregroundColor(.secondary)
                     .accessibilityLabel("Undo last bead")
 
-                    Spacer()
-
-                    Button {
-                        showCompletion = true
-                    } label: {
-                        Image(systemName: "checkmark.circle")
+                    Button { showCompletion = true } label: {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
                     }
-                    .foregroundColor(.secondary)
+                    .buttonStyle(.plain)
                     .accessibilityLabel("Complete session")
                 }
             }
-            .font(.system(size: 14))
-            .padding(.horizontal, 2)
+            .font(.system(size: 20))
+            .padding(.horizontal, 10)
+            .padding(.bottom, 4)
+            .frame(height: 36)
         }
-        .padding(.horizontal, 6)
     }
 }

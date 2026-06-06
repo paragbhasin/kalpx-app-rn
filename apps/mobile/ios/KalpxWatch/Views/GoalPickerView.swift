@@ -5,9 +5,6 @@ struct GoalPickerView: View {
     let onSelect: (String, Int?) -> Void
 
     private let goals: [(label: String, type: String, value: Int?)] = [
-        ("1 minute",   "time",      60),
-        ("3 minutes",  "time",     180),
-        ("5 minutes",  "time",     300),
         ("27 beads",   "count",     27),
         ("54 beads",   "count",     54),
         ("108 beads",  "count",    108),

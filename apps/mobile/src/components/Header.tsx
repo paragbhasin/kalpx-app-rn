@@ -103,24 +103,10 @@ const Header: React.FC<HeaderProps> = ({ isTransparent, backgroundColor }) => {
         />
       </TouchableOpacity>
 
-      {/* Language Dropdown */}
-      <View style={styles.dropdownContainer}>
-        <Dropdown
-          selectedTextProps={{ allowFontScaling: false }}
-          data={languages}
-          labelField="label"
-          valueField="value"
-          placeholder="Language"
-          value={selectedLang}
-          onChange={(val) => changeLanguage(val.value)}
-          style={styles.dropdown}
-          selectedTextStyle={styles.selectedText}
-          placeholderStyle={styles.placeholder}
-          itemTextStyle={styles.itemText}
-          maxHeight={130}
-          containerStyle={styles.dropdownListContainer}
-        />
-      </View>
+      {/* Language Dropdown — commented out */}
+      {/* <View style={styles.dropdownContainer}>
+        <Dropdown ... />
+      </View> */}
     </View>
   );
 };

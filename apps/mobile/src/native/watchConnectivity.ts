@@ -83,4 +83,13 @@ export const watchConnectivity = {
       .then(() => console.log('[WatchConnectivity] writePathDataToAppGroup SUCCESS'))
       .catch((e: any) => console.error('[WatchConnectivity] writePathDataToAppGroup FAILED:', e));
   },
+
+  // Writes today's japa count + inner path summary to app group for Watch face complications.
+  // iPhone calls this on homeData load so the Watch widget shows accurate today count.
+  writeTodayStatsToAppGroup(stats: { todayJapaCount: number; innerPathToday?: object | null }): Promise<void> {
+    if (!supported) return Promise.resolve();
+    return KalpxWatchConnectivityModule.writeTodayStatsToAppGroup(stats)
+      .then(() => console.log('[WatchConnectivity] writeTodayStatsToAppGroup SUCCESS'))
+      .catch((e: any) => console.error('[WatchConnectivity] writeTodayStatsToAppGroup FAILED:', e));
+  },
 };

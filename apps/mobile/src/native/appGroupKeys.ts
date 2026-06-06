@@ -28,4 +28,13 @@ export const AppGroupKeys = {
 
   // Written by iPhone on homeData load — Watch reads on launch to render home list
   watchPathData: 'kalpx_watch_path_data',
+
+  // Written by Watch on session complete + iPhone on homeData load — Watch widget reads
+  todayJapaCount: 'kalpx_today_japa_count',
+
+  // Written by iPhone on homeData load — Watch widget reads for inner path complication
+  innerPathToday: 'kalpx_inner_path_today',
+
+  // Written by user preference in iPhone settings — Watch widget reads for privacy
+  complicationPrivacy: 'kalpx_complication_privacy',
 } as const;

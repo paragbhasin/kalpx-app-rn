@@ -142,6 +142,18 @@ export async function pushPathDataToWatch(): Promise<void> {
     watchConnectivity.writePathDataToAppGroup(pathData);
     watchConnectivity.pushPathDataViaContext(pathData);
     watchConnectivity.sendToWatch({ type: 'path_data', payload: pathData });
+
+    // Write today's japa count + inner path for Watch face complications
+    const todayJapaCount: number = (homeData as any)?.japa_stats?.today_count ?? 0;
+    const innerPathToday = hasActivePath && innerPath ? {
+      day:         ips.day_number  ?? 1,
+      totalDays:   ips.total_days  ?? 14,
+      mantraRef:   innerPath.mantra?.ref   ?? null,
+      mantraName:  innerPath.mantra?.name  ?? null,
+      devanagari:  innerPath.mantra?.devanagari ?? null,
+    } : null;
+    watchConnectivity.writeTodayStatsToAppGroup({ todayJapaCount, innerPathToday });
+
     console.log('[WatchPath] pushed path data to Watch');
   } catch (err) {
     console.warn('[WatchPath] push failed:', err);

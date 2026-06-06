@@ -130,7 +130,13 @@
     "visualWisdom": "दृश्य ज्ञान",
     "visualWisdomDesc": "संस्कृति, ज्ञान, अनुष्ठानों और आध्यात्मिक अभ्यासों पर निर्देशित वीडियो कहीं भी, कभी भी देखें",
     "sacredRituals": "पवित्र अनुष्ठान",
-    "sacredRitualsDesc": "अपनी आध्यात्मिक यात्रा को गहरा करने के लिए सार्थक अनुष्ठानों, दैनिक अभ्यासों और भक्ति दिनचर्या की खोज करें"
+    "sacredRitualsDesc": "अपनी आध्यात्मिक यात्रा को गहरा करने के लिए सार्थक अनुष्ठानों, दैनिक अभ्यासों और भक्ति दिनचर्या की खोज करें",
+    "learn": "सीखें और बढ़ें",
+    "explore": "वीडियो देखें",
+    "practice": "दैनिक अभ्यास",
+    "journey": "पवित्र यात्राएं",
+    "poojas": "मंदिर पूजाएं",
+    "retreats": "रिट्रीट और कल्याण"
   },
   "testimonials": [
     {
@@ -244,7 +250,7 @@
       "setReminders": "रिमाइंडर सेट करें",
       "myPractices": "मेरे अभ्यास",
       "notifications": "सूचनाएँ",
-      "faqs": "FAQs",
+      "faqs": "अक्सर पूछे जाने वाले प्रश्न",
       "language": "भाषा",
       "privacy": "गोपनीयता नीति",
       "settings": "सेटिंग",
@@ -252,7 +258,9 @@
       "logout": "लॉग आउट",
       "logoutConfirm": "क्या आप वाकई लॉग आउट करना चाहते हैं?",
       "deleteAccount": "खाता हटाएँ",
-      "deleteAccountConfirm": "यह वापस नहीं होगा। क्या आप सच में अपना खाता हटाना चाहते हैं?"
+      "deleteAccountConfirm": "यह वापस नहीं होगा। क्या आप सच में अपना खाता हटाना चाहते हैं?",
+      "notificationPreferences": "सूचना प्राथमिकताएं",
+      "savedReflections": "सहेजे गए मनन"
     }
   },
   "common": {
@@ -457,7 +465,7 @@
     "idealDuration": "आदर्श अवधि",
     "duration1": "3 दिन – सप्ताहांत भक्ति",
     "duration2": "7 दिन – पूर्ण अनुभव",
-    "duration3": "10+ दिन – आत्मीय immersion",
+    "duration3": "10+ दिन – गहरी आत्मिक डुबकी",
     "experienceType": "आप किस प्रकार का अनुभव चाहते हैं?",
     "experiences": {
       "essential": "मूलभूत",
@@ -494,7 +502,7 @@
       },
       "yoga": {
         "title": "योग इमर्शन",
-        "subtitle": "हर सांस के साथ भीतर की ओर बढ़ें।"
+        "subtitle": "हर श्वास के साथ अंदर की ओर उतरें।"
       },
       "bhakti": {
         "title": "भक्ति और सत्संग",
@@ -523,6 +531,10 @@
       "riverRetreats": {
         "title": "नदी तट रिट्रीट्स",
         "subtitle": "पवित्र प्रवाह के साथ बहें"
+      },
+      "desert": {
+        "title": "मरुस्थल आश्रम",
+        "subtitle": "मौन और ध्यान"
       }
     },
     "yourCity": "आपका शहर",
@@ -879,39 +891,39 @@
       "select": "चुनें",
       "addToMyPractice": "इसे मेरे अभ्यास में जोड़ें",
       "count": "गिनती",
-      "microCalm": "सूक्ष्म शांति",
-      "calmNow": "अभी शांत",
-      "easeStress": "तनाव कम करें",
-      "deepCalm": "गहरी शांति",
-      "softPeace": "कोमल शांति",
-      "microFocus": "सूक्ष्म एकाग्रता",
-      "quickFocus": "जल्दी एकाग्रता",
-      "mindClear": "मन साफ",
-      "staySharp": "सतर्क रहें",
-      "fullFocus": "पूर्ण एकाग्रता",
-      "tinyHeal": "छोटा उपचार",
-      "gentleHeal": "कोमल उपचार",
-      "emotionalEase": "भावनात्मक सहजता",
-      "heartHeal": "दिल उपचार",
-      "innerRenew": "आंतरिक नवीनीकरण",
-      "microThanks": "सूक्ष्म धन्यवाद",
-      "quickThanks": "जल्दी धन्यवाद",
-      "feelGood": "अच्छा महसूस करें",
-      "joyRise": "खुशी का उदय",
-      "brightMind": "उज्ज्वल मन",
-      "tinyLift": "नन्हा उत्थान",
-      "spiritLift": "आत्मिक उत्थान",
-      "divineTouch": "दैवीय स्पर्श",
-      "innerLight": "आंतरिक प्रकाश",
-      "soulAlign": "आत्मा संरेखण",
-      "miniBoost": "लघु प्रोत्साहन",
-      "vitalBoost": "प्राणिक प्रोत्साहन",
-      "bodyHeal": "शरीर उपचार",
-      "deepHeal": "गहरा उपचार",
-      "lifeRenew": "जीवन नवीनीकरण",
-      "goalFlow": "लक्ष्य प्रवाह",
-      "prosperPath": "समृद्धि पथ",
-      "wealthRise": "धन उदय"
+      "microCalm": "थोड़ी-सी शांति",
+      "calmNow": "अभी चैन मिले",
+      "easeStress": "मन हल्का करें",
+      "deepCalm": "मन की गहरी चैन",
+      "softPeace": "सुकून भरी शांति",
+      "microFocus": "थोड़ी एकाग्रता",
+      "quickFocus": "झटपट एकाग्रता",
+      "mindClear": "मन साफ़ करें",
+      "staySharp": "जागरूक रहें",
+      "fullFocus": "पूरा ध्यान",
+      "tinyHeal": "थोड़ी राहत",
+      "gentleHeal": "कोमल राहत",
+      "emotionalEase": "भावों में सुकून",
+      "heartHeal": "मन को चैन",
+      "innerRenew": "भीतर से ताज़गी",
+      "microThanks": "एक पल कृतज्ञता",
+      "quickThanks": "झटपट कृतज्ञता",
+      "feelGood": "मन खुश रहे",
+      "joyRise": "खुशी का उजास",
+      "brightMind": "मन का उजाला",
+      "tinyLift": "हल्की उड़ान",
+      "spiritLift": "आत्मा का उठान",
+      "divineTouch": "ईश्वर का स्पर्श",
+      "innerLight": "भीतर का उजाला",
+      "soulAlign": "आत्मा से जुड़ाव",
+      "miniBoost": "थोड़ी ऊर्जा",
+      "vitalBoost": "प्राण जागृति",
+      "bodyHeal": "तन की राहत",
+      "deepHeal": "गहरी राहत",
+      "lifeRenew": "जीवन में नई ऊर्जा",
+      "goalFlow": "लक्ष्य की ओर बहना",
+      "prosperPath": "समृद्धि की राह",
+      "wealthRise": "धन का उदय"
     },
     "reminder": {
       "schedule_conflict": "समय-सारिणी में टकराव",
@@ -1512,10 +1524,10 @@
   "community": {
     "postMenu": {
       "report": "रिपोर्ट करें",
-      "save": "सेव करें",
+      "save": "सहेजें",
       "hide": "छिपाएं",
       "share": "शेयर करें",
-      "unsave": "अनसेव करें",
+      "unsave": "हटाएं",
       "unhide": "दिखाएं",
       "edit": "पोस्ट संपादित करें",
       "delete": "पोस्ट हटाएं"
@@ -1546,7 +1558,7 @@
         "questions": "मेरे प्रश्न",
         "comments": "कमेंट",
         "useful": "उपयोगी",
-        "saved": "सेव किया गया",
+        "saved": "सहेजे गए",
         "hidden": "छिपा हुआ",
         "upvoted": "अपवोट किया गया",
         "downvoted": "डाउनवोट किया गया"
@@ -1822,7 +1834,7 @@
     "heroTitle": "KalpX मित्र",
     "companionTitle": "जीवन के लिए आपका रोज़ का साथी",
     "companionDesc1": "शाश्वत सनातन ज्ञान में निहित।",
-    "companionDesc2": "जो आप वहन करते हैं उसे सहारा दें, जो बढ़ रहा है उसे सशक्त करें, और एक दिन एक कदम चलें",
+    "companionDesc2": "जो बोझ है उसमें सहारा दें, जो पनप रहा है उसे बल दें, और एक दिन एक कदम चलते रहें",
     "beginCta": "मित्र के साथ शुरू करें →"
   },
   "turn8": {
@@ -1914,9 +1926,9 @@
       "mixed_partial": "एक हल्की रोज़ की लय बनाएं।"
     },
     "innerPath": {
-      "dayCount": "दिन {{day}} में से {{total}}",
-      "practiceHeld": "दिन {{day}} में से {{total}} · आज का अभ्यास हो गया",
-      "stepBegun": "दिन {{day}} में से {{total}} · आज का कदम शुरू हो गया"
+      "dayCount": "{{total}} में से दिन {{day}}",
+      "practiceHeld": "{{total}} में से दिन {{day}} · आज का अभ्यास हो गया",
+      "stepBegun": "{{total}} में से दिन {{day}} · आज का कदम शुरू हो गया"
     },
     "innerPathSegment": {
       "new": "जो आप अभी से गुज़र रहे हैं उसके लिए 14 दिन का पथ शुरू करें।",
@@ -1938,7 +1950,7 @@
       "default": "आज जो मन में चल रहा है वो साझा करें।"
     },
     "checkin": {
-      "heading": "आज आप कैसे उतर रहे हैं?",
+      "heading": "अभी मन कैसा है?",
       "subtext": "एक टैप। मित्र आपसे वहाँ मिलेगा जहाँ आप हैं।",
       "tellMitraCta": "मित्र से कहें →",
       "boundaryBefore": "अगर यह भारी लग रहा हो,",
@@ -1949,9 +1961,9 @@
     },
     "feeling": {
       "agitated": "बेचैन",
-      "drained": "थका हुआ",
+      "drained": "थका-सा",
       "steady": "स्थिर",
-      "open": "खुला"
+      "open": "खुला मन"
     },
     "error": {
       "unableToLoad": "लोड नहीं हो सका।",
@@ -1996,7 +2008,7 @@
     }
   },
   "quickCheckin": {
-    "title": "झटपट जाँच",
+    "title": "झटपट हाल-चाल",
     "subheading": "बताएं आप कैसा महसूस कर रहे हैं।\nमित्र एक उपयुक्त अभ्यास खोजेगा।",
     "checkingIn": "जाँच हो रही है…",
     "selectEnergy": "जारी रखने के लिए अपनी ऊर्जा चुनें।",
@@ -2022,7 +2034,7 @@
         "desc": "अशांत या तनावग्रस्त"
       },
       "drained": {
-        "label": "थका हुआ",
+        "label": "थका-सा",
         "desc": "हल्का या भारी"
       }
     },
@@ -2075,7 +2087,7 @@
       "practiceSubtitle": "शरीर से गुज़रें"
     },
     "heroFallback": "अभी भी यहाँ हैं। यही अभ्यास है।",
-    "dayPill": "दिन {{n}} में से {{m}}",
+    "dayPill": "{{m}} में से दिन {{n}}",
     "allComplete": {
       "title": "आज तीनों हो गए",
       "body": "मंत्र, संकल्प, अभ्यास — चक्र पूर्ण हुआ।"
@@ -2476,7 +2488,7 @@
         "permissionDenied": "माइक्रोफ़ोन की अनुमति नहीं मिली। आप इसके बजाय लिख सकते हैं।",
         "writeInstead": "लिखें",
         "statusRecording": "रिकॉर्ड हो रहा है…",
-        "statusStopped": "{{time}} रिकॉर्ड हुआ — सहेजने के लिए Done टैप करें",
+        "statusStopped": "{{time}} रिकॉर्ड हुआ — सहेजने के लिए 'हो गया' टैप करें",
         "statusIdle": "शुरू करने के लिए वृत्त पर टैप करें"
       },
       "stepModal": {
@@ -2512,6 +2524,54 @@
         "journalOnThis": "इस पर लिखें",
         "journalPlaceholder": "जो आए लिखें..."
       }
+    },
+    "viewAllSteps": "सभी चरण देखें",
+    "tapWhenReadyInterstitial": "तैयार हों तो टैप करें",
+    "exitConfirmBody": "यह कक्ष बंद होगा। आप कभी भी वापस आ सकते हैं।",
+    "actions": {
+      "addAnother": "एक और जोड़ें",
+      "returnHome": "घर वापस जाएं",
+      "illGoNow": "मैं अभी जाऊँगा",
+      "noted": "समझ गया।",
+      "inquiry": "जिज्ञासा",
+      "step": "चरण",
+      "aTeaching": "एक शिक्षा",
+      "beginRoomJourney": "कक्ष यात्रा शुरू करें",
+      "continueToNextStep": "अगले चरण पर जाएं",
+      "mitraBeginsWith": "मित्र इससे शुरू करता है",
+      "begin": "शुरू करें",
+      "tapWhenReady": "तैयार हों तो टैप करें",
+      "whenYouReady": "जब तैयार हों, शुरू करने के लिए टैप करें",
+      "returnToMitraHome": "मित्र होम पर वापस जाएं",
+      "leaveThisRoom": "यह कक्ष छोड़ें?",
+      "practiceHeld": "आपका अभ्यास सुरक्षित है। आप कभी भी वापस आ सकते हैं।",
+      "yesIllGoNow": "हाँ, मैं अभी जाऊँगा",
+      "stay": "रहें",
+      "aGentleStep": "एक कोमल कदम",
+      "mitraIsWithYou": "मित्र इस चरण में आपके साथ है।",
+      "continue": "जारी रखें",
+      "writeWhatYouWouldHaveSpoken": "जो कहना चाहते थे, वह लिखें।",
+      "letThisLand": "इसे महसूस होने दें",
+      "writeAFewWords": "कुछ शब्द लिखें…",
+      "copyAndGo": "कॉपी करें और जाएं",
+      "aThreadOfCare": "देखभाल का एक धागा याद रखा गया।",
+      "stayWithTheSound": "ध्वनि के साथ रहें।",
+      "stayWithTheOffering": "अर्पण के साथ रहें।",
+      "letThePracticeHoldYou": "अभ्यास को आपको थामने दें।",
+      "youMadeSpace": "आपने स्थान बनाया।",
+      "whatIsPresentRightNow": "अभी क्या उपस्थित है?",
+      "writeOneWordOrFewLines": "एक शब्द या कुछ पंक्तियाँ लिखें…",
+      "writeShortMessageToSomeone": "किसी प्रिय को एक छोटा संदेश लिखें।",
+      "yourMessage": "आपका संदेश…",
+      "savedToYourPath": "आपके पथ में सहेजा गया।",
+      "couldntSave": "सहेजा नहीं जा सका। कृपया फिर कोशिश करें।",
+      "writeAnother": "एक और लिखें",
+      "nameAnother": "एक और नाम लें",
+      "addAnotherItem": "एक और जोड़ें",
+      "youreHereThatIsEnough": "आप यहाँ हैं। यही पर्याप्त है।",
+      "youStayedWithIt": "आप इसके साथ रहे।",
+      "youCanReturnAnytime": "आप कभी भी इस कक्ष में वापस आ सकते हैं।",
+      "whatDoesThisBringUp": "यह क्या उठाता है?"
     },
     "mitraSuggestsBeginningWith": "मित्र इससे शुरू करने का सुझाव देता है",
     "sanatanWisdomSays": "सनातन ज्ञान कहता है",
@@ -2600,6 +2660,9 @@
     },
     "constants": {
       "lifeContext": {
+        "header": "जीवन का कौन-सा पहलू अभी सबसे ज़्यादा प्रभावित हो रहा है?",
+        "skipForNow": "अभी छोड़ें",
+        "myself": "मैं स्वयं",
         "workCareer": "काम और करियर",
         "relationships": "रिश्ते",
         "self": "मैं स्वयं",
@@ -2762,5 +2825,10 @@
     "levelBeginner": "शुरुआती",
     "levelIntermediate": "मध्यम",
     "levelAdvanced": "उन्नत"
+  },
+  "progressSection": {
+    "daysEngaged": "जुड़े दिन",
+    "fullyCompleted": "पूरे किए दिन",
+    "dailyRhythm": "रोज़ की लय"
   }
 }

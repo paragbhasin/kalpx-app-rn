@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "../../../lib/i18n";
 
 type DayState = "done" | "missed" | "pending" | string;
 
@@ -72,6 +73,7 @@ function dotStyles(state?: string) {
 }
 
 export function CycleProgressBlock({ sd, expanded: expandedProp, onToggle, hideHeader = false }: Props) {
+  const { t } = useTranslation();
   const [uncontrolledExpanded, setUncontrolledExpanded] = useState(false);
   const expanded = expandedProp ?? uncontrolledExpanded;
   const toggleExpanded = onToggle ?? (() => setUncontrolledExpanded((value) => !value));
@@ -92,7 +94,7 @@ export function CycleProgressBlock({ sd, expanded: expandedProp, onToggle, hideH
 
   const summaryLine =
     metrics.summary_label || `Day ${dayNumber} of ${totalDays}`;
-  const rhythmHeader = metrics.rhythm_header_label || "Daily Rhythm";
+  const rhythmHeader = metrics.rhythm_header_label || t('progressSection.dailyRhythm');
 
   const visibleRhythm = useMemo(() => {
     if (rhythm.length > 0) return rhythm;
@@ -181,11 +183,11 @@ export function CycleProgressBlock({ sd, expanded: expandedProp, onToggle, hideH
           >
             <Metric
               value={daysEngaged}
-              label={metrics.days_engaged_label || "Days you showed up"}
+              label={metrics.days_engaged_label || t('progressSection.daysEngaged')}
             />
             <Metric
               value={daysComplete}
-              label={metrics.days_complete_label || "Days fully held"}
+              label={metrics.days_complete_label || t('progressSection.fullyCompleted')}
             />
           </div>
 

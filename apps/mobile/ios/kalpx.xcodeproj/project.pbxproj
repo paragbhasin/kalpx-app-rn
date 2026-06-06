@@ -13,6 +13,7 @@
 		0F5CE3E0062F9D0B61E733A1 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E41D0296DDDAC8B9BC4C662 /* ExpoModulesProvider.swift */; };
 		1050A7C0CE294623B385519E /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9D907E5A3C4BDAAD72A93E /* noop-file.swift */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		20BB91EE597F853BA48CEF1E /* InnerPathDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6ED48393DE519F453AB6225 /* InnerPathDetailView.swift */; };
 		27F82797A9983CF694C29011 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 09E4E94BBD83FD47B0156700 /* PrivacyInfo.xcprivacy */; };
 		2B9C684F3C782DDB33A033A6 /* SankalpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1CFA64354B2E0F85553396D /* SankalpView.swift */; };
 		3B78610E5348905E53923BCE /* KalpxWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 4716FE0197CA6BFAD878301A /* KalpxWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -26,6 +27,7 @@
 		672FE2180F80CDDA8380DF2B /* BeadRingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 549A1863A78C035FCC0E8922 /* BeadRingView.swift */; };
 		78491082C6B6F0AE7A25F7FB /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2017CB10368132C4D55C285 /* WidgetKit.framework */; };
 		7F27698A25AA2F54C76B79F7 /* KalpxWatchConnectivityModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 3868A4D2D239A69E56E78540 /* KalpxWatchConnectivityModule.m */; };
+		7FED38701A54D99AD4ADC4AE /* RhythmDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC1D960F696AEE41803404AA /* RhythmDetailView.swift */; };
 		812704A17D7B40F097CE0B52 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F1A0B2FC91274AD8A4D21224 /* GoogleService-Info.plist */; };
 		8546F79D94EF8E000CAD8988 /* KalpxAppGroupKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D6B30C032FB68BFB568AED /* KalpxAppGroupKeys.swift */; };
 		919552073C4F5965CB08D947 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8116A15FF5DE4E1CB892B9B1 /* SwiftUI.framework */; };
@@ -164,9 +166,11 @@
 		CC0011CC0011CC0011CC0011 /* KalpxSankalpLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KalpxSankalpLiveActivity.swift; sourceTree = "<group>"; };
 		D2017CB10368132C4D55C285 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		D29CE03ED09FEF69AA41E972 /* QuickChantView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = QuickChantView.swift; path = KalpxWatch/Views/QuickChantView.swift; sourceTree = "<group>"; };
+		D6ED48393DE519F453AB6225 /* InnerPathDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = InnerPathDetailView.swift; path = KalpxWatch/Views/InnerPathDetailView.swift; sourceTree = "<group>"; };
 		DA6922EE08CE4FA4F4238E3F /* RootView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RootView.swift; path = KalpxWatch/Views/RootView.swift; sourceTree = "<group>"; };
 		DCBEB7653445217AD548D973 /* GoalPickerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GoalPickerView.swift; path = KalpxWatch/Views/GoalPickerView.swift; sourceTree = "<group>"; };
 		DD9D907E5A3C4BDAAD72A93E /* noop-file.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; name = "noop-file.swift"; path = "kalpx/noop-file.swift"; sourceTree = "<group>"; };
+		EC1D960F696AEE41803404AA /* RhythmDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RhythmDetailView.swift; path = KalpxWatch/Views/RhythmDetailView.swift; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = kalpx/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* kalpx-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "kalpx-Bridging-Header.h"; path = "kalpx/kalpx-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -319,6 +323,8 @@
 				B1CFA64354B2E0F85553396D /* SankalpView.swift */,
 				3320F9EC2A8E9B6F1FFC75B8 /* PracticeView.swift */,
 				4E965A5CBBD7C775C324DE81 /* CheckInView.swift */,
+				D6ED48393DE519F453AB6225 /* InnerPathDetailView.swift */,
+				EC1D960F696AEE41803404AA /* RhythmDetailView.swift */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -816,6 +822,8 @@
 				2B9C684F3C782DDB33A033A6 /* SankalpView.swift in Sources */,
 				D76D7FB8D69254948ACD07BA /* PracticeView.swift in Sources */,
 				BEADBA20FCE6D09621832310 /* CheckInView.swift in Sources */,
+				20BB91EE597F853BA48CEF1E /* InnerPathDetailView.swift in Sources */,
+				7FED38701A54D99AD4ADC4AE /* RhythmDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

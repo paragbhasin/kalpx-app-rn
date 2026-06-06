@@ -118,8 +118,8 @@ export const DOOR_LABELS: Record<DoorId, string> = {
 export const DOOR_LABELS_HI: Record<DoorId, string> = {
   my_rhythm: "मेरी लय",
   inner_path: "अंदर की राह",
-  quick_reset: "जल्दी जप",
-  tell_mitra: "मित्र को बताएं",
+  quick_reset: "मंत्र जप",
+  tell_mitra: "मित्र से बात करें",
 };
 
 // ── Room constants ──────────────────────────────────────────────────────────

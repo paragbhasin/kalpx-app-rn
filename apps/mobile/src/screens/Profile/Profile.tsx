@@ -109,7 +109,7 @@ const Profile = () => {
               icon: "time-outline",
               route: "Reminders",
             },
-            { key: "language", icon: "globe-outline", route: "Language" },
+            // { key: "language", icon: "globe-outline", route: "Language" },
           ],
         },
         {
@@ -165,7 +165,7 @@ const Profile = () => {
         {
           title: "PREFERENCES",
           items: [
-            { key: "language", icon: "globe-outline", route: "Language" },
+            // { key: "language", icon: "globe-outline", route: "Language" },
           ],
         },
         {

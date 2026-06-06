@@ -11,6 +11,7 @@ import {
   UIManager,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { mitraFetchProgress } from "../engine/mitraApi";
 import { Fonts } from "../theme/fonts";
@@ -51,6 +52,7 @@ interface ProgressData {
 }
 
 const ProgressSectionBlock: React.FC = () => {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(true);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<ProgressData | null>(null);
@@ -205,13 +207,13 @@ const ProgressSectionBlock: React.FC = () => {
                 <View style={[styles.subCard, { marginTop: 24 }]}>
                   <Text style={styles.subHeading}>This Cycle</Text>
                   <View style={styles.statRow}>
-                    <Text style={styles.statLabel}>Days Engaged</Text>
+                    <Text style={styles.statLabel}>{t('progressSection.daysEngaged')}</Text>
                     <Text style={styles.statValue}>
                       {cycle?.daysEngaged || 0} / {totalDays}
                     </Text>
                   </View>
                   <View style={styles.statRow}>
-                    <Text style={styles.statLabel}>Fully Completed</Text>
+                    <Text style={styles.statLabel}>{t('progressSection.fullyCompleted')}</Text>
                     <Text style={styles.statValue}>
                       {cycle?.daysFullyCompleted || 0} / {totalDays}
                     </Text>
@@ -245,7 +247,7 @@ const ProgressSectionBlock: React.FC = () => {
                 {/* Weekly Trend (Rhythm Dots) */}
                 {trend.length > 0 && (
                   <View style={[styles.subCard, { marginTop: 15 }]}>
-                    <Text style={styles.subHeading}>Daily Rhythm</Text>
+                    <Text style={styles.subHeading}>{t('progressSection.dailyRhythm')}</Text>
                     <View style={styles.rhythmDots}>
                       {trend.map((day, idx) => (
                         <View

@@ -40,11 +40,13 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate {
     // Most reliable delivery to Watch on simulator (works without isWatchAppInstalled).
     func pushPathDataViaContext(_ pathData: [String: Any]) {
         guard WCSession.default.activationState == .activated else { return }
+        // WCSession rejects NSNull (JS null) — strip before sending
+        let sanitized = stripNulls(pathData)
         var context = WCSession.default.applicationContext
-        context["pathData"] = pathData
+        context["pathData"] = sanitized
         do {
             try WCSession.default.updateApplicationContext(context)
-            NSLog("[WCSession] applicationContext updated with pathData")
+            NSLog("[WCSession] applicationContext updated with pathData keys=%@", sanitized.keys.joined(separator: ","))
         } catch {
             NSLog("[WCSession] updateApplicationContext(pathData) failed: %@", error.localizedDescription)
         }
@@ -62,17 +64,36 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate {
             completion?(nil)
             return
         }
+        // WCSession rejects NSNull — strip from entire message before sending
+        let safeMessage = stripNulls(message)
         if session.isReachable {
-            session.sendMessage(message, replyHandler: nil) { error in
+            session.sendMessage(safeMessage, replyHandler: nil) { error in
                 NSLog("[WCSession] sendMessage failed: %@, trying transferUserInfo", error.localizedDescription)
-                session.transferUserInfo(message)
+                session.transferUserInfo(safeMessage)
                 completion?(nil)
             }
         } else {
             // Not reachable — queue for background delivery
-            session.transferUserInfo(message)
+            session.transferUserInfo(safeMessage)
             completion?(nil)
         }
+    }
+
+    // Recursively remove NSNull values so WCSession plist encoding never rejects the payload.
+    // Swift Codable optional fields decode as nil when the key is absent — safe to drop nulls.
+    private func stripNulls(_ dict: [String: Any]) -> [String: Any] {
+        var result: [String: Any] = [:]
+        for (key, value) in dict {
+            if value is NSNull { continue }
+            if let nested = value as? [String: Any] {
+                result[key] = stripNulls(nested)
+            } else if let arr = value as? [[String: Any]] {
+                result[key] = arr.map { stripNulls($0) }
+            } else {
+                result[key] = value
+            }
+        }
+        return result
     }
 
     // MARK: - Receive from Watch

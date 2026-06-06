@@ -98,9 +98,12 @@ class KalpxWatchConnectivityModule: RCTEventEmitter {
     ) {
         let defaults = UserDefaults(suiteName: KalpxAppGroupKeys.groupID)
         guard let data = try? JSONSerialization.data(withJSONObject: pathData) else {
+            NSLog("[WatchPath-Swift] writePathDataToAppGroup: JSONSerialization FAILED for: %@", pathData)
             resolve(false); return
         }
         defaults?.set(data, forKey: KalpxAppGroupKeys.watchPathData)
+        let jsonStr = String(data: data, encoding: .utf8) ?? "nil"
+        NSLog("[WatchPath-Swift] writePathDataToAppGroup wrote %d bytes: %@", data.count, jsonStr)
         resolve(true)
     }
 
@@ -115,10 +118,11 @@ class KalpxWatchConnectivityModule: RCTEventEmitter {
         if let count = stats["todayJapaCount"] as? Int {
             defaults?.set(count, forKey: KalpxAppGroupKeys.todayJapaCount)
         }
-        if let ipRaw = stats["innerPathToday"] {
-            if let data = try? JSONSerialization.data(withJSONObject: ipRaw) {
-                defaults?.set(data, forKey: KalpxAppGroupKeys.innerPathToday)
-            }
+        if let ipRaw = stats["innerPathToday"],
+           !(ipRaw is NSNull),
+           let ipDict = ipRaw as? [String: Any],
+           let data = try? JSONSerialization.data(withJSONObject: ipDict) {
+            defaults?.set(data, forKey: KalpxAppGroupKeys.innerPathToday)
         }
         resolve(true)
     }

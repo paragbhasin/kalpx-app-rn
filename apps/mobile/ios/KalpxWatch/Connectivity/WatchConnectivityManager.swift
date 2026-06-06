@@ -139,10 +139,22 @@ class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDelegate {
     }
 
     private func applyPathData(_ raw: [String: Any]) {
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: raw),
-              let decoded  = try? JSONDecoder().decode(WatchPathData.self, from: jsonData)
-        else { return }
-        WatchAppGroupStorage.shared.savePathData(decoded)
-        DispatchQueue.main.async { self.pathData = decoded }
+        NSLog("[WatchPath-Watch] applyPathData: raw keys = %@", raw.keys.joined(separator: ","))
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: raw) else {
+            NSLog("[WatchPath-Watch] applyPathData: JSONSerialization failed")
+            return
+        }
+        let rawStr = String(data: jsonData, encoding: .utf8) ?? "non-utf8"
+        NSLog("[WatchPath-Watch] applyPathData: json = %@", rawStr)
+        do {
+            let decoded = try JSONDecoder().decode(WatchPathData.self, from: jsonData)
+            NSLog("[WatchPath-Watch] applyPathData: decoded OK — innerPath=%@, rhythm=%@",
+                  decoded.innerPath != nil ? "yes(hasActivePath=\(decoded.innerPath!.hasActivePath))" : "nil",
+                  decoded.rhythm    != nil ? "yes(hasRhythm=\(decoded.rhythm!.hasRhythm))" : "nil")
+            WatchAppGroupStorage.shared.savePathData(decoded)
+            DispatchQueue.main.async { self.pathData = decoded }
+        } catch {
+            NSLog("[WatchPath-Watch] applyPathData: DECODE FAILED: %@", error.localizedDescription)
+        }
     }
 }

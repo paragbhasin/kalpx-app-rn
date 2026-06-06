@@ -1,43 +1,50 @@
 import Foundation
 
-struct WatchMantraItem: Codable {
-    let ref: String
-    let name: String
-    let devanagari: String
-}
+// ── Inner Path triad ────────────────────────────────────────────────────────
 
-struct WatchSankalpItem: Codable {
+struct WatchTriadItem: Codable {
+    let slot: String       // "mantra" | "sankalp" | "practice"
+    let itemId: String
     let title: String
-    let line: String
-}
-
-struct WatchPracticeItem: Codable {
-    let title: String
-    let description: String
+    let subtitle: String
+    let howToLive: String? // sankalp only
 }
 
 struct WatchInnerPathData: Codable {
     let hasActivePath: Bool
     let dayNumber: Int
     let totalDays: Int
-    let mantra: WatchMantraItem?
-    let practice: WatchPracticeItem?
-    // sankalp: Watch reads kalpx_sankalp_today from app group directly
+    let triad: [WatchTriadItem]
+}
+
+// ── Rhythm ──────────────────────────────────────────────────────────────────
+
+struct WatchRhythmItem: Codable {
+    let itemId: String
+    let itemType: String   // "mantra" | "sankalp" | "practice"
+    let title: String
+    let description: String
+}
+
+struct WatchRhythmBand: Codable {
+    let band: String        // "morning" | "afternoon" | "night"
+    let isDone: Bool
+    let items: [WatchRhythmItem]
 }
 
 struct WatchRhythmData: Codable {
     let hasRhythm: Bool
-    let currentSlot: String   // "morning" | "afternoon" | "night"
-    let slotDone: Bool
-    let mantra: WatchMantraItem?
-    let sankalp: WatchSankalpItem?
-    let practice: WatchPracticeItem?
+    let bands: [WatchRhythmBand]
 }
+
+// ── Check-In ────────────────────────────────────────────────────────────────
 
 struct WatchCheckinData: Codable {
     let windowActive: Bool
     let pranaLabel: String?
 }
+
+// ── Root ────────────────────────────────────────────────────────────────────
 
 struct WatchPathData: Codable {
     let innerPath: WatchInnerPathData?

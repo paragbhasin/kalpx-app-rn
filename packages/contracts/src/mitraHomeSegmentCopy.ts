@@ -92,7 +92,7 @@ export const QUICK_CHANT_HAS_MANTRA_SUBTITLE_HI = "आपका चुना ह
 export const QUICK_CHANT_HISTORY_ONLY_SUBTITLE_HI =
   "आपका जप जब ज़रूरत हो यहाँ मिलेगा।";
 export const QUICK_CHANT_NO_STATE_SUBTITLE_HI =
-  "जल्दी वापस आने के लिए एक मंत्र चुनें।";
+  "वापस आने के लिए एक मंत्र चुनें।";
 
 /**
  * Tell Mitra card subtitle (conditional on state).
@@ -104,7 +104,7 @@ export const TELL_MITRA_ACTIVE_PATH_SUBTITLE =
 export const TELL_MITRA_DEFAULT_SUBTITLE = "Share what is moving today.";
 
 export const TELL_MITRA_HAS_HISTORY_SUBTITLE_HI =
-  "मित्र को बताते रहें जो मन में चल रहा है।";
+  "मित्र को बताते रहें मन में क्या चल रहा है।";
 export const TELL_MITRA_ACTIVE_PATH_SUBTITLE_HI =
   "अभी आपके मन में क्या है?";
 export const TELL_MITRA_DEFAULT_SUBTITLE_HI = "आज जो मन में चल रहा है वो साझा करें।";
@@ -135,7 +135,7 @@ export const SEGMENT_INNER_PATH_NO_STATE_SUBTITLE_HI: Record<MitraHomeSegment, s
 export const SEGMENT_GREETING_SUBTEXT_HI: Record<MitraHomeSegment, string> = {
   new: "आज मित्र आपसे कहाँ मिले?",
   rhythm_only: "आपकी लय चालू है।",
-  quick_chant_only: "आपका मंत्र जाप जब चाहें वापस आने के लिए यहाँ है।",
+  quick_chant_only: "आपका मंत्र जाप जब ज़रूरत हो तब वापस आने के लिए यहाँ है।",
   tell_mitra_only: "मित्र वहीं से जारी रखने के लिए यहाँ है जहाँ आप हैं।",
   inner_path_only: "आपका पथ चालू है।",
   rhythm_and_path: "आपकी लय और पथ दोनों चालू हैं।",

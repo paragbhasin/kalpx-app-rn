@@ -190,87 +190,10 @@ export function Header({
           </Link>
         </div>
 
-        {/* Mobile language switcher */}
-        <div ref={mobileLangRef} className="kalpx-mobile-only" style={{ position: "relative" }}>
-          <button
-            onClick={() => setMobileLangOpen((o) => !o)}
-            aria-label="Switch language"
-            data-testid="header-mobile-lang-btn"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 4,
-              fontSize: 12,
-              fontWeight: 600,
-              color: "var(--kalpx-text-muted)",
-              letterSpacing: 0.5,
-              padding: "4px 10px",
-              border: "1px solid var(--kalpx-border-gold)",
-              borderRadius: 20,
-              background: "transparent",
-              cursor: "pointer",
-            }}
-          >
-            <Globe size={13} strokeWidth={2} />
-            {locale === 'hi' ? 'हिंदी' : locale === 'te' ? 'తెలుగు' : 'English'}
-          </button>
-
-          {mobileLangOpen && (
-            <>
-              <div
-                onClick={() => setMobileLangOpen(false)}
-                style={{ position: "fixed", inset: 0, zIndex: 59 }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  top: 36,
-                  right: 0,
-                  background: "#fff",
-                  border: "1px solid var(--kalpx-border-gold)",
-                  borderRadius: 10,
-                  boxShadow: "var(--kalpx-shadow-card)",
-                  minWidth: 120,
-                  zIndex: 60,
-                  overflow: "hidden",
-                }}
-              >
-                {(
-                  [
-                    { code: 'en' as Locale, label: 'English' },
-                    { code: 'hi' as Locale, label: 'हिंदी' },
-                    // { code: 'te' as Locale, label: 'తెలుగు' },
-                  ] as const
-                ).map(({ code, label }) => (
-                  <button
-                    key={code}
-                    onClick={() => { setLocale(code); setMobileLangOpen(false); }}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      width: "100%",
-                      padding: "11px 16px",
-                      fontSize: 13,
-                      fontWeight: locale === code ? 700 : 500,
-                      color: locale === code ? "var(--kalpx-cta)" : "var(--kalpx-text)",
-                      background: locale === code ? "rgba(184,134,75,0.07)" : "none",
-                      border: "none",
-                      borderBottom: code !== 'te' ? "1px solid var(--kalpx-border-gold)" : "none",
-                      cursor: "pointer",
-                      textAlign: "left",
-                    }}
-                  >
-                    {label}
-                    {locale === code && (
-                      <span style={{ fontSize: 10, color: "var(--kalpx-cta)" }}>✓</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
+        {/* Mobile language switcher — commented out */}
+        {/* <div ref={mobileLangRef} className="kalpx-mobile-only" style={{ position: "relative" }}>
+          ...
+        </div> */}
 
         {/* Desktop nav */}
         <nav
@@ -288,81 +211,8 @@ export function Header({
             </NavLink>
           ))}
 
-          {/* Language switcher */}
-          <div ref={langRef} style={{ position: "relative" }}>
-            <button
-              onClick={() => setLangOpen((o) => !o)}
-              aria-label="Switch language"
-              data-testid="header-lang-btn"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
-                fontSize: 12,
-                fontWeight: 600,
-                color: "var(--kalpx-text-muted)",
-                letterSpacing: 0.5,
-                padding: "4px 10px",
-                border: "1px solid var(--kalpx-border-gold)",
-                borderRadius: 20,
-                background: "transparent",
-                cursor: "pointer",
-              }}
-            >
-              <Globe size={13} strokeWidth={2} />
-              {locale === 'hi' ? 'हिंदी' : locale === 'te' ? 'తెలుగు' : 'English'}
-            </button>
-
-            {langOpen && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: 36,
-                  right: 0,
-                  background: "#fff",
-                  border: "1px solid var(--kalpx-border-gold)",
-                  borderRadius: 10,
-                  boxShadow: "var(--kalpx-shadow-card)",
-                  minWidth: 120,
-                  zIndex: 70,
-                  overflow: "hidden",
-                }}
-              >
-                {(
-                  [
-                    { code: 'en' as Locale, label: 'English' },
-                    { code: 'hi' as Locale, label: 'हिंदी' },
-                    // { code: 'te' as Locale, label: 'తెలుగు' },
-                  ] as const
-                ).map(({ code, label }) => (
-                  <button
-                    key={code}
-                    onClick={() => handleLangSelect(code)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      width: "100%",
-                      padding: "11px 16px",
-                      fontSize: 13,
-                      fontWeight: locale === code ? 700 : 500,
-                      color: locale === code ? "var(--kalpx-cta)" : "var(--kalpx-text)",
-                      background: locale === code ? "rgba(184,134,75,0.07)" : "none",
-                      border: "none",
-                      borderBottom: code !== 'te' ? "1px solid var(--kalpx-border-gold)" : "none",
-                      cursor: "pointer",
-                      textAlign: "left",
-                    }}
-                  >
-                    {label}
-                    {locale === code && (
-                      <span style={{ fontSize: 10, color: "var(--kalpx-cta)" }}>✓</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          {/* Language switcher — commented out */}
+          {/* <div ref={langRef} style={{ position: "relative" }}>...</div> */}
 
           {authed ? (
             <>

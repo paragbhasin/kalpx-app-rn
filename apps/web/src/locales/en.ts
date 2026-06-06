@@ -687,4 +687,9 @@ export const en = {
       returnHome: '✕ Return home',
     },
   },
+  progressSection: {
+    daysEngaged: 'Days engaged',
+    fullyCompleted: 'Fully completed',
+    dailyRhythm: 'Daily Rhythm',
+  },
 } as const;

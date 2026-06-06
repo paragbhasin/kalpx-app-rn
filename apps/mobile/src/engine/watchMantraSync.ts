@@ -1,31 +1,13 @@
-import { getQuickResetOpening } from './mitraApi';
+import { mitraJourneyDailyView } from './mitraApi';
 import { watchConnectivity } from '../native/watchConnectivity';
 import store from '../store';
-
-function getRhythmTimeBand(): 'morning' | 'afternoon' | 'night' {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'morning';
-  if (hour < 20) return 'afternoon';
-  return 'night';
-}
 
 export async function pushMantrasToWatch(): Promise<void> {
   try {
     const homeData = store.getState().door?.homeData;
     const mantras: { ref: string; name: string; devanagari: string; label?: string }[] = [];
 
-    // Inner Path mantra — user's current default from quick reset
-    const opening = await getQuickResetOpening();
-    if (opening?.mantra) {
-      mantras.push({
-        ref:        opening.mantra.item_id,
-        name:       opening.mantra.title,
-        devanagari: opening.mantra.devanagari,
-        label:      'inner_path',
-      });
-    }
-
-    // Daily Rhythm mantras — morning / afternoon / night
+    // Rhythm mantras — all three bands
     const rhythm = homeData?.companion_rhythm;
     if (rhythm) {
       const slots = [
@@ -61,8 +43,9 @@ export async function pushMantrasToWatch(): Promise<void> {
   }
 }
 
-// Pushes structured path data so the Watch home list renders the correct sections.
-// Called on login + homeData load, same as pushMantrasToWatch.
+// Pushes structured path data so the Watch home list renders correctly.
+// Inner Path: real triad from daily-view API (mantra + sankalp + practice).
+// Rhythm: ALL three bands (morning/afternoon/night), not just current time slot.
 export async function pushPathDataToWatch(): Promise<void> {
   try {
     const homeData = store.getState().door?.homeData;
@@ -73,60 +56,60 @@ export async function pushPathDataToWatch(): Promise<void> {
     let innerPath = null;
 
     if (hasActivePath) {
-      let mantra = null;
       try {
-        const opening = await getQuickResetOpening();
-        if (opening?.mantra) {
-          mantra = {
-            ref:        opening.mantra.item_id,
-            name:       opening.mantra.title,
-            devanagari: opening.mantra.devanagari ?? '',
+        const result = await mitraJourneyDailyView();
+        const rawTriad: any[] = result?.envelope?.today?.triad ?? [];
+        const triad = rawTriad.map((item: any) => {
+          // how_to_live can be a string, an array, or absent — normalise to string|null
+          const htl = item.how_to_live;
+          const howToLive = Array.isArray(htl)
+            ? (htl.length > 0 ? htl.join(' ') : null)
+            : (htl || null);
+          return {
+            slot:      item.slot,
+            itemId:    item.item_id,
+            title:     item.title,
+            subtitle:  item.subtitle ?? '',
+            howToLive,
           };
-        }
-      } catch {}
-
-      innerPath = {
-        hasActivePath: true,
-        dayNumber:  ips.day_number  ?? 1,
-        totalDays:  ips.total_days  ?? 14,
-        mantra,
-        practice: null, // practice content requires inner-path-day API — handled in Phase 5
-      };
+        });
+        innerPath = {
+          hasActivePath: true,
+          dayNumber: ips.day_number ?? 1,
+          totalDays: ips.total_days ?? 14,
+          triad,
+        };
+      } catch {
+        // daily-view failed — still show Inner Path card with no triad
+        innerPath = {
+          hasActivePath: true,
+          dayNumber: ips.day_number ?? 1,
+          totalDays: ips.total_days ?? 14,
+          triad: [],
+        };
+      }
     }
 
-    // ── Rhythm ─────────────────────────────────────────────────────────────────
+    // ── Rhythm (all bands) ──────────────────────────────────────────────────────
     const cr = homeData?.companion_rhythm;
     const hasRhythm = cr?.has_rhythm === true;
     let rhythm = null;
 
     if (hasRhythm) {
-      const currentSlot = getRhythmTimeBand();
-      const slot = cr[currentSlot];
-      const slotDone = cr[`${currentSlot}_done`] ?? false;
+      const bands = (['morning', 'afternoon', 'night'] as const)
+        .map((band) => ({
+          band,
+          isDone: (cr as any)[`${band}_done`] ?? false,
+          items: ((cr as any)[band]?.items ?? []).map((i: any) => ({
+            itemId:      i.item_id,
+            itemType:    i.item_type,
+            title:       i.title_snapshot,
+            description: i.description_snapshot ?? '',
+          })),
+        }))
+        .filter((b) => b.items.length > 0);
 
-      const items: any[] = slot?.items ?? [];
-      const mantraItem   = items.find((i) => i.item_type === 'mantra');
-      const sankalpItem  = items.find((i) => i.item_type === 'sankalp');
-      const practiceItem = items.find((i) => i.item_type === 'practice');
-
-      rhythm = {
-        hasRhythm: true,
-        currentSlot,
-        slotDone,
-        mantra: mantraItem ? {
-          ref:        mantraItem.item_id,
-          name:       mantraItem.title_snapshot,
-          devanagari: mantraItem.devanagari ?? '',
-        } : null,
-        sankalp: sankalpItem ? {
-          title: sankalpItem.title_snapshot,
-          line:  sankalpItem.description_snapshot ?? '',
-        } : null,
-        practice: practiceItem ? {
-          title:       practiceItem.title_snapshot,
-          description: practiceItem.description_snapshot ?? '',
-        } : null,
-      };
+      rhythm = { hasRhythm: true, bands };
     }
 
     // ── Check-In ───────────────────────────────────────────────────────────────
@@ -138,21 +121,17 @@ export async function pushPathDataToWatch(): Promise<void> {
 
     const pathData = { innerPath, rhythm, checkin };
 
-    // Push via app group (persistent) + applicationContext (simulator-reliable) + live message
+    console.log('[WatchPath] pushing — hasActivePath:', hasActivePath, 'hasRhythm:', hasRhythm,
+      'triadCount:', (innerPath as any)?.triad?.length ?? 0,
+      'rhythmBands:', (rhythm as any)?.bands?.length ?? 0);
+
     watchConnectivity.writePathDataToAppGroup(pathData);
     watchConnectivity.pushPathDataViaContext(pathData);
     watchConnectivity.sendToWatch({ type: 'path_data', payload: pathData });
 
-    // Write today's japa count + inner path for Watch face complications
+    // Complication: today japa count
     const todayJapaCount: number = (homeData as any)?.japa_stats?.today_count ?? 0;
-    const innerPathToday = hasActivePath && innerPath ? {
-      day:         ips.day_number  ?? 1,
-      totalDays:   ips.total_days  ?? 14,
-      mantraRef:   innerPath.mantra?.ref   ?? null,
-      mantraName:  innerPath.mantra?.name  ?? null,
-      devanagari:  innerPath.mantra?.devanagari ?? null,
-    } : null;
-    watchConnectivity.writeTodayStatsToAppGroup({ todayJapaCount, innerPathToday });
+    watchConnectivity.writeTodayStatsToAppGroup({ todayJapaCount, innerPathToday: null });
 
     console.log('[WatchPath] pushed path data to Watch');
   } catch (err) {

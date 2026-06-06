@@ -75,13 +75,29 @@ class WatchAppGroupStorage {
     func savePathData(_ pathData: WatchPathData) {
         guard let data = try? encoder.encode(pathData) else { return }
         defaults?.set(data, forKey: KalpxAppGroupKeys.watchPathData)
+        NSLog("[WatchPath-Watch] savePathData: saved %d bytes, innerPath=%@, rhythm=%@",
+              data.count,
+              pathData.innerPath != nil ? "yes(hasActivePath=\(pathData.innerPath!.hasActivePath))" : "nil",
+              pathData.rhythm    != nil ? "yes(hasRhythm=\(pathData.rhythm!.hasRhythm))" : "nil")
     }
 
     func loadPathData() -> WatchPathData? {
-        guard let data = defaults?.data(forKey: KalpxAppGroupKeys.watchPathData),
-              let pathData = try? decoder.decode(WatchPathData.self, from: data)
-        else { return nil }
-        return pathData
+        guard let data = defaults?.data(forKey: KalpxAppGroupKeys.watchPathData) else {
+            NSLog("[WatchPath-Watch] loadPathData: no data in app group for key %@", KalpxAppGroupKeys.watchPathData)
+            return nil
+        }
+        let rawStr = String(data: data, encoding: .utf8) ?? "non-utf8"
+        NSLog("[WatchPath-Watch] loadPathData: raw JSON = %@", rawStr)
+        do {
+            let pathData = try decoder.decode(WatchPathData.self, from: data)
+            NSLog("[WatchPath-Watch] loadPathData: decoded OK — innerPath=%@, rhythm=%@",
+                  pathData.innerPath != nil ? "yes(hasActivePath=\(pathData.innerPath!.hasActivePath))" : "nil",
+                  pathData.rhythm    != nil ? "yes(hasRhythm=\(pathData.rhythm!.hasRhythm))" : "nil")
+            return pathData
+        } catch {
+            NSLog("[WatchPath-Watch] loadPathData: DECODE FAILED: %@  raw=%@", error.localizedDescription, rawStr)
+            return nil
+        }
     }
 
     // MARK: - Today's japa count (accumulates across sessions; reset by iPhone on new day)

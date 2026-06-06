@@ -1,4 +1,5 @@
-import { mitraJourneyDailyView } from './mitraApi';
+import { mitraJourneyDailyView, getQuickResetOpening } from './mitraApi';
+import { japaGetStats } from './japaApi';
 import { watchConnectivity } from '../native/watchConnectivity';
 import store from '../store';
 
@@ -71,6 +72,7 @@ export async function pushPathDataToWatch(): Promise<void> {
             title:     item.title,
             subtitle:  item.subtitle ?? '',
             howToLive,
+            audioUrl:  item.audio_url ?? null,
           };
         });
         innerPath = {
@@ -105,6 +107,7 @@ export async function pushPathDataToWatch(): Promise<void> {
             itemType:    i.item_type,
             title:       i.title_snapshot,
             description: i.description_snapshot ?? '',
+            audioUrl:    i.audio_url ?? null,
           })),
         }))
         .filter((b) => b.items.length > 0);
@@ -119,7 +122,39 @@ export async function pushPathDataToWatch(): Promise<void> {
       pranaLabel:   acw?.prana_label ?? null,
     };
 
-    const pathData = { innerPath, rhythm, checkin };
+    // ── Quick Reset mantra ─────────────────────────────────────────────────────
+    let quickReset = null;
+    try {
+      const qrResult = await getQuickResetOpening();
+      if (qrResult?.mantra) {
+        quickReset = {
+          itemId:      qrResult.mantra.item_id,
+          title:       qrResult.mantra.title,
+          devanagari:  qrResult.mantra.devanagari ?? '',
+          audioUrl:    qrResult.mantra.audio_url ?? null,
+        };
+      }
+    } catch { /* non-fatal */ }
+
+    // ── Per-mantra stats (today / week / year / lifetime) ─────────────────────
+    const mantraStats: Record<string, {
+      todayCount: number; weekCount: number; yearCount: number; lifetimeCount: number;
+    }> = {};
+    try {
+      const statsResult = await japaGetStats();
+      if (statsResult?.stats) {
+        for (const row of statsResult.stats) {
+          mantraStats[row.mantra_ref] = {
+            todayCount:    row.today_count,
+            weekCount:     row.week_count,
+            yearCount:     row.year_count,
+            lifetimeCount: row.lifetime_count,
+          };
+        }
+      }
+    } catch { /* non-fatal */ }
+
+    const pathData = { innerPath, rhythm, checkin, quickReset, mantraStats };
 
     console.log('[WatchPath] pushing — hasActivePath:', hasActivePath, 'hasRhythm:', hasRhythm,
       'triadCount:', (innerPath as any)?.triad?.length ?? 0,

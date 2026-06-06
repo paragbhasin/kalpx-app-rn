@@ -8,11 +8,13 @@ import WidgetKit
 class WatchJapaEngine: NSObject, ObservableObject {
 
     // MARK: - Published state
-    @Published var sessionCount:        Int  = 0
-    @Published var malaRoundsCompleted: Int  = 0
-    @Published var canUndo:             Bool = false
-    @Published var isActive:            Bool = false
-    @Published var isGoalReached:       Bool = false
+    @Published var sessionCount:        Int    = 0
+    @Published var malaRoundsCompleted: Int    = 0
+    @Published var canUndo:             Bool   = false
+    @Published var isActive:            Bool   = false
+    @Published var isGoalReached:       Bool   = false
+    @Published var currentMantraRef:    String  = ""
+    @Published var currentAudioUrl:    String? = nil
 
     // MARK: - Private state
     private var session      = WatchLocalSession.fresh(mantraRef: "om-namah-shivaya", goalType: "unlimited", goalValue: nil)
@@ -44,6 +46,7 @@ class WatchJapaEngine: NSObject, ObservableObject {
         malaRoundsCompleted  = saved.malaRoundsCompleted
         unsyncedDelta        = saved.unsyncedDelta
         canUndo              = saved.sessionCount > 0
+        currentMantraRef     = saved.mantraRef
         isActive             = true
         startSyncTimer()
     }
@@ -63,6 +66,8 @@ class WatchJapaEngine: NSObject, ObservableObject {
         undoStack            = []
         canUndo              = false
         isGoalReached        = false
+        currentMantraRef     = mantra.ref
+        currentAudioUrl      = mantra.audioUrl
         isActive             = true
 
         storage.saveCurrentSession(session)

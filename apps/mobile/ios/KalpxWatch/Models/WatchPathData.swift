@@ -8,6 +8,7 @@ struct WatchTriadItem: Codable {
     let title: String
     let subtitle: String
     let howToLive: String? // sankalp only
+    let audioUrl: String?  // guided audio, mantra only
 }
 
 struct WatchInnerPathData: Codable {
@@ -24,6 +25,7 @@ struct WatchRhythmItem: Codable {
     let itemType: String   // "mantra" | "sankalp" | "practice"
     let title: String
     let description: String
+    let audioUrl: String?  // guided audio, mantra only
 }
 
 struct WatchRhythmBand: Codable {
@@ -44,10 +46,30 @@ struct WatchCheckinData: Codable {
     let pranaLabel: String?
 }
 
+// ── Per-mantra stats ─────────────────────────────────────────────────────────
+
+struct WatchMantraStats: Codable {
+    let todayCount: Int
+    let weekCount: Int
+    let yearCount: Int
+    let lifetimeCount: Int
+}
+
+// ── Quick Reset ─────────────────────────────────────────────────────────────
+
+struct WatchQuickResetMantra: Codable {
+    let itemId: String
+    let title: String
+    let devanagari: String
+    let audioUrl: String?
+}
+
 // ── Root ────────────────────────────────────────────────────────────────────
 
 struct WatchPathData: Codable {
     let innerPath: WatchInnerPathData?
     let rhythm: WatchRhythmData?
     let checkin: WatchCheckinData
+    let quickReset: WatchQuickResetMantra?
+    let mantraStats: [String: WatchMantraStats]?
 }

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct QuickChantView: View {
     @EnvironmentObject var engine: WatchJapaEngine
+    @EnvironmentObject var connectivity: WatchConnectivityManager
     @State private var showCompletion = false
 
     var body: some View {
@@ -23,7 +24,7 @@ struct QuickChantView: View {
 
     private var chantView: some View {
         VStack(spacing: 0) {
-            // Whole upper section is the tap target — no "TAP" button
+            // Whole upper section is the tap target
             VStack(spacing: 6) {
                 Spacer(minLength: 4)
 
@@ -44,6 +45,12 @@ struct QuickChantView: View {
                     .padding(.horizontal, 8)
                     .padding(.top, 2)
 
+                // Stats row — baseline from iPhone + this session's count
+                if engine.sessionCount > 0 || (connectivity.pathData?.mantraStats?[engine.currentMantraRef]) != nil {
+                    statsRow()
+                        .transition(.opacity)
+                }
+
                 Text("tap to chant")
                     .font(.system(size: 10, weight: .regular))
                     .foregroundColor(.secondary)
@@ -58,6 +65,12 @@ struct QuickChantView: View {
             }
             .accessibilityAddTraits(.isButton)
             .accessibilityLabel("Count one bead. \(engine.sessionCount) counted")
+
+            // Guided audio player — shown if mantra has audio
+            if let url = engine.currentAudioUrl, !url.isEmpty {
+                MantraAudioPlayerView(audioUrl: url)
+                    .padding(.bottom, 2)
+            }
 
             // Small icon controls at the bottom
             HStack {
@@ -92,5 +105,39 @@ struct QuickChantView: View {
             .padding(.bottom, 4)
             .frame(height: 36)
         }
+    }
+
+    private func statsRow() -> some View {
+        let base     = connectivity.pathData?.mantraStats?[engine.currentMantraRef]
+        let today    = (base?.todayCount    ?? 0) + engine.sessionCount
+        let week     = (base?.weekCount     ?? 0) + engine.sessionCount
+        let year     = (base?.yearCount     ?? 0) + engine.sessionCount
+        let lifetime = (base?.lifetimeCount ?? 0) + engine.sessionCount
+
+        return HStack(spacing: 0) {
+            statCell("Today",  today)
+            if week > today    { statCell("Week",  week) }
+            if year > week     { statCell("Year",  year) }
+            if lifetime > year { statCell("Life",  lifetime) }
+        }
+        .padding(.top, 2)
+    }
+
+    private func statCell(_ label: String, _ count: Int) -> some View {
+        VStack(spacing: 1) {
+            Text(formatCount(count))
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .foregroundColor(.primary)
+            Text(label)
+                .font(.system(size: 9))
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func formatCount(_ n: Int) -> String {
+        if n >= 1_000_000 { return String(format: "%.1fM", Double(n) / 1_000_000) }
+        if n >= 1_000     { return String(format: "%.1fK", Double(n) / 1_000) }
+        return "\(n)"
     }
 }

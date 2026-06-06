@@ -1127,10 +1127,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				NSExtension = {
-					NSExtensionPointIdentifier = "com.apple.widgetkit-extension";
-				};
-				PRODUCT_BUNDLE_IDENTIFIER = com.kalpx.app.watchwidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kalpx.app.watchkitapp.watchwidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -1154,10 +1151,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				NSExtension = {
-					NSExtensionPointIdentifier = "com.apple.widgetkit-extension";
-				};
-				PRODUCT_BUNDLE_IDENTIFIER = com.kalpx.app.watchwidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kalpx.app.watchkitapp.watchwidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;

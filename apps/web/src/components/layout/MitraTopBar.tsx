@@ -90,7 +90,7 @@ export function MitraTopBar({ transparent = false }: Props) {
                 [
                   { code: "en" as Locale, label: "English" },
                   { code: "hi" as Locale, label: "हिंदी" },
-                  { code: "te" as Locale, label: "తెలుగు" },
+                  // { code: "te" as Locale, label: "తెలుగు" },
                 ] as const
               ).map(({ code, label }) => (
                 <button

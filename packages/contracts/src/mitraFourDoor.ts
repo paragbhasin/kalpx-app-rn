@@ -95,7 +95,7 @@ export const RHYTHM_ITEM_TYPE_LABELS_HI: Record<RhythmItemType, string> = {
   sankalp: "संकल्प",
   practice: "अभ्यास",
   reflection: "चिंतन",
-  library: "पुस्तकालय",
+  library: "लाइब्रेरी",
 };
 
 // ── Door constants ──────────────────────────────────────────────────────────
@@ -117,8 +117,8 @@ export const DOOR_LABELS: Record<DoorId, string> = {
 
 export const DOOR_LABELS_HI: Record<DoorId, string> = {
   my_rhythm: "मेरी लय",
-  inner_path: "आंतरिक पथ",
-  quick_reset: "त्वरित जप",
+  inner_path: "अंदर की राह",
+  quick_reset: "जल्दी जप",
   tell_mitra: "मित्र को बताएं",
 };
 
@@ -172,12 +172,12 @@ export const ROOM_DESCRIPTIONS: Record<VerifiedRoomId, string> = {
 };
 
 export const ROOM_DESCRIPTIONS_HI: Record<VerifiedRoomId, string> = {
-  room_stillness: "एक कमरा जब चीजें बहुत अधिक लगें तो मन को स्थिर करने के लिए।",
-  room_release: "एक कमरा जो भारी लगे उसे रखने के लिए।",
-  room_clarity: "एक कमरा अगला कदम स्पष्ट रूप से देखने के लिए।",
-  room_joy: "एक कमरा यह देखने के लिए कि पहले से क्या अच्छा है।",
-  room_connection: "एक कमरा जब हृदय अकेला महसूस करे।",
-  room_growth: "एक कमरा ऊर्जा को एक स्पष्ट कार्य में बदलने के लिए।",
+  room_stillness: "जब सब कुछ बहुत ज़्यादा लगे — मन को यहाँ थोड़ा थामें।",
+  room_release: "जो बोझ है — उसे यहाँ उतार दें।",
+  room_clarity: "अगला कदम थोड़ा साफ़ दिखे — इसके लिए।",
+  room_joy: "जो पहले से अच्छा है — उसे देखने के लिए।",
+  room_connection: "जब दिल अकेला लगे — उस वक्त के लिए।",
+  room_growth: "ऊर्जा को एक सीधे काम में लगाने के लिए।",
 };
 
 // ── Guards ──────────────────────────────────────────────────────────────────
@@ -274,9 +274,9 @@ export const RHYTHM_SUGGEST_COPY = {
 
 export const RHYTHM_SUGGEST_COPY_HI = {
   loading: "मित्र आपकी लय बना रहा है…",
-  error: "मित्र अभी इसे स्वचालित रूप से नहीं बना सका।",
+  error: "मित्र अभी यह अपने आप नहीं बना सका।",
   tryAgain: "फिर कोशिश करें",
-  chooseFromLibrary: "पुस्तकालय से चुनें",
+  chooseFromLibrary: "लाइब्रेरी से चुनें",
   signInRequired: "मित्र को आपकी लय बनाने दें — साइन इन करें।",
   signIn: "साइन इन करें",
 } as const;
@@ -715,7 +715,7 @@ export const QUICK_RESET_ACTION_LABELS_HI: Record<string, string> = {
   mitra_suggest_for_this_moment: "एक और शांत मंत्र आज़माएं",
   set_as_default: "मेरा क्विक रीसेट मंत्र सेट करें",
   change_mantra: "मंत्र बदलें",
-  choose_from_library: "पुस्तकालय से चुनें",
+  choose_from_library: "लाइब्रेरी से चुनें",
 };
 
 export function getQuickResetActionLabel(action: string, locale = "en"): string {

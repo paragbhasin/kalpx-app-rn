@@ -238,7 +238,7 @@ const RoomMemoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       const res = await api.get("mitra/rooms/memory/");
       setMemories(res?.data?.memories ?? []);
     } catch (err: any) {
-      setError(isHi ? "आपके विचार लोड नहीं हो सके। कृपया पुनः प्रयास करें।" : "Couldn't load your reflections. Please try again.");
+      setError(isHi ? "आपके विचार लोड नहीं हो सके। कृपया फिर से कोशिश करें।" : "Couldn't load your reflections. Please try again.");
       if (__DEV__) {
         console.warn("[RoomMemoryScreen] fetch failed:", err?.response?.status || err?.message);
       }
@@ -292,7 +292,7 @@ const RoomMemoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <View style={styles.center}>
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity style={styles.retryBtn} onPress={fetchMemories}>
-            <Text style={styles.retryLabel}>{isHi ? "पुनः प्रयास करें" : "Try again"}</Text>
+            <Text style={styles.retryLabel}>{isHi ? "फिर कोशिश करें" : "Try again"}</Text>
           </TouchableOpacity>
         </View>
       ) : memories.length === 0 ? (

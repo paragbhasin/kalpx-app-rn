@@ -79,23 +79,23 @@ export const SCREEN_STRINGS_HI: Record<string, string> = {
   "Return to devotion": "भक्ति में वापस लौटें",
 
   // ── turn_3_support ──────────────────────────────────────────────────────────
-  "What feels strongest right now?": "अभी क्या सबसे प्रबल लग रहा है?",
+  "What feels strongest right now?": "अभी सबसे ज़्यादा क्या महसूस हो रहा है?",
   "Pick where you feel it most.": "जहाँ सबसे ज़्यादा महसूस हो वह चुनें।",
-  "My body feels tight": "मेरा शरीर तनावग्रस्त महसूस होता है",
+  "My body feels tight": "मेरा शरीर जकड़ा हुआ महसूस होता है",
   "My breathing feels off": "मेरी साँसें ठीक नहीं लग रहीं",
   "My mind won't settle": "मेरा मन स्थिर नहीं हो रहा",
   "I don't know what to do": "मुझे नहीं पता क्या करूँ",
   "Something feels heavy inside": "अंदर कुछ भारी लग रहा है",
 
   // ── turn_3_growth ───────────────────────────────────────────────────────────
-  "What feels present right now?": "अभी क्या उपस्थित लग रहा है?",
+  "What feels present right now?": "अभी मन में क्या है?",
   "Pick whichever fits today.": "जो आज ठीक लगे वह चुनें।",
   "I feel steady": "मैं स्थिर महसूस कर रहा/रही हूँ",
-  "I feel thankful": "मैं कृतज्ञ महसूस कर रहा/रही हूँ",
+  "I feel thankful": "मैं शुक्रगुज़ार हूँ",
   "Something is changing": "कुछ बदल रहा है",
   "I feel better today": "मैं आज बेहतर महसूस कर रहा/रही हूँ",
   "I want to grow": "मैं बढ़ना चाहता/चाहती हूँ",
-  "I want more meaning": "मुझे अधिक अर्थ चाहिए",
+  "I want more meaning": "मुझे ज़िंदगी में कुछ मायने चाहिए",
 
   // ── turn_4_support ──────────────────────────────────────────────────────────
   "What is your mind doing?": "आपका मन क्या कर रहा है?",
@@ -104,24 +104,24 @@ export const SCREEN_STRINGS_HI: Record<string, string> = {
   "It keeps worrying ahead": "वह आगे की चिंता करता रहता है",
   "It keeps comparing": "वह तुलना करता रहता है",
   "It keeps arguing inside": "वह अंदर से बहस करता रहता है",
-  "It goes blank": "वह रिक्त हो जाता है",
+  "It goes blank": "वह खाली हो जाता है",
   "It keeps holding on": "वह पकड़े रहता है",
   "It keeps pushing away": "वह धकेलता रहता है",
 
   // ── turn_4_growth ───────────────────────────────────────────────────────────
-  "What do you want more of right now?": "अभी आप क्या अधिक चाहते हैं?",
+  "What do you want more of right now?": "अभी आपको और क्या चाहिए?",
   "The one that pulls you most.": "जो सबसे ज़्यादा खींचे।",
-  "More clarity": "अधिक स्पष्टता",
-  "More peace": "अधिक शांति",
-  "More strength": "अधिक शक्ति",
-  "More devotion": "अधिक भक्ति",
-  "More purpose": "अधिक उद्देश्य",
-  "More steadiness": "अधिक स्थिरता",
+  "More clarity": "और साफ़ होना है",
+  "More peace": "और शांति चाहिए",
+  "More strength": "और ताकत चाहिए",
+  "More devotion": "और भक्ति चाहिए",
+  "More purpose": "एक मकसद चाहिए",
+  "More steadiness": "और स्थिरता चाहिए",
 
   // ── turn_5_support ──────────────────────────────────────────────────────────
   "What feels underneath it most?": "इसके नीचे सबसे ज़्यादा क्या है?",
   "Pick what feels truest, even if small.": "जो सबसे सच्चा लगे वह चुनें, भले ही छोटा हो।",
-  "Fear": "भय",
+  "Fear": "डर",
   "Holding on too tightly": "बहुत कसकर पकड़े रहना",
   "Not wanting this at all": "यह बिल्कुल नहीं चाहना",
   "Feeling hurt": "आहत महसूस करना",
@@ -132,11 +132,11 @@ export const SCREEN_STRINGS_HI: Record<string, string> = {
   "What would help most today?": "आज क्या सबसे अधिक मदद करेगा?",
   "Pick whichever feels right.": "जो सही लगे वह चुनें।",
   "Something quiet": "कुछ शांत",
-  "Something practical": "कुछ व्यावहारिक",
-  "Something uplifting": "कुछ उत्साहवर्धक",
-  "Something devotional": "कुछ भक्तिपूर्ण",
+  "Something practical": "कुछ जो काम का हो",
+  "Something uplifting": "कुछ जो मन उठाए",
+  "Something devotional": "कुछ भक्ति का",
   "Something grounding": "कुछ स्थिर करने वाला",
-  "Something to think through": "कुछ विचार करने के लिए",
+  "Something to think through": "कुछ जिस पर सोच सकें",
 
   // ── turn_6 (guidance mode) ──────────────────────────────────────────────────
   "How would you like this guidance to sound?":
@@ -154,7 +154,7 @@ export const SCREEN_STRINGS_HI: Record<string, string> = {
   "Begin my journey": "मेरी यात्रा शुरू करें",
 
   // ── turn_3 (dynamic friction / legacy) ─────────────────────────────────────
-  "Or describe it...": "या इसे वर्णित करें...",
+  "Or describe it...": "या इसे बताएं...",
   "Racing — mind moving too fast": "दौड़ता हुआ — मन बहुत तेज़ चल रहा है",
   "Drained — low energy, nothing left": "थका हुआ — ऊर्जा कम, कुछ नहीं बचा",
   "Foggy — can't see clearly": "धुंधला — स्पष्ट नहीं दिख रहा",
@@ -199,7 +199,7 @@ export const SCREEN_STRINGS_HI: Record<string, string> = {
   "Useful for": "उपयोगी है",
   "Rooted in": "आधारित है",
   "This isn't homework. It's sadhana — a daily practice that builds something real over time.":
-    "यह गृहकार्य नहीं है। यह साधना है — एक दैनिक अभ्यास जो समय के साथ कुछ वास्तविक बनाता है।",
+    "यह होमवर्क नहीं है। यह साधना है — एक रोज़ का अभ्यास जो वक्त के साथ कुछ असली बनाता है।",
 };
 
 export const SCREEN_STRINGS_TE: Record<string, string> = {

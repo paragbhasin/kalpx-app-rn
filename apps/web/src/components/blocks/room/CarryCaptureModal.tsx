@@ -36,7 +36,7 @@ const CARRY_MEMORY_MODAL_HI: Record<string, CarryModalCopy> = {
     primary_label: "इसे रख दें",
   },
   growth_reflect: {
-    prompt: "कौन सी अंतर्दृष्टि या संकल्प आप अपने साथ ले जाना चाहते हैं?",
+    prompt: "कौन सी बात या संकल्प आप अपने साथ ले जाना चाहते हैं?",
     placeholder: "आपका मनन...",
     primary_label: "इसे थाम लें",
   },
@@ -64,7 +64,7 @@ const CARRY_MEMORY_MODAL_HI: Record<string, CarryModalCopy> = {
   clarity_journal: {
     title: "एक ईमानदार प्रश्न लिखें",
     sanatan_context: "स्पष्टता तब आती है जब हम भ्रम का अनुसरण करना बंद कर देते हैं और जो वास्तव में यहाँ है उसे देखते हैं।",
-    why_we_ask: "प्रश्न लिखना वास्तविक निर्णय को उसके चारों ओर के शोर से अलग कर देता है।",
+    why_we_ask: "सवाल लिखने से असली बात आसपास के शोर से अलग हो जाती है।",
     prompt: "वह प्रश्न क्या है जिसके साथ आप वास्तव में बैठे हैं?",
     placeholder: "अपना ईमानदार प्रश्न लिखें...",
     primary_label: "यह प्रश्न सहेजें",

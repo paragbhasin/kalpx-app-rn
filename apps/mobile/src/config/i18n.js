@@ -5,7 +5,7 @@ import moment from "moment";
 
 // Supported locales at startup. To re-enable a language: add its code here,
 // restore its imports and resource block below, and filter Language.tsx list.
-const ENABLED_LOCALES = ["en", "hi", "te"];
+const ENABLED_LOCALES = ["en", "hi" /*, "te"*/];
 
 // Hindi imports
 import hi from "./locales/hi/hi.json";

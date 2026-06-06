@@ -111,7 +111,7 @@ const ROOM_COMPLETION_LINES_HI: Record<
   },
   room_clarity: {
     message: "आप प्रश्न के साथ बैठे।",
-    subtext: "एक स्पष्ट दृष्टि अभी के लिए काफी है।",
+    subtext: "एक साफ़ नज़र अभी के लिए काफी है।",
   },
   room_growth: {
     message: "आप उस दिशा में बढ़े जो मायने रखती है।",

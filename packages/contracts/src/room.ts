@@ -44,7 +44,7 @@ export const ROOM_REFLECTION_OPTIONS: Record<VerifiedRoomId, RoomReflectionOptio
 
 export const ROOM_REFLECTION_OPTIONS_HI: Record<VerifiedRoomId, RoomReflectionOption[]> = {
   room_stillness: [
-    { code: "more_steady",        label: "अधिक स्थिर" },
+    { code: "more_steady",        label: "ज़्यादा स्थिर" },
     { code: "still_restless",     label: "अभी भी बेचैन" },
     { code: "a_little_clearer",   label: "थोड़ा स्पष्ट" },
     { code: "want_to_share_more", label: "मित्र को और बताना है", is_tell_mitra_bridge: true },
@@ -69,13 +69,13 @@ export const ROOM_REFLECTION_OPTIONS_HI: Record<VerifiedRoomId, RoomReflectionOp
   ],
   room_growth: [
     { code: "i_know_one_step",    label: "एक कदम पता है" },
-    { code: "feel_ready",         label: "तैयार महसूस हो रहा है" },
+    { code: "feel_ready",         label: "तैयार हूँ" },
     { code: "still_stuck",        label: "अभी भी अटका हूँ" },
     { code: "want_help_choosing", label: "चुनने में मदद चाहिए" },
   ],
   room_joy: [
     { code: "noticed_something_good", label: "कुछ अच्छा देखा" },
-    { code: "more_steady",            label: "अधिक स्थिर" },
+    { code: "more_steady",            label: "ज़्यादा स्थिर" },
     { code: "still_restless",         label: "अभी भी बेचैन" },
     { code: "want_to_share_more",     label: "मित्र को और बताना है", is_tell_mitra_bridge: true },
   ],
@@ -139,14 +139,14 @@ export const ROOM_GUIDED_COPY = {
 export const ROOM_GUIDED_COPY_HI = {
   begin:            "शुरू करें",
   whyThisLabel:     "यह क्यों चुना गया",
-  viewAllSteps:     "सभी चरण देखें",
+  viewAllSteps:     "सभी कदम देखें",
   exitLabel:        "अभी जाता हूँ",
   reflectionPrompt: "क्या थोड़ा बदला?",
   nextStep: {
-    finishHere:    "यहाँ समाप्त करें",
+    finishHere:    "यहाँ रुकें",
     tellMitraMore: "मित्र को और बताएं",
-    continueStep:  "एक और चरण जारी रखें",
-    returnHome:    "होम पर लौटें",
+    continueStep:  "एक और कदम लें",
+    returnHome:    "घर जाएँ",
   },
 } as const;
 

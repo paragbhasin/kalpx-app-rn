@@ -9,6 +9,7 @@ import {
   QUICK_CHANT_HISTORY_ONLY_SUBTITLE_HI,
   QUICK_CHANT_NO_STATE_SUBTITLE,
   QUICK_CHANT_NO_STATE_SUBTITLE_HI,
+  SEGMENT_GREETING_SUBTEXT_HI,
   SEGMENT_INNER_PATH_NO_STATE_SUBTITLE,
   SEGMENT_INNER_PATH_NO_STATE_SUBTITLE_HI,
   SEGMENT_RHYTHM_NO_STATE_SUBTITLE,
@@ -493,7 +494,7 @@ export function MitraHomePage() {
                           margin: 0,
                         }}
                       >
-                        {greeting.subtext}
+                        {isHindi && segment ? (SEGMENT_GREETING_SUBTEXT_HI[segment] ?? greeting.subtext) : greeting.subtext}
                       </p>
 
                       <div

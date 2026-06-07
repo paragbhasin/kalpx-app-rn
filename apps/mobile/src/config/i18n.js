@@ -3,9 +3,16 @@ import merge from "lodash/merge";
 import { initReactI18next } from "react-i18next";
 import moment from "moment";
 
-// Supported locales at startup. To re-enable a language: add its code here,
-// restore its imports and resource block below, and filter Language.tsx list.
-const ENABLED_LOCALES = ["en", "hi" /*, "te"*/];
+// Enabled locales are gated by EXPO_PUBLIC_ENABLED_LOCALES (baked in at EAS build time).
+// Production: EXPO_PUBLIC_ENABLED_LOCALES=en  →  English only.
+// Dev/internal: EXPO_PUBLIC_ENABLED_LOCALES=en,hi,te  →  all supported locales.
+// Translation files are never deleted — only UI exposure is gated.
+const _rawEnabledLocales = process.env.EXPO_PUBLIC_ENABLED_LOCALES ?? "en";
+const ENABLED_LOCALES = _rawEnabledLocales
+  .split(",")
+  .map((s) => s.trim())
+  .filter((s) => ["en", "hi", "te"].includes(s));
+if (!ENABLED_LOCALES.includes("en")) ENABLED_LOCALES.unshift("en");
 
 // Hindi imports
 import hi from "./locales/hi/hi.json";
@@ -239,6 +246,12 @@ i18n.use(initReactI18next).init({
     escapeValue: false,
   },
   saveMissing: true,
+}).then(() => {
+  // Reset any persisted locale that is no longer enabled (e.g. 'hi' stored when
+  // prod is English-only). Forces English silently on next app start.
+  if (!ENABLED_LOCALES.includes(i18n.language)) {
+    i18n.changeLanguage("en");
+  }
 });
 
 // Keep moment in English regardless of any in-session language changes

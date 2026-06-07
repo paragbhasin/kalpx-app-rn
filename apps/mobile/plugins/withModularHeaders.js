@@ -2,6 +2,20 @@ const { withDangerousMod } = require("@expo/config-plugins");
 const fs = require("fs");
 const path = require("path");
 
+const FMT_FIX_LINES = [
+  "  # Xcode 26 / LLVM 17+: {fmt} consteval fix for folly/hermes pods",
+  "  if installer.pods_project",
+  "    installer.pods_project.targets.each do |target|",
+  "      target.build_configurations.each do |config|",
+  "        existing = (config.build_settings['OTHER_CFLAGS'] || '$(inherited)').to_s",
+  "        unless existing.include?('-DFMT_USE_CONSTEVAL=0')",
+  "          config.build_settings['OTHER_CFLAGS'] = existing + ' -DFMT_USE_CONSTEVAL=0'",
+  "        end",
+  "      end",
+  "    end",
+  "  end",
+].join("\n");
+
 const withModularHeaders = (config) => {
   return withDangerousMod(config, [
     "ios",
@@ -10,29 +24,26 @@ const withModularHeaders = (config) => {
       let contents = fs.readFileSync(file, "utf8");
 
       if (!contents.includes("use_modular_headers!")) {
-        // Add use_modular_headers! inside the main target block
         contents = contents.replace(
           /(target '.*' do)/,
           "$1\n  use_modular_headers!"
         );
       }
 
-      // Xcode 26 / LLVM 17+ compatibility: {fmt} library uses consteval functions
-      // that fail under Xcode 26's stricter C++20 enforcement in folly/hermes pods.
-      // Disabling FMT_CONSTEVAL at pod level is the standard upstream workaround.
+      // Inject fmt consteval fix into the EXISTING post_install block so that
+      // react_native_post_install (called inside it) is not skipped. CocoaPods
+      // 1.x only runs the last post_install block — a second block would shadow
+      // the Expo-generated one and break pod installation.
       if (!contents.includes("FMT_USE_CONSTEVAL")) {
-        contents +=
-          "\n" +
-          "post_install do |installer|\n" +
-          "  installer.pods_project.targets.each do |target|\n" +
-          "    target.build_configurations.each do |config|\n" +
-          "      flags = (config.build_settings['OTHER_CFLAGS'] || '$(inherited)').to_s\n" +
-          "      unless flags.include?('-DFMT_USE_CONSTEVAL=0')\n" +
-          "        config.build_settings['OTHER_CFLAGS'] = \"#{flags} -DFMT_USE_CONSTEVAL=0\".strip\n" +
-          "      end\n" +
-          "    end\n" +
-          "  end\n" +
-          "end\n";
+        if (contents.includes("post_install do |installer|")) {
+          contents = contents.replace(
+            "post_install do |installer|",
+            "post_install do |installer|\n" + FMT_FIX_LINES
+          );
+        } else {
+          contents +=
+            "\npost_install do |installer|\n" + FMT_FIX_LINES + "\nend\n";
+        }
       }
 
       fs.writeFileSync(file, contents);

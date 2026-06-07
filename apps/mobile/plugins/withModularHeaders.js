@@ -2,15 +2,22 @@ const { withDangerousMod } = require("@expo/config-plugins");
 const fs = require("fs");
 const path = require("path");
 
-const FMT_FIX_LINES = [
-  "  # Xcode 26 / LLVM 17+: {fmt} consteval fix for folly/hermes pods",
-  "  if installer.pods_project",
-  "    installer.pods_project.targets.each do |target|",
-  "      target.build_configurations.each do |config|",
-  "        existing = (config.build_settings['OTHER_CFLAGS'] || '$(inherited)').to_s",
-  "        unless existing.include?('-DFMT_USE_CONSTEVAL=0')",
-  "          config.build_settings['OTHER_CFLAGS'] = existing + ' -DFMT_USE_CONSTEVAL=0'",
-  "        end",
+// Xcode 26 / LLVM 17+: {fmt} uses consteval functions that Xcode 26's stricter
+// C++20 enforcement rejects in folly/RCT-Folly pods compiled from source.
+// GCC_PREPROCESSOR_DEFINITIONS is used (not OTHER_CFLAGS) so it survives
+// react_native_post_install. Injected at END of the existing post_install block
+// so it runs AFTER react_native_post_install, which may otherwise reset flags.
+const FMT_FIX = [
+  "  # Xcode 26 / LLVM 17+ fmt consteval fix — must run after react_native_post_install",
+  "  installer.pods_project.targets.each do |target|",
+  "    target.build_configurations.each do |config|",
+  "      defs = config.build_settings['GCC_PREPROCESSOR_DEFINITIONS']",
+  "      if defs.nil?",
+  "        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = ['$(inherited)', 'FMT_USE_CONSTEVAL=0']",
+  "      elsif defs.is_a?(Array)",
+  "        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = defs + ['FMT_USE_CONSTEVAL=0'] unless defs.include?('FMT_USE_CONSTEVAL=0')",
+  "      elsif !defs.to_s.include?('FMT_USE_CONSTEVAL=0')",
+  "        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = defs.to_s + ' FMT_USE_CONSTEVAL=0'",
   "      end",
   "    end",
   "  end",
@@ -30,19 +37,15 @@ const withModularHeaders = (config) => {
         );
       }
 
-      // Inject fmt consteval fix into the EXISTING post_install block so that
-      // react_native_post_install (called inside it) is not skipped. CocoaPods
-      // 1.x only runs the last post_install block — a second block would shadow
-      // the Expo-generated one and break pod installation.
+      // Inject at end of existing post_install block (before its closing `end`),
+      // so react_native_post_install runs first and our fix applies last.
       if (!contents.includes("FMT_USE_CONSTEVAL")) {
         if (contents.includes("post_install do |installer|")) {
-          contents = contents.replace(
-            "post_install do |installer|",
-            "post_install do |installer|\n" + FMT_FIX_LINES
-          );
+          // Replace the final `end` in the file (closes the post_install block)
+          contents = contents.replace(/(\nend\s*)$/, "\n" + FMT_FIX + "\nend\n");
         } else {
           contents +=
-            "\npost_install do |installer|\n" + FMT_FIX_LINES + "\nend\n";
+            "\npost_install do |installer|\n" + FMT_FIX + "\nend\n";
         }
       }
 

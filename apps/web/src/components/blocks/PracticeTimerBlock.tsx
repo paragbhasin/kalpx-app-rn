@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "../../lib/i18n";
 
 /* ── Colour tokens ────────────────────────────────────────────────── */
 const GOLD = "#D4A017";
@@ -230,6 +231,7 @@ export function PracticeTimerBlock({
 }: Props) {
   ensureCSS();
   const isDesktop = useIsDesktopRunner();
+  const { t } = useTranslation();
   const infoViewOnly = screenData["info_view_only"] === true;
 
   /* ── Data resolution ── */
@@ -518,7 +520,7 @@ export function PracticeTimerBlock({
                         textAlign: "center",
                       }}
                     >
-                      What this practice asks of you
+                      {t('practiceRunner.whatThisAsks')}
                     </span>
                     <div
                       style={{
@@ -596,7 +598,7 @@ export function PracticeTimerBlock({
                           margin: "0 0 8px",
                         }}
                       >
-                        How long will you pause?
+                        {t('practiceRunner.howLongPause')}
                       </p>
                       <p
                         style={{
@@ -689,9 +691,9 @@ export function PracticeTimerBlock({
                           marginBottom: 22,
                         }}
                       >
-                        <span>1 min</span>
-                        <span>Drag to adjust</span>
-                        <span>10 min</span>
+                        <span>{t('practiceRunner.minMin')}</span>
+                        <span>{t('practiceRunner.dragToAdjust')}</span>
+                        <span>{t('practiceRunner.maxMin')}</span>
                       </div>
 
                       <button
@@ -712,7 +714,7 @@ export function PracticeTimerBlock({
                         }}
                         className="shadow-2xl"
                       >
-                        Begin
+                        {t('practiceRunner.begin')}
                       </button>
                     </>
                   ) : (
@@ -853,7 +855,7 @@ export function PracticeTimerBlock({
           >
             {hasContent(benefits) && (
               <DesktopInfoSection
-                label="Benefits"
+                label={t('practiceRunner.benefits')}
                 expanded={benefitsExpanded}
                 onToggle={() => setBenefitsExpanded((v) => !v)}
               >
@@ -873,7 +875,7 @@ export function PracticeTimerBlock({
 
             {hasContent(insight) && (
               <DesktopInfoSection
-                label="Essence"
+                label={t('practiceRunner.essence')}
                 expanded={essenceExpanded}
                 onToggle={() => setEssenceExpanded((v) => !v)}
               >
@@ -896,7 +898,7 @@ export function PracticeTimerBlock({
                 marginTop: 10,
               }}
             >
-              Return to Mitra Home
+              {t('practiceRunner.returnToMitraHome')}
             </button>
           </div>
         </div>
@@ -1006,7 +1008,7 @@ export function PracticeTimerBlock({
                 textAlign: "center",
               }}
             >
-              What this practice asks of you
+              {t('practiceRunner.whatThisAsks')}
             </span>
             <div
               style={{
@@ -1076,7 +1078,7 @@ export function PracticeTimerBlock({
                   margin: "0 0 8px",
                 }}
               >
-                How long will you pause?
+                {t('practiceRunner.howLongPause')}
               </p>
               <p
                 style={{
@@ -1168,9 +1170,9 @@ export function PracticeTimerBlock({
                   marginBottom: 20,
                 }}
               >
-                <span>1 min</span>
-                <span>Drag to adjust</span>
-                <span>10 min</span>
+                <span>{t('practiceRunner.minMin')}</span>
+                <span>{t('practiceRunner.dragToAdjust')}</span>
+                <span>{t('practiceRunner.maxMin')}</span>
               </div>
 
               {/* Begin CTA */}
@@ -1192,7 +1194,7 @@ export function PracticeTimerBlock({
                 }}
                 className="shadow-2xl"
               >
-                Begin
+                {t('practiceRunner.begin')}
               </button>
             </>
           ) : (
@@ -1334,7 +1336,7 @@ export function PracticeTimerBlock({
       {hasContent(benefits) && (
         <div style={{ width: "100%", marginBottom: 12 }}>
           <CollapsibleCard
-            label="Benefits"
+            label={t('practiceRunner.benefits')}
             expanded={benefitsExpanded}
             onToggle={() => setBenefitsExpanded((v) => !v)}
           >
@@ -1373,7 +1375,7 @@ export function PracticeTimerBlock({
       {hasContent(insight) && (
         <div style={{ width: "100%", marginBottom: 32 }}>
           <CollapsibleCard
-            label="Essence"
+            label={t('practiceRunner.essence')}
             expanded={essenceExpanded}
             onToggle={() => setEssenceExpanded((v) => !v)}
           >
@@ -1398,7 +1400,7 @@ export function PracticeTimerBlock({
           marginBottom: 88,
         }}
       >
-        Return to Mitra Home
+        {t('practiceRunner.returnToMitraHome')}
       </button>
     </div>
   );

@@ -692,4 +692,15 @@ export const en = {
     fullyCompleted: 'Fully completed',
     dailyRhythm: 'Daily Rhythm',
   },
+  practiceRunner: {
+    whatThisAsks: 'What this practice asks of you',
+    howLongPause: 'How long will you pause?',
+    dragToAdjust: 'Drag to adjust',
+    minMin: '1 min',
+    maxMin: '10 min',
+    begin: 'Begin',
+    benefits: 'Benefits',
+    essence: 'Essence',
+    returnToMitraHome: 'Return to Mitra Home',
+  },
 } as const;

@@ -439,7 +439,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                 cursor: "pointer",
               }}
             >
-              Skip
+              Continue
             </button>
           </div>
 
@@ -1536,8 +1536,15 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
             {narrativeText}
           </p>
           {completedTotal > 0 && completedTotal !== completedCount && (
-            <p style={{ fontSize: 13, color: "var(--kalpx-text-soft)", marginTop: 4 }}>
-              {completedTotal} {completedTotal === 1 ? "day was" : "days were"} fully complete.
+            <p
+              style={{
+                fontSize: 13,
+                color: "var(--kalpx-text-soft)",
+                marginTop: 4,
+              }}
+            >
+              {completedTotal} {completedTotal === 1 ? "day was" : "days were"}{" "}
+              fully complete.
             </p>
           )}
         </div>

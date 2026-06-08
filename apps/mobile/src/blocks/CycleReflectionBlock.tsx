@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import uuidv4 from "react-native-uuid";
 import { useToast } from "../context/ToastContext";
 import {
@@ -29,7 +30,6 @@ import {
 import { clearContinueJourneyHomeCache } from "../screens/Home/ContinueJourney";
 import store from "../store";
 import { loadScreenWithData, screenActions } from "../store/screenSlice";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Fonts } from "../theme/fonts";
 
 // Assets (imported as components via react-native-svg-transformer)
@@ -841,7 +841,10 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
         style={{ padding: 10 }}
         contentContainerStyle={
           is7DayCycle
-            ? [styles.day7ReflectionContent, { paddingBottom: Math.max(insets.bottom + 40, 64) }]
+            ? [
+                styles.day7ReflectionContent,
+                { paddingBottom: Math.max(insets.bottom + 40, 64) },
+              ]
             : { paddingBottom: Math.max(insets.bottom + 40, 64) }
         }
         keyboardShouldPersistTaps="handled"
@@ -1105,7 +1108,10 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     return (
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 20, paddingBottom: Math.max(insets.bottom + 40, 64) }}
+        contentContainerStyle={{
+          padding: 20,
+          paddingBottom: Math.max(insets.bottom + 40, 64),
+        }}
         keyboardShouldPersistTaps="handled"
       >
         {/* Classification verdict card */}
@@ -1451,7 +1457,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
             </View>
           </View>
           <TouchableOpacity style={styles.skipBtn} onPress={onSkipJourney}>
-            <Text style={styles.skipBtnText}>Skip</Text>
+            <Text style={styles.skipBtnText}>Continue</Text>
           </TouchableOpacity>
         </ScrollView>
 

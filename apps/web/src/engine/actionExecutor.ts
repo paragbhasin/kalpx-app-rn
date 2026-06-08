@@ -2174,7 +2174,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
             continuity: null,
             checkpoint_completed: true,
           }));
-          _navigateToOnboarding(dispatch, 'turn_1');
+          _navigateToOnboarding(dispatch, 'turn_2');
           return;
         }
 

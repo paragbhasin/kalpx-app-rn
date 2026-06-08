@@ -1,3 +1,5 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+patchedDependencies:
+  react-native@0.79.6: patches/react-native@0.79.6.patch

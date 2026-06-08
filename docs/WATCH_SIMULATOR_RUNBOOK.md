@@ -1,34 +1,54 @@
-# Apple Watch Simulator — Setup & Run Runbook
+# Apple Watch Simulator — Runbook
 
-How to pair, build, and run the KalpX Watch app on simulator. All commands run from `apps/mobile/ios/`.
-
----
-
-## 1. Check Available Simulators
-
-```bash
-xcrun simctl list devices | grep -E "(iPhone|Watch)" | grep -v unavailable
-```
-
-You need one iPhone and one Apple Watch. Note their UDIDs.
-
-**Current pairing in use:**
-- iPhone 16 Pro → `93383AB2-3B50-41E2-9785-733A7FAF006C`
-- Apple Watch Series 11 (46mm) → `6875317B-F6B8-40F1-AB03-2CCEDB071A99`
+> Written for Claude to execute directly on any machine.
+> All build commands run from `apps/mobile/ios/`.
+> **Xcode.app never needs to open.** Everything is terminal-only.
+> The only GUI that opens is `Simulator.app` (standalone — not Xcode) to see the screens.
 
 ---
 
-## 2. Boot Both Simulators
+## Step 0 — Discover Simulators on This Machine
+
+Run this first every session. Sets UDID variables used in all subsequent steps.
 
 ```bash
-# Boot iPhone
-xcrun simctl boot 93383AB2-3B50-41E2-9785-733A7FAF006C
-
-# Boot Watch
-xcrun simctl boot 6875317B-F6B8-40F1-AB03-2CCEDB071A99
+# List available iPhones and Watches
+xcrun simctl list devices available | grep -E "(iPhone|Watch)" | grep -v unavailable
 ```
 
-Then open Simulator.app so the screens are visible:
+Pick one iPhone and one Apple Watch from the output. Then set variables:
+
+```bash
+IPHONE_UDID=$(xcrun simctl list devices available | grep "iPhone" | grep -v unavailable | grep -oE '[A-F0-9-]{36}' | head -1)
+WATCH_UDID=$(xcrun simctl list devices available | grep "Apple Watch" | grep -v unavailable | grep -oE '[A-F0-9-]{36}' | head -1)
+
+echo "iPhone: $IPHONE_UDID"
+echo "Watch:  $WATCH_UDID"
+```
+
+> If the machine has multiple iPhones or Watches and you want a specific one, replace `head -1` with `grep "iPhone 16 Pro"` or similar to target the right model.
+
+---
+
+## Step 1 — Check What Is Already Booted
+
+```bash
+xcrun simctl list devices | grep -E "(iPhone|Watch)" | grep Booted
+xcrun simctl list pairs
+```
+
+If both simulators show `Booted` and the pair shows `(active, connected)` → skip to Step 3.
+
+---
+
+## Step 2 — Boot Simulators (if not already booted)
+
+```bash
+xcrun simctl boot $IPHONE_UDID
+xcrun simctl boot $WATCH_UDID
+```
+
+Open Simulator.app to see the screens (this is NOT Xcode):
 
 ```bash
 open -a Simulator
@@ -36,31 +56,41 @@ open -a Simulator
 
 ---
 
-## 3. Pair iPhone + Watch (if not already paired)
+## Step 3 — Pair iPhone + Watch (if no active pair)
 
-Check existing pairs first:
+Check first:
 
 ```bash
 xcrun simctl list pairs
 ```
 
-If they're already paired and connected (active, connected) — skip this step.
+If it shows `(active, connected)` → skip this step.
 
-To create a new pair:
+If no pair exists, create one:
 
 ```bash
-xcrun simctl pair <WATCH_UDID> <IPHONE_UDID>
+xcrun simctl pair $WATCH_UDID $IPHONE_UDID
 ```
 
-Example:
+If a pair exists but shows `(disconnected)`, unpair and re-pair:
 
 ```bash
-xcrun simctl pair 6875317B-F6B8-40F1-AB03-2CCEDB071A99 93383AB2-3B50-41E2-9785-733A7FAF006C
+# Get the pair ID from the list pairs output, then:
+PAIR_ID=$(xcrun simctl list pairs | grep -oE '[A-F0-9-]{36}' | head -1)
+xcrun simctl unpair $PAIR_ID
+xcrun simctl pair $WATCH_UDID $IPHONE_UDID
+```
+
+Verify:
+
+```bash
+xcrun simctl list pairs
+# Should show (active, connected)
 ```
 
 ---
 
-## 4. Build the Watch App
+## Step 4 — Build the Watch App
 
 From `apps/mobile/ios/`:
 
@@ -69,114 +99,121 @@ xcodebuild \
   -workspace kalpx.xcworkspace \
   -scheme KalpxWatch \
   -configuration Debug \
-  -destination "id=6875317B-F6B8-40F1-AB03-2CCEDB071A99" \
+  -destination "id=$WATCH_UDID" \
   -derivedDataPath /tmp/kalpx-watch-build \
-  build
-```
-
-Build output goes to `/tmp/kalpx-watch-build/Build/Products/Debug-watchsimulator/KalpxWatch.app`.
-
-To see only errors / success line:
-
-```bash
-xcodebuild ... build 2>&1 | grep -E "(error:|BUILD SUCCEEDED|BUILD FAILED)"
+  build 2>&1 | grep -E "(error:|BUILD SUCCEEDED|BUILD FAILED)"
 ```
 
 ---
 
-## 5. Install on Watch Simulator
-
-```bash
-APP_PATH=$(find /tmp/kalpx-watch-build/Build/Products/Debug-watchsimulator -name "KalpxWatch.app" | head -1)
-xcrun simctl install 6875317B-F6B8-40F1-AB03-2CCEDB071A99 "$APP_PATH"
-```
-
----
-
-## 6. Launch the Watch App
-
-```bash
-xcrun simctl launch 6875317B-F6B8-40F1-AB03-2CCEDB071A99 com.kalpx.app.watchkitapp
-```
-
----
-
-## 7. Build + Install + Launch (one-liner)
+## Step 5 — Install + Launch Watch App
 
 ```bash
 APP_PATH=$(find /tmp/kalpx-watch-build/Build/Products/Debug-watchsimulator -name "KalpxWatch.app" | head -1) \
-  && xcrun simctl install 6875317B-F6B8-40F1-AB03-2CCEDB071A99 "$APP_PATH" \
-  && xcrun simctl launch 6875317B-F6B8-40F1-AB03-2CCEDB071A99 com.kalpx.app.watchkitapp
+  && xcrun simctl install $WATCH_UDID "$APP_PATH" \
+  && xcrun simctl launch $WATCH_UDID com.kalpx.app.watchkitapp \
+  && echo "Watch app launched"
 ```
 
 ---
 
-## 8. View Watch Logs (for debugging)
+## Step 6 — Build + Install iPhone App (when iOS native files change)
 
-```bash
-xcrun simctl spawn 6875317B-F6B8-40F1-AB03-2CCEDB071A99 log stream \
-  --predicate 'subsystem contains "kalpx"' \
-  --level debug
-```
-
-Or broader (all app logs):
-
-```bash
-xcrun simctl spawn 6875317B-F6B8-40F1-AB03-2CCEDB071A99 log stream --level debug \
-  | grep -i kalpx
-```
-
----
-
-## 9. Build the iPhone App (when native changes are made)
-
-From `apps/mobile/ios/`:
+Only needed when Swift/Obj-C files on the iPhone side change. Watch-only changes don't need this.
 
 ```bash
 xcodebuild \
   -workspace kalpx.xcworkspace \
   -scheme kalpx \
   -configuration Debug \
-  -destination "id=93383AB2-3B50-41E2-9785-733A7FAF006C" \
+  -destination "id=$IPHONE_UDID" \
   -derivedDataPath /tmp/kalpx-iphone-build \
-  build
+  build 2>&1 | grep -E "(error:|BUILD SUCCEEDED|BUILD FAILED)"
 ```
 
-Install iPhone app:
+Install:
 
 ```bash
-APP_PATH=$(find /tmp/kalpx-iphone-build/Build/Products/Debug-iphonesimulator -name "kalpx.app" | head -1)
-xcrun simctl install 93383AB2-3B50-41E2-9785-733A7FAF006C "$APP_PATH"
-xcrun simctl launch 93383AB2-3B50-41E2-9785-733A7FAF006C com.kalpx.app
+APP_PATH=$(find /tmp/kalpx-iphone-build/Build/Products/Debug-iphonesimulator -name "kalpx.app" | head -1) \
+  && xcrun simctl install $IPHONE_UDID "$APP_PATH" \
+  && xcrun simctl launch $IPHONE_UDID com.kalpx.app \
+  && echo "iPhone app launched"
 ```
 
 ---
 
-## Known Simulator Limitations
+## Full Session — One Flow (Watch changes only)
 
-| Feature | Simulator | Real Device |
-|---|---|---|
-| WCSession `sendMessage` | Works when both apps open | Works always |
-| WCSession `applicationContext` | Works | Works |
-| App Group shared container | **NOT shared** (separate containers) | Shared |
-| Watch complications | Won't update | Works |
+Copy-paste this entire block for a clean start:
 
-**Critical:** iPhone Simulator and Watch Simulator have **separate app group containers**. Data written by iPhone to the app group is NOT readable by the Watch on simulator. Only WCSession channels work on simulator. On real device everything works.
+```bash
+# Set UDIDs
+IPHONE_UDID=$(xcrun simctl list devices available | grep "iPhone" | grep -v unavailable | grep -oE '[A-F0-9-]{36}' | head -1)
+WATCH_UDID=$(xcrun simctl list devices available | grep "Apple Watch" | grep -v unavailable | grep -oE '[A-F0-9-]{36}' | head -1)
+echo "iPhone: $IPHONE_UDID  Watch: $WATCH_UDID"
 
-This means: stats, path data, mantra data only flow Watch ↔ iPhone via WCSession on simulator. The Watch must have a live WCSession connection to receive data.
+# Boot (safe to run even if already booted — errors are harmless)
+xcrun simctl boot $IPHONE_UDID 2>/dev/null || true
+xcrun simctl boot $WATCH_UDID 2>/dev/null || true
+open -a Simulator
+
+# Pair if needed
+xcrun simctl list pairs | grep -q "active, connected" || xcrun simctl pair $WATCH_UDID $IPHONE_UDID
+
+# Build Watch
+xcodebuild \
+  -workspace kalpx.xcworkspace \
+  -scheme KalpxWatch \
+  -configuration Debug \
+  -destination "id=$WATCH_UDID" \
+  -derivedDataPath /tmp/kalpx-watch-build \
+  build 2>&1 | grep -E "(error:|BUILD SUCCEEDED|BUILD FAILED)"
+
+# Install + launch Watch
+APP_PATH=$(find /tmp/kalpx-watch-build/Build/Products/Debug-watchsimulator -name "KalpxWatch.app" | head -1) \
+  && xcrun simctl install $WATCH_UDID "$APP_PATH" \
+  && xcrun simctl launch $WATCH_UDID com.kalpx.app.watchkitapp \
+  && echo "Done"
+```
+
+---
+
+## View Logs (for debugging)
+
+```bash
+# Watch logs
+xcrun simctl spawn $WATCH_UDID log stream \
+  --level debug 2>/dev/null | grep -i "kalpx\|WatchPath\|WatchMantra\|japa"
+
+# iPhone logs
+xcrun simctl spawn $IPHONE_UDID log stream \
+  --level debug 2>/dev/null | grep -i "kalpx\|WatchPath\|WatchMantra\|japa"
+```
+
+---
+
+## Simulator Limitations (Critical)
+
+| Feature | Simulator behaviour |
+|---|---|
+| App group shared container | **NOT shared** — iPhone sim writes ≠ Watch sim reads |
+| WCSession `sendMessage` | Works when both apps are open |
+| WCSession `applicationContext` | Works (delivered on activation) |
+| Watch complications | Don't update |
+| Watch haptics | Silent (no physical taptic engine) |
+
+Because app groups aren't shared on simulator, **WCSession is the only data channel**. Open the iPhone app first, let it load homeData, then open the Watch app — data flows via `applicationContext`.
 
 ---
 
 ## Troubleshooting
 
-**Watch shows "Open KalpX on iPhone to begin" / no data**
-→ WCSession not delivering data. Open iPhone app first, let homeData load, then open Watch app.
-
-**Build fails: "Build input file cannot be found: .../QuickResetPromptView.swift"**
-→ File path wrong in pbxproj. Run the pbxproj path-fix Ruby script.
-
-**SourceKit errors in editor (Cannot find type 'WatchJapaEngine' in scope)**
-→ These are IDE cross-reference errors, NOT real build errors. `xcodebuild` still succeeds. Ignore them.
-
-**Watch app crashes on launch**
-→ Check for `NSNull` in any WCSession payload. Always call `stripNulls()` before `sendMessage` / `updateApplicationContext`. `NSNull` causes `WCErrorCodePayloadUnsupportedTypes`.
+| Symptom | Fix |
+|---|---|
+| `boot` fails with "Unable to boot" | `xcrun simctl shutdown $UDID` then boot again |
+| `IPHONE_UDID` / `WATCH_UDID` is empty | No matching simulator found. Run `xcrun simctl list devices available` and check model names match the grep pattern |
+| Build fails: "Build input file cannot be found" | New `.swift` file added with wrong path in pbxproj. Fix with the Ruby pbxproj path-fix script |
+| SourceKit errors in editor (Cannot find type X) | IDE cross-reference noise — real builds succeed, ignore |
+| Watch shows "Open KalpX on iPhone" | Open iPhone app, let homeData load, Watch receives data via WCSession |
+| App crash on launch (NSNull / WCSession) | `stripNulls()` missing before WCSession call — check `WatchConnectivityManager.swift` |
+| Pair shows disconnected | Run `xcrun simctl unpair $PAIR_ID` then `xcrun simctl pair $WATCH_UDID $IPHONE_UDID` |

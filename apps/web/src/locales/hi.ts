@@ -692,4 +692,15 @@ export const hi = {
     fullyCompleted: 'पूरे किए दिन',
     dailyRhythm: 'रोज़ की लय',
   },
+  practiceRunner: {
+    whatThisAsks: 'यह अभ्यास आपसे क्या माँगता है',
+    howLongPause: 'आप कितनी देर रुकेंगे?',
+    dragToAdjust: 'खींचकर बदलें',
+    minMin: '1 मिनट',
+    maxMin: '10 मिनट',
+    begin: 'शुरू करें',
+    benefits: 'लाभ',
+    essence: 'सार',
+    returnToMitraHome: 'मित्र होम पर वापस जाएं',
+  },
 } as const;

@@ -9,6 +9,7 @@ import { en } from '../locales/en';
 import { hi } from '../locales/hi';
 import { te } from '../locales/te';
 import { invalidateMitraHomeV3Cache } from '../engine/mitraApi';
+import { normalizeLocale } from './locale';
 
 export type Locale = 'en' | 'hi' | 'te';
 
@@ -35,13 +36,14 @@ const I18nContext = createContext<I18nContextValue>({
 function detectInitialLocale(): Locale {
   try {
     const stored = localStorage.getItem(LOCALE_STORAGE_KEY);
-    if (stored === 'en' || stored === 'hi' || stored === 'te') return stored;
+    const candidate = stored ?? (typeof navigator !== 'undefined' ? navigator.language?.split('-')[0] : undefined);
+    const normalized = normalizeLocale(candidate);
+    // Overwrite stale stored value (e.g. 'hi' stored when prod is English-only)
+    if (stored !== normalized) {
+      try { localStorage.setItem(LOCALE_STORAGE_KEY, normalized); } catch {}
+    }
+    return normalized;
   } catch {}
-  if (typeof navigator !== 'undefined') {
-    const lang = navigator.language?.split('-')[0];
-    if (lang === 'hi') return 'hi';
-    if (lang === 'te') return 'te';
-  }
   return 'en';
 }
 

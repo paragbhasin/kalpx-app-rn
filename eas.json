@@ -15,7 +15,8 @@
         "EXPO_PUBLIC_MITRA_TELL_MITRA_THREAD_UI": "1",
         "EXPO_PUBLIC_MITRA_ROOM_JOURNEY_V1": "0",
         "EXPO_PUBLIC_ENABLE_ANALYTICS": "false",
-        "EXPO_PUBLIC_ENABLE_META_PIXEL": "false"
+        "EXPO_PUBLIC_ENABLE_META_PIXEL": "false",
+        "EXPO_PUBLIC_ENABLED_LOCALES": "en"
       },
       "android": {
         "buildType": "app-bundle"
@@ -37,7 +38,8 @@
     "simulator": {
       "extends": "preview",
       "env": {
-        "EXPO_PUBLIC_API_ENV": "dev"
+        "EXPO_PUBLIC_API_ENV": "dev",
+        "EXPO_PUBLIC_ENABLED_LOCALES": "en,hi,te"
       },
       "ios": {
         "simulator": true,
@@ -49,7 +51,8 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_ENV": "dev"
+        "EXPO_PUBLIC_API_ENV": "dev",
+        "EXPO_PUBLIC_ENABLED_LOCALES": "en,hi,te"
       },
       "android": {
         "buildType": "apk"

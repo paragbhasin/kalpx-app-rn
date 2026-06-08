@@ -1,0 +1,14 @@
+diff --git a/third-party-podspecs/fmt.podspec b/third-party-podspecs/fmt.podspec
+index 2f38990e226c13f483aaf1b986302d4094243814..de6c44b607c3bfd61848a4782f47fe5e97bad7c7 100644
+--- a/third-party-podspecs/fmt.podspec
++++ b/third-party-podspecs/fmt.podspec
+@@ -19,7 +19,8 @@ Pod::Spec.new do |spec|
+   }
+   spec.pod_target_xcconfig = {
+     "CLANG_CXX_LANGUAGE_STANDARD" => rct_cxx_language_standard(),
+-    "GCC_WARN_INHIBIT_ALL_WARNINGS" => "YES" # Disable warnings because we don't control this library
++    "GCC_WARN_INHIBIT_ALL_WARNINGS" => "YES", # Disable warnings because we don't control this library
++    "GCC_PREPROCESSOR_DEFINITIONS" => "$(inherited) FMT_USE_CONSTEVAL=0"
+   }
+   spec.platforms = min_supported_versions
+   spec.libraries = "c++"

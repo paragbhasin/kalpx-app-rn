@@ -19,7 +19,8 @@
         "EXPO_PUBLIC_ENABLED_LOCALES": "en"
       },
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "app-bundle",
+        "autoIncrement": true
       },
       "ios": {
         "buildConfiguration": "Release"

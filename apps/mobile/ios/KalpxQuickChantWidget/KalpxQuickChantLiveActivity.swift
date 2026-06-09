@@ -2,18 +2,6 @@ import ActivityKit
 import SwiftUI
 import WidgetKit
 
-// MARK: - Design tokens
-private extension Color {
-    static let kalpxGold      = Color(red: 0.82, green: 0.62, blue: 0.18)
-    static let kalpxGoldLight = Color(red: 1.00, green: 0.85, blue: 0.38)
-    static let kalpxBrown     = Color(red: 0.48, green: 0.30, blue: 0.13)
-    static let kalpxBrownDark = Color(red: 0.25, green: 0.13, blue: 0.04)
-    static let kalpxText      = Color(red: 0.18, green: 0.12, blue: 0.06) // dark brown
-    static let kalpxMuted     = Color(red: 0.48, green: 0.38, blue: 0.26) // medium brown
-    static let kalpxCardBg    = Color(red: 0.97, green: 0.92, blue: 0.82) // very light beige
-    static let kalpxDivider   = Color(red: 0.55, green: 0.40, blue: 0.20).opacity(0.18)
-}
-
 // MARK: - Single rudraksha bead
 private struct BeadView: View {
     enum State { case filled, current, empty }
@@ -24,16 +12,16 @@ private struct BeadView: View {
         case .current:
             Circle()
                 .fill(RadialGradient(
-                    colors: [.kalpxGoldLight, .kalpxGold],
+                    colors: [.laGoldLight, .laGold],
                     center: UnitPoint(x: 0.35, y: 0.30),
                     startRadius: 0, endRadius: 7
                 ))
                 .frame(width: 12, height: 12)
-                .shadow(color: .kalpxGold.opacity(0.9), radius: 5)
+                .shadow(color: .laGold.opacity(0.9), radius: 5)
         case .filled:
             Circle()
                 .fill(RadialGradient(
-                    colors: [.kalpxBrown, .kalpxBrownDark],
+                    colors: [.laBrown, .laBrownDark],
                     center: UnitPoint(x: 0.35, y: 0.30),
                     startRadius: 0, endRadius: 5
                 ))
@@ -42,7 +30,7 @@ private struct BeadView: View {
         case .empty:
             Circle()
                 .fill(RadialGradient(
-                    colors: [.kalpxBrown.opacity(0.30), .kalpxBrownDark.opacity(0.18)],
+                    colors: [.laBrown.opacity(0.30), .laBrownDark.opacity(0.18)],
                     center: UnitPoint(x: 0.35, y: 0.30),
                     startRadius: 0, endRadius: 4
                 ))
@@ -66,16 +54,9 @@ private struct MalaRing: View {
                     .offset(y: -ringRadius)
                     .rotationEffect(.degrees(Double(i) * (360.0 / Double(total)) - 90))
             }
-            // Center: count + TODAY
-            VStack(spacing: 1) {
-                Text("\(sessionCount)")
-                    .font(.system(size: 18, weight: .bold, design: .rounded))
-                    .foregroundColor(.kalpxText)
-                Text("TODAY")
-                    .font(.system(size: 7, weight: .semibold))
-                    .foregroundColor(.kalpxMuted)
-                    .tracking(0.8)
-            }
+            Text("\(sessionCount)")
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .foregroundColor(.laText)
         }
         .frame(width: ringRadius * 2 + 18, height: ringRadius * 2 + 18)
     }
@@ -87,24 +68,19 @@ private struct MalaRing: View {
     }
 }
 
-// MARK: - Stat column for lock screen
+// MARK: - Stat column
 private struct StatColumn: View {
-    let icon: String
     let label: String
     let count: Int
 
     var body: some View {
-        VStack(spacing: 4) {
-            Image(systemName: icon)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.kalpxGold)
+        VStack(spacing: 2) {
             Text("\(count)")
-                .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundColor(.kalpxText)
-            Text(label.uppercased())
-                .font(.system(size: 8, weight: .semibold))
-                .foregroundColor(.kalpxMuted)
-                .tracking(0.9)
+                .font(.system(size: 16, weight: .bold, design: .rounded))
+                .foregroundColor(.laText)
+            Text(label)
+                .font(.system(size: 8, weight: .medium))
+                .foregroundColor(.laMuted)
         }
     }
 }
@@ -117,24 +93,21 @@ struct KalpxQuickChantLiveActivity: Widget {
                 .widgetURL(URL(string: context.attributes.deepLinkURL))
         } dynamicIsland: { context in
             DynamicIsland {
-                // Leading — branding only (OM + label), mirrors Sankalp design
                 DynamicIslandExpandedRegion(.leading) {
                     HStack(spacing: 5) {
                         Text("ॐ")
                             .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.kalpxGold)
-                        Text("MANTRA")
-                            .font(.system(size: 8, weight: .semibold))
-                            .foregroundColor(.kalpxGold.opacity(0.7))
-                            .tracking(1.2)
+                            .foregroundColor(.laGold)
+                        Text("Chanting now")
+                            .font(.system(size: 8, weight: .medium))
+                            .foregroundColor(.laGold.opacity(0.7))
                     }
                     .padding(.leading, 4)
                 }
-                // Bottom — full mantra name + devanagari, full width
                 DynamicIslandExpandedRegion(.bottom) {
                     VStack(spacing: 6) {
                         Rectangle()
-                            .fill(Color.kalpxGold.opacity(0.20))
+                            .fill(Color.laGold.opacity(0.20))
                             .frame(height: 1)
                         Text(context.attributes.mantraName)
                             .font(.system(size: 13, weight: .semibold))
@@ -145,7 +118,7 @@ struct KalpxQuickChantLiveActivity: Widget {
                             .padding(.horizontal, 4)
                         Text(context.attributes.mantraDevanagari)
                             .font(.system(size: 11))
-                            .foregroundColor(.kalpxGold.opacity(0.75))
+                            .foregroundColor(.laGold.opacity(0.75))
                             .multilineTextAlignment(.center)
                             .fixedSize(horizontal: false, vertical: true)
                             .lineLimit(2)
@@ -157,7 +130,7 @@ struct KalpxQuickChantLiveActivity: Widget {
                 HStack(spacing: 4) {
                     Text("ॐ")
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(.kalpxGold)
+                        .foregroundColor(.laGold)
                         .fixedSize()
                     Text(context.attributes.mantraName)
                         .font(.system(size: 11, weight: .semibold))
@@ -169,20 +142,19 @@ struct KalpxQuickChantLiveActivity: Widget {
                 }
             } compactTrailing: {
                 HStack(spacing: 3) {
-                    // Tiny bead dot
                     Circle()
-                        .fill(Color.kalpxGold)
+                        .fill(Color.laGold)
                         .frame(width: 5, height: 5)
-                        .shadow(color: .kalpxGold.opacity(0.8), radius: 2)
+                        .shadow(color: .laGold.opacity(0.8), radius: 2)
                     Text("\(context.state.sessionCount)")
                         .font(.system(size: 13, weight: .bold, design: .rounded))
                         .monospacedDigit()
-                        .foregroundColor(.kalpxGold)
+                        .foregroundColor(.laGold)
                 }
             } minimal: {
                 Text("\(context.state.sessionCount)")
                     .font(.system(size: 12, weight: .bold, design: .rounded))
-                    .foregroundColor(.kalpxGold)
+                    .foregroundColor(.laGold)
             }
         }
     }
@@ -195,41 +167,39 @@ struct KalpxQuickChantLiveActivity: Widget {
         VStack(spacing: 8) {
 
             if context.state.isCompleted {
-                // Completion state
                 VStack(spacing: 6) {
-                    Text("✓")
+                    Text("✦")
                         .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.kalpxGold)
-                    Text("Practice complete")
+                        .foregroundColor(.laGold)
+                    Text("Practice offered")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.kalpxText)
+                        .foregroundColor(.laText)
                     Text(context.attributes.mantraName)
                         .font(.system(size: 12))
-                        .foregroundColor(.kalpxMuted)
-                    Text("\(context.state.sessionCount) chants · \(elapsedString(context.state.elapsedSeconds))")
+                        .foregroundColor(.laMuted)
+                    Text("\(context.state.sessionCount) chants")
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.kalpxGold)
+                        .foregroundColor(.laGold)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
             } else {
-                // Active state — Row 1: mantra left, ring right
                 HStack(alignment: .center, spacing: 8) {
                     VStack(alignment: .leading, spacing: 2) {
                         HStack(alignment: .top, spacing: 4) {
                             Text("ॐ")
                                 .font(.system(size: 12, weight: .bold))
-                                .foregroundColor(.kalpxGold)
+                                .foregroundColor(.laGold)
                             Text(context.attributes.mantraName)
                                 .font(.system(size: 12, weight: .bold))
-                                .foregroundColor(.kalpxText)
+                                .foregroundColor(.laText)
                                 .fixedSize(horizontal: false, vertical: true)
                                 .lineLimit(3)
                         }
                         if !context.attributes.mantraDevanagari.isEmpty {
                             Text(context.attributes.mantraDevanagari)
                                 .font(.system(size: 10))
-                                .foregroundColor(.kalpxMuted)
+                                .foregroundColor(.laMuted)
                                 .fixedSize(horizontal: false, vertical: true)
                                 .lineLimit(3)
                         }
@@ -239,21 +209,19 @@ struct KalpxQuickChantLiveActivity: Widget {
                     MalaRing(sessionCount: context.state.sessionCount, ringRadius: 24)
                 }
 
-                // Divider
-                Rectangle().fill(Color.kalpxDivider).frame(height: 1)
+                Rectangle().fill(Color.laDivider).frame(height: 1)
 
-                // Stats row
                 HStack(spacing: 0) {
                     Spacer()
-                    statCell(icon: "sun.min",  label: "Today",    count: context.state.sessionCount)
+                    StatColumn(label: "Today",     count: context.state.sessionCount)
                     Spacer()
-                    Rectangle().fill(Color.kalpxDivider).frame(width: 1, height: 22)
+                    Rectangle().fill(Color.laDivider).frame(width: 1, height: 22)
                     Spacer()
-                    statCell(icon: "calendar", label: "Week",     count: context.state.weekCount)
+                    StatColumn(label: "This week", count: context.state.weekCount)
                     Spacer()
-                    Rectangle().fill(Color.kalpxDivider).frame(width: 1, height: 22)
+                    Rectangle().fill(Color.laDivider).frame(width: 1, height: 22)
                     Spacer()
-                    statCell(icon: "infinity", label: "Lifetime", count: context.state.totalCount)
+                    StatColumn(label: "Always",    count: context.state.totalCount)
                     Spacer()
                 }
 
@@ -262,14 +230,14 @@ struct KalpxQuickChantLiveActivity: Widget {
 //                    Button(intent: IncrementChantIntent()) {
 //                        Text("ॐ  Tap to Chant")
 //                            .font(.system(size: 12, weight: .semibold))
-//                            .foregroundColor(.kalpxBrown)
+//                            .foregroundColor(.laBrown)
 //                        .frame(maxWidth: .infinity)
 //                        .padding(.vertical, 6)
-//                        .background(Color.kalpxGold.opacity(0.15))
+//                        .background(Color.laGold.opacity(0.15))
 //                        .cornerRadius(8)
 //                        .overlay(
 //                            RoundedRectangle(cornerRadius: 8)
-//                                .stroke(Color.kalpxGold.opacity(0.35), lineWidth: 1)
+//                                .stroke(Color.laGold.opacity(0.35), lineWidth: 1)
 //                        )
 //                    }
 //                    .buttonStyle(.plain)
@@ -280,7 +248,6 @@ struct KalpxQuickChantLiveActivity: Widget {
         .padding(10)
         .background(
             ZStack {
-                // Base warm cream gradient
                 LinearGradient(
                     stops: [
                         .init(color: Color(red: 1.00, green: 0.97, blue: 0.91), location: 0.0),
@@ -290,7 +257,6 @@ struct KalpxQuickChantLiveActivity: Widget {
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
-                // Sunlight reflection highlight (top-left glow)
                 RadialGradient(
                     colors: [
                         Color.white.opacity(0.45),
@@ -304,59 +270,5 @@ struct KalpxQuickChantLiveActivity: Widget {
             .opacity(0.92)
         )
         .activityBackgroundTint(Color(red: 0.96, green: 0.90, blue: 0.78))
-    }
-
-    // MARK: - Compact stat cell for lock screen
-    @ViewBuilder
-    private func statCell(icon: String, label: String, count: Int) -> some View {
-        VStack(spacing: 1) {
-            Image(systemName: icon)
-                .font(.system(size: 9, weight: .medium))
-                .foregroundColor(.kalpxGold)
-            Text("\(count)")
-                .font(.system(size: 13, weight: .bold, design: .rounded))
-                .foregroundColor(.kalpxText)
-            Text(label.uppercased())
-                .font(.system(size: 7, weight: .semibold))
-                .foregroundColor(.kalpxMuted)
-                .tracking(0.7)
-        }
-    }
-
-    // MARK: - Helpers
-    @ViewBuilder
-    private func diStat(_ label: String, _ count: Int) -> some View {
-        VStack(spacing: 2) {
-            Text("\(count)")
-                .font(.system(size: 20, weight: .bold, design: .rounded))
-                .foregroundColor(.kalpxGold)
-            Text(label.uppercased())
-                .font(.system(size: 8, weight: .semibold))
-                .foregroundColor(.white.opacity(0.50))
-                .tracking(0.7)
-        }
-    }
-
-    @ViewBuilder
-    private func diStatText(_ label: String, _ value: String) -> some View {
-        VStack(spacing: 1) {
-            Text(value)
-                .font(.system(size: 13, weight: .bold, design: .rounded))
-                .foregroundColor(.kalpxGold)
-            Text(label.uppercased())
-                .font(.system(size: 8, weight: .medium))
-                .foregroundColor(.white.opacity(0.45))
-                .tracking(0.5)
-        }
-    }
-
-    private func firstLine(_ text: String) -> String {
-        text.components(separatedBy: "\n").first ?? text
-    }
-
-    private func elapsedString(_ seconds: Int) -> String {
-        let m = seconds / 60
-        let s = seconds % 60
-        return m > 0 ? "\(m)m \(s)s" : "\(s)s"
     }
 }

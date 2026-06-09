@@ -38,8 +38,16 @@ module.exports = {
       },
     },
     android: {
-      versionCode: 54,
+      versionCode: 55,
       package: "com.kalpx.app",
+      blockedPermissions: [
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+      ],
       adaptiveIcon: {
         foregroundImage: "./assets/new_logo.png",
         backgroundColor: "#ffffff",

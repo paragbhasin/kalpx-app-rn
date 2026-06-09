@@ -122,7 +122,7 @@ const StreakScreen = ({ navigation, route }) => {
   // ✅ dynamic download
   const handleDownload = async () => {
     try {
-      const { status } = await MediaLibrary.requestPermissionsAsync();
+      const { status } = await MediaLibrary.requestPermissionsAsync(true);
       if (status !== "granted") {
         Alert.alert("Permission required", "Please allow access to save images.");
         return;

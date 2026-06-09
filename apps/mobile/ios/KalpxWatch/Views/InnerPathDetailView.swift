@@ -21,10 +21,8 @@ struct InnerPathDetailView: View {
         case "mantra":
             let curated = connectivity.mantras?.first(where: { $0.ref == item.itemId })
                 ?? CuratedMantra(id: item.itemId, ref: item.itemId, name: item.title, devanagari: item.subtitle, audioUrl: item.audioUrl)
-            NavigationLink {
-                GoalPickerView(mantra: curated) { type, value in
-                    engine.startSession(mantra: curated, goalType: type, goalValue: value)
-                }
+            Button {
+                engine.startSession(mantra: curated, goalType: "unlimited", goalValue: nil)
             } label: {
                 RitualRow(
                     icon: "ॐ",
@@ -42,14 +40,15 @@ struct InnerPathDetailView: View {
             }
             .listRowBackground(KalpXWatchTheme.surface)
         default: // sankalp
-            VStack(alignment: .leading, spacing: 4) {
+            NavigationLink {
+                SankalpView(
+                    title: item.title,
+                    line:  item.howToLive ?? item.subtitle,
+                    source: "inner_path:\(item.itemId)"
+                )
+                .environmentObject(connectivity)
+            } label: {
                 RitualRow(icon: "◈", title: item.title)
-                if let how = item.howToLive, !how.isEmpty {
-                    Text(how)
-                        .font(.system(size: 11))
-                        .foregroundColor(KalpXWatchTheme.textTertiary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
             }
             .listRowBackground(KalpXWatchTheme.surface)
         }

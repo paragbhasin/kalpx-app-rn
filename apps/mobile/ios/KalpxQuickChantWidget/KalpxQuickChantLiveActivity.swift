@@ -2,85 +2,77 @@ import ActivityKit
 import SwiftUI
 import WidgetKit
 
-// MARK: - Single rudraksha bead
-private struct BeadView: View {
-    enum State { case filled, current, empty }
-    let state: State
-
-    var body: some View {
-        switch state {
-        case .current:
-            Circle()
-                .fill(RadialGradient(
-                    colors: [.laGoldLight, .laGold],
-                    center: UnitPoint(x: 0.35, y: 0.30),
-                    startRadius: 0, endRadius: 7
-                ))
-                .frame(width: 12, height: 12)
-                .shadow(color: .laGold.opacity(0.9), radius: 5)
-        case .filled:
-            Circle()
-                .fill(RadialGradient(
-                    colors: [.laBrown, .laBrownDark],
-                    center: UnitPoint(x: 0.35, y: 0.30),
-                    startRadius: 0, endRadius: 5
-                ))
-                .frame(width: 8, height: 8)
-                .shadow(color: .black.opacity(0.4), radius: 1, x: 0.5, y: 0.5)
-        case .empty:
-            Circle()
-                .fill(RadialGradient(
-                    colors: [.laBrown.opacity(0.30), .laBrownDark.opacity(0.18)],
-                    center: UnitPoint(x: 0.35, y: 0.30),
-                    startRadius: 0, endRadius: 4
-                ))
-                .frame(width: 7, height: 7)
-        }
-    }
-}
-
-// MARK: - 27-bead mala ring
+// MARK: - Progress ring (108-count cycle)
 private struct MalaRing: View {
     let sessionCount: Int
-    var ringRadius: CGFloat = 36
-    private let total = 27
+    var size: CGFloat = 64
+    private let total = 108
+    private let strokeWidth: CGFloat = 5
 
-    private var progress: Int { sessionCount % total }
+    private var fraction: Double { Double(sessionCount % total) / Double(total) }
 
     var body: some View {
         ZStack {
-            ForEach(0..<total, id: \.self) { i in
-                BeadView(state: beadState(i))
-                    .offset(y: -ringRadius)
-                    .rotationEffect(.degrees(Double(i) * (360.0 / Double(total)) - 90))
-            }
-            Text("\(sessionCount)")
-                .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundColor(.laText)
-        }
-        .frame(width: ringRadius * 2 + 18, height: ringRadius * 2 + 18)
-    }
+            // Glow halo
+            Circle()
+                .stroke(Color.laGold.opacity(0.18), lineWidth: 10)
+                .blur(radius: 4)
 
-    private func beadState(_ i: Int) -> BeadView.State {
-        if i == progress { return .current }
-        if i < progress  { return .filled  }
-        return .empty
+            // Ring track
+            Circle()
+                .stroke(Color.white.opacity(0.10), lineWidth: strokeWidth)
+
+            // Gold progress arc
+            Circle()
+                .trim(from: 0, to: max(fraction, 0.012))
+                .stroke(
+                    AngularGradient(
+                        colors: [Color.laGold.opacity(0.45), .laGold, .laGoldLight],
+                        center: .center,
+                        startAngle: .degrees(-90),
+                        endAngle: .degrees(270)
+                    ),
+                    style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round)
+                )
+                .rotationEffect(.degrees(-90))
+
+            // Flame at arc tip
+            if sessionCount % total > 0 {
+                Image(systemName: "flame.fill")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.laGoldLight)
+                    .shadow(color: Color.laGold.opacity(0.8), radius: 3)
+                    .offset(y: -(size / 2))
+                    .rotationEffect(.degrees(360 * fraction))
+            }
+
+            // Center: count + Today label
+            VStack(spacing: 1) {
+                Text("\(sessionCount)")
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                Text("Today")
+                    .font(.system(size: 8, weight: .medium))
+                    .foregroundColor(.white.opacity(0.60))
+            }
+        }
+        .frame(width: size, height: size)
     }
 }
 
-// MARK: - Stat column
-private struct StatColumn: View {
+// MARK: - Stat cell (dark theme, no icon)
+private struct StatCell: View {
     let label: String
     let count: Int
 
     var body: some View {
-        VStack(spacing: 2) {
+        VStack(spacing: 4) {
             Text("\(count)")
-                .font(.system(size: 16, weight: .bold, design: .rounded))
-                .foregroundColor(.laText)
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
             Text(label)
-                .font(.system(size: 8, weight: .medium))
-                .foregroundColor(.laMuted)
+                .font(.system(size: 9, weight: .medium))
+                .foregroundColor(.white.opacity(0.50))
         }
     }
 }
@@ -164,111 +156,101 @@ struct KalpxQuickChantLiveActivity: Widget {
     private func lockScreenView(
         context: ActivityViewContext<KalpxChantAttributes>
     ) -> some View {
-        VStack(spacing: 8) {
+        ZStack {
+            // Dark spiritual brown gradient
+            LinearGradient(
+                colors: [.laBackground, .laSurface, .laWarmBrown],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
 
-            if context.state.isCompleted {
-                VStack(spacing: 6) {
-                    Text("✦")
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.laGold)
-                    Text("Practice offered")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.laText)
-                    Text(context.attributes.mantraName)
-                        .font(.system(size: 12))
-                        .foregroundColor(.laMuted)
-                    Text("\(context.state.sessionCount) chants")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.laGold)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
-            } else {
-                HStack(alignment: .center, spacing: 8) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        HStack(alignment: .top, spacing: 4) {
-                            Text("ॐ")
-                                .font(.system(size: 12, weight: .bold))
-                                .foregroundColor(.laGold)
-                            Text(context.attributes.mantraName)
-                                .font(.system(size: 12, weight: .bold))
-                                .foregroundColor(.laText)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .lineLimit(3)
-                        }
-                        if !context.attributes.mantraDevanagari.isEmpty {
-                            Text(context.attributes.mantraDevanagari)
-                                .font(.system(size: 10))
-                                .foregroundColor(.laMuted)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .lineLimit(3)
-                        }
+            // Subtle gold radial glow near ring (top-right)
+            RadialGradient(
+                colors: [Color.laGold.opacity(0.08), Color.clear],
+                center: UnitPoint(x: 0.82, y: 0.18),
+                startRadius: 0,
+                endRadius: 80
+            )
+
+            VStack(spacing: 0) {
+                if context.state.isCompleted {
+                    VStack(spacing: 6) {
+                        Text("✦")
+                            .font(.system(size: 26, weight: .bold))
+                            .foregroundColor(.laGold)
+                            .shadow(color: Color.laGold.opacity(0.6), radius: 6)
+                        Text("Practice offered")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white)
+                        Text(context.attributes.mantraName)
+                            .font(.system(size: 12))
+                            .foregroundColor(.white.opacity(0.50))
+                        Text("\(context.state.sessionCount) chants")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.laGold)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                } else {
 
-                    MalaRing(sessionCount: context.state.sessionCount, ringRadius: 24)
+                    // Top row: logo | mantra + devanagari | ring
+                    HStack(alignment: .center, spacing: 12) {
+                        Image("new_logo")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 44, height: 44)
+                            .clipShape(Circle())
+                            .shadow(color: Color.laGold.opacity(0.40), radius: 6, x: 0, y: 2)
+
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(context.attributes.mantraName)
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundColor(.white)
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.78)
+                                .fixedSize(horizontal: false, vertical: true)
+                            if !context.attributes.mantraDevanagari.isEmpty {
+                                Text(context.attributes.mantraDevanagari)
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.white.opacity(0.40))
+                                    .lineLimit(1)
+                            }
+                        }
+
+                        Spacer()
+
+                        MalaRing(sessionCount: context.state.sessionCount)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.top, 12)
+                    .padding(.bottom, 10)
+
+                    // Divider
+                    Rectangle()
+                        .fill(Color.white.opacity(0.10))
+                        .frame(height: 1)
+                        .padding(.horizontal, 14)
+
+                    // Stats row: Weekly | Yearly | Lifetime (no icons)
+                    HStack(spacing: 0) {
+                        Spacer()
+                        StatCell(label: "Weekly",   count: context.state.weekCount)
+                        Spacer()
+                        Rectangle().fill(Color.white.opacity(0.10)).frame(width: 0.5, height: 32)
+                        Spacer()
+                        StatCell(label: "Yearly",   count: context.state.yearCount)
+                        Spacer()
+                        Rectangle().fill(Color.white.opacity(0.10)).frame(width: 0.5, height: 32)
+                        Spacer()
+                        StatCell(label: "Lifetime", count: context.state.totalCount)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.top, 8)
+                    .padding(.bottom, 12)
                 }
-
-                Rectangle().fill(Color.laDivider).frame(height: 1)
-
-                HStack(spacing: 0) {
-                    Spacer()
-                    StatColumn(label: "Today",     count: context.state.sessionCount)
-                    Spacer()
-                    Rectangle().fill(Color.laDivider).frame(width: 1, height: 22)
-                    Spacer()
-                    StatColumn(label: "This week", count: context.state.weekCount)
-                    Spacer()
-                    Rectangle().fill(Color.laDivider).frame(width: 1, height: 22)
-                    Spacer()
-                    StatColumn(label: "Always",    count: context.state.totalCount)
-                    Spacer()
-                }
-
-                // TODO: Re-enable once AppIntents registration is confirmed working
-//                if #available(iOS 17.0, *) {
-//                    Button(intent: IncrementChantIntent()) {
-//                        Text("ॐ  Tap to Chant")
-//                            .font(.system(size: 12, weight: .semibold))
-//                            .foregroundColor(.laBrown)
-//                        .frame(maxWidth: .infinity)
-//                        .padding(.vertical, 6)
-//                        .background(Color.laGold.opacity(0.15))
-//                        .cornerRadius(8)
-//                        .overlay(
-//                            RoundedRectangle(cornerRadius: 8)
-//                                .stroke(Color.laGold.opacity(0.35), lineWidth: 1)
-//                        )
-//                    }
-//                    .buttonStyle(.plain)
-//                }
             }
-
         }
-        .padding(10)
-        .background(
-            ZStack {
-                LinearGradient(
-                    stops: [
-                        .init(color: Color(red: 1.00, green: 0.97, blue: 0.91), location: 0.0),
-                        .init(color: Color(red: 0.97, green: 0.91, blue: 0.80), location: 0.55),
-                        .init(color: Color(red: 0.93, green: 0.86, blue: 0.72), location: 1.0),
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                RadialGradient(
-                    colors: [
-                        Color.white.opacity(0.45),
-                        Color.clear
-                    ],
-                    center: UnitPoint(x: 0.15, y: 0.10),
-                    startRadius: 0,
-                    endRadius: 120
-                )
-            }
-            .opacity(0.92)
-        )
-        .activityBackgroundTint(Color(red: 0.96, green: 0.90, blue: 0.78))
+        .activityBackgroundTint(Color.laBackground)
     }
 }

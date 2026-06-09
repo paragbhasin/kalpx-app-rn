@@ -3,19 +3,11 @@ import SwiftUI
 struct MantraPickerView: View {
     @EnvironmentObject var engine: WatchJapaEngine
     @EnvironmentObject var connectivity: WatchConnectivityManager
-    @State private var selectedMantra = CuratedMantra.default
-    @State private var showGoalPicker = false
-
     var body: some View {
-        if showGoalPicker {
-            GoalPickerView(mantra: selectedMantra) { goalType, goalValue in
-                engine.startSession(mantra: selectedMantra, goalType: goalType, goalValue: goalValue)
-            }
-        } else if let mantras = connectivity.mantras {
+        if let mantras = connectivity.mantras {
             List(mantras) { mantra in
                 Button {
-                    selectedMantra = mantra
-                    showGoalPicker = true
+                    engine.startSession(mantra: mantra, goalType: "unlimited", goalValue: nil)
                 } label: {
                     VStack(alignment: .leading, spacing: 4) {
                         if let label = mantra.label {

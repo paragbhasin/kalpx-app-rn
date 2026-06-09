@@ -98,25 +98,12 @@ struct KalpxSankalpLiveActivity: Widget {
         }
         .padding(14)
         .background(
-            ZStack {
-                LinearGradient(
-                    stops: [
-                        .init(color: Color(red: 1.00, green: 0.97, blue: 0.91), location: 0.0),
-                        .init(color: Color(red: 0.97, green: 0.91, blue: 0.80), location: 0.55),
-                        .init(color: Color(red: 0.93, green: 0.86, blue: 0.72), location: 1.0),
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                RadialGradient(
-                    colors: [Color.white.opacity(0.40), Color.clear],
-                    center: UnitPoint(x: 0.15, y: 0.10),
-                    startRadius: 0,
-                    endRadius: 100
-                )
-            }
-            .opacity(0.92)
+            LinearGradient(
+                colors: [.laBackground, .laSurface, .laWarmBrown],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
         )
-        .activityBackgroundTint(Color(red: 0.96, green: 0.90, blue: 0.78))
+        .activityBackgroundTint(Color.laBackground)
     }
 }

@@ -50,6 +50,7 @@ class WatchAppGroupStorage {
                 ref:        ref,
                 name:       name,
                 devanagari: dict["devanagari"] ?? "",
+                iast:       dict["iast"],
                 label:      dict["label"],
                 audioUrl:   dict["audioUrl"]
             )

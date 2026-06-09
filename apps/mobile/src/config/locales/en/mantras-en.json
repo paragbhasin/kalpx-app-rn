@@ -2370,5 +2370,28 @@
         "difficulty": 1,
         "language_level": "simple",
         "weight": 1.0
+    },
+    {
+        "id": "mantra.karpura_gauram",
+        "deity": "Shiva",
+        "text": "Karpura Gauram Karunavataram Samsara Saram Bhujagendra Haram Sada Vasantam Hridayaravinde Bhavam Bhavani Sahitam Namami",
+        "explanation": [
+            "This shloka glorifies Shiva as pure as camphor — brilliant white, yet filled with compassion.",
+            "'Karpura Gauram' means as white and pure as camphor, symbolizing absolute purity.",
+            "Shiva wears the serpent king as a garland and is the essence of all creation.",
+            "He eternally dwells in the lotus of the heart, alongside Bhavani (Parvati)."
+        ],
+        "source": {
+            "title": "Shaiva Stotra"
+        },
+        "tags": ["Shiva", "purity", "devotion", "shloka"],
+        "devanagari": "कर्पूरगौरं करुणावतारं संसारसारं भुजगेन्द्रहारम् । सदा वसन्तं हृदयारविन्दे भवं भवानीसहितं नमामि ॥",
+        "iast": "karpūragauraṃ karuṇāvatāraṃ saṃsārasāraṃ bhujagendrahāram | sadā vasantaṃ hṛdayāravinde bhavaṃ bhavānīsahitaṃ namāmi ||",
+        "simplified_pronunciation": "Kar-pu-ra Gau-ram Ka-ru-na-va-ta-ram Sam-sa-ra Sa-ram Bhu-ja-gen-dra Ha-ram Sa-da Va-san-tam Hri-da-ya-ra-vin-de Bha-vam Bha-va-ni Sa-hi-tam Na-ma-mi",
+        "suggested_reps": 108,
+        "best_times": ["dawn", "evening"],
+        "difficulty": 2,
+        "language_level": "devotional",
+        "weight": 1.2
     }
 ]

@@ -221,7 +221,7 @@ class KalpxLiveActivityService : Service() {
     // ── Notification builders ─────────────────────────────────────────────────
 
     private fun buildChantNotification(): Notification {
-        val beadProgress = sessionCount % 27
+        val malaProgress = sessionCount % 108   // 108-count mala cycle (mirrors iOS MalaRing)
         val elapsed = formatElapsed(elapsedSeconds)
 
         val contentPendingIntent = deepLinkPendingIntent(deepLinkURL, requestCode = 0)
@@ -235,7 +235,14 @@ class KalpxLiveActivityService : Service() {
                 .setStyle(
                     NotificationCompat.BigTextStyle()
                         .setBigContentTitle("✦ Practice offered")
-                        .bigText("$mantraName\n$sessionCount chants")
+                        .bigText(buildString {
+                            append(mantraName)
+                            if (devanagari.isNotEmpty()) {
+                                append("\n")
+                                append(devanagari)
+                            }
+                            append("\n$sessionCount chants")
+                        })
                 )
                 .setContentIntent(contentPendingIntent)
                 .setOngoing(false)
@@ -243,7 +250,7 @@ class KalpxLiveActivityService : Service() {
                 .setOnlyAlertOnce(true)
                 .setCategory(NotificationCompat.CATEGORY_STATUS)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setColor(Color.parseColor("#D09F2D"))
+                .setColor(Color.parseColor("#EAB578"))
                 .setColorized(true)
                 .build()
 
@@ -251,13 +258,13 @@ class KalpxLiveActivityService : Service() {
             // ── Active chanting state ── mirrors iOS lock screen: mantra + mala ring + stats
             // compact view (lock screen pill): title + statsLine
             // expanded view (shade): devanagari + stats + elapsed + ॐ Chant button
-            val statsLine = "Today $sessionCount  ·  This week $weekCount  ·  Always $totalCount"
+            val statsLine = "Today $sessionCount  ·  Weekly $weekCount  ·  Lifetime $totalCount"
             val bigText = buildString {
                 if (devanagari.isNotEmpty()) {
                     append(devanagari)
                     append("\n\n")
                 }
-                append("Today $sessionCount  ·  This week $weekCount  ·  Always $totalCount")
+                append("Today  $sessionCount    Weekly  $weekCount    Lifetime  $totalCount")
                 append("\n")
                 append(elapsed)
                 append(" elapsed")
@@ -273,25 +280,25 @@ class KalpxLiveActivityService : Service() {
             )
             val tapAction = NotificationCompat.Action.Builder(
                 R.drawable.ic_kalpx_notification,
-                "ॐ Chant",
+                "ॐ  Chant",
                 incrementPendingIntent
             ).build()
 
             NotificationCompat.Builder(this, CHANNEL_CHANT)
                 .setSmallIcon(R.drawable.ic_kalpx_notification)
-                .setContentTitle("ॐ $mantraName")
+                .setContentTitle("ॐ  $mantraName")
                 // compact/lock-screen pill shows contentText — use stats not devanagari so it
-                // reads as live data ("Today 5 · Week 5 · Lifetime 70") rather than truncated script
+                // reads as live data ("Today 5 · Weekly 5 · Lifetime 70") rather than truncated script
                 .setContentText(statsLine)
                 .setSubText(elapsed)
                 .setStyle(
                     NotificationCompat.BigTextStyle()
-                        .setBigContentTitle("ॐ $mantraName")
+                        .setBigContentTitle("ॐ  $mantraName")
                         .bigText(bigText)
                         .setSummaryText(elapsed)
                 )
-                // Bead progress bar: 27 beads per mala round, mirrors MalaRing SwiftUI view
-                .setProgress(27, beadProgress, false)
+                // Mala ring progress: 108 beads per cycle, mirrors iOS MalaRing (total = 108)
+                .setProgress(108, malaProgress, false)
                 .addAction(tapAction)
                 .setContentIntent(contentPendingIntent)
                 .setOngoing(true)
@@ -300,7 +307,7 @@ class KalpxLiveActivityService : Service() {
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-                .setColor(Color.parseColor("#D09F2D"))
+                .setColor(Color.parseColor("#EAB578"))
                 .setColorized(true)
                 .build()
         }
@@ -308,25 +315,27 @@ class KalpxLiveActivityService : Service() {
 
     private fun buildSankalpNotification(): Notification {
         // Mirrors KalpxSankalpLiveActivity.swift lock screen view:
-        //   ◈  A sankalp for today
-        //      {title}
-        //   │ {line}
+        //   ◈  A sankalp for today   ← subText (label)
+        //      {sankalpTitle}         ← title (main, bold)
+        //   │  {sankalpLine}          ← bigText intention line
         val contentPendingIntent = deepLinkPendingIntent(deepLinkURL, requestCode = 2)
         val bigText = buildString {
-            append("A sankalp for today\n")
-            if (sankalpLine.isNotEmpty()) append(sankalpLine)
+            if (sankalpLine.isNotEmpty()) {
+                append("│  ")
+                append(sankalpLine)
+            }
         }
 
         return NotificationCompat.Builder(this, CHANNEL_SANKALP)
             .setSmallIcon(R.drawable.ic_kalpx_notification)
-            .setContentTitle("◈ $sankalpTitle")
+            .setContentTitle("◈  $sankalpTitle")
             .setContentText(if (sankalpLine.isNotEmpty()) sankalpLine else "A sankalp for today")
-            .setSubText("Your sankalp")
+            .setSubText("A sankalp for today")
             .setStyle(
                 NotificationCompat.BigTextStyle()
-                    .setBigContentTitle("◈ $sankalpTitle")
+                    .setBigContentTitle("◈  $sankalpTitle")
                     .bigText(bigText)
-                    .setSummaryText("Your sankalp")
+                    .setSummaryText("A sankalp for today")
             )
             .setContentIntent(contentPendingIntent)
             .setOngoing(true)
@@ -335,7 +344,7 @@ class KalpxLiveActivityService : Service() {
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-            .setColor(Color.parseColor("#D09F2D"))
+            .setColor(Color.parseColor("#EAB578"))
             .setColorized(true)
             .build()
     }

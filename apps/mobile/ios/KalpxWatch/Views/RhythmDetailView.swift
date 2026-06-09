@@ -2,83 +2,69 @@ import SwiftUI
 
 struct RhythmDetailView: View {
     let rhythm: WatchRhythmData
+
     @EnvironmentObject var engine: WatchJapaEngine
+    @EnvironmentObject var connectivity: WatchConnectivityManager
 
     var body: some View {
         List {
             ForEach(rhythm.bands, id: \.band) { band in
                 Section(header: bandHeader(band)) {
                     ForEach(band.items, id: \.itemId) { item in
-                        row(for: item, band: band)
+                        itemRow(item, isDone: band.isDone)
                     }
                 }
             }
         }
         .navigationTitle("My Rhythm")
-    }
-
-    private func bandHeader(_ band: WatchRhythmBand) -> some View {
-        let name: String
-        switch band.band {
-        case "morning":   name = "Morning"
-        case "afternoon": name = "Afternoon"
-        case "night":     name = "Night"
-        default:          name = band.band.capitalized
-        }
-        let label = band.isDone ? "\(name) · Done ✓" : name
-        return Text(label)
+        .background(KalpXWatchTheme.background)
+        .scrollContentBackground(.hidden)
     }
 
     @ViewBuilder
-    private func row(for item: WatchRhythmItem, band: WatchRhythmBand) -> some View {
-        let dimmed = band.isDone
+    private func bandHeader(_ band: WatchRhythmBand) -> some View {
+        HStack(spacing: 4) {
+            GoldDot()
+            Text(bandLabel(band.band))
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundColor(KalpXWatchTheme.textTertiary)
+        }
+    }
 
+    @ViewBuilder
+    private func itemRow(_ item: WatchRhythmItem, isDone: Bool) -> some View {
         switch item.itemType {
         case "mantra":
-            let cm = CuratedMantra(
-                id:         item.itemId,
-                ref:        item.itemId,
-                name:       item.title,
-                devanagari: "",
-                label:      band.band.capitalized,
-                audioUrl:   item.audioUrl
-            )
+            let curated = connectivity.mantras?.first(where: { $0.ref == item.itemId })
+                ?? CuratedMantra(id: item.itemId, ref: item.itemId, name: item.title, devanagari: "", audioUrl: item.audioUrl)
             NavigationLink {
-                GoalPickerView(mantra: cm) { type, value in
-                    engine.startSession(mantra: cm, goalType: type, goalValue: value)
+                GoalPickerView(mantra: curated) { type, value in
+                    engine.startSession(mantra: curated, goalType: type, goalValue: value)
                 }
             } label: {
-                WatchListRow(icon: "ॐ", title: item.title, subtitle: nil)
-                    .opacity(dimmed ? 0.55 : 1)
+                RitualRow(icon: isDone ? "✓" : "ॐ", title: item.title, isDimmed: isDone)
             }
-
-        case "sankalp":
-            NavigationLink {
-                SankalpView(
-                    title:  item.title,
-                    line:   item.description,
-                    source: band.band
-                )
-            } label: {
-                WatchListRow(icon: "◈", title: item.title, subtitle: nil)
-                    .opacity(dimmed ? 0.55 : 1)
-            }
-
+            .listRowBackground(KalpXWatchTheme.surface)
         case "practice":
             NavigationLink {
-                PracticeView(
-                    title:       item.title,
-                    description: item.description,
-                    source:      band.band
-                )
+                PracticeView(title: item.title, description: item.description, source: "rhythm")
+                    .environmentObject(connectivity)
             } label: {
-                WatchListRow(icon: "◎", title: item.title, subtitle: nil)
-                    .opacity(dimmed ? 0.55 : 1)
+                RitualRow(icon: isDone ? "✓" : "◎", title: item.title, isDimmed: isDone)
             }
-
+            .listRowBackground(KalpXWatchTheme.surface)
         default:
-            WatchListRow(icon: "·", title: item.title, subtitle: nil)
-                .opacity(dimmed ? 0.55 : 1)
+            RitualRow(
+                icon: isDone ? "✓" : "◈",
+                title: item.title,
+                subtitle: item.description.isEmpty ? nil : item.description,
+                isDimmed: isDone
+            )
+            .listRowBackground(KalpXWatchTheme.surface)
         }
+    }
+
+    private func bandLabel(_ band: String) -> String {
+        band.prefix(1).uppercased() + band.dropFirst()
     }
 }

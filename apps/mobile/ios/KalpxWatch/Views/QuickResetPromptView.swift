@@ -1,71 +1,67 @@
 import SwiftUI
-import WatchKit
 
 struct QuickResetPromptView: View {
     let mantra: WatchQuickResetMantra
     let feeling: String
+
     @EnvironmentObject var engine: WatchJapaEngine
-    @State private var done = false
+    @Environment(\.dismiss) var dismiss
     @State private var showGoalPicker = false
 
     var body: some View {
-        if done {
-            VStack(spacing: 8) {
-                Text("✓")
-                    .font(.system(size: 28))
-                Text(feeling)
-                    .font(.system(size: 14, weight: .medium))
-                Text("Noted")
-                    .font(.system(size: 11))
-                    .foregroundColor(.secondary)
-            }
-        } else if showGoalPicker {
-            let cm = curatedMantra
-            GoalPickerView(mantra: cm) { goalType, goalValue in
-                engine.startSession(mantra: cm, goalType: goalType, goalValue: goalValue)
+        if showGoalPicker {
+            GoalPickerView(
+                mantra: CuratedMantra(
+                    id: mantra.itemId,
+                    ref: mantra.itemId,
+                    name: mantra.title,
+                    devanagari: mantra.devanagari,
+                    audioUrl: mantra.audioUrl
+                )
+            ) { type, value in
+                engine.startSession(
+                    mantra: CuratedMantra(
+                        id: mantra.itemId,
+                        ref: mantra.itemId,
+                        name: mantra.title,
+                        devanagari: mantra.devanagari,
+                        audioUrl: mantra.audioUrl
+                    ),
+                    goalType: type,
+                    goalValue: value
+                )
             }
         } else {
-            VStack(spacing: 8) {
-                Text("Quick Reset?")
-                    .font(.system(size: 14, weight: .semibold))
+            ScrollView {
+                VStack(spacing: 10) {
+                    Text(feeling)
+                        .font(.system(size: 11))
+                        .foregroundColor(KalpXWatchTheme.textTertiary)
 
-                Text(mantra.title)
-                    .font(.system(size: 11))
-                    .foregroundColor(.accentColor)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .padding(.horizontal, 4)
+                    Text(mantra.devanagari)
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundColor(KalpXWatchTheme.textPrimary)
+                        .multilineTextAlignment(.center)
 
-                Button {
-                    WKInterfaceDevice.current().play(.click)
-                    showGoalPicker = true
-                } label: {
-                    Text("Start")
-                        .font(.system(size: 13, weight: .semibold))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 4)
-                }
-                .buttonStyle(.borderedProminent)
-
-                Button { done = true } label: {
-                    Text("Skip")
+                    Text(mantra.title)
                         .font(.system(size: 12))
-                        .foregroundColor(.secondary)
-                }
-                .buttonStyle(.plain)
-            }
-            .padding(.horizontal, 8)
-        }
-    }
+                        .foregroundColor(KalpXWatchTheme.textSecondary)
+                        .multilineTextAlignment(.center)
 
-    private var curatedMantra: CuratedMantra {
-        CuratedMantra(
-            id:         mantra.itemId,
-            ref:        mantra.itemId,
-            name:       mantra.title,
-            devanagari: mantra.devanagari,
-            label:      "quick_reset",
-            audioUrl:   mantra.audioUrl
-        )
+                    VStack(spacing: 6) {
+                        WatchPrimaryButton(label: "Begin") {
+                            showGoalPicker = true
+                        }
+                        WatchSecondaryButton(label: "Later") {
+                            dismiss()
+                        }
+                    }
+                    .padding(.top, 4)
+                }
+                .padding(.horizontal, 4)
+            }
+            .navigationTitle("A moment of reset")
+            .background(KalpXWatchTheme.background)
+        }
     }
 }

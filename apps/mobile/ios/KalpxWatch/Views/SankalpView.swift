@@ -14,22 +14,26 @@ struct SankalpView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text(title)
                     .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(KalpXWatchTheme.textPrimary)
 
                 Text(line)
                     .font(.system(size: 13))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(KalpXWatchTheme.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Divider()
+                    .background(KalpXWatchTheme.elevated)
 
                 if marked {
                     HStack {
-                        Text("◈ Held")
+                        Text("◈")
+                            .foregroundColor(KalpXWatchTheme.gold)
+                        Text("Held")
                             .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(.accentColor)
+                            .foregroundColor(KalpXWatchTheme.textPrimary)
                     }
                 } else {
-                    Button {
+                    WatchPrimaryButton(label: "I held this") {
                         connectivity.sendToPhone([
                             "type":   "sankalp_held",
                             "source": source,
@@ -38,15 +42,12 @@ struct SankalpView: View {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
                             dismiss()
                         }
-                    } label: {
-                        Text("Mark as Held")
-                            .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.borderedProminent)
                 }
             }
             .padding(.horizontal, 4)
         }
         .navigationTitle("Sankalp")
+        .background(KalpXWatchTheme.background)
     }
 }

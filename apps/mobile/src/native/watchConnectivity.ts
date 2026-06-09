@@ -3,7 +3,8 @@ import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
 // Matches the exact pattern of liveActivity.ts — uses NativeModules, not TurboModuleRegistry.
 // The native module is registered as a legacy module via RCT_EXTERN_MODULE.
 const { KalpxWatchConnectivityModule } = NativeModules;
-const supported = Platform.OS === 'ios' && !!KalpxWatchConnectivityModule;
+// Supported on both iOS (WatchConnectivity) and Android (Wearable Data Layer)
+const supported = !!KalpxWatchConnectivityModule;
 console.log('[WatchConnectivity] module found:', !!KalpxWatchConnectivityModule, 'supported:', supported);
 if (KalpxWatchConnectivityModule) {
   console.log('[WatchConnectivity] methods:', Object.keys(KalpxWatchConnectivityModule));

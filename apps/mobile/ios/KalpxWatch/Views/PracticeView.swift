@@ -14,24 +14,28 @@ struct PracticeView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text(title)
                     .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(KalpXWatchTheme.textPrimary)
 
                 if !description.isEmpty {
                     Text(description)
                         .font(.system(size: 12))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(KalpXWatchTheme.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
                 Divider()
+                    .background(KalpXWatchTheme.elevated)
 
                 if marked {
                     HStack {
-                        Text("◎ Done")
+                        Text("◎")
+                            .foregroundColor(KalpXWatchTheme.gold)
+                        Text("Done")
                             .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(.accentColor)
+                            .foregroundColor(KalpXWatchTheme.textPrimary)
                     }
                 } else {
-                    Button {
+                    WatchPrimaryButton(label: "I did this") {
                         connectivity.sendToPhone([
                             "type":   "practice_done",
                             "source": source,
@@ -40,15 +44,12 @@ struct PracticeView: View {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
                             dismiss()
                         }
-                    } label: {
-                        Text("Mark Done")
-                            .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.borderedProminent)
                 }
             }
             .padding(.horizontal, 4)
         }
         .navigationTitle("Practice")
+        .background(KalpXWatchTheme.background)
     }
 }

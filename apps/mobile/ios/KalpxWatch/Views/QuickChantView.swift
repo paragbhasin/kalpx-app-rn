@@ -7,6 +7,8 @@ struct QuickChantView: View {
 
     var body: some View {
         ZStack {
+            KalpXWatchTheme.background.ignoresSafeArea()
+
             if showCompletion {
                 CompletionView(
                     count: engine.sessionCount,
@@ -30,14 +32,14 @@ struct QuickChantView: View {
 
                 Text("\(engine.sessionCount)")
                     .font(.system(size: 56, weight: .bold, design: .rounded))
-                    .foregroundColor(.primary)
+                    .foregroundColor(KalpXWatchTheme.textPrimary)
                     .contentTransition(.numericText())
                     .animation(.spring(duration: 0.12), value: engine.sessionCount)
 
                 if engine.malaRoundsCompleted > 0 {
                     Text("Round \(engine.malaRoundsCompleted)")
                         .font(.system(size: 10, weight: .semibold))
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(KalpXWatchTheme.gold)
                         .transition(.opacity)
                 }
 
@@ -45,7 +47,6 @@ struct QuickChantView: View {
                     .padding(.horizontal, 8)
                     .padding(.top, 2)
 
-                // Stats row — baseline from iPhone + this session's count
                 if engine.sessionCount > 0 || (connectivity.pathData?.mantraStats?[engine.currentMantraRef]) != nil {
                     statsRow()
                         .transition(.opacity)
@@ -53,7 +54,7 @@ struct QuickChantView: View {
 
                 Text("tap to chant")
                     .font(.system(size: 10, weight: .regular))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(KalpXWatchTheme.textTertiary)
                     .opacity(engine.sessionCount == 0 ? 1 : 0)
 
                 Spacer(minLength: 4)
@@ -76,7 +77,7 @@ struct QuickChantView: View {
             HStack {
                 Button { engine.discardSession() } label: {
                     Image(systemName: "xmark.circle")
-                        .foregroundStyle(.secondary)
+                        .foregroundColor(KalpXWatchTheme.textTertiary)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Discard session")
@@ -86,7 +87,7 @@ struct QuickChantView: View {
                 if engine.sessionCount > 0 {
                     Button { engine.undo() } label: {
                         Image(systemName: "arrow.uturn.backward.circle")
-                            .foregroundStyle(.secondary)
+                            .foregroundColor(KalpXWatchTheme.textTertiary)
                     }
                     .buttonStyle(.plain)
                     .disabled(!engine.canUndo)
@@ -94,7 +95,7 @@ struct QuickChantView: View {
 
                     Button { showCompletion = true } label: {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
+                            .foregroundColor(KalpXWatchTheme.gold)
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("Complete session")
@@ -127,10 +128,10 @@ struct QuickChantView: View {
         VStack(spacing: 1) {
             Text(formatCount(count))
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
-                .foregroundColor(.primary)
+                .foregroundColor(KalpXWatchTheme.textPrimary)
             Text(label)
                 .font(.system(size: 9))
-                .foregroundColor(.secondary)
+                .foregroundColor(KalpXWatchTheme.textSecondary)
         }
         .frame(maxWidth: .infinity)
     }

@@ -27,12 +27,16 @@ struct CheckInView: View {
         VStack(spacing: 8) {
             Text("✓")
                 .font(.system(size: 28))
+                .foregroundColor(KalpXWatchTheme.gold)
             Text(feeling)
                 .font(.system(size: 14, weight: .medium))
+                .foregroundColor(KalpXWatchTheme.textPrimary)
             Text("Noted")
                 .font(.system(size: 11))
-                .foregroundColor(.secondary)
+                .foregroundColor(KalpXWatchTheme.textTertiary)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(KalpXWatchTheme.background)
         .accessibilityLabel("Check-in recorded: \(feeling)")
     }
 
@@ -52,9 +56,13 @@ struct CheckInView: View {
             } label: {
                 Text(feeling.label)
                     .font(.system(size: 14))
+                    .foregroundColor(KalpXWatchTheme.textPrimary)
             }
+            .listRowBackground(KalpXWatchTheme.surface)
             .accessibilityLabel(feeling.label)
         }
         .navigationTitle("How are you?")
+        .background(KalpXWatchTheme.background)
+        .scrollContentBackground(.hidden)
     }
 }

@@ -11,27 +11,28 @@ struct CompletionView: View {
 
             Text("✦")
                 .font(.system(size: 22))
+                .foregroundColor(KalpXWatchTheme.gold)
 
             Text("You returned \(count) times.")
                 .font(.system(size: 12, weight: .medium))
+                .foregroundColor(KalpXWatchTheme.textPrimary)
                 .multilineTextAlignment(.center)
 
             Text("Let this practice be offered.")
                 .font(.system(size: 11))
-                .foregroundColor(.secondary)
+                .foregroundColor(KalpXWatchTheme.textSecondary)
                 .multilineTextAlignment(.center)
 
             Spacer()
 
-            HStack(spacing: 6) {
-                Button("Done", action: onDone)
-                    .buttonStyle(.bordered)
-
-                Button("More", action: onContinue)
-                    .buttonStyle(.borderedProminent)
+            VStack(spacing: 6) {
+                WatchPrimaryButton(label: "Chant more", action: onContinue)
+                WatchSecondaryButton(label: "Complete",  action: onDone)
             }
-            .font(.system(size: 13))
+            .padding(.horizontal, 2)
         }
         .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(KalpXWatchTheme.background)
     }
 }

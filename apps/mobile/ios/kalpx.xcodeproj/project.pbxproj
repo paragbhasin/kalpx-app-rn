@@ -13,10 +13,10 @@
 		0F5CE3E0062F9D0B61E733A1 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E41D0296DDDAC8B9BC4C662 /* ExpoModulesProvider.swift */; };
 		1050A7C0CE294623B385519E /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9D907E5A3C4BDAAD72A93E /* noop-file.swift */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		20BB91EE597F853BA48CEF1E /* InnerPathDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6ED48393DE519F453AB6225 /* InnerPathDetailView.swift */; };
 		27F82797A9983CF694C29011 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 09E4E94BBD83FD47B0156700 /* PrivacyInfo.xcprivacy */; };
 		2B9C684F3C782DDB33A033A6 /* SankalpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1CFA64354B2E0F85553396D /* SankalpView.swift */; };
 		3B78610E5348905E53923BCE /* KalpxWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 4716FE0197CA6BFAD878301A /* KalpxWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		3C9B5FD1DF379F122EE62D56 /* WatchComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = D88DC20804F0726EBDC3AFE6 /* WatchComponents.swift */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		48B8F114B491F4573B259157 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 31DC1468B8601143F4D30D91 /* Foundation.framework */; };
 		5579BDBB0F9955F2C427AE00 /* KalpxWatchConnectivityModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CBCE6BEE5AD9D023BEFFB9E /* KalpxWatchConnectivityModule.swift */; };
@@ -25,9 +25,9 @@
 		639EBC4998F065D4AAA1FFB3 /* CompletionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF736816FCAECC1A4B6D062C /* CompletionView.swift */; };
 		6455D3C3480506F39CB03245 /* MantraPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3744E65AA05E5709D0DA6F70 /* MantraPickerView.swift */; };
 		672FE2180F80CDDA8380DF2B /* BeadRingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 549A1863A78C035FCC0E8922 /* BeadRingView.swift */; };
+		6B5C3C1308CCEE1D7AE45F7E /* KalpXWatchTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBE5B6FAA77C68207A499372 /* KalpXWatchTheme.swift */; };
 		78491082C6B6F0AE7A25F7FB /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2017CB10368132C4D55C285 /* WidgetKit.framework */; };
 		7F27698A25AA2F54C76B79F7 /* KalpxWatchConnectivityModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 3868A4D2D239A69E56E78540 /* KalpxWatchConnectivityModule.m */; };
-		7FED38701A54D99AD4ADC4AE /* RhythmDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC1D960F696AEE41803404AA /* RhythmDetailView.swift */; };
 		812704A17D7B40F097CE0B52 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F1A0B2FC91274AD8A4D21224 /* GoogleService-Info.plist */; };
 		8546F79D94EF8E000CAD8988 /* KalpxAppGroupKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D6B30C032FB68BFB568AED /* KalpxAppGroupKeys.swift */; };
 		919552073C4F5965CB08D947 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8116A15FF5DE4E1CB892B9B1 /* SwiftUI.framework */; };
@@ -38,17 +38,21 @@
 		9B30000000000000000SANKC /* KalpxSankalpAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0010CC0010CC0010CC0010 /* KalpxSankalpAttributes.swift */; };
 		9B30310F10D1CFBE34D09E00 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6922EE08CE4FA4F4238E3F /* RootView.swift */; };
 		9DE0AA8311E22C75DCE08444 /* WatchLocalSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF57DD7578FAF7B22E6B3716 /* WatchLocalSession.swift */; };
-		A3B21B9B2C487E8145A995B5 /* MantraAudioPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89DE0279C36AEEB3932A0671 /* MantraAudioPlayerView.swift */; };
 		B18737E3E6D8E5EA8E0FBC35 /* QuickChantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D29CE03ED09FEF69AA41E972 /* QuickChantView.swift */; };
 		B74C0E4B84AAE7380C7E4664 /* WatchAppGroupStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23D9191D3B736E2DECD381F7 /* WatchAppGroupStorage.swift */; };
 		BB0001BB0001BB0001BB0001 /* KalpxChantAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0001AA0001AA0001AA0001 /* KalpxChantAttributes.swift */; };
 		BB0002BB0002BB0002BB0002 /* KalpxQuickChantLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0002AA0002AA0002AA0002 /* KalpxQuickChantLiveActivity.swift */; };
 		BB0003BB0003BB0003BB0003 /* KalpxQuickChantWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0003AA0003AA0003AA0003 /* KalpxQuickChantWidgetBundle.swift */; };
 		BB0004BB0004BB0004BB0004 /* IncrementChantIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0004AA0004AA0004AA0004 /* IncrementChantIntent.swift */; };
+		BB0010BB0010BB0010BB0010 /* KalpxLiveActivityTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0010AA0010AA0010AA0010 /* KalpxLiveActivityTheme.swift */; };
 		BB0006BB0006BB0006BB0006 /* KalpxLiveActivityModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0008AA0008AA0008AA0008 /* KalpxLiveActivityModule.swift */; };
 		BB0007BB0007BB0007BB0007 /* KalpxLiveActivityModule.m in Sources */ = {isa = PBXBuildFile; fileRef = AA0009AA0009AA0009AA0009 /* KalpxLiveActivityModule.m */; };
 		BB0008BB0008BB0008BB0008 /* KalpxChantAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0001AA0001AA0001AA0001 /* KalpxChantAttributes.swift */; };
 		BB0009BB0009BB0009BB0009 /* KalpxQuickChantWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = AA0007AA0007AA0007AA0007 /* KalpxQuickChantWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		BB1001BB1001BB1001BB1001 /* MantraAudioPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1001AA1001AA1001AA1001 /* MantraAudioPlayerView.swift */; };
+		BB1002BB1002BB1002BB1002 /* QuickResetPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1002AA1002AA1002AA1002 /* QuickResetPromptView.swift */; };
+		BB1003BB1003BB1003BB1003 /* RhythmDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1003AA1003AA1003AA1003 /* RhythmDetailView.swift */; };
+		BB1004BB1004BB1004BB1004 /* InnerPathDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1004AA1004AA1004AA1004 /* InnerPathDetailView.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		BBEBF87A701AEBBFEB733B95 /* WatchJapaEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A74AB26C1738E507DE5CC5 /* WatchJapaEngine.swift */; };
 		BEADBA20FCE6D09621832310 /* CheckInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E965A5CBBD7C775C324DE81 /* CheckInView.swift */; };
@@ -62,7 +66,6 @@
 		DDB37CDCA40C65C7FE0EE4E6 /* GoalPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCBEB7653445217AD548D973 /* GoalPickerView.swift */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 		F7E76788F40DFBDF83461C52 /* CuratedMantra.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6475BB9A0B4431C06ED71915 /* CuratedMantra.swift */; };
-		F90251696CBD4BF057FA6E53 /* QuickResetPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02AAC72286418B1057FBD18F /* QuickResetPromptView.swift */; };
 		FD98977648440A9FC29D27AA /* KalpxWatchWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB00272D4E8BDE7A5F8927C6 /* KalpxWatchWidget.swift */; };
 /* End PBXBuildFile section */
 
@@ -120,7 +123,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		02AAC72286418B1057FBD18F /* QuickResetPromptView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = QuickResetPromptView.swift; path = KalpxWatch/Views/QuickResetPromptView.swift; sourceTree = "<group>"; };
 		09E4E94BBD83FD47B0156700 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = kalpx/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		0E41D0296DDDAC8B9BC4C662 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-kalpx/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* kalpx.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = kalpx.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -145,7 +147,6 @@
 		7B19DEEEA715C13D7D2F9D53 /* Pods-kalpx.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kalpx.debug.xcconfig"; path = "Target Support Files/Pods-kalpx/Pods-kalpx.debug.xcconfig"; sourceTree = "<group>"; };
 		8116A15FF5DE4E1CB892B9B1 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		891EE88A7708CD07ECF4D9F9 /* WatchConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WatchConnectivity.framework; path = System/Library/Frameworks/WatchConnectivity.framework; sourceTree = SDKROOT; };
-		89DE0279C36AEEB3932A0671 /* MantraAudioPlayerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MantraAudioPlayerView.swift; path = KalpxWatch/Views/MantraAudioPlayerView.swift; sourceTree = "<group>"; };
 		99A0C115260CCD250E473708 /* WatchPathData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WatchPathData.swift; path = KalpxWatch/Models/WatchPathData.swift; sourceTree = "<group>"; };
 		9C263AE5C485401E3C2A794A /* Pods_kalpx.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_kalpx.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F3D369EA0B445B809A69DE1 /* WatchConnectivityManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WatchConnectivityManager.swift; path = kalpx/WatchConnectivityManager.swift; sourceTree = "<group>"; };
@@ -154,14 +155,20 @@
 		AA0002AA0002AA0002AA0002 /* KalpxQuickChantLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KalpxQuickChantLiveActivity.swift; sourceTree = "<group>"; };
 		AA0003AA0003AA0003AA0003 /* KalpxQuickChantWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KalpxQuickChantWidgetBundle.swift; sourceTree = "<group>"; };
 		AA0004AA0004AA0004AA0004 /* IncrementChantIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncrementChantIntent.swift; sourceTree = "<group>"; };
+		AA0010AA0010AA0010AA0010 /* KalpxLiveActivityTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KalpxLiveActivityTheme.swift; sourceTree = "<group>"; };
 		AA0005AA0005AA0005AA0005 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA0006AA0006AA0006AA0006 /* KalpxQuickChantWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KalpxQuickChantWidget.entitlements; sourceTree = "<group>"; };
 		AA0007AA0007AA0007AA0007 /* KalpxQuickChantWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = KalpxQuickChantWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0008AA0008AA0008AA0008 /* KalpxLiveActivityModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KalpxLiveActivityModule.swift; path = kalpx/KalpxLiveActivityModule.swift; sourceTree = "<group>"; };
 		AA0009AA0009AA0009AA0009 /* KalpxLiveActivityModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = KalpxLiveActivityModule.m; path = kalpx/KalpxLiveActivityModule.m; sourceTree = "<group>"; };
+		AA1001AA1001AA1001AA1001 /* MantraAudioPlayerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MantraAudioPlayerView.swift; path = KalpxWatch/Views/MantraAudioPlayerView.swift; sourceTree = "<group>"; };
+		AA1002AA1002AA1002AA1002 /* QuickResetPromptView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = QuickResetPromptView.swift; path = KalpxWatch/Views/QuickResetPromptView.swift; sourceTree = "<group>"; };
+		AA1003AA1003AA1003AA1003 /* RhythmDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RhythmDetailView.swift; path = KalpxWatch/Views/RhythmDetailView.swift; sourceTree = "<group>"; };
+		AA1004AA1004AA1004AA1004 /* InnerPathDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = InnerPathDetailView.swift; path = KalpxWatch/Views/InnerPathDetailView.swift; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = kalpx/SplashScreen.storyboard; sourceTree = "<group>"; };
 		B1CFA64354B2E0F85553396D /* SankalpView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SankalpView.swift; path = KalpxWatch/Views/SankalpView.swift; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
+		BBE5B6FAA77C68207A499372 /* KalpXWatchTheme.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = KalpXWatchTheme.swift; path = KalpxWatch/Theme/KalpXWatchTheme.swift; sourceTree = "<group>"; };
 		BF57DD7578FAF7B22E6B3716 /* WatchLocalSession.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WatchLocalSession.swift; path = KalpxWatch/Models/WatchLocalSession.swift; sourceTree = "<group>"; };
 		BF736816FCAECC1A4B6D062C /* CompletionView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CompletionView.swift; path = KalpxWatch/Views/CompletionView.swift; sourceTree = "<group>"; };
 		CA8590D6268E05059FAF2E64 /* KalpxWatchApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = KalpxWatchApp.swift; path = KalpxWatch/KalpxWatchApp.swift; sourceTree = "<group>"; };
@@ -170,11 +177,10 @@
 		CC0011CC0011CC0011CC0011 /* KalpxSankalpLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KalpxSankalpLiveActivity.swift; sourceTree = "<group>"; };
 		D2017CB10368132C4D55C285 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		D29CE03ED09FEF69AA41E972 /* QuickChantView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = QuickChantView.swift; path = KalpxWatch/Views/QuickChantView.swift; sourceTree = "<group>"; };
-		D6ED48393DE519F453AB6225 /* InnerPathDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = InnerPathDetailView.swift; path = KalpxWatch/Views/InnerPathDetailView.swift; sourceTree = "<group>"; };
+		D88DC20804F0726EBDC3AFE6 /* WatchComponents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WatchComponents.swift; path = KalpxWatch/Components/WatchComponents.swift; sourceTree = "<group>"; };
 		DA6922EE08CE4FA4F4238E3F /* RootView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RootView.swift; path = KalpxWatch/Views/RootView.swift; sourceTree = "<group>"; };
 		DCBEB7653445217AD548D973 /* GoalPickerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GoalPickerView.swift; path = KalpxWatch/Views/GoalPickerView.swift; sourceTree = "<group>"; };
 		DD9D907E5A3C4BDAAD72A93E /* noop-file.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; name = "noop-file.swift"; path = "kalpx/noop-file.swift"; sourceTree = "<group>"; };
-		EC1D960F696AEE41803404AA /* RhythmDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RhythmDetailView.swift; path = KalpxWatch/Views/RhythmDetailView.swift; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = kalpx/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* kalpx-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "kalpx-Bridging-Header.h"; path = "kalpx/kalpx-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -280,6 +286,14 @@
 			name = Storage;
 			sourceTree = "<group>";
 		};
+		373912A722E6BACBE9666683 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				BBE5B6FAA77C68207A499372 /* KalpXWatchTheme.swift */,
+			);
+			name = Theme;
+			sourceTree = "<group>";
+		};
 		3B2F15707A35B577A4058483 /* Engine */ = {
 			isa = PBXGroup;
 			children = (
@@ -327,10 +341,10 @@
 				B1CFA64354B2E0F85553396D /* SankalpView.swift */,
 				3320F9EC2A8E9B6F1FFC75B8 /* PracticeView.swift */,
 				4E965A5CBBD7C775C324DE81 /* CheckInView.swift */,
-				D6ED48393DE519F453AB6225 /* InnerPathDetailView.swift */,
-				EC1D960F696AEE41803404AA /* RhythmDetailView.swift */,
-				02AAC72286418B1057FBD18F /* QuickResetPromptView.swift */,
-				89DE0279C36AEEB3932A0671 /* MantraAudioPlayerView.swift */,
+				AA1001AA1001AA1001AA1001 /* MantraAudioPlayerView.swift */,
+				AA1002AA1002AA1002AA1002 /* QuickResetPromptView.swift */,
+				AA1003AA1003AA1003AA1003 /* RhythmDetailView.swift */,
+				AA1004AA1004AA1004AA1004 /* InnerPathDetailView.swift */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -399,11 +413,20 @@
 				AA0004AA0004AA0004AA0004 /* IncrementChantIntent.swift */,
 				CC0010CC0010CC0010CC0010 /* KalpxSankalpAttributes.swift */,
 				CC0011CC0011CC0011CC0011 /* KalpxSankalpLiveActivity.swift */,
+				AA0010AA0010AA0010AA0010 /* KalpxLiveActivityTheme.swift */,
 				AA0005AA0005AA0005AA0005 /* Info.plist */,
 				AA0006AA0006AA0006AA0006 /* KalpxQuickChantWidget.entitlements */,
 			);
 			name = KalpxQuickChantWidget;
 			path = KalpxQuickChantWidget;
+			sourceTree = "<group>";
+		};
+		E26327A0DD11CA8B424B641C /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				D88DC20804F0726EBDC3AFE6 /* WatchComponents.swift */,
+			);
+			name = Components;
 			sourceTree = "<group>";
 		};
 		EEFB28029A2D38249DD6C0D5 /* Connectivity */ = {
@@ -423,6 +446,8 @@
 				28221ABFDF88B9495FCEDC77 /* Models */,
 				3034931288F5BCC1D06CCD2F /* Storage */,
 				CA8590D6268E05059FAF2E64 /* KalpxWatchApp.swift */,
+				373912A722E6BACBE9666683 /* Theme */,
+				E26327A0DD11CA8B424B641C /* Components */,
 			);
 			name = KalpxWatch;
 			sourceTree = "<group>";
@@ -828,10 +853,12 @@
 				2B9C684F3C782DDB33A033A6 /* SankalpView.swift in Sources */,
 				D76D7FB8D69254948ACD07BA /* PracticeView.swift in Sources */,
 				BEADBA20FCE6D09621832310 /* CheckInView.swift in Sources */,
-				20BB91EE597F853BA48CEF1E /* InnerPathDetailView.swift in Sources */,
-				7FED38701A54D99AD4ADC4AE /* RhythmDetailView.swift in Sources */,
-				F90251696CBD4BF057FA6E53 /* QuickResetPromptView.swift in Sources */,
-				A3B21B9B2C487E8145A995B5 /* MantraAudioPlayerView.swift in Sources */,
+				BB1001BB1001BB1001BB1001 /* MantraAudioPlayerView.swift in Sources */,
+				BB1002BB1002BB1002BB1002 /* QuickResetPromptView.swift in Sources */,
+				BB1003BB1003BB1003BB1003 /* RhythmDetailView.swift in Sources */,
+				BB1004BB1004BB1004BB1004 /* InnerPathDetailView.swift in Sources */,
+				6B5C3C1308CCEE1D7AE45F7E /* KalpXWatchTheme.swift in Sources */,
+				3C9B5FD1DF379F122EE62D56 /* WatchComponents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -845,6 +872,7 @@
 				BB0004BB0004BB0004BB0004 /* IncrementChantIntent.swift in Sources */,
 				9B10000000000000000SANKA /* KalpxSankalpAttributes.swift in Sources */,
 				9B20000000000000000SANKB /* KalpxSankalpLiveActivity.swift in Sources */,
+				BB0010BB0010BB0010BB0010 /* KalpxLiveActivityTheme.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

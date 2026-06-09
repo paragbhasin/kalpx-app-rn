@@ -5,10 +5,10 @@ struct GoalPickerView: View {
     let onSelect: (String, Int?) -> Void
 
     private let goals: [(label: String, type: String, value: Int?)] = [
-        ("27 beads",   "count",     27),
-        ("54 beads",   "count",     54),
-        ("108 beads",  "count",    108),
-        ("Unlimited",  "unlimited", nil),
+        ("Short return",    "count",      27),
+        ("Deeper practice", "count",      54),
+        ("Full mala",       "count",     108),
+        ("Open practice",   "unlimited", nil),
     ]
 
     var body: some View {
@@ -18,8 +18,12 @@ struct GoalPickerView: View {
             } label: {
                 Text(goal.label)
                     .font(.system(size: 13))
+                    .foregroundColor(KalpXWatchTheme.textPrimary)
             }
+            .listRowBackground(KalpXWatchTheme.surface)
         }
         .navigationTitle(mantra.name)
+        .background(KalpXWatchTheme.background)
+        .scrollContentBackground(.hidden)
     }
 }

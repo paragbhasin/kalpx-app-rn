@@ -17,49 +17,39 @@ struct MantraPickerView: View {
                     selectedMantra = mantra
                     showGoalPicker = true
                 } label: {
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading, spacing: 4) {
                         if let label = mantra.label {
-                            Text(labelDisplay(label))
-                                .font(.system(size: 9, weight: .semibold))
-                                .foregroundColor(.accentColor)
+                            StateChip(label: labelDisplay(label), variant: .gold)
                         }
-                        Text(mantra.name)
-                            .font(.system(size: 13, weight: .medium))
-                        if !mantra.devanagari.isEmpty {
-                            Text(mantra.devanagari)
-                                .font(.system(size: 11))
-                                .foregroundColor(.secondary)
-                        }
+                        RitualRow(
+                            icon: "ॐ",
+                            title: mantra.name,
+                            subtitle: mantra.devanagari.isEmpty ? nil : mantra.devanagari
+                        )
                     }
                 }
+                .listRowBackground(KalpXWatchTheme.surface)
             }
             .navigationTitle("Quick Chant")
+            .background(KalpXWatchTheme.background)
+            .scrollContentBackground(.hidden)
         } else {
-            // Not logged in — no mantras pushed from iPhone yet
-            VStack(spacing: 8) {
-                Text("ॐ")
-                    .font(.system(size: 32))
-                Text("Open KalpX on iPhone to begin.")
-                    .font(.system(size: 12))
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-            .padding()
-            .onAppear {
-                connectivity.reloadMantras()
-                if connectivity.mantras == nil {
-                    connectivity.requestMantrasFromPhone()
+            EmptyStateView()
+                .onAppear {
+                    connectivity.reloadMantras()
+                    if connectivity.mantras == nil {
+                        connectivity.requestMantrasFromPhone()
+                    }
                 }
-            }
         }
     }
 
     private func labelDisplay(_ label: String) -> String {
         switch label {
         case "inner_path":  return "Inner Path"
-        case "Morning":     return "Morning Rhythm"
-        case "Afternoon":   return "Afternoon Rhythm"
-        case "Night":       return "Night Rhythm"
+        case "Morning":     return "Morning"
+        case "Afternoon":   return "Afternoon"
+        case "Night":       return "Night"
         default:            return label
         }
     }

@@ -5,6 +5,7 @@ struct CuratedMantra: Identifiable, Codable, Hashable {
     let ref: String
     let name: String
     let devanagari: String
+    var iast: String?      // IAST romanized full text, e.g. "oṃ tryambakaṃ yajāmahe..."
     var label: String?     // "inner_path", "Morning", "Afternoon", "Night", or nil
     var audioUrl: String?  // guided audio stream URL, optional
 

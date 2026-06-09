@@ -1,12 +1,14 @@
 import { mitraJourneyDailyView, getQuickResetOpening } from './mitraApi';
 import { japaGetStats } from './japaApi';
 import { watchConnectivity } from '../native/watchConnectivity';
+import { getCatalog } from '../data/mantras';
 import store from '../store';
 
 export async function pushMantrasToWatch(): Promise<void> {
   try {
     const homeData = store.getState().door?.homeData;
-    const mantras: { ref: string; name: string; devanagari: string; label?: string }[] = [];
+    const catalog = getCatalog('en');
+    const mantras: { ref: string; name: string; devanagari: string; iast?: string; label?: string }[] = [];
 
     // Rhythm mantras — all three bands
     const rhythm = homeData?.companion_rhythm;
@@ -22,10 +24,12 @@ export async function pushMantrasToWatch(): Promise<void> {
         );
         for (const item of mantraItems) {
           if (!mantras.find((m) => m.ref === item.item_id)) {
+            const local = catalog.find((m) => m.id === item.item_id);
             const entry: any = {
               ref:        item.item_id,
               name:       item.title_snapshot,
-              devanagari: '',
+              devanagari: local?.devanagari ?? '',
+              iast:       local?.iast ?? '',
               label,
             };
             if (item.audio_url) entry.audioUrl = item.audio_url;
@@ -43,6 +47,7 @@ export async function pushMantrasToWatch(): Promise<void> {
           ref:        qr.mantra.item_id,
           name:       qr.mantra.title,
           devanagari: qr.mantra.devanagari ?? '',
+          iast:       qr.mantra.iast ?? '',
           label:      'quick_reset',
         };
         if (qr.mantra.audio_url) entry.audioUrl = qr.mantra.audio_url;

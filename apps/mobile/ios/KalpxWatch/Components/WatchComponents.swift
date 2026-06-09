@@ -8,13 +8,14 @@ struct RitualRow: View {
     let title: String
     var subtitle: String? = nil
     var isDimmed: Bool = false
+    var iconColor: Color = KalpXWatchTheme.gold
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 5) {
                 Text(icon)
                     .font(.system(size: 11))
-                    .foregroundColor(KalpXWatchTheme.gold)
+                    .foregroundColor(iconColor)
                 Text(title)
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(KalpXWatchTheme.textPrimary)

@@ -46,6 +46,7 @@ import { liveActivity } from "../../native/liveActivity";
 import { watchConnectivity } from "../../native/watchConnectivity";
 import { handleWatchMessage } from "../../engine/watchSyncHandler";
 import { pushPathDataToWatch } from "../../engine/watchMantraSync";
+import { getCatalog } from "../../data/mantras";
 import { stopRoomAmbientAudio } from "../../engine/roomAmbientAudio";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import api from "../../Networks/axios";
@@ -62,20 +63,23 @@ import { rfs, rhPad, rs, TABLET_MAX_CARD_WIDTH } from "../../utils/responsive";
 async function pushMantrasToWatch() {
   try {
     const homeData = store.getState().door?.homeData;
-    const mantras: { ref: string; name: string; devanagari: string; label?: string }[] = [];
+    const catalog = getCatalog('en');
+    const mantras: { ref: string; name: string; devanagari: string; iast?: string; label?: string }[] = [];
 
-    // 1. Inner Path mantra — from quick reset opening (user's current default)
+    // 1. Quick Reset / default mantra
     const opening = await getQuickResetOpening();
     if (opening?.mantra) {
       mantras.push({
         ref:        opening.mantra.item_id,
         name:       opening.mantra.title,
         devanagari: opening.mantra.devanagari,
+        iast:       opening.mantra.iast ?? '',
         label:      'inner_path',
       });
     }
 
     // 2. Daily Rhythm mantras — morning / afternoon / night
+    // Look up devanagari + iast from local catalog using item_id
     const rhythm = homeData?.companion_rhythm;
     if (rhythm) {
       const slots = [
@@ -89,10 +93,12 @@ async function pushMantrasToWatch() {
         );
         for (const item of mantraItems) {
           if (!mantras.find((m) => m.ref === item.item_id)) {
+            const local = catalog.find((m) => m.id === item.item_id);
             mantras.push({
               ref:        item.item_id,
               name:       item.title_snapshot,
-              devanagari: '',   // Rhythm items don't carry devanagari — Watch shows name only
+              devanagari: local?.devanagari ?? '',
+              iast:       local?.iast ?? '',
               label,
             });
           }
@@ -101,11 +107,8 @@ async function pushMantrasToWatch() {
     }
 
     if (mantras.length > 0) {
-      // applicationContext: works without isWatchAppInstalled, simulator + device
       watchConnectivity.pushMantrasViaContext(mantras);
-      // app group: for device (shared container) + Watch reads on every launch
       watchConnectivity.writeMantrasToAppGroup(mantras);
-      // live message if Watch is open and reachable
       watchConnectivity.sendToWatch({ type: 'mantra_list', mantras });
       console.log('[WatchMantra] pushed', mantras.length, 'mantras to Watch');
     }

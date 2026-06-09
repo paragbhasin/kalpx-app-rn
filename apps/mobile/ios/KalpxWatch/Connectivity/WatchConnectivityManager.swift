@@ -65,7 +65,8 @@ class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDelegate {
 
             // 2. applicationContext — works on simulator without isWatchAppInstalled
             let ctx = session.receivedApplicationContext
-            if let raw = ctx["mantras"] as? [[String: String]], !raw.isEmpty {
+            if let rawAny = ctx["mantras"] as? [[String: Any]], !rawAny.isEmpty {
+                let raw = rawAny.map { self.stringifyDict($0) }
                 WatchAppGroupStorage.shared.saveMantras(raw)
                 self.mantras = WatchAppGroupStorage.shared.loadMantras()
             }
@@ -73,15 +74,15 @@ class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDelegate {
                 self.applyPathData(pdRaw)
             }
 
-            // 3. Request from iPhone if either mantras or pathData is missing
-            if self.mantras == nil || self.pathData == nil {
-                self.requestMantrasFromPhone()
-            }
+            // 3. Always request fresh data from iPhone on activation
+            //    (ensures updated catalog fields like iast/devanagari are reflected)
+            self.requestMantrasFromPhone()
         }
     }
 
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
-        if let raw = applicationContext["mantras"] as? [[String: String]], !raw.isEmpty {
+        if let rawAny = applicationContext["mantras"] as? [[String: Any]], !rawAny.isEmpty {
+            let raw = rawAny.map { self.stringifyDict($0) }
             WatchAppGroupStorage.shared.saveMantras(raw)
             let updated = WatchAppGroupStorage.shared.loadMantras()
             DispatchQueue.main.async { self.mantras = updated }
@@ -120,7 +121,8 @@ class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDelegate {
 
         switch type {
         case "mantra_list":
-            if let raw = message["mantras"] as? [[String: String]] {
+            if let rawAny = message["mantras"] as? [[String: Any]], !rawAny.isEmpty {
+                let raw = rawAny.map { self.stringifyDict($0) }
                 WatchAppGroupStorage.shared.saveMantras(raw)
                 let updated = WatchAppGroupStorage.shared.loadMantras()
                 DispatchQueue.main.async { self.mantras = updated }
@@ -151,10 +153,34 @@ class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDelegate {
             NSLog("[WatchPath-Watch] applyPathData: decoded OK — innerPath=%@, rhythm=%@",
                   decoded.innerPath != nil ? "yes(hasActivePath=\(decoded.innerPath!.hasActivePath))" : "nil",
                   decoded.rhythm    != nil ? "yes(hasRhythm=\(decoded.rhythm!.hasRhythm))" : "nil")
+
+            // Don't overwrite richer existing data with a partial push.
+            // This prevents a slow applicationContext delivery from downgrading
+            // a full pathData that arrived earlier via sendMessage.
+            let existing = WatchAppGroupStorage.shared.loadPathData()
+            let wouldLoseInnerPath = decoded.innerPath == nil && existing?.innerPath?.hasActivePath == true
+            let wouldLoseRhythm   = decoded.rhythm    == nil && existing?.rhythm?.hasRhythm        == true
+            if wouldLoseInnerPath || wouldLoseRhythm {
+                NSLog("[WatchPath-Watch] applyPathData: SKIP — would downgrade existing data (innerPath=%@, rhythm=%@)",
+                      wouldLoseInnerPath ? "would lose" : "ok",
+                      wouldLoseRhythm   ? "would lose" : "ok")
+                return
+            }
+
             WatchAppGroupStorage.shared.savePathData(decoded)
             DispatchQueue.main.async { self.pathData = decoded }
         } catch {
             NSLog("[WatchPath-Watch] applyPathData: DECODE FAILED: %@", error.localizedDescription)
         }
+    }
+
+    // Convert [String: Any] → [String: String], dropping non-string values.
+    // Needed because WCSession delivers mantra dicts as [[String: Any]] over plist.
+    private func stringifyDict(_ dict: [String: Any]) -> [String: String] {
+        var result: [String: String] = [:]
+        for (key, value) in dict {
+            if let s = value as? String { result[key] = s }
+        }
+        return result
     }
 }

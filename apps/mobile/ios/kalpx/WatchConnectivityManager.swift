@@ -28,8 +28,11 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate {
     // initial-delivery path on both simulator and device.
     func pushMantrasViaContext(_ mantras: [[String: Any]]) {
         guard WCSession.default.activationState == .activated else { return }
+        // Merge with existing context so pathData key is not overwritten
+        var context = WCSession.default.applicationContext
+        context["mantras"] = mantras
         do {
-            try WCSession.default.updateApplicationContext(["mantras": mantras])
+            try WCSession.default.updateApplicationContext(context)
             NSLog("[WCSession] applicationContext updated with %d mantras", mantras.count)
         } catch {
             NSLog("[WCSession] updateApplicationContext failed: %@", error.localizedDescription)

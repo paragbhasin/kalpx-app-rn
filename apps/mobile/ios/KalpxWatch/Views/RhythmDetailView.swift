@@ -37,10 +37,8 @@ struct RhythmDetailView: View {
         case "mantra":
             let curated = connectivity.mantras?.first(where: { $0.ref == item.itemId })
                 ?? CuratedMantra(id: item.itemId, ref: item.itemId, name: item.title, devanagari: "", audioUrl: item.audioUrl)
-            NavigationLink {
-                GoalPickerView(mantra: curated) { type, value in
-                    engine.startSession(mantra: curated, goalType: type, goalValue: value)
-                }
+            Button {
+                engine.startSession(mantra: curated, goalType: "unlimited", goalValue: nil)
             } label: {
                 RitualRow(icon: isDone ? "✓" : "ॐ", title: item.title, isDimmed: isDone)
             }
@@ -53,13 +51,21 @@ struct RhythmDetailView: View {
                 RitualRow(icon: isDone ? "✓" : "◎", title: item.title, isDimmed: isDone)
             }
             .listRowBackground(KalpXWatchTheme.surface)
-        default:
-            RitualRow(
-                icon: isDone ? "✓" : "◈",
-                title: item.title,
-                subtitle: item.description.isEmpty ? nil : item.description,
-                isDimmed: isDone
-            )
+        default: // sankalp
+            NavigationLink {
+                SankalpView(
+                    title:  item.title,
+                    line:   item.description,
+                    source: "rhythm:\(item.itemId)"
+                )
+                .environmentObject(connectivity)
+            } label: {
+                RitualRow(
+                    icon:     isDone ? "✓" : "◈",
+                    title:    item.title,
+                    isDimmed: isDone
+                )
+            }
             .listRowBackground(KalpXWatchTheme.surface)
         }
     }

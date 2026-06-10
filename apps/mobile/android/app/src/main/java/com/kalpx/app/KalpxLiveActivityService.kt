@@ -49,6 +49,35 @@ class KalpxLiveActivityService : Service() {
         const val ACTION_INCREMENT      = "com.kalpx.app.LA_INCREMENT"
 
         const val NOTIFICATION_ID = 1001
+
+        // Called from MainApplication.onCreate() so channels exist before the service
+        // is ever started — avoids areNotificationsEnabled() returning false on first run.
+        fun ensureChannels(context: android.content.Context) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+            val mgr = context.getSystemService(NotificationManager::class.java) ?: return
+            mgr.deleteNotificationChannel("kalpx_live_chant")
+            mgr.deleteNotificationChannel("kalpx_live_sankalp")
+            mgr.deleteNotificationChannel("kalpx_live_chant_v2")
+            mgr.deleteNotificationChannel("kalpx_live_sankalp_v2")
+            if (mgr.getNotificationChannel(CHANNEL_CHANT) == null) {
+                mgr.createNotificationChannel(NotificationChannel(
+                    CHANNEL_CHANT, "Chanting Session", NotificationManager.IMPORTANCE_DEFAULT
+                ).apply {
+                    description = "Shows your active mantra chanting session"
+                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                    setShowBadge(false); enableLights(false); enableVibration(false)
+                })
+            }
+            if (mgr.getNotificationChannel(CHANNEL_SANKALP) == null) {
+                mgr.createNotificationChannel(NotificationChannel(
+                    CHANNEL_SANKALP, "Sankalp", NotificationManager.IMPORTANCE_DEFAULT
+                ).apply {
+                    description = "Shows your active Sankalp commitment"
+                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                    setShowBadge(false); enableLights(false); enableVibration(false)
+                })
+            }
+        }
         // v3: removed setSound(null,null) — setting null sound causes Android/MIUI to classify
         // the channel as "Silent" in the UI, which shows only a dot on the lock screen.
         // IMPORTANCE_DEFAULT without explicit null sound = "Default" channel = full lock screen card.

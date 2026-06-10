@@ -1,0 +1,38 @@
+diff --git a/android/build.gradle b/android/build.gradle
+index eab6d4e8ffef63f5688e731c7ab825132e48e952..2cd3583d0248cd56d5859ba7843120abee2a7d40 100644
+--- a/android/build.gradle
++++ b/android/build.gradle
+@@ -1,7 +1,7 @@
+ buildscript {
+     ext.safeExtGet = {prop, fallback ->
+         rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+     }
+     repositories {
+         google()
+         gradlePluginPortal()
+     }
+     dependencies {
+         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${safeExtGet("kotlinVersion", "1.8.0")}")
+-        classpath("com.android.tools.build:gradle:8.1.1")
++        classpath("com.android.tools.build:gradle:7.4.2")
+     }
+ }
+
+@@ -15,7 +15,7 @@ if (isNewArchitectureEnabled()) {
+
+ android {
+     buildToolsVersion safeExtGet("buildToolsVersion", "34.0.0")
+-    compileSdkVersion safeExtGet("compileSdkVersion", 34)
++    compileSdkVersion safeExtGet("compileSdkVersion", 35)
+
+     if (project.android.hasProperty("namespace")) {
+         namespace "com.zoontek.rnedgetoedge"
+@@ -32,7 +32,7 @@ android {
+     defaultConfig {
+         buildConfigField("boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString())
+         minSdkVersion safeExtGet("minSdkVersion", 23)
+-        targetSdkVersion safeExtGet("targetSdkVersion", 34)
++        targetSdkVersion safeExtGet("targetSdkVersion", 35)
+     }
+     lintOptions {
+         abortOnError false

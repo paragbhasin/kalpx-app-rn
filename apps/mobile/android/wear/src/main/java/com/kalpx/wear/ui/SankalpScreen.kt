@@ -13,6 +13,8 @@ import androidx.wear.compose.material.Text
 import com.kalpx.wear.sync.WearConnectivityManager
 import com.kalpx.wear.theme.KalpXWearTheme
 import com.kalpx.wear.theme.WearPrimaryButton
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun SankalpScreen(title: String, line: String, source: String, onDone: () -> Unit) {

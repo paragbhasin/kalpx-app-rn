@@ -46,7 +46,15 @@ class KalpxLiveActivityService : Service() {
         const val ACTION_COMPLETE_CHANT = "com.kalpx.app.LA_COMPLETE_CHANT"
         const val ACTION_END            = "com.kalpx.app.LA_END"
         const val ACTION_START_SANKALP  = "com.kalpx.app.LA_START_SANKALP"
-        const val ACTION_INCREMENT      = "com.kalpx.app.LA_INCREMENT"
+        const val ACTION_INCREMENT         = "com.kalpx.app.LA_INCREMENT"
+        const val ACTION_START_RESET       = "com.kalpx.app.LA_START_RESET"
+        const val ACTION_END_RESET         = "com.kalpx.app.LA_END_RESET"
+        const val ACTION_START_RHYTHM      = "com.kalpx.app.LA_START_RHYTHM"
+        const val ACTION_UPDATE_RHYTHM     = "com.kalpx.app.LA_UPDATE_RHYTHM"
+        const val ACTION_END_RHYTHM        = "com.kalpx.app.LA_END_RHYTHM"
+        const val ACTION_START_INNER_PATH  = "com.kalpx.app.LA_START_INNER_PATH"
+        const val ACTION_UPDATE_INNER_PATH = "com.kalpx.app.LA_UPDATE_INNER_PATH"
+        const val ACTION_END_INNER_PATH    = "com.kalpx.app.LA_END_INNER_PATH"
 
         const val NOTIFICATION_ID = 1001
 
@@ -77,6 +85,15 @@ class KalpxLiveActivityService : Service() {
                     setShowBadge(false); enableLights(false); enableVibration(false)
                 })
             }
+            if (mgr.getNotificationChannel(CHANNEL_PRACTICE) == null) {
+                mgr.createNotificationChannel(NotificationChannel(
+                    CHANNEL_PRACTICE, "Daily Practice", NotificationManager.IMPORTANCE_DEFAULT
+                ).apply {
+                    description = "Shows your active Daily Rhythm or Inner Path practice"
+                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                    setShowBadge(false); enableLights(false); enableVibration(false)
+                })
+            }
         }
         // v3: removed setSound(null,null) — setting null sound causes Android/MIUI to classify
         // the channel as "Silent" in the UI, which shows only a dot on the lock screen.
@@ -101,9 +118,32 @@ class KalpxLiveActivityService : Service() {
         private const val KEY_SANKALP_LINE   = "kalpx_la_s_line"
         private const val KEY_IS_COMPLETED   = "kalpx_la_completed"
 
-        private const val TYPE_CHANT   = "chant"
-        private const val TYPE_SANKALP = "sankalp"
-        private const val TYPE_NONE    = "none"
+        private const val TYPE_CHANT      = "chant"
+        private const val TYPE_SANKALP    = "sankalp"
+        private const val TYPE_RESET      = "reset"
+        private const val TYPE_RHYTHM     = "rhythm"
+        private const val TYPE_INNER_PATH = "inner_path"
+        private const val TYPE_NONE       = "none"
+
+        const val CHANNEL_PRACTICE = "kalpx_live_practice_v1"
+
+        private const val KEY_RESET_MANTRA      = "kalpx_la_reset_mantra"
+        private const val KEY_RESET_DEVA        = "kalpx_la_reset_deva"
+        private const val KEY_RHYTHM_BAND       = "kalpx_la_rhythm_band"
+        private const val KEY_RHYTHM_LABEL      = "kalpx_la_rhythm_label"
+        private const val KEY_RHYTHM_ANCHOR     = "kalpx_la_rhythm_anchor"
+        private const val KEY_RHYTHM_TYPE       = "kalpx_la_rhythm_type"
+        private const val KEY_RHYTHM_DEVA       = "kalpx_la_rhythm_deva"
+        private const val KEY_RHYTHM_DONE       = "kalpx_la_rhythm_done"
+        private const val KEY_IP_DAY            = "kalpx_la_ip_day"
+        private const val KEY_IP_TOTAL          = "kalpx_la_ip_total"
+        private const val KEY_IP_MANTRA         = "kalpx_la_ip_mantra"
+        private const val KEY_IP_MANTRA_DEVA    = "kalpx_la_ip_mantra_deva"
+        private const val KEY_IP_SANKALP        = "kalpx_la_ip_sankalp"
+        private const val KEY_IP_PRACTICE       = "kalpx_la_ip_practice"
+        private const val KEY_IP_MANTRA_DONE    = "kalpx_la_ip_mantra_done"
+        private const val KEY_IP_SANKALP_DONE   = "kalpx_la_ip_sankalp_done"
+        private const val KEY_IP_PRACTICE_DONE  = "kalpx_la_ip_practice_done"
     }
 
     // ── In-memory state (mirrors KalpxChantAttributes ContentState on iOS) ────
@@ -121,6 +161,29 @@ class KalpxLiveActivityService : Service() {
     // Mirrors KalpxSankalpAttributes
     private var sankalpTitle: String = ""
     private var sankalpLine: String  = ""
+
+    // Mirrors KalpxResetAttributes.ContentState
+    private var resetMantraTitle: String = ""
+    private var resetDevanagari: String  = ""
+
+    // Mirrors KalpxRhythmAttributes.ContentState
+    private var rhythmBand: String             = ""
+    private var rhythmBandLabel: String        = ""
+    private var rhythmAnchorTitle: String      = ""
+    private var rhythmAnchorType: String       = ""
+    private var rhythmAnchorDevanagari: String = ""
+    private var rhythmBandDone: Boolean        = false
+
+    // Mirrors KalpxInnerPathAttributes.ContentState
+    private var innerPathDayNumber: Int           = 1
+    private var innerPathTotalDays: Int           = 21
+    private var innerPathMantraTitle: String      = ""
+    private var innerPathMantraDevanagari: String = ""
+    private var innerPathSankalpTitle: String     = ""
+    private var innerPathPracticeTitle: String    = ""
+    private var innerPathMantraDone: Boolean      = false
+    private var innerPathSankalpDone: Boolean     = false
+    private var innerPathPracticeDone: Boolean    = false
 
     private val notifManager by lazy {
         getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -145,7 +208,15 @@ class KalpxLiveActivityService : Service() {
             ACTION_COMPLETE_CHANT -> handleCompleteChant(intent)
             ACTION_END            -> handleEnd()
             ACTION_START_SANKALP  -> handleStartSankalp(intent)
-            ACTION_INCREMENT      -> handleIncrement()
+            ACTION_INCREMENT         -> handleIncrement()
+            ACTION_START_RESET       -> handleStartReset(intent)
+            ACTION_END_RESET         -> handleEndReset()
+            ACTION_START_RHYTHM      -> handleStartRhythm(intent)
+            ACTION_UPDATE_RHYTHM     -> handleUpdateRhythm(intent)
+            ACTION_END_RHYTHM        -> handleEndRhythm()
+            ACTION_START_INNER_PATH  -> handleStartInnerPath(intent)
+            ACTION_UPDATE_INNER_PATH -> handleUpdateInnerPath(intent)
+            ACTION_END_INNER_PATH    -> handleEndInnerPath()
             null -> {
                 // System restarted the service after kill (shouldn't happen with START_NOT_STICKY,
                 // but guard against it for safety).
@@ -245,6 +316,81 @@ class KalpxLiveActivityService : Service() {
             .apply()
 
         notifManager.notify(NOTIFICATION_ID, buildChantNotification())
+    }
+
+    private fun handleStartReset(intent: Intent) {
+        resetMantraTitle = intent.getStringExtra("mantraTitle") ?: ""
+        resetDevanagari  = intent.getStringExtra("devanagari") ?: ""
+        activeType       = TYPE_RESET
+        persistState()
+        startForegroundCompat(buildResetNotification())
+    }
+
+    private fun handleEndReset() {
+        activeType = TYPE_NONE
+        prefs.edit().putString(KEY_ACTIVE_TYPE, TYPE_NONE).apply()
+        notifManager.cancel(NOTIFICATION_ID)
+        ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+        stopSelf()
+    }
+
+    private fun handleStartRhythm(intent: Intent) {
+        rhythmBand             = intent.getStringExtra("band") ?: ""
+        rhythmBandLabel        = intent.getStringExtra("bandLabel") ?: ""
+        rhythmAnchorTitle      = intent.getStringExtra("anchorTitle") ?: ""
+        rhythmAnchorType       = intent.getStringExtra("anchorType") ?: ""
+        rhythmAnchorDevanagari = intent.getStringExtra("anchorDevanagari") ?: ""
+        rhythmBandDone         = false
+        activeType             = TYPE_RHYTHM
+        persistState()
+        startForegroundCompat(buildRhythmNotification())
+    }
+
+    private fun handleUpdateRhythm(intent: Intent) {
+        if (activeType != TYPE_RHYTHM) return
+        rhythmBandDone = intent.getBooleanExtra("bandDone", rhythmBandDone)
+        persistState()
+        notifManager.notify(NOTIFICATION_ID, buildRhythmNotification())
+    }
+
+    private fun handleEndRhythm() {
+        activeType = TYPE_NONE
+        prefs.edit().putString(KEY_ACTIVE_TYPE, TYPE_NONE).apply()
+        notifManager.cancel(NOTIFICATION_ID)
+        ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+        stopSelf()
+    }
+
+    private fun handleStartInnerPath(intent: Intent) {
+        innerPathDayNumber        = intent.getIntExtra("dayNumber", 1)
+        innerPathTotalDays        = intent.getIntExtra("totalDays", 21)
+        innerPathMantraTitle      = intent.getStringExtra("mantraTitle") ?: ""
+        innerPathMantraDevanagari = intent.getStringExtra("mantraDevanagari") ?: ""
+        innerPathSankalpTitle     = intent.getStringExtra("sankalpTitle") ?: ""
+        innerPathPracticeTitle    = intent.getStringExtra("practiceTitle") ?: ""
+        innerPathMantraDone       = false
+        innerPathSankalpDone      = false
+        innerPathPracticeDone     = false
+        activeType                = TYPE_INNER_PATH
+        persistState()
+        startForegroundCompat(buildInnerPathNotification())
+    }
+
+    private fun handleUpdateInnerPath(intent: Intent) {
+        if (activeType != TYPE_INNER_PATH) return
+        innerPathMantraDone   = intent.getBooleanExtra("mantraDone", innerPathMantraDone)
+        innerPathSankalpDone  = intent.getBooleanExtra("sankalpDone", innerPathSankalpDone)
+        innerPathPracticeDone = intent.getBooleanExtra("practiceDone", innerPathPracticeDone)
+        persistState()
+        notifManager.notify(NOTIFICATION_ID, buildInnerPathNotification())
+    }
+
+    private fun handleEndInnerPath() {
+        activeType = TYPE_NONE
+        prefs.edit().putString(KEY_ACTIVE_TYPE, TYPE_NONE).apply()
+        notifManager.cancel(NOTIFICATION_ID)
+        ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+        stopSelf()
     }
 
     // ── Notification builders ─────────────────────────────────────────────────
@@ -378,6 +524,146 @@ class KalpxLiveActivityService : Service() {
             .build()
     }
 
+    private fun buildResetNotification(): Notification {
+        val title = if (resetMantraTitle.isNotEmpty()) resetMantraTitle else "A moment of reset"
+        val bigText = buildString {
+            append("Return with this mantra")
+            if (resetMantraTitle.isNotEmpty()) {
+                append("\n")
+                append(resetMantraTitle)
+            }
+            if (resetDevanagari.isNotEmpty()) {
+                append("\n")
+                append(resetDevanagari)
+            }
+        }
+        val contentPendingIntent = deepLinkPendingIntent("kalpx://mitra/quick_reset", requestCode = 3)
+        return NotificationCompat.Builder(this, CHANNEL_CHANT)
+            .setSmallIcon(R.drawable.ic_kalpx_notification)
+            .setContentTitle("ॐ  $title")
+            .setContentText("A moment of reset")
+            .setSubText("Return slowly")
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .setBigContentTitle("ॐ  $title")
+                    .bigText(bigText)
+                    .setSummaryText("A moment of reset")
+            )
+            .setContentIntent(contentPendingIntent)
+            .setOngoing(true)
+            .setAutoCancel(false)
+            .setOnlyAlertOnce(true)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+            .setColor(Color.parseColor("#EAB578"))
+            .setColorized(true)
+            .build()
+    }
+
+    private fun buildRhythmNotification(): Notification {
+        val title = if (rhythmBandLabel.isNotEmpty()) rhythmBandLabel else "Daily Rhythm"
+        val contentText = when {
+            rhythmBandDone -> "✓ Rhythm held"
+            rhythmAnchorTitle.isNotEmpty() -> rhythmAnchorTitle
+            else -> "Your daily rhythm is active"
+        }
+        val bigText = buildString {
+            if (rhythmBandDone) {
+                append("✓ Rhythm held for ${rhythmBandLabel.lowercase()}")
+            } else {
+                if (rhythmAnchorType.isNotEmpty()) {
+                    append(rhythmAnchorType.uppercase())
+                    append("\n")
+                }
+                if (rhythmAnchorTitle.isNotEmpty()) {
+                    append(rhythmAnchorTitle)
+                }
+                if (rhythmAnchorDevanagari.isNotEmpty()) {
+                    append("\n")
+                    append(rhythmAnchorDevanagari)
+                }
+            }
+        }
+        val contentPendingIntent = deepLinkPendingIntent("kalpx://mitra/rhythm", requestCode = 4)
+        return NotificationCompat.Builder(this, CHANNEL_PRACTICE)
+            .setSmallIcon(R.drawable.ic_kalpx_notification)
+            .setContentTitle("◈  $title")
+            .setContentText(contentText)
+            .setSubText("Daily Rhythm")
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .setBigContentTitle("◈  $title")
+                    .bigText(bigText)
+                    .setSummaryText("Daily Rhythm")
+            )
+            .setContentIntent(contentPendingIntent)
+            .setOngoing(!rhythmBandDone)
+            .setAutoCancel(rhythmBandDone)
+            .setOnlyAlertOnce(true)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+            .setColor(Color.parseColor("#EAB578"))
+            .setColorized(true)
+            .build()
+    }
+
+    private fun buildInnerPathNotification(): Notification {
+        val dayLabel = "Day $innerPathDayNumber · $innerPathTotalDays"
+        val allDone = innerPathMantraDone && innerPathSankalpDone && innerPathPracticeDone
+        val contentText = when {
+            allDone -> "✓ All practices complete"
+            innerPathMantraTitle.isNotEmpty() -> innerPathMantraTitle
+            else -> "Inner Path active"
+        }
+        val bigText = buildString {
+            if (innerPathMantraTitle.isNotEmpty()) {
+                append(if (innerPathMantraDone) "✓" else "·")
+                append(" MANTRA  ")
+                append(innerPathMantraTitle)
+                if (innerPathMantraDevanagari.isNotEmpty() && !innerPathMantraDone) {
+                    append("\n   ")
+                    append(innerPathMantraDevanagari)
+                }
+            }
+            if (innerPathSankalpTitle.isNotEmpty()) {
+                append("\n")
+                append(if (innerPathSankalpDone) "✓" else "·")
+                append(" SANKALP  ")
+                append(innerPathSankalpTitle)
+            }
+            if (innerPathPracticeTitle.isNotEmpty()) {
+                append("\n")
+                append(if (innerPathPracticeDone) "✓" else "·")
+                append(" PRACTICE  ")
+                append(innerPathPracticeTitle)
+            }
+        }
+        val contentPendingIntent = deepLinkPendingIntent("kalpx://mitra/inner_path", requestCode = 5)
+        return NotificationCompat.Builder(this, CHANNEL_PRACTICE)
+            .setSmallIcon(R.drawable.ic_kalpx_notification)
+            .setContentTitle("✦  Inner Path  ·  $dayLabel")
+            .setContentText(contentText)
+            .setSubText("Inner Path")
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .setBigContentTitle("✦  Inner Path  ·  $dayLabel")
+                    .bigText(bigText)
+                    .setSummaryText("Inner Path")
+            )
+            .setContentIntent(contentPendingIntent)
+            .setOngoing(!allDone)
+            .setAutoCancel(allDone)
+            .setOnlyAlertOnce(true)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+            .setColor(Color.parseColor("#EAB578"))
+            .setColorized(true)
+            .build()
+    }
+
     // ── Android 16 Live Updates ───────────────────────────────────────────────
     // Android 16 (API 36) promotes ongoing foreground service notifications to a
     // richer lock-screen card via Notification.setLiveUpdateBehavior(LIVE).
@@ -436,6 +722,18 @@ class KalpxLiveActivityService : Service() {
             enableLights(false)
             enableVibration(false)
         })
+
+        mgr.createNotificationChannel(NotificationChannel(
+            CHANNEL_PRACTICE,
+            "Daily Practice",
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = "Shows your active Daily Rhythm or Inner Path practice"
+            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+            setShowBadge(false)
+            enableLights(false)
+            enableVibration(false)
+        })
     }
 
     // ── State persistence ─────────────────────────────────────────────────────
@@ -460,28 +758,65 @@ class KalpxLiveActivityService : Service() {
             putString(KEY_SANKALP_TITLE, sankalpTitle)
             putString(KEY_SANKALP_LINE, sankalpLine)
             putBoolean(KEY_IS_COMPLETED, isCompleted)
+            putString(KEY_RESET_MANTRA, resetMantraTitle)
+            putString(KEY_RESET_DEVA, resetDevanagari)
+            putString(KEY_RHYTHM_BAND, rhythmBand)
+            putString(KEY_RHYTHM_LABEL, rhythmBandLabel)
+            putString(KEY_RHYTHM_ANCHOR, rhythmAnchorTitle)
+            putString(KEY_RHYTHM_TYPE, rhythmAnchorType)
+            putString(KEY_RHYTHM_DEVA, rhythmAnchorDevanagari)
+            putBoolean(KEY_RHYTHM_DONE, rhythmBandDone)
+            putInt(KEY_IP_DAY, innerPathDayNumber)
+            putInt(KEY_IP_TOTAL, innerPathTotalDays)
+            putString(KEY_IP_MANTRA, innerPathMantraTitle)
+            putString(KEY_IP_MANTRA_DEVA, innerPathMantraDevanagari)
+            putString(KEY_IP_SANKALP, innerPathSankalpTitle)
+            putString(KEY_IP_PRACTICE, innerPathPracticeTitle)
+            putBoolean(KEY_IP_MANTRA_DONE, innerPathMantraDone)
+            putBoolean(KEY_IP_SANKALP_DONE, innerPathSankalpDone)
+            putBoolean(KEY_IP_PRACTICE_DONE, innerPathPracticeDone)
         }
     }
 
     private fun restoreFromPrefs() {
-        activeType     = prefs.getString(KEY_ACTIVE_TYPE, TYPE_NONE) ?: TYPE_NONE
-        mantraName     = prefs.getString(KEY_MANTRA_NAME, "") ?: ""
-        devanagari     = prefs.getString(KEY_DEVANAGARI, "") ?: ""
-        sessionCount   = prefs.getInt(KEY_SESSION, 0)
-        weekCount      = prefs.getInt(KEY_WEEK, 0)
-        totalCount     = prefs.getInt(KEY_TOTAL, 0)
-        elapsedSeconds = prefs.getInt(KEY_ELAPSED, 0)
-        deepLinkURL    = prefs.getString(KEY_DEEP_LINK, "kalpx://mitra/quick_chant/home") ?: "kalpx://mitra/quick_chant/home"
-        sankalpTitle   = prefs.getString(KEY_SANKALP_TITLE, "") ?: ""
-        sankalpLine    = prefs.getString(KEY_SANKALP_LINE, "") ?: ""
-        isCompleted    = prefs.getBoolean(KEY_IS_COMPLETED, false)
+        activeType                = prefs.getString(KEY_ACTIVE_TYPE, TYPE_NONE) ?: TYPE_NONE
+        mantraName                = prefs.getString(KEY_MANTRA_NAME, "") ?: ""
+        devanagari                = prefs.getString(KEY_DEVANAGARI, "") ?: ""
+        sessionCount              = prefs.getInt(KEY_SESSION, 0)
+        weekCount                 = prefs.getInt(KEY_WEEK, 0)
+        totalCount                = prefs.getInt(KEY_TOTAL, 0)
+        elapsedSeconds            = prefs.getInt(KEY_ELAPSED, 0)
+        deepLinkURL               = prefs.getString(KEY_DEEP_LINK, "kalpx://mitra/quick_chant/home") ?: "kalpx://mitra/quick_chant/home"
+        sankalpTitle              = prefs.getString(KEY_SANKALP_TITLE, "") ?: ""
+        sankalpLine               = prefs.getString(KEY_SANKALP_LINE, "") ?: ""
+        isCompleted               = prefs.getBoolean(KEY_IS_COMPLETED, false)
+        resetMantraTitle          = prefs.getString(KEY_RESET_MANTRA, "") ?: ""
+        resetDevanagari           = prefs.getString(KEY_RESET_DEVA, "") ?: ""
+        rhythmBand                = prefs.getString(KEY_RHYTHM_BAND, "") ?: ""
+        rhythmBandLabel           = prefs.getString(KEY_RHYTHM_LABEL, "") ?: ""
+        rhythmAnchorTitle         = prefs.getString(KEY_RHYTHM_ANCHOR, "") ?: ""
+        rhythmAnchorType          = prefs.getString(KEY_RHYTHM_TYPE, "") ?: ""
+        rhythmAnchorDevanagari    = prefs.getString(KEY_RHYTHM_DEVA, "") ?: ""
+        rhythmBandDone            = prefs.getBoolean(KEY_RHYTHM_DONE, false)
+        innerPathDayNumber        = prefs.getInt(KEY_IP_DAY, 1)
+        innerPathTotalDays        = prefs.getInt(KEY_IP_TOTAL, 21)
+        innerPathMantraTitle      = prefs.getString(KEY_IP_MANTRA, "") ?: ""
+        innerPathMantraDevanagari = prefs.getString(KEY_IP_MANTRA_DEVA, "") ?: ""
+        innerPathSankalpTitle     = prefs.getString(KEY_IP_SANKALP, "") ?: ""
+        innerPathPracticeTitle    = prefs.getString(KEY_IP_PRACTICE, "") ?: ""
+        innerPathMantraDone       = prefs.getBoolean(KEY_IP_MANTRA_DONE, false)
+        innerPathSankalpDone      = prefs.getBoolean(KEY_IP_SANKALP_DONE, false)
+        innerPathPracticeDone     = prefs.getBoolean(KEY_IP_PRACTICE_DONE, false)
     }
 
     private fun rebuildForegroundFromState() {
         when (activeType) {
-            TYPE_CHANT   -> startForegroundCompat(buildChantNotification())
-            TYPE_SANKALP -> startForegroundCompat(buildSankalpNotification())
-            else         -> stopSelf()
+            TYPE_CHANT      -> startForegroundCompat(buildChantNotification())
+            TYPE_SANKALP    -> startForegroundCompat(buildSankalpNotification())
+            TYPE_RESET      -> startForegroundCompat(buildResetNotification())
+            TYPE_RHYTHM     -> startForegroundCompat(buildRhythmNotification())
+            TYPE_INNER_PATH -> startForegroundCompat(buildInnerPathNotification())
+            else            -> stopSelf()
         }
     }
 

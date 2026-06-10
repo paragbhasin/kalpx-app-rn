@@ -3,4 +3,5 @@ packages:
   - 'packages/*'
 patchedDependencies:
   '@stripe/stripe-react-native@0.45.0': patches/@stripe__stripe-react-native@0.45.0.patch
+  react-native-edge-to-edge@1.6.0: patches/react-native-edge-to-edge@1.6.0.patch
   react-native@0.79.6: patches/react-native@0.79.6.patch

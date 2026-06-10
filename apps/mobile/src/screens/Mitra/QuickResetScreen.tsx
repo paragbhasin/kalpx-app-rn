@@ -400,7 +400,10 @@ export default function QuickResetScreen({
         t("quickReset.mantraSetMessage"),
       );
       setMantraUpdatedToastVisible(true);
-      await loadOpening();
+      // Reload AFTER the toast closes — calling loadOpening() here would flip
+      // phase "opening→loading→opening", remounting the Modal each time and
+      // causing the toast to appear multiple times.
+      setTimeout(loadOpening, 2800);
     },
     [loadOpening, t],
   );

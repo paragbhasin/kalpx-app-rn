@@ -203,10 +203,11 @@ export function useJapaEngine({
         yearCount: yearBase,
         lifetimeCount: lifetimeBase,
         lastUpdated: Date.now(),
+        todayLocalDate: todayLocalDate(tz),
       };
       AsyncStorage.setItem(statsKey(mantraRef), JSON.stringify(data)).catch(() => {});
     },
-    [mantraRef],
+    [mantraRef, tz],
   );
 
   // ── Offline queue ─────────────────────────────────────────────────────────
@@ -427,14 +428,21 @@ export function useJapaEngine({
       cachedYearBase.current = row.year_count - nc;
       cachedLifetimeBase.current = row.lifetime_count - nc;
 
-      // Reconcile today: if server's today_count > sessionCount, another device/session
-      // added counts — bump our sessionCount to match so user sees the latest total
+      // Reconcile today:
       if (row.today_count > sc) {
+        // Another device/session added counts — bump local to match server
         const gap = row.today_count - sc;
         sessionInitialCount.current = sessionInitialCount.current + gap;
         sessionCountRef.current = row.today_count;
         lastSyncedCount.current = row.today_count;
         setSessionCount(row.today_count);
+      } else if (row.today_count < sessionInitialCount.current) {
+        // Day rolled over while app stayed open: server resets today to a lower
+        // value (e.g. 0) but our baseline still holds yesterday's count.
+        sessionInitialCount.current = row.today_count;
+        sessionCountRef.current = row.today_count + nc;
+        lastSyncedCount.current = row.today_count;
+        setSessionCount(row.today_count + nc);
       }
 
       // Persist updated baselines to AsyncStorage
@@ -492,7 +500,8 @@ export function useJapaEngine({
         try {
           const s: JapaLocalStats = JSON.parse(statsRaw);
           if (s.mantraRef === mantraRef) {
-            todayBase    = s.todayCount    ?? 0;
+            const isNewDay = s.todayLocalDate && s.todayLocalDate !== todayLocalDate(tz);
+            todayBase    = isNewDay ? 0 : (s.todayCount    ?? 0);
             weekBase     = s.weekCount     ?? 0;
             yearBase     = s.yearCount     ?? 0;
             lifetimeBase = s.lifetimeCount ?? 0;

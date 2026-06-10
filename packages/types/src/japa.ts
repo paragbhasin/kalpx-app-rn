@@ -125,6 +125,7 @@ export interface JapaLocalStats {
   yearCount: number;
   lifetimeCount: number;
   lastUpdated: number;              // unix ms
+  todayLocalDate?: string;          // 'YYYY-MM-DD' — used to detect day rollover on re-launch
 }
 
 // Queued sync batch waiting to be sent when connectivity returns.

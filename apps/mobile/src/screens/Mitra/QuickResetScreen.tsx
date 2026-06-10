@@ -258,6 +258,15 @@ export default function QuickResetScreen({
     japaIncrementRef.current = japaEngine.increment;
   }, [japaEngine.refreshStats, japaEngine.syncNow, japaEngine.increment]);
 
+  // When the mantra ID becomes known (API responds after screen mounts), fetch
+  // server counts. The useFocusEffect below fires while mantraRef is still null
+  // and bails early, so we need this second trigger.
+  useEffect(() => {
+    if (activeMantraRef) {
+      japaRefreshRef.current?.();
+    }
+  }, [activeMantraRef]);
+
   // Sync on leave, refresh on enter — empty deps = stable, fires once on focus
   useFocusEffect(
     useCallback(() => {

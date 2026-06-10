@@ -17,6 +17,8 @@ import React, {
 } from "react";
 import {
   ActivityIndicator,
+  AppState,
+  AppStateStatus,
   Image,
   ImageBackground,
   Modal,
@@ -324,6 +326,17 @@ export default function FourDoorHomeContainer({
       }
     }, [loadHome]),
   );
+
+  // Reload when app returns from background — catches day rollover and any
+  // server-side state changes while the app was suspended.
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (nextState: AppStateStatus) => {
+      if (nextState === 'active') {
+        void loadHome(true, true);
+      }
+    });
+    return () => sub.remove();
+  }, [loadHome]);
 
   useFocusEffect(
     useCallback(() => {

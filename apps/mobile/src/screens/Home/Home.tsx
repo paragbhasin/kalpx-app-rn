@@ -198,22 +198,19 @@ export default function Home() {
     return () => sub.remove();
   }, []);
 
-  // Push mantras + path data to Watch when login state changes
-  useEffect(() => {
-    if (isLoggedIn) { pushMantrasToWatch(); void pushPathDataToWatch(); }
-  }, [isLoggedIn]);
-
-  // Push mantras + path data to Watch when homeData loads (rhythm + inner path now available)
+  // Push mantras + path data to Watch once both login and homeData are ready.
+  // Merged from two effects to avoid a double-sync burst (isLoggedIn fires first,
+  // then homeData arrives — both conditions must be true before syncing).
   useEffect(() => {
     if (isLoggedIn && homeData) { pushMantrasToWatch(); void pushPathDataToWatch(); }
-  }, [homeData]);
+  }, [isLoggedIn, homeData]);
 
   const HOME_BACKGROUND = require("../../../assets/new_home.webp");
   const CONTINUE_BG = require("../../../assets/beige_bg.webp");
   const isLandingHome =
     !hasPartialState && !(isLoggedIn && checkingJourney) && !mitraJourneyId;
 
-  // Auto-start Live Activity on home focus: Quick Chant if active, else Sankalp
+  // Auto-start Live Activity on home focus: Quick Chant > Inner Path > Rhythm > Sankalp
   useFocusEffect(
     React.useCallback(() => {
       getLiveActivityState(i18n.language || 'en').then((state) => {
@@ -226,6 +223,23 @@ export default function Home() {
             state.week_count,
             state.lifetime_count,
             state.lifetime_count,
+          );
+        } else if (state.type === 'inner_path') {
+          liveActivity.startInnerPath(
+            state.day_number,
+            state.total_days,
+            state.mantra_title,
+            state.mantra_devanagari,
+            state.sankalp_title,
+            state.practice_title,
+          );
+        } else if (state.type === 'rhythm') {
+          liveActivity.startRhythm(
+            state.band,
+            state.band_label,
+            state.anchor_title,
+            state.anchor_type,
+            state.anchor_devanagari,
           );
         } else if (state.type === 'sankalp') {
           liveActivity.startSankalp(state.title, state.line);
@@ -248,6 +262,23 @@ export default function Home() {
             state.week_count,
             state.lifetime_count,
             state.lifetime_count,
+          );
+        } else if (state.type === 'inner_path') {
+          liveActivity.startInnerPath(
+            state.day_number,
+            state.total_days,
+            state.mantra_title,
+            state.mantra_devanagari,
+            state.sankalp_title,
+            state.practice_title,
+          );
+        } else if (state.type === 'rhythm') {
+          liveActivity.startRhythm(
+            state.band,
+            state.band_label,
+            state.anchor_title,
+            state.anchor_type,
+            state.anchor_devanagari,
           );
         } else if (state.type === 'sankalp') {
           liveActivity.startSankalp(state.title, state.line);

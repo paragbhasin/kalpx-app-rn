@@ -154,13 +154,13 @@ class KalpxLiveActivityModule(
     // unqualified 'action' resolves to Intent.action (the property), not this function's
     // parameter, making it a no-op self-assignment. Set explicitly outside the apply block.
     private fun serviceIntent(intentAction: String, configure: Intent.() -> Unit = {}): Intent {
-        val intent = Intent(reactContext, KalpxLiveActivityService::class.java)
+        val intent = Intent(reactContext.applicationContext, KalpxLiveActivityService::class.java)
         intent.action = intentAction
         return intent.apply(configure)
     }
 
     private fun areNotificationsEnabled(): Boolean =
-        androidx.core.app.NotificationManagerCompat.from(reactContext).areNotificationsEnabled()
+        androidx.core.app.NotificationManagerCompat.from(reactContext.applicationContext).areNotificationsEnabled()
 
     private fun ReadableMap.safeInt(key: String, default: Int = 0): Int =
         if (hasKey(key) && !isNull(key)) getInt(key) else default

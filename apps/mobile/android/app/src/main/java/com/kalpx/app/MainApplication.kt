@@ -47,6 +47,9 @@ class MainApplication : Application(), ReactApplication {
       // If you opted-in for the New Architecture, we load the native entry point for this app.
       load()
     }
+    // Create live activity notification channels at startup so areNotificationsEnabled()
+    // returns the correct value on first-ever liveActivity.start() / startSankalp() call.
+    KalpxLiveActivityService.ensureChannels(this)
     ApplicationLifecycleDispatcher.onApplicationCreate(this)
   }
 

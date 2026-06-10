@@ -264,9 +264,10 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
     }, [selectedTarget]),
   });
 
-  // chantCount: use engine count when wired, else fallback to local state
+  // chantCount: always use local session count for display so the counter
+  // starts at 0 each session regardless of cumulative todayCount in the engine.
   const [localCount, setLocalCount] = useState(0);
-  const chantCount = mantraRef ? japaEngine.sessionCount : localCount;
+  const chantCount = localCount;
 
   // Expose sync/refresh to parent screen so it can hook into navigation events
   useEffect(() => {
@@ -339,8 +340,8 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   const handleIncrement = useCallback(() => {
     if (chantCount >= selectedTarget || isCompletingRef.current) return;
     if (mantraRef) {
-      // Increment first so engine counts match what we send to live activity
       japaEngine.increment();
+      setLocalCount((prev) => prev + 1);
       const curToday    = japaEngine.todayCount;
       const curWeek     = japaEngine.weekCount;
       const curLifetime = japaEngine.lifetimeCount;
@@ -432,6 +433,7 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
               <Text style={styles.currentCountText}>{chantCount}</Text>
               <Text style={styles.totalCountText}> / {selectedTarget}</Text>
             </View>
+
             {mantraRef &&
               (japaEngine.todayCount > 0 ||
                 japaEngine.weekCount > 0 ||

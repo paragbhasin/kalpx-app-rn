@@ -8,6 +8,7 @@ import { SnackBar } from './components/SnackBar';
 import { setWebNavigate } from './lib/webRouter';
 import { AppLayout } from './components/layout/AppLayout';
 import { ConsentBanner } from './components/ConsentBanner';
+import { DownloadModal } from './components/DownloadModal';
 import { I18nProvider } from './lib/i18n';
 
 function NavigateInjector() {
@@ -41,6 +42,7 @@ export function App() {
             </AppLayout>
             <SnackBar />
             <ConsentBanner />
+            <DownloadModal />
           </BrowserRouter>
         </Provider>
       </I18nProvider>

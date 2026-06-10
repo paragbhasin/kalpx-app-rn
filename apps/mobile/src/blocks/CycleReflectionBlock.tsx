@@ -27,7 +27,8 @@ import {
   ingestDay14View,
   ingestDay7View,
 } from "../engine/v3Ingest";
-import { clearContinueJourneyHomeCache } from "../screens/Home/ContinueJourney";
+import { clearContinueJourneyHomeCache, CHECKPOINT7_SHOWN_KEY, CHECKPOINT14_SHOWN_KEY } from "../screens/Home/ContinueJourney";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import store from "../store";
 import { loadScreenWithData, screenActions } from "../store/screenSlice";
 import { Fonts } from "../theme/fonts";
@@ -448,6 +449,9 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           value: true,
         }),
       );
+      // Clear the "first shown" date so the next journey cycle's day-7
+      // checkpoint is not blocked by this one.
+      AsyncStorage.removeItem(CHECKPOINT7_SHOWN_KEY).catch(() => {});
       const nv = env?.next_view ?? { view_key: "", payload: {} };
       if (decision === "reset" || nv.view_key === "onboarding_start") {
         for (const k of [
@@ -564,6 +568,9 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           value: true,
         }),
       );
+      // Clear the "first shown" date so the next journey cycle's day-14
+      // checkpoint is not blocked by this one.
+      AsyncStorage.removeItem(CHECKPOINT14_SHOWN_KEY).catch(() => {});
       const nv = env?.next_view ?? { view_key: "", payload: {} };
       if (decision === "change_focus" || nv.view_key === "onboarding_start") {
         for (const k of [

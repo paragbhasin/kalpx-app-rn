@@ -78,6 +78,20 @@ export const EVENT_NAMES = {
   CLASS_BOOKING_COMPLETED: 'class_booking_completed',
   CLASS_BOOKING_ABANDONED: 'class_booking_abandoned',
 
+  // Live Activity — Quick Reset
+  LIVE_ACTIVITY_RESET_STARTED: 'live_activity_reset_started',
+  LIVE_ACTIVITY_RESET_ENDED: 'live_activity_reset_ended',
+
+  // Live Activity — Daily Rhythm
+  LIVE_ACTIVITY_RHYTHM_STARTED: 'live_activity_rhythm_started',
+  LIVE_ACTIVITY_RHYTHM_UPDATED: 'live_activity_rhythm_updated',
+  LIVE_ACTIVITY_RHYTHM_ENDED: 'live_activity_rhythm_ended',
+
+  // Live Activity — Inner Path
+  LIVE_ACTIVITY_INNER_PATH_STARTED: 'live_activity_inner_path_started',
+  LIVE_ACTIVITY_INNER_PATH_UPDATED: 'live_activity_inner_path_updated',
+  LIVE_ACTIVITY_INNER_PATH_ENDED: 'live_activity_inner_path_ended',
+
   // Backend API event types (passed as event_name to /mitra/track-event/)
   API_TRACK_EVENT: 'track_event',
   API_TRACK_COMPLETION: 'track_completion',

@@ -15,6 +15,7 @@
  * cleared on stale fresh mount.
  */
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -31,6 +32,12 @@ import {
   View,
 } from "react-native";
 import uuidv4 from "react-native-uuid";
+
+// AsyncStorage keys that track when each checkpoint was first shown.
+// Cleared in CycleReflectionBlock when the checkpoint is actually completed
+// so the next journey cycle can show its own checkpoint.
+export const CHECKPOINT7_SHOWN_KEY = 'kalpx_checkpoint7_first_shown';
+export const CHECKPOINT14_SHOWN_KEY = 'kalpx_checkpoint14_first_shown';
 import { useDispatch } from "react-redux";
 import FourDoorHomeContainer from "../../containers/FourDoorHomeContainer";
 import { useToast } from "../../context/ToastContext";
@@ -249,6 +256,38 @@ export default function ContinueJourney({
         setLoading(false);
         return;
       }
+
+      // Checkpoint date guard: if the backend says day_7 or day_14 but the
+      // checkpoint was already shown on a PAST day (user didn't complete it),
+      // skip it and fall through to daily_view. The checkpoint only blocks on
+      // the day it first appears — not on every subsequent app open.
+      const viewKey = result.envelope?.target?.view_key;
+      if (viewKey === 'day_7_view' || viewKey === 'day_14_view') {
+        const storageKey = viewKey === 'day_7_view' ? CHECKPOINT7_SHOWN_KEY : CHECKPOINT14_SHOWN_KEY;
+        const today = new Date().toLocaleDateString('en-CA');
+        try {
+          const shownDate = await AsyncStorage.getItem(storageKey);
+          if (shownDate && shownDate !== today) {
+            // Shown on a past day — user didn't cross it, skip and go to daily
+            const { ingestDailyView: _ingest } = require('../../engine/v3Ingest');
+            const dailyResult = await (await import('../../engine/mitraApi')).mitraJourneyDailyView(null, i18n.language || 'en');
+            if (dailyResult?.envelope) {
+              const flat = _ingest(dailyResult.envelope);
+              for (const [k, v] of Object.entries(flat)) {
+                if (v !== undefined) dispatch(screenActions.setScreenValue({ key: k, value: v }));
+              }
+            }
+            routedRef.current = true;
+            dispatch(loadScreenWithData({ containerId: 'companion_dashboard_v3', stateId: 'day_active' }) as any);
+            navigation.navigate('DynamicEngine' as any);
+            setLoading(false);
+            return;
+          }
+          // First time showing today — mark it
+          if (!shownDate) await AsyncStorage.setItem(storageKey, today);
+        } catch { /* non-fatal — if AsyncStorage fails, show checkpoint normally */ }
+      }
+
       const next = routeToView(result.envelope);
       if (next) setReentry(next);
       setLoading(false);
@@ -256,7 +295,7 @@ export default function ContinueJourney({
       console.warn("[ContinueJourney] entry-view fetch failed:", err?.message);
       setLoading(false);
     }
-  }, [routeToView]);
+  }, [routeToView, dispatch, navigation]);
 
   // ── Mount effect ─────────────────────────────────────────────────
   useEffect(() => {

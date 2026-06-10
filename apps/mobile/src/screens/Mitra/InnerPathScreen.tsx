@@ -21,8 +21,10 @@
  *   - QuickSupportBlock / AdditionalItems / Room menus
  */
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
+import { CHECKPOINT7_SHOWN_KEY, CHECKPOINT14_SHOWN_KEY } from "../Home/ContinueJourney";
 import type {
   JourneyTriadReminders,
   JourneyTriadRemindersPatch,
@@ -171,6 +173,8 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
   const watchRunnerRef = useRef(false);
   // Tracks whether the initial load has completed; subsequent focuses trigger a silent refetch.
   const hasFocusedOnce = useRef(false);
+  // Track whether Inner Path LA is currently running
+  const innerPathLAActiveRef = useRef(false);
 
   // Re-fetch inner path content when locale changes so titles update immediately.
   // Uses mitraJourneyDailyView directly (bypasses entry-view payload caching).
@@ -206,6 +210,18 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
           for (const [k, v] of Object.entries(flat)) {
             if (v !== undefined) {
               dispatch(screenActions.setScreenValue({ key: k, value: v }));
+            }
+          }
+          // Update Inner Path LA with new completion state
+          if (innerPathLAActiveRef.current) {
+            const newTriad: any[] = Array.isArray((flat as any).today?.triad) ? (flat as any).today.triad : [];
+            const mantraDone = newTriad.find((t: any) => t?.slot === 'mantra')?.completed_today === true;
+            const sankalpDone = newTriad.find((t: any) => t?.slot === 'sankalp')?.completed_today === true;
+            const practiceDone = newTriad.find((t: any) => t?.slot === 'practice')?.completed_today === true;
+            liveActivity.updateInnerPath(mantraDone, sankalpDone, practiceDone);
+            if (mantraDone && sankalpDone && practiceDone) {
+              innerPathLAActiveRef.current = false;
+              setTimeout(() => liveActivity.endInnerPath(), 5_000);
             }
           }
         })
@@ -278,6 +294,28 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
             viewKey === "day_14_view",
           );
           console.log("[InnerPathScreen]", routeRunId, "embedded:", embedded);
+        }
+
+        // Checkpoint date guard: skip day_7 / day_14 if shown on a past day.
+        // Prevents re-showing an uncrossed checkpoint every time the user opens
+        // the app after the checkpoint day has passed.
+        if (viewKey === "day_7_view" || viewKey === "day_14_view") {
+          const storageKey = viewKey === "day_7_view" ? CHECKPOINT7_SHOWN_KEY : CHECKPOINT14_SHOWN_KEY;
+          const today = new Date().toLocaleDateString("en-CA");
+          try {
+            const shownDate = await AsyncStorage.getItem(storageKey);
+            if (shownDate && shownDate !== today) {
+              // Checkpoint was shown on a past day — fall through to daily view
+              const dailyResult = await mitraJourneyDailyView(null, i18n.language || "en");
+              if (!cancelled && dailyResult?.envelope) {
+                const flat = ingestDailyView(dailyResult.envelope);
+                writeAll(flat);
+              }
+              if (!embedded) setLoading(false);
+              return;
+            }
+            if (!shownDate) await AsyncStorage.setItem(storageKey, today);
+          } catch { /* non-fatal */ }
         }
 
         if (viewKey === "day_7_view") {
@@ -651,6 +689,22 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     if (!item) return;
     const journeyId = String((sd as any)?.journey_id ?? "");
     const dayNumber = Number((sd as any)?.day_number) || 0;
+
+    // Start Inner Path LA on explicit user action (not on screen mount)
+    if (!innerPathLAActiveRef.current) {
+      const mantraItem = triadItems.find((t) => t.slot === 'mantra');
+      const sankalpItem = triadItems.find((t) => t.slot === 'sankalp');
+      const practiceItem = triadItems.find((t) => t.slot === 'practice');
+      liveActivity.startInnerPath(
+        Number(sd.day_number) || 1,
+        Number(sd.total_days) || 14,
+        mantraItem?.title ?? '',
+        String((mantraItem?.master as any)?.devanagari ?? ''),
+        sankalpItem?.title ?? '',
+        practiceItem?.title ?? '',
+      ).then((id) => { if (id) innerPathLAActiveRef.current = true; }).catch(() => {});
+    }
+
     if (slot === "mantra") {
       navigation.navigate("InnerPathMantraRunner" as any, {
         item,

@@ -1233,36 +1233,52 @@ export interface V3GetResult<E extends V3Envelope> {
   notModified: boolean;
 }
 
+// In-flight dedup for v3Get: multiple callers hitting the same endpoint
+// simultaneously (e.g. mount + useFocusEffect, or two Watch sync functions)
+// share one network request instead of each issuing their own.
+const _v3Inflight: Map<string, Promise<V3GetResult<any>>> = new Map();
+
 async function v3Get<E extends V3Envelope>(
   url: string,
   etagIn: string | null = null,
   params?: Record<string, string>,
 ): Promise<V3GetResult<E>> {
-  const headers: Record<string, string> = {};
-  if (etagIn) headers["If-None-Match"] = etagIn;
-  try {
-    const res = await api.get(url, {
-      headers,
-      params,
-      validateStatus: (s: number) => (s >= 200 && s < 300) || s === 304,
-    });
-    const etag =
-      (res.headers?.etag as string) ||
-      (res.headers?.ETag as string) ||
-      etagIn ||
-      null;
-    if (res.status === 304) {
-      return { envelope: null, etag, notModified: true };
+  // Key includes ETag so If-None-Match callers don't share with cold callers.
+  const key = `${url}::${etagIn ?? ''}`;
+  const existing = _v3Inflight.get(key);
+  if (existing) return existing as Promise<V3GetResult<E>>;
+
+  const req: Promise<V3GetResult<E>> = (async () => {
+    const headers: Record<string, string> = {};
+    if (etagIn) headers["If-None-Match"] = etagIn;
+    try {
+      const res = await api.get(url, {
+        headers,
+        params,
+        validateStatus: (s: number) => (s >= 200 && s < 300) || s === 304,
+      });
+      const etag =
+        (res.headers?.etag as string) ||
+        (res.headers?.ETag as string) ||
+        etagIn ||
+        null;
+      if (res.status === 304) {
+        return { envelope: null, etag, notModified: true };
+      }
+      return { envelope: res.data as E, etag, notModified: false };
+    } catch (err: any) {
+      const status = err?.response?.status;
+      console.warn(
+        `[MITRA v3] GET ${url} failed (${status || "network"})`,
+        err?.message,
+      );
+      return { envelope: null, etag: null, notModified: false };
+    } finally {
+      _v3Inflight.delete(key);
     }
-    return { envelope: res.data as E, etag, notModified: false };
-  } catch (err: any) {
-    const status = err?.response?.status;
-    console.warn(
-      `[MITRA v3] GET ${url} failed (${status || "network"})`,
-      err?.message,
-    );
-    return { envelope: null, etag: null, notModified: false };
-  }
+  })();
+  _v3Inflight.set(key, req);
+  return req;
 }
 
 export function mitraJourneyEntryView(
@@ -2145,39 +2161,31 @@ export async function postRoomReflection(
 // ---------------------------------------------------------------------------
 // mitraJourneyHomeV3 — GET /api/mitra/v3/journey/home/ (S04 FourDoor surface)
 // ---------------------------------------------------------------------------
+// In-flight dedup: FourDoorHomeContainer fires useEffect(mount) + useFocusEffect
+// nearly simultaneously; without this both hit the server causing 429s.
+let _homeV3Inflight: Promise<MitraHomeV3Response> | null = null;
+
 export async function mitraJourneyHomeV3(opts?: {
   forceFresh?: boolean;
   locale?: string;
 }): Promise<MitraHomeV3Response> {
-  try {
-    const params: Record<string, string | number> = { tz: getTz() };
-    if (opts?.locale) params.locale = opts.locale;
-    if (opts?.forceFresh) params._t = Date.now();
-    const resp = await api.get<MitraHomeV3Response>(
-      "mitra/v3/journey/home/",
-      {
-        params,
-      },
-    );
-    console.log("[MITRA_HOME_API] full response object:", resp);
-    console.log("[MITRA_HOME_API] full response data:", resp.data);
-    console.log(
-      "[MITRA_HOME_API] full response data JSON:",
-      JSON.stringify(resp.data, null, 2),
-    );
-    return resp.data;
-  } catch (err: any) {
-    console.log("[MITRA_HOME_API] request failed:", err);
-    if (err?.response) {
-      console.log("[MITRA_HOME_API] error response object:", err.response);
-      console.log("[MITRA_HOME_API] error response data:", err.response.data);
-      console.log(
-        "[MITRA_HOME_API] error response data JSON:",
-        JSON.stringify(err.response.data, null, 2),
-      );
+  // forceFresh bypasses dedup (user-initiated refresh must always hit the network)
+  if (!opts?.forceFresh && _homeV3Inflight) return _homeV3Inflight;
+  const req = (async () => {
+    try {
+      const params: Record<string, string | number> = { tz: getTz() };
+      if (opts?.locale) params.locale = opts.locale;
+      if (opts?.forceFresh) params._t = Date.now();
+      const resp = await api.get<MitraHomeV3Response>("mitra/v3/journey/home/", { params });
+      return resp.data;
+    } catch (err: any) {
+      throw err;
+    } finally {
+      _homeV3Inflight = null;
     }
-    throw err;
-  }
+  })();
+  if (!opts?.forceFresh) _homeV3Inflight = req;
+  return req;
 }
 
 // ---------------------------------------------------------------------------
@@ -2218,19 +2226,33 @@ export async function postQuickCheckin(energy_state: QuickCheckinEnergyState): P
 }
 
 /** GET /api/mitra/v3/quick_reset/ — 3-state opening (E-D-10). null = flag off or error. */
+// In-flight dedup + 30s TTL cache: Watch sync calls this from pushMantrasToWatch AND
+// pushPathDataToWatch in the same tick — without this every sync burst hits the server 4x.
+let _qrInflight: Promise<QuickResetOpeningState | null> | null = null;
+let _qrCache: { data: QuickResetOpeningState | null; ts: number } | null = null;
+const _QR_TTL_MS = 30_000;
+export function invalidateQuickResetCache() { _qrCache = null; }
+
 export async function getQuickResetOpening(): Promise<QuickResetOpeningState | null> {
-  try {
-    const resp = await api.get<unknown>('mitra/v3/quick_reset/');
-    if (!isQuickResetOpeningState(resp.data)) {
-      console.warn('[QuickReset] invalid opening response:', typeof resp.data);
+  const now = Date.now();
+  if (_qrCache && now - _qrCache.ts < _QR_TTL_MS) return _qrCache.data;
+  if (_qrInflight) return _qrInflight;
+  _qrInflight = (async () => {
+    try {
+      const resp = await api.get<unknown>('mitra/v3/quick_reset/');
+      const data = isQuickResetOpeningState(resp.data) ? resp.data : null;
+      if (!data) console.warn('[QuickReset] invalid opening response:', typeof resp.data);
+      _qrCache = { data, ts: Date.now() };
+      return data;
+    } catch (err: any) {
+      if (err?.response?.status === 404) { _qrCache = { data: null, ts: Date.now() }; return null; }
+      console.warn('[QuickReset] getQuickResetOpening failed:', err?.message);
       return null;
+    } finally {
+      _qrInflight = null;
     }
-    return resp.data;
-  } catch (err: any) {
-    if (err?.response?.status === 404) return null;
-    console.warn('[QuickReset] getQuickResetOpening failed:', err?.message);
-    return null;
-  }
+  })();
+  return _qrInflight;
 }
 
 /** POST /api/mitra/v3/quick_chant/complete/ — log session + get copy (E-B-5). null on error. */
@@ -2350,6 +2372,8 @@ export async function apiPatchJourneyReminders(
 export type LiveActivityState =
   | { type: 'quick_chant'; mantra_name: string; devanagari: string; today_count: number; week_count: number; lifetime_count: number }
   | { type: 'sankalp'; title: string; line: string; source: 'inner_path' }
+  | { type: 'inner_path'; day_number: number; total_days: number; mantra_title: string; mantra_devanagari: string; sankalp_title: string; practice_title: string; mantra_done: boolean; sankalp_done: boolean; practice_done: boolean }
+  | { type: 'rhythm'; band: string; band_label: string; anchor_title: string; anchor_type: string; anchor_devanagari: string; band_done: boolean }
   | { type: 'none' };
 
 /** GET mitra/live-activity/state/ — what iOS Live Activity should display right now. */

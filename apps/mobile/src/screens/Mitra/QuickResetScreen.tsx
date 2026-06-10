@@ -258,6 +258,15 @@ export default function QuickResetScreen({
     japaIncrementRef.current = japaEngine.increment;
   }, [japaEngine.refreshStats, japaEngine.syncNow, japaEngine.increment]);
 
+  // When the mantra ID becomes known (API responds after screen mounts), fetch
+  // server counts. The useFocusEffect below fires while mantraRef is still null
+  // and bails early, so we need this second trigger.
+  useEffect(() => {
+    if (activeMantraRef) {
+      japaRefreshRef.current?.();
+    }
+  }, [activeMantraRef]);
+
   // Sync on leave, refresh on enter — empty deps = stable, fires once on focus
   useFocusEffect(
     useCallback(() => {
@@ -430,17 +439,10 @@ export default function QuickResetScreen({
     if (!isChantingActive) {
       runnerStartedAt.current = Date.now();
       setIsChantingActive(true);
-      liveActivity.start(
+      liveActivity.startReset(
         activeMantra.title,
         activeMantra.devanagari ?? "",
-        nextToday,
-        nextWeek,
-        nextLifetime,
-        nextLifetime,
-        elapsedSec,
       );
-    } else {
-      liveActivity.update(nextToday, nextWeek, nextLifetime, nextLifetime, elapsedSec);
     }
     japaEngine.increment();
   }, [activeMantra, isChantingActive, japaEngine]);
@@ -455,18 +457,16 @@ export default function QuickResetScreen({
       : 0;
     const finalElapsedSec = Math.floor(duration_ms / 1000);
 
-    // Show "Practice complete" state on Live Activity for 20s, then restore Sankalp
     if (isChantingActive) {
-      liveActivity.completeChant(japaEngine.todayCount, finalElapsedSec);
+      liveActivity.endReset();
       setTimeout(async () => {
-        liveActivity.end();
         const state = await getLiveActivityState(i18n.language || 'en').catch(() => ({ type: 'none' as const }));
         if (AppState.currentState === 'active' && state.type === 'sankalp') {
           liveActivity.startSankalp(state.title, state.line);
         }
-      }, 5_000);
+      }, 2_000);
     } else {
-      liveActivity.end();
+      liveActivity.endReset();
     }
 
     // Flush the japa engine (sync final count + mark session complete on backend)

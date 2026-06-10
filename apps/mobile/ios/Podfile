@@ -61,5 +61,21 @@ target 'kalpx' do
         end
       end
     end
+
+    # Fix: RNFB Core Configuration declares $(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH) as an
+    # input path, which creates a build-phase cycle (Info.plist is produced during the
+    # same build). Direct text patch on pbxproj removes the cycle reliably.
+    pbxproj_path = File.join(File.dirname(__FILE__), 'kalpx.xcodeproj', 'project.pbxproj')
+    pbxproj = File.read(pbxproj_path)
+    old_block = "C470A298BAFC82582BBFCF95 /* [CP-User] [RNFB] Core Configuration */ = {\n\t\t\tisa = PBXShellScriptBuildPhase;\n\t\t\tbuildActionMask = 2147483647;\n\t\t\tfiles = (\n\t\t\t);\n\t\t\tinputPaths = (\n\t\t\t\t\"$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)\",\n\t\t\t);"
+    new_block = "C470A298BAFC82582BBFCF95 /* [CP-User] [RNFB] Core Configuration */ = {\n\t\t\tisa = PBXShellScriptBuildPhase;\n\t\t\talwaysOutOfDate = 1;\n\t\t\tbuildActionMask = 2147483647;\n\t\t\tfiles = (\n\t\t\t);\n\t\t\tinputPaths = (\n\t\t\t);"
+    if pbxproj.include?(old_block)
+      File.write(pbxproj_path, pbxproj.gsub(old_block, new_block))
+      puts "post_install: fixed RNFB Core Configuration build phase (text patch)"
+    elsif pbxproj.include?("alwaysOutOfDate = 1")
+      puts "post_install: RNFB Core Configuration already patched"
+    else
+      puts "post_install: WARNING - could not find RNFB Core Configuration block to patch"
+    end
   end
 end

@@ -9,6 +9,9 @@ class KalpxLiveActivityModule: NSObject {
 
     private var activityID: String?
     private var sankalpActivityID: String?
+    private var resetActivityID: String?
+    private var rhythmActivityID: String?
+    private var innerPathActivityID: String?
     private var lastDeepLinkURL: String = "kalpx://mitra/quick_chant/home"
 
     // MARK: - Start
@@ -40,6 +43,9 @@ class KalpxLiveActivityModule: NSObject {
         Task {
             await self.endCurrentActivity()
             await self.endCurrentSankalpActivity() // Quick Chant takes Dynamic Island priority
+            await self.endCurrentResetActivity()
+            await self.endCurrentRhythmActivity()
+            await self.endCurrentInnerPathActivity()
 
             let attrs = KalpxChantAttributes(
                 mantraName: mantraName,
@@ -153,6 +159,66 @@ class KalpxLiveActivityModule: NSObject {
         }
     }
 
+    // MARK: - Start Reset
+
+    @objc func startResetActivity(
+        _ mantraTitle: String,
+        devanagari: String,
+        resolve: @escaping RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock
+    ) {
+        guard #available(iOS 16.2, *) else {
+            resolve(NSNull())
+            return
+        }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else {
+            reject("DISABLED", "Live Activities are disabled by user", nil)
+            return
+        }
+
+        Task {
+            await self.endCurrentActivity()
+            await self.endCurrentSankalpActivity()
+            await self.endCurrentResetActivity()
+            await self.endCurrentRhythmActivity()
+            await self.endCurrentInnerPathActivity()
+
+            let attrs = KalpxResetAttributes(deepLinkURL: "kalpx://mitra/quick_reset")
+            let state = KalpxResetAttributes.ContentState(
+                mantraTitle: mantraTitle,
+                mantraDevanagari: devanagari
+            )
+
+            do {
+                let activity = try Activity<KalpxResetAttributes>.request(
+                    attributes: attrs,
+                    content: ActivityContent(
+                        state: state,
+                        staleDate: Date().addingTimeInterval(8 * 60)
+                    ),
+                    pushType: nil
+                )
+                self.resetActivityID = activity.id
+                resolve(activity.id)
+            } catch {
+                reject("START_FAILED", error.localizedDescription, error)
+            }
+        }
+    }
+
+    // MARK: - End Reset
+
+    @objc func endResetActivity(
+        _ resolve: @escaping RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock
+    ) {
+        guard #available(iOS 16.2, *) else { resolve(NSNull()); return }
+        Task {
+            await self.endCurrentResetActivity()
+            resolve(true)
+        }
+    }
+
     // MARK: - Start Sankalp
 
     @objc func startSankalpActivity(
@@ -172,6 +238,9 @@ class KalpxLiveActivityModule: NSObject {
 
         Task {
             await self.endCurrentSankalpActivity()
+            await self.endCurrentResetActivity()
+            await self.endCurrentRhythmActivity()
+            await self.endCurrentInnerPathActivity()
 
             let attrs = KalpxSankalpAttributes(title: title, deepLinkURL: self.lastDeepLinkURL)
             let state = KalpxSankalpAttributes.ContentState(line: line)
@@ -206,6 +275,229 @@ class KalpxLiveActivityModule: NSObject {
             await activity.end(dismissalPolicy: .immediate)
         }
         sankalpActivityID = nil
+    }
+
+    @available(iOS 16.2, *)
+    private func endCurrentResetActivity() async {
+        for activity in Activity<KalpxResetAttributes>.activities {
+            await activity.end(dismissalPolicy: .immediate)
+        }
+        resetActivityID = nil
+    }
+
+    // MARK: - Start Rhythm
+
+    @objc func startRhythmActivity(
+        _ band: String,
+        bandLabel: String,
+        anchorTitle: String,
+        anchorType: String,
+        anchorDevanagari: String,
+        resolve: @escaping RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock
+    ) {
+        guard #available(iOS 16.2, *) else {
+            resolve(NSNull())
+            return
+        }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else {
+            reject("DISABLED", "Live Activities are disabled by user", nil)
+            return
+        }
+
+        Task {
+            await self.endCurrentActivity()
+            await self.endCurrentSankalpActivity()
+            await self.endCurrentResetActivity()
+            await self.endCurrentRhythmActivity()
+            await self.endCurrentInnerPathActivity()
+
+            let attrs = KalpxRhythmAttributes(deepLinkURL: "kalpx://mitra/rhythm")
+            let state = KalpxRhythmAttributes.ContentState(
+                band: band,
+                bandLabel: bandLabel,
+                anchorTitle: anchorTitle,
+                anchorType: anchorType,
+                anchorDevanagari: anchorDevanagari,
+                bandDone: false
+            )
+
+            do {
+                let activity = try Activity<KalpxRhythmAttributes>.request(
+                    attributes: attrs,
+                    content: ActivityContent(
+                        state: state,
+                        staleDate: Date().addingTimeInterval(5 * 60 * 60)
+                    ),
+                    pushType: nil
+                )
+                self.rhythmActivityID = activity.id
+                resolve(activity.id)
+            } catch {
+                reject("START_FAILED", error.localizedDescription, error)
+            }
+        }
+    }
+
+    // MARK: - Update Rhythm
+
+    @objc func updateRhythmActivity(
+        _ bandDone: Bool,
+        resolve: @escaping RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock
+    ) {
+        guard #available(iOS 16.2, *) else { resolve(NSNull()); return }
+        guard let id = rhythmActivityID,
+              let activity = Activity<KalpxRhythmAttributes>.activities.first(where: { $0.id == id })
+        else { resolve(NSNull()); return }
+
+        Task {
+            let current = activity.content.state
+            let state = KalpxRhythmAttributes.ContentState(
+                band: current.band,
+                bandLabel: current.bandLabel,
+                anchorTitle: current.anchorTitle,
+                anchorType: current.anchorType,
+                anchorDevanagari: current.anchorDevanagari,
+                bandDone: bandDone
+            )
+            await activity.update(ActivityContent(state: state, staleDate: nil))
+            resolve(true)
+        }
+    }
+
+    // MARK: - End Rhythm
+
+    @objc func endRhythmActivity(
+        _ resolve: @escaping RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock
+    ) {
+        guard #available(iOS 16.2, *) else { resolve(NSNull()); return }
+        Task {
+            await self.endCurrentRhythmActivity()
+            resolve(true)
+        }
+    }
+
+    // MARK: - Start Inner Path
+
+    @objc func startInnerPathActivity(
+        _ dayNumber: Int,
+        totalDays: Int,
+        mantraTitle: String,
+        mantraDevanagari: String,
+        sankalpTitle: String,
+        practiceTitle: String,
+        resolve: @escaping RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock
+    ) {
+        guard #available(iOS 16.2, *) else {
+            resolve(NSNull())
+            return
+        }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else {
+            reject("DISABLED", "Live Activities are disabled by user", nil)
+            return
+        }
+
+        Task {
+            await self.endCurrentActivity()
+            await self.endCurrentSankalpActivity()
+            await self.endCurrentResetActivity()
+            await self.endCurrentRhythmActivity()
+            await self.endCurrentInnerPathActivity()
+
+            let attrs = KalpxInnerPathAttributes(deepLinkURL: "kalpx://mitra/inner_path")
+            let state = KalpxInnerPathAttributes.ContentState(
+                dayNumber: dayNumber,
+                totalDays: totalDays,
+                mantraTitle: mantraTitle,
+                mantraDevanagari: mantraDevanagari,
+                sankalpTitle: sankalpTitle,
+                practiceTitle: practiceTitle,
+                mantraDone: false,
+                sankalpDone: false,
+                practiceDone: false
+            )
+
+            do {
+                let activity = try Activity<KalpxInnerPathAttributes>.request(
+                    attributes: attrs,
+                    content: ActivityContent(
+                        state: state,
+                        staleDate: Date().addingTimeInterval(3 * 60 * 60)
+                    ),
+                    pushType: nil
+                )
+                self.innerPathActivityID = activity.id
+                resolve(activity.id)
+            } catch {
+                reject("START_FAILED", error.localizedDescription, error)
+            }
+        }
+    }
+
+    // MARK: - Update Inner Path
+
+    @objc func updateInnerPathActivity(
+        _ mantraDone: Bool,
+        sankalpDone: Bool,
+        practiceDone: Bool,
+        resolve: @escaping RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock
+    ) {
+        guard #available(iOS 16.2, *) else { resolve(NSNull()); return }
+        guard let id = innerPathActivityID,
+              let activity = Activity<KalpxInnerPathAttributes>.activities.first(where: { $0.id == id })
+        else { resolve(NSNull()); return }
+
+        Task {
+            let current = activity.content.state
+            let state = KalpxInnerPathAttributes.ContentState(
+                dayNumber: current.dayNumber,
+                totalDays: current.totalDays,
+                mantraTitle: current.mantraTitle,
+                mantraDevanagari: current.mantraDevanagari,
+                sankalpTitle: current.sankalpTitle,
+                practiceTitle: current.practiceTitle,
+                mantraDone: mantraDone,
+                sankalpDone: sankalpDone,
+                practiceDone: practiceDone
+            )
+            await activity.update(ActivityContent(state: state, staleDate: nil))
+            resolve(true)
+        }
+    }
+
+    // MARK: - End Inner Path
+
+    @objc func endInnerPathActivity(
+        _ resolve: @escaping RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock
+    ) {
+        guard #available(iOS 16.2, *) else { resolve(NSNull()); return }
+        Task {
+            await self.endCurrentInnerPathActivity()
+            resolve(true)
+        }
+    }
+
+    // MARK: - Private
+
+    @available(iOS 16.2, *)
+    private func endCurrentRhythmActivity() async {
+        for activity in Activity<KalpxRhythmAttributes>.activities {
+            await activity.end(dismissalPolicy: .immediate)
+        }
+        rhythmActivityID = nil
+    }
+
+    @available(iOS 16.2, *)
+    private func endCurrentInnerPathActivity() async {
+        for activity in Activity<KalpxInnerPathAttributes>.activities {
+            await activity.end(dismissalPolicy: .immediate)
+        }
+        innerPathActivityID = nil
     }
 
     @objc static func requiresMainQueueSetup() -> Bool { false }

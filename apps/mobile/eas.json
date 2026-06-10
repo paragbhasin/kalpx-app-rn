@@ -18,11 +18,13 @@
         "EXPO_PUBLIC_ENABLE_META_PIXEL": "false"
       },
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "app-bundle",
+        "autoIncrement": true
       },
       "ios": {
         "buildConfiguration": "Release",
-        "image": "latest"
+        "image": "latest",
+        "autoIncrement": true
       }
     },
     "preview": {

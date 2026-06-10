@@ -205,29 +205,58 @@ export function MitraMenuDrawer({ onClose }: Props) {
             >
               {t("drawer.downloadApp")}
             </p>
-            <a
-              href="#"
-              style={{
-                width: 45,
-                height: 45,
-                borderRadius: 10,
-                background: "#fff",
-                boxShadow: "0 14px 24px rgba(67,33,4,0.12)",
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#2f3135",
-                textDecoration: "none",
-              }}
-            >
-              <img
-                src="/apple-black.svg"
-                width={28}
-                height={33}
-                alt=""
-                aria-hidden="true"
-              />
-            </a>
+            <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
+              <a
+                href="https://apps.apple.com/us/app/kalpx/id6755144623"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  width: 45,
+                  height: 45,
+                  borderRadius: 10,
+                  background: "#fff",
+                  boxShadow: "0 14px 24px rgba(67,33,4,0.12)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#2f3135",
+                  textDecoration: "none",
+                }}
+                aria-label="Download on the App Store"
+              >
+                <img
+                  src="/apple-black.svg"
+                  width={28}
+                  height={33}
+                  alt="App Store"
+                  aria-hidden="true"
+                />
+              </a>
+              <a
+                href="https://play.google.com/store/apps/details?id=com.kalpx.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  width: 45,
+                  height: 45,
+                  borderRadius: 10,
+                  background: "#fff",
+                  boxShadow: "0 14px 24px rgba(67,33,4,0.12)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  textDecoration: "none",
+                }}
+                aria-label="Get it on Google Play"
+              >
+                <img
+                  src="/playstore.svg"
+                  width={28}
+                  height={28}
+                  alt="Google Play"
+                />
+              </a>
+            </div>
           </div>
 
           <div

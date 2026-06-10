@@ -35,6 +35,8 @@ module.exports = {
           "KalpX uses the microphone for audio or video related features.",
         NSLocationWhenInUseUsageDescription:
           "KalpX uses location to personalize classes and content.",
+        NSSupportsLiveActivities: true,
+        NSSupportsLiveActivitiesFrequentUpdates: true,
       },
     },
     android: {

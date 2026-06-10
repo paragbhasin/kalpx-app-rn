@@ -148,8 +148,12 @@ export const liveActivity = {
   },
 
   async startReset(mantraTitle: string, devanagari: string): Promise<string | null> {
-    if (!supported || Platform.OS !== 'ios') return null;
+    if (!supported) return null;
     if (!LA_FLAGS.LIVE_ACTIVITY_QUICK_RESET_ENABLED) return null;
+    if (Platform.OS === "android") {
+      const granted = await ensureAndroidNotificationPermission();
+      if (!granted) return null;
+    }
     _quickChantSuppressedUntil = 0;
     await KalpxLiveActivityModule.endActivity().catch(() => {}); // clear stats LA before showing in-session LA
     return KalpxLiveActivityModule.startResetActivity(mantraTitle, devanagari)
@@ -161,7 +165,7 @@ export const liveActivity = {
   },
 
   endReset(reason: 'practice_complete' | 'chant_override' | 'timeout' = 'practice_complete'): Promise<void> {
-    if (!supported || Platform.OS !== 'ios') return Promise.resolve();
+    if (!supported) return Promise.resolve();
     _quickChantSuppressedUntil = Date.now() + 30_000; // suppress stats LA restart for 30s
     return Promise.all([
       KalpxLiveActivityModule.endResetActivity().catch(() => {}),
@@ -170,8 +174,12 @@ export const liveActivity = {
   },
 
   async startRhythm(band: string, bandLabel: string, anchorTitle: string, anchorType: string, anchorDevanagari: string): Promise<string | null> {
-    if (!supported || Platform.OS !== 'ios') return null;
+    if (!supported) return null;
     if (!LA_FLAGS.LIVE_ACTIVITY_DAILY_RHYTHM_ENABLED) return null;
+    if (Platform.OS === "android") {
+      const granted = await ensureAndroidNotificationPermission();
+      if (!granted) return null;
+    }
     return KalpxLiveActivityModule.startRhythmActivity(band, bandLabel, anchorTitle, anchorType, anchorDevanagari)
       .then((id: string) => {
         trackLA(EVENT_NAMES.LIVE_ACTIVITY_RHYTHM_STARTED, { band, anchor_type: anchorType });
@@ -181,22 +189,26 @@ export const liveActivity = {
   },
 
   updateRhythm(bandDone: boolean): Promise<void> {
-    if (!supported || Platform.OS !== 'ios') return Promise.resolve();
+    if (!supported) return Promise.resolve();
     return KalpxLiveActivityModule.updateRhythmActivity(bandDone)
       .then(() => { trackLA(EVENT_NAMES.LIVE_ACTIVITY_RHYTHM_UPDATED, { band_done: bandDone }); })
       .catch(() => {});
   },
 
   endRhythm(reason: 'band_complete' | 'chant_override' | 'screen_exit' = 'band_complete'): Promise<void> {
-    if (!supported || Platform.OS !== 'ios') return Promise.resolve();
+    if (!supported) return Promise.resolve();
     return KalpxLiveActivityModule.endRhythmActivity()
       .then(() => { trackLA(EVENT_NAMES.LIVE_ACTIVITY_RHYTHM_ENDED, { reason }); })
       .catch(() => {});
   },
 
   async startInnerPath(dayNumber: number, totalDays: number, mantraTitle: string, mantraDevanagari: string, sankalpTitle: string, practiceTitle: string): Promise<string | null> {
-    if (!supported || Platform.OS !== 'ios') return null;
+    if (!supported) return null;
     if (!LA_FLAGS.LIVE_ACTIVITY_INNER_PATH_ENABLED) return null;
+    if (Platform.OS === "android") {
+      const granted = await ensureAndroidNotificationPermission();
+      if (!granted) return null;
+    }
     return KalpxLiveActivityModule.startInnerPathActivity(dayNumber, totalDays, mantraTitle, mantraDevanagari, sankalpTitle, practiceTitle)
       .then((id: string) => {
         trackLA(EVENT_NAMES.LIVE_ACTIVITY_INNER_PATH_STARTED, { day_number: dayNumber, total_days: totalDays });
@@ -206,14 +218,14 @@ export const liveActivity = {
   },
 
   updateInnerPath(mantraDone: boolean, sankalpDone: boolean, practiceDone: boolean): Promise<void> {
-    if (!supported || Platform.OS !== 'ios') return Promise.resolve();
+    if (!supported) return Promise.resolve();
     return KalpxLiveActivityModule.updateInnerPathActivity(mantraDone, sankalpDone, practiceDone)
       .then(() => { trackLA(EVENT_NAMES.LIVE_ACTIVITY_INNER_PATH_UPDATED, { mantra_done: mantraDone, sankalp_done: sankalpDone, practice_done: practiceDone }); })
       .catch(() => {});
   },
 
   endInnerPath(reason: 'all_done' | 'chant_override' | 'timeout' = 'all_done'): Promise<void> {
-    if (!supported || Platform.OS !== 'ios') return Promise.resolve();
+    if (!supported) return Promise.resolve();
     return KalpxLiveActivityModule.endInnerPathActivity()
       .then(() => { trackLA(EVENT_NAMES.LIVE_ACTIVITY_INNER_PATH_ENDED, { reason }); })
       .catch(() => {});

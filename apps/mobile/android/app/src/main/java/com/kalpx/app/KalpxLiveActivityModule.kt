@@ -148,6 +148,138 @@ class KalpxLiveActivityModule(
         promise.resolve(pending)
     }
 
+    // ── startResetActivity ────────────────────────────────────────────────────
+    // Mirrors: KalpxLiveActivityModule.swift startResetActivity(_:devanagari:resolve:reject:)
+
+    @ReactMethod
+    fun startResetActivity(mantraTitle: String, devanagari: String, promise: Promise) {
+        if (!areNotificationsEnabled()) {
+            promise.reject("DISABLED", "Notifications are disabled — cannot show Live Activity")
+            return
+        }
+        try {
+            val intent = serviceIntent(KalpxLiveActivityService.ACTION_START_RESET) {
+                putExtra("mantraTitle", mantraTitle)
+                putExtra("devanagari", devanagari)
+            }
+            ContextCompat.startForegroundService(reactContext, intent)
+            promise.resolve("reset_activity")
+        } catch (e: Exception) {
+            promise.reject("START_FAILED", e.message, e)
+        }
+    }
+
+    // ── endResetActivity ──────────────────────────────────────────────────────
+
+    @ReactMethod
+    fun endResetActivity(promise: Promise) {
+        try {
+            reactContext.startService(serviceIntent(KalpxLiveActivityService.ACTION_END_RESET))
+        } catch (_: Exception) {}
+        promise.resolve(true)
+    }
+
+    // ── startRhythmActivity ───────────────────────────────────────────────────
+    // Mirrors: KalpxLiveActivityModule.swift startRhythmActivity(_:bandLabel:anchorTitle:anchorType:anchorDevanagari:resolve:reject:)
+
+    @ReactMethod
+    fun startRhythmActivity(band: String, bandLabel: String, anchorTitle: String, anchorType: String, anchorDevanagari: String, promise: Promise) {
+        if (!areNotificationsEnabled()) {
+            promise.reject("DISABLED", "Notifications are disabled — cannot show Live Activity")
+            return
+        }
+        try {
+            val intent = serviceIntent(KalpxLiveActivityService.ACTION_START_RHYTHM) {
+                putExtra("band", band)
+                putExtra("bandLabel", bandLabel)
+                putExtra("anchorTitle", anchorTitle)
+                putExtra("anchorType", anchorType)
+                putExtra("anchorDevanagari", anchorDevanagari)
+            }
+            ContextCompat.startForegroundService(reactContext, intent)
+            promise.resolve("rhythm_activity")
+        } catch (e: Exception) {
+            promise.reject("START_FAILED", e.message, e)
+        }
+    }
+
+    // ── updateRhythmActivity ──────────────────────────────────────────────────
+
+    @ReactMethod
+    fun updateRhythmActivity(bandDone: Boolean, promise: Promise) {
+        try {
+            val intent = serviceIntent(KalpxLiveActivityService.ACTION_UPDATE_RHYTHM) {
+                putExtra("bandDone", bandDone)
+            }
+            reactContext.startService(intent)
+            promise.resolve(true)
+        } catch (e: Exception) {
+            promise.resolve(null)
+        }
+    }
+
+    // ── endRhythmActivity ─────────────────────────────────────────────────────
+
+    @ReactMethod
+    fun endRhythmActivity(promise: Promise) {
+        try {
+            reactContext.startService(serviceIntent(KalpxLiveActivityService.ACTION_END_RHYTHM))
+        } catch (_: Exception) {}
+        promise.resolve(true)
+    }
+
+    // ── startInnerPathActivity ────────────────────────────────────────────────
+    // Mirrors: KalpxLiveActivityModule.swift startInnerPathActivity(_:totalDays:mantraTitle:mantraDevanagari:sankalpTitle:practiceTitle:resolve:reject:)
+
+    @ReactMethod
+    fun startInnerPathActivity(dayNumber: Int, totalDays: Int, mantraTitle: String, mantraDevanagari: String, sankalpTitle: String, practiceTitle: String, promise: Promise) {
+        if (!areNotificationsEnabled()) {
+            promise.reject("DISABLED", "Notifications are disabled — cannot show Live Activity")
+            return
+        }
+        try {
+            val intent = serviceIntent(KalpxLiveActivityService.ACTION_START_INNER_PATH) {
+                putExtra("dayNumber", dayNumber)
+                putExtra("totalDays", totalDays)
+                putExtra("mantraTitle", mantraTitle)
+                putExtra("mantraDevanagari", mantraDevanagari)
+                putExtra("sankalpTitle", sankalpTitle)
+                putExtra("practiceTitle", practiceTitle)
+            }
+            ContextCompat.startForegroundService(reactContext, intent)
+            promise.resolve("inner_path_activity")
+        } catch (e: Exception) {
+            promise.reject("START_FAILED", e.message, e)
+        }
+    }
+
+    // ── updateInnerPathActivity ───────────────────────────────────────────────
+
+    @ReactMethod
+    fun updateInnerPathActivity(mantraDone: Boolean, sankalpDone: Boolean, practiceDone: Boolean, promise: Promise) {
+        try {
+            val intent = serviceIntent(KalpxLiveActivityService.ACTION_UPDATE_INNER_PATH) {
+                putExtra("mantraDone", mantraDone)
+                putExtra("sankalpDone", sankalpDone)
+                putExtra("practiceDone", practiceDone)
+            }
+            reactContext.startService(intent)
+            promise.resolve(true)
+        } catch (e: Exception) {
+            promise.resolve(null)
+        }
+    }
+
+    // ── endInnerPathActivity ──────────────────────────────────────────────────
+
+    @ReactMethod
+    fun endInnerPathActivity(promise: Promise) {
+        try {
+            reactContext.startService(serviceIntent(KalpxLiveActivityService.ACTION_END_INNER_PATH))
+        } catch (_: Exception) {}
+        promise.resolve(true)
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     // Note: do NOT use apply { action = ... } here — inside a lambda with Intent receiver,

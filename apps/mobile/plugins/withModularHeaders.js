@@ -28,6 +28,18 @@ const FMT_HEADER_PATCH = `
       File.write(fmt_base_h, patched)
     end
   end
+
+  # Xcode 26+: 'Create Symlinks to Header Folders' script phases have no input/output
+  # files, causing Xcode to treat them as ambiguous dependencies (error in Xcode 16+).
+  # Fix: mark alwaysOutOfDate = 1 so Xcode skips dependency analysis for these phases.
+  installer.pods_project.targets.each do |target|
+    target.build_phases.each do |phase|
+      next unless phase.is_a?(Xcodeproj::Project::Object::PBXShellScriptBuildPhase)
+      next unless phase.name == 'Create Symlinks to Header Folders'
+      phase.always_out_of_date = '1'
+    end
+  end
+  installer.pods_project.save
 `;
 
 const withModularHeaders = (config) => {
@@ -35,6 +47,7 @@ const withModularHeaders = (config) => {
     "ios",
     async (config) => {
       const file = path.join(config.modRequest.platformProjectRoot, "Podfile");
+      if (!fs.existsSync(file)) return config;
       let contents = fs.readFileSync(file, "utf8");
 
       if (!contents.includes("use_modular_headers!")) {

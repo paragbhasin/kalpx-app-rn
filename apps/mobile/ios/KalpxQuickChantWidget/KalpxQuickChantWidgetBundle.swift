@@ -6,5 +6,8 @@ struct KalpxQuickChantWidgetBundle: WidgetBundle {
     var body: some Widget {
         KalpxQuickChantLiveActivity()
         KalpxSankalpLiveActivity()
+        KalpxResetLiveActivity()
+        KalpxRhythmLiveActivity()
+        KalpxInnerPathLiveActivity()
     }
 }

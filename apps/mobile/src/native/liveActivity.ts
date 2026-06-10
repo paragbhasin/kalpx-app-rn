@@ -1,6 +1,27 @@
 import { NativeModules, PermissionsAndroid, Platform } from "react-native";
+import { EVENT_NAMES } from '@kalpx/analytics';
 
 const { KalpxLiveActivityModule } = NativeModules;
+
+// Client-side feature flags — belt-and-suspenders.
+// Primary gating is server-side: backend returns type:'none' when a surface is off.
+const LA_FLAGS = {
+  LIVE_ACTIVITY_QUICK_RESET_ENABLED: true,
+  LIVE_ACTIVITY_DAILY_RHYTHM_ENABLED: true,
+  LIVE_ACTIVITY_INNER_PATH_ENABLED: true,
+};
+
+// Thin analytics shim — logs events as structured console output so they are
+// visible in Metro and can be captured by any attached analytics provider.
+// Swap the body for a real SDK call (Firebase Analytics, Amplitude, etc.) when ready.
+function trackLA(event: string, params?: Record<string, unknown>): void {
+  console.log('[LA:analytics]', event, params ?? {});
+}
+
+// Suppress quick_chant LA restart for 30s after the user manually ends a session.
+// Prevents Home.tsx useFocusEffect from immediately restarting the stats LA
+// when the server still returns type:'quick_chant' right after session complete.
+let _quickChantSuppressedUntil = 0;
 
 // Supported on iOS (ActivityKit) and Android (Foreground Service + Ongoing Notification).
 // On any other platform the methods are no-ops returning null/0.
@@ -50,6 +71,10 @@ export const liveActivity = {
         console.warn("[LiveActivity] start skipped — POST_NOTIFICATIONS not granted");
         return null;
       }
+    }
+    if (Date.now() < _quickChantSuppressedUntil) {
+      console.log('[LiveActivity] start suppressed — reset just ended');
+      return null;
     }
     console.log("[LiveActivity] calling start", { mantraName, sessionCount, weekCount, yearCount, totalCount, deepLinkURL });
     return KalpxLiveActivityModule.startActivity(
@@ -120,5 +145,77 @@ export const liveActivity = {
   consumePendingIncrements(): Promise<number> {
     if (!supported) return Promise.resolve(0);
     return KalpxLiveActivityModule.getPendingIncrements().catch(() => 0);
+  },
+
+  async startReset(mantraTitle: string, devanagari: string): Promise<string | null> {
+    if (!supported || Platform.OS !== 'ios') return null;
+    if (!LA_FLAGS.LIVE_ACTIVITY_QUICK_RESET_ENABLED) return null;
+    _quickChantSuppressedUntil = 0;
+    await KalpxLiveActivityModule.endActivity().catch(() => {}); // clear stats LA before showing in-session LA
+    return KalpxLiveActivityModule.startResetActivity(mantraTitle, devanagari)
+      .then((id: string) => {
+        trackLA(EVENT_NAMES.LIVE_ACTIVITY_RESET_STARTED);
+        return id;
+      })
+      .catch(() => null);
+  },
+
+  endReset(reason: 'practice_complete' | 'chant_override' | 'timeout' = 'practice_complete'): Promise<void> {
+    if (!supported || Platform.OS !== 'ios') return Promise.resolve();
+    _quickChantSuppressedUntil = Date.now() + 30_000; // suppress stats LA restart for 30s
+    return Promise.all([
+      KalpxLiveActivityModule.endResetActivity().catch(() => {}),
+      KalpxLiveActivityModule.endActivity().catch(() => {}), // also kill stats LA if still running
+    ]).then(() => { trackLA(EVENT_NAMES.LIVE_ACTIVITY_RESET_ENDED, { reason }); });
+  },
+
+  async startRhythm(band: string, bandLabel: string, anchorTitle: string, anchorType: string, anchorDevanagari: string): Promise<string | null> {
+    if (!supported || Platform.OS !== 'ios') return null;
+    if (!LA_FLAGS.LIVE_ACTIVITY_DAILY_RHYTHM_ENABLED) return null;
+    return KalpxLiveActivityModule.startRhythmActivity(band, bandLabel, anchorTitle, anchorType, anchorDevanagari)
+      .then((id: string) => {
+        trackLA(EVENT_NAMES.LIVE_ACTIVITY_RHYTHM_STARTED, { band, anchor_type: anchorType });
+        return id;
+      })
+      .catch(() => null);
+  },
+
+  updateRhythm(bandDone: boolean): Promise<void> {
+    if (!supported || Platform.OS !== 'ios') return Promise.resolve();
+    return KalpxLiveActivityModule.updateRhythmActivity(bandDone)
+      .then(() => { trackLA(EVENT_NAMES.LIVE_ACTIVITY_RHYTHM_UPDATED, { band_done: bandDone }); })
+      .catch(() => {});
+  },
+
+  endRhythm(reason: 'band_complete' | 'chant_override' | 'screen_exit' = 'band_complete'): Promise<void> {
+    if (!supported || Platform.OS !== 'ios') return Promise.resolve();
+    return KalpxLiveActivityModule.endRhythmActivity()
+      .then(() => { trackLA(EVENT_NAMES.LIVE_ACTIVITY_RHYTHM_ENDED, { reason }); })
+      .catch(() => {});
+  },
+
+  async startInnerPath(dayNumber: number, totalDays: number, mantraTitle: string, mantraDevanagari: string, sankalpTitle: string, practiceTitle: string): Promise<string | null> {
+    if (!supported || Platform.OS !== 'ios') return null;
+    if (!LA_FLAGS.LIVE_ACTIVITY_INNER_PATH_ENABLED) return null;
+    return KalpxLiveActivityModule.startInnerPathActivity(dayNumber, totalDays, mantraTitle, mantraDevanagari, sankalpTitle, practiceTitle)
+      .then((id: string) => {
+        trackLA(EVENT_NAMES.LIVE_ACTIVITY_INNER_PATH_STARTED, { day_number: dayNumber, total_days: totalDays });
+        return id;
+      })
+      .catch(() => null);
+  },
+
+  updateInnerPath(mantraDone: boolean, sankalpDone: boolean, practiceDone: boolean): Promise<void> {
+    if (!supported || Platform.OS !== 'ios') return Promise.resolve();
+    return KalpxLiveActivityModule.updateInnerPathActivity(mantraDone, sankalpDone, practiceDone)
+      .then(() => { trackLA(EVENT_NAMES.LIVE_ACTIVITY_INNER_PATH_UPDATED, { mantra_done: mantraDone, sankalp_done: sankalpDone, practice_done: practiceDone }); })
+      .catch(() => {});
+  },
+
+  endInnerPath(reason: 'all_done' | 'chant_override' | 'timeout' = 'all_done'): Promise<void> {
+    if (!supported || Platform.OS !== 'ios') return Promise.resolve();
+    return KalpxLiveActivityModule.endInnerPathActivity()
+      .then(() => { trackLA(EVENT_NAMES.LIVE_ACTIVITY_INNER_PATH_ENDED, { reason }); })
+      .catch(() => {});
   },
 };

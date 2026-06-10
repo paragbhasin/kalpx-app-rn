@@ -245,6 +245,7 @@ export default function RhythmHomeScreen({
 
   const [resolvingItemId, setResolvingItemId] = useState<string | null>(null);
   const [homeBand, setHomeBand] = useState<RhythmTimeBand | null>(null);
+  const lastLABandRef = useRef<RhythmTimeBand | null>(null);
 
   const screenBridge = useScreenStore();
   const screenBridgeRef = useRef(screenBridge);
@@ -269,7 +270,20 @@ export default function RhythmHomeScreen({
       // P0-D: refresh home data on focus so slot completion state is current after runner return
       mitraJourneyHomeV3({ forceFresh: true, locale: i18n.language || 'en' })
         .then((fresh) => {
-          if (fresh) dispatch(setHomeData(fresh));
+          if (fresh) {
+            dispatch(setHomeData(fresh));
+            // End Rhythm LA if the band the user was working on is now complete
+            const b = lastLABandRef.current;
+            if (b) {
+              const bandItems: RhythmItem[] = (fresh as any).companion_rhythm?.[b]?.items ?? [];
+              const done = bandItems.length > 0 && bandItems.every((i: RhythmItem) => i.completed_today === true);
+              if (done) {
+                lastLABandRef.current = null;
+                liveActivity.updateRhythm(true);
+                setTimeout(() => liveActivity.endRhythm(), 3_000);
+              }
+            }
+          }
         })
         .catch(() => {});
       // Start Sankalp Live Activity while this screen is in foreground
@@ -366,6 +380,20 @@ export default function RhythmHomeScreen({
       (homeData as any)?.inner_path_summary?.journey_id ?? "",
     );
     const dayNumber = Number((homeData as any)?.day_number) || 0;
+
+    // Start Daily Rhythm LA on explicit user action (not on screen mount)
+    const anchorDevanagari = item.item_type === 'mantra'
+      ? String((enrichedItem as any).devanagari ?? (enrichedItem as any).devanagari_snapshot ?? '')
+      : '';
+    liveActivity.startRhythm(
+      band,
+      String(RHYTHM_BAND_LABELS[band] ?? band),
+      String(enrichedItem.title_snapshot ?? item.title_snapshot ?? ''),
+      item.item_type,
+      anchorDevanagari,
+    );
+    lastLABandRef.current = band;
+
     if (item.item_type === "mantra") {
       navigation.navigate("RhythmMantraRunner" as any, {
         item: enrichedItem,

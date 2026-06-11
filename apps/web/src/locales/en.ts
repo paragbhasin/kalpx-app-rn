@@ -472,6 +472,7 @@ export const en = {
       endEarly: 'End early',
       setAsMantra: 'Set as my Quick Reset mantra',
       chooseMantra: 'Choose a Mantra',
+      useThisMantra: 'Use this mantra',
       companionReady: 'Your Daily Companion is ready.',
       eachMoment: 'Each moment has its practice. Return to it whenever you need.',
       close: 'Close',

@@ -2,6 +2,8 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { AudioPlayerBlock } from "./AudioPlayerBlock";
 import { useTranslation } from "../../lib/i18n";
+import { useJapaEngine } from "../../engine/useJapaEngine";
+import type { JapaSourceSurface } from "@kalpx/types";
 
 /* ── Constants ────────────────────────────────────────────────────── */
 const BEAD_COUNT = 18;
@@ -514,6 +516,14 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
   const completingRef = useRef(false);
 
   const activeItem: any = screenData["runner_active_item"] || {};
+
+  /* ── Japa engine (stats + backend sync) ── */
+  const mantraRef: string | null =
+    activeItem.item_id || activeItem.itemId || activeItem.id || null;
+  const sourceSurface: JapaSourceSurface =
+    (screenData["source_surface"] as JapaSourceSurface) ?? "inner_path";
+  const japaEngine = useJapaEngine({ mantraRef, sourceSurface, goalType: "count" });
+
   const title: string =
     activeItem.title ||
     activeItem.title_snapshot ||
@@ -552,6 +562,7 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
   /* ── Increment ── */
   const increment = useCallback(() => {
     if (completingRef.current) return;
+    japaEngine.increment();
     setReps((prev) => {
       const next = prev + 1;
       onAction?.({
@@ -565,7 +576,15 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
       }
       return next;
     });
-  }, [unlimited, repsTotal, onAction]);
+  }, [unlimited, repsTotal, onAction, japaEngine]);
+
+  /* ── Refresh stats on mount, flush on unmount ── */
+  useEffect(() => {
+    if (!mantraRef) return;
+    japaEngine.refreshStats();
+    return () => { void japaEngine.syncNow(); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mantraRef]);
 
   /* ── Preset pills ── */
   function setPreset(n: number) {
@@ -664,6 +683,16 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
                 >
                   {traditionLine}
                 </p>
+              )}
+
+              {/* Japa stats row */}
+              {(japaEngine.todayCount > 0 || japaEngine.weekCount > 0 || japaEngine.yearCount > 0 || japaEngine.lifetimeCount > 0) && (
+                <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap", marginTop: -10, marginBottom: 14 }}>
+                  {japaEngine.todayCount > 0 && <span style={{ fontSize: 12, color: MUTED }}>Today {japaEngine.todayCount.toLocaleString()}</span>}
+                  {japaEngine.weekCount > 0 && <span style={{ fontSize: 12, color: MUTED }}>Week {japaEngine.weekCount.toLocaleString()}</span>}
+                  {japaEngine.yearCount > 0 && <span style={{ fontSize: 12, color: MUTED }}>Year {japaEngine.yearCount.toLocaleString()}</span>}
+                  {japaEngine.lifetimeCount > 0 && <span style={{ fontSize: 12, color: MUTED }}>Lifetime {japaEngine.lifetimeCount.toLocaleString()}</span>}
+                </div>
               )}
 
               {!infoViewOnly && (
@@ -890,6 +919,16 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
         >
           {traditionLine}
         </p>
+      )}
+
+      {/* 2b ── Japa stats row */}
+      {(japaEngine.todayCount > 0 || japaEngine.weekCount > 0 || japaEngine.yearCount > 0 || japaEngine.lifetimeCount > 0) && (
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginTop: 2, marginBottom: 4 }}>
+          {japaEngine.todayCount > 0 && <span style={{ fontSize: 11, color: MUTED }}>Today {japaEngine.todayCount.toLocaleString()}</span>}
+          {japaEngine.weekCount > 0 && <span style={{ fontSize: 11, color: MUTED }}>Week {japaEngine.weekCount.toLocaleString()}</span>}
+          {japaEngine.yearCount > 0 && <span style={{ fontSize: 11, color: MUTED }}>Year {japaEngine.yearCount.toLocaleString()}</span>}
+          {japaEngine.lifetimeCount > 0 && <span style={{ fontSize: 11, color: MUTED }}>Lifetime {japaEngine.lifetimeCount.toLocaleString()}</span>}
+        </div>
       )}
 
       {!infoViewOnly && (

@@ -396,10 +396,8 @@ export default function QuickResetScreen({
     async (mantra: QuickResetMantra) => {
       await postQuickResetSetDefault(mantra.item_id);
       setDefaultSetConfirmed(true);
-      setHighlightedToastTitle(t("quickReset.mantraSetTitle"));
-      setHighlightedToastMessage(
-        t("quickReset.mantraSetMessage"),
-      );
+      setHighlightedToastTitle(t("quickReset.mantraUpdatedTitle"));
+      setHighlightedToastMessage(t("quickReset.mantraUpdatedMessage"));
       setMantraUpdatedToastVisible(true);
       // Reload AFTER the toast closes — calling loadOpening() here would flip
       // phase "opening→loading→opening", remounting the Modal each time and
@@ -441,6 +439,7 @@ export default function QuickResetScreen({
     setHighlightedToastTitle(t("quickReset.mantraUpdatedTitle"));
     setHighlightedToastMessage(t("quickReset.mantraUpdatedMessage"));
     setMantraUpdatedToastVisible(true);
+    postQuickResetSetDefault(mantra.item_id);
   }, [t]);
 
   const handleLibraryMantraSelected = useCallback((item: LibrarySearchItem) => {

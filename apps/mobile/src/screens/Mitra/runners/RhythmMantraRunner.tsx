@@ -33,7 +33,7 @@ export default function RhythmMantraRunner() {
         item={item}
         mantraRef={item.item_id ?? null}
         sourceSurface="daily_rhythm"
-        onEngineReady={(api) => { engineApiRef.current = api; }}
+        onEngineReady={(api) => { engineApiRef.current = api; api.refreshStats(); }}
         onComplete={(repsCompleted, durationSec) => {
           navigation.replace("RhythmMantraCompletion", {
             item_id: item.item_id,

@@ -472,6 +472,7 @@ export const hi = {
       endEarly: 'जल्दी समाप्त करें',
       setAsMantra: 'मेरे त्वरित रीसेट मंत्र के रूप में सेट करें',
       chooseMantra: 'एक मंत्र चुनें',
+      useThisMantra: 'यह मंत्र उपयोग करें',
       companionReady: 'आपका रोज़ का साथी तैयार है।',
       eachMoment: 'प्रत्येक पल का अपना अभ्यास है। जब भी ज़रूरत हो वापस आएं।',
       close: 'बंद करें',

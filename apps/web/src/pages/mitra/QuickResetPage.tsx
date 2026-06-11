@@ -18,6 +18,7 @@ import {
   CollapsibleCard,
   MantraTextCard,
 } from "../../components/blocks/RepCounterBlock";
+import { LibrarySearchModal } from "../../components/blocks/dashboard/LibrarySearchModal";
 import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
 import { HighlightedToast } from "../../components/ui/HighlightedToast";
 import {
@@ -27,6 +28,7 @@ import {
   postQuickChantComplete,
   postQuickResetSetDefault,
 } from "../../engine/mitraApi";
+import { useJapaEngine } from "../../engine/useJapaEngine";
 import { setHomeData } from "../../store/doorSlice";
 
 type Phase = "loading" | "opening" | "preview" | "running" | "done" | "error";
@@ -326,14 +328,11 @@ export function QuickResetPage() {
   );
   const [completionData, setCompletionData] =
     useState<QuickChantCompleteResponse | null>(null);
-  const [beadCount, setBeadCount] = useState(0);
   const [iastExpanded, setIastExpanded] = useState(false);
   const [devExpanded, setDevExpanded] = useState(false);
   const [meaningExpanded, setMeaningExpanded] = useState(false);
   const [essenceExpanded, setEssenceExpanded] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [pickerMantras, setPickerMantras] = useState<QuickResetMantra[]>([]);
-  const [pickerLoading, setPickerLoading] = useState(false);
   const [defaultSetConfirmed, setDefaultSetConfirmed] = useState(false);
   const [highlightedToastTitle, setHighlightedToastTitle] =
     useState("Mantra Updated ✦");
@@ -348,6 +347,19 @@ export function QuickResetPage() {
   const audioUrl = (selectedMantra ?? openingState?.mantra)?.audio_url ?? null;
 
   const activeMantra = selectedMantra ?? openingState?.mantra ?? null;
+
+  const japaEngine = useJapaEngine({
+    mantraRef: activeMantra?.item_id ?? null,
+    sourceSurface: "quick_chant",
+    goalType: "unlimited",
+  });
+  const beadCount = japaEngine.sessionCount;
+
+  // Refresh stats when mantra becomes known (API responds after mount)
+  useEffect(() => {
+    if (activeMantra?.item_id) japaEngine.refreshStats();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeMantra?.item_id]);
 
   // ── Audio: play on entering running phase ──────────────────────────────────
   useEffect(() => {
@@ -400,10 +412,8 @@ export function QuickResetPage() {
     async (mantra: QuickResetMantra) => {
       await postQuickResetSetDefault(mantra.item_id);
       setDefaultSetConfirmed(true);
-      setHighlightedToastTitle("Quick Reset Mantra Set ✦");
-      setHighlightedToastMessage(
-        "Your mantra has been set for future Quick Reset moments.",
-      );
+      setHighlightedToastTitle("Mantra Updated ✦");
+      setHighlightedToastMessage("Your rhythm has been gently realigned.");
       setMantraUpdatedToastVisible(true);
       await loadOpening();
     },
@@ -411,44 +421,48 @@ export function QuickResetPage() {
   );
 
   // ── Mantra picker ──────────────────────────────────────────────────────────
-  const openPicker = useCallback(async () => {
+  const openPicker = useCallback(() => {
     setPickerOpen(true);
-    setPickerLoading(true);
-    const raw = await postBrowseMantras("peacecalm");
-    setPickerMantras(normalizeBrowseMantras(raw));
-    setPickerLoading(false);
   }, []);
 
-  const handlePickerSelect = useCallback((mantra: QuickResetMantra) => {
+  const handleLibraryItemSelected = useCallback((item: any) => {
+    const mantra: QuickResetMantra = {
+      item_id:    item.itemId || item.item_id || item.id,
+      title:      item.title,
+      devanagari: item.devanagari ?? "",
+      iast:       item.iast ?? "",
+      meaning:    item.meaning ?? "",
+      essence:    item.essence ?? null,
+      audio_url:  item.audio_url ?? null,
+    };
     setSelectedMantra(mantra);
     setPickerOpen(false);
     setPhase("preview");
     setHighlightedToastTitle("Mantra Updated ✦");
     setHighlightedToastMessage("Your rhythm has been gently realigned.");
     setMantraUpdatedToastVisible(true);
+    postQuickResetSetDefault(mantra.item_id);
   }, []);
 
   // ── Runner start ───────────────────────────────────────────────────────────
   const handleBeginChanting = useCallback(() => {
     runnerStartedAt.current = Date.now();
-    setBeadCount(0);
     setPhase("running");
   }, []);
 
   const handleTapBead = useCallback(() => {
     if (phase !== "running") {
       runnerStartedAt.current = Date.now();
-      setBeadCount(1);
       setPhase("running");
-      return;
     }
-    setBeadCount((count) => count + 1);
-  }, [phase]);
+    japaEngine.increment();
+  }, [phase, japaEngine]);
 
   // ── Done chanting ──────────────────────────────────────────────────────────
   const handleDoneChanting = useCallback(async () => {
     if (!activeMantra) return;
     const duration_ms = Date.now() - runnerStartedAt.current;
+    await japaEngine.completeSession();
     const result = await postQuickChantComplete({
       mantra_ref: activeMantra.item_id,
       duration_ms,
@@ -460,7 +474,7 @@ export function QuickResetPage() {
     } else {
       navigate(-1);
     }
-  }, [activeMantra, navigate]);
+  }, [activeMantra, japaEngine, navigate]);
 
   // ── End early — always silent ──────────────────────────────────────────────
   const handleEndEarly = useCallback(async () => {
@@ -469,6 +483,7 @@ export function QuickResetPage() {
       return;
     }
     const duration_ms = Date.now() - runnerStartedAt.current;
+    japaEngine.syncNow();
     postQuickChantComplete({
       mantra_ref: activeMantra.item_id,
       duration_ms,
@@ -607,7 +622,7 @@ export function QuickResetPage() {
                     display: "flex",
                     alignItems: "baseline",
                     gap: 8,
-                    margin: "0 0 12px",
+                    margin: "0 0 6px",
                   }}
                 >
                   <span
@@ -622,6 +637,15 @@ export function QuickResetPage() {
                     {beadCount}
                   </span>
                 </div>
+
+                {(japaEngine.todayCount > 0 || japaEngine.weekCount > 0 || japaEngine.yearCount > 0 || japaEngine.lifetimeCount > 0) && (
+                  <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap", marginBottom: 10 }}>
+                    {japaEngine.todayCount > 0 && <span style={{ fontSize: 12, color: "#8A7A5A" }}>Today {japaEngine.todayCount.toLocaleString()}</span>}
+                    {japaEngine.weekCount > 0 && <span style={{ fontSize: 12, color: "#8A7A5A" }}>Week {japaEngine.weekCount.toLocaleString()}</span>}
+                    {japaEngine.yearCount > 0 && <span style={{ fontSize: 12, color: "#8A7A5A" }}>Year {japaEngine.yearCount.toLocaleString()}</span>}
+                    {japaEngine.lifetimeCount > 0 && <span style={{ fontSize: 12, color: "#8A7A5A" }}>Lifetime {japaEngine.lifetimeCount.toLocaleString()}</span>}
+                  </div>
+                )}
 
                 <div
                   style={{
@@ -880,6 +904,23 @@ export function QuickResetPage() {
         <div style={S.progressWrap}>
           <span style={S.progressMain}>{beadCount}</span>
         </div>
+
+        {(japaEngine.todayCount > 0 || japaEngine.weekCount > 0 || japaEngine.yearCount > 0 || japaEngine.lifetimeCount > 0) && (
+          <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap", marginTop: -4, marginBottom: 6 }}>
+            {japaEngine.todayCount > 0 && (
+              <span style={{ fontSize: 12, color: "#8A7A5A" }}>Today {japaEngine.todayCount.toLocaleString()}</span>
+            )}
+            {japaEngine.weekCount > 0 && (
+              <span style={{ fontSize: 12, color: "#8A7A5A" }}>Week {japaEngine.weekCount.toLocaleString()}</span>
+            )}
+            {japaEngine.yearCount > 0 && (
+              <span style={{ fontSize: 12, color: "#8A7A5A" }}>Year {japaEngine.yearCount.toLocaleString()}</span>
+            )}
+            {japaEngine.lifetimeCount > 0 && (
+              <span style={{ fontSize: 12, color: "#8A7A5A" }}>Lifetime {japaEngine.lifetimeCount.toLocaleString()}</span>
+            )}
+          </div>
+        )}
 
         <div
           style={{
@@ -1186,7 +1227,15 @@ export function QuickResetPage() {
             false,
           )}
         </main>
-        {pickerOpen && renderPickerOverlay()}
+        <LibrarySearchModal
+          isVisible={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          mode="select"
+          lockedItemType="mantra"
+          headerTitle={t('mitra.quickReset.chooseMantra')}
+          selectLabel={t('mitra.quickReset.useThisMantra')}
+          onItemSelected={handleLibraryItemSelected}
+        />
       </>,
     );
   }
@@ -1205,7 +1254,15 @@ export function QuickResetPage() {
             false,
           )}
         </main>
-        {pickerOpen && renderPickerOverlay()}
+        <LibrarySearchModal
+          isVisible={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          mode="select"
+          lockedItemType="mantra"
+          headerTitle={t('mitra.quickReset.chooseMantra')}
+          selectLabel={t('mitra.quickReset.useThisMantra')}
+          onItemSelected={handleLibraryItemSelected}
+        />
       </>,
     );
   }
@@ -1288,284 +1345,4 @@ export function QuickResetPage() {
     </>,
   );
 
-  // ── Picker overlay ─────────────────────────────────────────────────────────
-  function renderPickerOverlay() {
-    if (isDesktop) {
-      return (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 140,
-            background: "rgba(67,33,4,0.14)",
-            backdropFilter: "blur(3px)",
-            WebkitBackdropFilter: "blur(3px)",
-            display: "flex",
-            justifyContent: "flex-end",
-          }}
-          onClick={() => setPickerOpen(false)}
-        >
-          <div
-            style={{
-              width: "min(460px, 100vw)",
-              height: "100vh",
-              background:
-                "linear-gradient(180deg, rgba(255,250,244,0.98) 0%, rgba(255,247,239,0.98) 100%)",
-              borderLeft: "1px solid rgba(218,194,142,0.42)",
-              boxShadow: "-24px 0 64px rgba(67,33,4,0.12)",
-              display: "flex",
-              flexDirection: "column",
-              position: "relative",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div
-              style={{
-                padding: "24px 24px 18px",
-                position: "relative",
-                flexShrink: 0,
-              }}
-            >
-              <img
-                src="/leaves-bird.png"
-                alt=""
-                aria-hidden="true"
-                style={{
-                  position: "absolute",
-                  top: "-28px",
-                  right: "10px",
-                  width: "165px",
-                  pointerEvents: "none",
-                  userSelect: "none",
-                  opacity: 0.92,
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => setPickerOpen(false)}
-                style={{
-                  position: "absolute",
-                  top: 18,
-                  right: 18,
-                  width: 36,
-                  height: 36,
-                  borderRadius: "50%",
-                  border: "1px solid rgba(218,194,142,0.55)",
-                  background: "rgba(255,255,255,0.8)",
-                  color: "#8B6A2A",
-                  fontSize: 18,
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-                aria-label="Close mantra picker"
-              >
-                ×
-              </button>
-              <div style={{ textAlign: "center", paddingTop: 8 }}>
-                <p style={{ ...S.pageTitle, margin: "0 0 12px", fontSize: 24 }}>
-                  {t('mitra.quickReset.chooseMantra')}
-                </p>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 12,
-                    color: "#C7A048",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 88,
-                      height: 1,
-                      background: "rgba(199,160,72,0.45)",
-                    }}
-                  />
-                  <span style={{ fontSize: 18, lineHeight: 1 }}>✦</span>
-                  <div
-                    style={{
-                      width: 88,
-                      height: 1,
-                      background: "rgba(199,160,72,0.45)",
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div
-              style={{
-                flex: 1,
-                overflowY: "auto",
-                padding: "0 24px 24px",
-                boxSizing: "border-box",
-              }}
-            >
-              {pickerLoading ? (
-                <p
-                  style={{
-                    color: "#C99317",
-                    fontSize: 15,
-                    textAlign: "center",
-                    marginTop: 32,
-                  }}
-                >
-                  {t('mitra.quickReset.loading')}
-                </p>
-              ) : (
-                pickerMantras.map((mantra) => (
-                  <div
-                    key={mantra.item_id}
-                    style={{
-                      ...S.pickerItem,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 18,
-                    }}
-                    onClick={() => handlePickerSelect(mantra)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) =>
-                      e.key === "Enter" && handlePickerSelect(mantra)
-                    }
-                  >
-                    <div style={{ flex: 1 }}>
-                      <p style={S.pickerItemTitle}>{mantra.title}</p>
-                      {mantra.devanagari && (
-                        <p style={S.pickerItemDevanagari}>
-                          {mantra.devanagari}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div style={S.overlay as React.CSSProperties}>
-        <div
-          style={{
-            width: "100%",
-            maxWidth: 420,
-            margin: "0 auto",
-            padding: "18px 16px 0",
-            position: "relative",
-          }}
-        >
-          <img
-            src="/leaves-bird.png"
-            alt=""
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              top: "-57px",
-              right: "9px",
-              width: "165px",
-
-              pointerEvents: "none",
-              userSelect: "none",
-            }}
-          />
-          {/* <button
-            style={{
-              ...S.backBtn,
-              marginBottom: 24,
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-            }}
-            onClick={() => setPickerOpen(false)}
-          >
-            <ArrowLeft size={22} strokeWidth={2} />
-            Back
-          </button> */}
-          <div style={{ textAlign: "center" }}>
-            <p style={{ ...S.pageTitle, margin: "0 0 12px", fontSize: 22 }}>
-              {t('mitra.quickReset.chooseMantra')}
-            </p>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 12,
-                color: "#C7A048",
-              }}
-            >
-              <div
-                style={{
-                  width: 78,
-                  height: 1,
-                  background: "rgba(199,160,72,0.45)",
-                }}
-              />
-              <span style={{ fontSize: 18, lineHeight: 1 }}>✦</span>
-              <div
-                style={{
-                  width: 78,
-                  height: 1,
-                  background: "rgba(199,160,72,0.45)",
-                }}
-              />
-            </div>
-          </div>
-        </div>
-        <div
-          style={{
-            ...(S.pickerList as React.CSSProperties),
-            width: "100%",
-            maxWidth: 420,
-            margin: "0 auto",
-            padding: "0 16px 24px",
-            boxSizing: "border-box",
-          }}
-        >
-          {pickerLoading ? (
-            <p
-              style={{
-                color: "#C99317",
-                fontSize: 15,
-                textAlign: "center",
-                marginTop: 32,
-              }}
-            >
-              {t('mitra.quickReset.loading')}
-            </p>
-          ) : (
-            pickerMantras.map((mantra) => (
-              <div
-                key={mantra.item_id}
-                style={{
-                  ...S.pickerItem,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 18,
-                }}
-                onClick={() => handlePickerSelect(mantra)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) =>
-                  e.key === "Enter" && handlePickerSelect(mantra)
-                }
-              >
-                <div style={{ flex: 1 }}>
-                  <p style={S.pickerItemTitle}>{mantra.title}</p>
-                  {mantra.devanagari && (
-                    <p style={S.pickerItemDevanagari}>{mantra.devanagari}</p>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    );
-  }
 }

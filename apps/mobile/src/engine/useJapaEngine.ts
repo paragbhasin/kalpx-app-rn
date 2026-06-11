@@ -128,6 +128,7 @@ export function useJapaEngine({
   const [elapsedMs, setElapsedMs] = useState(0);
   const [isSyncing, setIsSyncing] = useState(false);
   const [canUndo, setCanUndo] = useState(false);
+  const [statsRevision, setStatsRevision] = useState(0);
 
   // ── Refs (mutable, no re-render) ──────────────────────────────────────────
   const serverSessionId = useRef<number | null>(null);
@@ -453,10 +454,11 @@ export function useJapaEngine({
         cachedLifetimeBase.current,
       );
 
-      // Trigger re-render for week/lifetime
-      setSessionCount((c) => c);
-    } catch {
-      // swallow — stale local values remain, not a critical failure
+      // Force re-render so week/year/lifetime (computed from refs) update in the UI.
+      // setSessionCount((c) => c) is a React 18 no-op when c===0; use a dedicated counter.
+      setStatsRevision((r) => r + 1);
+    } catch (err) {
+      console.warn('[JapaEngine] refreshStats error:', err);
     }
   }, [mantraRef, persistStats]);
 
@@ -469,7 +471,7 @@ export function useJapaEngine({
     localSessionId.current = uuidv4();
     serverSessionId.current = null;
     startPending.current = false;
-    lastSyncTimestamp.current = 0;
+    lastSyncTimestamp.current = Date.now();
     sessionStartedAt.current = Date.now();
     goalReachedRef.current = false;
     undoStack.current = [];
@@ -703,9 +705,9 @@ export function useJapaEngine({
 
   // ── Derived values ────────────────────────────────────────────────────────
   // sessionCount starts at today's existing count → it IS today's running total.
-  // newChants = only what happened this session (excludes the starting baseline).
-  // todayCount = sessionCount (same thing — the big number)
-  // week/lifetime add only the new chants on top of their own baselines.
+  // statsRevision increments after each refreshStats to force a re-render even
+  // when sessionCount didn't change (so week/year/lifetime display from refs update).
+  void statsRevision;
 
   const newChants = Math.max(0, sessionCount - sessionInitialCount.current);
   const todayCount = sessionCount;   // big number = today's total

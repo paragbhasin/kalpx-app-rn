@@ -33,7 +33,7 @@ export default function InnerPathMantraRunner() {
         item={item}
         mantraRef={item.item_id ?? null}
         sourceSurface="inner_path"
-        onEngineReady={(api) => { engineApiRef.current = api; }}
+        onEngineReady={(api) => { engineApiRef.current = api; api.refreshStats(); }}
         onComplete={(repsCompleted, durationSec) => {
           navigation.replace("InnerPathMantraCompletion", {
             item_id: item.item_id,

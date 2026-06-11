@@ -1,4 +1,4 @@
-import { NativeModules, PermissionsAndroid, Platform } from "react-native";
+import { Alert, Linking, NativeModules, PermissionsAndroid, Platform } from "react-native";
 import { EVENT_NAMES } from '@kalpx/analytics';
 
 const { KalpxLiveActivityModule } = NativeModules;
@@ -28,12 +28,27 @@ let _quickChantSuppressedUntil = 0;
 const supported = !!KalpxLiveActivityModule && (Platform.OS === "ios" || Platform.OS === "android");
 console.log("[LiveActivity] module found:", !!KalpxLiveActivityModule, "supported:", supported);
 
-// Android 13+ (API 33) requires POST_NOTIFICATIONS runtime permission before
-// posting any notification. Called once before the first start() or startSankalp().
-// On iOS this is handled by ActivityKit's areActivitiesEnabled check.
-async function ensureAndroidNotificationPermission(): Promise<boolean> {
-  if (Platform.OS !== "android") return true;
-  if (Platform.Version < 33) return true;
+// Shows a one-time alert directing the user to Settings when notifications
+// are permanently blocked. Shown for Android NEVER_ASK_AGAIN and iOS DISABLED.
+function promptOpenSettings(): void {
+  Alert.alert(
+    "Notifications Turned Off",
+    Platform.OS === "ios"
+      ? "Live Activities are disabled for KalpX. To see your practice on the lock screen, go to Settings → KalpX → Live Activities."
+      : "Notifications are disabled for KalpX. To see your practice on the lock screen, enable notifications in Settings.",
+    [
+      { text: "Not now", style: "cancel" },
+      { text: "Open Settings", onPress: () => Linking.openSettings() },
+    ]
+  );
+}
+
+// Android 13+ (API 33) requires POST_NOTIFICATIONS runtime permission.
+// Returns 'granted', 'denied' (can ask again — silent skip), or
+// 'blocked' (never_ask_again / permanently off — show Settings prompt).
+async function checkAndroidNotificationPermission(): Promise<'granted' | 'denied' | 'blocked'> {
+  if (Platform.OS !== "android") return 'granted';
+  if (Platform.Version < 33) return 'granted';
   try {
     const status = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
@@ -44,9 +59,11 @@ async function ensureAndroidNotificationPermission(): Promise<boolean> {
         buttonNegative: "Not now",
       }
     );
-    return status === PermissionsAndroid.RESULTS.GRANTED;
+    if (status === PermissionsAndroid.RESULTS.GRANTED) return 'granted';
+    if (status === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) return 'blocked';
+    return 'denied';
   } catch {
-    return false;
+    return 'denied';
   }
 }
 
@@ -66,11 +83,9 @@ export const liveActivity = {
       return null;
     }
     if (Platform.OS === "android") {
-      const granted = await ensureAndroidNotificationPermission();
-      if (!granted) {
-        console.warn("[LiveActivity] start skipped — POST_NOTIFICATIONS not granted");
-        return null;
-      }
+      const perm = await checkAndroidNotificationPermission();
+      if (perm === 'blocked') { promptOpenSettings(); return null; }
+      if (perm === 'denied') { console.warn("[LiveActivity] start skipped — POST_NOTIFICATIONS denied"); return null; }
     }
     if (Date.now() < _quickChantSuppressedUntil) {
       console.log('[LiveActivity] start suppressed — reset just ended');
@@ -85,6 +100,7 @@ export const liveActivity = {
       console.log("[LiveActivity] started OK, id:", id);
       return id;
     }).catch((err: any) => {
+      if (err?.code === 'DISABLED') { promptOpenSettings(); return null; }
       console.error("[LiveActivity] start FAILED:", err);
       return null;
     });
@@ -119,11 +135,9 @@ export const liveActivity = {
       return null;
     }
     if (Platform.OS === "android") {
-      const granted = await ensureAndroidNotificationPermission();
-      if (!granted) {
-        console.warn("[LiveActivity] startSankalp skipped — POST_NOTIFICATIONS not granted");
-        return null;
-      }
+      const perm = await checkAndroidNotificationPermission();
+      if (perm === 'blocked') { promptOpenSettings(); return null; }
+      if (perm === 'denied') { console.warn("[LiveActivity] startSankalp skipped — POST_NOTIFICATIONS denied"); return null; }
     }
     console.log("[LiveActivity] calling startSankalp", { title, line });
     return KalpxLiveActivityModule.startSankalpActivity(title, line)
@@ -132,6 +146,7 @@ export const liveActivity = {
         return id;
       })
       .catch((err: any) => {
+        if (err?.code === 'DISABLED') { promptOpenSettings(); return null; }
         console.error("[LiveActivity] startSankalp FAILED:", err);
         return null;
       });
@@ -151,11 +166,9 @@ export const liveActivity = {
     if (!supported) return null;
     if (!LA_FLAGS.LIVE_ACTIVITY_QUICK_RESET_ENABLED) return null;
     if (Platform.OS === "android") {
-      const granted = await ensureAndroidNotificationPermission();
-      if (!granted) {
-        console.warn("[LiveActivity] startReset skipped — POST_NOTIFICATIONS not granted");
-        return null;
-      }
+      const perm = await checkAndroidNotificationPermission();
+      if (perm === 'blocked') { promptOpenSettings(); return null; }
+      if (perm === 'denied') { console.warn("[LiveActivity] startReset skipped — POST_NOTIFICATIONS denied"); return null; }
     }
     _quickChantSuppressedUntil = 0;
     await KalpxLiveActivityModule.endActivity().catch(() => {}); // clear stats LA before showing in-session LA
@@ -165,6 +178,7 @@ export const liveActivity = {
         return id;
       })
       .catch((err: any) => {
+        if (err?.code === 'DISABLED') { promptOpenSettings(); return null; }
         console.error("[LiveActivity] startReset FAILED:", err);
         return null;
       });
@@ -183,11 +197,9 @@ export const liveActivity = {
     if (!supported) return null;
     if (!LA_FLAGS.LIVE_ACTIVITY_DAILY_RHYTHM_ENABLED) return null;
     if (Platform.OS === "android") {
-      const granted = await ensureAndroidNotificationPermission();
-      if (!granted) {
-        console.warn("[LiveActivity] startRhythm skipped — POST_NOTIFICATIONS not granted");
-        return null;
-      }
+      const perm = await checkAndroidNotificationPermission();
+      if (perm === 'blocked') { promptOpenSettings(); return null; }
+      if (perm === 'denied') { console.warn("[LiveActivity] startRhythm skipped — POST_NOTIFICATIONS denied"); return null; }
     }
     return KalpxLiveActivityModule.startRhythmActivity(band, bandLabel, anchorTitle, anchorType, anchorDevanagari)
       .then((id: string) => {
@@ -195,6 +207,7 @@ export const liveActivity = {
         return id;
       })
       .catch((err: any) => {
+        if (err?.code === 'DISABLED') { promptOpenSettings(); return null; }
         console.error("[LiveActivity] startRhythm FAILED:", err);
         return null;
       });
@@ -218,11 +231,9 @@ export const liveActivity = {
     if (!supported) return null;
     if (!LA_FLAGS.LIVE_ACTIVITY_INNER_PATH_ENABLED) return null;
     if (Platform.OS === "android") {
-      const granted = await ensureAndroidNotificationPermission();
-      if (!granted) {
-        console.warn("[LiveActivity] startInnerPath skipped — POST_NOTIFICATIONS not granted");
-        return null;
-      }
+      const perm = await checkAndroidNotificationPermission();
+      if (perm === 'blocked') { promptOpenSettings(); return null; }
+      if (perm === 'denied') { console.warn("[LiveActivity] startInnerPath skipped — POST_NOTIFICATIONS denied"); return null; }
     }
     return KalpxLiveActivityModule.startInnerPathActivity(dayNumber, totalDays, mantraTitle, mantraDevanagari, sankalpTitle, practiceTitle)
       .then((id: string) => {
@@ -230,6 +241,7 @@ export const liveActivity = {
         return id;
       })
       .catch((err: any) => {
+        if (err?.code === 'DISABLED') { promptOpenSettings(); return null; }
         console.error("[LiveActivity] startInnerPath FAILED:", err);
         return null;
       });

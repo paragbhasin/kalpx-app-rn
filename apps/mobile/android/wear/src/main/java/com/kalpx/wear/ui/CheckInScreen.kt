@@ -88,8 +88,7 @@ private fun NotedView(feeling: String) {
     ) {
         Text("✓", fontSize = 28.sp, color = KalpXWearTheme.gold)
         Spacer(Modifier.height(4.dp))
-        Text(feeling, fontSize = 14.sp, fontWeight = FontWeight.Medium,
+        Text("Noted gently", fontSize = 14.sp, fontWeight = FontWeight.Medium,
             color = KalpXWearTheme.textPrimary)
-        Text("Noted", fontSize = 11.sp, color = KalpXWearTheme.textTertiary)
     }
 }

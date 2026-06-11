@@ -28,16 +28,13 @@ struct CheckInView: View {
             Text("✓")
                 .font(.system(size: 28))
                 .foregroundColor(KalpXWatchTheme.gold)
-            Text(feeling)
+            Text("Noted gently")
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(KalpXWatchTheme.textPrimary)
-            Text("Noted")
-                .font(.system(size: 11))
-                .foregroundColor(KalpXWatchTheme.textTertiary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(KalpXWatchTheme.background)
-        .accessibilityLabel("Check-in recorded: \(feeling)")
+        .accessibilityLabel("Check-in recorded")
     }
 
     private var feelingsList: some View {

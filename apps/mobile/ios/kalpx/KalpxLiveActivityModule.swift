@@ -64,7 +64,7 @@ class KalpxLiveActivityModule: NSObject {
             do {
                 let activity = try Activity<KalpxChantAttributes>.request(
                     attributes: attrs,
-                    content: ActivityContent(state: state, staleDate: nil),
+                    content: ActivityContent(state: state, staleDate: Date().addingTimeInterval(4 * 60 * 60)),
                     pushType: nil
                 )
                 self.activityID = activity.id
@@ -102,7 +102,7 @@ class KalpxLiveActivityModule: NSObject {
                 elapsedSeconds: elapsedSeconds,
                 isCompleted: false
             )
-            await activity.update(ActivityContent(state: state, staleDate: nil))
+            await activity.update(ActivityContent(state: state, staleDate: Date().addingTimeInterval(4 * 60 * 60)))
             resolve(true)
         }
     }
@@ -153,7 +153,7 @@ class KalpxLiveActivityModule: NSObject {
                     elapsedSeconds: elapsedSeconds,
                     isCompleted: true
                 )
-                await activity.update(ActivityContent(state: state, staleDate: nil))
+                await activity.update(ActivityContent(state: state, staleDate: Date().addingTimeInterval(5 * 60)))
             }
             resolve(true)
         }

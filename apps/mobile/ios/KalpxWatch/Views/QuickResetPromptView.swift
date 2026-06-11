@@ -34,7 +34,7 @@ struct QuickResetPromptView: View {
         } else {
             ScrollView {
                 VStack(spacing: 10) {
-                    Text(feeling)
+                    Text("Return slowly")
                         .font(.system(size: 11))
                         .foregroundColor(KalpXWatchTheme.textTertiary)
 

@@ -47,7 +47,7 @@ fun QuickResetPromptScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            feeling,
+            "Return slowly",
             fontSize = 11.sp,
             color = KalpXWearTheme.textTertiary
         )

@@ -69,9 +69,9 @@ class KalpxLiveActivityService : Service() {
             mgr.deleteNotificationChannel("kalpx_live_sankalp_v2")
             if (mgr.getNotificationChannel(CHANNEL_CHANT) == null) {
                 mgr.createNotificationChannel(NotificationChannel(
-                    CHANNEL_CHANT, "Chanting Session", NotificationManager.IMPORTANCE_DEFAULT
+                    CHANNEL_CHANT, "Mantra Practice", NotificationManager.IMPORTANCE_DEFAULT
                 ).apply {
-                    description = "Shows your active mantra chanting session"
+                    description = "Your mantra chanting session"
                     lockscreenVisibility = Notification.VISIBILITY_PUBLIC
                     setShowBadge(false); enableLights(false); enableVibration(false)
                 })
@@ -80,16 +80,16 @@ class KalpxLiveActivityService : Service() {
                 mgr.createNotificationChannel(NotificationChannel(
                     CHANNEL_SANKALP, "Sankalp", NotificationManager.IMPORTANCE_DEFAULT
                 ).apply {
-                    description = "Shows your active Sankalp commitment"
+                    description = "Your daily sankalp"
                     lockscreenVisibility = Notification.VISIBILITY_PUBLIC
                     setShowBadge(false); enableLights(false); enableVibration(false)
                 })
             }
             if (mgr.getNotificationChannel(CHANNEL_PRACTICE) == null) {
                 mgr.createNotificationChannel(NotificationChannel(
-                    CHANNEL_PRACTICE, "Daily Practice", NotificationManager.IMPORTANCE_DEFAULT
+                    CHANNEL_PRACTICE, "Daily Rhythm", NotificationManager.IMPORTANCE_DEFAULT
                 ).apply {
-                    description = "Shows your active Daily Rhythm or Inner Path practice"
+                    description = "Your daily rhythm and inner path"
                     lockscreenVisibility = Notification.VISIBILITY_PUBLIC
                     setShowBadge(false); enableLights(false); enableVibration(false)
                 })
@@ -397,7 +397,6 @@ class KalpxLiveActivityService : Service() {
 
     private fun buildChantNotification(): Notification {
         val malaProgress = sessionCount % 108   // 108-count mala cycle (mirrors iOS MalaRing)
-        val elapsed = formatElapsed(elapsedSeconds)
 
         val contentPendingIntent = deepLinkPendingIntent(deepLinkURL, requestCode = 0)
 
@@ -433,16 +432,13 @@ class KalpxLiveActivityService : Service() {
             // ── Active chanting state ── mirrors iOS lock screen: mantra + mala ring + stats
             // compact view (lock screen pill): title + statsLine
             // expanded view (shade): devanagari + stats + elapsed + ॐ Chant button
-            val statsLine = "Today $sessionCount  ·  Weekly $weekCount  ·  Lifetime $totalCount"
+            val statsLine = "Today $sessionCount  ·  Weekly $weekCount  ·  All time $totalCount"
             val bigText = buildString {
                 if (devanagari.isNotEmpty()) {
                     append(devanagari)
                     append("\n\n")
                 }
-                append("Today  $sessionCount    Weekly  $weekCount    Lifetime  $totalCount")
-                append("\n")
-                append(elapsed)
-                append(" elapsed")
+                append("Today  $sessionCount    Weekly  $weekCount    All time  $totalCount")
             }
 
             // Tap-to-chant action — mirrors IncrementChantIntent (enabled on Android, unlike iOS
@@ -465,12 +461,10 @@ class KalpxLiveActivityService : Service() {
                 // compact/lock-screen pill shows contentText — use stats not devanagari so it
                 // reads as live data ("Today 5 · Weekly 5 · Lifetime 70") rather than truncated script
                 .setContentText(statsLine)
-                .setSubText(elapsed)
                 .setStyle(
                     NotificationCompat.BigTextStyle()
                         .setBigContentTitle("ॐ  $mantraName")
                         .bigText(bigText)
-                        .setSummaryText(elapsed)
                 )
                 // Mala ring progress: 108 beads per cycle, mirrors iOS MalaRing (total = 108)
                 .setProgress(108, malaProgress, false)
@@ -613,7 +607,7 @@ class KalpxLiveActivityService : Service() {
         val dayLabel = "Day $innerPathDayNumber · $innerPathTotalDays"
         val allDone = innerPathMantraDone && innerPathSankalpDone && innerPathPracticeDone
         val contentText = when {
-            allDone -> "✓ All practices complete"
+            allDone -> "✓ All three held today"
             innerPathMantraTitle.isNotEmpty() -> innerPathMantraTitle
             else -> "Inner Path active"
         }
@@ -701,10 +695,10 @@ class KalpxLiveActivityService : Service() {
         // makes a sound; all subsequent bead-tap updates are completely silent.
         mgr.createNotificationChannel(NotificationChannel(
             CHANNEL_CHANT,
-            "Chanting Session",
+            "Mantra Practice",
             NotificationManager.IMPORTANCE_DEFAULT
         ).apply {
-            description = "Shows your active mantra chanting session"
+            description = "Your mantra chanting session"
             lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             setShowBadge(false)
             enableLights(false)
@@ -716,7 +710,7 @@ class KalpxLiveActivityService : Service() {
             "Sankalp",
             NotificationManager.IMPORTANCE_DEFAULT
         ).apply {
-            description = "Shows your active Sankalp commitment"
+            description = "Your daily sankalp"
             lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             setShowBadge(false)
             enableLights(false)
@@ -725,10 +719,10 @@ class KalpxLiveActivityService : Service() {
 
         mgr.createNotificationChannel(NotificationChannel(
             CHANNEL_PRACTICE,
-            "Daily Practice",
+            "Daily Rhythm",
             NotificationManager.IMPORTANCE_DEFAULT
         ).apply {
-            description = "Shows your active Daily Rhythm or Inner Path practice"
+            description = "Your daily rhythm and inner path"
             lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             setShowBadge(false)
             enableLights(false)

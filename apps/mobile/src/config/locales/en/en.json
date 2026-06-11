@@ -2076,25 +2076,30 @@
     }
   },
   "quickReset": {
-    "subtitle": "Quick Reset Mantra",
+    "subtitle": "Your mantra",
     "doneChanting": "Done chanting",
     "errorTitle": "Unable to open Quick Reset",
     "pleaseRetry": "Please try again.",
     "retry": "Retry",
-    "setAsMyMantra": "Set as my Quick Reset mantra",
-    "setAsYourMantra": "Set as your Quick Reset mantra.",
+    "setAsMyMantra": "Set as default mantra",
+    "setAsYourMantra": "Saved as your default mantra",
     "close": "Close",
-    "chooseMantra": "Choose a Mantra",
+    "chooseMantra": "Choose a mantra",
+    "useThisMantra": "Use this mantra",
     "guidedAudio": "Guided Audio",
     "meaning": "Meaning",
     "essence": "Essence",
     "mantraUpdatedTitle": "Mantra Updated ✦",
     "mantraUpdatedMessage": "Your rhythm has been gently realigned.",
-    "mantraSetTitle": "Quick Reset Mantra Set ✦",
-    "mantraSetMessage": "Your mantra has been set for future Quick Reset moments.",
+    "mantraSetTitle": "Default mantra saved ✦",
+    "mantraSetMessage": "Your default mantra has been saved",
     "tap": "TAP",
     "here": "HERE",
-    "back": "Back"
+    "back": "Back",
+    "endChantTitle": "End this chant?",
+    "endChantBody": "Changing mantra will close your current chant session.",
+    "stayHere": "Stay here",
+    "endAndChange": "End & change"
   },
   "innerPath": {
     "heldToday": {

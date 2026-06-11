@@ -16,11 +16,11 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
+  Alert,
   Animated,
   AppState,
   Easing,
   Image,
-  ImageBackground,
   LayoutAnimation,
   Modal,
   Platform,
@@ -37,6 +37,9 @@ const RudrakshBead = ({ width, height, style }: { width?: number; height?: numbe
 import AudioPlayerBlock, {
   stopAllAudioPlayerSounds,
 } from "../../blocks/AudioPlayerBlock";
+import LibrarySearchModal, {
+  type LibrarySearchItem,
+} from "../../components/LibrarySearchModal";
 import type { MantraTextCardProps } from "../../containers/CycleTransitionsContainer";
 import {
   getLiveActivityState,
@@ -293,8 +296,6 @@ export default function QuickResetScreen({
   const [meaningExpanded, setMeaningExpanded] = useState(false);
   const [essenceExpanded, setEssenceExpanded] = useState(false);
   const [pickerVisible, setPickerVisible] = useState(false);
-  const [pickerMantras, setPickerMantras] = useState<QuickResetMantra[]>([]);
-  const [pickerLoading, setPickerLoading] = useState(false);
   const [defaultSetConfirmed, setDefaultSetConfirmed] = useState(false);
   const [highlightedToastTitle, setHighlightedToastTitle] =
     useState(t("quickReset.mantraUpdatedTitle"));
@@ -409,16 +410,27 @@ export default function QuickResetScreen({
   );
 
   // ── Mantra picker modal ────────────────────────────────────────────────────
-  const openPicker = useCallback(async () => {
+  const endAndOpenPicker = useCallback(async () => {
+    liveActivity.endReset();
+    await japaEngine.completeSession();
+    setIsChantingActive(false);
     setPickerVisible(true);
-    setPickerLoading(true);
-    try {
-      const raw = await postBrowseMantras("peacecalm");
-      setPickerMantras(normalizeBrowseMantras(raw));
-    } finally {
-      setPickerLoading(false);
+  }, [japaEngine]);
+
+  const openPicker = useCallback(() => {
+    if (beadCount > 0) {
+      Alert.alert(
+        t("quickReset.endChantTitle"),
+        t("quickReset.endChantBody"),
+        [
+          { text: t("quickReset.stayHere"), style: "cancel" },
+          { text: t("quickReset.endAndChange"), style: "destructive", onPress: endAndOpenPicker },
+        ],
+      );
+      return;
     }
-  }, []);
+    setPickerVisible(true);
+  }, [beadCount, endAndOpenPicker, t]);
 
   const handlePickerSelect = useCallback((mantra: QuickResetMantra) => {
     setDefaultSetConfirmed(false);
@@ -430,6 +442,18 @@ export default function QuickResetScreen({
     setHighlightedToastMessage(t("quickReset.mantraUpdatedMessage"));
     setMantraUpdatedToastVisible(true);
   }, [t]);
+
+  const handleLibraryMantraSelected = useCallback((item: LibrarySearchItem) => {
+    handlePickerSelect({
+      item_id:    item.itemId,
+      title:      item.title,
+      devanagari: item.devanagari ?? "",
+      iast:       item.iast ?? "",
+      meaning:    item.meaning ?? "",
+      essence:    item.essence,
+      audio_url:  item.audio_url ?? null,
+    });
+  }, [handlePickerSelect]);
 
   // ── Runner start ───────────────────────────────────────────────────────────
   const handleTapBead = useCallback(() => {
@@ -903,62 +927,16 @@ export default function QuickResetScreen({
 
   function renderPickerModal() {
     return (
-      <Modal
-        visible={pickerVisible}
-        animationType="fade"
-        transparent
-        onRequestClose={() => setPickerVisible(false)}
-      >
-        <SafeAreaView style={styles.modalSafeArea}>
-          <ImageBackground
-            source={require("../../../assets/beige_bg.webp")}
-            style={styles.background}
-            imageStyle={styles.backgroundImage}
-          >
-            <View style={styles.pickerHeader}>
-              <TouchableOpacity
-                onPress={() => setPickerVisible(false)}
-                activeOpacity={0.7}
-                style={styles.pickerBackBtn}
-              >
-                <Text style={styles.contentBackBtnText}>{t("quickReset.close")}</Text>
-              </TouchableOpacity>
-              <Text style={styles.pickerTitle}>{t("quickReset.chooseMantra")}</Text>
-              <View style={styles.pickerDivider}>
-                <View style={styles.pickerDividerLine} />
-                <Text style={styles.pickerDividerIcon}>✦</Text>
-                <View style={styles.pickerDividerLine} />
-              </View>
-            </View>
-            {pickerLoading ? (
-              <View style={styles.centerContent}>
-                <ActivityIndicator size="large" color="#C99317" />
-              </View>
-            ) : (
-              <ScrollView
-                contentContainerStyle={styles.pickerList}
-                showsVerticalScrollIndicator={false}
-              >
-                {pickerMantras.map((mantra) => (
-                  <TouchableOpacity
-                    key={mantra.item_id}
-                    style={styles.pickerItem}
-                    onPress={() => handlePickerSelect(mantra)}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={styles.pickerItemTitle}>{mantra.title}</Text>
-                    {!!mantra.devanagari && (
-                      <Text style={styles.pickerItemDevanagari}>
-                        {mantra.devanagari}
-                      </Text>
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            )}
-          </ImageBackground>
-        </SafeAreaView>
-      </Modal>
+      <LibrarySearchModal
+        isVisible={pickerVisible}
+        onClose={() => setPickerVisible(false)}
+        onItemAdded={() => {}}
+        mode="select"
+        lockedItemType="mantra"
+        headerTitle={t("quickReset.chooseMantra")}
+        selectLabel={t("quickReset.useThisMantra")}
+        onItemSelected={handleLibraryMantraSelected}
+      />
     );
   }
 }
@@ -968,18 +946,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFF8EF",
   },
-  modalSafeArea: {
-    flex: 1,
-    backgroundColor: "rgba(67, 33, 4, 0.12)",
-  },
   embeddedTransparent: {
     backgroundColor: "transparent",
   },
   background: {
     flex: 1,
-  },
-  backgroundImage: {
-    resizeMode: "cover",
   },
   scrollContent: {
     paddingHorizontal: 24,
@@ -991,11 +962,6 @@ const styles = StyleSheet.create({
     width: "100%",
     gap: 18,
     alignItems: "center",
-  },
-  contentBackBtnText: {
-    fontSize: sfs(15),
-    color: "#C99317",
-    fontFamily: Fonts.sans.medium,
   },
   openingHeading: {
     fontSize: sfs(22),
@@ -1369,70 +1335,6 @@ const styles = StyleSheet.create({
     color: "#7B6550",
     textAlign: "center",
     marginTop: 8,
-  },
-  pickerList: {
-    paddingHorizontal: 16,
-    paddingBottom: 24,
-  },
-  pickerHeader: {
-    paddingHorizontal: 16,
-    paddingTop: 18,
-    paddingBottom: 12,
-    position: "relative",
-  },
-  pickerBackBtn: {
-    alignSelf: "flex-start",
-    marginBottom: 26,
-  },
-  pickerTitle: {
-    fontSize: sfs(24),
-    fontFamily: Fonts.serif.bold,
-    color: "#432104",
-    textAlign: "center",
-    marginBottom: 16,
-  },
-  pickerDivider: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 14,
-    marginBottom: 6,
-  },
-  pickerDividerLine: {
-    width: 102,
-    height: 1,
-    backgroundColor: "rgba(199,160,72,0.45)",
-  },
-  pickerDividerIcon: {
-    color: "#C7A048",
-    fontSize: sfs(18),
-    lineHeight: sfs(18),
-  },
-  pickerItem: {
-    paddingVertical: 18,
-    paddingHorizontal: 22,
-    borderRadius: 28,
-    borderWidth: 1,
-    borderColor: "rgba(218,194,142,0.55)",
-    backgroundColor: Platform.OS === "android" ? "#FEFCF9" : "rgba(255,255,255,0.82)",
-    ...platformShadow("#C9A84C", 6, 0.06, 14, 2),
-    gap: 10,
-    marginBottom: 18,
-  },
-  pickerItemTitle: {
-    fontSize: sfs(18),
-    fontFamily: Fonts.serif.bold,
-    color: "#432104",
-    fontWeight: "700",
-    textAlign: "center",
-    lineHeight: sfs(24),
-  },
-  pickerItemDevanagari: {
-    fontSize: sfs(16),
-    color: "#8B6914",
-    fontFamily: Fonts.sans.regular,
-    textAlign: "center",
-    lineHeight: sfs(26),
   },
   toastOverlay: {
     flex: 1,

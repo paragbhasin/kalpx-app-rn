@@ -25,6 +25,19 @@ interface LibraryItem {
   item_type?: string;
   description?: string;
   subtitle?: string;
+  // Mantra-specific fields returned by library/search
+  devanagari?: string;
+  iast?: string;
+  meaning?: string;
+  essence?: string;
+  audio_url?: string | null;
+  deity?: string;
+  tradition?: string;
+  tags?: string[];
+  level?: string;
+  beginnerSafe?: boolean;
+  alreadyInCore?: boolean;
+  alreadyAdded?: boolean;
 }
 
 export type LibrarySearchItem = LibraryItem;
@@ -34,8 +47,14 @@ interface LibrarySearchModalProps {
   onClose: () => void;
   onItemAdded: () => void;
   journeyId?: string | number;
-  mode?: "add_to_journey" | "select_for_rhythm";
+  mode?: "add_to_journey" | "select_for_rhythm" | "select";
   onItemSelected?: (item: LibrarySearchItem) => void;
+  /** Lock to a single content type: hides type tabs and enables browse-on-open */
+  lockedItemType?: "mantra" | "sankalp" | "practice";
+  /** Override the action button label in select/select_for_rhythm mode */
+  selectLabel?: string;
+  /** Override the modal header title */
+  headerTitle?: string;
 }
 
 const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
@@ -45,18 +64,22 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
   journeyId,
   mode,
   onItemSelected,
+  lockedItemType,
+  selectLabel,
+  headerTitle,
 }) => {
   const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState<LibraryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [addingId, setAddingId] = useState<string | null>(null);
-  const [selectedType, setSelectedType] = useState<string>("all");
+  const [selectedType, setSelectedType] = useState<string>(lockedItemType ?? "all");
   const inputRef = useRef<TextInput | null>(null);
 
   const performSearch = useCallback(
     async (query: string) => {
-      if (query.length < 2) {
+      // In locked mode allow empty query (browse); in free mode require 2+ chars
+      if (!lockedItemType && query.length < 2) {
         setResults([]);
         return;
       }
@@ -64,7 +87,12 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
       setLoading(true);
       try {
         const lang = i18n.language || "en";
-        if (selectedType === "all") {
+        if (lockedItemType) {
+          const res = await mitraLibrarySearch(query, lockedItemType, lang);
+          setResults(
+            (res?.results || []).map((item: any) => ({ ...item, _type: lockedItemType })),
+          );
+        } else if (selectedType === "all") {
           const [mantras, sankalps, practices] = await Promise.allSettled([
             mitraLibrarySearch(query, "mantra", lang),
             mitraLibrarySearch(query, "sankalp", lang),
@@ -97,34 +125,53 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
         setLoading(false);
       }
     },
-    [selectedType],
+    [selectedType, lockedItemType],
   );
 
   useEffect(() => {
     if (!isVisible) return;
     const timer = setTimeout(() => {
-      if (searchQuery.length >= 2) performSearch(searchQuery);
+      if (searchQuery.length >= 2) {
+        performSearch(searchQuery);
+      } else if (lockedItemType && searchQuery.length === 0) {
+        performSearch("");
+      }
     }, 350);
     return () => clearTimeout(timer);
-  }, [isVisible, performSearch, searchQuery]);
+  }, [isVisible, performSearch, searchQuery, lockedItemType]);
 
   useEffect(() => {
     if (!isVisible) return;
     setSearchQuery("");
     setResults([]);
-    setSelectedType("all");
-    const timer = setTimeout(() => {
-      inputRef.current?.focus();
-    }, 250);
-    return () => clearTimeout(timer);
-  }, [isVisible]);
+    setSelectedType(lockedItemType ?? "all");
+    if (!lockedItemType) {
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 250);
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible]); // lockedItemType is a stable prop; intentionally excluded from deps
+
+  // Browse-on-open: when locked to a type, fetch full list immediately on open
+  useEffect(() => {
+    if (!isVisible || !lockedItemType) return;
+    const lang = i18n.language || "en";
+    setLoading(true);
+    mitraLibrarySearch("", lockedItemType, lang)
+      .then((res) => {
+        setResults((res?.results || []).map((item: any) => ({ ...item, _type: lockedItemType })));
+      })
+      .catch(() => setResults([]))
+      .finally(() => setLoading(false));
+  }, [isVisible, lockedItemType]);
 
   const selectType = (type: string) => {
     setSelectedType(type);
   };
 
   const handleAddItem = async (item: any) => {
-    if (mode === "select_for_rhythm" && onItemSelected) {
+    if ((mode === "select_for_rhythm" || mode === "select") && onItemSelected) {
       onItemSelected(item as LibrarySearchItem);
       return;
     }
@@ -201,39 +248,41 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
             <View style={styles.handle} />
 
             <View style={styles.header}>
-              <Text style={styles.headerTitle}>{t("libraryModal.title")}</Text>
+              <Text style={styles.headerTitle}>{headerTitle ?? t("libraryModal.title")}</Text>
               <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
                 <Ionicons name="close" size={28} color="#958b80" />
               </TouchableOpacity>
             </View>
 
-            <View style={styles.typeWrap}>
-              {[
-                { label: t("libraryModal.typeAll"), value: "all" },
-                { label: t("libraryModal.typeMantra"), value: "mantra" },
-                { label: t("libraryModal.typeSankalp"), value: "sankalp" },
-                { label: t("libraryModal.typePractice"), value: "practice" },
-              ].map((type) => {
-                const active = selectedType === type.value;
-                return (
-                  <TouchableOpacity
-                    key={type.value}
-                    onPress={() => selectType(type.value)}
-                    activeOpacity={0.8}
-                    style={[styles.typeChip, active && styles.typeChipActive]}
-                  >
-                    <Text
-                      style={[
-                        styles.typeChipText,
-                        active && styles.typeChipTextActive,
-                      ]}
+            {!lockedItemType && (
+              <View style={styles.typeWrap}>
+                {[
+                  { label: t("libraryModal.typeAll"), value: "all" },
+                  { label: t("libraryModal.typeMantra"), value: "mantra" },
+                  { label: t("libraryModal.typeSankalp"), value: "sankalp" },
+                  { label: t("libraryModal.typePractice"), value: "practice" },
+                ].map((type) => {
+                  const active = selectedType === type.value;
+                  return (
+                    <TouchableOpacity
+                      key={type.value}
+                      onPress={() => selectType(type.value)}
+                      activeOpacity={0.8}
+                      style={[styles.typeChip, active && styles.typeChipActive]}
                     >
-                      {type.label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
+                      <Text
+                        style={[
+                          styles.typeChipText,
+                          active && styles.typeChipTextActive,
+                        ]}
+                      >
+                        {type.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
 
             <View style={styles.searchRow}>
               <View style={styles.searchContainer}>
@@ -244,7 +293,7 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
                   placeholderTextColor="#a39b93"
                   value={searchQuery}
                   onChangeText={setSearchQuery}
-                  autoFocus
+                  autoFocus={!lockedItemType}
                   selectionColor="#C99317"
                   cursorColor="#C99317"
                   underlineColorAndroid="transparent"
@@ -273,15 +322,11 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
                 contentContainerStyle={styles.listContent}
                 keyboardShouldPersistTaps="handled"
                 ListEmptyComponent={
-                  searchQuery.length >= 2 ? (
-                    <Text style={styles.emptyText}>
-                      {t("libraryModal.noResults")}
-                    </Text>
-                  ) : (
-                    <Text style={styles.emptyText}>
-                      {t("libraryModal.emptyHint")}
-                    </Text>
-                  )
+                  <Text style={styles.emptyText}>
+                    {searchQuery.length >= 2 || lockedItemType
+                      ? t("libraryModal.noResults")
+                      : t("libraryModal.emptyHint")}
+                  </Text>
                 }
                 renderItem={({ item }: { item: any }) => (
                   <View
@@ -338,7 +383,9 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
                             <ActivityIndicator size="small" color="#d4a017" />
                           ) : (
                             <Text style={styles.addBtnText}>
-                              {mode === "select_for_rhythm" ? t("libraryModal.select") : t("libraryModal.add")}
+                              {(mode === "select_for_rhythm" || mode === "select")
+                                ? (selectLabel ?? t("libraryModal.select"))
+                                : t("libraryModal.add")}
                             </Text>
                           )}
                         </TouchableOpacity>

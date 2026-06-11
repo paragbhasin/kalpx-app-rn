@@ -267,7 +267,7 @@ class KalpxLiveActivityModule: NSObject {
             do {
                 let activity = try Activity<KalpxSankalpAttributes>.request(
                     attributes: attrs,
-                    content: ActivityContent(state: state, staleDate: nil),
+                    content: ActivityContent(state: state, staleDate: Date().addingTimeInterval(30 * 60)),
                     pushType: nil
                 )
                 self.sankalpActivityID = activity.id
@@ -382,7 +382,7 @@ class KalpxLiveActivityModule: NSObject {
                 anchorDevanagari: current.anchorDevanagari,
                 bandDone: bandDone
             )
-            await activity.update(ActivityContent(state: state, staleDate: nil))
+            await activity.update(ActivityContent(state: state, staleDate: Date().addingTimeInterval(5 * 60 * 60)))
             resolve(true)
         }
     }
@@ -486,7 +486,7 @@ class KalpxLiveActivityModule: NSObject {
                 sankalpDone: sankalpDone,
                 practiceDone: practiceDone
             )
-            await activity.update(ActivityContent(state: state, staleDate: nil))
+            await activity.update(ActivityContent(state: state, staleDate: Date().addingTimeInterval(3 * 60 * 60)))
             resolve(true)
         }
     }

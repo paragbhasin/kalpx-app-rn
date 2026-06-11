@@ -50,6 +50,7 @@ import NotificationPreferences from "../screens/Profile/NotificationPreferences"
 import Privacy from "../screens/Profile/Privacy";
 import Profile from "../screens/Profile/Profile";
 import ProfileDetails from "../screens/Profile/ProfileDetails";
+import SecurityScreen from "../screens/Profile/SecurityScreen";
 import RoomMemoryScreen from "../screens/Room/RoomMemoryScreen";
 import Sankalp from "../screens/Sankalp";
 import CommunityDetail from "../screens/Social/CommunityDetail";
@@ -454,6 +455,11 @@ export const ProfileStackNavigator = () => (
       name="Reminders"
       component={RemindersScreen}
       options={{ headerShown: false, gestureEnabled: false }}
+    />
+    <Stack.Screen
+      name="Security"
+      component={SecurityScreen}
+      options={{ headerShown: false }}
     />
   </Stack.Navigator>
 );

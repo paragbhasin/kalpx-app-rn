@@ -3,10 +3,6 @@ package com.kalpx.wear.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Undo
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,9 +12,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.wear.compose.material.Icon
-import androidx.wear.compose.material.IconButton
-import androidx.wear.compose.material.IconButtonDefaults
 import androidx.wear.compose.material.Text
 import com.kalpx.wear.engine.WearJapaEngine
 import com.kalpx.wear.sync.WearConnectivityManager
@@ -124,38 +117,39 @@ fun QuickChantScreen() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
-                onClick = { engine.discardSession() },
-                colors = IconButtonDefaults.iconButtonColors(
-                    contentColor = KalpXWearTheme.textTertiary
-                )
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clickable { engine.discardSession() }
+                    .semantics { contentDescription = "Discard session" },
+                contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Filled.Close, contentDescription = "Discard session",
-                    tint = KalpXWearTheme.textTertiary)
+                Text("✕", fontSize = 16.sp, color = KalpXWearTheme.textTertiary)
             }
 
             if (engine.sessionCount > 0) {
                 Row {
-                    IconButton(
-                        onClick = { engine.undo() },
-                        enabled = engine.canUndo,
-                        colors = IconButtonDefaults.iconButtonColors(
-                            contentColor = KalpXWearTheme.textTertiary,
-                            disabledContentColor = KalpXWearTheme.textTertiary.copy(alpha = 0.3f)
-                        )
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clickable(enabled = engine.canUndo) { engine.undo() }
+                            .semantics { contentDescription = "Undo" },
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Filled.Undo, contentDescription = "Undo",
-                            tint = if (engine.canUndo) KalpXWearTheme.textTertiary
-                            else KalpXWearTheme.textTertiary.copy(alpha = 0.3f))
+                        Text(
+                            "↩", fontSize = 16.sp,
+                            color = if (engine.canUndo) KalpXWearTheme.textTertiary
+                                    else KalpXWearTheme.textTertiary.copy(alpha = 0.3f)
+                        )
                     }
-                    IconButton(
-                        onClick = { showCompletion = true },
-                        colors = IconButtonDefaults.iconButtonColors(
-                            contentColor = KalpXWearTheme.gold
-                        )
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clickable { showCompletion = true }
+                            .semantics { contentDescription = "Complete session" },
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Filled.Check, contentDescription = "Complete session",
-                            tint = KalpXWearTheme.gold)
+                        Text("✓", fontSize = 16.sp, color = KalpXWearTheme.gold)
                     }
                 }
             }

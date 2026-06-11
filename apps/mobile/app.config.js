@@ -35,6 +35,8 @@ module.exports = {
           "KalpX uses the microphone for audio or video related features.",
         NSLocationWhenInUseUsageDescription:
           "KalpX uses location to personalize classes and content.",
+        NSFaceIDUsageDescription:
+          "KalpX uses Face ID to keep your practice private and unlock the app.",
         NSSupportsLiveActivities: true,
         NSSupportsLiveActivitiesFrequentUpdates: true,
       },
@@ -102,6 +104,7 @@ module.exports = {
         },
       ],
       ["expo-apple-authentication"],
+      ["expo-local-authentication"],
       [
         "expo-image-picker",
         {

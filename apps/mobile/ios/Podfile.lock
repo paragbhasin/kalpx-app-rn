@@ -323,6 +323,8 @@ PODS:
     - ExpoModulesCore
   - ExpoLinking (7.1.7):
     - ExpoModulesCore
+  - ExpoLocalAuthentication (16.0.5):
+    - ExpoModulesCore
   - ExpoLocalization (16.1.6):
     - ExpoModulesCore
   - ExpoLocation (18.1.6):
@@ -2840,6 +2842,7 @@ DEPENDENCIES:
   - "ExpoKeepAwake (from `../../../node_modules/.pnpm/expo-keep-awake@14.1.4_expo@53.0.27_@babel+core@7.29.0_@expo+metro-runtime@5.0.5_react-_1a9c9588694afb8ddd0a0d6a8e2a9536/node_modules/expo-keep-awake/ios`)"
   - "ExpoLinearGradient (from `../../../node_modules/.pnpm/expo-linear-gradient@14.1.5_expo@53.0.27_@babel+core@7.29.0_@expo+metro-runtime@5.0.5_r_4cf641c0f68a21f489c4430a41daa479/node_modules/expo-linear-gradient/ios`)"
   - "ExpoLinking (from `../../../node_modules/.pnpm/expo-linking@7.1.7_expo@53.0.27_@babel+core@7.29.0_@expo+metro-runtime@5.0.5_react-nati_8590122c74e698f45ed68d26c7593aee/node_modules/expo-linking/ios`)"
+  - "ExpoLocalAuthentication (from `../../../node_modules/.pnpm/expo-local-authentication@16.0.5_expo@53.0.27_@babel+core@7.29.0_@expo+metro-runtime@5._f2c970ef7c31ea355319419ab1a9ea85/node_modules/expo-local-authentication/ios`)"
   - "ExpoLocalization (from `../../../node_modules/.pnpm/expo-localization@16.1.6_expo@53.0.27_@babel+core@7.29.0_@expo+metro-runtime@5.0.5_reac_508cf648bab197e315274e50e2ed206e/node_modules/expo-localization/ios`)"
   - "ExpoLocation (from `../../../node_modules/.pnpm/expo-location@18.1.6_expo@53.0.27_@babel+core@7.29.0_@expo+metro-runtime@5.0.5_react-na_a0027fd0ee229a6c58405ff49ad15f03/node_modules/expo-location/ios`)"
   - "ExpoMediaLibrary (from `../../../node_modules/.pnpm/expo-media-library@17.1.7_expo@53.0.27_@babel+core@7.29.0_@expo+metro-runtime@5.0.5_rea_a0be5c25a747801c59baa335e6e5fd55/node_modules/expo-media-library/ios`)"
@@ -3031,6 +3034,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/.pnpm/expo-linear-gradient@14.1.5_expo@53.0.27_@babel+core@7.29.0_@expo+metro-runtime@5.0.5_r_4cf641c0f68a21f489c4430a41daa479/node_modules/expo-linear-gradient/ios"
   ExpoLinking:
     :path: "../../../node_modules/.pnpm/expo-linking@7.1.7_expo@53.0.27_@babel+core@7.29.0_@expo+metro-runtime@5.0.5_react-nati_8590122c74e698f45ed68d26c7593aee/node_modules/expo-linking/ios"
+  ExpoLocalAuthentication:
+    :path: "../../../node_modules/.pnpm/expo-local-authentication@16.0.5_expo@53.0.27_@babel+core@7.29.0_@expo+metro-runtime@5._f2c970ef7c31ea355319419ab1a9ea85/node_modules/expo-local-authentication/ios"
   ExpoLocalization:
     :path: "../../../node_modules/.pnpm/expo-localization@16.1.6_expo@53.0.27_@babel+core@7.29.0_@expo+metro-runtime@5.0.5_reac_508cf648bab197e315274e50e2ed206e/node_modules/expo-localization/ios"
   ExpoLocation:
@@ -3258,6 +3263,7 @@ SPEC CHECKSUMS:
   ExpoKeepAwake: bf0811570c8da182bfb879169437d4de298376e7
   ExpoLinearGradient: 7734c8059972fcf691fb4330bcdf3390960a152d
   ExpoLinking: d5c183998ca6ada66ff45e407e0f965b398a8902
+  ExpoLocalAuthentication: c35f18692dcb35775a1be0f37b2131096951a6bd
   ExpoLocalization: 999a1ff61a7f5917d65c2bd9234883009019ca9f
   ExpoLocation: a43df2ff15f2fae9504b23a77060e7cd16b3e326
   ExpoMediaLibrary: 0daf5e811e00daa47690f5da2989e71ff7de56e0
@@ -3386,6 +3392,6 @@ SPEC CHECKSUMS:
   StripeUICore: 186f245526e86ab02578abcc6bb6d27cc34084c6
   Yoga: b37eeaa6148984cac70ecaf8022bb209e03296cb
 
-PODFILE CHECKSUM: c0f93fbd4ab260eab0bf6e7f0ef305f9891c9ef1
+PODFILE CHECKSUM: 971d9a28680231e559e0b5a94da4213319d78dc9
 
 COCOAPODS: 1.16.2

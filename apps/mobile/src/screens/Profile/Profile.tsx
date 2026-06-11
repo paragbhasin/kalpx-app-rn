@@ -113,6 +113,16 @@ const Profile = () => {
           ],
         },
         {
+          title: "SECURITY",
+          items: [
+            {
+              key: "security",
+              icon: "shield-checkmark-outline",
+              route: "Security",
+            },
+          ],
+        },
+        {
           title: "LEGAL",
           items: [
             {
@@ -204,6 +214,7 @@ const Profile = () => {
       });
     }
     if (key === "reminders") return "Reminders";
+    if (key === "security") return "App Lock";
     if (key === "terms") return "Terms of Service";
     if (key === "indiaPrivacy") return "India Privacy Notice";
     if (key === "dataDeletion") return "Data Deletion";

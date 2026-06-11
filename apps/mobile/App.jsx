@@ -55,7 +55,9 @@ import { attachDeepLinkListeners } from "./src/utils/deeplink";
 import { registerDeviceToBackend } from "./src/utils/registerDevice";
 
 import UpdateModal from "./src/components/UpdateModal";
+import { AppLockOverlay } from "./src/components/AppLockOverlay";
 import { useUpdateCheck } from "./src/hooks/useUpdateCheck";
+import { useAppLock } from "./src/hooks/useAppLock";
 
 const TransparentTheme = {
   ...DefaultTheme,
@@ -148,6 +150,7 @@ function AppInner({ initialRoute, navigationRef }) {
   const [activeRouteName, setActiveRouteName] = useState(null);
 
   const { showUpdate, updateType, dismissUpdate } = useUpdateCheck();
+  const { overlayMode, handleUnlock } = useAppLock();
 
   const handleOpenStore = () => {
     const url =
@@ -172,8 +175,9 @@ function AppInner({ initialRoute, navigationRef }) {
     let cancelled = false;
     const hydrate = async () => {
       try {
-        // Preferences restore first (no auth required, just AsyncStorage)
-        dispatch(restorePreferences());
+        // Await restore so app_lock_enabled is in Redux BEFORE fetchPreferences
+        // sets loaded:true — prevents the race that would dismiss the lock overlay.
+        await dispatch(restorePreferences());
 
         const [token, userId] = await Promise.all([
           AsyncStorage.getItem("access_token"),
@@ -267,6 +271,9 @@ function AppInner({ initialRoute, navigationRef }) {
         onUpdateNow={handleOpenStore}
         onLater={dismissUpdate}
       />
+      {overlayMode !== 'hidden' && (
+        <AppLockOverlay mode={overlayMode} onUnlock={handleUnlock} />
+      )}
     </View>
   );
 }

@@ -82,6 +82,7 @@ export interface PreferencesSlice {
   voice_consent_given: boolean;
   // Client-only
   season_banner_dismissed_at: number | null;
+  app_lock_enabled: boolean;
   loaded: boolean;
 }
 
@@ -115,6 +116,7 @@ const initialState: PreferencesSlice = {
   global_consent: { receive_push_notifications: true, receive_emails: true },
   voice_consent_given: false,
   season_banner_dismissed_at: null,
+  app_lock_enabled: false,
   loaded: false,
 };
 
@@ -182,6 +184,9 @@ export const persistPreferences = createAsyncThunk(
   'preferences/persist',
   async (_, { getState }) => {
     const state = (getState() as any).preferences as PreferencesSlice;
+    // Never write the blank initial state — only persist once prefs are loaded
+    // from AsyncStorage or the backend, to avoid stomping saved user preferences.
+    if (!state.loaded) return;
     const payload = JSON.stringify({
       _version: PREFERENCES_VERSION,
       data: state,
@@ -234,12 +239,17 @@ const preferencesSlice = createSlice({
           // Backend returns top-level fields; notifications sub-resource is a
           // separate endpoint. Keep client-only fields (reduced_motion,
           // season_banner_dismissed_at) intact across server sync.
-          const { reduced_motion, season_banner_dismissed_at, notifications } =
-            state;
+          const {
+            reduced_motion,
+            season_banner_dismissed_at,
+            notifications,
+            app_lock_enabled,
+          } = state;
           Object.assign(state, action.payload, {
             reduced_motion,
             season_banner_dismissed_at,
             notifications,
+            app_lock_enabled,
           });
         }
         state.loaded = true;

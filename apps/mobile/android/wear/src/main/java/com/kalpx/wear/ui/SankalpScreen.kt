@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -40,17 +41,18 @@ fun SankalpScreen(title: String, line: String, source: String, onDone: () -> Uni
                     color = KalpXWearTheme.textPrimary)
             }
         } else {
-            WearPrimaryButton("I held this") {
+            val scope = rememberCoroutineScope()
+            WearPrimaryButton("I held this", onClick = {
                 WearConnectivityManager.sendToPhone(
                     "/kalpx/watch_message",
                     mapOf("type" to "sankalp_held", "source" to source)
                 )
                 marked = true
-                kotlinx.coroutines.MainScope().launch {
-                    kotlinx.coroutines.delay(1200)
+                scope.launch {
+                    delay(1200)
                     onDone()
                 }
-            }
+            })
         }
     }
 }

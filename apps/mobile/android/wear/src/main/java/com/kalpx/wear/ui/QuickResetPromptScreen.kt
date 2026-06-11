@@ -67,8 +67,8 @@ fun QuickResetPromptScreen(
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(10.dp))
-        WearPrimaryButton("Begin") { showGoalPicker = true }
+        WearPrimaryButton("Begin", onClick = { showGoalPicker = true })
         Spacer(Modifier.height(4.dp))
-        WearSecondaryButton("Later") { onNavigateBack() }
+        WearSecondaryButton("Later", onClick = { onNavigateBack() })
     }
 }

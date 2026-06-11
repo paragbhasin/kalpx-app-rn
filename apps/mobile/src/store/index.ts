@@ -122,7 +122,10 @@ export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
 let _lastCompanionState: any = null;
-let _lastPreferences: any = null;
+// Initialize to the actual initial object — not null — so the first subscribe
+// fire (before any preferences action) doesn't write the blank initial state
+// over the user's saved AsyncStorage data.
+let _lastPreferences: any = store.getState().preferences;
 
 store.subscribe(() => {
   const s: any = store.getState();

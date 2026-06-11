@@ -1,8 +1,11 @@
 import ActivityKit
 import Foundation
 
-private let kAppGroupID = "group.com.kalpx.app"
-private let kPendingKey = "kalpx_pending_chant_increments"
+private let kAppGroupID      = "group.com.kalpx.app"
+private let kPendingKey      = "kalpx_pending_chant_increments"
+private let kActivityIDKey   = "kalpx_la_activity_id"
+private let kRhythmIDKey     = "kalpx_la_rhythm_id"
+private let kInnerPathIDKey  = "kalpx_la_inner_path_id"
 
 @objc(KalpxLiveActivityModule)
 class KalpxLiveActivityModule: NSObject {
@@ -13,6 +16,21 @@ class KalpxLiveActivityModule: NSObject {
     private var rhythmActivityID: String?
     private var innerPathActivityID: String?
     private var lastDeepLinkURL: String = "kalpx://mitra/quick_chant/home"
+
+    // Restore persisted IDs so update guards survive module re-instantiation
+    // (memory pressure, OTA JS reload, extended background).
+    override init() {
+        let d = UserDefaults(suiteName: kAppGroupID)
+        activityID      = d?.string(forKey: kActivityIDKey)
+        rhythmActivityID    = d?.string(forKey: kRhythmIDKey)
+        innerPathActivityID = d?.string(forKey: kInnerPathIDKey)
+        super.init()
+    }
+
+    private func saveID(_ id: String?, forKey key: String) {
+        let d = UserDefaults(suiteName: kAppGroupID)
+        if let id { d?.set(id, forKey: key) } else { d?.removeObject(forKey: key) }
+    }
 
     // MARK: - Start
 
@@ -68,6 +86,7 @@ class KalpxLiveActivityModule: NSObject {
                     pushType: nil
                 )
                 self.activityID = activity.id
+                self.saveID(activity.id, forKey: kActivityIDKey)
                 resolve(activity.id)
             } catch {
                 reject("START_FAILED", error.localizedDescription, error)
@@ -267,6 +286,7 @@ class KalpxLiveActivityModule: NSObject {
             await activity.end(dismissalPolicy: .immediate)
         }
         activityID = nil
+        saveID(nil, forKey: kActivityIDKey)
     }
 
     @available(iOS 16.2, *)
@@ -332,6 +352,7 @@ class KalpxLiveActivityModule: NSObject {
                     pushType: nil
                 )
                 self.rhythmActivityID = activity.id
+                self.saveID(activity.id, forKey: kRhythmIDKey)
                 resolve(activity.id)
             } catch {
                 reject("START_FAILED", error.localizedDescription, error)
@@ -430,6 +451,7 @@ class KalpxLiveActivityModule: NSObject {
                     pushType: nil
                 )
                 self.innerPathActivityID = activity.id
+                self.saveID(activity.id, forKey: kInnerPathIDKey)
                 resolve(activity.id)
             } catch {
                 reject("START_FAILED", error.localizedDescription, error)
@@ -490,6 +512,7 @@ class KalpxLiveActivityModule: NSObject {
             await activity.end(dismissalPolicy: .immediate)
         }
         rhythmActivityID = nil
+        saveID(nil, forKey: kRhythmIDKey)
     }
 
     @available(iOS 16.2, *)
@@ -498,6 +521,7 @@ class KalpxLiveActivityModule: NSObject {
             await activity.end(dismissalPolicy: .immediate)
         }
         innerPathActivityID = nil
+        saveID(nil, forKey: kInnerPathIDKey)
     }
 
     @objc static func requiresMainQueueSetup() -> Bool { false }

@@ -1,16 +1,23 @@
 package com.kalpx.app
 
-import com.facebook.react.ReactPackage
+import com.facebook.react.TurboReactPackage
 import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.uimanager.ViewManager
+import com.facebook.react.module.model.ReactModuleInfo
+import com.facebook.react.module.model.ReactModuleInfoProvider
 
-class KalpxWatchConnectivityPackage : ReactPackage {
-    override fun createNativeModules(
-        reactContext: ReactApplicationContext
-    ): List<NativeModule> = listOf(KalpxWatchConnectivityModule(reactContext))
+class KalpxWatchConnectivityPackage : TurboReactPackage() {
 
-    override fun createViewManagers(
-        reactContext: ReactApplicationContext
-    ): List<ViewManager<*, *>> = emptyList()
+    override fun getModule(name: String, context: ReactApplicationContext): NativeModule? =
+        if (name == KalpxWatchConnectivityModule.NAME) KalpxWatchConnectivityModule(context) else null
+
+    override fun getReactModuleInfoProvider(): ReactModuleInfoProvider = ReactModuleInfoProvider {
+        mapOf(
+            KalpxWatchConnectivityModule.NAME to ReactModuleInfo(
+                KalpxWatchConnectivityModule.NAME,
+                KalpxWatchConnectivityModule.NAME,
+                false, false, false, false, false
+            )
+        )
+    }
 }

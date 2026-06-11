@@ -29,7 +29,11 @@ class KalpxWatchConnectivityModule(
 
     private val mainHandler = Handler(Looper.getMainLooper())
 
-    override fun getName(): String = "KalpxWatchConnectivityModule"
+    companion object {
+        const val NAME = "KalpxWatchConnectivityModule"
+    }
+
+    override fun getName(): String = NAME
 
     // ── setup ─────────────────────────────────────────────────────────────────
     // On Android there is no WCSession to activate — no-op kept for API parity.

@@ -152,7 +152,10 @@ export const liveActivity = {
     if (!LA_FLAGS.LIVE_ACTIVITY_QUICK_RESET_ENABLED) return null;
     if (Platform.OS === "android") {
       const granted = await ensureAndroidNotificationPermission();
-      if (!granted) return null;
+      if (!granted) {
+        console.warn("[LiveActivity] startReset skipped — POST_NOTIFICATIONS not granted");
+        return null;
+      }
     }
     _quickChantSuppressedUntil = 0;
     await KalpxLiveActivityModule.endActivity().catch(() => {}); // clear stats LA before showing in-session LA
@@ -161,7 +164,10 @@ export const liveActivity = {
         trackLA(EVENT_NAMES.LIVE_ACTIVITY_RESET_STARTED);
         return id;
       })
-      .catch(() => null);
+      .catch((err: any) => {
+        console.error("[LiveActivity] startReset FAILED:", err);
+        return null;
+      });
   },
 
   endReset(reason: 'practice_complete' | 'chant_override' | 'timeout' = 'practice_complete'): Promise<void> {
@@ -178,14 +184,20 @@ export const liveActivity = {
     if (!LA_FLAGS.LIVE_ACTIVITY_DAILY_RHYTHM_ENABLED) return null;
     if (Platform.OS === "android") {
       const granted = await ensureAndroidNotificationPermission();
-      if (!granted) return null;
+      if (!granted) {
+        console.warn("[LiveActivity] startRhythm skipped — POST_NOTIFICATIONS not granted");
+        return null;
+      }
     }
     return KalpxLiveActivityModule.startRhythmActivity(band, bandLabel, anchorTitle, anchorType, anchorDevanagari)
       .then((id: string) => {
         trackLA(EVENT_NAMES.LIVE_ACTIVITY_RHYTHM_STARTED, { band, anchor_type: anchorType });
         return id;
       })
-      .catch(() => null);
+      .catch((err: any) => {
+        console.error("[LiveActivity] startRhythm FAILED:", err);
+        return null;
+      });
   },
 
   updateRhythm(bandDone: boolean): Promise<void> {
@@ -207,14 +219,20 @@ export const liveActivity = {
     if (!LA_FLAGS.LIVE_ACTIVITY_INNER_PATH_ENABLED) return null;
     if (Platform.OS === "android") {
       const granted = await ensureAndroidNotificationPermission();
-      if (!granted) return null;
+      if (!granted) {
+        console.warn("[LiveActivity] startInnerPath skipped — POST_NOTIFICATIONS not granted");
+        return null;
+      }
     }
     return KalpxLiveActivityModule.startInnerPathActivity(dayNumber, totalDays, mantraTitle, mantraDevanagari, sankalpTitle, practiceTitle)
       .then((id: string) => {
         trackLA(EVENT_NAMES.LIVE_ACTIVITY_INNER_PATH_STARTED, { day_number: dayNumber, total_days: totalDays });
         return id;
       })
-      .catch(() => null);
+      .catch((err: any) => {
+        console.error("[LiveActivity] startInnerPath FAILED:", err);
+        return null;
+      });
   },
 
   updateInnerPath(mantraDone: boolean, sankalpDone: boolean, practiceDone: boolean): Promise<void> {

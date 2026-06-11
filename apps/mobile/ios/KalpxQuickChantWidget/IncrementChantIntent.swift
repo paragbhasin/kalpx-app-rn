@@ -22,7 +22,7 @@ struct IncrementChantIntent: LiveActivityIntent {
                 defaults.set(pending + 1, forKey: kPendingKey)
             }
 
-            await activity.update(ActivityContent(state: state, staleDate: nil))
+            await activity.update(ActivityContent(state: state, staleDate: Date().addingTimeInterval(4 * 60 * 60)))
         }
         return .result()
     }

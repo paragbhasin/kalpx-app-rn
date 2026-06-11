@@ -26,11 +26,12 @@ class KalpxLiveActivityModule(
 ) : ReactContextBaseJavaModule(reactContext) {
 
     companion object {
+        const val NAME = "KalpxLiveActivityModule"
         const val PREFS_NAME = "kalpx_live_activity_prefs"
         const val KEY_PENDING = "kalpx_pending_chant_increments"
     }
 
-    override fun getName(): String = "KalpxLiveActivityModule"
+    override fun getName(): String = NAME
 
     // ── startActivity ─────────────────────────────────────────────────────────
     // Mirrors: KalpxLiveActivityModule.swift startActivity(_:devanagari:counts:resolve:reject:)

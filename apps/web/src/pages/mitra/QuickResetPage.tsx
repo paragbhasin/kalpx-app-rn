@@ -296,6 +296,63 @@ const S = {
     gap: 10,
     marginTop: 8,
   } as const,
+  confirmOverlay: {
+    position: "fixed" as const,
+    inset: 0,
+    background: "rgba(0,0,0,0.45)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1000,
+  } as const,
+  confirmBox: {
+    background: "#fff",
+    borderRadius: 20,
+    padding: "28px 24px 20px",
+    width: "min(90vw, 340px)",
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: 8,
+  } as const,
+  confirmTitle: {
+    margin: 0,
+    fontSize: 18,
+    fontWeight: 700,
+    color: "#1a1a1a",
+  } as const,
+  confirmBody: {
+    margin: 0,
+    fontSize: 14,
+    color: "#555",
+    lineHeight: 1.5,
+  } as const,
+  confirmBtns: {
+    display: "flex",
+    gap: 10,
+    marginTop: 12,
+  } as const,
+  confirmStay: {
+    flex: 1,
+    padding: "12px 0",
+    borderRadius: 50,
+    border: "none",
+    background: "#f0ece6",
+    color: "#1a1a1a",
+    fontSize: 15,
+    fontWeight: 600,
+    cursor: "pointer",
+  } as const,
+  confirmEnd: {
+    flex: 1,
+    padding: "12px 0",
+    borderRadius: 50,
+    border: "none",
+    background: "transparent",
+    color: "#C0392B",
+    fontSize: 15,
+    fontWeight: 600,
+    cursor: "pointer",
+  } as const,
 };
 
 function useIsDesktopQuickReset() {
@@ -333,6 +390,7 @@ export function QuickResetPage() {
   const [meaningExpanded, setMeaningExpanded] = useState(false);
   const [essenceExpanded, setEssenceExpanded] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [endChantConfirmOpen, setEndChantConfirmOpen] = useState(false);
   const [defaultSetConfirmed, setDefaultSetConfirmed] = useState(false);
   const [highlightedToastTitle, setHighlightedToastTitle] =
     useState("Mantra Updated ✦");
@@ -503,10 +561,14 @@ export function QuickResetPage() {
         action === "change_mantra" ||
         action === "choose_from_library"
       ) {
-        openPicker();
+        if (beadCount > 0) {
+          setEndChantConfirmOpen(true);
+        } else {
+          openPicker();
+        }
       }
     },
-    [handleShowAnother, handleSetDefault, openPicker, activeMantra],
+    [handleShowAnother, handleSetDefault, openPicker, activeMantra, beadCount],
   );
 
   // ── Return from done: refresh home so completed_today is current ──────────
@@ -1177,6 +1239,22 @@ export function QuickResetPage() {
           message={highlightedToastMessage}
           onClose={() => setMantraUpdatedToastVisible(false)}
         />
+        {endChantConfirmOpen && (
+          <div style={S.confirmOverlay}>
+            <div style={S.confirmBox}>
+              <p style={S.confirmTitle}>End this chant?</p>
+              <p style={S.confirmBody}>Changing mantra will close your current chant session.</p>
+              <div style={S.confirmBtns}>
+                <button style={S.confirmStay} onClick={() => setEndChantConfirmOpen(false)}>
+                  Stay here
+                </button>
+                <button style={S.confirmEnd} onClick={() => { setEndChantConfirmOpen(false); void japaEngine.syncNow(); openPicker(); }}>
+                  End &amp; change
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </MitraMobileShell>
   );

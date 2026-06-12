@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState, AppStateStatus } from 'react-native';
-import * as LocalAuthentication from 'expo-local-authentication';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store';
+import * as LocalAuthentication from "expo-local-authentication";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AppState, AppStateStatus } from "react-native";
+import { useSelector } from "react-redux";
+import { RootState } from "../store";
 
 export const APP_LOCK_TIMEOUT_SECONDS = 60;
 
-export type OverlayMode = 'hidden' | 'privacy' | 'locked';
+export type OverlayMode = "hidden" | "privacy" | "locked";
 
 export function useAppLock() {
   const appLockEnabled = useSelector(
@@ -16,11 +16,10 @@ export function useAppLock() {
     (state: RootState) => state.preferences.loaded,
   );
 
-  // Start hidden — privacy mode is only needed when backgrounding (app switcher).
-  // Cold launch shows content immediately; if lock is enabled it switches to
-  // 'locked' once AsyncStorage prefs load (<100ms).
-  const [overlayMode, setOverlayModeState] = useState<OverlayMode>('hidden');
-  const overlayModeRef = useRef<OverlayMode>('hidden');
+  // Start in privacy mode to prevent content flash on cold launch.
+  // Resolved to 'hidden' or 'locked' in <50ms once AsyncStorage prefs load.
+  const [overlayMode, setOverlayModeState] = useState<OverlayMode>("privacy");
+  const overlayModeRef = useRef<OverlayMode>("privacy");
 
   const setOverlayMode = useCallback((mode: OverlayMode) => {
     overlayModeRef.current = mode;
@@ -50,14 +49,14 @@ export function useAppLock() {
     isAuthInProgressRef.current = true;
     try {
       const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Unlock KalpX',
-        cancelLabel: 'Cancel',
+        promptMessage: "Unlock KalpX",
+        cancelLabel: "Cancel",
         disableDeviceFallback: false,
-        fallbackLabel: 'Use Passcode',
+        fallbackLabel: "Use Passcode",
       });
       if (result.success) {
-        overlayModeRef.current = 'hidden';
-        setOverlayModeState('hidden');
+        overlayModeRef.current = "hidden";
+        setOverlayModeState("hidden");
       }
       // fail or cancel: remain locked — Unlock button retries
     } catch {
@@ -74,10 +73,10 @@ export function useAppLock() {
     if (!prefsLoaded || coldLaunchHandled.current) return;
     coldLaunchHandled.current = true;
     if (appLockEnabled) {
-      setOverlayMode('locked');
+      setOverlayMode("locked");
       // triggerAuth is called by AppLockOverlay's useEffect when mode → 'locked'
     } else {
-      setOverlayMode('hidden');
+      setOverlayMode("hidden");
     }
   }, [prefsLoaded, appLockEnabled, setOverlayMode]);
 
@@ -85,31 +84,31 @@ export function useAppLock() {
   useEffect(() => {
     if (!coldLaunchHandled.current) return;
     if (!appLockEnabled) {
-      setOverlayMode('hidden');
+      setOverlayMode("hidden");
     }
   }, [appLockEnabled, setOverlayMode]);
 
   const handleAppStateChange = useCallback(
     (nextState: AppStateStatus) => {
-      if (nextState === 'background' || nextState === 'inactive') {
+      if (nextState === "background" || nextState === "inactive") {
         backgroundedAtRef.current = Date.now();
         // Already locked: keep locked. Otherwise show privacy screen immediately
         // to protect content in the app switcher / recent apps.
-        if (overlayModeRef.current !== 'locked') {
-          overlayModeRef.current = 'privacy';
-          setOverlayModeState('privacy');
+        if (overlayModeRef.current !== "locked") {
+          overlayModeRef.current = "privacy";
+          setOverlayModeState("privacy");
         }
-      } else if (nextState === 'active') {
+      } else if (nextState === "active") {
         if (!prefsLoadedRef.current) return;
 
         if (!appLockEnabledRef.current) {
-          overlayModeRef.current = 'hidden';
-          setOverlayModeState('hidden');
+          overlayModeRef.current = "hidden";
+          setOverlayModeState("hidden");
           return;
         }
 
         // If already locked (e.g. backgrounded while locked), re-trigger auth
-        if (overlayModeRef.current === 'locked') {
+        if (overlayModeRef.current === "locked") {
           triggerAuth();
           return;
         }
@@ -121,12 +120,12 @@ export function useAppLock() {
         backgroundedAtRef.current = null;
 
         if (elapsed >= APP_LOCK_TIMEOUT_SECONDS) {
-          overlayModeRef.current = 'locked';
-          setOverlayModeState('locked');
+          overlayModeRef.current = "locked";
+          setOverlayModeState("locked");
           triggerAuth();
         } else {
-          overlayModeRef.current = 'hidden';
-          setOverlayModeState('hidden');
+          overlayModeRef.current = "hidden";
+          setOverlayModeState("hidden");
         }
       }
     },
@@ -134,7 +133,7 @@ export function useAppLock() {
   );
 
   useEffect(() => {
-    const sub = AppState.addEventListener('change', handleAppStateChange);
+    const sub = AppState.addEventListener("change", handleAppStateChange);
     return () => sub.remove();
   }, [handleAppStateChange]);
 

@@ -2,20 +2,26 @@ package com.kalpx.wear.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.rotary.onRotaryScrollEvent
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material.Text
 import com.kalpx.wear.engine.WearJapaEngine
+import com.kalpx.wear.models.WatchMantraStats
 import com.kalpx.wear.sync.WearConnectivityManager
 import com.kalpx.wear.theme.KalpXWearTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun QuickChantScreen() {
@@ -36,156 +42,219 @@ fun QuickChantScreen() {
         return
     }
 
+    val currentMantra = connectivity.mantras?.firstOrNull { it.ref == engine.currentMantraRef }
+    val scrollState = rememberScrollState()
+    val focusRequester = remember { FocusRequester() }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(KalpXWearTheme.background),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Upper area — full tap target
+        // ── Compact header: X | ॐ + count | ✓ ──────────────────────────────
+        CompactChantHeader(
+            sessionCount = engine.sessionCount,
+            malaRoundsCompleted = engine.malaRoundsCompleted,
+            onIncrement = { engine.increment() },
+            onDiscard = { engine.discardSession() },
+            onComplete = { showCompletion = true }
+        )
+
+        // ── Bead ring ────────────────────────────────────────────────────────
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp)
+                .height(26.dp)
+                .clickable { engine.increment() }
+        ) {
+            BeadRingView(beadInRound = engine.beadInRound)
+        }
+
+        Spacer(Modifier.height(2.dp))
+
+        // ── Scrollable: mantra name + devanagari + divider + stats ───────────
         Column(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
+                .onRotaryScrollEvent { event ->
+                    coroutineScope.launch {
+                        scrollState.scrollTo(
+                            (scrollState.value + event.verticalScrollPixels)
+                                .toInt().coerceIn(0, scrollState.maxValue)
+                        )
+                    }
+                    true
+                }
+                .focusRequester(focusRequester)
+                .focusable()
+                .verticalScroll(scrollState)
                 .clickable { engine.increment() }
-                .semantics { contentDescription = "Count one bead. ${engine.sessionCount} counted" },
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .padding(horizontal = 14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(Modifier.height(4.dp))
+            currentMantra?.let { mantra ->
+                Spacer(Modifier.height(5.dp))
+                Text(
+                    text = mantra.name,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = KalpXWearTheme.gold,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2
+                )
+                if (mantra.devanagari.isNotEmpty()) {
+                    Spacer(Modifier.height(3.dp))
+                    Text(
+                        text = mantra.devanagari,
+                        fontSize = 10.sp,
+                        color = KalpXWearTheme.textTertiary,
+                        textAlign = TextAlign.Center,
+                        maxLines = 2
+                    )
+                }
+                Spacer(Modifier.height(6.dp))
+            }
 
-            Text(
-                text = "${engine.sessionCount}",
-                fontSize = 52.sp,
-                fontWeight = FontWeight.Bold,
-                color = KalpXWearTheme.textPrimary,
-                textAlign = TextAlign.Center
+            // Divider
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(0.5.dp)
+                    .background(KalpXWearTheme.textTertiary.copy(alpha = 0.25f))
             )
 
-            if (engine.malaRoundsCompleted > 0) {
-                Spacer(Modifier.height(2.dp))
+            // Stats: Weekly | Yearly | Lifetime
+            ChantStatsRow(
+                sessionCount = engine.sessionCount,
+                stats = connectivity.pathData?.mantraStats?.get(engine.currentMantraRef)
+            )
+            Spacer(Modifier.height(4.dp))
+        }
+
+        // ── Audio player (optional) ──────────────────────────────────────────
+        val audioUrl = engine.currentAudioUrl
+        if (!audioUrl.isNullOrEmpty()) {
+            MantraAudioPlayerView(audioUrl = audioUrl)
+            Spacer(Modifier.height(4.dp))
+        }
+    }
+}
+
+// ── Compact header ─────────────────────────────────────────────────────────────
+
+@Composable
+private fun CompactChantHeader(
+    sessionCount: Int,
+    malaRoundsCompleted: Int,
+    onIncrement: () -> Unit,
+    onDiscard: () -> Unit,
+    onComplete: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(42.dp)
+            .clickable { onIncrement() }
+            .padding(horizontal = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .clickable { onDiscard() },
+            contentAlignment = Alignment.Center
+        ) {
+            Text("✕", fontSize = 16.sp, color = KalpXWearTheme.textTertiary)
+        }
+
+        Spacer(Modifier.weight(1f))
+
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text("ॐ", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = KalpXWearTheme.gold)
+            Text(
+                text = "$sessionCount",
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold,
+                color = KalpXWearTheme.textPrimary
+            )
+            if (malaRoundsCompleted > 0) {
                 Text(
-                    "Round ${engine.malaRoundsCompleted}",
-                    fontSize = 10.sp,
+                    text = "Round $malaRoundsCompleted",
+                    fontSize = 8.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = KalpXWearTheme.gold
                 )
             }
-
-            Spacer(Modifier.height(4.dp))
-            BeadRingView(beadInRound = engine.beadInRound)
-            Spacer(Modifier.height(4.dp))
-
-            // Stats row
-            val base = connectivity.pathData?.mantraStats?.get(engine.currentMantraRef)
-            if (engine.sessionCount > 0 || base != null) {
-                StatsRow(
-                    sessionCount = engine.sessionCount,
-                    todayBase = base?.todayCount ?: 0,
-                    weekBase = base?.weekCount ?: 0,
-                    yearBase = base?.yearCount ?: 0,
-                    lifetimeBase = base?.lifetimeCount ?: 0
-                )
-                Spacer(Modifier.height(2.dp))
-            }
-
-            // tap hint
-            if (engine.sessionCount == 0) {
-                Text(
-                    "tap to chant",
-                    fontSize = 10.sp,
-                    color = KalpXWearTheme.textTertiary
-                )
-            }
-
-            Spacer(Modifier.height(4.dp))
         }
 
-        // Audio player
-        val audioUrl = engine.currentAudioUrl
-        if (!audioUrl.isNullOrEmpty()) {
-            MantraAudioPlayerView(audioUrl = audioUrl)
-            Spacer(Modifier.height(2.dp))
-        }
+        Spacer(Modifier.weight(1f))
 
-        // Icon controls
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(36.dp)
-                .padding(horizontal = 10.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Box(
+            modifier = Modifier.size(34.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clickable { engine.discardSession() }
-                    .semantics { contentDescription = "Discard session" },
-                contentAlignment = Alignment.Center
-            ) {
-                Text("✕", fontSize = 16.sp, color = KalpXWearTheme.textTertiary)
-            }
-
-            if (engine.sessionCount > 0) {
-                Row {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clickable(enabled = engine.canUndo) { engine.undo() }
-                            .semantics { contentDescription = "Undo" },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "↩", fontSize = 16.sp,
-                            color = if (engine.canUndo) KalpXWearTheme.textTertiary
-                                    else KalpXWearTheme.textTertiary.copy(alpha = 0.3f)
-                        )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clickable { showCompletion = true }
-                            .semantics { contentDescription = "Complete session" },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("✓", fontSize = 16.sp, color = KalpXWearTheme.gold)
-                    }
+            if (sessionCount > 0) {
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clickable { onComplete() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("✓", fontSize = 16.sp, color = KalpXWearTheme.gold)
                 }
             }
         }
-        Spacer(Modifier.height(4.dp))
+    }
+}
+
+// ── Stats row: Weekly | Yearly | Lifetime ──────────────────────────────────────
+
+@Composable
+private fun ChantStatsRow(sessionCount: Int, stats: WatchMantraStats?) {
+    val weekly   = (stats?.weekCount     ?: 0) + sessionCount
+    val yearly   = (stats?.yearCount     ?: 0) + sessionCount
+    val lifetime = (stats?.lifetimeCount ?: 0) + sessionCount
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(36.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ChantStatCell(label = "Weekly",   count = weekly,   modifier = Modifier.weight(1f))
+        Box(
+            modifier = Modifier
+                .width(0.5.dp)
+                .height(18.dp)
+                .background(KalpXWearTheme.textTertiary.copy(alpha = 0.30f))
+        )
+        ChantStatCell(label = "Yearly",   count = yearly,   modifier = Modifier.weight(1f))
+        Box(
+            modifier = Modifier
+                .width(0.5.dp)
+                .height(18.dp)
+                .background(KalpXWearTheme.textTertiary.copy(alpha = 0.30f))
+        )
+        ChantStatCell(label = "Lifetime", count = lifetime, modifier = Modifier.weight(1f))
     }
 }
 
 @Composable
-private fun StatsRow(
-    sessionCount: Int,
-    todayBase: Int, weekBase: Int, yearBase: Int, lifetimeBase: Int
-) {
-    val today    = todayBase    + sessionCount
-    val week     = weekBase     + sessionCount
-    val year     = yearBase     + sessionCount
-    val lifetime = lifetimeBase + sessionCount
-
-    Row(modifier = Modifier.fillMaxWidth()) {
-        StatCell("Today", today, Modifier.weight(1f))
-        if (week > today)    StatCell("Week",  week,  Modifier.weight(1f))
-        if (year > week)     StatCell("Year",  year,  Modifier.weight(1f))
-        if (lifetime > year) StatCell("Life",  lifetime, Modifier.weight(1f))
-    }
-}
-
-@Composable
-private fun StatCell(label: String, count: Int, modifier: Modifier = Modifier) {
+private fun ChantStatCell(label: String, count: Int, modifier: Modifier = Modifier) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            formatCount(count),
+            text = formatCount(count),
             fontSize = 11.sp,
             fontWeight = FontWeight.SemiBold,
             color = KalpXWearTheme.textPrimary
         )
-        Text(label, fontSize = 9.sp, color = KalpXWearTheme.textSecondary)
+        Text(text = label, fontSize = 8.sp, color = KalpXWearTheme.textTertiary)
     }
 }
 

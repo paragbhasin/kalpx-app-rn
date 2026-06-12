@@ -3,9 +3,13 @@ package com.kalpx.wear.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
@@ -96,7 +100,14 @@ fun HomeListScreen() {
                 modifier = Modifier.background(KalpXWearTheme.background)
             ) {
                 item {
-                    Text("KalpX", fontSize = 13.sp, color = KalpXWearTheme.textTertiary)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
+                    ) {
+                        Text("ॐ", fontSize = 22.sp, fontWeight = FontWeight.Medium, color = KalpXWearTheme.gold)
+                        Text("KalpX", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = KalpXWearTheme.textPrimary)
+                        Text("Stay centered", fontSize = 11.sp, color = KalpXWearTheme.textTertiary)
+                    }
                 }
 
                 pathData?.rhythm?.let { rh ->

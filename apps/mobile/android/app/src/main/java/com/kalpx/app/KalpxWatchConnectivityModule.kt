@@ -4,7 +4,6 @@ import android.os.Handler
 import android.os.Looper
 import com.facebook.react.bridge.*
 import com.facebook.react.modules.core.DeviceEventManagerModule
-import com.facebook.react.turbomodule.core.interfaces.TurboModule
 import com.google.android.gms.wearable.CapabilityClient
 import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.PutDataMapRequest
@@ -26,7 +25,7 @@ import org.json.JSONObject
  */
 class KalpxWatchConnectivityModule(
     private val reactContext: ReactApplicationContext
-) : ReactContextBaseJavaModule(reactContext), TurboModule {
+) : ReactContextBaseJavaModule(reactContext) {
 
     private val mainHandler = Handler(Looper.getMainLooper())
 

@@ -16,7 +16,10 @@ class KalpxWatchConnectivityPackage : TurboReactPackage() {
             KalpxWatchConnectivityModule.NAME to ReactModuleInfo(
                 KalpxWatchConnectivityModule.NAME,
                 KalpxWatchConnectivityModule.NAME,
-                false, false, false, false, false
+                false,  // canOverrideExistingModule
+                false,  // needsEagerInit
+                false,  // isCxxModule
+                false   // isTurboModule=false → routes through getLegacyJavaModule → JavaInteropTurboModule
             )
         )
     }

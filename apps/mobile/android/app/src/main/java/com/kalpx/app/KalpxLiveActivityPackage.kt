@@ -16,7 +16,10 @@ class KalpxLiveActivityPackage : TurboReactPackage() {
             KalpxLiveActivityModule.NAME to ReactModuleInfo(
                 KalpxLiveActivityModule.NAME,
                 KalpxLiveActivityModule.NAME,
-                false, false, false, false, false
+                false,  // canOverrideExistingModule
+                false,  // needsEagerInit
+                false,  // isCxxModule
+                false   // isTurboModule=false → routes through getLegacyJavaModule → JavaInteropTurboModule
             )
         )
     }

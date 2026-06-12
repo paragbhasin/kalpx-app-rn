@@ -163,6 +163,7 @@ const mapRunnerItem = (
 
 const SocialPostCard: React.FC<SocialPostCardProps> = ({
   post,
+  initialExpanded,
   onUpvote,
   onDownvote,
   onComment,

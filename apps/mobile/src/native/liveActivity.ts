@@ -1,7 +1,11 @@
-import { Alert, Linking, NativeModules, PermissionsAndroid, Platform } from "react-native";
+import { Alert, Linking, NativeModules, Platform, PermissionsAndroid, TurboModuleRegistry } from "react-native";
 import { EVENT_NAMES } from '@kalpx/analytics';
 
-const { KalpxLiveActivityModule } = NativeModules;
+// New Architecture (RN 0.79 bridgeless): TurboModuleRegistry is the correct
+// way to access TurboModules. NativeModules is kept as fallback for debug/bridge mode.
+const KalpxLiveActivityModule: any =
+  TurboModuleRegistry.get<any>('KalpxLiveActivityModule') ??
+  NativeModules.KalpxLiveActivityModule;
 
 // Client-side feature flags — belt-and-suspenders.
 // Primary gating is server-side: backend returns type:'none' when a surface is off.

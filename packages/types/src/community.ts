@@ -65,6 +65,7 @@ export interface CommunityPost {
     type?: string;
     category?: string;
   } | null;
+  is_pinned?: boolean;
   // Phase 12-era field names kept defensive
   likes_count?: number;
   is_liked?: boolean;

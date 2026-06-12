@@ -324,42 +324,23 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
   const [selectedPracticeForPopup, setSelectedPracticeForPopup] =
     useState(null);
 
-  // Actual image dimensions measured via Image.getSize — no clipping, no letterboxing
-  const [imageNaturalRatios, setImageNaturalRatios] = useState<Record<number, number>>({});
+  // Per-slide aspect ratios from metadata
+  const slideAspectRatios = useMemo(
+    () =>
+      imagesData.map((slide: any) => {
+        const ratioStr =
+          slide?.layout?.aspect_ratio ||
+          slide?.aspect_ratio ||
+          post.layout?.aspect_ratio ||
+          post.aspect_ratio ||
+          "4:5";
+        const [w, h] = ratioStr.split(":").map(Number);
+        return w && h ? w / h : 4 / 5;
+      }),
+    [imagesData, post.layout?.aspect_ratio, post.aspect_ratio],
+  );
 
-  useEffect(() => {
-    imagesData.forEach((slide: any, idx: number) => {
-      const url =
-        slide?.image_url ||
-        slide?.image ||
-        (typeof slide === "string" ? slide : null);
-      if (url && imageNaturalRatios[idx] === undefined) {
-        Image.getSize(
-          url,
-          (w, h) => {
-            if (w && h) {
-              setImageNaturalRatios((prev) => ({ ...prev, [idx]: w / h }));
-            }
-          },
-          () => {},
-        );
-      }
-    });
-  }, [imagesData]);
-
-  // Fallback to metadata ratio while the real size loads
-  const metaRatioForSlide = (idx: number) => {
-    const slide = imagesData[idx];
-    const ratioStr =
-      slide?.layout?.aspect_ratio || post.layout?.aspect_ratio || "4:5";
-    const [w, h] = ratioStr.split(":").map(Number);
-    return w && h ? w / h : 0.8;
-  };
-
-  const aspectRatio =
-    imageNaturalRatios[activeIndex] ?? metaRatioForSlide(activeIndex);
-
-  // Dynamic height based on current slide's actual image ratio
+  const aspectRatio = slideAspectRatios[activeIndex] ?? 4 / 5;
   const imageHeight = cardWidth / aspectRatio;
 
   const getSlideBlocks = (slideIndex: number) => {
@@ -430,22 +411,25 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
       imageUrl?.toLowerCase().endsWith(".mov");
     const isLoaded = loadedIndices.includes(slideIndex);
 
+    const slideRatio = slideAspectRatios[slideIndex] ?? 4 / 5;
+    const slideHeight = MEDIA_WIDTH / slideRatio;
+
     return (
-      <View style={[styles.imageContainer, { width: MEDIA_WIDTH }]}>
+      <View style={{ width: MEDIA_WIDTH, height: slideHeight, backgroundColor: "transparent" }}>
         {imageUrl &&
           isLoaded &&
           (isVideo ? (
             <VideoPostPlayer
               url={imageUrl}
-              aspectRatio={aspectRatio}
+              aspectRatio={slideRatio}
               width={MEDIA_WIDTH}
               shouldPlay={isVisible && activeIndex === slideIndex}
             />
           ) : (
             <Image
               source={{ uri: imageUrl }}
-              style={styles.postImage}
-              resizeMode="cover"
+              style={{ width: MEDIA_WIDTH, height: slideHeight }}
+              resizeMode="contain"
             />
           ))}
         {blocks.map((block: any, index: number) => {
@@ -1134,11 +1118,9 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
         <View>
           <View
             style={{
-              height: imageHeight,
               width: MEDIA_WIDTH,
               marginHorizontal: MEDIA_MARGIN,
               marginTop: 4,
-              borderRadius: 16,
               overflow: "hidden",
             }}
           >
@@ -1553,14 +1535,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginTop: 4,
   },
-  imageContainer: {
-    flex: 1, // Fill the carousel item height
-    borderRadius: 16, // Reddit style rounded media
-    overflow: "hidden",
-    backgroundColor: "#F6F7F8",
-    justifyContent: "center",
-    alignItems: "center",
-  },
   paginationCounterWrapper: {
     flexDirection: "row",
     alignItems: "center",
@@ -1598,11 +1572,6 @@ const styles = StyleSheet.create({
   },
   inactiveDot: {
     backgroundColor: "#D1D5DB",
-  },
-  postImage: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 16,
   },
   overlay: {
     position: "absolute",

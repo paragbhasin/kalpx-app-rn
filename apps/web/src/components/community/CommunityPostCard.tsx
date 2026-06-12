@@ -1188,9 +1188,9 @@ export function CommunityPostCard({
             style={{
               position: "relative",
               marginTop: 5,
-              borderRadius: isDesktopViewport ? 18 : 10,
+              borderRadius: isDesktopViewport ? 18 : 0,
               overflow: "hidden",
-              background: "#000000",
+              background: "transparent",
               aspectRatio: mediaStageAspectRatio,
               minHeight: isDesktopViewport ? 520 : undefined,
               maxHeight: isDesktopViewport ? "78vh" : undefined,
@@ -1212,19 +1212,21 @@ export function CommunityPostCard({
                   backgroundSize: "cover",
                   filter: "blur(28px)",
                   transform: "scale(1.08)",
-                  opacity: 0.34,
+                  opacity: isDesktopViewport ? 0.34 : 1,
                 }}
               />
             )}
-            <div
-              aria-hidden="true"
-              style={{
-                position: "absolute",
-                inset: 0,
-                background:
-                  "linear-gradient(180deg, rgba(10,12,16,0.18), rgba(10,12,16,0.52))",
-              }}
-            />
+            {isDesktopViewport && (
+              <div
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background:
+                    "linear-gradient(180deg, rgba(10,12,16,0.18), rgba(10,12,16,0.52))",
+                }}
+              />
+            )}
             {activeSlide.type === "video" ? (
               <div
                 style={{
@@ -1315,7 +1317,7 @@ export function CommunityPostCard({
                   height: "100%",
                   objectFit: "contain",
                   display: "block",
-                  background: "#0f1115",
+                  background: "transparent",
                 }}
               />
             )}

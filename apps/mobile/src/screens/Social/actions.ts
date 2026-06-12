@@ -1,5 +1,4 @@
 import api from "../../Networks/axios";
-import { getConsistentRandomStats } from "../../utils/randomStats";
 
 export const EXPLORE_REQUEST = "EXPLORE_REQUEST";
 export const EXPLORE_SUCCESS = "EXPLORE_SUCCESS";
@@ -25,15 +24,12 @@ export const fetchExplorePosts = () => async (dispatch) => {
     const res = await api.get("/public/explore-posts/");
     console.log("🔥 THUNK RECEIVED:", res.data?.length);
 
-    const results = (Array.isArray(res.data) ? res.data : []).map(post => {
-      const randoms = getConsistentRandomStats(post.id);
-      return {
-        ...post,
-        upvote_count: post.upvote_count !== undefined && post.upvote_count !== null && post.upvote_count !== 0 ? post.upvote_count : randoms.upvotes,
-        share_count: post.share_count !== undefined && post.share_count !== null && post.share_count !== 0 ? post.share_count : randoms.shares,
-        comment_count: post.comment_count !== undefined && post.comment_count !== null && post.comment_count !== 0 ? post.comment_count : randoms.comments,
-      };
-    });
+    const results = (Array.isArray(res.data) ? res.data : []).map(post => ({
+      ...post,
+      upvote_count: post.upvote_count ?? 0,
+      share_count: post.share_count ?? 0,
+      comment_count: post.comment_count ?? 0,
+    }));
 
     dispatch({
       type: EXPLORE_SUCCESS,
@@ -199,15 +195,12 @@ export const fetchCommunityPosts = (slug: string, page = 1, sort = 'new', locale
       lang: locale,
     });
     const res = await api.get(`/posts/?${params.toString()}`);
-    const results = (res.data.results || []).map(post => {
-      const randoms = getConsistentRandomStats(post.id || post._activity_id || Math.random());
-      return {
-        ...post,
-        upvote_count: post.upvote_count !== undefined && post.upvote_count !== null && post.upvote_count !== 0 ? post.upvote_count : randoms.upvotes,
-        share_count: post.share_count !== undefined && post.share_count !== null && post.share_count !== 0 ? post.share_count : randoms.shares,
-        comment_count: post.comment_count !== undefined && post.comment_count !== null && post.comment_count !== 0 ? post.comment_count : randoms.comments,
-      };
-    });
+    const results = (res.data.results || []).map(post => ({
+      ...post,
+      upvote_count: post.upvote_count ?? 0,
+      share_count: post.share_count ?? 0,
+      comment_count: post.comment_count ?? 0,
+    }));
 
     dispatch({
       type: FETCH_COMMUNITY_POSTS_SUCCESS,

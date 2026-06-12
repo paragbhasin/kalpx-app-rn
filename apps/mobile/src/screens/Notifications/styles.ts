@@ -1,6 +1,4 @@
-import { Dimensions, StyleSheet } from "react-native";
-
-const screenWidth = Dimensions.get("window").width;
+import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
@@ -24,19 +22,27 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderBottomWidth: 0.7,
-    borderBottomColor: "#ddd",
+    borderBottomColor: "#e8e0d4",
+    backgroundColor: "#ffffff",
+    borderLeftWidth: 4,
+    borderLeftColor: "transparent",
   },
   unread: {
-    backgroundColor: "#FFF3D6",      // gold-light highlight
+    backgroundColor: "#FFF8EC",
     borderLeftWidth: 4,
-    borderLeftColor: "#CA8A04",      // brand gold
+    borderLeftColor: "#CA8A04",
   },
-  icon: {
-    width: 28,
-    height: 28,
-    marginRight: 12,
-    marginTop: 4,
-    resizeMode: "contain",
+  dotWrapper: {
+    width: 20,
+    alignItems: "center",
+    paddingTop: 5,
+    marginRight: 6,
+  },
+  unreadDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#CA8A04",
   },
   textContainer: {
     flex: 1,
@@ -47,16 +53,33 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   title: {
-    color: "#000",
+    color: "#1a1a1a",
     marginBottom: 2,
+    flex: 1,
+    marginRight: 8,
+  },
+  titleRead: {
+    color: "#555",
+    marginBottom: 2,
+    flex: 1,
+    marginRight: 8,
   },
   time: {
-    color: "#888",
+    color: "#aaa",
+    fontSize: 11,
+  },
+  timeUnread: {
+    color: "#9A6B04",
+    fontSize: 11,
   },
   message: {
-    color: "#444",
+    color: "#888",
+    marginTop: 1,
+  },
+  messageUnread: {
+    color: "#555",
+    marginTop: 1,
   },
 });
-
 
 export default styles;

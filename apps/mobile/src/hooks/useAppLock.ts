@@ -16,10 +16,11 @@ export function useAppLock() {
     (state: RootState) => state.preferences.loaded,
   );
 
-  // Start in privacy mode to prevent content flash on cold launch.
-  // Resolved to 'hidden' or 'locked' in <50ms once AsyncStorage prefs load.
-  const [overlayMode, setOverlayModeState] = useState<OverlayMode>('privacy');
-  const overlayModeRef = useRef<OverlayMode>('privacy');
+  // Start hidden — privacy mode is only needed when backgrounding (app switcher).
+  // Cold launch shows content immediately; if lock is enabled it switches to
+  // 'locked' once AsyncStorage prefs load (<100ms).
+  const [overlayMode, setOverlayModeState] = useState<OverlayMode>('hidden');
+  const overlayModeRef = useRef<OverlayMode>('hidden');
 
   const setOverlayMode = useCallback((mode: OverlayMode) => {
     overlayModeRef.current = mode;

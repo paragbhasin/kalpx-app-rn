@@ -25,6 +25,7 @@ import { useScreenStore } from "./src/engine/useScreenBridge";
 
 import SnackBar from "./src/components/SnackBar";
 import ToastHost from "./src/components/ToastHost";
+import { NotificationNudgeBanner } from "./src/components/NotificationNudgeBanner";
 import "./src/config/i18n";
 import { CartProvider } from "./src/context/CartContext";
 import { ToastProvider } from "./src/context/ToastContext";
@@ -260,6 +261,7 @@ function AppInner({ initialRoute, navigationRef }) {
         }}
       >
         <View style={{ flex: 1, backgroundColor: "transparent" }}>
+          <NotificationNudgeBanner />
           <Routes initialRouteName={initialRoute} />
           <SnackBarContainer />
         </View>

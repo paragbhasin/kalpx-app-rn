@@ -10,18 +10,7 @@ import {
   type CommunityListItem,
 } from "../../engine/communityApi";
 import { webStorage } from "../../lib/webStorage";
-import { getConsistentCommunityStats } from "./communityVisuals";
-
 type ExploreTab = "all" | "followed";
-
-function formatWeeklyVisitors(community: CommunityListItem): string {
-  if (community.weekly_visitors != null && community.weekly_visitors !== "") {
-    return String(community.weekly_visitors);
-  }
-  return getConsistentCommunityStats(
-    community.slug || community.id || community.name || "community",
-  ).weeklyVisitors;
-}
 
 export function CommunityExplorePage() {
   const navigate = useNavigate();
@@ -262,17 +251,6 @@ export function CommunityExplorePage() {
                         >
                           {community.name || "Community"}
                         </button>
-                      </div>
-                      <div
-                        style={{
-                          marginTop: 6,
-                          color: "#9ca3af",
-                          fontSize: 16,
-                          lineHeight: 1.25,
-                          fontWeight: 600,
-                        }}
-                      >
-                        {formatWeeklyVisitors(community)} Weekly Visitors
                       </div>
                     </div>
 

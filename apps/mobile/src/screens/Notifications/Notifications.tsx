@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import {
   FlatList,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useDispatch, useSelector } from "react-redux";
@@ -64,17 +64,30 @@ export default function Notifications() {
     <TouchableOpacity
       style={[styles.row, !item.read && styles.unread]}
       onPress={() => openNotification(item)}
+      activeOpacity={0.7}
     >
+      <View style={styles.dotWrapper}>
+        {!item.read && <View style={styles.unreadDot} />}
+      </View>
       <View style={styles.textContainer}>
         <View style={styles.titleRow}>
-          <TextComponent type="streakSadanaText" style={styles.title}>
+          <TextComponent
+            type="streakSadanaText"
+            style={item.read ? styles.titleRead : styles.title}
+          >
             {item.title}
           </TextComponent>
-          <TextComponent type="mediumText" style={styles.time}>
+          <TextComponent
+            type="mediumText"
+            style={item.read ? styles.time : styles.timeUnread}
+          >
             {moment(item.timestamp).locale(i18n.language.split('-')[0]).format("MMM D, YYYY")}
           </TextComponent>
         </View>
-        <TextComponent type="mediumText" style={styles.message}>
+        <TextComponent
+          type="mediumText"
+          style={item.read ? styles.message : styles.messageUnread}
+        >
           {item.message}
         </TextComponent>
       </View>
@@ -133,7 +146,7 @@ export default function Notifications() {
             dispatch({ type: "RESET_NOTIFICATIONS" });
             dispatch(fetchNotifications(1));
           }}
-          contentContainerStyle={{ paddingTop: 50, paddingBottom: 20 }}
+          contentContainerStyle={{ paddingTop: 4, paddingBottom: 20 }}
           ListFooterComponent={
             loading && page > 1 ? (
               <LoadingOverlay visible={loading} text="Fetching Data..." />

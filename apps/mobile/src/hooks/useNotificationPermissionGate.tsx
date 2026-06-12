@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import NotificationPermissionModal from '../components/NotificationPermissionModal';
-import { mitraTrackEvent } from '../engine/mitraApi';
+import { collapseNotificationBanner } from '../components/NotificationNudgeBanner';
+import { apiPatchJourneyReminders, mitraTrackEvent } from '../engine/mitraApi';
 import {
   checkNotificationPermission,
   openNotificationSettings,
@@ -8,6 +9,15 @@ import {
 } from '../service/notificationPermission';
 import { requestPushPermission } from '../service/pushNotifications';
 import { registerDeviceToBackend } from '../utils/registerDevice';
+
+const ALL_REMINDERS_ON = {
+  mantra_reminder_enabled: true,
+  mantra_reminder_time: '07:00:00',
+  sankalp_reminder_enabled: true,
+  sankalp_reminder_time: '08:00:00',
+  practice_reminder_enabled: true,
+  practice_reminder_time: '18:00:00',
+};
 
 /**
  * Drop this hook into any screen that has reminder toggles or save-with-reminders.
@@ -38,6 +48,7 @@ export function useNotificationPermissionGate() {
       mitraTrackEvent('notification_pre_prompt_view', {
         meta: { trigger: 'reminder_toggle', permission_status: 'denied' },
       });
+      collapseNotificationBanner();
       setModalStatus('denied');
       setModalVisible(true);
       pendingAction.current = action;
@@ -49,6 +60,7 @@ export function useNotificationPermissionGate() {
     if (token) {
       mitraTrackEvent('notification_permission_granted', { meta: { source: 'reminder_toggle' } });
       registerDeviceToBackend();
+      apiPatchJourneyReminders(ALL_REMINDERS_ON).catch(() => {});
       await action();
     } else {
       mitraTrackEvent('notification_permission_denied', { meta: { source: 'reminder_toggle' } });
@@ -67,6 +79,7 @@ export function useNotificationPermissionGate() {
     if (token) {
       mitraTrackEvent('notification_permission_granted', { meta: { source: 'reminder_toggle' } });
       registerDeviceToBackend();
+      apiPatchJourneyReminders(ALL_REMINDERS_ON).catch(() => {});
       if (pendingAction.current) await pendingAction.current();
     } else {
       mitraTrackEvent('notification_permission_denied', { meta: { source: 'reminder_toggle' } });

@@ -22,7 +22,6 @@ import CommunityAuthModal from "../../components/CommunityAuthModal";
 import SocialPostCard from "../../components/SocialPostCard";
 import { useScrollContext } from "../../context/ScrollContext";
 import { COMMUNITY_BACKGROUNDS } from "../../utils/CommunityAssets";
-import { getConsistentCommunityStats } from "../../utils/randomStats";
 import {
     hidePostDetail,
     reportContent,
@@ -76,7 +75,6 @@ const CommunityDetail = () => {
     intent: "general",
   });
 
-  const stableStats = useMemo(() => getConsistentCommunityStats(slug), [slug]);
   useEffect(() => {
     dispatch(fetchCommunityDetail(slug, i18n.language) as any);
     dispatch(fetchCommunityPosts(slug, 1, sortBy, i18n.language) as any);
@@ -411,7 +409,6 @@ const CommunityDetail = () => {
   );
 
   const renderAbout = () => {
-    const { weeklyVisitors, weeklyContribution } = stableStats;
 
     const rules = [
       {
@@ -444,12 +441,12 @@ const CommunityDetail = () => {
 
         <View style={styles.statsMetricsRow}>
           <View style={styles.metricItem}>
-            <Text style={styles.metricValue}>{weeklyVisitors}</Text>
-            <Text style={styles.metricLabel}>Weekly Visitors</Text>
+            <Text style={styles.metricValue}>{community?.follower_count ?? 0}</Text>
+            <Text style={styles.metricLabel}>Members</Text>
           </View>
           <View style={styles.metricItem}>
-            <Text style={styles.metricValue}>{weeklyContribution}</Text>
-            <Text style={styles.metricLabel}>Weekly Contribution</Text>
+            <Text style={styles.metricValue}>{community?.post_count ?? 0}</Text>
+            <Text style={styles.metricLabel}>Posts</Text>
           </View>
         </View>
 

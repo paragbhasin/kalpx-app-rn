@@ -26,10 +26,7 @@ import {
   type CommunityListItem,
 } from "../../engine/communityApi";
 import { webStorage } from "../../lib/webStorage";
-import {
-  getConsistentCommunityStats,
-  resolveCommunityImage,
-} from "./communityVisuals";
+import { resolveCommunityImage } from "./communityVisuals";
 
 type CommunityTab = "Feed" | "About";
 type SortOption = "new" | "top" | "hot";
@@ -227,11 +224,6 @@ export function CommunityDetailPage() {
       mounted = false;
     };
   }, [lang, postsReloadKey, slug, sortBy]);
-
-  const stableStats = useMemo(
-    () => getConsistentCommunityStats(slug || community?.id || "community"),
-    [community?.id, slug],
-  );
 
   const handleBack = () => {
     if (typeof window !== "undefined" && window.history.length > 1) {
@@ -442,15 +434,15 @@ export function CommunityDetailPage() {
         <div style={desktopStatsGridStyle}>
           <div>
             <div style={desktopStatValueStyle}>
-              {stableStats.weeklyVisitors}
+              {community?.follower_count ?? 0}
             </div>
-            <div style={desktopStatLabelStyle}>Weekly Visitors</div>
+            <div style={desktopStatLabelStyle}>Members</div>
           </div>
           <div>
             <div style={desktopStatValueStyle}>
-              {stableStats.weeklyContribution}
+              {community?.post_count ?? 0}
             </div>
-            <div style={desktopStatLabelStyle}>Contributions</div>
+            <div style={desktopStatLabelStyle}>Posts</div>
           </div>
         </div>
 
@@ -654,14 +646,14 @@ export function CommunityDetailPage() {
               }}
             >
               <div style={metricCardStyle}>
-                <div style={metricValueStyle}>{stableStats.weeklyVisitors}</div>
-                <div style={metricLabelStyle}>Weekly Visitors</div>
+                <div style={metricValueStyle}>{community?.follower_count ?? 0}</div>
+                <div style={metricLabelStyle}>Members</div>
               </div>
               <div style={metricCardStyle}>
                 <div style={metricValueStyle}>
-                  {stableStats.weeklyContribution}
+                  {community?.post_count ?? 0}
                 </div>
-                <div style={metricLabelStyle}>Weekly Contribution</div>
+                <div style={metricLabelStyle}>Posts</div>
               </div>
             </div>
 

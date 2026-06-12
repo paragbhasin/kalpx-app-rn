@@ -308,6 +308,7 @@ export default function SocialExplore({
   });
 
   const renderItem = (item: any) => {
+    if (!item.hook_image) return null;
     const isVideo =
       item.hook_image?.toLowerCase().endsWith(".mp4") ||
       item.hook_image?.toLowerCase().endsWith(".mov");
@@ -411,9 +412,8 @@ export default function SocialExplore({
       content: item.community_post?.content || item.base_text || item.summary,
       images: item.community_post?.images?.length
         ? item.community_post.images
-        : item.slides?.map((s: any) => ({ image: s.image_url })) || [
-            { image: item.hook_image },
-          ],
+        : item.slides?.map((s: any) => ({ image: s.image_url })) ||
+          (item.hook_image ? [{ image: item.hook_image }] : []),
       community_name:
         item.community_name ||
         item.community_post?.community_name ||

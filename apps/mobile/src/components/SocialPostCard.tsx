@@ -33,7 +33,6 @@ import { loadScreenWithData, screenActions } from "../store/screenSlice";
 import { COMMUNITY_BACKGROUNDS } from "../utils/CommunityAssets";
 import { getRawPracticeObject } from "../utils/getPracticeObjectById";
 import { getTranslatedPractice } from "../utils/getTranslatedPractice";
-import { getConsistentRandomStats } from "../utils/randomStats";
 import CommunityAuthModal from "./CommunityAuthModal";
 import DailyPracticeDetailsCard from "./DailyPracticeDetailsCard";
 import MantraCard from "./MantraCard";
@@ -49,6 +48,7 @@ const MEDIA_MARGIN = 12;
 
 interface SocialPostCardProps {
   post: any;
+  initialExpanded?: boolean;
   onUpvote?: () => void;
   onDownvote?: () => void;
   onComment?: () => void;
@@ -215,7 +215,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     [post.linked_item?.id, post.linked_item?.type],
   );
 
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(initialExpanded ?? false);
   const [showMenu, setShowMenu] = useState(false);
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const [isAuthModalVisible, setIsAuthModalVisible] = useState(false);
@@ -247,42 +247,15 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     }
   };
 
-  // Use stable deterministic randoms based on post ID if counts are missing
-  const stableRandoms = useMemo(
-    () => getConsistentRandomStats(post.id || post._activity_id || 0),
-    [post.id, post._activity_id],
-  );
-  const [randomUpvotes] = useState(stableRandoms.upvotes);
-  const [randomShares] = useState(stableRandoms.shares);
-
-  const getEffectiveUpvotes = (p: any) => {
-    // Prioritize actual counts, then score, then our stable random
-    if (
-      p.upvote_count !== undefined &&
-      p.upvote_count !== null &&
-      p.upvote_count !== 0
-    )
-      return p.upvote_count;
-    if (p.score !== undefined && p.score !== null && p.score !== 0)
-      return p.score;
-    return randomUpvotes;
-  };
-
-  const getEffectiveShares = (p: any) => {
-    return p.share_count || randomShares;
-  };
-
-  const [upvoteCount, setUpvoteCount] = useState(() =>
-    getEffectiveUpvotes(post),
-  );
-  const [shareCount, setShareCount] = useState(() => getEffectiveShares(post));
+  const [upvoteCount, setUpvoteCount] = useState(() => post.upvote_count ?? post.score ?? 0);
+  const [shareCount, setShareCount] = useState(() => post.share_count ?? 0);
   const [hasUserVoted, setHasUserVoted] = useState<"up" | "down" | null>(
     post.user_vote === 1 ? "up" : post.user_vote === -1 ? "down" : null,
   );
 
   useEffect(() => {
-    setUpvoteCount(getEffectiveUpvotes(post));
-    setShareCount(getEffectiveShares(post));
+    setUpvoteCount(post.upvote_count ?? post.score ?? 0);
+    setShareCount(post.share_count ?? 0);
     setHasUserVoted(
       post.user_vote === 1 ? "up" : post.user_vote === -1 ? "down" : null,
     );
@@ -325,7 +298,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
 
   // truncated content
   const content = translatedContent || "";
-  const shouldTruncate = content.length > 100;
+  const shouldTruncate = content.length > 200;
 
   const [cardWidth, setCardWidth] = useState(screenWidth - 8); // Updated base width for padding: 4
   const [activeIndex, setActiveIndex] = useState(0);
@@ -350,19 +323,42 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
   const [selectedPracticeForPopup, setSelectedPracticeForPopup] =
     useState(null);
 
-  const initialSlide = imagesData[0];
-  const aspectRatioString =
-    initialSlide?.layout?.aspect_ratio || post.layout?.aspect_ratio || "1:1";
-  let aspectRatio = 1;
+  // Actual image dimensions measured via Image.getSize — no clipping, no letterboxing
+  const [imageNaturalRatios, setImageNaturalRatios] = useState<Record<number, number>>({});
 
-  if (aspectRatioString) {
-    const [w, h] = aspectRatioString.split(":").map(Number);
-    if (w && h) {
-      aspectRatio = w / h;
-    }
-  }
+  useEffect(() => {
+    imagesData.forEach((slide: any, idx: number) => {
+      const url =
+        slide?.image_url ||
+        slide?.image ||
+        (typeof slide === "string" ? slide : null);
+      if (url && imageNaturalRatios[idx] === undefined) {
+        Image.getSize(
+          url,
+          (w, h) => {
+            if (w && h) {
+              setImageNaturalRatios((prev) => ({ ...prev, [idx]: w / h }));
+            }
+          },
+          () => {},
+        );
+      }
+    });
+  }, [imagesData]);
 
-  // Dynamic height based on measured width and strict ratio
+  // Fallback to metadata ratio while the real size loads
+  const metaRatioForSlide = (idx: number) => {
+    const slide = imagesData[idx];
+    const ratioStr =
+      slide?.layout?.aspect_ratio || post.layout?.aspect_ratio || "4:5";
+    const [w, h] = ratioStr.split(":").map(Number);
+    return w && h ? w / h : 0.8;
+  };
+
+  const aspectRatio =
+    imageNaturalRatios[activeIndex] ?? metaRatioForSlide(activeIndex);
+
+  // Dynamic height based on current slide's actual image ratio
   const imageHeight = cardWidth / aspectRatio;
 
   const getSlideBlocks = (slideIndex: number) => {
@@ -1126,6 +1122,11 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
             </View> */}
 
       {/* Title */}
+      {post.is_pinned && (
+        <View style={{ alignSelf: "flex-start", marginLeft: 12, marginBottom: 2, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4, backgroundColor: "rgba(169, 132, 67, 0.12)" }}>
+          <Text style={{ fontSize: 10, fontWeight: "700", color: "rgba(169, 132, 67, 0.9)", letterSpacing: 0.5, textTransform: "uppercase" }}>Pinned</Text>
+        </View>
+      )}
       {translatedTitle && <Text style={styles.title}>{translatedTitle}</Text>}
 
       {imagesData.length > 0 && (
@@ -1191,7 +1192,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
       {content ? (
         <View style={styles.contentContainer}>
           <Text style={styles.content}>
-            {isExpanded ? content : content.slice(0, 100)}
+            {isExpanded ? content : content.slice(0, 200)}
             {!isExpanded && shouldTruncate && "..."}
           </Text>
           {shouldTruncate && (

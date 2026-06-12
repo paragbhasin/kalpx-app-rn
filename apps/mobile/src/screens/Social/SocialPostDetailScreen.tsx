@@ -527,6 +527,7 @@ export default function SocialPostDetailScreen() {
             {(post || initialPost) && (
               <SocialPostCard
                 post={post || initialPost}
+                initialExpanded={true}
                 onUpvote={() =>
                   dispatch(
                     votePostDetail((post || initialPost).id, "upvote") as any,

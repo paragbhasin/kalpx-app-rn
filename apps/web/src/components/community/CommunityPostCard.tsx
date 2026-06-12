@@ -1135,6 +1135,29 @@ export function CommunityPostCard({
         }}
       />
 
+      {post.is_pinned && (
+        <div
+          style={{
+            display: "inline-block",
+            marginLeft: 12,
+            marginBottom: 4,
+            paddingLeft: 8,
+            paddingRight: 8,
+            paddingTop: 2,
+            paddingBottom: 2,
+            borderRadius: 4,
+            backgroundColor: "rgba(169, 132, 67, 0.12)",
+            fontSize: 10,
+            fontWeight: 700,
+            color: "rgba(169, 132, 67, 0.9)",
+            letterSpacing: "0.05em",
+            textTransform: "uppercase",
+          }}
+        >
+          Pinned
+        </div>
+      )}
+
       {post.title && (
         <h2
           style={{

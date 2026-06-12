@@ -8,6 +8,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.ReadableMap
+import com.facebook.react.turbomodule.core.interfaces.TurboModule
 
 /**
  * KalpxLiveActivityModule — Android mirror of KalpxLiveActivityModule.swift
@@ -23,7 +24,7 @@ import com.facebook.react.bridge.ReadableMap
  */
 class KalpxLiveActivityModule(
     private val reactContext: ReactApplicationContext
-) : ReactContextBaseJavaModule(reactContext) {
+) : ReactContextBaseJavaModule(reactContext), TurboModule {
 
     companion object {
         const val NAME = "KalpxLiveActivityModule"

@@ -12,3 +12,7 @@ export const IMAGE_BASE_URL =
   API_ENV === 'prod' ? 'https://kalpx.com' : 'https://dev.kalpx.com';
 
 export const IS_PROD = API_ENV === 'prod';
+
+export const PHONE_AUTH_ENABLED =
+  (process.env.EXPO_PUBLIC_PHONE_AUTH_ENABLED as string | undefined) === '1' ||
+  (process.env.VITE_PHONE_AUTH_ENABLED as string | undefined) === '1';

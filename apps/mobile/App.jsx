@@ -91,11 +91,8 @@ Notifications.setNotificationHandler({
   }),
 });
 
-Text.defaultProps = Text.defaultProps || {};
-Text.defaultProps.allowFontScaling = false;
-
-TextInput.defaultProps = TextInput.defaultProps || {};
-TextInput.defaultProps.allowFontScaling = false;
+// React 19 removed defaultProps on function components — Text/TextInput
+// allowFontScaling is handled per-component or via StyleSheet going forward.
 
 function SnackBarContainer() {
   const dispatch = useDispatch();

@@ -6,7 +6,7 @@
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { PHONE_AUTH_COUNTRIES, DEFAULT_PHONE_COUNTRY } from '@kalpx/types';
-import type { PhoneOtpVerifyResponse, PhoneCountryCode } from '@kalpx/types';
+import type { PhoneOtpVerifyResponse, PhoneCountryCode, PhoneOtpPurpose } from '@kalpx/types';
 import { storeTokens } from '@kalpx/auth';
 import { webStorage } from '../lib/webStorage';
 import { requestPhoneOtp, verifyPhoneOtp, resendPhoneOtp } from '../lib/phoneApi';
@@ -36,8 +36,10 @@ function errorCopy(code: string | undefined, fallback: string, extra?: string): 
   return extra ? `${base} ${extra}` : base;
 }
 
+const NEEDS_PASSWORD = new Set<PhoneOtpPurpose>(['signup', 'password_reset_phone']);
+
 interface Props {
-  purpose: 'auth' | 'link_phone';
+  purpose: PhoneOtpPurpose;
   onSuccess: (tokens?: { accessToken: string; refreshToken: string }, isNewUser?: boolean) => void;
 }
 
@@ -50,6 +52,8 @@ export function PhoneOtpFlow({ purpose, onSuccess }: Props) {
   const [sessionToken, setSessionToken] = useState('');
   const [maskedPhone, setMaskedPhone] = useState('');
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(''));
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [cooldown, setCooldown] = useState(0);
@@ -115,9 +119,22 @@ export function PhoneOtpFlow({ purpose, onSuccess }: Props) {
       setError('Please enter the 6-digit code.');
       return;
     }
+    if (NEEDS_PASSWORD.has(purpose)) {
+      if (password.length < 8) {
+        setError('Password must be at least 8 characters.');
+        return;
+      }
+      if (password !== confirmPassword) {
+        setError('Passwords do not match.');
+        return;
+      }
+    }
     setLoading(true);
     setError('');
-    const result = await verifyPhoneOtp({ session_token: sessionToken, otp: code });
+    const payload: Parameters<typeof verifyPhoneOtp>[0] = { session_token: sessionToken, otp: code };
+    if (purpose === 'signup') payload.password = password;
+    if (purpose === 'password_reset_phone') payload.new_password = password;
+    const result = await verifyPhoneOtp(payload);
     setLoading(false);
     if (!result.success) {
       const attemptsRemaining = (result as any).data?.attempts_remaining;
@@ -201,6 +218,8 @@ export function PhoneOtpFlow({ purpose, onSuccess }: Props) {
   }
 
   const otpComplete = otp.every(Boolean);
+  const passwordLabel = purpose === 'password_reset_phone' ? 'New password' : 'Create a password';
+  const confirmLabel = purpose === 'password_reset_phone' ? 'Confirm new password' : 'Confirm password';
 
   return (
     <div className="phone-otp-flow">
@@ -229,12 +248,48 @@ export function PhoneOtpFlow({ purpose, onSuccess }: Props) {
           />
         ))}
       </div>
+      {NEEDS_PASSWORD.has(purpose) && (
+        <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder={passwordLabel}
+            disabled={loading}
+            aria-label={passwordLabel}
+            autoComplete="new-password"
+            style={{
+              height: '46px',
+              padding: '0 12px',
+              border: '1px solid var(--kalpx-border, #ddd)',
+              borderRadius: '8px',
+              fontSize: '1rem',
+            }}
+          />
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder={confirmLabel}
+            disabled={loading}
+            aria-label={confirmLabel}
+            autoComplete="new-password"
+            style={{
+              height: '46px',
+              padding: '0 12px',
+              border: '1px solid var(--kalpx-border, #ddd)',
+              borderRadius: '8px',
+              fontSize: '1rem',
+            }}
+          />
+        </div>
+      )}
       {error && <div className="phone-otp-error">{error}</div>}
       <button
         type="button"
         className="submit-btn"
         onClick={handleVerifyOtp}
-        disabled={loading || !otpComplete}
+        disabled={loading || !otpComplete || (NEEDS_PASSWORD.has(purpose) && (password.length < 8 || password !== confirmPassword))}
       >
         {loading ? 'Verifying…' : 'Verify'}
       </button>

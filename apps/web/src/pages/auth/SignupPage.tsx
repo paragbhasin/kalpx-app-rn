@@ -266,7 +266,7 @@ export function SignupPage() {
             )}
 
             {authMethod === "phone" && WEB_ENV.phoneAuthEnabled === "1" ? (
-              <PhoneOtpFlow purpose="auth" onSuccess={handlePhoneSignupSuccess} />
+              <PhoneOtpFlow purpose="signup" onSuccess={handlePhoneSignupSuccess} />
             ) : (
             <form onSubmit={handleRegister} className="auth-form">
               {/* Email */}

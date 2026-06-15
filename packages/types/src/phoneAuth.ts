@@ -8,7 +8,7 @@ export const DEFAULT_PHONE_COUNTRY = 'IN' as const;
 export type PhoneCountry = typeof PHONE_AUTH_COUNTRIES[number];
 export type PhoneCountryCode = PhoneCountry['code'];
 
-export type PhoneOtpPurpose = 'auth' | 'link_phone';
+export type PhoneOtpPurpose = 'signup' | 'otp_login' | 'link_phone' | 'password_reset_phone';
 
 export interface PhoneOtpRequestPayload {
   phone: string;
@@ -19,6 +19,10 @@ export interface PhoneOtpRequestPayload {
 export interface PhoneOtpVerifyPayload {
   session_token: string;
   otp: string;
+  /** Required when purpose is 'signup' */
+  password?: string;
+  /** Required when purpose is 'password_reset_phone' */
+  new_password?: string;
 }
 
 export interface PhoneOtpResendPayload {

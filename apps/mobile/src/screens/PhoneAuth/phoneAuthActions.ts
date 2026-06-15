@@ -72,3 +72,27 @@ export const resendPhoneOtp = (
     callback({ success: false, error, code });
   }
 };
+
+export const loginWithPhone = (
+  payload: { phone: string; country: string; password: string },
+  callback: (result: PhoneAuthResult<PhoneOtpVerifyResponse>) => void,
+) => async (dispatch: any) => {
+  try {
+    const response = await api.post("/users/login/", payload);
+    const data: PhoneOtpVerifyResponse = response.data;
+    if (data.access_token && data.refresh_token) {
+      await AsyncStorage.setItem("access_token", data.access_token);
+      await AsyncStorage.setItem("refresh_token", data.refresh_token);
+      if (data.user) {
+        await AsyncStorage.setItem("user_id", `${(data.user as any).id ?? ""}`);
+      }
+      await registerDeviceToBackend();
+      dispatch(phoneLoginSuccess(data));
+    }
+    callback({ success: true, data });
+  } catch (err: any) {
+    const code: string | undefined = err?.response?.data?.error;
+    const error: string = err?.response?.data?.detail || err?.message || "Login failed";
+    callback({ success: false, error, code });
+  }
+};

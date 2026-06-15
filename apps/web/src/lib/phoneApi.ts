@@ -43,3 +43,17 @@ export async function resendPhoneOtp(
     return { success: false, error: getApiErrorMessage(err), code };
   }
 }
+
+export async function loginWithPhone(
+  phone: string,
+  country: string,
+  password: string,
+): Promise<{ success: true; data: PhoneOtpVerifyResponse } | { success: false; error: string; code?: string }> {
+  try {
+    const resp = await api.post('/users/login/', { phone, country, password });
+    return { success: true, data: resp.data as PhoneOtpVerifyResponse };
+  } catch (err: any) {
+    const code: string | undefined = err?.response?.data?.error;
+    return { success: false, error: getApiErrorMessage(err), code };
+  }
+}

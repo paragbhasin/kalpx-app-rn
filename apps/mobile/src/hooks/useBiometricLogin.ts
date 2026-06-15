@@ -52,10 +52,9 @@ export function useBiometricLogin() {
 
         if (refresh) {
           await AsyncStorage.setItem("refresh_token", refresh);
-          // Rotate the Keychain token so it stays fresh
-          await SecureStore.setItemAsync(BIOMETRIC_TOKEN_KEY, refresh, {
-            requireAuthentication: true,
-          });
+          // Don't write back to SecureStore here — setItemAsync with
+          // requireAuthentication: true triggers a second Face ID scan.
+          // Token rotation happens at logout (performLogout) instead.
         }
 
         // Restore user in Redux (same shape as App.jsx hydration)

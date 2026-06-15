@@ -189,7 +189,15 @@ export function LoginPage() {
     const result = await loginWithPhone(digits, phoneCountry, phonePassword);
     setPhoneLoginLoading(false);
     if (!result.success) {
-      setPhoneLoginError(result.error || "Invalid credentials");
+      const NO_ACCOUNT_CODES = new Set(["phone_not_registered", "account_not_found", "user_not_found", "no_account"]);
+      const code = (result as any).code as string | undefined;
+      if (NO_ACCOUNT_CODES.has(code ?? "")) {
+        dispatch(showSnackBar("No account found for this number. Please sign up first."));
+      } else if (code === "Invalid credentials" || result.error?.toLowerCase().includes("invalid")) {
+        setPhoneLoginError("Incorrect phone number or password. Please try again.");
+      } else {
+        setPhoneLoginError(result.error || "Login failed. Please try again.");
+      }
       return;
     }
     const data = result.data;
@@ -367,7 +375,7 @@ export function LoginPage() {
                     >
                       {phoneLoginLoading ? <Loader2 className="spinner" size={20} /> : "Sign in"}
                     </button>
-                    <div style={{ textAlign: "center", marginTop: "8px" }}>
+                    {/* <div style={{ textAlign: "center", marginTop: "8px" }}>
                       <button
                         type="button"
                         className="link-btn"
@@ -376,7 +384,7 @@ export function LoginPage() {
                       >
                         Login with OTP instead
                       </button>
-                    </div>
+                    </div> */}
                   </form>
                 )
               ) : (

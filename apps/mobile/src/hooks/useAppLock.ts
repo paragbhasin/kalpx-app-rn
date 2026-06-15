@@ -92,11 +92,15 @@ export function useAppLock() {
     (nextState: AppStateStatus) => {
       if (nextState === "background" || nextState === "inactive") {
         backgroundedAtRef.current = Date.now();
-        // Already locked: keep locked. Otherwise show privacy screen immediately
-        // to protect content in the app switcher / recent apps.
         if (overlayModeRef.current !== "locked") {
-          overlayModeRef.current = "privacy";
-          setOverlayModeState("privacy");
+          // Privacy overlay only makes sense when app lock is on — it hides
+          // content in the app switcher. When app lock is off (e.g. after
+          // logout + RESET_APP), don't black out the screen; it would stay
+          // black on return-to-active because prefsLoaded is false post-reset.
+          if (appLockEnabledRef.current) {
+            overlayModeRef.current = "privacy";
+            setOverlayModeState("privacy");
+          }
         }
       } else if (nextState === "active") {
         if (!prefsLoadedRef.current) return;

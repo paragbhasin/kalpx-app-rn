@@ -22,11 +22,16 @@ import { RootState } from "../../store";
 import { loginWithPhone } from "./phoneAuthActions";
 import type { PhoneAuthResult } from "./phoneAuthActions";
 import { resumePendingIfAny } from "../../utils/resumePending";
+import { useToast } from "../../context/ToastContext";
 
 const COUNTRY_OPTIONS = [...PHONE_AUTH_COUNTRIES];
+const COUNTRY_SHORT: Record<string, string> = { IN: "India", US: "USA", GB: "UK" };
+
+const NO_ACCOUNT_CODES = new Set(["phone_not_registered", "account_not_found", "user_not_found", "no_account"]);
 
 export default function PhonePasswordLoginScreen({ navigation }) {
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
+  const { showToast } = useToast();
 
   const [country, setCountry] = useState<PhoneCountryCode>(DEFAULT_PHONE_COUNTRY);
   const [phone, setPhone] = useState("");
@@ -53,8 +58,14 @@ export default function PhonePasswordLoginScreen({ navigation }) {
       loginWithPhone({ phone: digits, country, password }, (result: PhoneAuthResult<PhoneOtpVerifyResponse>) => {
         setLoading(false);
         if (!result.success) {
-          const { error } = result as { success: false; error: string };
-          setError(error || "Invalid credentials");
+          const { error, code } = result as { success: false; error: string; code?: string };
+          if (NO_ACCOUNT_CODES.has(code ?? "")) {
+            showToast("No account found for this number. Please sign up first.", 4000, "error");
+          } else if (code === "Invalid credentials" || error?.toLowerCase().includes("invalid")) {
+            setError("Incorrect phone number or password. Please try again.");
+          } else {
+            setError(error || "Login failed. Please try again.");
+          }
           return;
         }
         resumePendingIfAny(navigation);
@@ -89,7 +100,13 @@ export default function PhonePasswordLoginScreen({ navigation }) {
                       type="cardText"
                       style={[styles.countryBtnText, country === c.code && styles.countryBtnTextActive]}
                     >
-                      {c.dialCode} {c.label}
+                      {c.dialCode}
+                    </TextComponent>
+                    <TextComponent
+                      type="cardText"
+                      style={[styles.countryBtnSub, country === c.code && styles.countryBtnTextActive]}
+                    >
+                      {COUNTRY_SHORT[c.code] ?? c.code}
                     </TextComponent>
                   </TouchableOpacity>
                 ))}
@@ -136,6 +153,8 @@ export default function PhonePasswordLoginScreen({ navigation }) {
                 loading={loading}
                 disabled={loading || phone.replace(/\D/g, "").length < 7 || !password}
                 style={styles.btn}
+                textStyle={styles.btnText}
+                loaderColor="#fff"
               />
 
               <TouchableOpacity
@@ -162,15 +181,17 @@ const styles = StyleSheet.create({
   card: { backgroundColor: "#fffdf7", borderRadius: 16, padding: 24, shadowColor: "#000", shadowOpacity: 0.08, shadowRadius: 12, elevation: 4 },
   cardTitle: { fontSize: 20, fontWeight: "700", marginBottom: 16, color: "#432104" },
   countryRow: { flexDirection: "row", gap: 8, marginBottom: 12 },
-  countryBtn: { flex: 1, paddingVertical: 8, borderWidth: 1, borderColor: "#e0d5c0", borderRadius: 8, alignItems: "center" },
+  countryBtn: { flex: 1, paddingVertical: 10, borderWidth: 1, borderColor: "#e0d5c0", borderRadius: 8, alignItems: "center", justifyContent: "center" },
   countryBtnActive: { borderColor: "#c9a84c", backgroundColor: "#fdf3dc" },
-  countryBtnText: { fontSize: 11, color: "#666" },
+  countryBtnText: { fontSize: 13, color: "#432104", fontWeight: "600" },
+  countryBtnSub: { fontSize: 10, color: "#888", marginTop: 2 },
   countryBtnTextActive: { color: "#432104", fontWeight: "600" },
   inputRow: { flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: "#e0d5c0", borderRadius: 8, paddingHorizontal: 12, height: 48 },
   dialCode: { color: "#432104", marginRight: 8, fontWeight: "600" },
   textInput: { flex: 1, fontSize: 15, color: "#1a1a1a" },
   error: { color: "#c0392b", marginTop: 8, fontSize: 13 },
-  btn: { marginTop: 16 },
+  btn: { marginTop: 16, backgroundColor: "#c9a84c", borderRadius: 10 },
+  btnText: { color: "#fff", fontSize: 16, fontWeight: "700" },
   otpLink: { marginTop: 14, alignItems: "center" },
   otpLinkText: { color: "#c9a84c", fontSize: 13, textDecorationLine: "underline" },
 });

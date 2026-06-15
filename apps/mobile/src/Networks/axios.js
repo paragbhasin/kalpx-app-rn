@@ -133,6 +133,20 @@ const refreshAccessToken = async () => {
   }
 };
 
+// Auth endpoints that return 401 for invalid credentials — never refresh on these
+const AUTH_ENDPOINTS = [
+  "/users/login/",
+  "/auth/phone/request-otp/",
+  "/auth/phone/verify-otp/",
+  "/auth/phone/resend-otp/",
+  "/users/generate_otp/",
+  "/users/verify_otp/",
+  "/token/refresh/",
+];
+
+const isAuthEndpoint = (url = "") =>
+  AUTH_ENDPOINTS.some((path) => url.includes(path));
+
 // Manage multiple refresh attempts
 let isRefreshing = false;
 let failedQueue = [];
@@ -215,8 +229,8 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     const status = error.response?.status;
 
-    // Handle 401 → attempt token refresh
-    if (status === 401 && !originalRequest._retry) {
+    // Handle 401 → attempt token refresh (skip for auth/login endpoints)
+    if (status === 401 && !originalRequest._retry && !isAuthEndpoint(originalRequest.url)) {
       console.log("[AUTH] Got 401 — attempting token refresh...");
 
       if (isRefreshing) {

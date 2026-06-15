@@ -7,4 +7,5 @@ export const WEB_ENV = {
   googleClientId: (import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined) ?? '',
   isDev: import.meta.env.DEV as boolean,
   tellMitraThreadUi: (import.meta.env.VITE_MITRA_TELL_MITRA_THREAD_UI as string | undefined) ?? '0',
+  phoneAuthEnabled: (import.meta.env.VITE_PHONE_AUTH_ENABLED as string | undefined) ?? '0',
 } as const;

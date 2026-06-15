@@ -8,6 +8,13 @@ import { useRecaptcha } from "../../hooks/useRecaptcha";
 import { useAppDispatch } from "../../store/hooks";
 import { showSnackBar } from "../../store/snackBarSlice";
 import { useTranslation } from "../../lib/i18n";
+import { PhoneOtpFlow } from "../../components/PhoneOtpFlow";
+import {
+  invalidateDashboardViewCache,
+  invalidateMitraHomeV3Cache,
+} from "../../engine/mitraApi";
+import { invalidateJourneyStatusCache } from "../../hooks/useJourneyStatus";
+import { invalidateJourneyEntryViewCache } from "../../hooks/useJourneyEntryView";
 import "./Auth.css";
 
 /**
@@ -129,12 +136,29 @@ export function LoginPage() {
   const { login, socialLoginGoogle } = useAuth();
   const { t } = useTranslation();
 
+  const [authMethod, setAuthMethod] = useState<"email" | "phone">("email");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const handlePhoneAuthSuccess = async (
+    tokens?: { accessToken: string; refreshToken: string },
+    isNewUser?: boolean,
+  ) => {
+    invalidateJourneyStatusCache();
+    invalidateJourneyEntryViewCache();
+    invalidateDashboardViewCache();
+    invalidateMitraHomeV3Cache();
+    dispatch(showSnackBar(t("auth.loginSuccess")));
+    if (isNewUser) {
+      navigate("/en/onboarding", { replace: true });
+    } else {
+      navigate(returnTo, { replace: true });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -201,6 +225,29 @@ export function LoginPage() {
                 }}
               />
 
+              {WEB_ENV.phoneAuthEnabled === "1" && (
+                <div className="auth-method-toggle">
+                  <button
+                    type="button"
+                    className={`auth-tab-btn${authMethod === "email" ? " auth-tab-btn--active" : ""}`}
+                    onClick={() => { setAuthMethod("email"); setError(""); }}
+                  >
+                    Email
+                  </button>
+                  <button
+                    type="button"
+                    className={`auth-tab-btn${authMethod === "phone" ? " auth-tab-btn--active" : ""}`}
+                    onClick={() => { setAuthMethod("phone"); setError(""); }}
+                  >
+                    Phone
+                  </button>
+                </div>
+              )}
+
+              {authMethod === "phone" && WEB_ENV.phoneAuthEnabled === "1" ? (
+                <PhoneOtpFlow purpose="auth" onSuccess={handlePhoneAuthSuccess} />
+              ) : (
+                <>
               <div className="auth-divider">
                 <span>{t("auth.orSignInWithEmail")}</span>
               </div>
@@ -288,6 +335,8 @@ export function LoginPage() {
                   <Link to="/signup">{t("auth.newToKalpX")}</Link>
                 </div>
               </form>
+                </>
+              )}
             </section>
           </section>
 

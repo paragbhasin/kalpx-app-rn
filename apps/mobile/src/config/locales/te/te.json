@@ -2603,9 +2603,12 @@
     },
     "constants": {
       "lifeContext": {
+        "header": "జీవితంలో ఏ అంశం ఇప్పుడు అత్యంత ప్రభావితమవుతోంది?",
+        "skipForNow": "ఇప్పుడు దాటవేయి",
         "workCareer": "పని మరియు వృత్తి",
         "relationships": "సంబంధాలు",
         "self": "నేను స్వయంగా",
+        "myself": "నేను స్వయంగా",
         "healthEnergy": "ఆరోగ్యం మరియు శక్తి",
         "moneySecurity": "డబ్బు మరియు భద్రత",
         "purposeDirection": "లక్ష్యం మరియు దిశ",

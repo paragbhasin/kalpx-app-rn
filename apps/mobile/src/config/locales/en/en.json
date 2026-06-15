@@ -2633,9 +2633,12 @@
     },
     "constants": {
       "lifeContext": {
+        "header": "What part of life is this touching most right now?",
+        "skipForNow": "Skip for now",
         "workCareer": "Work & career",
         "relationships": "Relationships",
         "self": "Myself",
+        "myself": "Myself",
         "healthEnergy": "Health & energy",
         "moneySecurity": "Money & security",
         "purposeDirection": "Purpose & direction",

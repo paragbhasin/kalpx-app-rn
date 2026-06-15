@@ -8,3 +8,4 @@ export * from './notifications';
 export * from './whyThis';
 export * from './mitraFourDoor';
 export * from './japa';
+export * from './phoneAuth';

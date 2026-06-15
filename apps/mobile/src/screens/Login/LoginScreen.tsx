@@ -37,6 +37,8 @@ import { mitraJourneyHomeV3 } from "../../engine/mitraApi";
 import { ENV } from "../../Networks/baseURL";
 import { loginUser, socialLoginUser } from "./actions";
 import ReCaptchaRuntime from "./ReCaptchaRuntime";
+
+const PHONE_AUTH_ENABLED = process.env.EXPO_PUBLIC_PHONE_AUTH_ENABLED === '1';
 import styles from "./styles";
 
 const screenWidth = Dimensions.get("window").width;
@@ -80,10 +82,6 @@ export default function LoginScreen({ navigation }) {
 
 const resumePendingIfAny = async () => {
   try {
-    // MitraIntentionScreen ("What feels needed today?") stores this key when
-    // an unauthenticated user taps a door. Navigate directly to the target
-    // screen via the root navigation ref so we bypass Home's checkJourney
-    // (which would redirect new users to MitraStart instead).
     const mitraIntentionPending = await AsyncStorage.getItem("mitra_intention_pending");
     if (mitraIntentionPending) {
       // Map door id → HomeStack screen name. For inner_path we keep the key
@@ -770,6 +768,16 @@ if (key === "pending_classes_data") {
                 )}
               </Formik>
             </View>
+            {PHONE_AUTH_ENABLED && (
+              <TouchableOpacity
+                onPress={() => navigation.navigate("PhonePasswordLogin" as any)}
+                style={{ alignItems: "center", marginTop: 12, paddingVertical: 8 }}
+              >
+                <TextComponent type="cardText" style={{ color: "#c9a84c", textDecorationLine: "underline" }}>
+                  Sign in with Phone
+                </TextComponent>
+              </TouchableOpacity>
+            )}
             <View style={styles.skipContainer}>
               <TouchableOpacity
                 onPress={async () => {

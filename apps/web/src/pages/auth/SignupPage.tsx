@@ -14,6 +14,14 @@ import { api } from "../../lib/api";
 import { getRecaptchaToken } from "../../lib/recaptcha";
 import { useAppDispatch } from "../../store/hooks";
 import { showSnackBar } from "../../store/snackBarSlice";
+import { WEB_ENV } from "../../lib/env";
+import { PhoneOtpFlow } from "../../components/PhoneOtpFlow";
+import {
+  invalidateDashboardViewCache,
+  invalidateMitraHomeV3Cache,
+} from "../../engine/mitraApi";
+import { invalidateJourneyStatusCache } from "../../hooks/useJourneyStatus";
+import { invalidateJourneyEntryViewCache } from "../../hooks/useJourneyEntryView";
 import "./Auth.css";
 
 /**
@@ -33,6 +41,23 @@ export function SignupPage() {
   const [searchParams] = useSearchParams();
   const returnTo = searchParams.get("returnTo") || "/en/mitra";
   const { generateOtp, verifyOtp, registerUser } = useAuth();
+  const [authMethod, setAuthMethod] = useState<"email" | "phone">("email");
+
+  const handlePhoneSignupSuccess = async (
+    _tokens?: { accessToken: string; refreshToken: string },
+    isNewUser?: boolean,
+  ) => {
+    invalidateJourneyStatusCache();
+    invalidateJourneyEntryViewCache();
+    invalidateDashboardViewCache();
+    invalidateMitraHomeV3Cache();
+    dispatch(showSnackBar("Welcome to KalpX!"));
+    if (isNewUser) {
+      navigate("/en/onboarding", { replace: true });
+    } else {
+      navigate(returnTo, { replace: true });
+    }
+  };
 
   // Form State
   const [email, setEmail] = useState("");
@@ -221,6 +246,28 @@ export function SignupPage() {
               <h2 className="auth-title">Create Your Account</h2>
             </div>
 
+            {WEB_ENV.phoneAuthEnabled === "1" && (
+              <div className="auth-method-toggle">
+                <button
+                  type="button"
+                  className={`auth-tab-btn${authMethod === "email" ? " auth-tab-btn--active" : ""}`}
+                  onClick={() => setAuthMethod("email")}
+                >
+                  Email
+                </button>
+                <button
+                  type="button"
+                  className={`auth-tab-btn${authMethod === "phone" ? " auth-tab-btn--active" : ""}`}
+                  onClick={() => setAuthMethod("phone")}
+                >
+                  Phone
+                </button>
+              </div>
+            )}
+
+            {authMethod === "phone" && WEB_ENV.phoneAuthEnabled === "1" ? (
+              <PhoneOtpFlow purpose="signup" onSuccess={handlePhoneSignupSuccess} />
+            ) : (
             <form onSubmit={handleRegister} className="auth-form">
               {/* Email */}
               <div className="form-group">
@@ -418,6 +465,7 @@ export function SignupPage() {
                 Already have an account? <Link to="/login">Login</Link>
               </div>
             </form>
+            )}
           </section>
         </div>
       </main>

@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { useSelector } from 'react-redux';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../theme/colors';
 import { Fonts } from '../theme/fonts';
 import {

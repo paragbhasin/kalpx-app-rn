@@ -12,7 +12,7 @@ import {
 // it can be shown. Without a small delay, the prompt fires before the activity
 // is ready and is silently dropped.
 const AUTO_TRIGGER_DELAY_MS = Platform.OS === 'android' ? 350 : 0;
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Ionicons } from '@expo/vector-icons';
 import { OverlayMode } from '../hooks/useAppLock';
 
 type Props = {

@@ -11,6 +11,7 @@ import {
   Image,
   ImageBackground,
   KeyboardAvoidingView,
+  LayoutAnimation,
   Platform,
   SafeAreaView,
   ScrollView,
@@ -37,11 +38,21 @@ import { mitraJourneyHomeV3 } from "../../engine/mitraApi";
 import { ENV } from "../../Networks/baseURL";
 import { loginUser, socialLoginUser } from "./actions";
 import ReCaptchaRuntime from "./ReCaptchaRuntime";
+import { PHONE_AUTH_COUNTRIES, DEFAULT_PHONE_COUNTRY } from "@kalpx/types";
+import type { PhoneCountryCode, PhoneOtpVerifyResponse } from "@kalpx/types";
+import { loginWithPhone } from "../PhoneAuth/phoneAuthActions";
+import type { PhoneAuthResult } from "../PhoneAuth/phoneAuthActions";
+import { useToast } from "../../context/ToastContext";
+import { useBiometricLogin } from "../../hooks/useBiometricLogin";
 
 const PHONE_AUTH_ENABLED = process.env.EXPO_PUBLIC_PHONE_AUTH_ENABLED === '1';
+const PHONE_COUNTRY_OPTIONS = [...PHONE_AUTH_COUNTRIES];
+const COUNTRY_SHORT: Record<string, string> = { IN: "India", US: "USA", GB: "UK" };
+const NO_ACCOUNT_CODES_PHONE = new Set(["phone_not_registered", "account_not_found", "user_not_found", "no_account"]);
 import styles from "./styles";
 
 const screenWidth = Dimensions.get("window").width;
+
 
 export default function LoginScreen({ navigation }) {
   const { t } = useTranslation();
@@ -79,6 +90,21 @@ export default function LoginScreen({ navigation }) {
 
   const [loginError, setLoginError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const { showToast } = useToast();
+  const [authMethod, setAuthMethod] = useState<"email" | "phone">("email");
+  const [phoneCountry, setPhoneCountry] = useState<PhoneCountryCode>(DEFAULT_PHONE_COUNTRY);
+  const [phoneNum, setPhoneNum] = useState("");
+  const [phonePassword, setPhonePassword] = useState("");
+  const [showPhonePassword, setShowPhonePassword] = useState(false);
+  const [phoneLoading, setPhoneLoading] = useState(false);
+  const [phoneError, setPhoneError] = useState("");
+
+  const {
+    hasBiometricLogin,
+    loading: biometricLoading,
+    error: biometricError,
+    handleBiometricLogin,
+  } = useBiometricLogin();
 
 const resumePendingIfAny = async () => {
   try {
@@ -433,7 +459,13 @@ if (key === "pending_classes_data") {
   //         async (res) => {
   //           if (res.success) {
   //             await AsyncStorage.setItem("showLocationConfirm", "true");
-  //             await resumePendingIfAny();
+  //             const bio = await checkBiometricEligibility();
+  //             if (bio.eligible) {
+  //               setBiometricLabel(bio.label);
+  //               setShowBiometricPrompt(true);
+  //             } else {
+  //               await resumePendingIfAny();
+  //             }
   //           } else {
   //             setLoginError(res.error || "Apple login failed");
   //           }
@@ -499,6 +531,32 @@ if (key === "pending_classes_data") {
           setLoginError(result?.error || "Login failed");
         }
       }) as any
+    );
+  };
+
+  const selectedPhoneCountry = PHONE_COUNTRY_OPTIONS.find((c) => c.code === phoneCountry)!;
+
+  const handlePhoneLogin = () => {
+    const digits = phoneNum.replace(/\D/g, "");
+    if (digits.length < 7) { setPhoneError("Please enter a valid phone number."); return; }
+    if (!phonePassword) { setPhoneError("Please enter your password."); return; }
+    setPhoneLoading(true);
+    setPhoneError("");
+    dispatch(
+      loginWithPhone({ phone: digits, country: phoneCountry, password: phonePassword }, async (result: PhoneAuthResult<PhoneOtpVerifyResponse>) => {
+        setPhoneLoading(false);
+        if (!result.success) {
+          const { code } = result as { success: false; error: string; code?: string };
+          if (NO_ACCOUNT_CODES_PHONE.has(code ?? "")) {
+            showToast("No account found for this number. Please sign up first.", 4000, "error");
+          } else {
+            setPhoneError("Incorrect phone number or password. Please try again.");
+          }
+          return;
+        }
+        await registerDeviceToBackend();
+        await resumePendingIfAny();
+      }),
     );
   };
 
@@ -579,7 +637,176 @@ if (key === "pending_classes_data") {
                <TextComponent type="headerText" style={styles.googleText}>{t("login.apple")}</TextComponent>
             </TouchableOpacity> */}
 
+            {/* ── Login with Face ID / Biometric ── */}
+            {hasBiometricLogin && (
+              <TouchableOpacity
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#fdf3dc",
+                  paddingVertical: 12,
+                  paddingHorizontal: 20,
+                  borderRadius: 10,
+                  borderWidth: 1,
+                  borderColor: "#c9a84c",
+                  marginTop: 12,
+                  width: screenWidth * 0.85,
+                  gap: 10,
+                  opacity: biometricLoading ? 0.6 : 1,
+                }}
+                onPress={() => handleBiometricLogin(resumePendingIfAny)}
+                activeOpacity={0.85}
+                disabled={biometricLoading}
+              >
+                <Icon
+                  name={Platform.OS === "ios" ? "scan-outline" : "finger-print-outline"}
+                  size={20}
+                  color="#432104"
+                />
+                <TextComponent type="headerText" style={{ fontSize: 16, color: "#432104" }}>
+                  {biometricLoading
+                    ? "Verifying..."
+                    : Platform.OS === "ios"
+                    ? "Login with Face ID"
+                    : "Login with Biometrics"}
+                </TextComponent>
+              </TouchableOpacity>
+            )}
+            {biometricError ? (
+              <TextComponent type="cardText" style={{ color: "#c0392b", textAlign: "center", marginTop: 4, fontSize: 13 }}>
+                {biometricError}
+              </TextComponent>
+            ) : null}
+
             <View style={styles.card}>
+              {/* ── Email / Phone tabs ── */}
+              {PHONE_AUTH_ENABLED && (
+                <View style={{ flexDirection: "row", marginBottom: 16, borderBottomWidth: 1, borderBottomColor: "#e0d5c0" }}>
+                  <TouchableOpacity
+                    style={{ flex: 1, alignItems: "center", paddingVertical: 10, borderBottomWidth: 2, borderBottomColor: authMethod === "email" ? "#c9a84c" : "transparent", marginBottom: -1 }}
+                    onPress={() => { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setAuthMethod("email"); setPhoneError(""); }}
+                  >
+                    <TextComponent type="semiBoldText" style={{ color: authMethod === "email" ? "#c9a84c" : "#9e9b97" }}>
+                      Email
+                    </TextComponent>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{ flex: 1, alignItems: "center", paddingVertical: 10, borderBottomWidth: 2, borderBottomColor: authMethod === "phone" ? "#c9a84c" : "transparent", marginBottom: -1 }}
+                    onPress={() => { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setAuthMethod("phone"); setLoginError(null); }}
+                  >
+                    <TextComponent type="semiBoldText" style={{ color: authMethod === "phone" ? "#c9a84c" : "#9e9b97" }}>
+                      Phone
+                    </TextComponent>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {authMethod === "phone" && PHONE_AUTH_ENABLED ? (
+                <>
+                  <TextComponent type="loginHeaderText" style={[styles.cardTitleLine1, { marginBottom: 16 }]}>
+                    Sign in with Phone
+                  </TextComponent>
+
+                  {/* Country selector */}
+                  <View style={{ flexDirection: "row", gap: 8, marginBottom: 12 }}>
+                    {PHONE_COUNTRY_OPTIONS.map((c) => (
+                      <TouchableOpacity
+                        key={c.code}
+                        onPress={() => setPhoneCountry(c.code)}
+                        disabled={phoneLoading}
+                        style={{ flex: 1, paddingVertical: 10, borderWidth: 1, borderColor: phoneCountry === c.code ? "#c9a84c" : "#e0d5c0", borderRadius: 8, alignItems: "center", justifyContent: "center", backgroundColor: phoneCountry === c.code ? "#fdf3dc" : "transparent" }}
+                      >
+                        <TextComponent type="cardText" style={{ fontSize: 13, color: "#432104", fontWeight: "600" }}>
+                          {c.dialCode}
+                        </TextComponent>
+                        <TextComponent type="cardText" style={{ fontSize: 10, color: phoneCountry === c.code ? "#432104" : "#888", marginTop: 2 }}>
+                          {COUNTRY_SHORT[c.code] ?? c.code}
+                        </TextComponent>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+
+                  {/* Phone number input */}
+                  <View style={{ flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: "#e0d5c0", borderRadius: 8, paddingHorizontal: 12, height: 48, marginBottom: 12 }}>
+                    <TextComponent type="cardText" style={{ color: "#432104", marginRight: 8, fontWeight: "600" }}>
+                      {selectedPhoneCountry.dialCode}
+                    </TextComponent>
+                    <TextInput
+                      style={{ flex: 1, fontSize: 15, color: "#1a1a1a" }}
+                      value={phoneNum}
+                      onChangeText={setPhoneNum}
+                      placeholder={selectedPhoneCountry.placeholder}
+                      keyboardType="phone-pad"
+                      editable={!phoneLoading}
+                      placeholderTextColor="#9e9b97"
+                    />
+                  </View>
+
+                  {/* Password input */}
+                  <View style={{ flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: "#e0d5c0", borderRadius: 8, paddingHorizontal: 12, height: 48 }}>
+                    <TextInput
+                      style={{ flex: 1, fontSize: 15, color: "#1a1a1a" }}
+                      value={phonePassword}
+                      onChangeText={setPhonePassword}
+                      placeholder="Password"
+                      placeholderTextColor="#9e9b97"
+                      secureTextEntry={!showPhonePassword}
+                      autoComplete="current-password"
+                      editable={!phoneLoading}
+                      returnKeyType="go"
+                      onSubmitEditing={handlePhoneLogin}
+                    />
+                    <TouchableOpacity onPress={() => setShowPhonePassword(!showPhonePassword)} style={{ paddingHorizontal: 8 }}>
+                      <Icon name={showPhonePassword ? "eye" : "eye-off"} size={20} color="#6c4b2f" />
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={{ alignItems: "flex-end", marginTop: 8 }}>
+                    <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
+                      <TextComponent type="semiBoldText" style={styles.forgot}>
+                        {t("login.forgotPassword")}
+                      </TextComponent>
+                    </TouchableOpacity>
+                  </View>
+
+                  {!!phoneError && (
+                    <TextComponent type="mediumText" style={styles.error}>{phoneError}</TextComponent>
+                  )}
+
+                  <LoadingButton
+                    text="Sign in"
+                    onPress={handlePhoneLogin}
+                    loading={phoneLoading}
+                    disabled={phoneLoading || phoneNum.replace(/\D/g, "").length < 7 || !phonePassword}
+                    style={styles.button}
+                    textStyle={styles.buttonText}
+                    loaderColor="#fff"
+                  />
+
+                  {/* <TouchableOpacity
+                    onPress={() => navigation.navigate("PhoneInput" as any, { purpose: "otp_login" })}
+                    style={{ marginTop: 12, alignItems: "center" }}
+                    disabled={phoneLoading}
+                  >
+                    <TextComponent type="cardText" style={{ color: "#c9a84c", fontSize: 13, textDecorationLine: "underline" }}>
+                      Login with OTP instead
+                    </TextComponent>
+                  </TouchableOpacity> */}
+
+                  <View style={styles.footerContainer}>
+                    <TextComponent type="cardText" style={styles.footer}>
+                      {t("login.footer")}{" "}
+                    </TextComponent>
+                    <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+                      <TextComponent type="cardText" style={styles.login}>
+                        {t("login.register")}
+                      </TextComponent>
+                    </TouchableOpacity>
+                  </View>
+                </>
+              ) : (
+                <>
               <TextComponent
                 type="loginHeaderText"
                 style={styles.cardTitleLine1}
@@ -605,7 +832,6 @@ if (key === "pending_classes_data") {
                 validationSchema={LoginSchema}
                 onSubmit={(values) => {
                   formikValuesRef.current = values;
-                  // Dev API accepts bypass tokens; production API requires a real token.
                   if (ENV === "dev") {
                     handleRecaptchaToken("dev-bypass-token");
                   } else {
@@ -636,7 +862,7 @@ if (key === "pending_classes_data") {
                       style={styles.input}
                       placeholder={t("login.username")}
                       placeholderTextColor="#9e9b97"
-                      value={values.username.normalize("NFC")} // ✅ normalize Unicode rendering
+                      value={values.username.normalize("NFC")}
                       onChangeText={handleChange("username")}
                       onBlur={handleBlur("username")}
                       testID="login_email_input"
@@ -767,17 +993,9 @@ if (key === "pending_classes_data") {
                   </>
                 )}
               </Formik>
+                </>
+              )}
             </View>
-            {PHONE_AUTH_ENABLED && (
-              <TouchableOpacity
-                onPress={() => navigation.navigate("PhonePasswordLogin" as any)}
-                style={{ alignItems: "center", marginTop: 12, paddingVertical: 8 }}
-              >
-                <TextComponent type="cardText" style={{ color: "#c9a84c", textDecorationLine: "underline" }}>
-                  Sign in with Phone
-                </TextComponent>
-              </TouchableOpacity>
-            )}
             <View style={styles.skipContainer}>
               <TouchableOpacity
                 onPress={async () => {
@@ -795,6 +1013,7 @@ if (key === "pending_classes_data") {
           </ScrollView>
         </ImageBackground>
       </KeyboardAvoidingView>
+
     </SafeAreaView>
   );
 }

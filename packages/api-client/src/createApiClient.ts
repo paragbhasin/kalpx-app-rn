@@ -62,6 +62,18 @@ export function createApiClient(config: ApiClientConfig): AxiosInstance {
     return cfg;
   });
 
+  // Auth endpoints return 401 for invalid credentials — never attempt refresh on these
+  const AUTH_ENDPOINTS = [
+    '/users/login/',
+    '/auth/phone/request-otp/',
+    '/auth/phone/verify-otp/',
+    '/auth/phone/resend-otp/',
+    '/users/generate_otp/',
+    '/users/verify_otp/',
+    '/token/refresh/',
+  ];
+  const isAuthEndpoint = (url = '') => AUTH_ENDPOINTS.some((p) => url.includes(p));
+
   // --- response interceptor — 401 refresh + retry ---
   instance.interceptors.response.use(
     (response) => response,
@@ -69,7 +81,7 @@ export function createApiClient(config: ApiClientConfig): AxiosInstance {
       const originalRequest = error.config;
       const status = error.response?.status;
 
-      if (status === 401 && !originalRequest._retry) {
+      if (status === 401 && !originalRequest._retry && !isAuthEndpoint(originalRequest.url)) {
         if (isRefreshing) {
           return new Promise<string>((resolve, reject) => {
             failedQueue.push({ resolve, reject });

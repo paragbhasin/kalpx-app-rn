@@ -6,29 +6,35 @@
 
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import TellMitraContainer from "../../containers/TellMitraContainer";
 import { Fonts } from "../../theme/fonts";
 import { sfs } from "../../utils/responsive";
 
 export default function TellMitraScreen() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <KeyboardAvoidingView
+      style={[styles.root, { backgroundColor: '#FAF7F2' }]}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? insets.top + 45 : 0}
+    >
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{t("tellMitraThread.title")}</Text>
       </View>
-      <View style={styles.body}>
+      <View style={[styles.body, { paddingBottom: insets.bottom }]}>
         <TellMitraContainer />
       </View>
-    </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  root: {
     flex: 1,
-    backgroundColor: '#FAF7F2',
   },
   header: {
     flexDirection: "row",

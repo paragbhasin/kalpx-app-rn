@@ -57,8 +57,10 @@ import { registerDeviceToBackend } from "./src/utils/registerDevice";
 
 import UpdateModal from "./src/components/UpdateModal";
 import { AppLockOverlay } from "./src/components/AppLockOverlay";
+import BiometricPromptModal from "./src/components/BiometricPromptModal";
 import { useUpdateCheck } from "./src/hooks/useUpdateCheck";
 import { useAppLock } from "./src/hooks/useAppLock";
+import { useBiometricPrompt } from "./src/hooks/useBiometricPrompt";
 
 const TransparentTheme = {
   ...DefaultTheme,
@@ -149,6 +151,12 @@ function AppInner({ initialRoute, navigationRef }) {
 
   const { showUpdate, updateType, dismissUpdate } = useUpdateCheck();
   const { overlayMode, handleUnlock } = useAppLock();
+  const {
+    showPrompt: showBiometricPrompt,
+    biometricLabel,
+    handleEnable: handleBiometricEnable,
+    handleDismiss: handleBiometricDismiss,
+  } = useBiometricPrompt();
 
   const handleOpenStore = () => {
     const url =
@@ -273,6 +281,12 @@ function AppInner({ initialRoute, navigationRef }) {
       {overlayMode !== 'hidden' && (
         <AppLockOverlay mode={overlayMode} onUnlock={handleUnlock} />
       )}
+      <BiometricPromptModal
+        visible={showBiometricPrompt}
+        biometricLabel={biometricLabel}
+        onEnable={handleBiometricEnable}
+        onDismiss={handleBiometricDismiss}
+      />
     </View>
   );
 }

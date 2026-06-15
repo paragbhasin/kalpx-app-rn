@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import * as LocalAuthentication from 'expo-local-authentication';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useDispatch, useSelector } from 'react-redux';
@@ -15,6 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import TextComponent from '../../components/TextComponent';
 import { RootState } from '../../store';
 import { setPreference } from '../../store/preferencesSlice';
+import { BIOMETRIC_TOKEN_KEY, BIOMETRIC_REGISTERED_KEY } from '../../utils/biometricKeys';
 
 const BRAND = '#a67c52';
 const GOLD = '#C9A84C';
@@ -83,6 +86,14 @@ const SecurityScreen = () => {
         });
         if (result.success) {
           dispatch(setPreference({ key: 'app_lock_enabled', value: true }));
+          // Also register biometric login so "Login with Face ID" appears on login screen
+          const refreshToken = await AsyncStorage.getItem('refresh_token');
+          if (refreshToken) {
+            await SecureStore.setItemAsync(BIOMETRIC_TOKEN_KEY, refreshToken, {
+              requireAuthentication: true,
+            });
+            await AsyncStorage.setItem(BIOMETRIC_REGISTERED_KEY, '1');
+          }
         } else if (
           result.error === 'not_available' ||
           result.error === 'not_enrolled'
@@ -97,6 +108,9 @@ const SecurityScreen = () => {
         // Cancelled: leave toggle off, no alert needed
       } else {
         dispatch(setPreference({ key: 'app_lock_enabled', value: false }));
+        // Also remove biometric login registration
+        await AsyncStorage.removeItem(BIOMETRIC_REGISTERED_KEY);
+        await SecureStore.deleteItemAsync(BIOMETRIC_TOKEN_KEY).catch(() => {});
       }
     } catch {
       // swallow

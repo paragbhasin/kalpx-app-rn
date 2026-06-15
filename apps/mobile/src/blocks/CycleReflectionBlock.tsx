@@ -32,6 +32,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import store from "../store";
 import { loadScreenWithData, screenActions } from "../store/screenSlice";
 import { Fonts } from "../theme/fonts";
+import { useAppRating } from "../hooks/useAppRating";
 
 // Assets (imported as components via react-native-svg-transformer)
 
@@ -63,6 +64,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   const { screenData, currentStateId } = useScreenStore();
   const { showToast } = useToast();
   const navigation = useNavigation<any>();
+  const { recordAndMaybePrompt: maybeRating, renderRatingModal } = useAppRating();
   const ss = screenData as Record<string, any>;
   const checkpointDayNum = Number(ss.checkpoint_day || 0);
   const dayNumberNum = Number(ss.day_number || 0);
@@ -508,7 +510,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
         );
         // Branch B: checkpoint completed — return to Inner Path (journey continues).
         clearContinueJourneyHomeCache();
-        navigation.navigate("InnerPath" as any);
+        maybeRating('inner_path', () => navigation.navigate("InnerPath" as any));
       }
     } catch (err: any) {
       console.warn(`[CycleReflectionBlock] day7 submit failed:`, err.message);
@@ -646,7 +648,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           }) as any,
         );
         clearContinueJourneyHomeCache();
-        navigation.navigate("InnerPath" as any);
+        maybeRating('inner_path', () => navigation.navigate("InnerPath" as any));
       }
     } catch (err: any) {
       console.warn(`[CycleReflectionBlock] day14 submit failed:`, err.message);
@@ -843,6 +845,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     (is7DayCycle || is14DayCycle)
   ) {
     return (
+      <>
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{ padding: 10 }}
@@ -1088,6 +1091,8 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           </TouchableOpacity>
         )}
       </ScrollView>
+      {renderRatingModal()}
+      </>
     );
   }
 
@@ -1113,6 +1118,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
       : d14.deepen_practice_cta || "Deepen  Practice";
 
     return (
+      <>
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
@@ -1271,6 +1277,8 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      {renderRatingModal()}
+      </>
     );
   }
 

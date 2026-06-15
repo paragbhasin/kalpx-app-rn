@@ -19,14 +19,18 @@ import { PHONE_AUTH_COUNTRIES, DEFAULT_PHONE_COUNTRY } from "@kalpx/types";
 import type { PhoneCountryCode } from "@kalpx/types";
 import { RootState } from "../../store";
 import { requestPhoneOtp } from "./phoneAuthActions";
+import { useToast } from "../../context/ToastContext";
 import type { PhoneAuthResult } from "./phoneAuthActions";
 import type { PhoneOtpRequestResponse } from "@kalpx/types";
 
 const COUNTRY_OPTIONS = [...PHONE_AUTH_COUNTRIES];
+const COUNTRY_SHORT: Record<string, string> = { IN: "India", US: "USA", GB: "UK" };
+const NO_ACCOUNT_CODES = new Set(["phone_not_registered", "account_not_found", "user_not_found", "no_account"]);
 
 export default function PhoneInputScreen({ navigation, route }) {
   const purpose = route?.params?.purpose ?? "otp_login";
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
+  const { showToast } = useToast();
 
   const [country, setCountry] = useState<PhoneCountryCode>(DEFAULT_PHONE_COUNTRY);
   const [phone, setPhone] = useState("");
@@ -50,7 +54,9 @@ export default function PhoneInputScreen({ navigation, route }) {
         setLoading(false);
         if (!result.success) {
           const { code, error } = result as { success: false; error: string; code?: string };
-          if (code === "phone_auth_disabled") {
+          if (NO_ACCOUNT_CODES.has(code ?? "")) {
+            showToast("No account found for this number. Please sign up first.", 4000, "error");
+          } else if (code === "phone_auth_disabled") {
             setError("Phone login is not available yet. Please use email to sign in.");
           } else {
             setError(error || "Failed to send OTP. Please try again.");
@@ -102,7 +108,13 @@ export default function PhoneInputScreen({ navigation, route }) {
                       type="cardText"
                       style={[styles.countryBtnText, country === c.code && styles.countryBtnTextActive]}
                     >
-                      {c.dialCode} {c.label}
+                      {c.dialCode}
+                    </TextComponent>
+                    <TextComponent
+                      type="cardText"
+                      style={[styles.countryBtnSub, country === c.code && styles.countryBtnTextActive]}
+                    >
+                      {COUNTRY_SHORT[c.code] ?? c.code}
                     </TextComponent>
                   </TouchableOpacity>
                 ))}
@@ -131,6 +143,8 @@ export default function PhoneInputScreen({ navigation, route }) {
                 loading={loading}
                 disabled={loading || phone.replace(/\D/g, "").length < 7}
                 style={styles.btn}
+                textStyle={styles.btnText}
+                loaderColor="#fff"
               />
             </View>
           </ScrollView>
@@ -150,13 +164,15 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 20, fontWeight: "700", marginBottom: 8, color: "#432104" },
   hint: { color: "#666", marginBottom: 16, fontSize: 13 },
   countryRow: { flexDirection: "row", gap: 8, marginBottom: 12 },
-  countryBtn: { flex: 1, paddingVertical: 8, borderWidth: 1, borderColor: "#e0d5c0", borderRadius: 8, alignItems: "center" },
+  countryBtn: { flex: 1, paddingVertical: 10, borderWidth: 1, borderColor: "#e0d5c0", borderRadius: 8, alignItems: "center", justifyContent: "center" },
   countryBtnActive: { borderColor: "#c9a84c", backgroundColor: "#fdf3dc" },
-  countryBtnText: { fontSize: 11, color: "#666" },
+  countryBtnText: { fontSize: 13, color: "#432104", fontWeight: "600" },
+  countryBtnSub: { fontSize: 10, color: "#888", marginTop: 2 },
   countryBtnTextActive: { color: "#432104", fontWeight: "600" },
   phoneRow: { flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: "#e0d5c0", borderRadius: 8, paddingHorizontal: 12, marginBottom: 12, height: 48 },
   dialCode: { color: "#432104", marginRight: 8, fontWeight: "600" },
   phoneInput: { flex: 1, fontSize: 16, color: "#1a1a1a" },
   error: { color: "#c0392b", marginBottom: 8, fontSize: 13 },
-  btn: { marginTop: 8 },
+  btn: { marginTop: 8, backgroundColor: "#c9a84c", borderRadius: 10 },
+  btnText: { color: "#fff", fontSize: 16, fontWeight: "700" },
 });

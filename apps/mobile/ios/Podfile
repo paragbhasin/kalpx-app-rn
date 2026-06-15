@@ -62,20 +62,24 @@ target 'kalpx' do
       end
     end
 
-    # Fix: RNFB Core Configuration declares $(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH) as an
-    # input path, which creates a build-phase cycle (Info.plist is produced during the
-    # same build). Direct text patch on pbxproj removes the cycle reliably.
+    # Fix: RNFB Core Configuration script declares Info.plist as an inputPath, creating
+    # a build-phase cycle with the widget copy step. We mark it alwaysOutOfDate (bypasses
+    # dependency analysis) and clear its inputPaths so Xcode can order phases freely.
     pbxproj_path = File.join(File.dirname(__FILE__), 'kalpx.xcodeproj', 'project.pbxproj')
-    pbxproj = File.read(pbxproj_path)
-    old_block = "C470A298BAFC82582BBFCF95 /* [CP-User] [RNFB] Core Configuration */ = {\n\t\t\tisa = PBXShellScriptBuildPhase;\n\t\t\tbuildActionMask = 2147483647;\n\t\t\tfiles = (\n\t\t\t);\n\t\t\tinputPaths = (\n\t\t\t\t\"$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)\",\n\t\t\t);"
-    new_block = "C470A298BAFC82582BBFCF95 /* [CP-User] [RNFB] Core Configuration */ = {\n\t\t\tisa = PBXShellScriptBuildPhase;\n\t\t\talwaysOutOfDate = 1;\n\t\t\tbuildActionMask = 2147483647;\n\t\t\tfiles = (\n\t\t\t);\n\t\t\tinputPaths = (\n\t\t\t);"
-    if pbxproj.include?(old_block)
-      File.write(pbxproj_path, pbxproj.gsub(old_block, new_block))
-      puts "post_install: fixed RNFB Core Configuration build phase (text patch)"
-    elsif pbxproj.include?("alwaysOutOfDate = 1")
-      puts "post_install: RNFB Core Configuration already patched"
+    content = File.read(pbxproj_path)
+    rnfb_already_patched = content.match?(/C470A298BAFC82582BBFCF95[^\}]*alwaysOutOfDate/)
+    if content.include?('C470A298BAFC82582BBFCF95') && !rnfb_already_patched
+      content = content.gsub(
+        /(C470A298BAFC82582BBFCF95[^\n]*\n\s*isa = PBXShellScriptBuildPhase;)/,
+        "\\1\n\t\t\talwaysOutOfDate = 1;"
+      )
+      content = content.gsub(/[ \t]*"\$\(BUILT_PRODUCTS_DIR\)\/\$\(INFOPLIST_PATH\)",?\n/, '')
+      File.write(pbxproj_path, content)
+      puts "post_install: patched RNFB Core Configuration (cycle fix applied)"
+    elsif !content.include?('C470A298BAFC82582BBFCF95')
+      puts "post_install: WARNING - RNFB UUID not found in pbxproj"
     else
-      puts "post_install: WARNING - could not find RNFB Core Configuration block to patch"
+      puts "post_install: RNFB Core Configuration already patched"
     end
   end
 end

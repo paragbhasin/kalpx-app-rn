@@ -20,9 +20,8 @@ export default function TellMitraScreen() {
     <KeyboardAvoidingView
       style={[styles.root, { backgroundColor: '#FAF7F2' }]}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={0}
+      keyboardVerticalOffset={Platform.OS === "ios" ? insets.top + 45 : 0}
     >
-      <View style={{ height: insets.top, backgroundColor: '#FAF7F2' }} />
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{t("tellMitraThread.title")}</Text>
       </View>

@@ -10,6 +10,7 @@ import {
   mitraTrackCompletion,
 } from "../../../engine/mitraApi";
 import { setHomeData } from "../../../store/doorSlice";
+import { useAppRating } from "../../../hooks/useAppRating";
 
 const BEIGE_BG = require("../../../../assets/beige_bg.webp");
 
@@ -21,6 +22,7 @@ export default function RhythmPracticeCompletion() {
   const completedRef = useRef(false);
   const COPY = useCompletionCopy("rhythm_practice");
   const [badge, setBadge] = useState<string>(COPY.pending);
+  const { recordAndMaybePrompt, renderRatingModal } = useAppRating();
 
   useEffect(() => {
     if (completedRef.current) return;
@@ -30,7 +32,10 @@ export default function RhythmPracticeCompletion() {
       mitraRhythmComplete(slot, item_id),
       mitraTrackCompletion({ itemType: "practice", itemId: item_id, source: "rhythm_daily", journeyId, dayNumber }),
     ])
-      .then(([result]) => setBadge(result ? COPY.badgeSuccess : COPY.failure))
+      .then(([result]) => {
+        setBadge(result ? COPY.badgeSuccess : COPY.failure);
+        setTimeout(() => recordAndMaybePrompt('rhythm'), 1500);
+      })
       .catch(() => setBadge(COPY.failure));
   }, []);
 
@@ -54,6 +59,7 @@ export default function RhythmPracticeCompletion() {
           testID={__DEV__ ? "test_rhythm_practice_completion_return" : undefined}
         />
       </ImageBackground>
+      {renderRatingModal()}
     </SafeAreaView>
   );
 }

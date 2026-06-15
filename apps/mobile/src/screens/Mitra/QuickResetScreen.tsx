@@ -54,6 +54,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Fonts } from "../../theme/fonts";
 import { platformShadow } from "../../theme/shadows";
 import { sfs } from "../../utils/responsive";
+import { useAppRating } from "../../hooks/useAppRating";
 
 type Phase = "loading" | "opening" | "preview" | "done" | "error";
 const VISUAL_BEAD_COUNT = 18;
@@ -311,6 +312,7 @@ export default function QuickResetScreen({
   const ringSpin = useRef(new Animated.Value(0)).current;
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+  const { recordAndMaybePrompt: maybeRating, renderRatingModal } = useAppRating();
   const ringSize = isTablet ? 310 : 230;
   const ringCenter = ringSize / 2;
   const ringRadius = isTablet ? 120 : 86;
@@ -356,16 +358,14 @@ export default function QuickResetScreen({
     if (!returnToFourDoorOnToastClose) return;
 
     setReturnToFourDoorOnToastClose(false);
-    if (embedded) {
-      goBack();
-      return;
-    }
-    if (navigation.canGoBack()) {
-      navigation.goBack();
-      return;
-    }
-    rootNavigate("Home");
-  }, [embedded, goBack, navigation, returnToFourDoorOnToastClose]);
+    const doNavigate = () => {
+      if (embedded) { goBack(); return; }
+      if (navigation.canGoBack()) { navigation.goBack(); return; }
+      rootNavigate("Home");
+    };
+    console.log('[AppRating] calling maybeRating quick_chant');
+    maybeRating('quick_chant', doNavigate);
+  }, [embedded, goBack, maybeRating, navigation, returnToFourDoorOnToastClose]);
 
   useEffect(() => {
     if (!mantraUpdatedToastVisible) return;
@@ -821,6 +821,7 @@ export default function QuickResetScreen({
             message={highlightedToastMessage}
             onClose={handleHighlightedToastClose}
           />
+          {renderRatingModal()}
         </View>
       </SafeAreaView>
     );
@@ -848,6 +849,7 @@ export default function QuickResetScreen({
             message={highlightedToastMessage}
             onClose={handleHighlightedToastClose}
           />
+          {renderRatingModal()}
         </View>
       </SafeAreaView>
     );
@@ -901,6 +903,7 @@ export default function QuickResetScreen({
             onClose={handleHighlightedToastClose}
           />
         </View>
+        {renderRatingModal()}
       </SafeAreaView>
     );
   }

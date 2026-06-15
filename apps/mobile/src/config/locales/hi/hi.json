@@ -2614,26 +2614,6 @@
       "dailyLife": "रोज़मर्रा का जीवन",
       "skipForNow": "अभी छोड़ें"
     },
-    "constants": {
-      "lifeContext": {
-        "workCareer": "काम और करियर",
-        "relationships": "रिश्ते",
-        "self": "मैं स्वयं",
-        "healthEnergy": "स्वास्थ्य और ऊर्जा",
-        "moneySecurity": "पैसा और सुरक्षा",
-        "purposeDirection": "मकसद और दिशा",
-        "dailyLife": "रोज़मर्रा का जीवन"
-      },
-      "actionKind": {
-        "runnerMantra": "मंत्र",
-        "runnerSankalp": "संकल्प",
-        "runnerPractice": "अभ्यास",
-        "teaching": "शिक्षण",
-        "inquiry": "जिज्ञासा",
-        "inRoomStep": "चरण",
-        "inRoomCarry": "संकल्प"
-      }
-    },
     "whyThis": {
       "unavailable": "इस सिफारिश का कारण अभी उपलब्ध नहीं है।",
       "letThisStay": "यह मेरे साथ रहे",

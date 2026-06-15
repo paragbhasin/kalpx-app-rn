@@ -3,6 +3,8 @@ import { AnyAction } from "@reduxjs/toolkit";
 import { Formik } from "formik";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+const PHONE_AUTH_ENABLED = process.env.EXPO_PUBLIC_PHONE_AUTH_ENABLED === '1';
 import {
   Dimensions,
   ImageBackground,
@@ -614,6 +616,17 @@ export default function SignupScreen({ navigation }) {
                         </TextComponent>
                       </TouchableOpacity>
                     </View>
+
+                    {PHONE_AUTH_ENABLED && (
+                      <TouchableOpacity
+                        onPress={() => navigation.navigate("PhoneInput" as any, { purpose: "signup" })}
+                        style={{ alignItems: "center", marginTop: 12, paddingVertical: 8 }}
+                      >
+                        <TextComponent type="cardText" style={{ color: "#c9a84c", textDecorationLine: "underline" }}>
+                          Sign up with Phone instead
+                        </TextComponent>
+                      </TouchableOpacity>
+                    )}
                   </>
                 );
               }}

@@ -770,7 +770,7 @@ if (key === "pending_classes_data") {
             </View>
             {PHONE_AUTH_ENABLED && (
               <TouchableOpacity
-                onPress={() => navigation.navigate("PhoneInput" as any, { purpose: "auth" })}
+                onPress={() => navigation.navigate("PhonePasswordLogin" as any)}
                 style={{ alignItems: "center", marginTop: 12, paddingVertical: 8 }}
               >
                 <TextComponent type="cardText" style={{ color: "#c9a84c", textDecorationLine: "underline" }}>

@@ -25,6 +25,7 @@ import TravelPlannerScreen from "../../screens/Home/TravelPlannerScreen";
 import LoginScreen from "../../screens/Login/LoginScreen";
 import PhoneInputScreen from "../../screens/PhoneAuth/PhoneInputScreen";
 import PhoneOtpVerifyScreen from "../../screens/PhoneAuth/PhoneOtpVerifyScreen";
+import PhonePasswordLoginScreen from "../../screens/PhoneAuth/PhonePasswordLoginScreen";
 import OnlineclassesScreen from "../../screens/OnlineclassesScreen";
 import Language from "../../screens/Profile/Language";
 import Privacy from "../../screens/Profile/Privacy";
@@ -53,6 +54,7 @@ const Routes = ({ initialRouteName = "AppDrawer" }) => {
       <Stack.Screen name="Signup" component={SignupScreen} />
       <Stack.Screen name="PhoneInput" component={PhoneInputScreen} options={{ headerShown: false }} />
       <Stack.Screen name="PhoneOtpVerify" component={PhoneOtpVerifyScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="PhonePasswordLogin" component={PhonePasswordLoginScreen} options={{ headerShown: false }} />
       <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
       <Stack.Screen name="VerificationScreen" component={VerificationScreen} />
       <Stack.Screen name="SetNewPasswordScreen" component={SetNewPasswordScreen} />

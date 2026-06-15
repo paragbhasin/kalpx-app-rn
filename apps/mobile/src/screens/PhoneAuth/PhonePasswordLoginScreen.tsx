@@ -13,57 +13,51 @@ import {
 import { useDispatch } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
 import { AnyAction } from "@reduxjs/toolkit";
+import Icon from "react-native-vector-icons/Ionicons";
 import TextComponent from "../../components/TextComponent";
 import LoadingButton from "../../components/LoadingButton";
 import { PHONE_AUTH_COUNTRIES, DEFAULT_PHONE_COUNTRY } from "@kalpx/types";
-import type { PhoneCountryCode } from "@kalpx/types";
+import type { PhoneCountryCode, PhoneOtpVerifyResponse } from "@kalpx/types";
 import { RootState } from "../../store";
-import { requestPhoneOtp } from "./phoneAuthActions";
+import { loginWithPhone } from "./phoneAuthActions";
 import type { PhoneAuthResult } from "./phoneAuthActions";
-import type { PhoneOtpRequestResponse } from "@kalpx/types";
+import { resumePendingIfAny } from "../../utils/resumePending";
 
 const COUNTRY_OPTIONS = [...PHONE_AUTH_COUNTRIES];
 
-export default function PhoneInputScreen({ navigation, route }) {
-  const purpose = route?.params?.purpose ?? "otp_login";
+export default function PhonePasswordLoginScreen({ navigation }) {
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
 
   const [country, setCountry] = useState<PhoneCountryCode>(DEFAULT_PHONE_COUNTRY);
   const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const selectedCountry = COUNTRY_OPTIONS.find((c) => c.code === country)!;
-  const dialCode = selectedCountry.dialCode;
-  const placeholder = selectedCountry.placeholder;
 
-  const handleSendOtp = () => {
+  const handleLogin = () => {
     const digits = phone.replace(/\D/g, "");
     if (digits.length < 7) {
       setError("Please enter a valid phone number.");
       return;
     }
+    if (!password) {
+      setError("Please enter your password.");
+      return;
+    }
     setLoading(true);
     setError("");
     dispatch(
-      requestPhoneOtp({ phone: digits, country, purpose }, (result: PhoneAuthResult<PhoneOtpRequestResponse>) => {
+      loginWithPhone({ phone: digits, country, password }, (result: PhoneAuthResult<PhoneOtpVerifyResponse>) => {
         setLoading(false);
         if (!result.success) {
-          const { code, error } = result as { success: false; error: string; code?: string };
-          if (code === "phone_auth_disabled") {
-            setError("Phone login is not available yet. Please use email to sign in.");
-          } else {
-            setError(error || "Failed to send OTP. Please try again.");
-          }
+          const { error } = result as { success: false; error: string };
+          setError(error || "Invalid credentials");
           return;
         }
-        navigation.navigate("PhoneOtpVerify" as any, {
-          sessionToken: result.data.session_token,
-          maskedPhone: result.data.masked_phone,
-          cooldownSeconds: result.data.cooldown_seconds,
-          otpExpirySeconds: result.data.otp_expiry_seconds,
-          purpose,
-        });
+        resumePendingIfAny(navigation);
       }),
     );
   };
@@ -71,25 +65,18 @@ export default function PhoneInputScreen({ navigation, route }) {
   return (
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <ImageBackground
-          source={require("../../../assets/hoomepagebg.webp")}
-          style={styles.bg}
-        >
+        <ImageBackground source={require("../../../assets/hoomepagebg.webp")} style={styles.bg}>
           <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
             {navigation.canGoBack() && (
               <TouchableOpacity onPress={() => navigation.goBack()} style={styles.back}>
-                <TextComponent type="cardText" style={{ color: "#432104", fontSize: 22 }}>‹</TextComponent>
+                <Icon name="chevron-back" size={26} color="#432104" />
               </TouchableOpacity>
             )}
             <TextComponent type="headerBigText" style={styles.brand}>KalpX</TextComponent>
 
             <View style={styles.card}>
               <TextComponent type="loginHeaderText" style={styles.cardTitle}>Sign in with Phone</TextComponent>
-              <TextComponent type="cardText" style={styles.hint}>
-                We'll send a one-time code to verify your number.
-              </TextComponent>
 
-              {/* Country selector — 3 inline buttons */}
               <View style={styles.countryRow}>
                 {COUNTRY_OPTIONS.map((c) => (
                   <TouchableOpacity
@@ -108,17 +95,35 @@ export default function PhoneInputScreen({ navigation, route }) {
                 ))}
               </View>
 
-              <View style={styles.phoneRow}>
-                <TextComponent type="cardText" style={styles.dialCode}>{dialCode}</TextComponent>
+              <View style={styles.inputRow}>
+                <TextComponent type="cardText" style={styles.dialCode}>{selectedCountry.dialCode}</TextComponent>
                 <TextInput
-                  style={styles.phoneInput}
+                  style={styles.textInput}
                   value={phone}
                   onChangeText={setPhone}
-                  placeholder={placeholder}
+                  placeholder={selectedCountry.placeholder}
                   keyboardType="phone-pad"
                   editable={!loading}
                   autoFocus
                 />
+              </View>
+
+              <View style={[styles.inputRow, { marginTop: 12 }]}>
+                <TextInput
+                  style={[styles.textInput, { flex: 1 }]}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="Password"
+                  placeholderTextColor="#9e9b97"
+                  secureTextEntry={!showPassword}
+                  autoComplete="current-password"
+                  editable={!loading}
+                  returnKeyType="go"
+                  onSubmitEditing={handleLogin}
+                />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ paddingHorizontal: 8 }}>
+                  <Icon name={showPassword ? "eye" : "eye-off"} size={20} color="#6c4b2f" />
+                </TouchableOpacity>
               </View>
 
               {!!error && (
@@ -126,12 +131,20 @@ export default function PhoneInputScreen({ navigation, route }) {
               )}
 
               <LoadingButton
-                text="Send OTP"
-                onPress={handleSendOtp}
+                text="Sign in"
+                onPress={handleLogin}
                 loading={loading}
-                disabled={loading || phone.replace(/\D/g, "").length < 7}
+                disabled={loading || phone.replace(/\D/g, "").length < 7 || !password}
                 style={styles.btn}
               />
+
+              <TouchableOpacity
+                onPress={() => navigation.navigate("PhoneInput" as any, { purpose: "otp_login" })}
+                style={styles.otpLink}
+                disabled={loading}
+              >
+                <TextComponent type="cardText" style={styles.otpLinkText}>Login with OTP instead</TextComponent>
+              </TouchableOpacity>
             </View>
           </ScrollView>
         </ImageBackground>
@@ -147,16 +160,17 @@ const styles = StyleSheet.create({
   back: { padding: 8, alignSelf: "flex-start" },
   brand: { textAlign: "center", marginBottom: 20, color: "#432104" },
   card: { backgroundColor: "#fffdf7", borderRadius: 16, padding: 24, shadowColor: "#000", shadowOpacity: 0.08, shadowRadius: 12, elevation: 4 },
-  cardTitle: { fontSize: 20, fontWeight: "700", marginBottom: 8, color: "#432104" },
-  hint: { color: "#666", marginBottom: 16, fontSize: 13 },
+  cardTitle: { fontSize: 20, fontWeight: "700", marginBottom: 16, color: "#432104" },
   countryRow: { flexDirection: "row", gap: 8, marginBottom: 12 },
   countryBtn: { flex: 1, paddingVertical: 8, borderWidth: 1, borderColor: "#e0d5c0", borderRadius: 8, alignItems: "center" },
   countryBtnActive: { borderColor: "#c9a84c", backgroundColor: "#fdf3dc" },
   countryBtnText: { fontSize: 11, color: "#666" },
   countryBtnTextActive: { color: "#432104", fontWeight: "600" },
-  phoneRow: { flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: "#e0d5c0", borderRadius: 8, paddingHorizontal: 12, marginBottom: 12, height: 48 },
+  inputRow: { flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: "#e0d5c0", borderRadius: 8, paddingHorizontal: 12, height: 48 },
   dialCode: { color: "#432104", marginRight: 8, fontWeight: "600" },
-  phoneInput: { flex: 1, fontSize: 16, color: "#1a1a1a" },
-  error: { color: "#c0392b", marginBottom: 8, fontSize: 13 },
-  btn: { marginTop: 8 },
+  textInput: { flex: 1, fontSize: 15, color: "#1a1a1a" },
+  error: { color: "#c0392b", marginTop: 8, fontSize: 13 },
+  btn: { marginTop: 16 },
+  otpLink: { marginTop: 14, alignItems: "center" },
+  otpLinkText: { color: "#c9a84c", fontSize: 13, textDecorationLine: "underline" },
 });

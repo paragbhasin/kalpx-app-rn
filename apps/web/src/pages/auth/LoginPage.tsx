@@ -9,6 +9,12 @@ import { useAppDispatch } from "../../store/hooks";
 import { showSnackBar } from "../../store/snackBarSlice";
 import { useTranslation } from "../../lib/i18n";
 import { PhoneOtpFlow } from "../../components/PhoneOtpFlow";
+import { CountryDialSelector } from "../../components/CountryDialSelector";
+import { loginWithPhone } from "../../lib/phoneApi";
+import { storeTokens } from "@kalpx/auth";
+import { webStorage } from "../../lib/webStorage";
+import { DEFAULT_PHONE_COUNTRY } from "@kalpx/types";
+import type { PhoneCountryCode } from "@kalpx/types";
 import {
   invalidateDashboardViewCache,
   invalidateMitraHomeV3Cache,
@@ -137,6 +143,13 @@ export function LoginPage() {
   const { t } = useTranslation();
 
   const [authMethod, setAuthMethod] = useState<"email" | "phone">("email");
+  const [phoneLoginMode, setPhoneLoginMode] = useState<"password" | "otp">("password");
+  const [phoneCountry, setPhoneCountry] = useState<PhoneCountryCode>(DEFAULT_PHONE_COUNTRY);
+  const [phoneNum, setPhoneNum] = useState("");
+  const [phonePassword, setPhonePassword] = useState("");
+  const [showPhonePassword, setShowPhonePassword] = useState(false);
+  const [phoneLoginLoading, setPhoneLoginLoading] = useState(false);
+  const [phoneLoginError, setPhoneLoginError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -158,6 +171,35 @@ export function LoginPage() {
     } else {
       navigate(returnTo, { replace: true });
     }
+  };
+
+  const handlePhonePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const digits = phoneNum.replace(/\D/g, "");
+    if (digits.length < 7) {
+      setPhoneLoginError("Please enter a valid phone number.");
+      return;
+    }
+    if (!phonePassword) {
+      setPhoneLoginError("Please enter your password.");
+      return;
+    }
+    setPhoneLoginLoading(true);
+    setPhoneLoginError("");
+    const result = await loginWithPhone(digits, phoneCountry, phonePassword);
+    setPhoneLoginLoading(false);
+    if (!result.success) {
+      setPhoneLoginError(result.error || "Invalid credentials");
+      return;
+    }
+    const data = result.data;
+    if (data.access_token && data.refresh_token) {
+      await storeTokens(webStorage, {
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token,
+      });
+    }
+    await handlePhoneAuthSuccess(undefined, data.is_new_user);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -245,7 +287,98 @@ export function LoginPage() {
               )}
 
               {authMethod === "phone" && WEB_ENV.phoneAuthEnabled === "1" ? (
-                <PhoneOtpFlow purpose="auth" onSuccess={handlePhoneAuthSuccess} />
+                phoneLoginMode === "otp" ? (
+                  <div>
+                    <PhoneOtpFlow purpose="otp_login" onSuccess={handlePhoneAuthSuccess} />
+                    <div style={{ textAlign: "center", marginTop: "12px" }}>
+                      <button
+                        type="button"
+                        className="link-btn"
+                        onClick={() => { setPhoneLoginMode("password"); setPhoneLoginError(""); }}
+                        style={{ color: "var(--kalpx-gold, #b8864b)", fontSize: "0.9rem" }}
+                      >
+                        Back to phone + password
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <form onSubmit={handlePhonePasswordSubmit} className="auth-form" style={{ marginTop: "16px" }}>
+                    <div className="form-group">
+                      <label>Phone number</label>
+                      <div className="phone-input-row">
+                        <CountryDialSelector
+                          value={phoneCountry}
+                          onChange={(c) => setPhoneCountry(c as PhoneCountryCode)}
+                          disabled={phoneLoginLoading}
+                        />
+                        <input
+                          type="tel"
+                          inputMode="numeric"
+                          value={phoneNum}
+                          onChange={(e) => setPhoneNum(e.target.value)}
+                          placeholder="Phone number"
+                          disabled={phoneLoginLoading}
+                          aria-label="Phone number"
+                          style={{
+                            flex: 1,
+                            height: "46px",
+                            padding: "0 12px",
+                            border: "1px solid var(--kalpx-border, #ddd)",
+                            borderLeft: "none",
+                            borderRadius: "0 8px 8px 0",
+                            fontSize: "1rem",
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="phone-password">Password</label>
+                      <div className="input-wrapper">
+                        <Lock className="input-icon" size={18} />
+                        <input
+                          id="phone-password"
+                          type={showPhonePassword ? "text" : "password"}
+                          value={phonePassword}
+                          onChange={(e) => setPhonePassword(e.target.value)}
+                          placeholder="Your password"
+                          disabled={phoneLoginLoading}
+                          autoComplete="current-password"
+                          style={{ paddingRight: "3rem" }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPhonePassword(!showPhonePassword)}
+                          className="password-toggle"
+                        >
+                          {showPhonePassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
+                    </div>
+                    {phoneLoginError && (
+                      <div className="global-error" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <Info size={16} />
+                        <span>{phoneLoginError}</span>
+                      </div>
+                    )}
+                    <button
+                      type="submit"
+                      className="submit-btn"
+                      disabled={phoneLoginLoading}
+                    >
+                      {phoneLoginLoading ? <Loader2 className="spinner" size={20} /> : "Sign in"}
+                    </button>
+                    <div style={{ textAlign: "center", marginTop: "8px" }}>
+                      <button
+                        type="button"
+                        className="link-btn"
+                        onClick={() => { setPhoneLoginMode("otp"); setPhoneLoginError(""); }}
+                        style={{ color: "var(--kalpx-gold, #b8864b)", fontSize: "0.9rem" }}
+                      >
+                        Login with OTP instead
+                      </button>
+                    </div>
+                  </form>
+                )
               ) : (
                 <>
               <div className="auth-divider">

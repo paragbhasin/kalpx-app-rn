@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -42,9 +43,14 @@ export default function PhoneOtpVerifyScreen({ navigation, route }) {
   const { sessionToken, maskedPhone, cooldownSeconds, purpose } = route.params ?? {};
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
 
+  const needsPassword = purpose === "signup" || purpose === "password_reset_phone";
+
   const [value, setValue] = useState("");
   const ref = useBlurOnFulfill({ value, cellCount: CELL_COUNT });
   const [props, getCellOnLayoutHandler] = useClearByFocusCell({ value, setValue });
+
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -71,10 +77,17 @@ export default function PhoneOtpVerifyScreen({ navigation, route }) {
 
   const handleVerify = () => {
     if (value.length < CELL_COUNT) { setError("Please enter the 6-digit code."); return; }
+    if (needsPassword) {
+      if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
+      if (password !== confirmPassword) { setError("Passwords do not match."); return; }
+    }
     setLoading(true);
     setError("");
+    const payload: Parameters<typeof verifyPhoneOtp>[0] = { session_token: currentSessionToken, otp: value };
+    if (purpose === "signup") (payload as any).password = password;
+    if (purpose === "password_reset_phone") (payload as any).new_password = password;
     dispatch(
-      verifyPhoneOtp({ session_token: currentSessionToken, otp: value }, (result: PhoneAuthResult<PhoneOtpVerifyResponse>) => {
+      verifyPhoneOtp(payload, (result: PhoneAuthResult<PhoneOtpVerifyResponse>) => {
         setLoading(false);
         if (!result.success) {
           const { code, error } = result as { success: false; error: string; code?: string };
@@ -156,6 +169,31 @@ export default function PhoneOtpVerifyScreen({ navigation, route }) {
                 )}
               />
 
+              {needsPassword && (
+                <View style={{ marginTop: 16, gap: 10 }}>
+                  <TextInput
+                    style={styles.passwordInput}
+                    value={password}
+                    onChangeText={setPassword}
+                    placeholder={purpose === "password_reset_phone" ? "New password" : "Create a password"}
+                    placeholderTextColor="#9e9b97"
+                    secureTextEntry
+                    autoComplete="new-password"
+                    editable={!loading}
+                  />
+                  <TextInput
+                    style={styles.passwordInput}
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                    placeholder={purpose === "password_reset_phone" ? "Confirm new password" : "Confirm password"}
+                    placeholderTextColor="#9e9b97"
+                    secureTextEntry
+                    autoComplete="new-password"
+                    editable={!loading}
+                  />
+                </View>
+              )}
+
               {!!error && (
                 <TextComponent type="cardText" style={styles.error}>{error}</TextComponent>
               )}
@@ -164,7 +202,7 @@ export default function PhoneOtpVerifyScreen({ navigation, route }) {
                 text="Verify"
                 onPress={handleVerify}
                 loading={loading}
-                disabled={loading || value.length < CELL_COUNT}
+                disabled={loading || value.length < CELL_COUNT || (needsPassword && (password.length < 8 || password !== confirmPassword))}
                 style={styles.btn}
               />
 
@@ -209,4 +247,5 @@ const styles = StyleSheet.create({
   resendHint: { color: "#888", fontSize: 13 },
   resendLink: { color: "#c9a84c", fontSize: 13, textDecorationLine: "underline" },
   sep: { color: "#ccc", marginHorizontal: 4 },
+  passwordInput: { height: 48, borderWidth: 1, borderColor: "#e0d5c0", borderRadius: 8, paddingHorizontal: 12, fontSize: 15, color: "#1a1a1a", backgroundColor: "#fff" },
 });

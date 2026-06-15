@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as LocalAuthentication from "expo-local-authentication";
+import * as SecureStore from "expo-secure-store";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState, AppStateStatus, Platform } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,6 +12,9 @@ const ENABLED_KEY = "biometric_lock_setup_done";
 // Written on every "Not now" dismiss with a Unix timestamp.
 const DISMISS_TS_KEY = "biometric_prompt_dismiss_ts";
 const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+
+import { BIOMETRIC_TOKEN_KEY, BIOMETRIC_REGISTERED_KEY } from "../utils/biometricKeys";
+export { BIOMETRIC_TOKEN_KEY, BIOMETRIC_REGISTERED_KEY } from "../utils/biometricKeys";
 
 async function detectBiometricLabel(): Promise<string | null> {
   const hasHardware = await LocalAuthentication.hasHardwareAsync();
@@ -135,12 +139,30 @@ export function useBiometricPrompt() {
   }, [isLoggedIn]);
 
   const handleEnable = useCallback(async () => {
+    // Trigger Face ID first — this requests the OS permission dialog if needed
+    // and verifies the user's identity before storing anything.
+    const result = await LocalAuthentication.authenticateAsync({
+      promptMessage: `Enable ${biometricLabel || "Face ID"} for KalpX`,
+      cancelLabel: "Cancel",
+      disableDeviceFallback: false,
+      fallbackLabel: "Use Passcode",
+    });
+
+    if (!result.success) return; // user cancelled or scan failed — keep prompt visible
+
     setShowPrompt(false);
+    const refreshToken = await AsyncStorage.getItem("refresh_token");
+    if (refreshToken) {
+      await SecureStore.setItemAsync(BIOMETRIC_TOKEN_KEY, refreshToken, {
+        requireAuthentication: true,
+      });
+      await AsyncStorage.setItem(BIOMETRIC_REGISTERED_KEY, "1");
+    }
     await AsyncStorage.setItem(ENABLED_KEY, "1");
     await AsyncStorage.removeItem(DISMISS_TS_KEY);
     dispatch(setPreference({ key: "app_lock_enabled", value: true }));
     dispatch(persistPreferences() as any);
-  }, [dispatch]);
+  }, [dispatch, biometricLabel]);
 
   const handleDismiss = useCallback(async () => {
     // Record dismiss time; foreground trigger will re-show after 24 h

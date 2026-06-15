@@ -43,6 +43,7 @@ import type { PhoneCountryCode, PhoneOtpVerifyResponse } from "@kalpx/types";
 import { loginWithPhone } from "../PhoneAuth/phoneAuthActions";
 import type { PhoneAuthResult } from "../PhoneAuth/phoneAuthActions";
 import { useToast } from "../../context/ToastContext";
+import { useBiometricLogin } from "../../hooks/useBiometricLogin";
 
 const PHONE_AUTH_ENABLED = process.env.EXPO_PUBLIC_PHONE_AUTH_ENABLED === '1';
 const PHONE_COUNTRY_OPTIONS = [...PHONE_AUTH_COUNTRIES];
@@ -97,6 +98,13 @@ export default function LoginScreen({ navigation }) {
   const [showPhonePassword, setShowPhonePassword] = useState(false);
   const [phoneLoading, setPhoneLoading] = useState(false);
   const [phoneError, setPhoneError] = useState("");
+
+  const {
+    hasBiometricLogin,
+    loading: biometricLoading,
+    error: biometricError,
+    handleBiometricLogin,
+  } = useBiometricLogin();
 
 const resumePendingIfAny = async () => {
   try {
@@ -628,6 +636,48 @@ if (key === "pending_classes_data") {
               <Image source={require("../../../assets/devicon_apple.png")} style={styles.appleIcon} resizeMode="contain"/>
                <TextComponent type="headerText" style={styles.googleText}>{t("login.apple")}</TextComponent>
             </TouchableOpacity> */}
+
+            {/* ── Login with Face ID / Biometric ── */}
+            {hasBiometricLogin && (
+              <TouchableOpacity
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#fdf3dc",
+                  paddingVertical: 12,
+                  paddingHorizontal: 20,
+                  borderRadius: 10,
+                  borderWidth: 1,
+                  borderColor: "#c9a84c",
+                  marginTop: 12,
+                  width: screenWidth * 0.85,
+                  gap: 10,
+                  opacity: biometricLoading ? 0.6 : 1,
+                }}
+                onPress={() => handleBiometricLogin(resumePendingIfAny)}
+                activeOpacity={0.85}
+                disabled={biometricLoading}
+              >
+                <Icon
+                  name={Platform.OS === "ios" ? "scan-outline" : "finger-print-outline"}
+                  size={20}
+                  color="#432104"
+                />
+                <TextComponent type="headerText" style={{ fontSize: 16, color: "#432104" }}>
+                  {biometricLoading
+                    ? "Verifying..."
+                    : Platform.OS === "ios"
+                    ? "Login with Face ID"
+                    : "Login with Biometrics"}
+                </TextComponent>
+              </TouchableOpacity>
+            )}
+            {biometricError ? (
+              <TextComponent type="cardText" style={{ color: "#c0392b", textAlign: "center", marginTop: 4, fontSize: 13 }}>
+                {biometricError}
+              </TextComponent>
+            ) : null}
 
             <View style={styles.card}>
               {/* ── Email / Phone tabs ── */}

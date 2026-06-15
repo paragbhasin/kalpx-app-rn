@@ -1,8 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Modal,
-  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -20,9 +19,12 @@ interface Props {
 export default function AppRatingModal({ visible, onYes, onNotYet }: Props) {
   const slideAnim = useRef(new Animated.Value(80)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [interactive, setInteractive] = useState(false);
 
   useEffect(() => {
     if (visible) {
+      setInteractive(false);
+      const t = setTimeout(() => setInteractive(true), 400);
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
@@ -36,7 +38,9 @@ export default function AppRatingModal({ visible, onYes, onNotYet }: Props) {
           useNativeDriver: true,
         }),
       ]).start();
+      return () => clearTimeout(t);
     } else {
+      setInteractive(false);
       fadeAnim.setValue(0);
       slideAnim.setValue(80);
     }
@@ -45,7 +49,6 @@ export default function AppRatingModal({ visible, onYes, onNotYet }: Props) {
   return (
     <Modal visible={visible} transparent animationType="none">
       <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={onNotYet} />
         <Animated.View
           style={[styles.card, { transform: [{ translateY: slideAnim }] }]}
         >
@@ -53,14 +56,14 @@ export default function AppRatingModal({ visible, onYes, onNotYet }: Props) {
           <Text style={styles.title}>Is KalpX helping you feel more rooted in your day?</Text>
           <View style={styles.btnCol}>
             <TouchableOpacity
-              onPress={onYes}
+              onPress={interactive ? onYes : undefined}
               activeOpacity={0.82}
               style={styles.primaryBtn}
             >
               <Text style={styles.primaryBtnText}>Yes, it is</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={onNotYet}
+              onPress={interactive ? onNotYet : undefined}
               activeOpacity={0.7}
               style={styles.secondaryBtn}
             >

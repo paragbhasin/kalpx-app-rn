@@ -106,10 +106,16 @@ export function useAppRating() {
     afterCloseRef.current?.();
     afterCloseRef.current = null;
     try {
-      const url = Platform.OS === 'ios'
-        ? 'itms-apps://itunes.apple.com/app/id6755144623?action=write-review'
-        : 'market://details?id=com.kalpx.app';
-      await Linking.openURL(url);
+      if (Platform.OS === 'ios') {
+        await Linking.openURL('itms-apps://itunes.apple.com/app/id6755144623?action=write-review');
+      } else {
+        const canMarket = await Linking.canOpenURL('market://details?id=com.kalpx.app');
+        await Linking.openURL(
+          canMarket
+            ? 'market://details?id=com.kalpx.app'
+            : 'https://play.google.com/store/apps/details?id=com.kalpx.app'
+        );
+      }
     } catch {}
   }
 

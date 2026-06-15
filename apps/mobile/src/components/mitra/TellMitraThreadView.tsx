@@ -14,7 +14,6 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import {
   Keyboard,
-  KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
@@ -382,16 +381,15 @@ export default function TellMitraThreadView({
         {conversation.map((item) => renderItem(item))}
       </ScrollView>
 
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        {!!errorMsg && <Text style={s.errorText}>{errorMsg}</Text>}
-        <View
-          style={[
-            s.footerWrap,
-            Platform.OS === "android" && androidKeyboardOffset > 0
-              ? { paddingBottom: androidKeyboardOffset }
-              : null,
-          ]}
-        >
+      {!!errorMsg && <Text style={s.errorText}>{errorMsg}</Text>}
+      <View
+        style={[
+          s.footerWrap,
+          Platform.OS === "android" && androidKeyboardOffset > 0
+            ? { paddingBottom: androidKeyboardOffset }
+            : null,
+        ]}
+      >
         <View style={s.composerRow}>
           <TextInput
             ref={inputRef}
@@ -426,8 +424,7 @@ export default function TellMitraThreadView({
         >
           {t('tellMitraThread.disclaimer')}
         </Text>
-        </View>
-      </KeyboardAvoidingView>
+      </View>
     </View>
   );
 }

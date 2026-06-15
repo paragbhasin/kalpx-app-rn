@@ -1,6 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as LocalAuthentication from "expo-local-authentication";
 import * as SecureStore from "expo-secure-store";
 import { useCallback, useEffect, useState } from "react";
+import { Platform } from "react-native";
 import { useDispatch } from "react-redux";
 import axios from "axios";
 import BASE_URL from "../Networks/baseURL";
@@ -25,8 +27,18 @@ export function useBiometricLogin() {
       setLoading(true);
       setError(null);
       try {
-        // getItemAsync with requireAuthentication: true triggers Face ID / Touch ID
-        // automatically — no separate LocalAuthentication call needed.
+        // Android: SecureStore doesn't auto-prompt biometrics on read — we must
+        // call authenticateAsync first to satisfy the Keystore auth requirement.
+        // iOS: getItemAsync triggers Face ID automatically, so skip this step.
+        if (Platform.OS === "android") {
+          const authResult = await LocalAuthentication.authenticateAsync({
+            promptMessage: "Verify your identity to log in",
+            cancelLabel: "Cancel",
+            disableDeviceFallback: false,
+          });
+          if (!authResult.success) return; // user cancelled — silent
+        }
+
         const storedRefresh = await SecureStore.getItemAsync(
           BIOMETRIC_TOKEN_KEY,
           { requireAuthentication: true },

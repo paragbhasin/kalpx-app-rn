@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Linking, Platform } from 'react-native';
 import React, { useRef, useState } from 'react';
+import * as StoreReview from 'expo-store-review';
 import AppRatingModal from '../components/AppRatingModal';
 
 const STORAGE_KEY = '@kalpx_rating_v1';
@@ -54,8 +55,8 @@ async function saveState(state: RatingState): Promise<void> {
 }
 
 function isSuppressed(state: RatingState): boolean {
-  if (state.has_rated) return true;
-  if (state.dismiss_count >= 2) return true;
+  if (!__DEV__ && state.has_rated) return true;
+  if (!__DEV__ && state.dismiss_count >= 2) return true;
   if (!__DEV__ && state.last_prompted_ms > 0 && Date.now() - state.last_prompted_ms < THIRTY_DAYS_MS) return true;
   return false;
 }
@@ -105,7 +106,7 @@ export function useAppRating() {
     await saveState(state);
     afterCloseRef.current?.();
     afterCloseRef.current = null;
-    try {
+    const openStore = async () => {
       if (Platform.OS === 'ios') {
         await Linking.openURL('itms-apps://itunes.apple.com/app/id6755144623?action=write-review');
       } else {
@@ -116,7 +117,23 @@ export function useAppRating() {
             : 'https://play.google.com/store/apps/details?id=com.kalpx.app'
         );
       }
-    } catch {}
+    };
+
+    if (__DEV__) {
+      // Native review is silently suppressed in dev builds — open store directly
+      try { await openStore(); } catch {}
+    } else {
+      try {
+        const isAvailable = await StoreReview.isAvailableAsync();
+        if (isAvailable) {
+          await StoreReview.requestReview();
+        } else {
+          await openStore();
+        }
+      } catch {
+        try { await openStore(); } catch {}
+      }
+    }
   }
 
   async function handleNotYet() {

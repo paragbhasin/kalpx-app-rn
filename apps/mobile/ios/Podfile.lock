@@ -363,6 +363,8 @@ PODS:
     - ExpoModulesCore
   - ExpoSplashScreen (0.30.10):
     - ExpoModulesCore
+  - ExpoStoreReview (8.1.5):
+    - ExpoModulesCore
   - ExpoSymbols (0.4.5):
     - ExpoModulesCore
   - ExpoSystemUI (5.0.11):
@@ -2850,6 +2852,7 @@ DEPENDENCIES:
   - "ExpoSecureStore (from `../../../node_modules/.pnpm/expo-secure-store@14.2.4_expo@53.0.27_@babel+core@7.29.0_@expo+metro-runtime@5.0.5_reac_c3bcb7796c36e6b6761ffda175e5ebc9/node_modules/expo-secure-store/ios`)"
   - "ExpoSharing (from `../../../node_modules/.pnpm/expo-sharing@13.1.5_expo@53.0.27_@babel+core@7.29.0_@expo+metro-runtime@5.0.5_react-nat_1639b7c65e7911251998b808b5a41ee7/node_modules/expo-sharing/ios`)"
   - "ExpoSplashScreen (from `../../../node_modules/.pnpm/expo-splash-screen@0.30.10_expo@53.0.27_@babel+core@7.29.0_@expo+metro-runtime@5.0.5_re_78cc63628709c416abcc0ae094fd3bbb/node_modules/expo-splash-screen/ios`)"
+  - "ExpoStoreReview (from `../../../node_modules/.pnpm/expo-store-review@8.1.5_expo@53.0.27_@babel+core@7.29.0_@expo+metro-runtime@5.0.5_react_62f50dd114bd41e40736f92929929758/node_modules/expo-store-review/ios`)"
   - "ExpoSymbols (from `../../../node_modules/.pnpm/expo-symbols@0.4.5_expo@53.0.27_@babel+core@7.29.0_@expo+metro-runtime@5.0.5_react-nati_6bde97cece9e92a85dcf5bd6325db410/node_modules/expo-symbols/ios`)"
   - "ExpoSystemUI (from `../../../node_modules/.pnpm/expo-system-ui@5.0.11_c1e08b7bdc93db2cc462f8606a242011/node_modules/expo-system-ui/ios`)"
   - "ExpoWebBrowser (from `../../../node_modules/.pnpm/expo-web-browser@14.2.0_expo@53.0.27_@babel+core@7.29.0_@expo+metro-runtime@5.0.5_react_8a216ead75c0d8ad6a7c548d05399f6f/node_modules/expo-web-browser/ios`)"
@@ -3050,6 +3053,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/.pnpm/expo-sharing@13.1.5_expo@53.0.27_@babel+core@7.29.0_@expo+metro-runtime@5.0.5_react-nat_1639b7c65e7911251998b808b5a41ee7/node_modules/expo-sharing/ios"
   ExpoSplashScreen:
     :path: "../../../node_modules/.pnpm/expo-splash-screen@0.30.10_expo@53.0.27_@babel+core@7.29.0_@expo+metro-runtime@5.0.5_re_78cc63628709c416abcc0ae094fd3bbb/node_modules/expo-splash-screen/ios"
+  ExpoStoreReview:
+    :path: "../../../node_modules/.pnpm/expo-store-review@8.1.5_expo@53.0.27_@babel+core@7.29.0_@expo+metro-runtime@5.0.5_react_62f50dd114bd41e40736f92929929758/node_modules/expo-store-review/ios"
   ExpoSymbols:
     :path: "../../../node_modules/.pnpm/expo-symbols@0.4.5_expo@53.0.27_@babel+core@7.29.0_@expo+metro-runtime@5.0.5_react-nati_6bde97cece9e92a85dcf5bd6325db410/node_modules/expo-symbols/ios"
   ExpoSystemUI:
@@ -3271,6 +3276,7 @@ SPEC CHECKSUMS:
   ExpoSecureStore: 3f1b632d6d40bcc62b4983ef9199cd079592a50a
   ExpoSharing: b0377be82430d07398c6a4cd60b5a15696accbd3
   ExpoSplashScreen: 0ad5acac1b5d2953c6e00d4319f16d616f70d4dd
+  ExpoStoreReview: f70e5929ba4a594078dd3285d5151427167f48fa
   ExpoSymbols: c5612a90fb9179cdaebcd19bea9d8c69e5d3b859
   ExpoSystemUI: 433a971503b99020318518ed30a58204288bab2d
   ExpoWebBrowser: dc39a88485f007e61a3dff05d6a75f22ab4a2e92

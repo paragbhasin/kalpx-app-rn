@@ -6,6 +6,7 @@ import {
   SOCIAL_LOGIN_REQUEST,
   SOCIAL_LOGIN_SUCCESS
 } from './actions';
+import { PHONE_LOGIN_SUCCESS } from '../PhoneAuth/phoneAuthActions';
 
 const initialState = {
   loading: false,
@@ -18,6 +19,7 @@ export const loginReducer = (state = initialState, action) => {
     case LOGIN_REQUEST:
       return { ...state, loading: true, error: null };
     case LOGIN_SUCCESS:
+    case PHONE_LOGIN_SUCCESS:
       return { ...state, loading: false, user: action.payload };
     case LOGIN_FAILURE:
       return { ...state, loading: false, error: action.payload };

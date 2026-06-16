@@ -15,7 +15,8 @@
         "EXPO_PUBLIC_MITRA_TELL_MITRA_THREAD_UI": "1",
         "EXPO_PUBLIC_MITRA_ROOM_JOURNEY_V1": "0",
         "EXPO_PUBLIC_ENABLE_ANALYTICS": "false",
-        "EXPO_PUBLIC_ENABLE_META_PIXEL": "false"
+        "EXPO_PUBLIC_ENABLE_META_PIXEL": "false",
+        "EXPO_PUBLIC_PHONE_AUTH_ENABLED": "1"
       },
       "android": {
         "buildType": "app-bundle",

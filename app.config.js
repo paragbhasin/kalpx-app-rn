@@ -58,6 +58,7 @@ module.exports = {
       favicon: "./apps/mobile/assets/images/favicon.png",
     },
     plugins: [
+      "./apps/mobile/plugins/withKalpxNativeAndroid",
       "./apps/mobile/plugins/withAndroidAutolinkingFix",
       "./apps/mobile/plugins/withAbiSplits",
       "./apps/mobile/plugins/withModularHeaders",

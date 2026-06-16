@@ -340,7 +340,19 @@ export function LoginPage() {
                       </div>
                     </div>
                     <div className="form-group">
-                      <label htmlFor="phone-password">Password</label>
+                      <div className="label-row">
+                        <label htmlFor="phone-password">Password</label>
+                        <Link
+                          to="/forgot-password-phone"
+                          style={{
+                            fontSize: "0.8rem",
+                            color: "var(--kalpx-gold)",
+                            fontWeight: 600,
+                          }}
+                        >
+                          Forgot password?
+                        </Link>
+                      </div>
                       <div className="input-wrapper">
                         <Lock className="input-icon" size={18} />
                         <input

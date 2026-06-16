@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { RequiresAuth } from "./components/RequiresAuth";
 import { RequiresJourney } from "./components/RequiresJourney";
 import { ForgotPasswordPage } from "./pages/auth/ForgotPasswordPage";
+import { ForgotPasswordPhonePage } from "./pages/auth/ForgotPasswordPhonePage";
 import { LoginPage } from "./pages/auth/LoginPage";
 import { LogoutPage } from "./pages/auth/LogoutPage";
 import { ResetPasswordPage } from "./pages/auth/ResetPasswordPage";
@@ -87,6 +88,7 @@ export function AppRoutes() {
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/verify" element={<VerifyPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/forgot-password-phone" element={<ForgotPasswordPhonePage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/logout" element={<LogoutPage />} />
 

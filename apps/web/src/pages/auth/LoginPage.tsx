@@ -387,16 +387,9 @@ export function LoginPage() {
                     >
                       {phoneLoginLoading ? <Loader2 className="spinner" size={20} /> : "Sign in"}
                     </button>
-                    {/* <div style={{ textAlign: "center", marginTop: "8px" }}>
-                      <button
-                        type="button"
-                        className="link-btn"
-                        onClick={() => { setPhoneLoginMode("otp"); setPhoneLoginError(""); }}
-                        style={{ color: "var(--kalpx-gold, #b8864b)", fontSize: "0.9rem" }}
-                      >
-                        Login with OTP instead
-                      </button>
-                    </div> */}
+                    <div className="auth-footer">
+                      <Link to="/signup">{t("auth.newToKalpX")}</Link>
+                    </div>
                   </form>
                 )
               ) : (

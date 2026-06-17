@@ -97,6 +97,7 @@ import MantraRunnerDisplay from '../blocks/MantraRunnerDisplay';
 import SankalpHoldBlock from '../blocks/SankalpHoldBlock';
 import PracticeTimerBlock from '../blocks/PracticeTimerBlock';
 import CompletionReturnTransient from '../blocks/CompletionReturnTransient';
+import CommunityCompletionReturn from '../blocks/CommunityCompletionReturn';
 
 // Week 4 — Support Path (Mitra v3 Moments 20, 21, 22, 31, 38, 42)
 import TriggerEntryBlock from '../blocks/TriggerEntryBlock';
@@ -228,6 +229,7 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   sankalp_hold: SankalpHoldBlock,
   practice_timer: PracticeTimerBlock,
   completion_return: CompletionReturnTransient,
+  community_completion_return: CommunityCompletionReturn,
   // Week 4 — Support Path
   trigger_entry: TriggerEntryBlock,
   sound_bridge_transient: SoundBridgeTransient,

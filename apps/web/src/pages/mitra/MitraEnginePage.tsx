@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { useTranslation } from "../../lib/i18n";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { CompletionReturnBlock } from "../../components/blocks/CompletionReturnBlock";
+import { CommunityCompletionReturnBlock } from "../../components/blocks/CommunityCompletionReturnBlock";
 import { PracticeTimerBlock } from "../../components/blocks/PracticeTimerBlock";
 import {
   CollapsibleCard,
@@ -1176,11 +1177,19 @@ export function MitraEnginePage() {
         }}
       >
         <div style={{ maxWidth: 480, margin: "0 auto" }}>
-          <CompletionReturnBlock
-            block={{}}
-            screenData={screenState.screenData}
-            onAction={(action) => executeAction(action, actionContext)}
-          />
+          {isCommunityRunner ? (
+            <CommunityCompletionReturnBlock
+              block={{}}
+              screenData={screenState.screenData}
+              onAction={(action) => executeAction(action, actionContext)}
+            />
+          ) : (
+            <CompletionReturnBlock
+              block={{}}
+              screenData={screenState.screenData}
+              onAction={(action) => executeAction(action, actionContext)}
+            />
+          )}
         </div>
       </div>
     );

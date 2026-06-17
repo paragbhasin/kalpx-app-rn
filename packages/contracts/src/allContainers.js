@@ -2235,6 +2235,21 @@ export const PracticeRunnerContainer = {
       ],
     },
 
+    // Forked completion screen for community runs — renders
+    // CommunityCompletionReturn so community-specific behaviour stays isolated
+    // from the shared completion_return.
+    community_completion_return: {
+      variant: "completion_return",
+      immersive_v3: true,
+      tone: { theme: "gold_dark", mood: "grounded" },
+      blocks: [
+        {
+          type: "community_completion_return",
+          variant_key: "runner_variant",
+        },
+      ],
+    },
+
     // Legacy practice_step_runner (pre-v3 sacred pause) — preserved for
     // trigger / quick practice variants.
     practice_step_runner_legacy: {

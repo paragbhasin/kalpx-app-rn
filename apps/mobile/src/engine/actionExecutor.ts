@@ -3234,9 +3234,14 @@ export async function executeAction(
           setScreenValue(null, "runner_action_id");
           loadScreen({ container_id: "room", state_id: "render" });
         } else {
+          // Community runs land on the forked community completion screen so
+          // their completion behaviour stays isolated from the shared one.
           loadScreen({
             container_id: "practice_runner",
-            state_id: "completion_return",
+            state_id:
+              source === "community"
+                ? "community_completion_return"
+                : "completion_return",
           });
         }
         break;

@@ -49,6 +49,11 @@ import { stopRoomAmbientAudio } from "../engine/roomAmbientAudio";
 import MantraRunnerView from "../blocks/runners/MantraRunnerView";
 import SankalpRunnerView from "../blocks/runners/SankalpRunnerView";
 import PracticeRunnerView from "../blocks/runners/PracticeRunnerView";
+// Community runs use forked copies so community-specific tweaks never touch the
+// shared core/rhythm/support runners (and vice-versa).
+import CommunityMantraRunnerView from "../blocks/runners/CommunityMantraRunnerView";
+import CommunitySankalpRunnerView from "../blocks/runners/CommunitySankalpRunnerView";
+import CommunityPracticeRunnerView from "../blocks/runners/CommunityPracticeRunnerView";
 
 // SVGs / Assets
 import { SvgUri } from "react-native-svg";
@@ -960,6 +965,15 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   };
 
   const handleBack = () => {
+    // Community runs return to the community feed they were launched from.
+    if (isCommunityRunner) {
+      if ((navigationRef as any).canGoBack?.()) {
+        (navigationRef as any).goBack();
+      } else {
+        (navigationRef as any).navigate("CommunityLanding");
+      }
+      return;
+    }
     const target = screenData.info_back_target;
     if (target) {
       loadScreen({
@@ -990,11 +1004,23 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   // still use the test_runner_force_complete testID inside MantraRunnerView /
   // SankalpRunnerView / PracticeRunnerView blocks, which call onComplete → handleRunnerComplete.
 
+  // Pick forked community runner views when this run came from community, so
+  // community changes stay isolated from the shared runners.
+  const MantraViewComp = isCommunityRunner
+    ? CommunityMantraRunnerView
+    : MantraRunnerView;
+  const SankalpViewComp = isCommunityRunner
+    ? CommunitySankalpRunnerView
+    : SankalpRunnerView;
+  const PracticeViewComp = isCommunityRunner
+    ? CommunityPracticeRunnerView
+    : PracticeRunnerView;
+
   if (isInfoScreen) {
     return (
       <View style={styles.container}>
         {currentType === "mantra" && (
-          <MantraRunnerView
+          <MantraViewComp
             item={info}
             isViewOnly={isViewOnlyInfo}
             initialReps={Number(screenData.reps_total) || 27}
@@ -1012,7 +1038,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
           />
         )}
         {currentType === "sankalp" && (
-          <SankalpRunnerView
+          <SankalpViewComp
             item={info}
             isViewOnly={isViewOnlyInfo}
             runnerStartTimeKey={screenData.runner_start_time}
@@ -1025,7 +1051,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
           />
         )}
         {currentType === "practice" && (
-          <PracticeRunnerView
+          <PracticeViewComp
             item={info}
             isViewOnly={isViewOnlyInfo}
             runnerStartTimeKey={screenData.runner_start_time}

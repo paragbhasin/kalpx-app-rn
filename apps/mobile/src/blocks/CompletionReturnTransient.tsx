@@ -30,7 +30,6 @@ const MantraLotus3d = ({ width, height, opacity, style }: { width?: number; heig
 import { VoiceTextInput } from "../components/VoiceTextInput";
 import { executeAction } from "../engine/actionExecutor";
 import {
-  mitraAddAdditionalItem,
   mitraTrackEvent,
   postGratitudeLedger,
 } from "../engine/mitraApi";
@@ -38,7 +37,6 @@ import { useScreenStore } from "../engine/useScreenBridge";
 import { readMomentSlot, useContentSlots } from "../hooks/useContentSlots";
 import { store } from "../store";
 import { screenActions } from "../store/screenSlice";
-import { showSnackBar } from "../store/snackBarSlice";
 import { Fonts } from "../theme/fonts";
 
 // Phase E — variant-specific completion messages now served from the
@@ -136,7 +134,6 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
   const contentFade = useRef(new Animated.Value(0)).current;
   const checkProgress = useRef(new Animated.Value(0)).current;
   const messageOpacity = useRef(new Animated.Value(0)).current;
-  const [communityAddLoading, setCommunityAddLoading] = useState(false);
   const [showWriteInput, setShowWriteInput] = useState(false);
 
   const REFLECTION_CHIPS = [
@@ -153,19 +150,6 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
   };
 
   const isCommunityRunner = screenData.runner_source === "community";
-  const activeRunnerItem = screenData.runner_active_item || {};
-  const activeRunnerItemId = String(
-    activeRunnerItem.item_id || activeRunnerItem.itemId || activeRunnerItem.id || "",
-  );
-  const activeRunnerType = String(
-    screenData.runner_variant ||
-      activeRunnerItem.item_type ||
-      activeRunnerItem.itemType ||
-      activeRunnerItem.type ||
-      "",
-  );
-  const activeAdditionalItemId =
-    screenData.runner_additional_item_id ?? null;
 
   const setScreenValue = (key: string, value: any) => {
     store.dispatch(screenActions.setScreenValue({ key, value }));
@@ -178,52 +162,6 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
     setScreenValue("runner_start_time", null);
     setScreenValue("runner_variant", null);
     setScreenValue("completion_return", null);
-  };
-
-  const ensureCommunityAdditionalItem = async () => {
-    if (!activeRunnerItemId || !activeRunnerType) return null;
-    if (activeAdditionalItemId) {
-      return { additionalItem: { id: activeAdditionalItemId }, created: false };
-    }
-
-    const res = await mitraAddAdditionalItem(
-      activeRunnerItemId,
-      activeRunnerType,
-      "community",
-    );
-    const nextId = res?.additionalItem?.id ?? res?.additional_item?.id ?? null;
-    if (nextId != null) {
-      store.dispatch(
-        screenActions.setScreenValue({
-          key: "runner_additional_item_id",
-          value: nextId,
-        }),
-      );
-    }
-    store.dispatch(
-      showSnackBar(
-        res?.created
-          ? "Added to your Mitra practice."
-          : "Already in your Mitra practice.",
-      ),
-    );
-    return res;
-  };
-
-  const handleCommunityAdd = async () => {
-    if (communityAddLoading) return;
-    if (!activeRunnerItemId || !activeRunnerType) {
-      store.dispatch(showSnackBar("Could not add this item right now."));
-      return;
-    }
-    setCommunityAddLoading(true);
-    try {
-      await ensureCommunityAdditionalItem();
-    } catch (_) {
-      store.dispatch(showSnackBar("Could not add this item right now."));
-    } finally {
-      setCommunityAddLoading(false);
-    }
   };
 
   useEffect(() => {
@@ -280,6 +218,16 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
       mitraTrackEvent("completion_return_manually_returned", {
         meta: { item_type: resolvedVariant, source: screenData.runner_source },
       }).catch(() => {});
+    }
+    // Community runner: go back to the community screen the user came from
+    // (CommunityLanding / CommunityDetail) rather than the Mitra dashboard.
+    if (isCommunityRunner) {
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      } else {
+        navigation.navigate("CommunityLanding");
+      }
+      return;
     }
     // v3 Flow Contract §A.8: support runner completion returns to source room.
     // Backend MAY seed `return_action: "return_to_source"` explicitly; if not,
@@ -556,39 +504,26 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
           </View>
 
           <View style={styles.footer}>
-            {isCommunityRunner && (
-              <TouchableOpacity
-                style={[
-                  styles.communityAddCta,
-                  communityAddLoading && styles.communityAddCtaDisabled,
-                ]}
-                onPress={() => {
-                  void handleCommunityAdd();
-                }}
-                activeOpacity={0.8}
-                disabled={communityAddLoading}
-              >
-                <Text style={[styles.communityAddCtaText, isHindi && { letterSpacing: 0 }]}>
-                  {communityAddLoading ? t("completion.addingLabel") : t("completion.addToMyPractice")}
-                </Text>
-              </TouchableOpacity>
-            )}
-
             <TouchableOpacity
               style={styles.primaryCta}
               onPress={() => handleReturnHome(true)}
               activeOpacity={0.8}
             >
               <Text style={[styles.primaryCtaText, isHindi && { letterSpacing: 0 }]}>
-                {isRhythmSource
-                  ? t("completion.returnToMyRhythm")
-                  : isInnerPathSource
-                    ? t("completion.returnToInnerPath")
-                    : slot("return_home_cta") || t("completion.returnToMitraHome")}
+                {isCommunityRunner
+                  ? t("completion.returnToCommunity", {
+                      defaultValue: "Return to Community",
+                    })
+                  : isRhythmSource
+                    ? t("completion.returnToMyRhythm")
+                    : isInnerPathSource
+                      ? t("completion.returnToInnerPath")
+                      : slot("return_home_cta") ||
+                        t("completion.returnToMitraHome")}
               </Text>
             </TouchableOpacity>
 
-            {!isRoomSequenceCompletion && !!slot("repeat_cta") && (
+            {!isRoomSequenceCompletion && !isCommunityRunner && !!slot("repeat_cta") && (
               <TouchableOpacity
                 style={styles.secondaryCta}
                 onPress={handleRepeat}

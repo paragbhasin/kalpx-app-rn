@@ -19,6 +19,7 @@ import { Alert, Linking } from "react-native";
 import i18n from "../config/i18n";
 import api from "../Networks/axios";
 import { navigate as rootNavigate, navigationRef } from "../Shared/Routes/NavigationService";
+import { markCommunityPracticeDone } from "../utils/communityRhythmOffer";
 import { cleanupFlowState, GUARDED_ACTIONS, hasTellMitraRoomEntryContext } from "@kalpx/contracts";
 import {
   // Audit fix F1/F2/F3/F9 (2026-04-13) — wrappers for dashboard_load orchestration
@@ -3091,6 +3092,14 @@ export async function executeAction(
 
         const resolvedItemType = activeItem.item_type || activeItem.itemType;
         const resolvedItemId = activeItem.item_id || activeItem.itemId;
+
+        // Community linked practices can be done once. Remember the completion
+        // so the next attempt (from SocialPostCard) offers a Daily Rhythm slot
+        // instead of re-running the practice.
+        if (source === "community" && resolvedItemId) {
+          markCommunityPracticeDone(String(resolvedItemId)).catch(() => {});
+        }
+
         if (resolvedItemType && source) {
           // BE call — item_id may be empty for some mantras; BE accepts it.
           await mitraTrackCompletion({

@@ -26,6 +26,7 @@ import { verifyPhoneOtp, resendPhoneOtp } from "./phoneAuthActions";
 import type { PhoneAuthResult } from "./phoneAuthActions";
 import type { PhoneOtpVerifyResponse, PhoneOtpResendResponse } from "@kalpx/types";
 import { resumePendingIfAny } from "../../utils/resumePending";
+import { useToast } from "../../context/ToastContext";
 
 const CELL_COUNT = 6;
 const MAX_RESENDS = 3;
@@ -42,6 +43,7 @@ const ERROR_COPY: Record<string, string> = {
 export default function PhoneOtpVerifyScreen({ navigation, route }) {
   const { sessionToken, maskedPhone, cooldownSeconds, purpose } = route.params ?? {};
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
+  const { showToast } = useToast();
 
   const needsPassword = purpose === "signup" || purpose === "password_reset_phone";
 
@@ -96,6 +98,11 @@ export default function PhoneOtpVerifyScreen({ navigation, route }) {
           return;
         }
         const isNewUser = result.data?.is_new_user;
+        if (purpose === "password_reset_phone") {
+          showToast("Password reset successfully. Please sign in.", 3500, "success");
+          navigation.navigate("PhonePasswordLogin" as any);
+          return;
+        }
         if (purpose === "link_phone") {
           navigation.goBack();
           return;

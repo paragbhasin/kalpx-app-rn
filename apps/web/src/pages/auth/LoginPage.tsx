@@ -340,7 +340,19 @@ export function LoginPage() {
                       </div>
                     </div>
                     <div className="form-group">
-                      <label htmlFor="phone-password">Password</label>
+                      <div className="label-row">
+                        <label htmlFor="phone-password">Password</label>
+                        <Link
+                          to="/forgot-password-phone"
+                          style={{
+                            fontSize: "0.8rem",
+                            color: "var(--kalpx-gold)",
+                            fontWeight: 600,
+                          }}
+                        >
+                          Forgot password?
+                        </Link>
+                      </div>
                       <div className="input-wrapper">
                         <Lock className="input-icon" size={18} />
                         <input
@@ -375,16 +387,9 @@ export function LoginPage() {
                     >
                       {phoneLoginLoading ? <Loader2 className="spinner" size={20} /> : "Sign in"}
                     </button>
-                    {/* <div style={{ textAlign: "center", marginTop: "8px" }}>
-                      <button
-                        type="button"
-                        className="link-btn"
-                        onClick={() => { setPhoneLoginMode("otp"); setPhoneLoginError(""); }}
-                        style={{ color: "var(--kalpx-gold, #b8864b)", fontSize: "0.9rem" }}
-                      >
-                        Login with OTP instead
-                      </button>
-                    </div> */}
+                    <div className="auth-footer">
+                      <Link to="/signup">{t("auth.newToKalpX")}</Link>
+                    </div>
                   </form>
                 )
               ) : (

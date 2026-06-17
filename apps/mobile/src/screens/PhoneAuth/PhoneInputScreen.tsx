@@ -90,9 +90,13 @@ export default function PhoneInputScreen({ navigation, route }) {
             <TextComponent type="headerBigText" style={styles.brand}>KalpX</TextComponent>
 
             <View style={styles.card}>
-              <TextComponent type="loginHeaderText" style={styles.cardTitle}>Sign in with Phone</TextComponent>
+              <TextComponent type="loginHeaderText" style={styles.cardTitle}>
+                {purpose === "password_reset_phone" ? "Reset Password" : "Sign in with Phone"}
+              </TextComponent>
               <TextComponent type="cardText" style={styles.hint}>
-                We'll send a one-time code to verify your number.
+                {purpose === "password_reset_phone"
+                  ? "Enter your phone number and we'll send a reset code."
+                  : "We'll send a one-time code to verify your number."}
               </TextComponent>
 
               {/* Country selector — 3 inline buttons */}

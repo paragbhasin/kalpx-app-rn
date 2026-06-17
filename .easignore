@@ -3,11 +3,10 @@
 # Web app not needed for mobile builds
 apps/web/
 
-# Native build outputs — EAS rebuilds these from scratch
-android/
-ios/
-apps/mobile/android/
-apps/mobile/ios/
+# Root-level native dirs only (nothing there). apps/mobile/android & apps/mobile/ios
+# are TRACKED native code (bare workflow) and MUST be uploaded so EAS skips prebuild.
+/android/
+/ios/
 
 # Node modules — EAS installs fresh
 node_modules/

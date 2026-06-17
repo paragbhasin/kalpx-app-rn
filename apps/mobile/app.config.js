@@ -2,7 +2,7 @@ module.exports = {
   expo: {
     name: "kalpx",
     slug: "kalpx",
-    version: "1.1.47",
+    version: "1.1.48",
     orientation: "portrait",
     icon: "./assets/new_logo.png",
     scheme: "kalpx",
@@ -19,7 +19,7 @@ module.exports = {
       appleTeamId: "9G5NZ5LBRU",
       googleServicesFile:
         process.env.GOOGLE_SERVICES_PLIST || "../../GoogleService-Info.plist",
-      buildNumber: "51",
+      buildNumber: "52",
       entitlements: {
         "aps-environment": "production",
       },
@@ -42,7 +42,7 @@ module.exports = {
       },
     },
     android: {
-      versionCode: 61,
+      versionCode: 62,
       package: "com.kalpx.app",
       blockedPermissions: [
         "android.permission.READ_MEDIA_IMAGES",

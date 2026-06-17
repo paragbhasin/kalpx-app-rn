@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Modal,
+  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -191,6 +192,9 @@ const RhythmSlotPickerModal: React.FC<Props> = ({ offer, onClose }) => {
               defaultValue: "Already in your Daily Rhythm",
             })}
           </Text>
+          {!!offer?.title && (
+            <Text style={styles.practiceName}>{offer.title}</Text>
+          )}
           <Text style={styles.subtitle}>
             {t("community.rhythm.alreadySubtitle", {
               slot: bandLabel(existingSlot),
@@ -222,6 +226,9 @@ const RhythmSlotPickerModal: React.FC<Props> = ({ offer, onClose }) => {
               defaultValue: "Added to your Daily Rhythm",
             })}
           </Text>
+          {!!offer?.title && (
+            <Text style={styles.practiceName}>{offer.title}</Text>
+          )}
           <Text style={styles.subtitle}>
             {t("community.rhythm.addedSubtitle", {
               slot: bandLabel(addedSlot),
@@ -254,6 +261,9 @@ const RhythmSlotPickerModal: React.FC<Props> = ({ offer, onClose }) => {
             defaultValue: "Make this a daily practice?",
           })}
         </Text>
+        {!!offer?.title && (
+          <Text style={styles.practiceName}>{offer.title}</Text>
+        )}
         <Text style={styles.subtitle}>
           {t("community.rhythm.offerSubtitle", {
             defaultValue:
@@ -306,9 +316,12 @@ const RhythmSlotPickerModal: React.FC<Props> = ({ offer, onClose }) => {
       animationType="fade"
       onRequestClose={handleClose}
     >
-      <View style={styles.backdrop}>
-        <View style={styles.sheet}>{renderBody()}</View>
-      </View>
+      <Pressable style={styles.backdrop} onPress={handleClose}>
+        {/* Stop taps on the sheet from closing the modal. */}
+        <Pressable style={styles.sheet} onPress={() => {}}>
+          {renderBody()}
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 };
@@ -333,6 +346,14 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#1c1c1c",
     textAlign: "center",
+  },
+  practiceName: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#CC9933",
+    textAlign: "center",
+    marginTop: 6,
+    paddingHorizontal: 8,
   },
   subtitle: {
     fontSize: 13,

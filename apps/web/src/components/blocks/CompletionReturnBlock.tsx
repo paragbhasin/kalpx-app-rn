@@ -81,6 +81,7 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
   const slots: any = (screenData["completion_return"] as any) || {};
 
   const returnSource: string = (screenData["runner_source"] as string) || "core";
+  const isCommunity = returnSource === "community";
   const _rhythmResult = screenData["rhythm_complete_result"] as import('@kalpx/types').RhythmCompleteResponse | null | undefined;
   const _isRhythmCompletion = returnSource === "rhythm_daily"
     && typeof _rhythmResult?.copy?.headline === "string"
@@ -101,7 +102,9 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
     : (slots.wisdom_anchor_line || "");
 
   // CTA labels — API-driven; fall back to localized strings
-  const returnHomeLabel: string = _isRhythmCompletion ? t('mitra.room.returnToMyRhythm') : (slots.return_home_cta || t('mitra.room.returnMitraHome'));
+  const returnHomeLabel: string = isCommunity
+    ? t('mitra.room.returnToCommunity')
+    : _isRhythmCompletion ? t('mitra.room.returnToMyRhythm') : (slots.return_home_cta || t('mitra.room.returnMitraHome'));
   const repeatLabel: string = slots.repeat_cta || t('mitra.room.repeat');
 
   const REFLECTION_CHIPS = [
@@ -395,7 +398,11 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
 
         {/* 6 ── Return to Mitra Home CTA */}
         <button
-          onClick={() => onAction?.({ type: returnAction })}
+          onClick={() =>
+            isCommunity
+              ? window.history.back()
+              : onAction?.({ type: returnAction })
+          }
           data-testid="return-to-dashboard-btn"
           style={{
             background: "#FBF5F5",
@@ -417,7 +424,7 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
           {returnHomeLabel}
         </button>
 
-        {!isRoomSequenceCompletion && repeatLabel && (
+        {!isRoomSequenceCompletion && !isCommunity && repeatLabel && (
           <button
             onClick={() => onAction?.({ type: "repeat_runner" })}
             data-testid="repeat-runner-btn"

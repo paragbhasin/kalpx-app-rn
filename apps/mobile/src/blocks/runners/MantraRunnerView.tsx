@@ -630,10 +630,6 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
           ) : null}
         </View>
 
-        {isCommunityRunner && (
-          <CommunityActionBar addLoading={addLoading} onAdd={onAddToPractice} />
-        )}
-
         <TouchableOpacity onPress={onBack} style={styles.backLink}>
           <Text style={styles.backLinkText}>{t("quickReset.back")}</Text>
         </TouchableOpacity>

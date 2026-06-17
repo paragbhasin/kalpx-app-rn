@@ -611,6 +611,7 @@ export const hi = {
       tryAPractice: 'एक अभ्यास करें',
       writeAFewWords: 'कुछ शब्द लिखें',
       returnToMyRhythm: 'मेरी लय पर लौटें',
+      returnToCommunity: 'समुदाय में लौटें',
       anythingToCarry: 'इससे क्या साथ ले जाना है?',
       repeat: 'दोहराएं',
       chip: {
@@ -687,6 +688,18 @@ export const hi = {
     trigger: {
       returnHome: '✕ घर वापस जाएं',
     },
+  },
+  communityRhythm: {
+    offerTitle: 'इसे रोज़ की साधना बनाएँ?',
+    offerSubtitle:
+      'आप इसे एक बार कर चुके हैं। इसे अपनी दैनिक लय में जोड़ें और नियमित रखें — समय चुनें।',
+    addedTitle: 'आपकी दैनिक लय में जुड़ गया',
+    addedSubtitle: 'यह हर दिन आपकी {slot} साधना में रहेगा।',
+    alreadyTitle: 'पहले से आपकी दैनिक लय में है',
+    alreadySubtitle: 'यह पहले से आपकी {slot} साधना का हिस्सा है।',
+    goToRhythm: 'दैनिक लय देखें',
+    done: 'हो गया',
+    notNow: 'अभी नहीं',
   },
   progressSection: {
     daysEngaged: 'जुड़े दिन',

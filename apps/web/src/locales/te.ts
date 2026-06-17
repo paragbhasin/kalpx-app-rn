@@ -611,6 +611,7 @@ export const te = {
       tryAPractice: 'ఒక సాధన చేయి',
       writeAFewWords: 'కొన్ని మాటలు రాయి',
       returnToMyRhythm: 'నా రిథమ్‌కు తిరిగి వెళ్ళండి',
+      returnToCommunity: 'సముదాయానికి తిరిగి వెళ్లండి',
       anythingToCarry: 'ఇందులో నుండి ఏమి తీసుకెళ్ళాలి?',
       repeat: 'మళ్ళీ చేయి',
       chip: {
@@ -687,5 +688,17 @@ export const te = {
     trigger: {
       returnHome: '✕ హోమ్‌కు తిరిగి వెళ్ళండి',
     },
+  },
+  communityRhythm: {
+    offerTitle: 'దీన్ని రోజువారీ సాధనగా చేయాలా?',
+    offerSubtitle:
+      'మీరు దీన్ని ఒకసారి చేశారు. కొనసాగించడానికి దీన్ని మీ రోజువారీ లయలో చేర్చండి — సమయాన్ని ఎంచుకోండి.',
+    addedTitle: 'మీ రోజువారీ లయలో చేర్చబడింది',
+    addedSubtitle: 'ఇది ప్రతిరోజూ మీ {slot} సాధనలో కనిపిస్తుంది.',
+    alreadyTitle: 'ఇప్పటికే మీ రోజువారీ లయలో ఉంది',
+    alreadySubtitle: 'ఇది ఇప్పటికే మీ {slot} సాధనలో భాగం.',
+    goToRhythm: 'రోజువారీ లయకు వెళ్లండి',
+    done: 'పూర్తయింది',
+    notNow: 'ఇప్పుడు కాదు',
   },
 } as const;

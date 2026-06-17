@@ -1545,6 +1545,17 @@
     "confirm": "Confirm"
   },
   "community": {
+    "rhythm": {
+      "offerTitle": "Make this a daily practice?",
+      "offerSubtitle": "You've already done this once. Add it to your Daily Rhythm to keep it going — pick a time of day.",
+      "addedTitle": "Added to your Daily Rhythm",
+      "addedSubtitle": "This will appear in your {{slot}} practice every day.",
+      "alreadyTitle": "Already in your Daily Rhythm",
+      "alreadySubtitle": "This is already part of your {{slot}} practice.",
+      "goToRhythm": "Go to Daily Rhythm",
+      "done": "Done",
+      "notNow": "Not now"
+    },
     "postMenu": {
       "report": "Report",
       "save": "Save",
@@ -2345,6 +2356,7 @@
     }
   },
   "completion": {
+    "returnToCommunity": "Return to Community",
     "innerPath_mantra": {
       "title": "Your mantra is held for today.",
       "subtitle": "You returned through sacred sound. Let this remembrance stay with you gently.",

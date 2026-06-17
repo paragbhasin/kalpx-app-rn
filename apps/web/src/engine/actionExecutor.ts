@@ -37,6 +37,7 @@ import { setHomeData } from '../store/doorSlice';
 import { ingestDailyView, ingestDay7View, ingestDay14View } from './v3Ingest';
 import { ensureRoomAmbientPlaying } from '../lib/audio/calmMusic';
 import { webNavigate } from '../lib/webRouter';
+import { markCommunityPracticeDone } from '../utils/communityRhythmOffer';
 import { invalidateJourneyStatusCache } from '../hooks/useJourneyStatus';
 import { invalidateJourneyEntryViewCache } from '../hooks/useJourneyEntryView';
 import { WEB_ENV } from '../lib/env';
@@ -609,6 +610,13 @@ export async function executeAction(action: any, context: ActionContext): Promis
             tz,
             meta,
           });
+        }
+
+        // Community linked practices can be done once. Remember the completion
+        // so the next attempt (from CommunityPostCard) offers a Daily Rhythm
+        // slot instead of re-running the practice.
+        if (rawRunnerSource === 'community' && itemId) {
+          markCommunityPracticeDone(String(itemId)).catch(() => {});
         }
 
         const roomId = (screenData.room_id as string | null) ?? null;

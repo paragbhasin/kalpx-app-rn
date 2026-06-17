@@ -411,10 +411,6 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
           )}
         </View>
 
-        {isCommunityRunner && (
-          <CommunityActionBar addLoading={addLoading} onAdd={onAddToPractice} />
-        )}
-
         <TouchableOpacity onPress={onBack} style={styles.backLink}>
           <Text style={styles.backLinkText}>{t("sankalpRunner.back")}</Text>
         </TouchableOpacity>

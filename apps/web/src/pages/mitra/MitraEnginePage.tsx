@@ -32,44 +32,14 @@ const Quick2Icon = "/mobile-assets/quick_2.webp";
 const Quick3Icon = "/mobile-assets/quick_3.webp";
 const Quick4Icon = "/mobile-assets/quick_4.webp";
 
-function CommunityRunnerActionBar({
-  addLoading,
-  onAdd,
-}: {
+function CommunityRunnerActionBar(_props: {
   addLoading: boolean;
   onAdd: () => void;
 }) {
-  const { t } = useTranslation();
-  return (
-    <div
-      style={{
-        display: "flex",
-        gap: 10,
-        padding: "8px 16px 24px",
-        marginTop: -100,
-      }}
-    >
-      <button
-        onClick={onAdd}
-        disabled={addLoading}
-        style={{
-          flex: 1,
-
-          borderRadius: 12,
-          border: "1px solid var(--kalpx-border-gold)",
-          background: "rgba(255,248,239,0.92)",
-          color: "var(--kalpx-cta)",
-          fontSize: 14,
-          fontWeight: 700,
-          padding: "12px 14px",
-          cursor: addLoading ? "not-allowed" : "pointer",
-          opacity: addLoading ? 0.65 : 1,
-        }}
-      >
-        {addLoading ? t('mitra.engine.adding') : t('mitra.engine.addToPractice')}
-      </button>
-    </div>
-  );
+  // "Add to My Practice" removed for community runs — the Daily Rhythm flow
+  // (re-tap the practice in the community feed) is now the single way to make a
+  // community practice recurring.
+  return null;
 }
 
 const TRIGGER_BROWN = "#432104";
@@ -1211,39 +1181,6 @@ export function MitraEnginePage() {
             screenData={screenState.screenData}
             onAction={(action) => executeAction(action, actionContext)}
           />
-          {isCommunityRunner && (
-            <div
-              style={{
-                position: "relative",
-                zIndex: 2,
-                padding: "0 20px 28px",
-                marginTop: 0,
-                transform: "translateY(-149px)",
-                pointerEvents: "auto",
-              }}
-            >
-              <button
-                onClick={() => {
-                  void handleCommunityAdd();
-                }}
-                disabled={communityAddLoading}
-                style={{
-                  width: "100%",
-                  borderRadius: 12,
-                  border: "1px solid var(--kalpx-border-gold)",
-                  background: "rgba(255,248,239,0.92)",
-                  color: "var(--kalpx-cta)",
-                  fontSize: 14,
-                  fontWeight: 700,
-                  padding: "12px 14px",
-                  cursor: communityAddLoading ? "not-allowed" : "pointer",
-                  opacity: communityAddLoading ? 0.65 : 1,
-                }}
-              >
-                {communityAddLoading ? t('mitra.engine.adding') : t('mitra.engine.addToPractice')}
-              </button>
-            </div>
-          )}
         </div>
       </div>
     );

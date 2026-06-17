@@ -571,10 +571,6 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
           </>
         )}
 
-        {isCommunityRunner && (
-          <CommunityActionBar addLoading={addLoading} onAdd={onAddToPractice} />
-        )}
-
         <TouchableOpacity
           onPress={handleBack}
           style={[styles.backLink, { marginTop: 20 }]}

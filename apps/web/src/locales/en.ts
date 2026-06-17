@@ -611,6 +611,7 @@ export const en = {
       tryAPractice: 'Try a practice',
       writeAFewWords: 'Write a few words',
       returnToMyRhythm: 'Return to My Rhythm',
+      returnToCommunity: 'Return to Community',
       anythingToCarry: 'Anything to carry from this?',
       repeat: 'Repeat',
       chip: {
@@ -687,6 +688,18 @@ export const en = {
     trigger: {
       returnHome: '✕ Return home',
     },
+  },
+  communityRhythm: {
+    offerTitle: 'Make this a daily practice?',
+    offerSubtitle:
+      "You've already done this once. Add it to your Daily Rhythm to keep it going — pick a time of day.",
+    addedTitle: 'Added to your Daily Rhythm',
+    addedSubtitle: 'This will appear in your {slot} practice every day.',
+    alreadyTitle: 'Already in your Daily Rhythm',
+    alreadySubtitle: 'This is already part of your {slot} practice.',
+    goToRhythm: 'Go to Daily Rhythm',
+    done: 'Done',
+    notNow: 'Not now',
   },
   progressSection: {
     daysEngaged: 'Days engaged',

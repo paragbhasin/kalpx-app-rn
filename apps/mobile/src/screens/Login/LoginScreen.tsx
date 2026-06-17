@@ -763,7 +763,7 @@ if (key === "pending_classes_data") {
                   </View>
 
                   <View style={{ alignItems: "flex-end", marginTop: 8 }}>
-                    <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
+                    <TouchableOpacity onPress={() => navigation.navigate("PhoneInput" as any, { purpose: "password_reset_phone" })}>
                       <TextComponent type="semiBoldText" style={styles.forgot}>
                         {t("login.forgotPassword")}
                       </TextComponent>

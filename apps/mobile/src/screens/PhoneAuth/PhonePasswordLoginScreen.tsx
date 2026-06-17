@@ -158,11 +158,19 @@ export default function PhonePasswordLoginScreen({ navigation }) {
               />
 
               <TouchableOpacity
-                onPress={() => navigation.navigate("PhoneInput" as any, { purpose: "otp_login" })}
+                onPress={() => navigation.navigate("PhoneInput" as any, { purpose: "password_reset_phone" })}
                 style={styles.otpLink}
                 disabled={loading}
               >
-                <TextComponent type="cardText" style={styles.otpLinkText}>Login with OTP instead</TextComponent>
+                <TextComponent type="cardText" style={styles.otpLinkText}>Forgot password?</TextComponent>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Signup" as any)}
+                style={styles.createAccountLink}
+                disabled={loading}
+              >
+                <TextComponent type="cardText" style={styles.createAccountText}>New to KalpX? Create account</TextComponent>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -194,4 +202,6 @@ const styles = StyleSheet.create({
   btnText: { color: "#fff", fontSize: 16, fontWeight: "700" },
   otpLink: { marginTop: 14, alignItems: "center" },
   otpLinkText: { color: "#c9a84c", fontSize: 13, textDecorationLine: "underline" },
+  createAccountLink: { marginTop: 10, alignItems: "center" },
+  createAccountText: { color: "#c9a84c", fontSize: 13 },
 });

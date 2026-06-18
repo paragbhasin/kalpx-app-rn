@@ -19,7 +19,7 @@ module.exports = {
       appleTeamId: "9G5NZ5LBRU",
       googleServicesFile:
         process.env.GOOGLE_SERVICES_PLIST || "../../GoogleService-Info.plist",
-      buildNumber: "55",
+      buildNumber: "57",
       entitlements: {
         "aps-environment": "production",
       },
@@ -42,7 +42,7 @@ module.exports = {
       },
     },
     android: {
-      versionCode: 62,
+      versionCode: 63,
       package: "com.kalpx.app",
       blockedPermissions: [
         "android.permission.READ_MEDIA_IMAGES",

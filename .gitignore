@@ -63,6 +63,7 @@ build.ipa
 
 # iOS signing credentials — local only, never commit
 apps/mobile/credentials.json
+apps/mobile/credentials/
 apps/mobile/ios/certs/
 
 # Screenshot pipeline output

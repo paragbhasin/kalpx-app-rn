@@ -51,15 +51,26 @@ target 'kalpx' do
       :ccache_enabled => podfile_properties['apple.ccacheEnabled'] == 'true',
     )
 
-    # Xcode 26 / Clang: {fmt}'s FMT_COMPILE_STRING uses consteval constructors that
-    # the new compiler rejects in folly/React Native. Disable consteval in {fmt} so
-    # it falls back to constexpr, which all Clang versions accept.
+    # Xcode 26 / Clang: fmt/format-inl.h uses FMT_STRING (alias of FMT_COMPILE_STRING)
+    # which invokes a consteval constructor. Clang 17 rejects this in non-consteval
+    # contexts. Disable consteval in {fmt} via both GCC_PREPROCESSOR_DEFINITIONS and
+    # OTHER_CPLUSPLUSFLAGS (belt-and-suspenders — xcconfig chain may shadow one or the
+    # other depending on target). Failing file: Pods/fmt/include/fmt/format-inl.h:59.
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
-        existing = config.build_settings['OTHER_CPLUSPLUSFLAGS'] || '$(inherited)'
-        unless existing.include?('FMT_CONSTEVAL')
-          config.build_settings['OTHER_CPLUSPLUSFLAGS'] = "#{existing} -DFMT_CONSTEVAL= -DFMT_USE_CONSTEVAL=0"
-        end
+        # GCC_PREPROCESSOR_DEFINITIONS — handles both C and C++ preprocessor
+        defs = config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] || ['$(inherited)']
+        defs = [defs] if defs.is_a?(String)
+        defs << 'FMT_CONSTEVAL=' unless defs.any? { |d| d.to_s.include?('FMT_CONSTEVAL') }
+        defs << 'FMT_USE_CONSTEVAL=0' unless defs.any? { |d| d.to_s.include?('FMT_USE_CONSTEVAL') }
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = defs
+
+        # OTHER_CPLUSPLUSFLAGS — explicit C++ compiler flags
+        flags = config.build_settings['OTHER_CPLUSPLUSFLAGS'] || ['$(inherited)']
+        flags = [flags] if flags.is_a?(String)
+        flags << '-DFMT_CONSTEVAL=' unless flags.any? { |f| f.to_s.include?('FMT_CONSTEVAL') }
+        flags << '-DFMT_USE_CONSTEVAL=0' unless flags.any? { |f| f.to_s.include?('FMT_USE_CONSTEVAL') }
+        config.build_settings['OTHER_CPLUSPLUSFLAGS'] = flags
       end
     end
 

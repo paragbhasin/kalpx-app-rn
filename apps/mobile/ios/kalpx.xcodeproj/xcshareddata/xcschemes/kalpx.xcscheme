@@ -20,6 +20,20 @@
                ReferencedContainer = "container:kalpx.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "9DA95B0B93127BEB73C8ADE9"
+               BuildableName = "KalpxWatchWidgetExtension.appex"
+               BlueprintName = "KalpxWatchWidgetExtension"
+               ReferencedContainer = "container:kalpx.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction

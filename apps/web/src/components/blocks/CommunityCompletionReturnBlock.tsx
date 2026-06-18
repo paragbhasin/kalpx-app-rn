@@ -18,6 +18,7 @@
 import React, { useEffect, useState } from "react";
 import { VoiceTextInput } from "../VoiceTextInput";
 import { useTranslation } from "../../lib/i18n";
+import { webNavigate } from "../../lib/webRouter";
 
 /* ── Colour tokens (match mobile styles) ─────────────────────────── */
 const BROWN       = "#5C3A12";
@@ -398,11 +399,20 @@ export function CommunityCompletionReturnBlock({ block, screenData = {}, onActio
 
         {/* 6 ── Return to Mitra Home CTA */}
         <button
-          onClick={() =>
-            isCommunity
-              ? window.history.back()
-              : onAction?.({ type: returnAction })
-          }
+          onClick={() => {
+            if (isCommunity) {
+              // Go to the exact community page the practice was launched from,
+              // not browser-back (which lands on the previous runner state).
+              const rp =
+                typeof screenData["runner_return_path"] === "string" &&
+                (screenData["runner_return_path"] as string).trim().length > 0
+                  ? (screenData["runner_return_path"] as string).trim()
+                  : "/en/community";
+              webNavigate(rp);
+            } else {
+              onAction?.({ type: returnAction });
+            }
+          }}
           data-testid="return-to-dashboard-btn"
           style={{
             background: "#FBF5F5",

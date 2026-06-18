@@ -1384,7 +1384,7 @@ export function PracticeTimerBlock({
         </div>
       )}
 
-      {/* ── Back link ── */}
+      {/* ── Back link — consistent with mantra/sankalp runners ── */}
       <button
         onClick={() => onAction?.({ type: "runner_exit" })}
         style={{
@@ -1400,7 +1400,7 @@ export function PracticeTimerBlock({
           marginBottom: 88,
         }}
       >
-        {t('practiceRunner.returnToMitraHome')}
+        Back
       </button>
     </div>
   );

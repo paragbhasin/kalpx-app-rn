@@ -34,12 +34,12 @@ export function CommunityReactionBar({
   userVote = null,
   compact = false,
 }: CommunityReactionBarProps) {
-  const iconSize = compact ? 18 : 20;
-  const fontSize = compact ? 16 : 17;
+  const iconSize = compact ? 15 : 16;
+  const fontSize = compact ? 13 : 14;
   const pillStyle: React.CSSProperties = {
     borderRadius: 8,
     border: "1px solid #d7d1c7",
-    padding: "8px 14px",
+    padding: "6px 8px",
     background: "#fff",
     display: "inline-flex",
     alignItems: "center",
@@ -48,7 +48,7 @@ export function CommunityReactionBar({
     cursor: "pointer",
 
     boxSizing: "border-box",
-    flexShrink: 0,
+    flexShrink: 1,
   };
   const wrapClick =
     (handler?: () => void) => (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -63,7 +63,7 @@ export function CommunityReactionBar({
         alignItems: "center",
         flexWrap: "nowrap",
         marginTop: compact ? 8 : 12,
-        gap: 8,
+        gap: 6,
         width: "100%",
       }}
     >
@@ -72,7 +72,7 @@ export function CommunityReactionBar({
           ...pillStyle,
           opacity: isUpvoting ? 0.6 : 1,
           gap: 4,
-          minWidth: 108,
+          minWidth: 64,
           justifyContent: "space-between",
         }}
       >
@@ -129,8 +129,8 @@ export function CommunityReactionBar({
         style={{
           ...pillStyle,
           cursor: onComment ? "pointer" : "default",
-          gap: 8,
-          minWidth: 98,
+          gap: 6,
+          minWidth: 44,
         }}
         aria-label={`Comments (${commentCount})`}
       >
@@ -146,8 +146,8 @@ export function CommunityReactionBar({
         style={{
           ...pillStyle,
           cursor: onShare ? "pointer" : "default",
-          gap: 8,
-          minWidth: 98,
+          gap: 6,
+          minWidth: 44,
         }}
         aria-label={`Shares (${shareCount})`}
       >
@@ -163,14 +163,21 @@ export function CommunityReactionBar({
         style={{
           ...pillStyle,
           cursor: onAskQuestion ? "pointer" : "default",
-          gap: 8,
-          minWidth: "fit-content",
-          justifyContent: "flex-start",
+          gap: 6,
+          minWidth: 0,
+          justifyContent: "center",
         }}
         aria-label="Ask question"
       >
-        <CircleHelp size={iconSize} />
-        <span style={{ fontSize, fontWeight: 500, lineHeight: 1 }}>
+        <CircleHelp size={iconSize} style={{ flexShrink: 0 }} />
+        <span
+          style={{
+            fontSize,
+            fontWeight: 500,
+            lineHeight: 1,
+            whiteSpace: "nowrap",
+          }}
+        >
           Ask question
         </span>
       </button>

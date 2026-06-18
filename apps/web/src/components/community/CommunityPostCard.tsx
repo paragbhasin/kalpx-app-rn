@@ -853,6 +853,11 @@ export function CommunityPostCard({
             source: "community",
             variant: linkedItemType,
             item,
+            // Return to this exact community page when the runner exits/backs out.
+            return_path:
+              typeof window !== "undefined"
+                ? window.location.pathname + window.location.search
+                : "/en/community",
           },
         },
         {

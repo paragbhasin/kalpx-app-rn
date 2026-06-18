@@ -281,6 +281,16 @@ export async function executeAction(action: any, context: ActionContext): Promis
       break;
     }
     case 'info_back': {
+      // Community runs return to the exact community page they launched from.
+      if (screenData.runner_source === 'community') {
+        const rp =
+          typeof screenData.runner_return_path === 'string' &&
+          screenData.runner_return_path.trim().length > 0
+            ? screenData.runner_return_path.trim()
+            : '/en/community';
+        webNavigate(rp);
+        break;
+      }
       const backTarget = screenData.info_back_target;
       if (backTarget) {
         const dest = _resolveTarget(backTarget);

@@ -36,7 +36,10 @@ export function ModalSheet({
     <>
       {/* Backdrop */}
       <div
-        onClick={onClose}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClose();
+        }}
         style={{
           position: "fixed",
           inset: 0,
@@ -48,6 +51,7 @@ export function ModalSheet({
 
       {/* Sheet */}
       <div
+        onClick={(e) => e.stopPropagation()}
         style={{
           position: "fixed",
           bottom: 0,

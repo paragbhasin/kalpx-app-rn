@@ -51,6 +51,18 @@ target 'kalpx' do
       :ccache_enabled => podfile_properties['apple.ccacheEnabled'] == 'true',
     )
 
+    # Xcode 26 / Clang: {fmt}'s FMT_COMPILE_STRING uses consteval constructors that
+    # the new compiler rejects in folly/React Native. Disable consteval in {fmt} so
+    # it falls back to constexpr, which all Clang versions accept.
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        existing = config.build_settings['OTHER_CPLUSPLUSFLAGS'] || '$(inherited)'
+        unless existing.include?('FMT_CONSTEVAL')
+          config.build_settings['OTHER_CPLUSPLUSFLAGS'] = "#{existing} -DFMT_CONSTEVAL= -DFMT_USE_CONSTEVAL=0"
+        end
+      end
+    end
+
     # This is necessary for Xcode 14, because it signs resource bundles by default
     # when building for devices.
     installer.target_installation_results.pod_target_installation_results

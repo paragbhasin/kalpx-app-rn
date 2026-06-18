@@ -22,6 +22,16 @@ apps/web/test-results/
 .maestro/screenshots/
 screenshots/
 
+# Mobile native build outputs — heavy, rebuilt by EAS on the worker
+# android/app/build alone is 1.4 GB locally; ios/Pods is 227 MB
+apps/mobile/android/app/build/
+apps/mobile/android/build/
+apps/mobile/android/.gradle/
+apps/mobile/android/.cxx/
+apps/mobile/ios/Pods/
+apps/mobile/ios/build/
+apps/mobile/ios/DerivedData/
+
 # Build artifacts
 build-extract/
 build.ipa

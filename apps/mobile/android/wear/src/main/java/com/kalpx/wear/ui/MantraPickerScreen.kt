@@ -40,11 +40,7 @@ fun MantraPickerScreen(onSessionStarted: () -> Unit) {
                         title = mantra.name,
                         subtitle = mantra.devanagari.takeIf { it.isNotEmpty() }
                     )
-                    mantra.label?.let { label ->
-                        Spacer(Modifier.height(2.dp))
-                        GoldLabel(labelDisplay(label))
-                        Spacer(Modifier.height(4.dp))
-                    }
+                    Spacer(Modifier.height(4.dp))
                 }
             }
         }

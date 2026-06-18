@@ -34,7 +34,11 @@ object WearJapaEngine {
 
     private var goalType = "unlimited"
     private var goalValue: Int? = null
-    private var currentMantra = CuratedMantra.default
+
+    // The mantra of the active session — used directly by the chant screen so it works
+    // even for mantras not present in the curated picker list (e.g. Inner Path triad).
+    var currentMantra by mutableStateOf(CuratedMantra.default)
+        private set
 
     fun init(context: Context) {
         prefs = context.getSharedPreferences("kalpx_japa", Context.MODE_PRIVATE)

@@ -42,7 +42,10 @@ fun QuickChantScreen() {
         return
     }
 
-    val currentMantra = connectivity.mantras?.firstOrNull { it.ref == engine.currentMantraRef }
+    // Prefer the engine's active-session mantra (works for any mantra, including ones
+    // not in the curated picker list); fall back to the curated list if needed.
+    val currentMantra = engine.currentMantra.takeIf { it.ref == engine.currentMantraRef && it.name.isNotEmpty() }
+        ?: connectivity.mantras?.firstOrNull { it.ref == engine.currentMantraRef }
     val scrollState = rememberScrollState()
     val focusRequester = remember { FocusRequester() }
     val coroutineScope = rememberCoroutineScope()
@@ -80,9 +83,10 @@ fun QuickChantScreen() {
             BeadRingView(beadInRound = engine.beadInRound)
         }
 
-        Spacer(Modifier.height(2.dp))
+        Spacer(Modifier.height(6.dp))
 
-        // ── Scrollable: mantra name + devanagari + divider + stats ───────────
+        // ── Scrollable: audio player + mantra + devanagari + divider + stats ──
+        // Everything from the audio player down scrolls together.
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -103,6 +107,13 @@ fun QuickChantScreen() {
                 .padding(horizontal = 14.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Audio player — first in the scroll, directly below the beads
+            val audioUrl = engine.currentAudioUrl
+            if (!audioUrl.isNullOrEmpty()) {
+                MantraAudioPlayerView(audioUrl = audioUrl)
+                Spacer(Modifier.height(6.dp))
+            }
+
             currentMantra?.let { mantra ->
                 Spacer(Modifier.height(5.dp))
                 Text(
@@ -139,14 +150,9 @@ fun QuickChantScreen() {
                 sessionCount = engine.sessionCount,
                 stats = connectivity.pathData?.mantraStats?.get(engine.currentMantraRef)
             )
-            Spacer(Modifier.height(4.dp))
-        }
-
-        // ── Audio player (optional) ──────────────────────────────────────────
-        val audioUrl = engine.currentAudioUrl
-        if (!audioUrl.isNullOrEmpty()) {
-            MantraAudioPlayerView(audioUrl = audioUrl)
-            Spacer(Modifier.height(4.dp))
+            // Bottom scroll room so the stats can be scrolled up into the wide
+            // centre of the round screen instead of clipping on the bottom bezel.
+            Spacer(Modifier.height(48.dp))
         }
     }
 }

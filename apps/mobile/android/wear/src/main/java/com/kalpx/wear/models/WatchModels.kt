@@ -18,7 +18,8 @@ data class CuratedMantra(
             id = json.optString("ref").ifEmpty { json.optString("id") },
             ref = json.optString("ref"),
             name = json.optString("name"),
-            devanagari = json.optString("devanagari"),
+            // Source data stores line breaks as literal "\n" — render them as real newlines
+            devanagari = json.optString("devanagari").replace("\\n", "\n"),
             label = json.optString("label").takeIf { it.isNotEmpty() },
             audioUrl = json.optString("audioUrl").takeIf { it.isNotEmpty() }
         )
@@ -152,7 +153,7 @@ fun parsePathData(json: String): WatchPathData? = runCatching {
         WatchQuickResetMantra(
             itemId = qr.optString("itemId"),
             title = qr.optString("title"),
-            devanagari = qr.optString("devanagari"),
+            devanagari = qr.optString("devanagari").replace("\\n", "\n"),
             audioUrl = qr.optString("audioUrl").takeIf { it.isNotEmpty() }
         )
     }

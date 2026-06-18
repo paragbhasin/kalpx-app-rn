@@ -12,6 +12,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material.Text
+import com.kalpx.wear.engine.WearJapaEngine
 import com.kalpx.wear.models.CuratedMantra
 import com.kalpx.wear.models.WatchQuickResetMantra
 import com.kalpx.wear.theme.KalpXWearTheme
@@ -24,17 +25,8 @@ fun QuickResetPromptScreen(
     feeling: String,
     onNavigateBack: () -> Unit
 ) {
-    var showGoalPicker by remember { mutableStateOf(false) }
     val curatedMantra = remember(mantra) {
         CuratedMantra(mantra.itemId, mantra.itemId, mantra.title, mantra.devanagari, null, mantra.audioUrl)
-    }
-
-    if (showGoalPicker) {
-        GoalPickerScreen(mantra = curatedMantra) {
-            showGoalPicker = false
-            onNavigateBack()
-        }
-        return
     }
 
     Column(
@@ -42,7 +34,8 @@ fun QuickResetPromptScreen(
             .fillMaxSize()
             .background(KalpXWearTheme.background)
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 8.dp),
+            // Round-safe padding so text + buttons clear the bezel
+            .padding(horizontal = 24.dp, vertical = 30.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -54,10 +47,11 @@ fun QuickResetPromptScreen(
         Spacer(Modifier.height(6.dp))
         Text(
             mantra.devanagari,
-            fontSize = 20.sp,
+            fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
             color = KalpXWearTheme.textPrimary,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            lineHeight = 18.sp
         )
         Spacer(Modifier.height(4.dp))
         Text(
@@ -67,7 +61,11 @@ fun QuickResetPromptScreen(
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(10.dp))
-        WearPrimaryButton("Begin", onClick = { showGoalPicker = true })
+        // Begin → start chanting directly (unlimited), skipping the goal picker
+        WearPrimaryButton("Begin", onClick = {
+            WearJapaEngine.startSession(curatedMantra, "unlimited", null)
+            onNavigateBack()
+        })
         Spacer(Modifier.height(4.dp))
         WearSecondaryButton("Later", onClick = { onNavigateBack() })
     }

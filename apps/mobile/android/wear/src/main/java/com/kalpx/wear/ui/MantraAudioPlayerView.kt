@@ -4,19 +4,10 @@ import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.wear.compose.material.Button
-import androidx.wear.compose.material.ButtonDefaults
-import androidx.wear.compose.material.Icon
+import androidx.wear.compose.material.ChipDefaults
+import androidx.wear.compose.material.CompactChip
 import androidx.wear.compose.material.Text
 import com.kalpx.wear.theme.KalpXWearTheme
 
@@ -58,25 +49,20 @@ fun MantraAudioPlayerView(audioUrl: String) {
         }
     }
 
-    Button(
+    val accent = if (isPlaying) KalpXWearTheme.gold else KalpXWearTheme.textSecondary
+    // Small pill; glyph swaps ▶ → ❚❚ when playing (Pause vector isn't in material-icons-core)
+    CompactChip(
         onClick = { toggle() },
-        colors = ButtonDefaults.buttonColors(
+        colors = ChipDefaults.chipColors(
             backgroundColor = KalpXWearTheme.surface,
-            contentColor = if (isPlaying) KalpXWearTheme.gold else KalpXWearTheme.textSecondary
-        )
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Filled.PlayArrow,
-                contentDescription = if (isPlaying) "Pause" else "Play",
-                tint = if (isPlaying) KalpXWearTheme.gold else KalpXWearTheme.textSecondary
-            )
-            Spacer(Modifier.width(4.dp))
+            contentColor = accent
+        ),
+        label = {
             Text(
-                if (isPlaying) "Pause" else "Audio",
-                fontSize = 11.sp,
-                color = if (isPlaying) KalpXWearTheme.gold else KalpXWearTheme.textSecondary
+                if (isPlaying) "❚❚  Pause" else "▶  Audio",
+                fontSize = 10.sp,
+                color = accent
             )
         }
-    }
+    )
 }

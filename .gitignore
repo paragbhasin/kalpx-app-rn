@@ -61,6 +61,10 @@ build-extract/
 build.ipa
 *.apk
 
+# iOS signing credentials — local only, never commit
+apps/mobile/credentials.json
+apps/mobile/ios/certs/
+
 # Screenshot pipeline output
 tests/unit/.compiled/
 

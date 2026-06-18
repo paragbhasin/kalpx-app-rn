@@ -25,7 +25,8 @@
       "ios": {
         "buildConfiguration": "Release",
         "image": "latest",
-        "autoIncrement": true
+        "autoIncrement": true,
+        "credentialsSource": "local"
       }
     },
     "preview": {

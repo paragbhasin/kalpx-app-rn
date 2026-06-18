@@ -58,7 +58,11 @@ fun CheckInScreen(onNavigateBack: () -> Unit) {
 @Composable
 private fun FeelingsList(onSelect: (String, String) -> Unit) {
     ScalingLazyColumn(
-        modifier = Modifier.background(KalpXWearTheme.background)
+        modifier = Modifier.background(KalpXWearTheme.background),
+        // Start near the top (just clearing the bezel) instead of auto-centering,
+        // which left a big empty gap above the title.
+        autoCentering = null,
+        contentPadding = PaddingValues(top = 26.dp, bottom = 40.dp, start = 8.dp, end = 8.dp)
     ) {
         item {
             Text(

@@ -24,7 +24,7 @@
       },
       "ios": {
         "buildConfiguration": "Release",
-        "image": "latest",
+        "image": "macos-sequoia-15.4-xcode-16.3",
         "autoIncrement": true,
         "credentialsSource": "local"
       }

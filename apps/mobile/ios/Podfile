@@ -51,21 +51,42 @@ target 'kalpx' do
       :ccache_enabled => podfile_properties['apple.ccacheEnabled'] == 'true',
     )
 
-    # Xcode 26 / Clang: fmt/format-inl.h uses FMT_STRING (alias of FMT_COMPILE_STRING)
-    # which invokes a consteval constructor. Clang 17 rejects this in non-consteval
-    # contexts. Disable consteval in {fmt} via both GCC_PREPROCESSOR_DEFINITIONS and
-    # OTHER_CPLUSPLUSFLAGS (belt-and-suspenders — xcconfig chain may shadow one or the
-    # other depending on target). Failing file: Pods/fmt/include/fmt/format-inl.h:59.
+    # Xcode 26 / Clang 17: fmt/format-inl.h:59 uses FMT_STRING (alias of FMT_COMPILE_STRING)
+    # which invokes a consteval constructor rejected in non-consteval contexts.
+    #
+    # PRIMARY FIX — patch fmt headers directly so FMT_CONSTEVAL is never consteval.
+    # Build-settings approaches (GCC_PREPROCESSOR_DEFINITIONS / OTHER_CPLUSPLUSFLAGS)
+    # are shadowed by CocoaPods xcconfig chain on Xcode 26 and do not reach the compiler.
+    fmt_headers = Dir.glob(File.join(installer.sandbox.root.to_s, 'fmt', '**', '*.h'))
+    fmt_patched_count = 0
+    fmt_headers.each do |path|
+      content = File.read(path)
+      patched = content
+        .gsub(/(#\s*define\s+FMT_USE_CONSTEVAL\s+)1\b/, '\10')
+        .gsub(/(#\s*define\s+FMT_CONSTEVAL\s+)consteval\b/, '\1constexpr')
+      if patched != content
+        File.write(path, patched)
+        fmt_patched_count += 1
+        puts "post_install: patched fmt/#{File.basename(path)} (consteval→constexpr)"
+      end
+    end
+    if fmt_patched_count > 0
+      puts "post_install: fmt source patch complete — #{fmt_patched_count} file(s) patched"
+    elsif fmt_headers.any?
+      puts "post_install: fmt headers found but no consteval pattern (already patched or version mismatch)"
+    else
+      puts "post_install: WARNING — fmt headers not found at #{installer.sandbox.root}/fmt/**/*.h"
+    end
+
+    # SECONDARY (belt-and-suspenders) — build settings in case xcconfig chain allows it
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
-        # GCC_PREPROCESSOR_DEFINITIONS — handles both C and C++ preprocessor
         defs = config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] || ['$(inherited)']
         defs = [defs] if defs.is_a?(String)
         defs << 'FMT_CONSTEVAL=' unless defs.any? { |d| d.to_s.include?('FMT_CONSTEVAL') }
         defs << 'FMT_USE_CONSTEVAL=0' unless defs.any? { |d| d.to_s.include?('FMT_USE_CONSTEVAL') }
         config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = defs
 
-        # OTHER_CPLUSPLUSFLAGS — explicit C++ compiler flags
         flags = config.build_settings['OTHER_CPLUSPLUSFLAGS'] || ['$(inherited)']
         flags = [flags] if flags.is_a?(String)
         flags << '-DFMT_CONSTEVAL=' unless flags.any? { |f| f.to_s.include?('FMT_CONSTEVAL') }

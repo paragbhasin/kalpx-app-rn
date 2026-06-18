@@ -1,5 +1,6 @@
 package com.kalpx.wear.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.material.Text
+import com.kalpx.wear.engine.WearJapaEngine
 import com.kalpx.wear.models.CuratedMantra
 import com.kalpx.wear.models.WatchRhythmItem
 import com.kalpx.wear.models.WatchTriadItem
@@ -36,6 +38,19 @@ fun HomeListScreen() {
     var selectedGoalMantra by remember { mutableStateOf<CuratedMantra?>(null) }
     var selectedTriadItem by remember { mutableStateOf<WatchTriadItem?>(null) }
     var selectedRhythmItem by remember { mutableStateOf<WatchRhythmItem?>(null) }
+
+    // Swipe-from-left-edge / hardware back goes back ONE level (deepest first),
+    // instead of exiting the app. Disabled at home so back exits as expected.
+    val inDetail = selectedGoalMantra != null || selectedTriadItem != null ||
+        selectedRhythmItem != null || destination != null
+    BackHandler(enabled = inDetail) {
+        when {
+            selectedGoalMantra != null -> selectedGoalMantra = null
+            selectedTriadItem != null -> selectedTriadItem = null
+            selectedRhythmItem != null -> selectedRhythmItem = null
+            else -> destination = null
+        }
+    }
 
     when {
         selectedGoalMantra != null -> {
@@ -76,7 +91,7 @@ fun HomeListScreen() {
             pathData?.rhythm?.let { rhythm ->
                 RhythmDetailScreen(
                     rhythm = rhythm,
-                    onMantraSelected = { selectedGoalMantra = it },
+                    onMantraSelected = { WearJapaEngine.startSession(it, "unlimited", null) },
                     onPracticeSelected = { selectedRhythmItem = it },
                     onSankalpSelected = { selectedRhythmItem = it }
                 )
@@ -86,7 +101,7 @@ fun HomeListScreen() {
             pathData?.innerPath?.let { ip ->
                 InnerPathDetailScreen(
                     innerPath = ip,
-                    onMantraSelected = { selectedGoalMantra = it },
+                    onMantraSelected = { WearJapaEngine.startSession(it, "unlimited", null) },
                     onPracticeSelected = { selectedTriadItem = it },
                     onSankalpSelected = { selectedTriadItem = it }
                 )

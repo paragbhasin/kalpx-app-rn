@@ -14,6 +14,7 @@ import androidx.wear.compose.material.Text
 import com.kalpx.wear.sync.WearConnectivityManager
 import com.kalpx.wear.theme.KalpXWearTheme
 import com.kalpx.wear.theme.RitualChip
+import kotlinx.coroutines.delay
 
 private val FEELINGS = listOf(
     "Agitated" to "agitated",
@@ -37,7 +38,7 @@ fun CheckInScreen(onNavigateBack: () -> Unit) {
             )
         }
         selected != null -> {
-            NotedView(feeling = selected!!)
+            NotedView(feeling = selected!!, onNavigateBack = onNavigateBack)
         }
         else -> {
             FeelingsList { label, pranaType ->
@@ -78,7 +79,12 @@ private fun FeelingsList(onSelect: (String, String) -> Unit) {
 }
 
 @Composable
-private fun NotedView(feeling: String) {
+private fun NotedView(feeling: String, onNavigateBack: () -> Unit) {
+    // Show the confirmation briefly, then return to home (matches Practice/Sankalp)
+    LaunchedEffect(Unit) {
+        delay(1200)
+        onNavigateBack()
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()

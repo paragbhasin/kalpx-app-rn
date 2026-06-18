@@ -62,7 +62,9 @@ fun RitualChip(
 fun WearPrimaryButton(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Chip(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(40.dp),
         colors = ChipDefaults.chipColors(
             backgroundColor = KalpXWearTheme.gold,
             contentColor = KalpXWearTheme.background
@@ -70,7 +72,9 @@ fun WearPrimaryButton(label: String, onClick: () -> Unit, modifier: Modifier = M
         label = {
             Text(
                 label, fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
-                color = KalpXWearTheme.background
+                color = KalpXWearTheme.background,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
         }
     )
@@ -87,7 +91,13 @@ fun WearSecondaryButton(label: String, onClick: () -> Unit, modifier: Modifier =
             backgroundColor = KalpXWearTheme.surface,
             contentColor = KalpXWearTheme.textSecondary
         ),
-        label = { Text(label, fontSize = 12.sp, color = KalpXWearTheme.textSecondary) }
+        label = {
+            Text(
+                label, fontSize = 12.sp, color = KalpXWearTheme.textSecondary,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+        }
     )
 }
 

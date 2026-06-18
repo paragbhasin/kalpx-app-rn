@@ -2,6 +2,8 @@ package com.kalpx.wear.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,11 +26,13 @@ fun CompletionScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(KalpXWearTheme.background)
-            .padding(horizontal = 8.dp),
+            .verticalScroll(rememberScrollState())
+            // Round-safe: generous vertical padding so buttons don't clip on the bezel
+            .padding(horizontal = 24.dp, vertical = 30.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("✦", fontSize = 22.sp, color = KalpXWearTheme.gold)
+        Text("✦", fontSize = 20.sp, color = KalpXWearTheme.gold)
         Spacer(Modifier.height(4.dp))
         Text(
             "You returned $count times.",
@@ -44,9 +48,9 @@ fun CompletionScreen(
             color = KalpXWearTheme.textSecondary,
             textAlign = TextAlign.Center
         )
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(12.dp))
         WearPrimaryButton("Chant more", onContinue)
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(6.dp))
         WearSecondaryButton("Complete", onDone)
     }
 }

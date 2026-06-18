@@ -10,6 +10,8 @@ buildscript {
     classpath('com.android.tools.build:gradle')
     classpath('com.facebook.react:react-native-gradle-plugin')
     classpath('org.jetbrains.kotlin:kotlin-gradle-plugin')
+    // Required so the :wear module's `id "org.jetbrains.kotlin.plugin.compose"` resolves (Kotlin 2.0+)
+    classpath('org.jetbrains.kotlin:compose-compiler-gradle-plugin:2.0.21')
   }
 }
 

@@ -52,7 +52,9 @@ fun QuickChantScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(KalpXWearTheme.background),
+            .background(KalpXWearTheme.background)
+            // Top inset so the ॐ header clears the round bezel
+            .padding(top = 22.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // ── Compact header: X | ॐ + count | ✓ ──────────────────────────────
@@ -63,6 +65,9 @@ fun QuickChantScreen() {
             onDiscard = { engine.discardSession() },
             onComplete = { showCompletion = true }
         )
+
+        // Gap between the count and the bead ring
+        Spacer(Modifier.height(10.dp))
 
         // ── Bead ring ────────────────────────────────────────────────────────
         Box(
@@ -159,18 +164,19 @@ private fun CompactChantHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(42.dp)
+            .height(44.dp)
             .clickable { onIncrement() }
-            .padding(horizontal = 6.dp),
+            // Pull ✕/✓ inward so the round bezel doesn't clip them
+            .padding(horizontal = 30.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
-                .size(34.dp)
+                .size(32.dp)
                 .clickable { onDiscard() },
             contentAlignment = Alignment.Center
         ) {
-            Text("✕", fontSize = 16.sp, color = KalpXWearTheme.textTertiary)
+            Text("✕", fontSize = 18.sp, color = KalpXWearTheme.textSecondary)
         }
 
         Spacer(Modifier.weight(1f))
@@ -196,17 +202,17 @@ private fun CompactChantHeader(
         Spacer(Modifier.weight(1f))
 
         Box(
-            modifier = Modifier.size(34.dp),
+            modifier = Modifier.size(32.dp),
             contentAlignment = Alignment.Center
         ) {
             if (sessionCount > 0) {
                 Box(
                     modifier = Modifier
-                        .size(34.dp)
+                        .size(32.dp)
                         .clickable { onComplete() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("✓", fontSize = 16.sp, color = KalpXWearTheme.gold)
+                    Text("✓", fontSize = 18.sp, color = KalpXWearTheme.gold)
                 }
             }
         }

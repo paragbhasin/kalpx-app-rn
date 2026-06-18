@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.material.Text
-import com.kalpx.wear.models.CuratedMantra
+import com.kalpx.wear.engine.WearJapaEngine
 import com.kalpx.wear.sync.WearConnectivityManager
 import com.kalpx.wear.theme.EmptyStateView
 import com.kalpx.wear.theme.GoldLabel
@@ -19,16 +19,9 @@ import com.kalpx.wear.theme.RitualChip
 
 @Composable
 fun MantraPickerScreen(onSessionStarted: () -> Unit) {
-    var selectedMantra by remember { mutableStateOf<CuratedMantra?>(null) }
     val mantras = WearConnectivityManager.mantras
 
     when {
-        selectedMantra != null -> {
-            GoalPickerScreen(mantra = selectedMantra!!) {
-                selectedMantra = null
-                onSessionStarted()
-            }
-        }
         mantras == null -> {
             EmptyStateView()
         }
@@ -38,7 +31,11 @@ fun MantraPickerScreen(onSessionStarted: () -> Unit) {
             ) {
                 items(mantras) { mantra ->
                     RitualChip(
-                        onClick = { selectedMantra = mantra },
+                        // Match iOS: tapping a mantra starts chanting directly (unlimited goal)
+                        onClick = {
+                            WearJapaEngine.startSession(mantra, "unlimited", null)
+                            onSessionStarted()
+                        },
                         icon = "ॐ",
                         title = mantra.name,
                         subtitle = mantra.devanagari.takeIf { it.isNotEmpty() }

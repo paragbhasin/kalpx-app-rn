@@ -46,28 +46,38 @@ Note: building locally needs node on PATH — see `project-android-studio-node-p
 
 ---
 
-## 3. BLOCKER B — The watch app is NOT bundled into the phone build
+## 3. BLOCKER B — How the watch app reaches users (separate Wear-track upload)
 
-**As of this writing there is NO `wearApp project(':wear')` in `apps/mobile/android/app/build.gradle`.** The `:wear` module builds a separate `wear-debug.apk` that has only ever been installed **manually via adb** during testing. Nothing ships it to users' watches. The watch manifest also has `com.google.android.wearable.standalone = false`.
+The phone (`com.kalpx.app`) and watch (`com.kalpx.app.wear`) have **different package names**, so the legacy "embed inside the phone APK" model (`wearApp project(':wear')`) does **not** apply — that requires the same package and is deprecated anyway.
 
-**You must pick a distribution model and wire it up before release:**
+**Correct path: build the watch APK separately and upload it to the Play Console Wear OS track** of the same app listing. Phone and watch are two artifacts:
+- Phone: `./gradlew :app:bundleRelease` → upload AAB to the phone track.
+- Watch: `./gradlew :wear:assembleRelease` → sign it → upload the APK to the **Wear OS track**.
 
-- **Standalone (recommended, modern):** set the watch app `standalone = true`, give it its own `versionCode`, and publish the watch APK to the Play Store **Wear OS track** under the same app. Phone & watch install independently. This is the Google-supported path.
-- **Embedded (legacy):** add `wearApp project(':wear')` to `app/build.gradle` so the watch APK is packaged inside the phone APK. Deprecated by Google — likely rejected for new Play submissions. Only viable for sideloaded/internal builds.
+Notes:
+- The watch app keeps `standalone = false` (it genuinely needs the phone for data — it shows "Open KalpX on phone" with no data). That's fine; a non-standalone wear app is still distributed via its own Wear-track APK.
+- The `:wear` module has **no release signing config** yet — `:wear:assembleRelease` currently produces `wear-release-unsigned.apk`. It must be signed with the release key (same Play App Signing setup as the phone) before upload.
+- Give the `:wear` module a real `versionCode`/`versionName` bump per release (currently `versionCode 1`).
 
-Until one of these is done, **the watch app cannot reach real users at all**, independent of the sync code being correct.
+Until the watch APK is signed and uploaded to the Wear track, **the watch app cannot reach real users**, independent of the sync code being correct.
 
 ---
 
-## 4. REMOVE / GUARD the dev-only emulator relay before release
+## 4. Dev-only emulator relay — ALREADY GUARDED ✅ (verified)
 
-Wear pairing does **not** work between emulators (the new Google Pixel Watch companion app won't enter "Pair with emulator" mode — see `project-wear-emulator-pairing-deadend`). To test sync on emulators, a dev relay was added. **These must NOT ship in a production build:**
+Wear pairing does not work between emulators (see `project-wear-emulator-pairing-deadend`), so a dev relay carries the payload for emulator testing. It is now **guarded to debug builds only** — verified absent from the release APK (manifest AND dex):
 
-1. **Watch receiver** — `apps/mobile/android/wear/.../sync/RelaySyncReceiver.kt` and its `<receiver android:name=".sync.RelaySyncReceiver" android:exported="true">` entry in `apps/mobile/android/wear/src/main/AndroidManifest.xml`. It's an exported broadcast injection point.
-2. **Phone JS taps** — the two `console.log('[WATCH_RELAY_PATH]'/'[WATCH_RELAY_MANTRAS]', ...)` lines in `apps/mobile/src/native/watchConnectivity.ts`. They dump the payload to device logs.
-3. **Host script** — `scripts/watch-relay.sh` (dev tool only; harmless to keep in repo, never runs in prod).
+1. **Watch receiver** — `RelaySyncReceiver.kt` lives in `apps/mobile/android/wear/src/**debug**/java/...` and is registered only in `apps/mobile/android/wear/src/debug/AndroidManifest.xml`. Release builds contain neither the class nor the receiver.
+2. **Phone JS taps** — the two `console.log('[WATCH_RELAY_*]')` lines in `apps/mobile/src/native/watchConnectivity.ts` are wrapped in `if (__DEV__) { ... }`, so they're stripped from release JS bundles.
+3. **Host script** — `scripts/watch-relay.sh` (dev tool; never runs in prod).
 
-**Before a release build:** either delete #1 and #2, or guard them to debug builds (`BuildConfig.DEBUG` on the receiver registration / `if (__DEV__)` around the console.logs). Re-add for emulator testing afterward.
+No action needed here for release. To re-test on emulators, build/install the **debug** wear APK and run the relay script (section 6).
+
+Verification command (re-run anytime):
+```bash
+cd apps/mobile/android && ./gradlew :wear:assembleRelease
+aapt2 dump xmltree --file AndroidManifest.xml wear/build/outputs/apk/release/wear-release-unsigned.apk | grep -i RelaySync   # expect: nothing
+```
 
 ---
 

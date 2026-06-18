@@ -55,7 +55,7 @@ export const watchConnectivity = {
   pushMantrasViaContext(mantras: object[]): Promise<void> {
     // DEV relay tap: emit the exact payload so a host script can mirror it to a watch
     // emulator (Wear pairing is unavailable on emulators). No behavioural change.
-    try { console.log('[WATCH_RELAY_MANTRAS]', JSON.stringify(mantras)); } catch {}
+    if (__DEV__) { try { console.log('[WATCH_RELAY_MANTRAS]', JSON.stringify(mantras)); } catch {} }
     if (!supported) return Promise.resolve();
     return KalpxWatchConnectivityModule.pushMantrasViaContext(mantras)
       .then(() => console.log('[WatchConnectivity] pushMantrasViaContext SUCCESS'))
@@ -77,7 +77,7 @@ export const watchConnectivity = {
   pushPathDataViaContext(pathData: object): Promise<void> {
     // DEV relay tap: emit the exact payload so a host script can mirror it to a watch
     // emulator (Wear pairing is unavailable on emulators). No behavioural change.
-    try { console.log('[WATCH_RELAY_PATH]', JSON.stringify(pathData)); } catch {}
+    if (__DEV__) { try { console.log('[WATCH_RELAY_PATH]', JSON.stringify(pathData)); } catch {} }
     if (!supported) return Promise.resolve();
     return KalpxWatchConnectivityModule.pushPathDataViaContext(pathData)
       .then(() => console.log('[WatchConnectivity] pushPathDataViaContext SUCCESS'))

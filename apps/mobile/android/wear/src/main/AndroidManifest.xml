@@ -39,14 +39,8 @@
             </intent-filter>
         </service>
 
-        <!-- DEV-ONLY: host relay for emulator sync testing (Wear pairing unavailable on emulators) -->
-        <receiver
-            android:name=".sync.RelaySyncReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.kalpx.wear.RELAY_SYNC"/>
-            </intent-filter>
-        </receiver>
+        <!-- DEV-ONLY relay receiver (RelaySyncReceiver) is registered only in the debug
+             manifest at src/debug/AndroidManifest.xml — it does NOT ship in release. -->
 
     </application>
 </manifest>

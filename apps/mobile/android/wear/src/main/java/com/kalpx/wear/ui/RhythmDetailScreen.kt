@@ -1,6 +1,7 @@
 package com.kalpx.wear.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
@@ -29,7 +30,10 @@ fun RhythmDetailScreen(
     onSankalpSelected: (WatchRhythmItem) -> Unit
 ) {
     ScalingLazyColumn(
-        modifier = Modifier.background(KalpXWearTheme.background)
+        modifier = Modifier.background(KalpXWearTheme.background),
+        // Start near the top instead of auto-centering (which left a big gap above the first band)
+        autoCentering = null,
+        contentPadding = PaddingValues(top = 24.dp, bottom = 40.dp, start = 8.dp, end = 8.dp)
     ) {
         rhythm.bands.forEach { band ->
             item {

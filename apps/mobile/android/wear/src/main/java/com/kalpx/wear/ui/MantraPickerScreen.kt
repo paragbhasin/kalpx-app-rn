@@ -2,6 +2,7 @@ package com.kalpx.wear.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.*
@@ -27,7 +28,9 @@ fun MantraPickerScreen(onSessionStarted: () -> Unit) {
         }
         else -> {
             ScalingLazyColumn(
-                modifier = Modifier.background(KalpXWearTheme.background)
+                modifier = Modifier.background(KalpXWearTheme.background),
+                autoCentering = null,
+                contentPadding = PaddingValues(top = 24.dp, bottom = 40.dp, start = 8.dp, end = 8.dp)
             ) {
                 items(mantras) { mantra ->
                     RitualChip(

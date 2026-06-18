@@ -29,7 +29,11 @@ fun RitualChip(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
+            // Force a thin row (Wear Chip's default min height is a chunky 52dp)
+            .height(if (subtitle != null) 40.dp else 32.dp)
             .alpha(if (isDimmed) 0.45f else 1f),
+        // Tight padding so the rows are as thin as possible
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 2.dp),
         colors = ChipDefaults.chipColors(
             backgroundColor = KalpXWearTheme.surface,
             contentColor = KalpXWearTheme.textPrimary

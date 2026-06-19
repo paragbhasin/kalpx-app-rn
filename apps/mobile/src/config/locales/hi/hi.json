@@ -2822,7 +2822,15 @@
     "badgePractice": "अभ्यास",
     "levelBeginner": "शुरुआती",
     "levelIntermediate": "मध्यम",
-    "levelAdvanced": "उन्नत"
+    "levelAdvanced": "उन्नत",
+    "browseHint": "नीचे देखें, या कुछ विशेष खोजें।",
+    "viewDetails": "विवरण देखें",
+    "pronunciation": "उच्चारण",
+    "meaning": "अर्थ",
+    "essence": "सार",
+    "about": "परिचय",
+    "deity": "देवता",
+    "tradition": "परंपरा"
   },
   "progressSection": {
     "daysEngaged": "जुड़े दिन",

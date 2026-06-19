@@ -520,6 +520,7 @@ export const en = {
       nightSubtitle: 'Sharanagati — offering what the day held',
       libraryModal: {
         title: 'Add from Library',
+        type_all: 'All',
         type_mantra: 'Mantra',
         type_sankalp: 'Sankalp',
         type_practice: 'Practice',
@@ -528,6 +529,15 @@ export const en = {
         searchPlaceholder: 'Search…',
         searchBtn: 'Search',
         noResults: 'No results found. Try a different search.',
+        browseHint: 'Browse below, or search for something specific.',
+        viewDetails: 'View details',
+        pronunciation: 'Pronunciation',
+        meaning: 'Meaning',
+        essence: 'Essence',
+        about: 'About',
+        deity: 'Deity',
+        tradition: 'Tradition',
+        select: 'Add',
       },
     },
     rhythmWizard: {

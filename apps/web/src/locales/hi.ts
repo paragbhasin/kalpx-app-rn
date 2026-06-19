@@ -520,6 +520,7 @@ export const hi = {
       nightSubtitle: 'शरणागति — दिन ने जो थामा उसे अर्पित करना',
       libraryModal: {
         title: 'पुस्तकालय से जोड़ें',
+        type_all: 'सभी',
         type_mantra: 'मंत्र',
         type_sankalp: 'संकल्प',
         type_practice: 'अभ्यास',
@@ -528,6 +529,15 @@ export const hi = {
         searchPlaceholder: 'खोजें...',
         searchBtn: 'खोजें',
         noResults: 'कोई परिणाम नहीं मिला। कुछ और खोजें।',
+        browseHint: 'नीचे देखें, या कुछ विशेष खोजें।',
+        viewDetails: 'विवरण देखें',
+        pronunciation: 'उच्चारण',
+        meaning: 'अर्थ',
+        essence: 'सार',
+        about: 'परिचय',
+        deity: 'देवता',
+        tradition: 'परंपरा',
+        select: 'जोड़ें',
       },
     },
     rhythmWizard: {

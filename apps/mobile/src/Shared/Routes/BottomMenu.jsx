@@ -53,6 +53,10 @@ const BottomMenuContent = () => {
 
           return {
             headerShown: false,
+            // Hide the tab bar while the keyboard is open so it doesn't sit
+            // between the content and the keyboard, pushing inputs (e.g. the
+            // Tell Mitra composer) underneath it.
+            tabBarHideOnKeyboard: true,
             tabBarStyle: {
               display: isVisible ? "flex" : "none",
               backgroundColor: shouldUseTransparentTabBar

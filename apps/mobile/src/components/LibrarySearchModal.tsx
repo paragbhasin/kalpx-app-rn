@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Modal,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -74,13 +75,15 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [addingId, setAddingId] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string>(lockedItemType ?? "all");
+  // When set, the detail panel for this item replaces the browse/search list.
+  const [detailItem, setDetailItem] = useState<any | null>(null);
   const inputRef = useRef<TextInput | null>(null);
 
   const performSearch = useCallback(
     async (query: string) => {
-      // In locked mode allow empty query (browse); in free mode require 2+ chars
-      if (!lockedItemType && query.length < 2) {
-        setResults([]);
+      // Empty query browses the default list (locked or free mode). A single
+      // character is too noisy to search, so keep the current list as-is.
+      if (!lockedItemType && query.length === 1) {
         return;
       }
 
@@ -128,22 +131,26 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
     [selectedType, lockedItemType],
   );
 
+  // Load the list whenever the sheet opens, the query changes, or the active
+  // tab changes. Empty query → browse the default list (no Search press needed);
+  // 2+ chars → search within the selected type. performSearch carries
+  // selectedType in its deps, so switching tabs re-runs this and re-browses.
   useEffect(() => {
     if (!isVisible) return;
+    const q = searchQuery.trim();
+    if (!lockedItemType && q.length === 1) return;
+    const delay = q.length === 0 ? 0 : 350;
     const timer = setTimeout(() => {
-      if (searchQuery.length >= 2) {
-        performSearch(searchQuery);
-      } else if (lockedItemType && searchQuery.length === 0) {
-        performSearch("");
-      }
-    }, 350);
+      performSearch(q);
+    }, delay);
     return () => clearTimeout(timer);
   }, [isVisible, performSearch, searchQuery, lockedItemType]);
 
+  // Reset state each time the sheet opens.
   useEffect(() => {
     if (!isVisible) return;
     setSearchQuery("");
-    setResults([]);
+    setDetailItem(null);
     setSelectedType(lockedItemType ?? "all");
     if (!lockedItemType) {
       const timer = setTimeout(() => {
@@ -153,26 +160,16 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
     }
   }, [isVisible]); // lockedItemType is a stable prop; intentionally excluded from deps
 
-  // Browse-on-open: when locked to a type, fetch full list immediately on open
-  useEffect(() => {
-    if (!isVisible || !lockedItemType) return;
-    const lang = i18n.language || "en";
-    setLoading(true);
-    mitraLibrarySearch("", lockedItemType, lang)
-      .then((res) => {
-        setResults((res?.results || []).map((item: any) => ({ ...item, _type: lockedItemType })));
-      })
-      .catch(() => setResults([]))
-      .finally(() => setLoading(false));
-  }, [isVisible, lockedItemType]);
-
   const selectType = (type: string) => {
+    if (type === selectedType) return;
     setSelectedType(type);
+    setSearchQuery("");
   };
 
   const handleAddItem = async (item: any) => {
     if ((mode === "select_for_rhythm" || mode === "select") && onItemSelected) {
       onItemSelected(item as LibrarySearchItem);
+      setDetailItem(null);
       return;
     }
     if (item.alreadyInCore || item.alreadyAdded || addingId !== null) return;
@@ -198,6 +195,7 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
       );
 
       onItemAdded();
+      setDetailItem(null);
     } catch (err) {
       console.error("[LibraryAdd] Failed:", err);
     } finally {
@@ -248,12 +246,128 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
             <View style={styles.handle} />
 
             <View style={styles.header}>
-              <Text style={styles.headerTitle}>{headerTitle ?? t("libraryModal.title")}</Text>
+              {detailItem ? (
+                <TouchableOpacity
+                  onPress={() => setDetailItem(null)}
+                  style={styles.backBtn}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons name="chevron-back" size={22} color="#7d5408" />
+                  <Text style={styles.backText} numberOfLines={1}>
+                    {headerTitle ?? t("libraryModal.title")}
+                  </Text>
+                </TouchableOpacity>
+              ) : (
+                <Text style={styles.headerTitle}>{headerTitle ?? t("libraryModal.title")}</Text>
+              )}
               <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
                 <Ionicons name="close" size={28} color="#958b80" />
               </TouchableOpacity>
             </View>
 
+            {detailItem ? (
+              <ScrollView
+                style={styles.detailScroll}
+                contentContainerStyle={styles.detailContent}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+              >
+                <View style={styles.badgeRow}>
+                  <Text style={styles.itemTypeBadge}>
+                    {TYPE_BADGE_LABELS[detailItem._type || detailItem.itemType] ||
+                      (detailItem._type || detailItem.itemType)}
+                  </Text>
+                  {Boolean(getLevelLabel(detailItem)) && (
+                    <Text style={[styles.levelBadge, getLevelStyle(detailItem)]}>
+                      {getLevelLabel(detailItem)}
+                    </Text>
+                  )}
+                </View>
+
+                <Text style={styles.detailTitle}>{detailItem.title}</Text>
+
+                {Boolean(detailItem.devanagari) && (
+                  <Text style={styles.detailDevanagari}>{detailItem.devanagari}</Text>
+                )}
+                {Boolean(detailItem.iast) && (
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>{t("libraryModal.pronunciation")}</Text>
+                    <Text style={styles.detailBody}>{detailItem.iast}</Text>
+                  </View>
+                )}
+                {Boolean(detailItem.meaning) && (
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>{t("libraryModal.meaning")}</Text>
+                    <Text style={styles.detailBody}>{detailItem.meaning}</Text>
+                  </View>
+                )}
+                {Boolean(detailItem.essence) && (
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>{t("libraryModal.essence")}</Text>
+                    <Text style={styles.detailBody}>{detailItem.essence}</Text>
+                  </View>
+                )}
+                {Boolean(detailItem.subtitle || detailItem.description) && (
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>{t("libraryModal.about")}</Text>
+                    <Text style={styles.detailBody}>
+                      {detailItem.subtitle || detailItem.description}
+                    </Text>
+                  </View>
+                )}
+                {(Boolean(detailItem.deity) || Boolean(detailItem.tradition)) && (
+                  <View style={styles.detailMetaRow}>
+                    {Boolean(detailItem.deity) && (
+                      <View style={styles.detailMetaItem}>
+                        <Text style={styles.detailLabel}>{t("libraryModal.deity")}</Text>
+                        <Text style={styles.detailMetaValue}>{detailItem.deity}</Text>
+                      </View>
+                    )}
+                    {Boolean(detailItem.tradition) && (
+                      <View style={styles.detailMetaItem}>
+                        <Text style={styles.detailLabel}>{t("libraryModal.tradition")}</Text>
+                        <Text style={styles.detailMetaValue}>{detailItem.tradition}</Text>
+                      </View>
+                    )}
+                  </View>
+                )}
+                {detailItem.tags && detailItem.tags.length > 0 && (
+                  <View style={styles.tagRow}>
+                    {detailItem.tags.map((tag: string) => (
+                      <Text key={tag} style={styles.tag}>
+                        {tag}
+                      </Text>
+                    ))}
+                  </View>
+                )}
+
+                <View style={styles.detailActionWrap}>
+                  {detailItem.alreadyInCore ? (
+                    <Text style={styles.statusText}>{t("libraryModal.inCore")}</Text>
+                  ) : detailItem.alreadyAdded ? (
+                    <Text style={styles.statusText}>{t("libraryModal.added")}</Text>
+                  ) : (
+                    <TouchableOpacity
+                      style={styles.detailActionBtn}
+                      onPress={() => handleAddItem(detailItem)}
+                      disabled={addingId !== null}
+                      activeOpacity={0.85}
+                    >
+                      {addingId === (detailItem.itemId || detailItem.item_id) ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                      ) : (
+                        <Text style={styles.detailActionBtnText}>
+                          {mode === "select_for_rhythm" || mode === "select"
+                            ? selectLabel ?? t("libraryModal.select")
+                            : t("libraryModal.add")}
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </ScrollView>
+            ) : (
+              <>
             {!lockedItemType && (
               <View style={styles.typeWrap}>
                 {[
@@ -323,9 +437,9 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
                 keyboardShouldPersistTaps="handled"
                 ListEmptyComponent={
                   <Text style={styles.emptyText}>
-                    {searchQuery.length >= 2 || lockedItemType
+                    {searchQuery.trim().length >= 2
                       ? t("libraryModal.noResults")
-                      : t("libraryModal.emptyHint")}
+                      : t("libraryModal.browseHint")}
                   </Text>
                 }
                 renderItem={({ item }: { item: any }) => (
@@ -336,7 +450,11 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
                         styles.disabledCard,
                     ]}
                   >
-                    <View style={styles.itemInfo}>
+                    <TouchableOpacity
+                      style={styles.itemInfo}
+                      activeOpacity={0.7}
+                      onPress={() => setDetailItem(item)}
+                    >
                       <View style={styles.badgeRow}>
                         <Text style={styles.itemTypeBadge}>
                           {TYPE_BADGE_LABELS[item._type || item.itemType] || (item._type || item.itemType)}
@@ -366,7 +484,14 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
                           ))}
                         </View>
                       )}
-                    </View>
+
+                      <View style={styles.detailsHintRow}>
+                        <Text style={styles.detailsHintText}>
+                          {t("libraryModal.viewDetails")}
+                        </Text>
+                        <Ionicons name="chevron-forward" size={14} color="#b08a3e" />
+                      </View>
+                    </TouchableOpacity>
 
                     <View style={styles.actionWrap}>
                       {item.alreadyInCore ? (
@@ -394,6 +519,8 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
                   </View>
                 )}
               />
+            )}
+              </>
             )}
           </View>
         </KeyboardAvoidingView>
@@ -625,6 +752,103 @@ const styles = StyleSheet.create({
   addBtnText: {
     color: "#d4a017",
     fontSize: 12,
+    fontFamily: Fonts.sans.semiBold,
+  },
+
+  // "View details" affordance on each list card
+  detailsHintRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    marginTop: 12,
+  },
+  detailsHintText: {
+    fontSize: 12,
+    color: "#b08a3e",
+    fontFamily: Fonts.sans.semiBold,
+  },
+
+  // Back button (detail header)
+  backBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+    flex: 1,
+    marginRight: 12,
+  },
+  backText: {
+    fontSize: 17,
+    color: "#7d5408",
+    fontFamily: Fonts.serif.bold,
+    fontWeight: "700",
+  },
+
+  // Detail panel
+  detailScroll: {
+    marginTop: 14,
+  },
+  detailContent: {
+    paddingBottom: 24,
+  },
+  detailTitle: {
+    fontSize: 24,
+    fontFamily: Fonts.serif.bold,
+    color: "#4b260a",
+    fontWeight: "700",
+    lineHeight: 30,
+    marginTop: 10,
+  },
+  detailDevanagari: {
+    fontSize: 22,
+    fontFamily: Fonts.serif.regular,
+    color: "#6b3d12",
+    lineHeight: 36,
+    marginTop: 14,
+  },
+  detailSection: {
+    marginTop: 18,
+  },
+  detailLabel: {
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    color: "#a07c45",
+    fontFamily: Fonts.sans.bold,
+    marginBottom: 6,
+  },
+  detailBody: {
+    fontSize: 16,
+    fontFamily: Fonts.serif.regular,
+    color: "#544a40",
+    lineHeight: 24,
+  },
+  detailMetaRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 28,
+    marginTop: 20,
+  },
+  detailMetaItem: {
+    minWidth: 100,
+  },
+  detailMetaValue: {
+    fontSize: 15,
+    fontFamily: Fonts.serif.bold,
+    color: "#4b260a",
+  },
+  detailActionWrap: {
+    marginTop: 28,
+  },
+  detailActionBtn: {
+    backgroundColor: "#D39A14",
+    borderRadius: 16,
+    paddingVertical: 15,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  detailActionBtnText: {
+    color: "#fff",
+    fontSize: 16,
     fontFamily: Fonts.sans.semiBold,
   },
 });

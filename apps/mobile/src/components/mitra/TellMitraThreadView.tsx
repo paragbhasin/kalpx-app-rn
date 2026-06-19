@@ -92,18 +92,53 @@ export default function TellMitraThreadView({
 }: TellMitraThreadViewProps) {
   const { t } = useTranslation();
   const RETURN_CARD_CHIPS: TellMitraFollowupOption[] = [
-    { label: t("tellMitraThread.returnCard.more_steady"),    value: "more_steady"    },
-    { label: t("tellMitraThread.returnCard.still_heavy"),    value: "still_heavy"    },
-    { label: t("tellMitraThread.returnCard.need_clarity"),   value: "need_clarity"   },
-    { label: t("tellMitraThread.returnCard.tell_mitra_more"), value: "tell_mitra_more" },
+    {
+      label: t("tellMitraThread.returnCard.more_steady"),
+      value: "more_steady",
+    },
+    {
+      label: t("tellMitraThread.returnCard.still_heavy"),
+      value: "still_heavy",
+    },
+    {
+      label: t("tellMitraThread.returnCard.need_clarity"),
+      value: "need_clarity",
+    },
+    {
+      label: t("tellMitraThread.returnCard.tell_mitra_more"),
+      value: "tell_mitra_more",
+    },
   ];
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
+  const { width, height: windowHeight } = useWindowDimensions();
   const isTablet = width >= 768;
-  const [keyboardHeight, setKeyboardHeight] = React.useState(0);
-  const androidKeyboardOffset =
-    Platform.OS === "android" ? Math.max(0, keyboardHeight - insets.bottom) : 0;
   const footerClearance = Math.max(insets.bottom + 72, 88);
+
+  // Self-correcting keyboard avoidance (edge-to-edge makes adjustResize behave
+  // inconsistently). We measure how much the window ACTUALLY shrank when the
+  // keyboard opened and pad the root by only the remaining gap:
+  //   inset = keyboardHeight - (window shrink already applied by the OS)
+  // • OS fully resized   → shrink == keyboardHeight → inset 0
+  // • OS didn't resize   → shrink == 0              → inset == keyboardHeight
+  // • partial resize     → inset == the exact remainder
+  const [keyboardHeight, setKeyboardHeight] = React.useState(0);
+  const baseWindowHeightRef = React.useRef(windowHeight);
+  React.useEffect(() => {
+    if (keyboardHeight === 0) baseWindowHeightRef.current = windowHeight;
+  }, [windowHeight, keyboardHeight]);
+  const windowShrink = Math.max(0, baseWindowHeightRef.current - windowHeight);
+  // The disclaimer lives BELOW the composer. We lift only enough to put the
+  // composer just above the keyboard and let the disclaimer tuck behind it, so
+  // there is no empty gap: subtract the disclaimer's height (and the nav inset,
+  // which the keyboard already covers) from the raw keyboard overlap.
+  const [disclaimerHeight, setDisclaimerHeight] = React.useState(0);
+  const keyboardInset =
+    keyboardHeight > 0
+      ? Math.max(
+          0,
+          keyboardHeight - windowShrink - insets.bottom - disclaimerHeight,
+        )
+      : 0;
 
   React.useEffect(() => {
     const showEvent =
@@ -153,8 +188,8 @@ export default function TellMitraThreadView({
     // ── mitra_response ───────────────────────────────────────────────────────
     if (item.type === "mitra_response") {
       return (
-        <View key={item.id} style={s.mitraBlock}>
-          <Text style={s.mitraLabel}>{t('tellMitraThread.mitraLabel')}</Text>
+        <View key={item.id}>
+          <Text style={s.mitraLabel}>{t("tellMitraThread.mitraLabel")}</Text>
           {shouldShowPriorContext(item.prior_context_summary) ? (
             <Text style={s.priorContextText}>{item.prior_context_summary}</Text>
           ) : null}
@@ -202,7 +237,9 @@ export default function TellMitraThreadView({
     if (item.type === "room_recommendation") {
       return (
         <View key={item.id} style={s.roomCard}>
-          <Text style={s.roomCardLabel}>{t('tellMitraThread.recommendedNext')}</Text>
+          <Text style={s.roomCardLabel}>
+            {t("tellMitraThread.recommendedNext")}
+          </Text>
           <Text style={s.roomCardTitle}>{item.room_label}</Text>
           {item.room_description ? (
             <Text style={s.roomCardDesc}>{item.room_description}</Text>
@@ -212,14 +249,18 @@ export default function TellMitraThreadView({
             onPress={() => onEnterRoom(item)}
             activeOpacity={0.8}
           >
-            <Text style={s.goldBtnText}>{t('tellMitraThread.enterRoom', { room_label: item.room_label })}</Text>
+            <Text style={s.goldBtnText}>
+              {t("tellMitraThread.enterRoom", { room_label: item.room_label })}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={s.ghostLink}
             onPress={onTellMitraMore}
             activeOpacity={0.7}
           >
-            <Text style={s.ghostLinkText}>{t('tellMitraThread.tellMitraMore')}</Text>
+            <Text style={s.ghostLinkText}>
+              {t("tellMitraThread.tellMitraMore")}
+            </Text>
           </TouchableOpacity>
           {item.secondary_room_id &&
           isValidRoomId(item.secondary_room_id) &&
@@ -229,7 +270,11 @@ export default function TellMitraThreadView({
               onPress={() =>
                 onChipClick(
                   {
-                    label: t('tellMitraThread.orTryRoom', { room: item.secondary_room_label || getRoomLabel(item.secondary_room_id as any) }),
+                    label: t("tellMitraThread.orTryRoom", {
+                      room:
+                        item.secondary_room_label ||
+                        getRoomLabel(item.secondary_room_id as any),
+                    }),
                     value: `secondary_room_${item.secondary_room_id}`,
                   },
                   item.id,
@@ -238,7 +283,11 @@ export default function TellMitraThreadView({
               activeOpacity={0.7}
             >
               <Text style={[s.ghostLinkText, { fontSize: sfs(12) }]}>
-                {t('tellMitraThread.orTryRoom', { room: item.secondary_room_label || getRoomLabel(item.secondary_room_id as any) })}
+                {t("tellMitraThread.orTryRoom", {
+                  room:
+                    item.secondary_room_label ||
+                    getRoomLabel(item.secondary_room_id as any),
+                })}
               </Text>
             </TouchableOpacity>
           ) : null}
@@ -251,9 +300,11 @@ export default function TellMitraThreadView({
       return (
         <View key={item.id} style={s.returnCard}>
           <Text style={s.returnCardTitle}>
-            {t('tellMitraThread.youreBack', { room_label: item.room_label })}
+            {t("tellMitraThread.youreBack", { room_label: item.room_label })}
           </Text>
-          <Text style={s.returnCardSubtitle}>{t('tellMitraThread.whatFeelsDifferent')}</Text>
+          <Text style={s.returnCardSubtitle}>
+            {t("tellMitraThread.whatFeelsDifferent")}
+          </Text>
           <View style={s.chipsWrap}>
             {RETURN_CARD_CHIPS.map((opt) => (
               <TouchableOpacity
@@ -269,7 +320,9 @@ export default function TellMitraThreadView({
                 style={[s.chip, submitting && s.chipDisabled]}
                 activeOpacity={0.7}
               >
-                <Text style={s.chipText}>{t(`tellMitraThread.returnCard.${opt.value}`)}</Text>
+                <Text style={s.chipText}>
+                  {t(`tellMitraThread.returnCard.${opt.value}`)}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -281,7 +334,7 @@ export default function TellMitraThreadView({
     if (item.type === "wisdom_options") {
       return (
         <View key={item.id} style={s.wisdomBlock}>
-          <Text style={s.wisdomLabel}>{t('tellMitraThread.orTry')}</Text>
+          <Text style={s.wisdomLabel}>{t("tellMitraThread.orTry")}</Text>
           {item.next_options.map((opt, i) => (
             <TouchableOpacity
               key={i}
@@ -302,7 +355,9 @@ export default function TellMitraThreadView({
     if (item.type === "safety") {
       return (
         <View key={item.id} style={s.safetyCard}>
-          <Text style={s.safetyTitle}>{t('tellMitraThread.mitraHearsYou')}</Text>
+          <Text style={s.safetyTitle}>
+            {t("tellMitraThread.mitraHearsYou")}
+          </Text>
           <Text style={s.safetyText}>{item.response_copy}</Text>
         </View>
       );
@@ -312,7 +367,7 @@ export default function TellMitraThreadView({
     if (item.type === "loading") {
       return (
         <View key={item.id} style={s.mitraBlock}>
-          <Text style={s.mitraLabel}>{t('tellMitraThread.mitraLabel')}</Text>
+          <Text style={s.mitraLabel}>{t("tellMitraThread.mitraLabel")}</Text>
           <Text style={s.loadingDots}>· · ·</Text>
         </View>
       );
@@ -331,12 +386,20 @@ export default function TellMitraThreadView({
   }
 
   return (
-    <View style={[s.root, isTablet && { maxWidth: 720, alignSelf: 'center', width: '100%' }]}>
+    <View
+      style={[
+        s.root,
+        { paddingBottom: keyboardInset },
+        isTablet && { maxWidth: 720, alignSelf: "center", width: "100%" },
+      ]}
+    >
       {/* Start fresh button — only when thread has items */}
       {conversation.length > 0 && (
         <View style={s.startFreshRow}>
           <TouchableOpacity onPress={onStartFresh} activeOpacity={0.7}>
-            <Text style={s.startFreshText}>{t('tellMitraThread.startFresh')}</Text>
+            <Text style={s.startFreshText}>
+              {t("tellMitraThread.startFresh")}
+            </Text>
           </TouchableOpacity>
         </View>
       )}
@@ -356,21 +419,28 @@ export default function TellMitraThreadView({
         {conversation.length === 0 && (
           <View style={s.emptyState}>
             <Text style={s.emptySubtext}>
-              {t('tellMitraThread.emptySubtext')}
+              {t("tellMitraThread.emptySubtext")}
             </Text>
-            <Text style={s.emptyHint}>
-              {t('tellMitraThread.emptyHint')}
-            </Text>
-            <View style={[s.chipsWrap, { marginTop: 20 }]}>
+            <Text style={s.emptyHint}>{t("tellMitraThread.emptyHint")}</Text>
+            <View
+              style={[s.chipsWrap, { marginTop: 20, justifyContent: "center" }]}
+            >
               {QUICK_START_CHIPS.map((chip) => (
                 <TouchableOpacity
                   key={chip.value}
-                  onPress={() => onQuickStartChip(chip.value, t(`tellMitraThread.quickStart.${chip.value}`))}
+                  onPress={() =>
+                    onQuickStartChip(
+                      chip.value,
+                      t(`tellMitraThread.quickStart.${chip.value}`),
+                    )
+                  }
                   disabled={submitting}
                   style={[s.chip, submitting && s.chipDisabled]}
                   activeOpacity={0.7}
                 >
-                  <Text style={s.chipText}>{t(`tellMitraThread.quickStart.${chip.value}`)}</Text>
+                  <Text style={s.chipText}>
+                    {t(`tellMitraThread.quickStart.${chip.value}`)}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -382,14 +452,7 @@ export default function TellMitraThreadView({
       </ScrollView>
 
       {!!errorMsg && <Text style={s.errorText}>{errorMsg}</Text>}
-      <View
-        style={[
-          s.footerWrap,
-          Platform.OS === "android" && androidKeyboardOffset > 0
-            ? { paddingBottom: androidKeyboardOffset }
-            : null,
-        ]}
-      >
+      <View style={s.footerWrap}>
         <View style={s.composerRow}>
           <TextInput
             ref={inputRef}
@@ -413,16 +476,17 @@ export default function TellMitraThreadView({
             disabled={submitting || !draft.trim()}
             activeOpacity={0.8}
           >
-            <Text style={s.sendBtnText}>{submitting ? "…" : t('tellMitraThread.send')}</Text>
+            <Text style={s.sendBtnText}>
+              {submitting ? "…" : t("tellMitraThread.send")}
+            </Text>
           </TouchableOpacity>
         </View>
+        {/* Disclaimer sits below the composer; the keyboard covers it when open */}
         <Text
-          style={[
-            s.disclaimerText,
-            { paddingBottom: Math.max(insets.bottom + 6, 8) },
-          ]}
+          onLayout={(e) => setDisclaimerHeight(e.nativeEvent.layout.height)}
+          style={[s.disclaimerText]}
         >
-          {t('tellMitraThread.disclaimer')}
+          {t("tellMitraThread.disclaimer")}
         </Text>
       </View>
     </View>
@@ -435,7 +499,7 @@ const s = StyleSheet.create({
   root: { flex: 1 },
   startFreshRow: {
     paddingHorizontal: 16,
-    paddingTop: 10,
+    paddingTop: 2,
     alignItems: "flex-end",
   },
   startFreshText: {
@@ -445,10 +509,10 @@ const s = StyleSheet.create({
   },
   scrollArea: { flex: 1 },
   scrollContent: { padding: 16, paddingBottom: 12 },
-  scrollContentEmpty: { paddingTop: 28 },
+  scrollContentEmpty: { flexGrow: 1, justifyContent: "center", paddingTop: 28 },
 
   // Empty state
-  emptyState: { paddingBottom: 24 },
+  emptyState: { paddingBottom: 24, alignItems: "center" },
   emptyTitle: {
     fontFamily: Fonts.serif.regular,
     fontSize: sfs(24),
@@ -461,8 +525,14 @@ const s = StyleSheet.create({
     color: "#7B6550",
     lineHeight: sfs(22),
     marginBottom: 4,
+    textAlign: "center",
   },
-  emptyHint: { fontSize: sfs(13), color: "#9B8B77", lineHeight: sfs(20) },
+  emptyHint: {
+    fontSize: sfs(13),
+    color: "#9B8B77",
+    lineHeight: sfs(20),
+    textAlign: "center",
+  },
 
   // User bubbles
   userRow: { alignItems: "flex-end", marginBottom: 12 },
@@ -493,13 +563,13 @@ const s = StyleSheet.create({
   },
 
   // Mitra response
-  mitraBlock: { marginBottom: 18 },
+  mitraBlock: {},
   mitraLabel: {
     fontSize: sfs(10),
     color: "#B8963E",
     fontWeight: "700",
     letterSpacing: 0.8,
-    marginBottom: 6,
+    // marginBottom: 6,
     fontFamily: Fonts.sans.regular,
   },
   priorContextText: {
@@ -538,7 +608,11 @@ const s = StyleSheet.create({
     backgroundColor: "rgba(255,250,243,0.95)",
   },
   chipDisabled: { opacity: 0.4 },
-  chipText: { fontSize: sfs(14), color: "#5C4B35", fontFamily: Fonts.sans.regular },
+  chipText: {
+    fontSize: sfs(14),
+    color: "#5C4B35",
+    fontFamily: Fonts.sans.regular,
+  },
   chipTextDisabled: { color: "#BBAA99" },
 
   // Room recommendation card
@@ -694,9 +768,9 @@ const s = StyleSheet.create({
     borderColor: "rgba(201,168,76,0.35)",
     borderRadius: 14,
     padding: 10,
-    fontSize: sfs(15),
+    fontSize: sfs(12),
     color: "#3B2A1A",
-    minHeight: 44,
+    minHeight: 20,
     maxHeight: 120,
     backgroundColor: "rgba(255,253,249,0.98)",
     textAlignVertical: "top",
@@ -704,7 +778,7 @@ const s = StyleSheet.create({
   sendBtn: {
     backgroundColor: "#C99317",
     borderRadius: 12,
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingHorizontal: 16,
     alignItems: "center",
     justifyContent: "center",
@@ -717,7 +791,7 @@ const s = StyleSheet.create({
     textAlign: "center",
     lineHeight: sfs(16),
     paddingHorizontal: 20,
-    paddingVertical: 6,
+    paddingTop: 6,
     fontFamily: Fonts.sans.regular,
   },
 });

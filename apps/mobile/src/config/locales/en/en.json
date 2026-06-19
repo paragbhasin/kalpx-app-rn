@@ -2849,6 +2849,14 @@
     "badgePractice": "Practice",
     "levelBeginner": "Beginner",
     "levelIntermediate": "Intermediate",
-    "levelAdvanced": "Advanced"
+    "levelAdvanced": "Advanced",
+    "browseHint": "Browse below, or search for something specific.",
+    "viewDetails": "View details",
+    "pronunciation": "Pronunciation",
+    "meaning": "Meaning",
+    "essence": "Essence",
+    "about": "About",
+    "deity": "Deity",
+    "tradition": "Tradition"
   }
 }

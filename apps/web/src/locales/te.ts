@@ -520,6 +520,7 @@ export const te = {
       nightSubtitle: 'శరణాగతి — రోజు ఏమి కలిగించిందో అది సమర్పించడం',
       libraryModal: {
         title: 'గ్రంథాలయం నుండి జోడించండి',
+        type_all: 'అన్నీ',
         type_mantra: 'మంత్రం',
         type_sankalp: 'సంకల్పం',
         type_practice: 'అభ్యాసం',
@@ -528,6 +529,15 @@ export const te = {
         searchPlaceholder: 'వెతకండి...',
         searchBtn: 'వెతకండి',
         noResults: 'ఫలితాలు కనుగొనలేదు. వేరే విధంగా వెతకండి.',
+        browseHint: 'క్రింద చూడండి, లేదా నిర్దిష్టంగా వెతకండి.',
+        viewDetails: 'వివరాలు చూడండి',
+        pronunciation: 'ఉచ్చారణ',
+        meaning: 'అర్థం',
+        essence: 'సారాంశం',
+        about: 'పరిచయం',
+        deity: 'దేవత',
+        tradition: 'సంప్రదాయం',
+        select: 'జోడించు',
       },
     },
     rhythmWizard: {

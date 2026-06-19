@@ -2907,6 +2907,14 @@
     "badgePractice": "అభ్యాసం",
     "levelBeginner": "ప్రారంభ",
     "levelIntermediate": "మధ్యస్థ",
-    "levelAdvanced": "అధునాతన"
+    "levelAdvanced": "అధునాతన",
+    "browseHint": "క్రింద చూడండి, లేదా నిర్దిష్టంగా వెతకండి.",
+    "viewDetails": "వివరాలు చూడండి",
+    "pronunciation": "ఉచ్చారణ",
+    "meaning": "అర్థం",
+    "essence": "సారాంశం",
+    "about": "పరిచయం",
+    "deity": "దేవత",
+    "tradition": "సంప్రదాయం"
   }
 }

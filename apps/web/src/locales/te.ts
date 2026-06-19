@@ -700,5 +700,6 @@ export const te = {
     goToRhythm: 'రోజువారీ లయకు వెళ్లండి',
     done: 'పూర్తయింది',
     notNow: 'ఇప్పుడు కాదు',
+    addToPractice: 'సాధనలో చేర్చండి',
   },
 } as const;

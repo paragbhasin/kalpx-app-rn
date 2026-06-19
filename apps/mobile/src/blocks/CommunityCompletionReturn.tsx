@@ -28,6 +28,9 @@ import Svg, { Path } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 const MantraLotus3d = ({ width, height, opacity, style }: { width?: number; height?: number; opacity?: number; style?: any }) => <Image source={require("../../assets/mantra-lotus-3d.webp")} style={[{ width, height, opacity, resizeMode: 'contain' }, style]} />;
 import { VoiceTextInput } from "../components/VoiceTextInput";
+import RhythmSlotPickerModal, {
+  type RhythmOffer,
+} from "../components/RhythmSlotPickerModal";
 import { executeAction } from "../engine/actionExecutor";
 import {
   mitraTrackEvent,
@@ -135,6 +138,21 @@ const CommunityCompletionReturn: React.FC<CompletionReturnTransientProps> = ({
   const checkProgress = useRef(new Animated.Value(0)).current;
   const messageOpacity = useRef(new Animated.Value(0)).current;
   const [showWriteInput, setShowWriteInput] = useState(false);
+  // "Add to Practice" on the completion screen opens the Daily Rhythm slot modal.
+  const [rhythmOffer, setRhythmOffer] = useState<RhythmOffer | null>(null);
+
+  const openRhythmOffer = () => {
+    const item = (screenData.runner_active_item || {}) as any;
+    const itemId = String(item.item_id || item.itemId || item.id || "");
+    if (!itemId) return;
+    setRhythmOffer({
+      item_id: itemId,
+      item_type: resolvedVariant,
+      title: item.title || item.title_snapshot || item.name || "",
+      description:
+        item.summary || item.insight || item.short_text || null,
+    });
+  };
 
   const REFLECTION_CHIPS = [
     t("completion.reflectionChip.moreCalmLabel"),
@@ -523,6 +541,25 @@ const CommunityCompletionReturn: React.FC<CompletionReturnTransientProps> = ({
               </Text>
             </TouchableOpacity>
 
+            {isCommunityRunner && (
+              <TouchableOpacity
+                style={styles.addPracticeCta}
+                onPress={openRhythmOffer}
+                activeOpacity={0.85}
+              >
+                <Text
+                  style={[
+                    styles.addPracticeCtaText,
+                    isHindi && { letterSpacing: 0 },
+                  ]}
+                >
+                  {t("community.rhythm.addToPractice", {
+                    defaultValue: "Add to Practice",
+                  })}
+                </Text>
+              </TouchableOpacity>
+            )}
+
             {!isRoomSequenceCompletion && !isCommunityRunner && !!slot("repeat_cta") && (
               <TouchableOpacity
                 style={styles.secondaryCta}
@@ -535,11 +572,35 @@ const CommunityCompletionReturn: React.FC<CompletionReturnTransientProps> = ({
           </View>
         </View>
       </ScrollView>
+
+      <RhythmSlotPickerModal
+        offer={rhythmOffer}
+        onClose={() => setRhythmOffer(null)}
+      />
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
+  addPracticeCta: {
+    marginTop: 12,
+    backgroundColor: "rgba(255,248,239,0.92)",
+    borderWidth: 1,
+    borderColor: "#DAC28E",
+    borderRadius: 24,
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    width: "100%",
+    maxWidth: 280,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  addPracticeCtaText: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 14,
+    color: "#B88413",
+    letterSpacing: 0.2,
+  },
   overlay: {
     flex: 1,
     width: "100%",

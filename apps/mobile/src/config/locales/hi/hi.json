@@ -1531,7 +1531,8 @@
       "alreadySubtitle": "यह पहले से आपकी {{slot}} साधना का हिस्सा है।",
       "goToRhythm": "दैनिक लय देखें",
       "done": "हो गया",
-      "notNow": "अभी नहीं"
+      "notNow": "अभी नहीं",
+      "addToPractice": "अभ्यास में जोड़ें"
     },
     "postMenu": {
       "report": "रिपोर्ट करें",

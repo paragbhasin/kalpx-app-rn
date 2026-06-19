@@ -700,6 +700,7 @@ export const hi = {
     goToRhythm: 'दैनिक लय देखें',
     done: 'हो गया',
     notNow: 'अभी नहीं',
+    addToPractice: 'अभ्यास में जोड़ें',
   },
   progressSection: {
     daysEngaged: 'जुड़े दिन',

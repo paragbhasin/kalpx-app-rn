@@ -1554,7 +1554,8 @@
       "alreadySubtitle": "This is already part of your {{slot}} practice.",
       "goToRhythm": "Go to Daily Rhythm",
       "done": "Done",
-      "notNow": "Not now"
+      "notNow": "Not now",
+      "addToPractice": "Add to Practice"
     },
     "postMenu": {
       "report": "Report",

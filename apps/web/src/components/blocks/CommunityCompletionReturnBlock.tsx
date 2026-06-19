@@ -19,6 +19,10 @@ import React, { useEffect, useState } from "react";
 import { VoiceTextInput } from "../VoiceTextInput";
 import { useTranslation } from "../../lib/i18n";
 import { webNavigate } from "../../lib/webRouter";
+import {
+  RhythmSlotPickerModal,
+  type RhythmOffer,
+} from "../community/RhythmSlotPickerModal";
 
 /* ── Colour tokens (match mobile styles) ─────────────────────────── */
 const BROWN       = "#5C3A12";
@@ -128,6 +132,20 @@ export function CommunityCompletionReturnBlock({ block, screenData = {}, onActio
 
   /* ── Reflection chips ── */
   const [showWriteInput, setShowWriteInput] = useState(false);
+  // "Add to Practice" opens the Daily Rhythm slot modal for this practice.
+  const [rhythmOffer, setRhythmOffer] = useState<RhythmOffer | null>(null);
+
+  const openRhythmOffer = () => {
+    const item = (screenData["runner_active_item"] || {}) as any;
+    const itemId = String(item.item_id || item.itemId || item.id || "");
+    if (!itemId) return;
+    setRhythmOffer({
+      item_id: itemId,
+      item_type: variant as "mantra" | "sankalp" | "practice",
+      title: item.title || item.title_snapshot || item.name || "",
+      description: item.summary || item.insight || item.short_text || null,
+    });
+  };
 
   function handleChipTap(chipLabel: string) {
     onAction?.({
@@ -434,6 +452,31 @@ export function CommunityCompletionReturnBlock({ block, screenData = {}, onActio
           {returnHomeLabel}
         </button>
 
+        {isCommunity && (
+          <button
+            onClick={openRhythmOffer}
+            data-testid="add-to-practice-btn"
+            style={{
+              background: "rgba(255,248,239,0.92)",
+              border: "1px solid var(--kalpx-border-gold)",
+              borderRadius: 32,
+              paddingBlock: 14,
+              paddingInline: 40,
+              width: "100%",
+              maxWidth: 280,
+              fontSize: 15,
+              fontWeight: 700,
+              color: "var(--kalpx-cta)",
+              letterSpacing: 0.2,
+              cursor: "pointer",
+              fontFamily: "var(--kalpx-font-sans, sans-serif)",
+              marginTop: 10,
+            }}
+          >
+            {t('communityRhythm.addToPractice')}
+          </button>
+        )}
+
         {!isRoomSequenceCompletion && !isCommunity && repeatLabel && (
           <button
             onClick={() => onAction?.({ type: "repeat_runner" })}
@@ -456,6 +499,11 @@ export function CommunityCompletionReturnBlock({ block, screenData = {}, onActio
           </button>
         )}
       </div>
+
+      <RhythmSlotPickerModal
+        offer={rhythmOffer}
+        onClose={() => setRhythmOffer(null)}
+      />
     </div>
   );
 }

@@ -700,6 +700,7 @@ export const en = {
     goToRhythm: 'Go to Daily Rhythm',
     done: 'Done',
     notNow: 'Not now',
+    addToPractice: 'Add to Practice',
   },
   progressSection: {
     daysEngaged: 'Days engaged',

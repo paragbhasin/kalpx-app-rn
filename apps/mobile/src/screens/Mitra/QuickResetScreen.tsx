@@ -367,13 +367,18 @@ export default function QuickResetScreen({
     maybeRating('quick_chant', doNavigate);
   }, [embedded, goBack, maybeRating, navigation, returnToFourDoorOnToastClose]);
 
+  const handleHighlightedToastCloseRef = useRef(handleHighlightedToastClose);
+  useEffect(() => {
+    handleHighlightedToastCloseRef.current = handleHighlightedToastClose;
+  });
+
   useEffect(() => {
     if (!mantraUpdatedToastVisible) return;
     const timeout = setTimeout(() => {
-      handleHighlightedToastClose();
+      handleHighlightedToastCloseRef.current();
     }, 2600);
     return () => clearTimeout(timeout);
-  }, [handleHighlightedToastClose, mantraUpdatedToastVisible]);
+  }, [mantraUpdatedToastVisible]);
 
   // ── Secondary action: "Show another calming mantra" ────────────────────────
   const handleShowAnother = useCallback(async () => {
@@ -564,6 +569,30 @@ export default function QuickResetScreen({
 
     return (
       <View style={[styles.openingShell, isTablet && { maxWidth: 600, alignSelf: 'center', width: '100%' }]}>
+        {secondaryActions.filter(a => a !== "set_as_default").length > 0 && (
+          <View style={styles.topActionRow}>
+            {secondaryActions.filter(a => a !== "set_as_default").map((action) => (
+              <TouchableOpacity
+                key={action}
+                onPress={() => handleSecondaryAction(action)}
+                activeOpacity={0.75}
+                style={styles.topActionBtn}
+              >
+                <Text style={styles.topActionIcon}>
+                  {action === "change_mantra" ? "⟳" : "✦"}
+                </Text>
+                <Text style={styles.topActionLabel} numberOfLines={1}>
+                  {action === "mitra_suggest_for_this_moment"
+                    ? "Suggest a mantra"
+                    : action === "change_mantra"
+                    ? "Choose Mantra"
+                    : getQuickResetActionLabel(action, i18n.language)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
         <Text style={styles.openingHeading}>{mantra.title}</Text>
         <Text style={styles.openingSubhead}>{t("quickReset.subtitle")}</Text>
 
@@ -709,28 +738,26 @@ export default function QuickResetScreen({
           </TouchableOpacity>
         </View>
 
-        <View style={styles.secondaryActions}>
-          {secondaryActions.map((action) => (
+        {secondaryActions.includes("set_as_default") && (
+          <View style={[styles.secondaryActions, { marginTop: 8 }]}>
             <TouchableOpacity
-              key={action}
-              onPress={() => handleSecondaryAction(action)}
+              onPress={() => handleSecondaryAction("set_as_default")}
               activeOpacity={0.75}
               style={styles.secondaryActionRow}
             >
               <View style={styles.secondaryActionIconWrap}>
-                <Text style={styles.secondaryActionIcon}>
-                  {action === "change_mantra" ? "⟳" : "☷"}
-                </Text>
+                <Text style={styles.secondaryActionIcon}>☷</Text>
               </View>
               <View style={styles.secondaryActionCopy}>
                 <Text style={styles.secondaryActionRowText}>
-                  {getQuickResetActionLabel(action, i18n.language)}
+                  {getQuickResetActionLabel("set_as_default", i18n.language)}
                 </Text>
                 <View style={styles.secondaryActionUnderline} />
               </View>
             </TouchableOpacity>
-          ))}
-        </View>
+          </View>
+        )}
+
 
         {/* {defaultSetConfirmed ? (
           <Text style={styles.confirmText}>
@@ -1247,6 +1274,35 @@ const styles = StyleSheet.create({
     fontSize: sfs(14),
     fontFamily: Fonts.sans.semiBold,
     color: "#fff",
+  },
+  topActionRow: {
+    flexDirection: "row",
+    gap: 10,
+    width: "100%",
+    marginBottom: 16,
+  },
+  topActionBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "rgba(201,168,76,0.3)",
+    backgroundColor: Platform.OS === "android" ? "#FEFCF9" : "rgba(255,255,255,0.75)",
+  },
+  topActionIcon: {
+    fontSize: sfs(16),
+    color: "#B08A3E",
+  },
+  topActionLabel: {
+    fontSize: sfs(13),
+    color: "#432104",
+    fontFamily: Fonts.sans.medium,
+    flexShrink: 1,
   },
   secondaryActions: {
     width: "100%",

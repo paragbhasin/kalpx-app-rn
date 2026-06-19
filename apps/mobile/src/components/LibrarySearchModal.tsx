@@ -39,11 +39,13 @@ interface LibraryItem {
   beginnerSafe?: boolean;
   alreadyInCore?: boolean;
   alreadyAdded?: boolean;
+  summary?: string;
   // Sankalp / Practice fields
   line?: string;
   insight?: string;
   how_to_live?: string[];
   benefits?: string[];
+  steps?: string[];
 }
 
 export type LibrarySearchItem = LibraryItem;
@@ -265,136 +267,181 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
             </View>
 
             {detailItem ? (
-              <ScrollView
-                style={styles.detailScroll}
-                contentContainerStyle={styles.detailContent}
-                keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator={false}
-              >
-                <View style={styles.badgeRow}>
-                  <Text style={styles.itemTypeBadge}>
-                    {TYPE_BADGE_LABELS[detailItem._type || detailItem.itemType] ||
-                      (detailItem._type || detailItem.itemType)}
-                  </Text>
-                  {Boolean(getLevelLabel(detailItem)) && (
-                    <Text style={[styles.levelBadge, getLevelStyle(detailItem)]}>
-                      {getLevelLabel(detailItem)}
-                    </Text>
-                  )}
-                </View>
-
-                <Text style={styles.detailTitle}>{detailItem.title}</Text>
-
-                {Boolean(detailItem.devanagari) && (
-                  <Text style={styles.detailDevanagari}>{detailItem.devanagari}</Text>
-                )}
-                {Boolean(detailItem.iast) && (
-                  <View style={styles.detailSection}>
-                    <Text style={styles.detailLabel}>{t("libraryModal.pronunciation")}</Text>
-                    <Text style={styles.detailBody}>{detailItem.iast}</Text>
-                  </View>
-                )}
-                {Boolean(detailItem.meaning) && (
-                  <View style={styles.detailSection}>
-                    <Text style={styles.detailLabel}>{t("libraryModal.meaning")}</Text>
-                    <Text style={styles.detailBody}>{detailItem.meaning}</Text>
-                  </View>
-                )}
-                {Boolean(detailItem.essence) && (
-                  <View style={styles.detailSection}>
-                    <Text style={styles.detailLabel}>{t("libraryModal.essence")}</Text>
-                    <Text style={styles.detailBody}>{detailItem.essence}</Text>
-                  </View>
-                )}
-                {Boolean(detailItem.insight) && (
-                  <View style={styles.detailSection}>
-                    <Text style={styles.detailLabel}>INSIGHT</Text>
-                    <Text style={[styles.detailBody, { fontStyle: 'italic' }]}>{detailItem.insight}</Text>
-                  </View>
-                )}
-                {Boolean(detailItem.subtitle || detailItem.description) &&
-                  (detailItem.subtitle !== detailItem.title) && (
-                  <View style={styles.detailSection}>
-                    <Text style={styles.detailLabel}>{t("libraryModal.about")}</Text>
-                    <Text style={styles.detailBody}>
-                      {detailItem.subtitle || detailItem.description}
-                    </Text>
-                  </View>
-                )}
-                {detailItem.how_to_live && detailItem.how_to_live.length > 0 && (
-                  <View style={styles.detailSection}>
-                    <Text style={styles.detailLabel}>HOW TO LIVE THIS</Text>
-                    {detailItem.how_to_live.map((step: string, i: number) => (
-                      <View key={i} style={{ flexDirection: 'row', marginTop: 6, gap: 8 }}>
-                        <Text style={{ color: '#C99317', fontSize: 14, lineHeight: 22 }}>•</Text>
-                        <Text style={[styles.detailBody, { flex: 1, marginTop: 0 }]}>{step}</Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
-                {detailItem.benefits && detailItem.benefits.length > 0 && (
-                  <View style={styles.detailSection}>
-                    <Text style={styles.detailLabel}>BENEFITS</Text>
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
-                      {detailItem.benefits.map((b: string, i: number) => (
-                        <View key={i} style={{ backgroundColor: 'rgba(201,168,76,0.1)', borderRadius: 999, paddingVertical: 4, paddingHorizontal: 12 }}>
-                          <Text style={{ fontSize: 12, color: '#7B6550' }}>{b}</Text>
-                        </View>
-                      ))}
-                    </View>
-                  </View>
-                )}
-                {(Boolean(detailItem.deity) || Boolean(detailItem.tradition)) && (
-                  <View style={styles.detailMetaRow}>
-                    {Boolean(detailItem.deity) && (
-                      <View style={styles.detailMetaItem}>
-                        <Text style={styles.detailLabel}>{t("libraryModal.deity")}</Text>
-                        <Text style={styles.detailMetaValue}>{detailItem.deity}</Text>
-                      </View>
-                    )}
-                    {Boolean(detailItem.tradition) && (
-                      <View style={styles.detailMetaItem}>
-                        <Text style={styles.detailLabel}>{t("libraryModal.tradition")}</Text>
-                        <Text style={styles.detailMetaValue}>{detailItem.tradition}</Text>
-                      </View>
-                    )}
-                  </View>
-                )}
-                {detailItem.tags && detailItem.tags.length > 0 && (
-                  <View style={styles.tagRow}>
-                    {detailItem.tags.map((tag: string) => (
-                      <Text key={tag} style={styles.tag}>
-                        {tag}
+              <>
+                {/* ── Sticky top: badges+button row, then title ── */}
+                <View style={styles.detailStickyTop}>
+                  <View style={[styles.badgeRow, { justifyContent: 'space-between' }]}>
+                    <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap', flex: 1 }}>
+                      <Text style={styles.itemTypeBadge}>
+                        {TYPE_BADGE_LABELS[detailItem._type || detailItem.itemType] ||
+                          (detailItem._type || detailItem.itemType)}
                       </Text>
-                    ))}
-                  </View>
-                )}
-
-                <View style={styles.detailActionWrap}>
-                  {detailItem.alreadyInCore ? (
-                    <Text style={styles.statusText}>{t("libraryModal.inCore")}</Text>
-                  ) : detailItem.alreadyAdded ? (
-                    <Text style={styles.statusText}>{t("libraryModal.added")}</Text>
-                  ) : (
-                    <TouchableOpacity
-                      style={styles.detailActionBtn}
-                      onPress={() => handleAddItem(detailItem)}
-                      disabled={addingId !== null}
-                      activeOpacity={0.85}
-                    >
-                      {addingId === (detailItem.itemId || detailItem.item_id) ? (
-                        <ActivityIndicator size="small" color="#fff" />
-                      ) : (
-                        <Text style={styles.detailActionBtnText}>
-                          {mode === "select_for_rhythm" || mode === "select"
-                            ? selectLabel ?? t("libraryModal.select")
-                            : t("libraryModal.add")}
+                      {Boolean(getLevelLabel(detailItem)) && (
+                        <Text style={[styles.levelBadge, getLevelStyle(detailItem)]}>
+                          {getLevelLabel(detailItem)}
                         </Text>
                       )}
-                    </TouchableOpacity>
-                  )}
+                    </View>
+                    {detailItem.alreadyInCore ? (
+                      <Text style={styles.statusText}>{t("libraryModal.inCore")}</Text>
+                    ) : detailItem.alreadyAdded ? (
+                      <Text style={styles.statusText}>{t("libraryModal.added")}</Text>
+                    ) : (
+                      <TouchableOpacity
+                        style={styles.detailActionBtnCompact}
+                        onPress={() => handleAddItem(detailItem)}
+                        disabled={addingId !== null}
+                        activeOpacity={0.85}
+                      >
+                        {addingId === (detailItem.itemId || detailItem.item_id) ? (
+                          <ActivityIndicator size="small" color="#fff" />
+                        ) : (
+                          <Text style={styles.detailActionBtnText}>
+                            {mode === "select_for_rhythm" || mode === "select"
+                              ? selectLabel ?? t("libraryModal.select")
+                              : t("libraryModal.add")}
+                          </Text>
+                        )}
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                  <Text style={styles.detailTitle}>{detailItem.title}</Text>
+                  <View style={styles.detailDivider} />
                 </View>
-              </ScrollView>
+
+                {/* ── Scrollable details below ── */}
+                <ScrollView
+                  style={styles.detailScroll}
+                  contentContainerStyle={styles.detailContent}
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}
+                >
+                  {(() => {
+                    const itemType = detailItem._type || detailItem.item_type || detailItem.itemType;
+                    const BenefitPills = ({ items }: { items: string[] }) => (
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+                        {items.map((b: string, i: number) => (
+                          <View key={i} style={{ backgroundColor: 'rgba(201,168,76,0.1)', borderRadius: 999, paddingVertical: 4, paddingHorizontal: 12 }}>
+                            <Text style={{ fontSize: 12, color: '#7B6550' }}>{b}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    );
+                    const BulletList = ({ items }: { items: string[] }) => (
+                      <>
+                        {items.map((s: string, i: number) => (
+                          <View key={i} style={{ flexDirection: 'row', marginTop: 6, gap: 8 }}>
+                            <Text style={{ color: '#C99317', fontSize: 14, lineHeight: 22 }}>•</Text>
+                            <Text style={[styles.detailBody, { flex: 1, marginTop: 0 }]}>{s}</Text>
+                          </View>
+                        ))}
+                      </>
+                    );
+                    const TagRow = () => detailItem.tags?.length > 0 ? (
+                      <View style={styles.tagRow}>
+                        {detailItem.tags.map((tag: string) => (
+                          <Text key={tag} style={styles.tag}>{tag}</Text>
+                        ))}
+                      </View>
+                    ) : null;
+
+                    if (itemType === 'mantra') {
+                      return <>
+                        {Boolean(detailItem.devanagari) && (
+                          <Text style={styles.detailDevanagari}>{detailItem.devanagari}</Text>
+                        )}
+                        {Boolean(detailItem.iast) && (
+                          <View style={styles.detailSection}>
+                            <Text style={styles.detailLabel}>{t("libraryModal.pronunciation")}</Text>
+                            <Text style={styles.detailBody}>{detailItem.iast}</Text>
+                          </View>
+                        )}
+                        {Boolean(detailItem.meaning || detailItem.summary) && (
+                          <View style={styles.detailSection}>
+                            <Text style={styles.detailLabel}>{t("libraryModal.meaning")}</Text>
+                            <Text style={styles.detailBody}>{detailItem.meaning || detailItem.summary}</Text>
+                          </View>
+                        )}
+                        {Boolean(detailItem.essence || detailItem.insight) && (
+                          <View style={styles.detailSection}>
+                            <Text style={styles.detailLabel}>{t("libraryModal.essence")}</Text>
+                            <Text style={styles.detailBody}>{detailItem.essence || detailItem.insight}</Text>
+                          </View>
+                        )}
+                        {(Boolean(detailItem.deity) || Boolean(detailItem.tradition)) && (
+                          <View style={styles.detailMetaRow}>
+                            {Boolean(detailItem.deity) && (
+                              <View style={styles.detailMetaItem}>
+                                <Text style={styles.detailLabel}>{t("libraryModal.deity")}</Text>
+                                <Text style={styles.detailMetaValue}>{detailItem.deity}</Text>
+                              </View>
+                            )}
+                            {Boolean(detailItem.tradition) && (
+                              <View style={styles.detailMetaItem}>
+                                <Text style={styles.detailLabel}>{t("libraryModal.tradition")}</Text>
+                                <Text style={styles.detailMetaValue}>{detailItem.tradition}</Text>
+                              </View>
+                            )}
+                          </View>
+                        )}
+                        <TagRow />
+                      </>;
+                    }
+
+                    if (itemType === 'sankalp') {
+                      return <>
+                        {Boolean(detailItem.insight || detailItem.essence) && (
+                          <View style={styles.detailSection}>
+                            <Text style={styles.detailLabel}>{t("libraryModal.essence")}</Text>
+                            <Text style={[styles.detailBody, { fontStyle: 'italic' }]}>{detailItem.insight || detailItem.essence}</Text>
+                          </View>
+                        )}
+                        {detailItem.benefits?.length > 0 && (
+                          <View style={styles.detailSection}>
+                            <Text style={styles.detailLabel}>BENEFITS</Text>
+                            <BenefitPills items={detailItem.benefits} />
+                          </View>
+                        )}
+                        {detailItem.how_to_live?.length > 0 && (
+                          <View style={styles.detailSection}>
+                            <Text style={styles.detailLabel}>HOW TO LIVE THIS</Text>
+                            <BulletList items={detailItem.how_to_live} />
+                          </View>
+                        )}
+                        <TagRow />
+                      </>;
+                    }
+
+                    // practice
+                    return <>
+                      {Boolean(detailItem.essence || detailItem.insight) && (
+                        <View style={styles.detailSection}>
+                          <Text style={styles.detailLabel}>{t("libraryModal.essence")}</Text>
+                          <Text style={styles.detailBody}>{detailItem.essence || detailItem.insight}</Text>
+                        </View>
+                      )}
+                      {detailItem.benefits?.length > 0 && (
+                        <View style={styles.detailSection}>
+                          <Text style={styles.detailLabel}>BENEFITS</Text>
+                          <BenefitPills items={detailItem.benefits} />
+                        </View>
+                      )}
+                      {detailItem.steps?.length > 0 && (
+                        <View style={styles.detailSection}>
+                          <Text style={styles.detailLabel}>STEPS</Text>
+                          {detailItem.steps.map((step: string, i: number) => (
+                            <View key={i} style={{ flexDirection: 'row', marginTop: 8, gap: 10 }}>
+                              <Text style={{ color: '#C99317', fontSize: 13, fontFamily: Fonts.sans.semiBold, minWidth: 20 }}>{i + 1}.</Text>
+                              <Text style={[styles.detailBody, { flex: 1, marginTop: 0 }]}>{step}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+                      <TagRow />
+                    </>;
+                  })()}
+                </ScrollView>
+              </>
             ) : (
               <>
             {!lockedItemType && (
@@ -578,7 +625,7 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingHorizontal: 18,
     paddingBottom: 22,
-    maxHeight: "76%",
+    height: "76%",
   },
   handle: {
     alignSelf: "center",
@@ -813,19 +860,43 @@ const styles = StyleSheet.create({
   },
 
   // Detail panel
+  detailStickyTop: {
+    paddingBottom: 8,
+  },
+  detailTitleRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    marginTop: 6,
+  },
+  detailDivider: {
+    height: 1,
+    backgroundColor: "rgba(201,168,76,0.18)",
+    marginTop: 10,
+  },
+  detailActionBtnCompact: {
+    backgroundColor: "#D39A14",
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "flex-start",
+    marginTop: 8,
+  },
   detailScroll: {
-    marginTop: 14,
+    marginTop: 6,
   },
   detailContent: {
     paddingBottom: 24,
   },
   detailTitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontFamily: Fonts.serif.bold,
     color: "#4b260a",
     fontWeight: "700",
-    lineHeight: 30,
-    marginTop: 10,
+    lineHeight: 28,
+    marginTop: 4,
   },
   detailDevanagari: {
     fontSize: 22,
@@ -835,7 +906,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   detailSection: {
-    marginTop: 18,
+    marginTop: 12,
   },
   detailLabel: {
     fontSize: 11,

@@ -19,11 +19,13 @@ interface LibraryItem {
   tradition?: string;
   tags?: string[];
   level?: string;
+  summary?: string;
   // Sankalp / Practice fields
   line?: string;
   insight?: string;
   how_to_live?: string[];
   benefits?: string[];
+  steps?: string[];
 }
 
 interface PickedItem {
@@ -164,16 +166,18 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
         style={{
           background: "#FFF8EF",
           borderRadius: "18px 18px 0 0",
-          padding: "24px 20px 40px",
+          padding: "24px 20px 0",
           width: "100%",
           maxWidth: 480,
-          maxHeight: "80dvh",
-          overflowY: "auto",
+          height: "80dvh",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header: back arrow | title (centered) | close */}
-        <div style={{ display: "grid", gridTemplateColumns: "40px 1fr 40px", alignItems: "center", marginBottom: 16 }}>
+        {/* Header: back arrow | title (centered) | close — never scrolls */}
+        <div style={{ display: "grid", gridTemplateColumns: "40px 1fr 40px", alignItems: "center", marginBottom: 16, flexShrink: 0 }}>
           <div>
             {detailItem && (
               <button
@@ -204,9 +208,10 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
         </div>
 
         {detailItem ? (
-          <div>
-            {(detailItem.item_type || detailItem.level) && (
-              <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+            {/* ── Sticky top: badges+button row, then title ── */}
+            <div style={{ paddingBottom: 14, borderBottom: "1px solid rgba(201,168,76,0.18)", flexShrink: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
                 {detailItem.item_type && (
                   <span style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: 1, color: "#8b6838", background: "#f4ecdf", padding: "4px 10px", borderRadius: 999, fontWeight: 700 }}>
                     {t(`mitra.rhythmSetup.libraryModal.type_${detailItem.item_type}`)}
@@ -217,91 +222,129 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
                     {detailItem.level}
                   </span>
                 )}
+                <button
+                  onClick={() => pick(detailItem)}
+                  style={{
+                    marginLeft: "auto",
+                    flexShrink: 0,
+                    padding: "6px 18px",
+                    borderRadius: 12,
+                    border: "none",
+                    background: "linear-gradient(90deg, #C99317 0%, #E0AE21 100%)",
+                    color: "#fff",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  {t("mitra.rhythmSetup.libraryModal.select")}
+                </button>
               </div>
-            )}
-
-            <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 22, color: "#4b260a", lineHeight: 1.25 }}>
-              {detailItem.title}
+              <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 20, color: "#4b260a", lineHeight: 1.3 }}>
+                {detailItem.title}
+              </div>
             </div>
 
-            {detailItem.devanagari && (
-              <div style={{ fontFamily: "var(--kalpx-font-serif)", fontSize: 20, color: "#6b3d12", lineHeight: 1.6, marginTop: 12 }}>
-                {detailItem.devanagari}
-              </div>
-            )}
-            {renderDetailSection(t("mitra.rhythmSetup.libraryModal.pronunciation"), detailItem.iast)}
-            {renderDetailSection(t("mitra.rhythmSetup.libraryModal.meaning"), detailItem.meaning)}
-            {renderDetailSection(t("mitra.rhythmSetup.libraryModal.essence"), detailItem.essence)}
-            {detailItem.insight && (
-              <div style={{ marginTop: 16 }}>
-                <div style={labelStyle}>INSIGHT</div>
-                <div style={{ ...bodyStyle, fontStyle: "italic" }}>{detailItem.insight}</div>
-              </div>
-            )}
-            {(detailItem.subtitle ?? detailItem.description) &&
-              (detailItem.subtitle !== detailItem.title) &&
-              renderDetailSection(t("mitra.rhythmSetup.libraryModal.about"), detailItem.subtitle ?? detailItem.description)
-            }
-            {detailItem.how_to_live && detailItem.how_to_live.length > 0 && (
-              <div style={{ marginTop: 16 }}>
-                <div style={labelStyle}>HOW TO LIVE THIS</div>
-                {detailItem.how_to_live.map((step, i) => (
-                  <div key={i} style={{ display: "flex", gap: 8, marginTop: 8 }}>
-                    <span style={{ color: "#C99317", fontSize: 16, lineHeight: "1.5" }}>•</span>
-                    <div style={{ ...bodyStyle, fontSize: 14 }}>{step}</div>
+            {/* ── Scrollable details below ── */}
+            <div style={{ overflowY: "auto", flex: 1, paddingTop: 14, paddingBottom: 40 }}>
+              {(() => {
+                const BenefitPills = ({ items }: { items: string[] }) => (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+                    {items.map((b, i) => (
+                      <span key={i} style={{ fontSize: 12, color: "#7B6550", background: "rgba(201,168,76,0.1)", padding: "4px 12px", borderRadius: 999 }}>{b}</span>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
-            {detailItem.benefits && detailItem.benefits.length > 0 && (
-              <div style={{ marginTop: 16 }}>
-                <div style={labelStyle}>BENEFITS</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
-                  {detailItem.benefits.map((b, i) => (
-                    <span key={i} style={{
-                      fontSize: 12,
-                      color: "#7B6550",
-                      background: "rgba(201,168,76,0.1)",
-                      padding: "4px 12px",
-                      borderRadius: 999,
-                    }}>{b}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-            {renderDetailSection(t("mitra.rhythmSetup.libraryModal.deity"), detailItem.deity)}
-            {renderDetailSection(t("mitra.rhythmSetup.libraryModal.tradition"), detailItem.tradition)}
-            {detailItem.tags && detailItem.tags.length > 0 && (
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 18 }}>
-                {detailItem.tags.map((tag) => (
-                  <span key={tag} style={{ fontSize: 11, color: "#84766a", background: "rgba(232,225,217,0.7)", padding: "5px 12px", borderRadius: 999 }}>
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
+                );
+                const BulletList = ({ items }: { items: string[] }) => (
+                  <>
+                    {items.map((s, i) => (
+                      <div key={i} style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                        <span style={{ color: "#C99317", fontSize: 16, lineHeight: "1.5" }}>•</span>
+                        <div style={{ ...bodyStyle, fontSize: 14 }}>{s}</div>
+                      </div>
+                    ))}
+                  </>
+                );
+                const TagRow = () => detailItem.tags && detailItem.tags.length > 0 ? (
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 18 }}>
+                    {detailItem.tags!.map((tag) => (
+                      <span key={tag} style={{ fontSize: 11, color: "#84766a", background: "rgba(232,225,217,0.7)", padding: "5px 12px", borderRadius: 999 }}>{tag}</span>
+                    ))}
+                  </div>
+                ) : null;
 
-            <button
-              onClick={() => pick(detailItem)}
-              style={{
-                marginTop: 26,
-                width: "100%",
-                padding: "14px 16px",
-                borderRadius: 12,
-                border: "none",
-                background: "linear-gradient(90deg, #C99317 0%, #E0AE21 100%)",
-                color: "#fff",
-                fontSize: 16,
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              {t("mitra.rhythmSetup.libraryModal.select")}
-            </button>
+                if (detailItem.item_type === "mantra") {
+                  return <>
+                    {detailItem.devanagari && (
+                      <div style={{ fontFamily: "var(--kalpx-font-serif)", fontSize: 20, color: "#6b3d12", lineHeight: 1.6, marginBottom: 4 }}>
+                        {detailItem.devanagari}
+                      </div>
+                    )}
+                    {renderDetailSection(t("mitra.rhythmSetup.libraryModal.pronunciation"), detailItem.iast)}
+                    {renderDetailSection(t("mitra.rhythmSetup.libraryModal.meaning"), detailItem.meaning || detailItem.summary)}
+                    {(detailItem.essence || detailItem.insight) && renderDetailSection(t("mitra.rhythmSetup.libraryModal.essence"), detailItem.essence || detailItem.insight)}
+                    {(detailItem.deity || detailItem.tradition) && (
+                      <div style={{ display: "flex", gap: 24, marginTop: 16 }}>
+                        {detailItem.deity && renderDetailSection(t("mitra.rhythmSetup.libraryModal.deity"), detailItem.deity)}
+                        {detailItem.tradition && renderDetailSection(t("mitra.rhythmSetup.libraryModal.tradition"), detailItem.tradition)}
+                      </div>
+                    )}
+                    <TagRow />
+                  </>;
+                }
+
+                if (detailItem.item_type === "sankalp") {
+                  return <>
+                    {(detailItem.insight || detailItem.essence) && (
+                      <div style={{ marginTop: 16 }}>
+                        <div style={labelStyle}>{t("mitra.rhythmSetup.libraryModal.essence")}</div>
+                        <div style={{ ...bodyStyle, fontStyle: "italic" }}>{detailItem.insight || detailItem.essence}</div>
+                      </div>
+                    )}
+                    {detailItem.benefits && detailItem.benefits.length > 0 && (
+                      <div style={{ marginTop: 16 }}>
+                        <div style={labelStyle}>BENEFITS</div>
+                        <BenefitPills items={detailItem.benefits} />
+                      </div>
+                    )}
+                    {detailItem.how_to_live && detailItem.how_to_live.length > 0 && (
+                      <div style={{ marginTop: 16 }}>
+                        <div style={labelStyle}>HOW TO LIVE THIS</div>
+                        <BulletList items={detailItem.how_to_live} />
+                      </div>
+                    )}
+                    <TagRow />
+                  </>;
+                }
+
+                // practice
+                return <>
+                  {(detailItem.essence || detailItem.insight) && renderDetailSection(t("mitra.rhythmSetup.libraryModal.essence"), detailItem.essence || detailItem.insight)}
+                  {detailItem.benefits && detailItem.benefits.length > 0 && (
+                    <div style={{ marginTop: 16 }}>
+                      <div style={labelStyle}>BENEFITS</div>
+                      <BenefitPills items={detailItem.benefits} />
+                    </div>
+                  )}
+                  {detailItem.steps && detailItem.steps.length > 0 && (
+                    <div style={{ marginTop: 16 }}>
+                      <div style={labelStyle}>STEPS</div>
+                      {detailItem.steps.map((step, i) => (
+                        <div key={i} style={{ display: "flex", gap: 10, marginTop: 8 }}>
+                          <span style={{ color: "#C99317", fontSize: 13, fontWeight: 600, minWidth: 20 }}>{i + 1}.</span>
+                          <div style={{ ...bodyStyle, fontSize: 14 }}>{step}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <TagRow />
+                </>;
+              })()}
+            </div>
           </div>
         ) : (
-          <>
-            <div style={{ display: "flex", gap: 6, marginBottom: 12, flexWrap: "wrap" }}>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            <div style={{ display: "flex", gap: 6, marginBottom: 12, flexWrap: "wrap", flexShrink: 0 }}>
               {TAB_VALUES.map((val) => (
                 <button
                   key={val}
@@ -321,7 +364,7 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
               ))}
             </div>
 
-            <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+            <div style={{ display: "flex", gap: 8, marginBottom: 16, flexShrink: 0 }}>
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -357,6 +400,7 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
               </button>
             </div>
 
+            <div style={{ flex: 1, overflowY: "auto", paddingBottom: 40 }}>
             {searching && (
               <div style={{ display: "flex", justifyContent: "center", padding: "36px 0" }}>
                 <div
@@ -493,7 +537,8 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
                 </div>
               </div>
             ))}
-          </>
+            </div>
+          </div>
         )}
       </div>
     </div>

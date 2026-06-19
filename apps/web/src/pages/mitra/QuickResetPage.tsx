@@ -937,7 +937,11 @@ export function QuickResetPage() {
                           textAlign: "left",
                         }}
                       >
-                        {getQuickResetActionLabel(action)}
+                        {action === "mitra_suggest_for_this_moment"
+                          ? "Suggest a mantra"
+                          : action === "change_mantra"
+                          ? "Choose Mantra"
+                          : getQuickResetActionLabel(action)}
                       </span>
                       <span
                         style={{
@@ -956,10 +960,49 @@ export function QuickResetPage() {
       );
     }
 
+    const topActions = secondaryActions.filter(a => a !== "set_as_default");
+
     return (
       <div style={S.openingShell}>
         {/* {renderBackBtn()} */}
-        <div style={{ height: 18 }} />
+        {topActions.length > 0 && (
+          <div style={{ display: "flex", gap: 10, width: "100%", maxWidth: 360, marginBottom: 16 }}>
+            {topActions.map((action) => (
+              <button
+                key={action}
+                onClick={() => handleSecondaryAction(action)}
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 7,
+                  padding: "10px 10px",
+                  borderRadius: 14,
+                  border: "1px solid rgba(201,168,76,0.3)",
+                  background: "rgba(255,255,255,0.75)",
+                  cursor: "pointer",
+                  fontSize: 13,
+                  fontFamily: "var(--kalpx-font-sans)",
+                  color: "#432104",
+                  fontWeight: 500,
+                }}
+              >
+                {action === "change_mantra" ? (
+                  <RotateCw size={14} strokeWidth={2} color="#B08A3E" />
+                ) : (
+                  <SlidersHorizontal size={14} strokeWidth={2} color="#B08A3E" />
+                )}
+                {action === "mitra_suggest_for_this_moment"
+                  ? "Suggest a mantra"
+                  : action === "change_mantra"
+                  ? "Choose Mantra"
+                  : getQuickResetActionLabel(action)}
+              </button>
+            ))}
+          </div>
+        )}
+        <div style={{ height: 4 }} />
         <p style={S.openingHeading}>{mantra.title}</p>
         <p style={S.openingSubhead}>{t('mitra.quickReset.subtitle')}</p>
 
@@ -1139,7 +1182,7 @@ export function QuickResetPage() {
               {t('mitra.quickReset.endEarly')}
             </button>
           )}
-          {secondaryActions.map((action) => (
+          {secondaryActions.filter(a => a === "set_as_default").map((action) => (
             <button
               key={action}
               style={{

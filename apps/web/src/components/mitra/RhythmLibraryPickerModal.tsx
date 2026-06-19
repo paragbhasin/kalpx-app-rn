@@ -1,5 +1,5 @@
 import type { RhythmTimeBand, RhythmItemType } from "@kalpx/types";
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "../../lib/i18n";
 import { searchLibraryItems } from "../../engine/mitraApi";
 
@@ -19,6 +19,11 @@ interface LibraryItem {
   tradition?: string;
   tags?: string[];
   level?: string;
+  // Sankalp / Practice fields
+  line?: string;
+  insight?: string;
+  how_to_live?: string[];
+  benefits?: string[];
 }
 
 interface PickedItem {
@@ -124,6 +129,12 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
     fontFamily: "var(--kalpx-font-serif)",
   };
 
+  function truncate(text: string | null | undefined, max = 110): string {
+    if (!text) return "";
+    if (text.length <= max) return text;
+    return text.slice(0, max).trimEnd() + "…";
+  }
+
   function renderDetailSection(label: string, value?: string | null) {
     if (!value) return null;
     return (
@@ -161,33 +172,35 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          {detailItem ? (
-            <button
-              onClick={() => setDetailItem(null)}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                fontFamily: "var(--kalpx-font-serif)",
-                fontWeight: 700,
-                fontSize: 16,
-                color: "#7D5408",
-                padding: 0,
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-              }}
-            >
-              <span style={{ fontSize: 30, lineHeight: 1 }}>‹</span>
-              {t("mitra.rhythmSetup.libraryModal.title")}
-            </button>
-          ) : (
-            <span style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 18, color: "#432104" }}>
-              {t("mitra.rhythmSetup.libraryModal.title")}
-            </span>
-          )}
-          <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#7B6550" }}>✕</button>
+        {/* Header: back arrow | title (centered) | close */}
+        <div style={{ display: "grid", gridTemplateColumns: "40px 1fr 40px", alignItems: "center", marginBottom: 16 }}>
+          <div>
+            {detailItem && (
+              <button
+                onClick={() => setDetailItem(null)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  color: "#7D5408",
+                  fontSize: 26,
+                  lineHeight: 1,
+                  fontWeight: 700,
+                }}
+              >
+                ‹
+              </button>
+            )}
+          </div>
+          <div style={{ textAlign: "center", fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 17, color: "#432104" }}>
+            {t("mitra.rhythmSetup.libraryModal.title")}
+          </div>
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer", color: "#7B6550", padding: 0 }}>✕</button>
+          </div>
         </div>
 
         {detailItem ? (
@@ -219,7 +232,43 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
             {renderDetailSection(t("mitra.rhythmSetup.libraryModal.pronunciation"), detailItem.iast)}
             {renderDetailSection(t("mitra.rhythmSetup.libraryModal.meaning"), detailItem.meaning)}
             {renderDetailSection(t("mitra.rhythmSetup.libraryModal.essence"), detailItem.essence)}
-            {renderDetailSection(t("mitra.rhythmSetup.libraryModal.about"), detailItem.subtitle ?? detailItem.description)}
+            {detailItem.insight && (
+              <div style={{ marginTop: 16 }}>
+                <div style={labelStyle}>INSIGHT</div>
+                <div style={{ ...bodyStyle, fontStyle: "italic" }}>{detailItem.insight}</div>
+              </div>
+            )}
+            {(detailItem.subtitle ?? detailItem.description) &&
+              (detailItem.subtitle !== detailItem.title) &&
+              renderDetailSection(t("mitra.rhythmSetup.libraryModal.about"), detailItem.subtitle ?? detailItem.description)
+            }
+            {detailItem.how_to_live && detailItem.how_to_live.length > 0 && (
+              <div style={{ marginTop: 16 }}>
+                <div style={labelStyle}>HOW TO LIVE THIS</div>
+                {detailItem.how_to_live.map((step, i) => (
+                  <div key={i} style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                    <span style={{ color: "#C99317", fontSize: 16, lineHeight: "1.5" }}>•</span>
+                    <div style={{ ...bodyStyle, fontSize: 14 }}>{step}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {detailItem.benefits && detailItem.benefits.length > 0 && (
+              <div style={{ marginTop: 16 }}>
+                <div style={labelStyle}>BENEFITS</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+                  {detailItem.benefits.map((b, i) => (
+                    <span key={i} style={{
+                      fontSize: 12,
+                      color: "#7B6550",
+                      background: "rgba(201,168,76,0.1)",
+                      padding: "4px 12px",
+                      borderRadius: 999,
+                    }}>{b}</span>
+                  ))}
+                </div>
+              </div>
+            )}
             {renderDetailSection(t("mitra.rhythmSetup.libraryModal.deity"), detailItem.deity)}
             {renderDetailSection(t("mitra.rhythmSetup.libraryModal.tradition"), detailItem.tradition)}
             {detailItem.tags && detailItem.tags.length > 0 && (
@@ -334,24 +383,113 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
             {!searching && results.map((item) => (
               <div
                 key={item.itemId ?? item.item_id}
-                onClick={() => setDetailItem(item)}
                 style={{
                   border: "1px solid rgba(201,168,76,0.2)",
-                  borderRadius: 10,
-                  padding: "12px 14px",
-                  marginBottom: 8,
-                  cursor: "pointer",
-                  background: "rgba(255,252,248,0.9)",
+                  borderRadius: 14,
+                  padding: "14px 16px",
+                  marginBottom: 10,
+                  background: "#fff",
+                  boxShadow: "0 1px 4px rgba(67,33,4,0.06)",
                 }}
               >
-                <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 15, color: "#432104" }}>
+                {/* Badges row */}
+                {(item.item_type || item.level) && (
+                  <div style={{ display: "flex", gap: 6, marginBottom: 8, flexWrap: "wrap" }}>
+                    {item.item_type && (
+                      <span style={{
+                        fontSize: 10,
+                        textTransform: "uppercase" as const,
+                        letterSpacing: 1,
+                        color: "#8b6838",
+                        background: "#f4ecdf",
+                        padding: "3px 10px",
+                        borderRadius: 999,
+                        fontWeight: 700,
+                      }}>
+                        {t(`mitra.rhythmSetup.libraryModal.type_${item.item_type}`)}
+                      </span>
+                    )}
+                    {item.level && (
+                      <span style={{
+                        fontSize: 10,
+                        textTransform: "uppercase" as const,
+                        letterSpacing: 1,
+                        color: item.level.toLowerCase() === "beginner" ? "#3f7a67"
+                          : item.level.toLowerCase() === "advanced" ? "#8b3fa0"
+                          : "#6b5a3e",
+                        background: item.level.toLowerCase() === "beginner" ? "rgba(115,171,147,0.14)"
+                          : item.level.toLowerCase() === "advanced" ? "rgba(139,63,160,0.12)"
+                          : "rgba(201,168,76,0.12)",
+                        padding: "3px 10px",
+                        borderRadius: 999,
+                        fontWeight: 700,
+                      }}>
+                        {item.level}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* Title */}
+                <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 16, color: "#3B2A1A", lineHeight: 1.3 }}>
                   {item.title}
                 </div>
+
+                {/* Description — JS truncation for guaranteed "…" on every card */}
                 {(item.subtitle || item.description) && (
-                  <div style={{ fontSize: 13, color: "#7B6550", marginTop: 4 }}>{item.subtitle ?? item.description}</div>
+                  <div style={{ fontSize: 13, color: "#7B6550", marginTop: 5 }}>
+                    {truncate(item.subtitle ?? item.description)}
+                  </div>
                 )}
-                <div style={{ fontSize: 12, color: "#b08a3e", fontWeight: 600, marginTop: 8 }}>
-                  {t("mitra.rhythmSetup.libraryModal.viewDetails")} ›
+
+                {/* Tags */}
+                {item.tags && item.tags.length > 0 && (
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
+                    {item.tags.map((tag) => (
+                      <span key={tag} style={{
+                        fontSize: 11,
+                        color: "#84766a",
+                        background: "rgba(232,225,217,0.7)",
+                        padding: "3px 10px",
+                        borderRadius: 999,
+                      }}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Footer row: View details + Select */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
+                  <button
+                    onClick={() => setDetailItem(item)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      padding: 0,
+                      fontSize: 13,
+                      color: "#b08a3e",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {t("mitra.rhythmSetup.libraryModal.viewDetails")} ›
+                  </button>
+                  <button
+                    onClick={() => pick(item)}
+                    style={{
+                      border: "1.5px solid #C99317",
+                      borderRadius: 999,
+                      background: "transparent",
+                      color: "#C99317",
+                      fontSize: 13,
+                      fontWeight: 700,
+                      padding: "5px 18px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {t("mitra.rhythmSetup.libraryModal.select")}
+                  </button>
                 </div>
               </div>
             ))}

@@ -712,7 +712,7 @@ export function TellMitraThreadView({
               onBlur={onComposerBlur}
               placeholder={composerPlaceholder}
               maxLength={1000}
-              rows={2}
+              rows={1}
               style={{
                 flex: 1,
                 boxSizing: "border-box" as const,

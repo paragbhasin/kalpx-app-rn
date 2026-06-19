@@ -105,6 +105,7 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
     padding: 16,
+    paddingBottom: 0,
     backgroundColor: "#FAF7F2",
   },
 });

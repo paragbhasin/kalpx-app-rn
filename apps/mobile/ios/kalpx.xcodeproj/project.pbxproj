@@ -1215,7 +1215,10 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				OTHER_LDFLAGS = "-e _NSExtensionMain";
+				OTHER_LDFLAGS = (
+					"-e",
+					_NSExtensionMain,
+				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.kalpx.app.watchkitapp.watchwidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1242,7 +1245,10 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				OTHER_LDFLAGS = "-e _NSExtensionMain";
+				OTHER_LDFLAGS = (
+					"-e",
+					_NSExtensionMain,
+				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.kalpx.app.watchkitapp.watchwidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";

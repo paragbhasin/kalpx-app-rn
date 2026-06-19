@@ -871,3 +871,12 @@ button {
     transform: rotate(360deg);
   }
 }
+
+/* Multi-line text truncation with ellipsis — used in library card descriptions */
+.kalpx-line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

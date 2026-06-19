@@ -39,6 +39,11 @@ interface LibraryItem {
   beginnerSafe?: boolean;
   alreadyInCore?: boolean;
   alreadyAdded?: boolean;
+  // Sankalp / Practice fields
+  line?: string;
+  insight?: string;
+  how_to_live?: string[];
+  benefits?: string[];
 }
 
 export type LibrarySearchItem = LibraryItem;
@@ -152,12 +157,6 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
     setSearchQuery("");
     setDetailItem(null);
     setSelectedType(lockedItemType ?? "all");
-    if (!lockedItemType) {
-      const timer = setTimeout(() => {
-        inputRef.current?.focus();
-      }, 250);
-      return () => clearTimeout(timer);
-    }
   }, [isVisible]); // lockedItemType is a stable prop; intentionally excluded from deps
 
   const selectType = (type: string) => {
@@ -231,7 +230,7 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
   };
 
   return (
-    <Modal visible={isVisible} animationType="fade" transparent>
+    <Modal visible={isVisible} animationType="fade" transparent onShow={() => inputRef.current?.blur()}>
       <View style={styles.overlay}>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -307,12 +306,42 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
                     <Text style={styles.detailBody}>{detailItem.essence}</Text>
                   </View>
                 )}
-                {Boolean(detailItem.subtitle || detailItem.description) && (
+                {Boolean(detailItem.insight) && (
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>INSIGHT</Text>
+                    <Text style={[styles.detailBody, { fontStyle: 'italic' }]}>{detailItem.insight}</Text>
+                  </View>
+                )}
+                {Boolean(detailItem.subtitle || detailItem.description) &&
+                  (detailItem.subtitle !== detailItem.title) && (
                   <View style={styles.detailSection}>
                     <Text style={styles.detailLabel}>{t("libraryModal.about")}</Text>
                     <Text style={styles.detailBody}>
                       {detailItem.subtitle || detailItem.description}
                     </Text>
+                  </View>
+                )}
+                {detailItem.how_to_live && detailItem.how_to_live.length > 0 && (
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>HOW TO LIVE THIS</Text>
+                    {detailItem.how_to_live.map((step: string, i: number) => (
+                      <View key={i} style={{ flexDirection: 'row', marginTop: 6, gap: 8 }}>
+                        <Text style={{ color: '#C99317', fontSize: 14, lineHeight: 22 }}>•</Text>
+                        <Text style={[styles.detailBody, { flex: 1, marginTop: 0 }]}>{step}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+                {detailItem.benefits && detailItem.benefits.length > 0 && (
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>BENEFITS</Text>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+                      {detailItem.benefits.map((b: string, i: number) => (
+                        <View key={i} style={{ backgroundColor: 'rgba(201,168,76,0.1)', borderRadius: 999, paddingVertical: 4, paddingHorizontal: 12 }}>
+                          <Text style={{ fontSize: 12, color: '#7B6550' }}>{b}</Text>
+                        </View>
+                      ))}
+                    </View>
                   </View>
                 )}
                 {(Boolean(detailItem.deity) || Boolean(detailItem.tradition)) && (
@@ -407,7 +436,7 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
                   placeholderTextColor="#a39b93"
                   value={searchQuery}
                   onChangeText={setSearchQuery}
-                  autoFocus={!lockedItemType}
+                  autoFocus={false}
                   selectionColor="#C99317"
                   cursorColor="#C99317"
                   underlineColorAndroid="transparent"

@@ -65,6 +65,9 @@ target 'kalpx' do
         .gsub(/(#\s*define\s+FMT_USE_CONSTEVAL\s+)1\b/, '\10')
         .gsub(/(#\s*define\s+FMT_CONSTEVAL\s+)consteval\b/, '\1constexpr')
       if patched != content
+        # fmt ships its headers read-only; make writable before patching so the
+        # post-install hook doesn't fail with "Permission denied".
+        File.chmod(0644, path) rescue nil
         File.write(path, patched)
         fmt_patched_count += 1
         puts "post_install: patched fmt/#{File.basename(path)} (consteval→constexpr)"

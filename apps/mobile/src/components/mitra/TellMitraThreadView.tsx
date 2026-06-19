@@ -16,13 +16,16 @@ import {
   Keyboard,
   Platform,
   ScrollView,
+  StyleProp,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
+  ViewStyle,
   useWindowDimensions,
 } from "react-native";
+
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Fonts } from "../../theme/fonts";
 import { sfs } from "../../utils/responsive";
@@ -116,53 +119,24 @@ export default function TellMitraThreadView({
   const isTablet = width >= 768;
   const footerClearance = Math.max(insets.bottom + 72, 88);
 
-  // Self-correcting keyboard avoidance (edge-to-edge makes adjustResize behave
-  // inconsistently). We measure how much the window ACTUALLY shrank when the
-  // keyboard opened and pad the root by only the remaining gap:
-  //   inset = keyboardHeight - (window shrink already applied by the OS)
-  // • OS fully resized   → shrink == keyboardHeight → inset 0
-  // • OS didn't resize   → shrink == 0              → inset == keyboardHeight
-  // • partial resize     → inset == the exact remainder
-  const [keyboardHeight, setKeyboardHeight] = React.useState(0);
-  const baseWindowHeightRef = React.useRef(windowHeight);
+  const baseWindowH = React.useRef<number | null>(null);
+  if (baseWindowH.current === null) baseWindowH.current = windowHeight;
+  const [kbHeight, setKbHeight] = React.useState(0);
   React.useEffect(() => {
-    if (keyboardHeight === 0) baseWindowHeightRef.current = windowHeight;
-  }, [windowHeight, keyboardHeight]);
-  const windowShrink = Math.max(0, baseWindowHeightRef.current - windowHeight);
-  // The disclaimer lives BELOW the composer. We lift only enough to put the
-  // composer just above the keyboard and let the disclaimer tuck behind it, so
-  // there is no empty gap: subtract the disclaimer's height (and the nav inset,
-  // which the keyboard already covers) from the raw keyboard overlap.
-  const [disclaimerHeight, setDisclaimerHeight] = React.useState(0);
-  const keyboardInset =
-    keyboardHeight > 0
-      ? Math.max(
-          0,
-          keyboardHeight - windowShrink - insets.bottom - disclaimerHeight,
-        )
-      : 0;
-
-  React.useEffect(() => {
-    const showEvent =
-      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
-    const hideEvent =
-      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
-
-    // Track keyboard height for the avoidance inset only. We intentionally do
-    // NOT auto-scroll the thread when the keyboard opens — that made the
-    // conversation jump on focus.
-    const onShow = Keyboard.addListener(showEvent, (event) => {
-      setKeyboardHeight(event.endCoordinates?.height || 0);
-    });
-    const onHide = Keyboard.addListener(hideEvent, () => {
-      setKeyboardHeight(0);
-    });
-
-    return () => {
-      onShow.remove();
-      onHide.remove();
-    };
+    const showEvt = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvt = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+    const onShow = Keyboard.addListener(showEvt, (e) => setKbHeight(e.endCoordinates.height));
+    const onHide = Keyboard.addListener(hideEvt, () => setKbHeight(0));
+    return () => { onShow.remove(); onHide.remove(); };
   }, []);
+  // On Android with adjustResize the window shrinks by ~kbHeight so inset ≈ 0.
+  // In edge-to-edge mode adjustResize is suppressed, windowShrink stays 0.
+  const windowShrink = Platform.OS === "android"
+    ? Math.max(0, (baseWindowH.current ?? windowHeight) - windowHeight)
+    : 0;
+  // Tab bar sits below content: subtract its height so footer lands at keyboard top.
+  const keyboardInset = Math.max(0, kbHeight - windowShrink - (49 + insets.bottom));
+
 
   function renderItem(item: TellMitraConversationItem) {
     // ── user_message ─────────────────────────────────────────────────────────
@@ -387,14 +361,12 @@ export default function TellMitraThreadView({
     return null;
   }
 
-  return (
-    <View
-      style={[
-        s.root,
-        { paddingBottom: keyboardInset },
-        isTablet && { maxWidth: 720, alignSelf: "center", width: "100%" },
-      ]}
-    >
+  const rootStyle: StyleProp<ViewStyle> = [
+    s.root,
+    isTablet && { maxWidth: 720, alignSelf: "center", width: "100%" },
+  ];
+  const body = (
+    <>
       {/* Start fresh button — only when thread has items */}
       {conversation.length > 0 && (
         <View style={s.startFreshRow}>
@@ -484,14 +456,17 @@ export default function TellMitraThreadView({
             </Text>
           </TouchableOpacity>
         </View>
-        {/* Disclaimer sits below the composer; the keyboard covers it when open */}
-        <Text
-          onLayout={(e) => setDisclaimerHeight(e.nativeEvent.layout.height)}
-          style={[s.disclaimerText]}
-        >
+        {/* Disclaimer sits below the composer */}
+        <Text style={s.disclaimerText}>
           {t("tellMitraThread.disclaimer")}
         </Text>
       </View>
+    </>
+  );
+
+  return (
+    <View style={[rootStyle, { paddingBottom: keyboardInset }]}>
+      {body}
     </View>
   );
 }

@@ -19,6 +19,7 @@ import {
   View,
 } from "react-native";
 import "react-native-get-random-values";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 import { MenuProvider } from "react-native-popup-menu";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { useScreenStore } from "./src/engine/useScreenBridge";
@@ -422,17 +423,19 @@ export default function App() {
   if (initialRoute === null) return null;
 
   return (
-    <MenuProvider>
-      <Provider store={store}>
-        <ToastProvider>
-          <CartProvider>
-            <AppInner
-              initialRoute={initialRoute}
-              navigationRef={navigationRef}
-            />
-          </CartProvider>
-        </ToastProvider>
-      </Provider>
-    </MenuProvider>
+    <KeyboardProvider statusBarTranslucent navigationBarTranslucent>
+      <MenuProvider>
+        <Provider store={store}>
+          <ToastProvider>
+            <CartProvider>
+              <AppInner
+                initialRoute={initialRoute}
+                navigationRef={navigationRef}
+              />
+            </CartProvider>
+          </ToastProvider>
+        </Provider>
+      </MenuProvider>
+    </KeyboardProvider>
   );
 }

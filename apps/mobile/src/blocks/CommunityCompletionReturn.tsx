@@ -597,7 +597,7 @@ const styles = StyleSheet.create({
   },
   addPracticeCtaText: {
     fontFamily: Fonts.serif.bold,
-    fontSize: 14,
+    fontSize: 16,
     color: "#B88413",
     letterSpacing: 0.2,
   },

@@ -13,15 +13,15 @@ import type {
   TellMitraV3Response,
 } from "@kalpx/types";
 import { ArrowLeft, Sparkles } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { TellMitraThreadView } from "../../components/mitra/TellMitraThreadView";
 import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
+import { TellMitraThreadView } from "../../components/mitra/TellMitraThreadView";
 import { executeAction } from "../../engine/actionExecutor";
 import { postTellMitraV3 } from "../../engine/mitraApi";
-import { useTranslation } from '../../lib/i18n';
 import { WEB_ENV } from "../../lib/env";
+import { useTranslation } from "../../lib/i18n";
 import type { AppDispatch } from "../../store";
 import { useScreenState } from "../../store/screenSlice";
 
@@ -74,12 +74,35 @@ export function TellMitraPage() {
   const [conversation, setConversation] = useState<TellMitraConversationItem[]>(
     [],
   );
+  // On mobile, hide the top bar while the composer is focused (keyboard up) to
+  // reclaim space — mirrors the native app.
+  const [composerFocused, setComposerFocused] = useState(false);
   const [composerPlaceholder, setComposerPlaceholder] = useState(
-    t('mitra.tellMitra.placeholder'),
+    t("mitra.tellMitra.placeholder"),
   );
   const composerRef = useRef<HTMLTextAreaElement>(null);
   const threadBottomRef = useRef<HTMLDivElement>(null);
   const freshResetPendingRef = useRef(false);
+  // Anchor-on-send (mirrors the native app): pin the user's just-sent message
+  // to the top of the thread instead of jumping to the bottom.
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const anchorOffsetRef = useRef(0);
+  const pendingAnchorRef = useRef(false);
+  const captureSendAnchor = () => {
+    anchorOffsetRef.current = conversation.length === 0
+      ? 0
+      : scrollContainerRef.current?.scrollHeight ?? 0;
+    pendingAnchorRef.current = true;
+  };
+  useLayoutEffect(() => {
+    if (pendingAnchorRef.current && scrollContainerRef.current) {
+      pendingAnchorRef.current = false;
+      scrollContainerRef.current.scrollTo({
+        top: anchorOffsetRef.current,
+        behavior: "smooth",
+      });
+    }
+  }, [conversation]);
   const activeContextRef = useRef<{
     parentEventId: string | number | null;
     parentIntentType: string | null;
@@ -117,7 +140,12 @@ export function TellMitraPage() {
           if (i >= initialMessage.length) {
             clearInterval(interval!);
             setTimeout(() => {
-              void submitThread(initialMessage, "tell_mitra_prana_entry", undefined, true);
+              void submitThread(
+                initialMessage,
+                "tell_mitra_prana_entry",
+                undefined,
+                true,
+              );
               setText("");
             }, 400);
           }
@@ -193,11 +221,11 @@ export function TellMitraPage() {
     const inputText = (override?.text ?? text).trim();
     const inputSource = override?.sourceSurface ?? "tell_mitra_page_web";
     if (!inputText) {
-      setError(t('mitra.tellMitra.errorEmpty'));
+      setError(t("mitra.tellMitra.errorEmpty"));
       return;
     }
     if (inputText.length > 1000) {
-      setError(t('mitra.tellMitra.errorTooLong'));
+      setError(t("mitra.tellMitra.errorTooLong"));
       return;
     }
     setError(null);
@@ -227,7 +255,7 @@ export function TellMitraPage() {
         setScreen("fallback");
       }
     } catch {
-      setError(t('mitra.tellMitra.errorGeneric'));
+      setError(t("mitra.tellMitra.errorGeneric"));
     } finally {
       setSubmitting(false);
     }
@@ -278,16 +306,14 @@ export function TellMitraPage() {
     const effectiveSource = freshResetPendingRef.current
       ? "tell_mitra_start_fresh"
       : sourceSurface;
-    const isReset = freshResetPendingRef.current || (forceReset === true);
+    const isReset = freshResetPendingRef.current || forceReset === true;
     freshResetPendingRef.current = false;
     const loadingId = _id();
     const now = new Date().toISOString();
     setConversation((prev) => [...prev, { id: loadingId, type: "loading" }]);
     setSubmitting(true);
-    setTimeout(
-      () => threadBottomRef.current?.scrollIntoView({ behavior: "smooth" }),
-      50,
-    );
+    // No scroll here — the thread stays anchored to where the user's message
+    // began (set via captureSendAnchor) so the reply reads top-down.
     try {
       if (WEB_ENV.isDev)
         console.log("[S17-D4B] chip payload", {
@@ -331,9 +357,7 @@ export function TellMitraPage() {
         newItems.push({
           id: _id(),
           type: "safety",
-          response_copy:
-            resp.response_copy ||
-            t('mitra.tellMitra.notAlone'),
+          response_copy: resp.response_copy || t("mitra.tellMitra.notAlone"),
         });
       } else {
         if (resp.response_copy) {
@@ -386,21 +410,21 @@ export function TellMitraPage() {
         ...prev.filter((i) => i.id !== loadingId),
         ...newItems,
       ]);
+      // Dismiss the keyboard so the reply is fully visible (mirrors the app).
+      composerRef.current?.blur();
     } catch {
       setConversation((prev) => [
         ...prev.filter((i) => i.id !== loadingId),
         {
           id: _id(),
           type: "error",
-          message: t('mitra.tellMitra.errorGeneric'),
+          message: t("mitra.tellMitra.errorGeneric"),
         },
       ]);
     } finally {
       setSubmitting(false);
-      setTimeout(
-        () => threadBottomRef.current?.scrollIntoView({ behavior: "smooth" }),
-        100,
-      );
+      // Intentionally no scroll-to-bottom here — the view stays anchored to the
+      // user's message so the reply reads top-down (mirrors the native app).
     }
   }
 
@@ -436,7 +460,7 @@ export function TellMitraPage() {
             : item,
         ),
       );
-      setComposerPlaceholder(t('mitra.tellMitra.composerPlaceholderLetMeTell'));
+      setComposerPlaceholder(t("mitra.tellMitra.composerPlaceholderLetMeTell"));
       setTimeout(() => composerRef.current?.focus(), 50);
       return;
     }
@@ -470,6 +494,7 @@ export function TellMitraPage() {
       value: opt.value,
       created_at: new Date().toISOString(),
     };
+    captureSendAnchor();
     setConversation((prev) => [...prev, userChip]);
     const mappedText = CHIP_SUBMIT_TEXT[opt.value];
     const sourceSurface = isReturnCard
@@ -505,7 +530,7 @@ export function TellMitraPage() {
   }
 
   function handleTellMitraMoreThread() {
-    setComposerPlaceholder(t('mitra.tellMitra.composerPlaceholderMore'));
+    setComposerPlaceholder(t("mitra.tellMitra.composerPlaceholderMore"));
     setTimeout(() => composerRef.current?.focus(), 50);
   }
 
@@ -514,6 +539,7 @@ export function TellMitraPage() {
       value === "calm_now"
         ? "Just help me calm down"
         : (CHIP_SUBMIT_TEXT[value] ?? label);
+    captureSendAnchor();
     setConversation((prev) => [
       ...prev,
       {
@@ -529,7 +555,7 @@ export function TellMitraPage() {
   function handleStartFresh() {
     setConversation([]);
     setText("");
-    setComposerPlaceholder(t('mitra.tellMitra.placeholder'));
+    setComposerPlaceholder(t("mitra.tellMitra.placeholder"));
     freshResetPendingRef.current = true;
     activeContextRef.current = {
       parentEventId: null,
@@ -675,7 +701,6 @@ export function TellMitraPage() {
     outline: "none",
   };
 
-
   const PRIOR_CONTEXT_CARD: React.CSSProperties = {
     background: "rgba(201,168,76,0.06)",
     border: "1px solid rgba(201,168,76,0.18)",
@@ -779,7 +804,7 @@ export function TellMitraPage() {
             marginBottom: 2,
           }}
         >
-          {t('mitra.tellMitra.orTry')}
+          {t("mitra.tellMitra.orTry")}
         </div>
         {result.next_options.map((opt: TellMitraNextOption, i: number) => (
           <button
@@ -823,6 +848,7 @@ export function TellMitraPage() {
       <MitraMobileShell
         backgroundImage="/beige_bg.png"
         wideDesktop={isDesktop}
+        hideTopBar={!isDesktop && composerFocused}
       >
         <div style={PAGE_SHELL}>
           <main
@@ -834,15 +860,20 @@ export function TellMitraPage() {
               padding: isDesktop ? "28px 20px 0" : "24px 16px 0",
             }}
           >
-            <div style={{ width: "100%", maxWidth: isDesktop ? 1180 : 740, position: "relative" }}>
-              <button
-                onClick={() => navigate("/en/mitra")}
-                style={BACK_BTN}
+            {/* {isDesktop && (
+              <div
+                style={{
+                  width: "100%",
+                  maxWidth: isDesktop ? 1180 : 740,
+                  position: "relative",
+                }}
               >
-                <ArrowLeft size={22} strokeWidth={2} />
-                {t('mitra.tellMitra.back')}
-              </button>
-            </div>
+                <button onClick={() => navigate("/en/mitra")} style={BACK_BTN}>
+                  <ArrowLeft size={22} strokeWidth={2} />
+                  {t("mitra.tellMitra.back")}
+                </button>
+              </div>
+            )} */}
             <div
               style={{
                 width: "100%",
@@ -850,15 +881,18 @@ export function TellMitraPage() {
                 flex: 1,
                 display: "flex",
                 flexDirection: "column",
-                background: "#FAF7F2",
-                borderRadius: isDesktop ? 28 : "20px 20px 0 0",
-                border: "1px solid rgba(201,168,76,0.15)",
-                borderBottom: isDesktop ? "1px solid rgba(201,168,76,0.15)" : "none",
+
+                // Desktop: a contained card. Mobile: clean full-bleed page that
+                // mirrors the native app (no floating-card border/shadow).
+                borderRadius: isDesktop ? 28 : 0,
+                border: isDesktop ? "1px solid rgba(201,168,76,0.15)" : "none",
                 boxShadow: isDesktop
                   ? "0 18px 48px rgba(67,33,4,0.08)"
-                  : "0 -4px 24px rgba(67,33,4,0.06)",
+                  : "none",
                 overflow: "hidden",
-                minHeight: isDesktop ? "calc(100dvh - 132px)" : "calc(100dvh - 100px)",
+                minHeight: isDesktop
+                  ? "calc(100dvh - 132px)"
+                  : "calc(100dvh - 100px)",
               }}
             >
               <TellMitraThreadView
@@ -869,11 +903,13 @@ export function TellMitraPage() {
                 composerPlaceholder={composerPlaceholder}
                 composerRef={composerRef}
                 threadBottomRef={threadBottomRef}
+                scrollContainerRef={scrollContainerRef}
                 onComposerChange={(val) => {
                   setText(val);
                   if (error) setError(null);
                 }}
                 onSubmit={(input) => {
+                  captureSendAnchor();
                   setText("");
                   setConversation((prev) => [
                     ...prev,
@@ -891,6 +927,8 @@ export function TellMitraPage() {
                 onTellMitraMore={handleTellMitraMoreThread}
                 onStartFresh={handleStartFresh}
                 onQuickStartChip={handleQuickStartChip}
+                onComposerFocus={() => setComposerFocused(true)}
+                onComposerBlur={() => setComposerFocused(false)}
                 onWisdomOptionPress={(opt) => {
                   if (opt.action_type === "navigate_to_room" && opt.room_id) {
                     void executeAction(
@@ -907,7 +945,10 @@ export function TellMitraPage() {
                         currentStateId: "tell_mitra",
                       },
                     );
-                  } else if (opt.action_type === "navigate_to_door" && opt.door) {
+                  } else if (
+                    opt.action_type === "navigate_to_door" &&
+                    opt.door
+                  ) {
                     navigate(DOOR_ROUTES[opt.door] ?? "/en/mitra");
                   }
                 }}
@@ -934,595 +975,453 @@ export function TellMitraPage() {
           }}
         >
           <div style={PAGE_INNER}>
-            <button
-              onClick={() => navigate("/en/mitra")}
-              style={BACK_BTN}
-            >
+            <button onClick={() => navigate("/en/mitra")} style={BACK_BTN}>
               <ArrowLeft size={22} strokeWidth={2} />
-              {t('mitra.tellMitra.back')}
+              {t("mitra.tellMitra.back")}
             </button>
 
-          {/* Input section — always visible unless a result screen is shown */}
-          {screen === "none" && (
-            <>
-            <div style={TELL_MITRA_FORM_CARD}>
-              <img
-                src="/leaves-bird.png"
-                alt=""
-                aria-hidden="true"
-                style={{
-                  position: "absolute",
-                  top: -86,
-                  right: -8,
-                  width: 180,
-                  pointerEvents: "none",
-                  userSelect: "none",
-                  opacity: 0.42,
-                }}
-              />
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 14,
-                  marginBottom: 16,
-                }}
-              >
-                <div
-                  style={{
-                    width: 64,
-                    height: 64,
-                    borderRadius: "50%",
-                    border: "1px solid rgba(225, 197, 136, 0.5)",
-                    background: "rgba(255, 249, 239, 0.9)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    boxShadow: "0 8px 22px rgba(201,168,76,0.08)",
-                    flexShrink: 0,
-                  }}
-                >
-                  <Sparkles size={28} strokeWidth={1.8} color="#D5A028" />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div
+            {/* Input section — always visible unless a result screen is shown */}
+            {screen === "none" && (
+              <>
+                <div style={TELL_MITRA_FORM_CARD}>
+                  <img
+                    src="/leaves-bird.png"
+                    alt=""
+                    aria-hidden="true"
                     style={{
-                      fontFamily: "var(--kalpx-font-serif)",
-                      fontWeight: 700,
-                      fontSize: 20,
-                      color: "#432104",
-                      marginBottom: 6,
+                      position: "absolute",
+                      top: -86,
+                      right: -8,
+                      width: 180,
+                      pointerEvents: "none",
+                      userSelect: "none",
+                      opacity: 0.42,
                     }}
-                  >
-                    {t('mitra.tellMitra.tellMitraCta')}
-                  </div>
+                  />
                   <div
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: 10,
-                      color: "#D9A83A",
+                      gap: 14,
+                      marginBottom: 16,
                     }}
                   >
                     <div
                       style={{
-                        flex: 1,
-                        maxWidth: 52,
-                        height: 1,
-                        background: "rgba(217,168,58,0.45)",
+                        width: 64,
+                        height: 64,
+                        borderRadius: "50%",
+                        border: "1px solid rgba(225, 197, 136, 0.5)",
+                        background: "rgba(255, 249, 239, 0.9)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        boxShadow: "0 8px 22px rgba(201,168,76,0.08)",
+                        flexShrink: 0,
                       }}
-                    />
-                    <span style={{ fontSize: 18, lineHeight: 1 }}>◇</span>
-                    <div
-                      style={{
-                        flex: 1,
-                        maxWidth: 52,
-                        height: 1,
-                        background: "rgba(217,168,58,0.45)",
-                      }}
-                    />
+                    >
+                      <Sparkles size={28} strokeWidth={1.8} color="#D5A028" />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div
+                        style={{
+                          fontFamily: "var(--kalpx-font-serif)",
+                          fontWeight: 700,
+                          fontSize: 20,
+                          color: "#432104",
+                          marginBottom: 6,
+                        }}
+                      >
+                        {t("mitra.tellMitra.tellMitraCta")}
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
+                          color: "#D9A83A",
+                        }}
+                      >
+                        <div
+                          style={{
+                            flex: 1,
+                            maxWidth: 52,
+                            height: 1,
+                            background: "rgba(217,168,58,0.45)",
+                          }}
+                        />
+                        <span style={{ fontSize: 18, lineHeight: 1 }}>◇</span>
+                        <div
+                          style={{
+                            flex: 1,
+                            maxWidth: 52,
+                            height: 1,
+                            background: "rgba(217,168,58,0.45)",
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-              <div
-                style={{
-                  fontSize: 16,
-                  color: "#7B6550",
-                  lineHeight: 1.55,
-                  marginBottom: 18,
-                }}
-              >
-                {t('mitra.tellMitra.shareCarrying')}
-              </div>
-              <textarea
-                value={text}
-                onChange={(e) => {
-                  setText(e.target.value);
-                  if (error) setError(null);
-                }}
-                maxLength={1000}
-                rows={5}
-                placeholder={t('mitra.tellMitra.placeholder')}
-                style={TELL_MITRA_TEXTAREA}
-              />
-              <img
-                src="/leaves-bird.png"
-                alt=""
-                aria-hidden="true"
-                style={{
-                  position: "absolute",
-                  right: 28,
-                  bottom: 168,
-                  width: 94,
-                  opacity: 0.14,
-                  pointerEvents: "none",
-                  userSelect: "none",
-                }}
-              />
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginTop: 6,
-                  marginBottom: 18,
-                }}
-              >
-                <span style={{ fontSize: 12, color: "#8B6A43" }}>
-                  {text.length} / 1000
-                </span>
-                {error && (
-                  <span style={{ fontSize: 13, color: "#e06060" }}>
-                    {error}
-                  </span>
-                )}
-              </div>
-              <button
-                onClick={() => void submit()}
-                disabled={submitting || !text.trim()}
-                style={{
-                  ...GOLD_BTN,
-                  padding: "16px 0",
-                  borderRadius: 20,
-                  fontSize: 18,
-                  opacity: submitting || !text.trim() ? 0.5 : 1,
-                  cursor:
-                    submitting || !text.trim() ? "not-allowed" : "pointer",
-                }}
-              >
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 10,
-                  }}
-                >
-                  {submitting ? t('mitra.tellMitra.sending') : t('mitra.tellMitra.tellMitraCta')}
-                  {!submitting && <Sparkles size={18} strokeWidth={2} />}
-                </span>
-              </button>
-              {/* <button
+                  <div
+                    style={{
+                      fontSize: 16,
+                      color: "#7B6550",
+                      lineHeight: 1.55,
+                      marginBottom: 18,
+                    }}
+                  >
+                    {t("mitra.tellMitra.shareCarrying")}
+                  </div>
+                  <textarea
+                    value={text}
+                    onChange={(e) => {
+                      setText(e.target.value);
+                      if (error) setError(null);
+                    }}
+                    maxLength={1000}
+                    rows={5}
+                    placeholder={t("mitra.tellMitra.placeholder")}
+                    style={TELL_MITRA_TEXTAREA}
+                  />
+                  <img
+                    src="/leaves-bird.png"
+                    alt=""
+                    aria-hidden="true"
+                    style={{
+                      position: "absolute",
+                      right: 28,
+                      bottom: 168,
+                      width: 94,
+                      opacity: 0.14,
+                      pointerEvents: "none",
+                      userSelect: "none",
+                    }}
+                  />
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginTop: 6,
+                      marginBottom: 18,
+                    }}
+                  >
+                    <span style={{ fontSize: 12, color: "#8B6A43" }}>
+                      {text.length} / 1000
+                    </span>
+                    {error && (
+                      <span style={{ fontSize: 13, color: "#e06060" }}>
+                        {error}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => void submit()}
+                    disabled={submitting || !text.trim()}
+                    style={{
+                      ...GOLD_BTN,
+                      padding: "16px 0",
+                      borderRadius: 20,
+                      fontSize: 18,
+                      opacity: submitting || !text.trim() ? 0.5 : 1,
+                      cursor:
+                        submitting || !text.trim() ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 10,
+                      }}
+                    >
+                      {submitting
+                        ? t("mitra.tellMitra.sending")
+                        : t("mitra.tellMitra.tellMitraCta")}
+                      {!submitting && <Sparkles size={18} strokeWidth={2} />}
+                    </span>
+                  </button>
+                  {/* <button
                 onClick={() => navigate("/en/mitra/checkin-quick")}
                 style={{ ...GHOST_BTN, marginTop: 10 }}
               >
                 Quick Check-in instead
               </button> */}
-            </div>
-            <div
-              style={{
-                padding: "10px 0 0",
-                textAlign: "center",
-              }}
-            >
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: 12,
-                  color: "#8B6A43",
-                  lineHeight: 1.6,
-                  fontFamily: "var(--kalpx-font-sans)",
-                }}
-              >
-                {t('mitra.tellMitra.disclaimer')}
-              </p>
-            </div>
-            </>
-          )}
-
-          {/* navigate_to_room */}
-          {screen === "navigate_to_room" && result && (
-            <div style={CARD}>
-              <div
-                style={{
-                  fontFamily: "var(--kalpx-font-serif)",
-                  fontWeight: 700,
-                  fontSize: 18,
-                  color: "#C99317",
-                  marginBottom: 16,
-                }}
-              >
-                {t('mitra.tellMitra.mitraHeard')}
-              </div>
-              <ConversationSummary />
-              <PriorContextCard />
-              {result.response_copy && (
+                </div>
                 <div
                   style={{
-                    background: "rgba(255,253,250,0.96)",
-                    borderLeft: "3px solid rgba(201,168,76,0.6)",
-                    borderRadius: "0 12px 12px 0",
-                    padding: "20px 24px",
-                    marginBottom: 24,
-                    fontFamily: "'Cormorant Garamond', serif",
-                    fontSize: 20,
-                    lineHeight: 1.7,
-                    color: "#432104",
-                    fontStyle: "italic",
+                    padding: "10px 0 0",
+                    textAlign: "center",
                   }}
                 >
-                  {result.response_copy}
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: 12,
+                      color: "#8B6A43",
+                      lineHeight: 1.6,
+                      fontFamily: "var(--kalpx-font-sans)",
+                    }}
+                  >
+                    {t("mitra.tellMitra.disclaimer")}
+                  </p>
                 </div>
-              )}
-              <FollowupChips />
-              <div
-                style={{
-                  background: "rgba(201,168,76,0.06)",
-                  border: "1px solid rgba(201,168,76,0.2)",
-                  borderRadius: 12,
-                  padding: "14px 16px",
-                  marginBottom: 16,
-                }}
-              >
+              </>
+            )}
+
+            {/* navigate_to_room */}
+            {screen === "navigate_to_room" && result && (
+              <div style={CARD}>
                 <div
                   style={{
                     fontFamily: "var(--kalpx-font-serif)",
                     fontWeight: 700,
-                    fontSize: 16,
-                    color: "#432104",
+                    fontSize: 18,
+                    color: "#C99317",
+                    marginBottom: 16,
                   }}
                 >
-                  {result.suggested_room_label}
+                  {t("mitra.tellMitra.mitraHeard")}
                 </div>
-                {result.suggested_room_description && (
-                  <div style={{ fontSize: 14, color: "#7B6550", marginTop: 4 }}>
-                    {result.suggested_room_description}
+                <ConversationSummary />
+                <PriorContextCard />
+                {result.response_copy && (
+                  <div
+                    style={{
+                      background: "rgba(255,253,250,0.96)",
+                      borderLeft: "3px solid rgba(201,168,76,0.6)",
+                      borderRadius: "0 12px 12px 0",
+                      padding: "20px 24px",
+                      marginBottom: 24,
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: 20,
+                      lineHeight: 1.7,
+                      color: "#432104",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    {result.response_copy}
                   </div>
                 )}
-              </div>
-              <button
-                onClick={() =>
-                  void executeAction(
-                    {
-                      type: "enter_room",
-                      payload: {
-                        room_id: result.suggested_room_id,
-                        source: "tell_mitra",
-                        room_entry_context: result.room_entry_context,
-                      },
-                    },
-                    {
-                      dispatch,
-                      screenData: screenState.screenData,
-                      currentStateId: "tell_mitra",
-                    },
-                  )
-                }
-                style={{ ...GOLD_BTN, opacity: submitting ? 0.6 : 1 }}
-              >
-                {submitting
-                  ? t('mitra.tellMitra.sending')
-                  : `Go to ${result.suggested_room_label || "Room"}`}
-              </button>
-              {result.secondary_room_id &&
-                result.secondary_room_id !== result.suggested_room_id && (
-                  <button
-                    onClick={() =>
-                      void executeAction(
-                        {
-                          type: "enter_room",
-                          payload: {
-                            room_id: result.secondary_room_id!,
-                            source: "tell_mitra_secondary",
-                          },
-                        },
-                        {
-                          dispatch,
-                          screenData: screenState.screenData,
-                          currentStateId: "tell_mitra",
-                        },
-                      )
-                    }
-                    style={{ ...GHOST_BTN, marginTop: 6 }}
+                <FollowupChips />
+                <div
+                  style={{
+                    background: "rgba(201,168,76,0.06)",
+                    border: "1px solid rgba(201,168,76,0.2)",
+                    borderRadius: 12,
+                    padding: "14px 16px",
+                    marginBottom: 16,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontFamily: "var(--kalpx-font-serif)",
+                      fontWeight: 700,
+                      fontSize: 16,
+                      color: "#432104",
+                    }}
                   >
-                    {t('mitra.tellMitra.orTryRoom').replace('{{room}}', result.secondary_room_label || getRoomLabel(result.secondary_room_id as any))}
+                    {result.suggested_room_label}
+                  </div>
+                  {result.suggested_room_description && (
+                    <div
+                      style={{ fontSize: 14, color: "#7B6550", marginTop: 4 }}
+                    >
+                      {result.suggested_room_description}
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={() =>
+                    void executeAction(
+                      {
+                        type: "enter_room",
+                        payload: {
+                          room_id: result.suggested_room_id,
+                          source: "tell_mitra",
+                          room_entry_context: result.room_entry_context,
+                        },
+                      },
+                      {
+                        dispatch,
+                        screenData: screenState.screenData,
+                        currentStateId: "tell_mitra",
+                      },
+                    )
+                  }
+                  style={{ ...GOLD_BTN, opacity: submitting ? 0.6 : 1 }}
+                >
+                  {submitting
+                    ? t("mitra.tellMitra.sending")
+                    : `Go to ${result.suggested_room_label || "Room"}`}
+                </button>
+                {result.secondary_room_id &&
+                  result.secondary_room_id !== result.suggested_room_id && (
+                    <button
+                      onClick={() =>
+                        void executeAction(
+                          {
+                            type: "enter_room",
+                            payload: {
+                              room_id: result.secondary_room_id!,
+                              source: "tell_mitra_secondary",
+                            },
+                          },
+                          {
+                            dispatch,
+                            screenData: screenState.screenData,
+                            currentStateId: "tell_mitra",
+                          },
+                        )
+                      }
+                      style={{ ...GHOST_BTN, marginTop: 6 }}
+                    >
+                      {t("mitra.tellMitra.orTryRoom").replace(
+                        "{{room}}",
+                        result.secondary_room_label ||
+                          getRoomLabel(result.secondary_room_id as any),
+                      )}
+                    </button>
+                  )}
+                <button
+                  onClick={() => {
+                    setScreen("none");
+                    setText("");
+                  }}
+                  style={{ ...GHOST_BTN, marginTop: 10 }}
+                >
+                  {t("mitra.tellMitra.tellMitraMore")}
+                </button>
+                <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                  <button
+                    onClick={() => navigate("/en/mitra/checkin-quick")}
+                    style={{ ...GHOST_BTN, fontSize: 13 }}
+                  >
+                    {t("mitra.tellMitra.quickCheckin")}
                   </button>
+                  <button
+                    onClick={() => navigate("/en/mitra/quick-reset")}
+                    style={{ ...GHOST_BTN, fontSize: 13 }}
+                  >
+                    {t("mitra.tellMitra.quickReset")}
+                  </button>
+                </div>
+                <button
+                  onClick={() => navigate("/en/mitra")}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#A08060",
+                    fontSize: 13,
+                    cursor: "pointer",
+                    marginTop: 10,
+                    width: "100%",
+                  }}
+                >
+                  {t("mitra.tellMitra.returnHome")}
+                </button>
+              </div>
+            )}
+
+            {/* navigate_to_door */}
+            {screen === "navigate_to_door" && result && (
+              <div style={CARD}>
+                <div
+                  style={{
+                    fontFamily: "var(--kalpx-font-serif)",
+                    fontWeight: 700,
+                    fontSize: 18,
+                    color: "#C99317",
+                    marginBottom: 16,
+                  }}
+                >
+                  {t("mitra.tellMitra.mitraHeard")}
+                </div>
+                <ConversationSummary />
+                <PriorContextCard />
+                {result.response_copy && (
+                  <div
+                    style={{
+                      background: "rgba(255,253,250,0.96)",
+                      borderLeft: "3px solid rgba(201,168,76,0.6)",
+                      borderRadius: "0 12px 12px 0",
+                      padding: "20px 24px",
+                      marginBottom: 24,
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: 20,
+                      lineHeight: 1.7,
+                      color: "#432104",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    {result.response_copy}
+                  </div>
                 )}
-              <button
-                onClick={() => {
-                  setScreen("none");
-                  setText("");
-                }}
-                style={{ ...GHOST_BTN, marginTop: 10 }}
-              >
-                {t('mitra.tellMitra.tellMitraMore')}
-              </button>
-              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
                 <button
-                  onClick={() => navigate("/en/mitra/checkin-quick")}
-                  style={{ ...GHOST_BTN, fontSize: 13 }}
+                  onClick={() => {
+                    if (result.door)
+                      navigate(DOOR_ROUTES[result.door] ?? "/en/mitra");
+                  }}
+                  style={GOLD_BTN}
                 >
-                  {t('mitra.tellMitra.quickCheckin')}
+                  Open {result.door ? getDoorLabel(result.door) : "Door"}
                 </button>
                 <button
-                  onClick={() => navigate("/en/mitra/quick-reset")}
-                  style={{ ...GHOST_BTN, fontSize: 13 }}
+                  onClick={() => {
+                    setScreen("none");
+                    setText("");
+                  }}
+                  style={{ ...GHOST_BTN, marginTop: 10 }}
                 >
-                  {t('mitra.tellMitra.quickReset')}
+                  {t("mitra.tellMitra.tellMitraMore")}
                 </button>
-              </div>
-              <button
-                onClick={() => navigate("/en/mitra")}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#A08060",
-                  fontSize: 13,
-                  cursor: "pointer",
-                  marginTop: 10,
-                  width: "100%",
-                }}
-              >
-                {t('mitra.tellMitra.returnHome')}
-              </button>
-            </div>
-          )}
-
-          {/* navigate_to_door */}
-          {screen === "navigate_to_door" && result && (
-            <div style={CARD}>
-              <div
-                style={{
-                  fontFamily: "var(--kalpx-font-serif)",
-                  fontWeight: 700,
-                  fontSize: 18,
-                  color: "#C99317",
-                  marginBottom: 16,
-                }}
-              >
-                {t('mitra.tellMitra.mitraHeard')}
-              </div>
-              <ConversationSummary />
-              <PriorContextCard />
-              {result.response_copy && (
-                <div
+                <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                  <button
+                    onClick={() => navigate("/en/mitra/checkin-quick")}
+                    style={{ ...GHOST_BTN, fontSize: 13 }}
+                  >
+                    {t("mitra.tellMitra.quickCheckin")}
+                  </button>
+                  <button
+                    onClick={() => navigate("/en/mitra/quick-reset")}
+                    style={{ ...GHOST_BTN, fontSize: 13 }}
+                  >
+                    {t("mitra.tellMitra.quickReset")}
+                  </button>
+                </div>
+                <button
+                  onClick={() => navigate("/en/mitra")}
                   style={{
-                    background: "rgba(255,253,250,0.96)",
-                    borderLeft: "3px solid rgba(201,168,76,0.6)",
-                    borderRadius: "0 12px 12px 0",
-                    padding: "20px 24px",
-                    marginBottom: 24,
-                    fontFamily: "'Cormorant Garamond', serif",
-                    fontSize: 20,
-                    lineHeight: 1.7,
-                    color: "#432104",
-                    fontStyle: "italic",
+                    background: "none",
+                    border: "none",
+                    color: "#A08060",
+                    fontSize: 13,
+                    cursor: "pointer",
+                    marginTop: 10,
+                    width: "100%",
                   }}
                 >
-                  {result.response_copy}
-                </div>
-              )}
-              <button
-                onClick={() => {
-                  if (result.door)
-                    navigate(DOOR_ROUTES[result.door] ?? "/en/mitra");
-                }}
-                style={GOLD_BTN}
-              >
-                Open {result.door ? getDoorLabel(result.door) : "Door"}
-              </button>
-              <button
-                onClick={() => {
-                  setScreen("none");
-                  setText("");
-                }}
-                style={{ ...GHOST_BTN, marginTop: 10 }}
-              >
-                {t('mitra.tellMitra.tellMitraMore')}
-              </button>
-              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-                <button
-                  onClick={() => navigate("/en/mitra/checkin-quick")}
-                  style={{ ...GHOST_BTN, fontSize: 13 }}
-                >
-                  {t('mitra.tellMitra.quickCheckin')}
-                </button>
-                <button
-                  onClick={() => navigate("/en/mitra/quick-reset")}
-                  style={{ ...GHOST_BTN, fontSize: 13 }}
-                >
-                  {t('mitra.tellMitra.quickReset')}
+                  {t("mitra.tellMitra.returnHome")}
                 </button>
               </div>
-              <button
-                onClick={() => navigate("/en/mitra")}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#A08060",
-                  fontSize: 13,
-                  cursor: "pointer",
-                  marginTop: 10,
-                  width: "100%",
-                }}
-              >
-                {t('mitra.tellMitra.returnHome')}
-              </button>
-            </div>
-          )}
+            )}
 
-          {/* provide_wisdom_inline */}
-          {screen === "provide_wisdom_inline" && result && (
-            <div style={CARD}>
-              <div
-                style={{
-                  fontFamily: "var(--kalpx-font-serif)",
-                  fontWeight: 700,
-                  fontSize: 18,
-                  color: "#C99317",
-                  marginBottom: 16,
-                }}
-              >
-                {t('mitra.tellMitra.mitraHeard')}
-              </div>
-              <ConversationSummary />
-              <PriorContextCard />
-              <div
-                style={{
-                  background: "rgba(255,253,250,0.96)",
-                  borderLeft: "3px solid rgba(201,168,76,0.6)",
-                  borderRadius: "0 12px 12px 0",
-                  padding: "20px 24px",
-                  marginBottom: 20,
-                  fontFamily: "'Cormorant Garamond', serif",
-                  fontSize: 20,
-                  lineHeight: 1.7,
-                  color: "#432104",
-                  fontStyle: "italic",
-                }}
-              >
-                {result.response_copy}
-              </div>
-              <NextOptionsTiles />
-              <button
-                onClick={() => {
-                  setScreen("none");
-                  setText("");
-                }}
-                style={GOLD_BTN}
-              >
-                {t('mitra.tellMitra.tellMitraMore')}
-              </button>
-              <button
-                onClick={() => navigate("/en/mitra")}
-                style={{ ...GHOST_BTN, marginTop: 8 }}
-              >
-                {t('mitra.tellMitra.returnHome')}
-              </button>
-            </div>
-          )}
-
-          {/* ask_followup — listening mode, no room CTA */}
-          {screen === "ask_followup" && result && (
-            <div style={CARD}>
-              <div
-                style={{
-                  fontFamily: "var(--kalpx-font-serif)",
-                  fontWeight: 700,
-                  fontSize: 18,
-                  color: "#C99317",
-                  marginBottom: 16,
-                }}
-              >
-                {t('mitra.tellMitra.mitraListening')}
-              </div>
-              <ConversationSummary />
-              {result.response_copy && (
+            {/* provide_wisdom_inline */}
+            {screen === "provide_wisdom_inline" && result && (
+              <div style={CARD}>
                 <div
                   style={{
-                    background: "rgba(255,253,250,0.96)",
-                    borderLeft: "3px solid rgba(201,168,76,0.6)",
-                    borderRadius: "0 12px 12px 0",
-                    padding: "20px 24px",
-                    marginBottom: 24,
-                    fontFamily: "'Cormorant Garamond', serif",
-                    fontSize: 20,
-                    lineHeight: 1.7,
-                    color: "#432104",
-                    fontStyle: "italic",
+                    fontFamily: "var(--kalpx-font-serif)",
+                    fontWeight: 700,
+                    fontSize: 18,
+                    color: "#C99317",
+                    marginBottom: 16,
                   }}
                 >
-                  {result.response_copy}
+                  {t("mitra.tellMitra.mitraHeard")}
                 </div>
-              )}
-              <FollowupChips />
-              <button
-                onClick={() => {
-                  setScreen("none");
-                  setText("");
-                }}
-                style={GOLD_BTN}
-              >
-                {t('mitra.tellMitra.tellMitraMore')}
-              </button>
-              <button
-                onClick={() => navigate("/en/mitra")}
-                style={{ ...GHOST_BTN, marginTop: 10 }}
-              >
-                {t('mitra.tellMitra.returnHome')}
-              </button>
-            </div>
-          )}
-
-          {/* safety */}
-          {screen === "safety" && result && (
-            <div style={CARD}>
-              <div
-                style={{
-                  fontFamily: "var(--kalpx-font-serif)",
-                  fontWeight: 700,
-                  fontSize: 18,
-                  color: "#432104",
-                  marginBottom: 16,
-                }}
-              >
-                {t('mitra.tellMitra.mitraHearsYou')}
-              </div>
-              <div
-                style={{
-                  fontSize: 16,
-                  lineHeight: 1.8,
-                  color: "#432104",
-                  marginBottom: 24,
-                }}
-              >
-                {result.response_copy ||
-                  t('mitra.tellMitra.notAlone')}
-              </div>
-              <button
-                onClick={() => {
-                  setScreen("none");
-                  setText("");
-                }}
-                style={GOLD_BTN}
-              >
-                {t('mitra.tellMitra.tellMitraMore')}
-              </button>
-              <button
-                onClick={() => navigate("/en/mitra")}
-                style={{ ...GHOST_BTN, marginTop: 10 }}
-              >
-                {t('mitra.tellMitra.returnHome')}
-              </button>
-            </div>
-          )}
-
-          {/* fallback */}
-          {screen === "fallback" && result && (
-            <div style={CARD}>
-              <div
-                style={{
-                  fontFamily: "var(--kalpx-font-serif)",
-                  fontWeight: 700,
-                  fontSize: 18,
-                  color: "#C99317",
-                  marginBottom: 16,
-                }}
-              >
-                {t('mitra.tellMitra.mitraHeard')}
-              </div>
-              <ConversationSummary />
-              <PriorContextCard />
-              {result.response_copy ? (
+                <ConversationSummary />
+                <PriorContextCard />
                 <div
                   style={{
                     background: "rgba(255,253,250,0.96)",
@@ -1539,38 +1438,184 @@ export function TellMitraPage() {
                 >
                   {result.response_copy}
                 </div>
-              ) : (
-                <p
+                <NextOptionsTiles />
+                <button
+                  onClick={() => {
+                    setScreen("none");
+                    setText("");
+                  }}
+                  style={GOLD_BTN}
+                >
+                  {t("mitra.tellMitra.tellMitraMore")}
+                </button>
+                <button
+                  onClick={() => navigate("/en/mitra")}
+                  style={{ ...GHOST_BTN, marginTop: 8 }}
+                >
+                  {t("mitra.tellMitra.returnHome")}
+                </button>
+              </div>
+            )}
+
+            {/* ask_followup — listening mode, no room CTA */}
+            {screen === "ask_followup" && result && (
+              <div style={CARD}>
+                <div
                   style={{
-                    fontFamily: "'Cormorant Garamond', serif",
-                    fontSize: 20,
-                    color: "#432104",
-                    fontStyle: "italic",
-                    marginBottom: 20,
-                    lineHeight: 1.7,
+                    fontFamily: "var(--kalpx-font-serif)",
+                    fontWeight: 700,
+                    fontSize: 18,
+                    color: "#C99317",
+                    marginBottom: 16,
                   }}
                 >
-                  {t('mitra.tellMitra.imHereHelp')}
-                </p>
-              )}
-              <NextOptionsTiles />
-              <button
-                onClick={() => {
-                  setScreen("none");
-                  setText("");
-                }}
-                style={GOLD_BTN}
-              >
-                {t('mitra.tellMitra.tellMitraMore')}
-              </button>
-              <button
-                onClick={() => navigate("/en/mitra")}
-                style={{ ...GHOST_BTN, marginTop: 8 }}
-              >
-                {t('mitra.tellMitra.returnHome')}
-              </button>
-            </div>
-          )}
+                  {t("mitra.tellMitra.mitraListening")}
+                </div>
+                <ConversationSummary />
+                {result.response_copy && (
+                  <div
+                    style={{
+                      background: "rgba(255,253,250,0.96)",
+                      borderLeft: "3px solid rgba(201,168,76,0.6)",
+                      borderRadius: "0 12px 12px 0",
+                      padding: "20px 24px",
+                      marginBottom: 24,
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: 20,
+                      lineHeight: 1.7,
+                      color: "#432104",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    {result.response_copy}
+                  </div>
+                )}
+                <FollowupChips />
+                <button
+                  onClick={() => {
+                    setScreen("none");
+                    setText("");
+                  }}
+                  style={GOLD_BTN}
+                >
+                  {t("mitra.tellMitra.tellMitraMore")}
+                </button>
+                <button
+                  onClick={() => navigate("/en/mitra")}
+                  style={{ ...GHOST_BTN, marginTop: 10 }}
+                >
+                  {t("mitra.tellMitra.returnHome")}
+                </button>
+              </div>
+            )}
+
+            {/* safety */}
+            {screen === "safety" && result && (
+              <div style={CARD}>
+                <div
+                  style={{
+                    fontFamily: "var(--kalpx-font-serif)",
+                    fontWeight: 700,
+                    fontSize: 18,
+                    color: "#432104",
+                    marginBottom: 16,
+                  }}
+                >
+                  {t("mitra.tellMitra.mitraHearsYou")}
+                </div>
+                <div
+                  style={{
+                    fontSize: 16,
+                    lineHeight: 1.8,
+                    color: "#432104",
+                    marginBottom: 24,
+                  }}
+                >
+                  {result.response_copy || t("mitra.tellMitra.notAlone")}
+                </div>
+                <button
+                  onClick={() => {
+                    setScreen("none");
+                    setText("");
+                  }}
+                  style={GOLD_BTN}
+                >
+                  {t("mitra.tellMitra.tellMitraMore")}
+                </button>
+                <button
+                  onClick={() => navigate("/en/mitra")}
+                  style={{ ...GHOST_BTN, marginTop: 10 }}
+                >
+                  {t("mitra.tellMitra.returnHome")}
+                </button>
+              </div>
+            )}
+
+            {/* fallback */}
+            {screen === "fallback" && result && (
+              <div style={CARD}>
+                <div
+                  style={{
+                    fontFamily: "var(--kalpx-font-serif)",
+                    fontWeight: 700,
+                    fontSize: 18,
+                    color: "#C99317",
+                    marginBottom: 16,
+                  }}
+                >
+                  {t("mitra.tellMitra.mitraHeard")}
+                </div>
+                <ConversationSummary />
+                <PriorContextCard />
+                {result.response_copy ? (
+                  <div
+                    style={{
+                      background: "rgba(255,253,250,0.96)",
+                      borderLeft: "3px solid rgba(201,168,76,0.6)",
+                      borderRadius: "0 12px 12px 0",
+                      padding: "20px 24px",
+                      marginBottom: 20,
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: 20,
+                      lineHeight: 1.7,
+                      color: "#432104",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    {result.response_copy}
+                  </div>
+                ) : (
+                  <p
+                    style={{
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: 20,
+                      color: "#432104",
+                      fontStyle: "italic",
+                      marginBottom: 20,
+                      lineHeight: 1.7,
+                    }}
+                  >
+                    {t("mitra.tellMitra.imHereHelp")}
+                  </p>
+                )}
+                <NextOptionsTiles />
+                <button
+                  onClick={() => {
+                    setScreen("none");
+                    setText("");
+                  }}
+                  style={GOLD_BTN}
+                >
+                  {t("mitra.tellMitra.tellMitraMore")}
+                </button>
+                <button
+                  onClick={() => navigate("/en/mitra")}
+                  style={{ ...GHOST_BTN, marginTop: 8 }}
+                >
+                  {t("mitra.tellMitra.returnHome")}
+                </button>
+              </div>
+            )}
           </div>
         </main>
       </div>

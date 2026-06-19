@@ -69,6 +69,7 @@ export interface TellMitraThreadViewProps {
   onWisdomOptionPress: (opt: TellMitraNextOption) => void;
   buildActionContext: () => any;
   errorMsg?: string;
+  onContentSizeChange?: (w: number, h: number) => void;
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -89,6 +90,7 @@ export default function TellMitraThreadView({
   onQuickStartChip,
   onWisdomOptionPress,
   errorMsg,
+  onContentSizeChange,
 }: TellMitraThreadViewProps) {
   const { t } = useTranslation();
   const RETURN_CARD_CHIPS: TellMitraFollowupOption[] = [
@@ -146,11 +148,11 @@ export default function TellMitraThreadView({
     const hideEvent =
       Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
 
+    // Track keyboard height for the avoidance inset only. We intentionally do
+    // NOT auto-scroll the thread when the keyboard opens — that made the
+    // conversation jump on focus.
     const onShow = Keyboard.addListener(showEvent, (event) => {
       setKeyboardHeight(event.endCoordinates?.height || 0);
-      requestAnimationFrame(() => {
-        scrollRef.current?.scrollToEnd({ animated: true });
-      });
     });
     const onHide = Keyboard.addListener(hideEvent, () => {
       setKeyboardHeight(0);
@@ -160,7 +162,7 @@ export default function TellMitraThreadView({
       onShow.remove();
       onHide.remove();
     };
-  }, [scrollRef]);
+  }, []);
 
   function renderItem(item: TellMitraConversationItem) {
     // ── user_message ─────────────────────────────────────────────────────────
@@ -414,6 +416,7 @@ export default function TellMitraThreadView({
         ]}
         nestedScrollEnabled
         keyboardShouldPersistTaps="handled"
+        onContentSizeChange={onContentSizeChange}
       >
         {/* Empty state */}
         {conversation.length === 0 && (
@@ -790,8 +793,8 @@ const s = StyleSheet.create({
     color: "#A08060",
     textAlign: "center",
     lineHeight: sfs(16),
-    paddingHorizontal: 20,
-    paddingTop: 6,
+    paddingHorizontal: 18,
+    // paddingTop: 6,
     fontFamily: Fonts.sans.regular,
   },
 });

@@ -16,6 +16,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  Keyboard,
   StyleSheet,
   Text,
   TextInput,
@@ -91,6 +92,26 @@ export default function TellMitraContainer() {
   const [composerPlaceholder, setComposerPlaceholder] = useState(() => t('tellMitraInput.placeholder'));
   const scrollViewRef = useRef<any>(null);
   const composerInputRef = useRef<TextInput>(null);
+  // Anchor-on-send: when the user sends, we pin THEIR message to the top of the
+  // thread (instead of jumping to the very bottom). We capture the scroll
+  // content height at send time (= where the new message starts) and scroll
+  // there once the new content lays out.
+  const contentHeightRef = useRef(0);
+  const anchorOffsetRef = useRef(0);
+  const pendingAnchorRef = useRef(false);
+  const prepareSendAnchor = useCallback(() => {
+    // First message replaces the empty state (starts at y=0); otherwise the new
+    // message starts at the current bottom of the existing content.
+    anchorOffsetRef.current = conversation.length === 0 ? 0 : contentHeightRef.current;
+    pendingAnchorRef.current = true;
+  }, [conversation.length]);
+  const handleThreadContentSizeChange = useCallback((_w: number, h: number) => {
+    contentHeightRef.current = h;
+    if (pendingAnchorRef.current) {
+      pendingAnchorRef.current = false;
+      scrollViewRef.current?.scrollTo({ y: anchorOffsetRef.current, animated: true });
+    }
+  }, []);
   const pendingTellMitraReturnRef = useRef<{
     room_id: string; room_label: string;
     return_key: string;
@@ -464,7 +485,9 @@ export default function TellMitraContainer() {
         }
       }
       setConversation(prev => [...prev.filter(i => i.id !== loadingId), ...newItems]);
-      setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
+      // Dismiss the keyboard so the reply is fully visible and reads top-down
+      // (the thread stays anchored to where the user's message began).
+      Keyboard.dismiss();
     } catch {
       setConversation(prev => [
         ...prev.filter(i => i.id !== loadingId),
@@ -518,6 +541,7 @@ export default function TellMitraContainer() {
       label: opt.label, value: opt.value,
       created_at: new Date().toISOString(),
     };
+    prepareSendAnchor();
     setConversation(prev => [...prev, userChip]);
     const mappedText = CHIP_SUBMIT_TEXT[opt.value];
     const sourceSurface = isReturnCard ? 'room_return_chip' : 'tell_mitra_followup_chip';
@@ -552,6 +576,7 @@ export default function TellMitraContainer() {
     const apiText = value === 'calm_now'
       ? 'Just help me calm down'
       : (CHIP_SUBMIT_TEXT[value] ?? label);
+    prepareSendAnchor();
     setConversation(prev => [...prev, { id: genId(), type: 'user_message', text: label, created_at: new Date().toISOString() }]);
     void submitThread(apiText, 'tell_mitra_quick_start');
   };
@@ -607,10 +632,12 @@ export default function TellMitraContainer() {
           scrollRef={scrollViewRef}
           onDraftChange={t => { setThreadDraft(t.slice(0, MAX_CHARS)); if (errorMsg) setErrorMsg(''); }}
           onSubmit={input => {
+            prepareSendAnchor();
             setConversation(prev => [...prev, { id: genId(), type: 'user_message', text: input, created_at: new Date().toISOString() }]);
             setThreadDraft('');
             void submitThread(input, 'tell_mitra_door');
           }}
+          onContentSizeChange={handleThreadContentSizeChange}
           onChipClick={handleChipClickThread}
           onEnterRoom={handleEnterRoomThread}
           onTellMitraMore={handleTellMitraMoreThread}

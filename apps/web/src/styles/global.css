@@ -865,3 +865,9 @@ button {
     transform: translateY(0);
   }
 }
+
+@keyframes kalpx-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

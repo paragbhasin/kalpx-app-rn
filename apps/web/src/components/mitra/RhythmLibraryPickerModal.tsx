@@ -174,9 +174,13 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
                 fontSize: 16,
                 color: "#7D5408",
                 padding: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
               }}
             >
-              ‹ {t("mitra.rhythmSetup.libraryModal.title")}
+              <span style={{ fontSize: 30, lineHeight: 1 }}>‹</span>
+              {t("mitra.rhythmSetup.libraryModal.title")}
             </button>
           ) : (
             <span style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 18, color: "#432104" }}>
@@ -216,12 +220,8 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
             {renderDetailSection(t("mitra.rhythmSetup.libraryModal.meaning"), detailItem.meaning)}
             {renderDetailSection(t("mitra.rhythmSetup.libraryModal.essence"), detailItem.essence)}
             {renderDetailSection(t("mitra.rhythmSetup.libraryModal.about"), detailItem.subtitle ?? detailItem.description)}
-            {(detailItem.deity || detailItem.tradition) && (
-              <div style={{ display: "flex", gap: 28, marginTop: 18, flexWrap: "wrap" }}>
-                {renderDetailSection(t("mitra.rhythmSetup.libraryModal.deity"), detailItem.deity)}
-                {renderDetailSection(t("mitra.rhythmSetup.libraryModal.tradition"), detailItem.tradition)}
-              </div>
-            )}
+            {renderDetailSection(t("mitra.rhythmSetup.libraryModal.deity"), detailItem.deity)}
+            {renderDetailSection(t("mitra.rhythmSetup.libraryModal.tradition"), detailItem.tradition)}
             {detailItem.tags && detailItem.tags.length > 0 && (
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 18 }}>
                 {detailItem.tags.map((tag) => (
@@ -308,6 +308,21 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
               </button>
             </div>
 
+            {searching && (
+              <div style={{ display: "flex", justifyContent: "center", padding: "36px 0" }}>
+                <div
+                  style={{
+                    width: 30,
+                    height: 30,
+                    border: "3px solid rgba(201,168,76,0.25)",
+                    borderTopColor: "#C99317",
+                    borderRadius: "50%",
+                    animation: "kalpx-spin 0.8s linear infinite",
+                  }}
+                />
+              </div>
+            )}
+
             {results.length === 0 && !searching && (
               <p style={{ color: "#A08060", textAlign: "center", fontSize: 14 }}>
                 {query.trim()
@@ -316,7 +331,7 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
               </p>
             )}
 
-            {results.map((item) => (
+            {!searching && results.map((item) => (
               <div
                 key={item.itemId ?? item.item_id}
                 onClick={() => setDetailItem(item)}

@@ -1210,11 +1210,7 @@ export function QuickResetPage() {
                   flexShrink: 0,
                 }}
               >
-                {action === "change_mantra" ? (
-                  <RotateCw size={20} strokeWidth={1.8} />
-                ) : (
-                  <SlidersHorizontal size={20} strokeWidth={1.8} />
-                )}
+                <SlidersHorizontal size={20} strokeWidth={1.8} />
               </span>
               <span
                 style={{

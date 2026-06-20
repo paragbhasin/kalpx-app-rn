@@ -28,6 +28,7 @@ import { useDispatch, useSelector } from "react-redux";
 import LibrarySearchModal, {
   type LibrarySearchItem,
 } from "../../components/LibrarySearchModal";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   getLiveActivityState,
   mitraJourneyHomeV3,
@@ -286,10 +287,16 @@ export default function RhythmHomeScreen({
           }
         })
         .catch(() => {});
-      // Start Sankalp Live Activity while this screen is in foreground
-      getLiveActivityState(i18n.language || 'en').then((state) => {
+      // No preference → default (start sankalp if type matches).
+      // Preference exists → only start if it matches.
+      Promise.all([
+        getLiveActivityState(i18n.language || 'en'),
+        AsyncStorage.getItem('kalpx:preferred_la'),
+      ]).then(([state, preferredRaw]) => {
         if (AppState.currentState !== 'active') return;
-        if (state.type === 'sankalp') {
+        const pref = preferredRaw ? JSON.parse(preferredRaw) : null;
+        if (state.type !== 'sankalp') return;
+        if (!pref || (pref.type === 'sankalp' && pref.name === state.title)) {
           liveActivity.startSankalp(state.title, state.line);
         }
       }).catch(() => {});

@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import {
   getQuickResetActionLabel,
@@ -309,6 +310,13 @@ export default function QuickResetScreen({
     useState(false);
 
   const runnerStartedAt = useRef<number>(0);
+  const preferredLARef = useRef<{ type: string; name: string } | null>(null);
+
+  useEffect(() => {
+    AsyncStorage.getItem('kalpx:preferred_la').then(raw => {
+      preferredLARef.current = raw ? JSON.parse(raw) : null;
+    }).catch(() => { preferredLARef.current = null; });
+  }, []);
   const ringSpin = useRef(new Animated.Value(0)).current;
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
@@ -470,10 +478,14 @@ export default function QuickResetScreen({
     if (!isChantingActive) {
       runnerStartedAt.current = Date.now();
       setIsChantingActive(true);
-      liveActivity.startReset(
-        activeMantra.title,
-        activeMantra.devanagari ?? "",
-      );
+      const pref = preferredLARef.current;
+      const canStart = pref === null || (pref.type === 'mantra' && pref.name === activeMantra.title);
+      if (canStart) {
+        liveActivity.startReset(
+          activeMantra.title,
+          activeMantra.devanagari ?? "",
+        );
+      }
     }
     japaEngine.increment();
   }, [activeMantra, isChantingActive, japaEngine]);
@@ -491,9 +503,13 @@ export default function QuickResetScreen({
     if (isChantingActive) {
       liveActivity.endReset();
       setTimeout(async () => {
-        const state = await getLiveActivityState(i18n.language || 'en').catch(() => ({ type: 'none' as const }));
-        if (AppState.currentState === 'active' && state.type === 'sankalp') {
-          liveActivity.startSankalp(state.title, state.line);
+        const [state, preferredRaw] = await Promise.all([
+          getLiveActivityState(i18n.language || 'en').catch(() => ({ type: 'none' as const })),
+          AsyncStorage.getItem('kalpx:preferred_la').catch(() => null),
+        ]);
+        const pref = preferredRaw ? JSON.parse(preferredRaw as string) : null;
+        if (AppState.currentState === 'active' && state.type === 'sankalp' && pref && pref.type === 'sankalp' && pref.name === (state as any).title) {
+          liveActivity.startSankalp((state as any).title, (state as any).line);
         }
       }, 2_000);
     } else {

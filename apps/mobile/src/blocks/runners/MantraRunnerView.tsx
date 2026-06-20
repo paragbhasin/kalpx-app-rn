@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, {
   useCallback,
   useEffect,
@@ -233,9 +234,16 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   const onCompleteRef = useRef(onComplete);
   const isLAActiveRef = useRef(false);
   const laCompleteCalledRef = useRef(false);
+  const preferredLARef = useRef<{ type: string; name: string } | null>(null);
   useEffect(() => {
     onCompleteRef.current = onComplete;
   }, [onComplete]);
+
+  useEffect(() => {
+    AsyncStorage.getItem('kalpx:preferred_la').then(raw => {
+      preferredLARef.current = raw ? JSON.parse(raw) : null;
+    }).catch(() => { preferredLARef.current = null; });
+  }, []);
 
   // Reset LA tracking on new session
   useEffect(() => {
@@ -349,13 +357,17 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
       const elapsedSec  = Math.floor(japaEngine.elapsedMs / 1000);
       if (!isLAActiveRef.current) {
         if (AppState.currentState === 'active') {
-          isLAActiveRef.current = true;
-          liveActivity.start(
-            item.title ?? '',
-            item.devanagari ?? '',
-            curToday, curWeek, curLifetime, curLifetime, elapsedSec,
-            deepLinkFromSurface(sourceSurface),
-          );
+          const pref = preferredLARef.current;
+          const canStart = pref === null || (pref.type === 'mantra' && pref.name === (item.title ?? ''));
+          if (canStart) {
+            isLAActiveRef.current = true;
+            liveActivity.start(
+              item.title ?? '',
+              item.devanagari ?? '',
+              curToday, curWeek, curLifetime, curLifetime, elapsedSec,
+              deepLinkFromSurface(sourceSurface),
+            );
+          }
         }
       } else {
         liveActivity.update(curToday, curWeek, curLifetime, curLifetime, elapsedSec);
@@ -382,42 +394,60 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
       : "";
 
   return (
-    <ScrollView
-      style={styles.scroll}
-      contentContainerStyle={[styles.scrollContent, isTablet && { paddingHorizontal: 40 }]}
-      showsVerticalScrollIndicator={false}
-    >
-      {isDevMode && (
-        <TouchableOpacity
-          testID="test_runner_force_complete"
-          accessibilityLabel="test_runner_force_complete"
-          accessible={true}
-          accessibilityRole="button"
-          onPress={() => {
-            if (isCompletingRef.current) return;
-            isCompletingRef.current = true;
-            const durationSec = Math.round(
-              (Date.now() - sessionStartTimeRef.current) / 1000,
+    <View style={styles.container}>
+      {!isViewOnly && (
+        <LiveActivityPreferenceBanner
+          experienceType="mantra"
+          experienceName={item.title ?? ''}
+          onActivate={() => {
+            if (!isLAActiveRef.current) {
+              isLAActiveRef.current = true;
+            }
+            liveActivity.start(
+              item.title ?? '',
+              item.devanagari ?? '',
+              japaEngine.todayCount,
+              japaEngine.weekCount,
+              japaEngine.lifetimeCount,
+              japaEngine.lifetimeCount,
+              Math.floor(japaEngine.elapsedMs / 1000),
+              deepLinkFromSurface(sourceSurface),
             );
-            onComplete(selectedTarget, durationSec);
           }}
-          style={{
-            position: "absolute",
-            top: 60,
-            right: 4,
-            width: 24,
-            height: 24,
-            opacity: 0.01,
-            zIndex: 9999,
-          }}
-        >
-          <View style={{ width: 24, height: 24 }} />
-        </TouchableOpacity>
+        />
       )}
-
-      {!isViewOnly && !isCommunityRunner && (
-        <LiveActivityPreferenceBanner experienceType="mantra" experienceName={item.title ?? ''} />
-      )}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[styles.scrollContent, isTablet && { paddingHorizontal: 40 }]}
+        showsVerticalScrollIndicator={false}
+      >
+        {isDevMode && (
+          <TouchableOpacity
+            testID="test_runner_force_complete"
+            accessibilityLabel="test_runner_force_complete"
+            accessible={true}
+            accessibilityRole="button"
+            onPress={() => {
+              if (isCompletingRef.current) return;
+              isCompletingRef.current = true;
+              const durationSec = Math.round(
+                (Date.now() - sessionStartTimeRef.current) / 1000,
+              );
+              onComplete(selectedTarget, durationSec);
+            }}
+            style={{
+              position: "absolute",
+              top: 60,
+              right: 4,
+              width: 24,
+              height: 24,
+              opacity: 0.01,
+              zIndex: 9999,
+            }}
+          >
+            <View style={{ width: 24, height: 24 }} />
+          </TouchableOpacity>
+        )}
 
       <View style={[styles.combinedMantraFlow, isTablet && { maxWidth: 640, alignSelf: 'center' }]}>
         <Text style={[styles.mantraTitle, { marginBottom: 12 }]}>
@@ -639,11 +669,15 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
           <Text style={styles.backLinkText}>{t("quickReset.back")}</Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   scroll: {
     flex: 1,
     backgroundColor: "transparent",

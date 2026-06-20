@@ -1,6 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Slider from "@react-native-community/slider";
 import { Audio } from "expo-av";
+import { LiveActivityPreferenceBanner } from "../../components/LiveActivityPreferenceBanner";
+import { liveActivity } from "../../native/liveActivity";
 import { Minus, Plus, RefreshCw } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -332,11 +334,24 @@ const CommunityPracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
   };
 
   return (
-    <ScrollView
-      style={styles.scroll}
-      contentContainerStyle={[styles.scrollContent, isTablet && { paddingHorizontal: 40 }]}
-      showsVerticalScrollIndicator={false}
-    >
+    <View style={styles.container}>
+      {!isViewOnly && (
+        <LiveActivityPreferenceBanner
+          experienceType="practice"
+          experienceName={item.title ?? ''}
+          onActivate={() => {
+            liveActivity.startSankalp(
+              item.title ?? '',
+              item.subtitle ?? item.line ?? item.summary ?? '',
+            );
+          }}
+        />
+      )}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[styles.scrollContent, isTablet && { paddingHorizontal: 40 }]}
+        showsVerticalScrollIndicator={false}
+      >
       {isDevMode && (
         <TouchableOpacity
           testID="test_runner_force_complete"
@@ -579,10 +594,14 @@ const CommunityPracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
         </TouchableOpacity>
       </View>
     </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   scroll: {
     flex: 1,
     backgroundColor: "transparent",

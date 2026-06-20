@@ -1,4 +1,6 @@
 import { Audio } from "expo-av";
+import { LiveActivityPreferenceBanner } from "../../components/LiveActivityPreferenceBanner";
+import { liveActivity } from "../../native/liveActivity";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -261,11 +263,21 @@ const CommunitySankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
   };
 
   return (
-    <ScrollView
-      style={styles.scroll}
-      contentContainerStyle={[styles.scrollContent, isTablet && { paddingHorizontal: 40 }]}
-      showsVerticalScrollIndicator={false}
-    >
+    <View style={styles.container}>
+      {!isViewOnly && (
+        <LiveActivityPreferenceBanner
+          experienceType="sankalp"
+          experienceName={item.title ?? ''}
+          onActivate={() => {
+            liveActivity.startSankalp(item.title ?? '', item.line ?? item.subtitle ?? '');
+          }}
+        />
+      )}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[styles.scrollContent, isTablet && { paddingHorizontal: 40 }]}
+        showsVerticalScrollIndicator={false}
+      >
       {isDevMode && (
         <TouchableOpacity
           testID="test_runner_force_complete"
@@ -416,10 +428,14 @@ const CommunitySankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
         </TouchableOpacity>
       </View>
     </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   scroll: {
     flex: 1,
     backgroundColor: "transparent",

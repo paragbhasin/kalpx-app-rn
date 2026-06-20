@@ -211,39 +211,37 @@ export default function Home() {
   const isLandingHome =
     !hasPartialState && !(isLoggedIn && checkingJourney) && !mitraJourneyId;
 
-  // Auto-start Live Activity on home focus: Quick Chant > Inner Path > Rhythm > Sankalp
+  // Auto-start Live Activity on home focus.
+  // No preference → default behavior (all types auto-start as before).
+  // Preference set → only the matching experience starts; everything else suppressed.
   useFocusEffect(
     React.useCallback(() => {
-      getLiveActivityState(i18n.language || 'en').then((state) => {
-        if (AppState.currentState !== 'active') return; // app went to background while fetching
-        if (state.type === 'quick_chant') {
-          liveActivity.start(
-            state.mantra_name,
-            state.devanagari,
-            state.today_count,
-            state.week_count,
-            state.lifetime_count,
-            state.lifetime_count,
-          );
-        } else if (state.type === 'inner_path') {
-          liveActivity.startInnerPath(
-            state.day_number,
-            state.total_days,
-            state.mantra_title,
-            state.mantra_devanagari,
-            state.sankalp_title,
-            state.practice_title,
-          );
-        } else if (state.type === 'rhythm') {
-          liveActivity.startRhythm(
-            state.band,
-            state.band_label,
-            state.anchor_title,
-            state.anchor_type,
-            state.anchor_devanagari,
-          );
-        } else if (state.type === 'sankalp') {
-          liveActivity.startSankalp(state.title, state.line);
+      Promise.all([
+        getLiveActivityState(i18n.language || 'en'),
+        AsyncStorage.getItem('kalpx:preferred_la'),
+      ]).then(([state, preferredRaw]) => {
+        if (AppState.currentState !== 'active') return;
+        const pref = preferredRaw ? JSON.parse(preferredRaw) : null;
+
+        if (!pref) {
+          // No preference: full default auto-start
+          if (state.type === 'quick_chant') {
+            liveActivity.start(state.mantra_name, state.devanagari, state.today_count, state.week_count, state.lifetime_count, state.lifetime_count);
+          } else if (state.type === 'inner_path') {
+            liveActivity.startInnerPath(state.day_number, state.total_days, state.mantra_title, state.mantra_devanagari, state.sankalp_title, state.practice_title);
+          } else if (state.type === 'rhythm') {
+            liveActivity.startRhythm(state.band, state.band_label, state.anchor_title, state.anchor_type, state.anchor_devanagari);
+          } else if (state.type === 'sankalp') {
+            liveActivity.startSankalp(state.title, state.line);
+          }
+        } else {
+          // Preference exists: only start the matching one, suppress everything else
+          if (state.type === 'quick_chant' && pref.type === 'mantra' && pref.name === state.mantra_name) {
+            liveActivity.start(state.mantra_name, state.devanagari, state.today_count, state.week_count, state.lifetime_count, state.lifetime_count);
+          } else if (state.type === 'sankalp' && pref.type === 'sankalp' && pref.name === state.title) {
+            liveActivity.startSankalp(state.title, state.line);
+          }
+          // inner_path + rhythm: suppressed when user has an explicit preference
         }
       }).catch(() => {});
     }, []),
@@ -253,36 +251,29 @@ export default function Home() {
   useEffect(() => {
     const sub = AppState.addEventListener('change', (nextState: AppStateStatus) => {
       if (nextState !== 'active') return;
-      getLiveActivityState(i18n.language || 'en').then((state) => {
+      Promise.all([
+        getLiveActivityState(i18n.language || 'en'),
+        AsyncStorage.getItem('kalpx:preferred_la'),
+      ]).then(([state, preferredRaw]) => {
         if (AppState.currentState !== 'active') return;
-        if (state.type === 'quick_chant') {
-          liveActivity.start(
-            state.mantra_name,
-            state.devanagari,
-            state.today_count,
-            state.week_count,
-            state.lifetime_count,
-            state.lifetime_count,
-          );
-        } else if (state.type === 'inner_path') {
-          liveActivity.startInnerPath(
-            state.day_number,
-            state.total_days,
-            state.mantra_title,
-            state.mantra_devanagari,
-            state.sankalp_title,
-            state.practice_title,
-          );
-        } else if (state.type === 'rhythm') {
-          liveActivity.startRhythm(
-            state.band,
-            state.band_label,
-            state.anchor_title,
-            state.anchor_type,
-            state.anchor_devanagari,
-          );
-        } else if (state.type === 'sankalp') {
-          liveActivity.startSankalp(state.title, state.line);
+        const pref = preferredRaw ? JSON.parse(preferredRaw) : null;
+
+        if (!pref) {
+          if (state.type === 'quick_chant') {
+            liveActivity.start(state.mantra_name, state.devanagari, state.today_count, state.week_count, state.lifetime_count, state.lifetime_count);
+          } else if (state.type === 'inner_path') {
+            liveActivity.startInnerPath(state.day_number, state.total_days, state.mantra_title, state.mantra_devanagari, state.sankalp_title, state.practice_title);
+          } else if (state.type === 'rhythm') {
+            liveActivity.startRhythm(state.band, state.band_label, state.anchor_title, state.anchor_type, state.anchor_devanagari);
+          } else if (state.type === 'sankalp') {
+            liveActivity.startSankalp(state.title, state.line);
+          }
+        } else {
+          if (state.type === 'quick_chant' && pref.type === 'mantra' && pref.name === state.mantra_name) {
+            liveActivity.start(state.mantra_name, state.devanagari, state.today_count, state.week_count, state.lifetime_count, state.lifetime_count);
+          } else if (state.type === 'sankalp' && pref.type === 'sankalp' && pref.name === state.title) {
+            liveActivity.startSankalp(state.title, state.line);
+          }
         }
       }).catch(() => {});
     });

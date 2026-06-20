@@ -1,6 +1,8 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio } from "expo-av";
 import React, { useEffect, useRef, useState } from "react";
 import { LiveActivityPreferenceBanner } from "../../components/LiveActivityPreferenceBanner";
+import { liveActivity } from "../../native/liveActivity";
 import { useTranslation } from "react-i18next";
 import {
   Image,
@@ -151,6 +153,13 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
   const sankalpSpinLoopRef = useRef<RNAnimated.CompositeAnimation | null>(null);
   const sessionStartTimeRef = useRef(Date.now());
   const isCompletingRef = useRef(false);
+  const preferredLARef = useRef<{ type: string; name: string } | null | undefined>(undefined);
+
+  useEffect(() => {
+    AsyncStorage.getItem('kalpx:preferred_la').then(raw => {
+      preferredLARef.current = raw ? JSON.parse(raw) : null;
+    }).catch(() => { preferredLARef.current = null; });
+  }, []);
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
 
@@ -262,49 +271,55 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
   };
 
   return (
-    <ScrollView
-      style={styles.scroll}
-      contentContainerStyle={[styles.scrollContent, isTablet && { paddingHorizontal: 40 }]}
-      showsVerticalScrollIndicator={false}
-    >
-      {isDevMode && (
-        <TouchableOpacity
-          testID="test_runner_force_complete"
-          accessibilityLabel="test_runner_force_complete"
-          accessible={true}
-          accessibilityRole="button"
-          onPress={() => {
-            if (isCompletingRef.current) return;
-            isCompletingRef.current = true;
-            sankalpSpinLoopRef.current?.stop();
-            sankalpSpin.setValue(0);
-            if (sankalpOmRef.current) {
-              sankalpOmRef.current.unloadAsync().catch(() => {});
-              sankalpOmRef.current = null;
-            }
-            setIsSankalpActivating(false);
-            const durationSec = Math.round(
-              (Date.now() - sessionStartTimeRef.current) / 1000,
-            );
-            onComplete(durationSec);
+    <View style={styles.container}>
+      {!isViewOnly && (
+        <LiveActivityPreferenceBanner
+          experienceType="sankalp"
+          experienceName={item.title ?? ''}
+          onActivate={() => {
+            liveActivity.startSankalp(item.title ?? '', item.line ?? item.subtitle ?? '');
           }}
-          style={{
-            position: "absolute",
-            top: 60,
-            right: 4,
-            width: 24,
-            height: 24,
-            opacity: 0.01,
-            zIndex: 9999,
-          }}
-        >
-          <View style={{ width: 24, height: 24 }} />
-        </TouchableOpacity>
+        />
       )}
-
-      {!isViewOnly && !isCommunityRunner && (
-        <LiveActivityPreferenceBanner experienceType="sankalp" experienceName={item.title ?? ''} />
-      )}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[styles.scrollContent, isTablet && { paddingHorizontal: 40 }]}
+        showsVerticalScrollIndicator={false}
+      >
+        {isDevMode && (
+          <TouchableOpacity
+            testID="test_runner_force_complete"
+            accessibilityLabel="test_runner_force_complete"
+            accessible={true}
+            accessibilityRole="button"
+            onPress={() => {
+              if (isCompletingRef.current) return;
+              isCompletingRef.current = true;
+              sankalpSpinLoopRef.current?.stop();
+              sankalpSpin.setValue(0);
+              if (sankalpOmRef.current) {
+                sankalpOmRef.current.unloadAsync().catch(() => {});
+                sankalpOmRef.current = null;
+              }
+              setIsSankalpActivating(false);
+              const durationSec = Math.round(
+                (Date.now() - sessionStartTimeRef.current) / 1000,
+              );
+              onComplete(durationSec);
+            }}
+            style={{
+              position: "absolute",
+              top: 60,
+              right: 4,
+              width: 24,
+              height: 24,
+              opacity: 0.01,
+              zIndex: 9999,
+            }}
+          >
+            <View style={{ width: 24, height: 24 }} />
+          </TouchableOpacity>
+        )}
 
       <View style={[styles.combinedSankalpFlow, isTablet && { maxWidth: 640, alignSelf: 'center' }]}>
         <View style={styles.mantraInfoCard}>
@@ -420,11 +435,15 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
           <Text style={styles.backLinkText}>{t("sankalpRunner.back")}</Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   scroll: {
     flex: 1,
     backgroundColor: "transparent",

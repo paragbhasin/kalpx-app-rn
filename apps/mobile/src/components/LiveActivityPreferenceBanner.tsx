@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -11,9 +12,9 @@ import {
 } from 'react-native';
 import { Colors } from '../theme/colors';
 import { Fonts } from '../theme/fonts';
+import { useToast } from '../context/ToastContext';
 
 const PREFERRED_LA_KEY = 'kalpx:preferred_la';
-const BANNER_DISMISSED_PREFIX = 'kalpx:la_banner_dismissed:';
 
 export type LiveActivityType = 'mantra' | 'sankalp' | 'practice';
 
@@ -25,28 +26,26 @@ interface PreferredLA {
 interface Props {
   experienceType: LiveActivityType;
   experienceName: string;
+  onActivate?: () => void;
 }
 
-export function LiveActivityPreferenceBanner({ experienceType, experienceName }: Props) {
+export function LiveActivityPreferenceBanner({ experienceType, experienceName, onActivate }: Props) {
   const [visible, setVisible] = useState(false);
   const [conflictModal, setConflictModal] = useState(false);
   const [currentLA, setCurrentLA] = useState<PreferredLA | null>(null);
   const [conflictChoice, setConflictChoice] = useState<'keep' | 'switch'>('keep');
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const { showToast } = useToast();
 
   const experienceKey = `${experienceType}:${experienceName}`;
-  const dismissedKey = `${BANNER_DISMISSED_PREFIX}${experienceKey}`;
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const [dismissed, preferredRaw] = await Promise.all([
-        AsyncStorage.getItem(dismissedKey),
-        AsyncStorage.getItem(PREFERRED_LA_KEY),
-      ]);
+      const preferredRaw = await AsyncStorage.getItem(PREFERRED_LA_KEY);
       if (cancelled) return;
-      if (dismissed) return;
       const pref: PreferredLA | null = preferredRaw ? JSON.parse(preferredRaw) : null;
+      // Don't show banner if this experience is already the preferred LA
       if (pref && pref.type === experienceType && pref.name === experienceName) return;
       setCurrentLA(pref);
       setVisible(true);
@@ -56,25 +55,26 @@ export function LiveActivityPreferenceBanner({ experienceType, experienceName }:
   }, [experienceKey]);
 
   const dismiss = () => {
-    AsyncStorage.setItem(dismissedKey, '1').catch(() => {});
     Animated.timing(fadeAnim, { toValue: 0, duration: 200, useNativeDriver: true }).start(() => {
       setVisible(false);
     });
   };
 
   const handleYes = () => {
-    if (currentLA) {
-      setConflictChoice('keep');
-      setConflictModal(true);
-    } else {
-      AsyncStorage.setItem(PREFERRED_LA_KEY, JSON.stringify({ type: experienceType, name: experienceName })).catch(() => {});
-      dismiss();
-    }
+    setConflictChoice('switch');
+    setConflictModal(true);
   };
 
   const handleConflictConfirm = () => {
     if (conflictChoice === 'switch') {
       AsyncStorage.setItem(PREFERRED_LA_KEY, JSON.stringify({ type: experienceType, name: experienceName })).catch(() => {});
+      onActivate?.();
+      showToast(
+        currentLA ? 'Live Activity Switched!' : 'Live Activity Added!',
+        3500,
+        'la_added',
+        'Lock your screen to see it',
+      );
     }
     setConflictModal(false);
     dismiss();
@@ -85,19 +85,32 @@ export function LiveActivityPreferenceBanner({ experienceType, experienceName }:
   return (
     <>
       <Animated.View style={[styles.banner, { opacity: fadeAnim }]}>
-        <View style={styles.row}>
-          <Text style={styles.icon}>🔒</Text>
-          <Text style={styles.text} numberOfLines={1}>
-            Make this your Live Activity?
-          </Text>
+        {/* Row 1: icon + text + close */}
+        <View style={styles.topRow}>
+          <View style={styles.iconBox}>
+            <Ionicons name="lock-closed" size={18} color={Colors.gold} />
+          </View>
+          <View style={styles.textBlock}>
+            <Text style={styles.title}>
+              Do you want to add this as your{' '}
+              <Text style={styles.titleHighlight}>Live Activity</Text>?
+            </Text>
+            <Text style={styles.subtitle}>
+              Stay connected to your practice on your lock screen.
+            </Text>
+          </View>
+          <TouchableOpacity onPress={dismiss} style={styles.closeBtn} hitSlop={10}>
+            <Text style={styles.closeText}>×</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Row 2: action buttons right-aligned */}
+        <View style={styles.bottomRow}>
           <TouchableOpacity onPress={dismiss} style={styles.notNowBtn} hitSlop={8}>
             <Text style={styles.notNowText}>Not Now</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={handleYes} style={styles.yesBtn} hitSlop={8}>
             <Text style={styles.yesText}>Yes, Add</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={dismiss} style={styles.closeBtn} hitSlop={10}>
-            <Text style={styles.closeText}>✕</Text>
           </TouchableOpacity>
         </View>
       </Animated.View>
@@ -106,53 +119,70 @@ export function LiveActivityPreferenceBanner({ experienceType, experienceName }:
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <View style={styles.modalIconWrap}>
-              <Text style={styles.modalIcon}>⚠</Text>
-            </View>
-            <Text style={styles.modalTitle}>
-              You already have a preferred{'\n'}Live Activity selected.
-            </Text>
-
-            <Text style={styles.modalLabel}>Current</Text>
-            <View style={styles.modalNameCard}>
-              <Text style={styles.modalNameText}>{currentLA?.name ?? ''}</Text>
+              <Ionicons name="phone-portrait-outline" size={28} color={Colors.gold} />
             </View>
 
-            <Text style={styles.modalLabel}>New</Text>
-            <View style={styles.modalNameCard}>
-              <Text style={styles.modalNameText}>{experienceName}</Text>
-            </View>
+            {currentLA ? (
+              <>
+                <Text style={styles.modalTitle}>
+                  You already have a preferred{'\n'}Live Activity selected.
+                </Text>
 
-            <Text style={styles.modalQuestion}>
-              Which would you like to display on your lock screen?
-            </Text>
+                <Text style={styles.modalLabel}>Current</Text>
+                <View style={styles.modalNameCard}>
+                  <Text style={styles.modalNameText}>{currentLA.name}</Text>
+                </View>
 
-            <TouchableOpacity
-              style={[styles.radioRow, conflictChoice === 'keep' && styles.radioRowSelected]}
-              onPress={() => setConflictChoice('keep')}
-              activeOpacity={0.8}
-            >
-              <View style={styles.radioOuter}>
-                {conflictChoice === 'keep' && <View style={styles.radioInner} />}
-              </View>
-              <View style={styles.radioTextBlock}>
-                <Text style={styles.radioTitle}>Keep Current</Text>
-                <Text style={styles.radioSub} numberOfLines={1}>{currentLA?.name ?? ''}</Text>
-              </View>
-            </TouchableOpacity>
+                <Text style={styles.modalLabel}>New</Text>
+                <View style={styles.modalNameCard}>
+                  <Text style={styles.modalNameText}>{experienceName}</Text>
+                </View>
 
-            <TouchableOpacity
-              style={[styles.radioRow, conflictChoice === 'switch' && styles.radioRowSelected]}
-              onPress={() => setConflictChoice('switch')}
-              activeOpacity={0.8}
-            >
-              <View style={styles.radioOuter}>
-                {conflictChoice === 'switch' && <View style={styles.radioInner} />}
-              </View>
-              <View style={styles.radioTextBlock}>
-                <Text style={styles.radioTitle}>Switch to New</Text>
-                <Text style={styles.radioSub} numberOfLines={1}>{experienceName}</Text>
-              </View>
-            </TouchableOpacity>
+                <Text style={styles.modalQuestion}>
+                  Which would you like to display on your lock screen?
+                </Text>
+
+                <TouchableOpacity
+                  style={[styles.radioRow, conflictChoice === 'keep' && styles.radioRowSelected]}
+                  onPress={() => setConflictChoice('keep')}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.radioOuter}>
+                    {conflictChoice === 'keep' && <View style={styles.radioInner} />}
+                  </View>
+                  <View style={styles.radioTextBlock}>
+                    <Text style={styles.radioTitle}>Keep Current</Text>
+                    <Text style={styles.radioSub} numberOfLines={1}>{currentLA.name}</Text>
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.radioRow, conflictChoice === 'switch' && styles.radioRowSelected]}
+                  onPress={() => setConflictChoice('switch')}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.radioOuter}>
+                    {conflictChoice === 'switch' && <View style={styles.radioInner} />}
+                  </View>
+                  <View style={styles.radioTextBlock}>
+                    <Text style={styles.radioTitle}>Switch to New</Text>
+                    <Text style={styles.radioSub} numberOfLines={1}>{experienceName}</Text>
+                  </View>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <Text style={styles.modalTitle}>
+                  Add as your Live Activity?
+                </Text>
+                <View style={styles.modalNameCard}>
+                  <Text style={styles.modalNameText}>{experienceName}</Text>
+                </View>
+                <Text style={styles.modalQuestion}>
+                  This will show on your lock screen while you practice.
+                </Text>
+              </>
+            )}
 
             <View style={styles.modalActions}>
               <TouchableOpacity
@@ -167,7 +197,7 @@ export function LiveActivityPreferenceBanner({ experienceType, experienceName }:
                 onPress={handleConflictConfirm}
                 activeOpacity={0.8}
               >
-                <Text style={styles.confirmText}>Confirm</Text>
+                <Text style={styles.confirmText}>{currentLA ? 'Confirm' : 'Add'}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -179,65 +209,91 @@ export function LiveActivityPreferenceBanner({ experienceType, experienceName }:
 
 const styles = StyleSheet.create({
   banner: {
-    marginHorizontal: 16,
+    marginHorizontal: 10,
     marginTop: 8,
     marginBottom: 4,
-    backgroundColor: '#FDF8EE',
+    backgroundColor: '#FAF5E9',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E5D9B8',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+  },
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  iconBox: {
+    width: 40,
+    height: 40,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: Colors.goldHairline,
-    overflow: 'hidden',
-    justifyContent: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-  },
-  row: {
-    flexDirection: 'row',
+    borderColor: '#E5D9B8',
+    backgroundColor: '#FDF8EE',
     alignItems: 'center',
-  },
-  icon: {
-    fontSize: 13,
-    marginRight: 7,
+    justifyContent: 'center',
+    marginRight: 12,
     flexShrink: 0,
   },
-  text: {
+  textBlock: {
     flex: 1,
+  },
+  title: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 13,
+    color: '#3A1F06',
+    lineHeight: 18,
+  },
+  titleHighlight: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 13,
+    color: Colors.gold,
+  },
+  subtitle: {
     fontFamily: Fonts.sans.regular,
-    fontSize: 12,
-    color: '#432104',
+    fontSize: 11,
+    color: '#9B7E5C',
+    marginTop: 3,
+    lineHeight: 15,
+  },
+  closeBtn: {
+    paddingLeft: 10,
+    paddingTop: 1,
+    flexShrink: 0,
+  },
+  closeText: {
+    fontSize: 18,
+    color: '#B09870',
+    lineHeight: 20,
+  },
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 12,
   },
   notNowBtn: {
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: Colors.borderCream,
-    marginLeft: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#D4C5A0',
+    marginRight: 8,
   },
   notNowText: {
     fontFamily: Fonts.sans.medium,
-    fontSize: 11,
-    color: Colors.brownMuted,
+    fontSize: 13,
+    color: '#3A1F06',
   },
   yesBtn: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 8,
     backgroundColor: Colors.gold,
-    marginLeft: 6,
   },
   yesText: {
     fontFamily: Fonts.sans.semiBold,
-    fontSize: 11,
+    fontSize: 13,
     color: '#fff',
-  },
-  closeBtn: {
-    paddingVertical: 4,
-    paddingLeft: 8,
-  },
-  closeText: {
-    fontSize: 11,
-    color: Colors.brownMuted,
   },
 
   // Modal

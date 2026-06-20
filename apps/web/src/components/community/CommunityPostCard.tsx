@@ -27,12 +27,7 @@ import { fetchLibraryItem } from "../../engine/mitraApi";
 import { WEB_ENV } from "../../lib/env";
 import { webStorage } from "../../lib/webStorage";
 import { store } from "../../store";
-import { hasCompletedCommunityPractice } from "../../utils/communityRhythmOffer";
 import { CommunityReactionBar } from "./CommunityReactionBar";
-import {
-  RhythmSlotPickerModal,
-  type RhythmOffer,
-} from "./RhythmSlotPickerModal";
 import { CommunityReportModal } from "./CommunityReportModal";
 
 const COMMUNITY_BACKGROUNDS: Record<string, string> = {
@@ -364,7 +359,6 @@ export function CommunityPostCard({
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isLaunchingLinkedItem, setIsLaunchingLinkedItem] = useState(false);
   // Set when the user re-taps an already-completed community practice.
-  const [rhythmOffer, setRhythmOffer] = useState<RhythmOffer | null>(null);
   const [isDesktopViewport, setIsDesktopViewport] = useState(false);
   const [shareCount, setShareCount] = useState(Number(post.share_count ?? 0));
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -811,22 +805,6 @@ export function CommunityPostCard({
 
     const ok = await ensureAuthed();
     if (!ok) return;
-
-    // Already did this once → don't let them do it again; offer to add it to
-    // their Daily Rhythm instead.
-    if (await hasCompletedCommunityPractice(String(linkedItemId))) {
-      setRhythmOffer({
-        item_id: String(linkedItemId),
-        item_type: linkedItemType,
-        title: linkedItemTitle || post.linked_item?.name || "",
-        description:
-          (post.linked_item as any)?.summary ||
-          (post.linked_item as any)?.insight ||
-          (post.linked_item as any)?.short_text ||
-          null,
-      });
-      return;
-    }
 
     setIsLaunchingLinkedItem(true);
     try {
@@ -1619,10 +1597,6 @@ export function CommunityPostCard({
         </div>
       )}
 
-      <RhythmSlotPickerModal
-        offer={rhythmOffer}
-        onClose={() => setRhythmOffer(null)}
-      />
     </div>
   );
 }

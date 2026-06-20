@@ -763,7 +763,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     } else {
       updateBackground(require("../../assets/beige_bg.webp"));
     }
-    updateHeaderHidden(isCommunityRunner);
+    updateHeaderHidden(false);
 
     // Initialize runner fields for merged info flows so complete_runner can
     // attribute completions correctly even when we stay inside this container.

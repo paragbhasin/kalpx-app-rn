@@ -1,3 +1,5 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LiveActivityPreferenceBanner } from "../../components/LiveActivityPreferenceBanner";
 import React, {
   useCallback,
   useEffect,
@@ -232,9 +234,16 @@ const CommunityMantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   const onCompleteRef = useRef(onComplete);
   const isLAActiveRef = useRef(false);
   const laCompleteCalledRef = useRef(false);
+  const preferredLARef = useRef<{ type: string; name: string } | null>(null);
   useEffect(() => {
     onCompleteRef.current = onComplete;
   }, [onComplete]);
+
+  useEffect(() => {
+    AsyncStorage.getItem('kalpx:preferred_la').then(raw => {
+      preferredLARef.current = raw ? JSON.parse(raw) : null;
+    }).catch(() => { preferredLARef.current = null; });
+  }, []);
 
   // Reset LA tracking on new session
   useEffect(() => {
@@ -348,13 +357,17 @@ const CommunityMantraRunnerView: React.FC<MantraRunnerViewProps> = ({
       const elapsedSec  = Math.floor(japaEngine.elapsedMs / 1000);
       if (!isLAActiveRef.current) {
         if (AppState.currentState === 'active') {
-          isLAActiveRef.current = true;
-          liveActivity.start(
-            item.title ?? '',
-            item.devanagari ?? '',
-            curToday, curWeek, curLifetime, curLifetime, elapsedSec,
-            deepLinkFromSurface(sourceSurface),
-          );
+          const pref = preferredLARef.current;
+          const canStart = pref === null || (pref.type === 'mantra' && pref.name === (item.title ?? ''));
+          if (canStart) {
+            isLAActiveRef.current = true;
+            liveActivity.start(
+              item.title ?? '',
+              item.devanagari ?? '',
+              curToday, curWeek, curLifetime, curLifetime, elapsedSec,
+              deepLinkFromSurface(sourceSurface),
+            );
+          }
         }
       } else {
         liveActivity.update(curToday, curWeek, curLifetime, curLifetime, elapsedSec);
@@ -381,11 +394,33 @@ const CommunityMantraRunnerView: React.FC<MantraRunnerViewProps> = ({
       : "";
 
   return (
-    <ScrollView
-      style={styles.scroll}
-      contentContainerStyle={[styles.scrollContent, isTablet && { paddingHorizontal: 40 }]}
-      showsVerticalScrollIndicator={false}
-    >
+    <View style={styles.container}>
+      {!isViewOnly && (
+        <LiveActivityPreferenceBanner
+          experienceType="mantra"
+          experienceName={item.title ?? ''}
+          onActivate={() => {
+            if (!isLAActiveRef.current) {
+              isLAActiveRef.current = true;
+            }
+            liveActivity.start(
+              item.title ?? '',
+              item.devanagari ?? '',
+              japaEngine.todayCount,
+              japaEngine.weekCount,
+              japaEngine.lifetimeCount,
+              japaEngine.lifetimeCount,
+              Math.floor(japaEngine.elapsedMs / 1000),
+              deepLinkFromSurface(sourceSurface),
+            );
+          }}
+        />
+      )}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[styles.scrollContent, isTablet && { paddingHorizontal: 40 }]}
+        showsVerticalScrollIndicator={false}
+      >
       {isDevMode && (
         <TouchableOpacity
           testID="test_runner_force_complete"
@@ -635,10 +670,14 @@ const CommunityMantraRunnerView: React.FC<MantraRunnerViewProps> = ({
         </TouchableOpacity>
       </View>
     </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   scroll: {
     flex: 1,
     backgroundColor: "transparent",

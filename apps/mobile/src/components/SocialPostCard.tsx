@@ -22,10 +22,6 @@ import Carousel from "react-native-reanimated-carousel";
 import { useDispatch, useSelector } from "react-redux";
 import { executeAction } from "../engine/actionExecutor";
 import { mitraLibrarySearch } from "../engine/mitraApi";
-import RhythmSlotPickerModal, {
-  type RhythmOffer,
-} from "./RhythmSlotPickerModal";
-import { hasCompletedCommunityPractice } from "../utils/communityRhythmOffer";
 import {
   completeMantra,
   getPracticeStreaks,
@@ -328,7 +324,6 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
   const [selectedPracticeForPopup, setSelectedPracticeForPopup] =
     useState(null);
   // Set when the user re-taps an already-completed community practice.
-  const [rhythmOffer, setRhythmOffer] = useState<RhythmOffer | null>(null);
 
   // Per-slide aspect ratios from metadata
   const slideAspectRatios = useMemo(
@@ -503,22 +498,6 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
       async () => {
         const linkedItemId = post.linked_item?.id;
         if (!linkedItemId || !linkedItemType) return;
-
-        // Already did this once → don't let them do it again; offer to add it
-        // to their Daily Rhythm instead.
-        if (await hasCompletedCommunityPractice(String(linkedItemId))) {
-          setRhythmOffer({
-            item_id: String(linkedItemId),
-            item_type: linkedItemType,
-            title: translatedLinkedItemName || post.linked_item?.name || "",
-            description:
-              post.linked_item?.summary ||
-              post.linked_item?.insight ||
-              post.linked_item?.short_text ||
-              null,
-          });
-          return;
-        }
 
         let hydratedItem: any = null;
         try {
@@ -1427,10 +1406,6 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
         </SafeAreaView>
       </Modal>
 
-      <RhythmSlotPickerModal
-        offer={rhythmOffer}
-        onClose={() => setRhythmOffer(null)}
-      />
 
       {renderAllPopups()}
     </View>

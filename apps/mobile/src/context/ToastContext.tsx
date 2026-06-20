@@ -3,12 +3,13 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 export interface Toast {
     id: string;
     message: string;
+    subtitle?: string;
     timeout?: number;
-    type?: 'success' | 'error' | 'info';
+    type?: 'success' | 'error' | 'info' | 'la_added';
 }
 
 interface ToastContextType {
-    showToast: (message: string, timeout?: number, type?: Toast['type']) => void;
+    showToast: (message: string, timeout?: number, type?: Toast['type'], subtitle?: string) => void;
     toasts: Toast[];
     removeToast: (id: string) => void;
 }
@@ -22,7 +23,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setToasts((prev) => prev.filter((t) => t.id !== id));
     }, []);
 
-    const showToast = useCallback((message: string, timeout = 3000, type: Toast['type'] = 'info') => {
+    const showToast = useCallback((message: string, timeout = 3000, type: Toast['type'] = 'info', subtitle?: string) => {
         setToasts((prev) => {
             // Deduplicate: skip if same message already visible
             if (prev.some((t) => t.message === message)) return prev;
@@ -30,7 +31,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             if (timeout > 0) {
                 setTimeout(() => removeToast(id), timeout);
             }
-            return [...prev, { id, message, timeout, type }];
+            return [...prev, { id, message, subtitle, timeout, type }];
         });
     }, [removeToast]);
 

@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-nati
 import Animated, { FadeInUp, FadeOutUp, Layout } from 'react-native-reanimated';
 import { useToast, Toast } from '../context/ToastContext';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Fonts } from '../theme/fonts';
 
 const { width } = Dimensions.get('window');
 
@@ -19,6 +20,30 @@ const ToastHost: React.FC = () => {
 };
 
 const ToastItem: React.FC<{ toast: Toast; onRemove: () => void }> = ({ toast, onRemove }) => {
+    if (toast.type === 'la_added') {
+        return (
+            <Animated.View
+                entering={FadeInUp.springify().damping(14).stiffness(120)}
+                exiting={FadeOutUp.duration(200)}
+                layout={Layout.springify()}
+                style={styles.laToast}
+            >
+                <View style={styles.laIconBox}>
+                    <Ionicons name="lock-closed" size={20} color="#C9A84C" />
+                </View>
+                <View style={styles.laTextBlock}>
+                    <Text style={styles.laTitle}>{toast.message}</Text>
+                    {!!toast.subtitle && (
+                        <Text style={styles.laSubtitle}>{toast.subtitle}</Text>
+                    )}
+                </View>
+                <View style={styles.laCheckBox}>
+                    <Ionicons name="checkmark-circle" size={22} color="#C9A84C" />
+                </View>
+            </Animated.View>
+        );
+    }
+
     return (
         <Animated.View
             entering={FadeInUp}
@@ -76,13 +101,65 @@ const styles = StyleSheet.create({
         padding: 4,
     },
     info: {
-        backgroundColor: '#1F2937', // gray-800
+        backgroundColor: '#1F2937',
     },
     success: {
-        backgroundColor: '#10B981', // green-500
+        backgroundColor: '#10B981',
     },
     error: {
-        backgroundColor: '#EF4444', // red-500
+        backgroundColor: '#EF4444',
+    },
+
+    // LA Added toast
+    laToast: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#1C1007',
+        borderRadius: 18,
+        borderWidth: 1,
+        borderColor: '#6B4C1E',
+        paddingVertical: 14,
+        paddingHorizontal: 16,
+        marginBottom: 10,
+        width: '100%',
+        maxWidth: 400,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.4,
+        shadowRadius: 12,
+        elevation: 10,
+    },
+    laIconBox: {
+        width: 42,
+        height: 42,
+        borderRadius: 12,
+        backgroundColor: '#2E1A06',
+        borderWidth: 1,
+        borderColor: '#6B4C1E',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 12,
+        flexShrink: 0,
+    },
+    laTextBlock: {
+        flex: 1,
+    },
+    laTitle: {
+        fontFamily: Fonts.sans.semiBold,
+        fontSize: 14,
+        color: '#F5E6C8',
+        lineHeight: 19,
+    },
+    laSubtitle: {
+        fontFamily: Fonts.sans.regular,
+        fontSize: 12,
+        color: '#9B7E5C',
+        marginTop: 2,
+        lineHeight: 16,
+    },
+    laCheckBox: {
+        marginLeft: 10,
+        flexShrink: 0,
     },
 });
 

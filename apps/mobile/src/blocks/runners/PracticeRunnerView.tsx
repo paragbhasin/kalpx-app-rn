@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LiveActivityPreferenceBanner } from "../../components/LiveActivityPreferenceBanner";
+import { liveActivity } from "../../native/liveActivity";
 import Slider from "@react-native-community/slider";
 import { Audio } from "expo-av";
 import { Minus, Plus, RefreshCw } from "lucide-react-native";
@@ -333,43 +334,52 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
   };
 
   return (
-    <ScrollView
-      style={styles.scroll}
-      contentContainerStyle={[styles.scrollContent, isTablet && { paddingHorizontal: 40 }]}
-      showsVerticalScrollIndicator={false}
-    >
-      {isDevMode && (
-        <TouchableOpacity
-          testID="test_runner_force_complete"
-          accessibilityLabel="test_runner_force_complete"
-          accessible={true}
-          accessibilityRole="button"
-          onPress={() => {
-            if (isCompletingRef.current) return;
-            stopPracticeTimer().catch(() => {});
-            isCompletingRef.current = true;
-            const durationSec = Math.round(
-              (Date.now() - sessionStartTimeRef.current) / 1000,
+    <View style={styles.container}>
+      {!isViewOnly && (
+        <LiveActivityPreferenceBanner
+          experienceType="practice"
+          experienceName={item.title ?? ''}
+          onActivate={() => {
+            liveActivity.startSankalp(
+              item.title ?? '',
+              item.subtitle ?? item.line ?? item.summary ?? '',
             );
-            onComplete(durationSec);
           }}
-          style={{
-            position: "absolute",
-            top: 60,
-            right: 4,
-            width: 24,
-            height: 24,
-            opacity: 0.01,
-            zIndex: 9999,
-          }}
-        >
-          <View style={{ width: 24, height: 24 }} />
-        </TouchableOpacity>
+        />
       )}
-
-      {!isViewOnly && !isCommunityRunner && (
-        <LiveActivityPreferenceBanner experienceType="practice" experienceName={item.title ?? ''} />
-      )}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[styles.scrollContent, isTablet && { paddingHorizontal: 40 }]}
+        showsVerticalScrollIndicator={false}
+      >
+        {isDevMode && (
+          <TouchableOpacity
+            testID="test_runner_force_complete"
+            accessibilityLabel="test_runner_force_complete"
+            accessible={true}
+            accessibilityRole="button"
+            onPress={() => {
+              if (isCompletingRef.current) return;
+              stopPracticeTimer().catch(() => {});
+              isCompletingRef.current = true;
+              const durationSec = Math.round(
+                (Date.now() - sessionStartTimeRef.current) / 1000,
+              );
+              onComplete(durationSec);
+            }}
+            style={{
+              position: "absolute",
+              top: 60,
+              right: 4,
+              width: 24,
+              height: 24,
+              opacity: 0.01,
+              zIndex: 9999,
+            }}
+          >
+            <View style={{ width: 24, height: 24 }} />
+          </TouchableOpacity>
+        )}
 
       <View style={[styles.visualContainer, isTablet && { maxWidth: 640, alignSelf: 'center', width: '100%' }]}>
         <View style={styles.mantraMainContainer}>
@@ -583,11 +593,15 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
           <Text style={styles.backLinkText}>{t("practiceRunner.back")}</Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   scroll: {
     flex: 1,
     backgroundColor: "transparent",

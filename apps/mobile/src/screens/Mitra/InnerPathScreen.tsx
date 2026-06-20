@@ -138,12 +138,19 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     }, [updateBackground]),
   );
 
-  // Start Sankalp Live Activity while this screen is in foreground
+  // Auto-start sankalp LA.
+  // No preference → default (start if sankalp type).
+  // Preference exists → only start if it matches.
   useFocusEffect(
     useCallback(() => {
-      getLiveActivityState(i18n.language || 'en').then((state) => {
+      Promise.all([
+        getLiveActivityState(i18n.language || 'en'),
+        AsyncStorage.getItem('kalpx:preferred_la'),
+      ]).then(([state, preferredRaw]) => {
         if (AppState.currentState !== 'active') return;
-        if (state.type === 'sankalp') {
+        const pref = preferredRaw ? JSON.parse(preferredRaw) : null;
+        if (state.type !== 'sankalp') return;
+        if (!pref || (pref.type === 'sankalp' && pref.name === state.title)) {
           liveActivity.startSankalp(state.title, state.line);
         }
       }).catch(() => {});

@@ -6,6 +6,7 @@ import { Audio } from "expo-av";
 import { Minus, Plus, RefreshCw } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useKeepAwake } from "expo-keep-awake";
 import {
   Image,
   LayoutAnimation,
@@ -167,6 +168,8 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
   onAddToPractice,
 }) => {
   const { t } = useTranslation();
+  // Keep the screen awake for the whole practice session; auto-released on unmount.
+  useKeepAwake();
   const clampMins = (v: number) => Math.max(1, Math.min(10, Math.round(v)));
 
   const resolveInitialMins = (): number => {

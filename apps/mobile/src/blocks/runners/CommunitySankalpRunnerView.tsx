@@ -3,6 +3,7 @@ import { LiveActivityPreferenceBanner } from "../../components/LiveActivityPrefe
 import { liveActivity } from "../../native/liveActivity";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useKeepAwake } from "expo-keep-awake";
 import {
   Image,
   LayoutAnimation,
@@ -144,6 +145,8 @@ const CommunitySankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
   onAddToPractice,
 }) => {
   const { t } = useTranslation();
+  // Keep the screen awake for the whole sankalp session; auto-released on unmount.
+  useKeepAwake();
   const [isSankalpActivating, setIsSankalpActivating] = useState(false);
   const [essenceExpanded, setEssenceExpanded] = useState(true);
   const [benefitsExpanded, setBenefitsExpanded] = useState(false);

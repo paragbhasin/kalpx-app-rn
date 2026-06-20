@@ -37,28 +37,23 @@ struct KalpxSankalpLiveActivity: Widget {
                     .padding(.bottom, 6)
                 }
             } compactLeading: {
-                let url = URL(string: context.attributes.deepLinkURL) ?? URL(string: "kalpx://mitra/quick_chant/home")!
-                Link(destination: url) {
-                    Text(context.attributes.title)
-                        .font(.system(size: 10, weight: .semibold))
-                        .foregroundColor(.white)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.6)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(.leading, 6)
-                }
+                Text(context.attributes.title)
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundColor(.white)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.6)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.leading, 6)
             } compactTrailing: {
-                let url = URL(string: context.attributes.deepLinkURL) ?? URL(string: "kalpx://mitra/quick_chant/home")!
-                Link(destination: url) {
-                    Text("◈")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.laGold)
-                }
+                Text("◈")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.laGold)
             } minimal: {
                 Text("◈")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.laGold)
             }
+            .widgetURL(URL(string: context.attributes.deepLinkURL))
         }
     }
 

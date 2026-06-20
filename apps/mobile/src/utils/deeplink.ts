@@ -154,17 +154,33 @@ export function handleMitraDeepLink(url: string | null | undefined): boolean {
   // ── rhythm_home/{slot} deeplink ──────────────────────────────────────────
   if (parsed.containerId === "rhythm_home") {
     const slot = parsed.stateId; // morning | afternoon | night
+    const runner = resolveLADestination(parsed);
     try {
-      navigate("RhythmHome", VALID_RHYTHM_SLOTS.has(slot) ? { slot } : undefined);
+      if (runner) {
+        navigate(runner.name, runner.params);
+        console.log(`[deeplink] → ${runner.name} (rhythm LA → exact runner)`);
+      } else {
+        navigate("RhythmHome", VALID_RHYTHM_SLOTS.has(slot) ? { slot } : undefined);
+        console.log(`[deeplink] → RhythmHome (slot=${slot})`);
+      }
     } catch (err) {
       console.warn("[deeplink] navigate RhythmHome failed:", err);
     }
-    console.log(`[deeplink] → RhythmHome (slot=${slot})`);
     return true;
   }
 
   // ── inner_path/{checkpoint} deeplink ────────────────────────────────────
   if (parsed.containerId === "inner_path") {
+    const runner = resolveLADestination(parsed);
+    if (runner) {
+      try {
+        navigate(runner.name, runner.params);
+        console.log(`[deeplink] → ${runner.name} (inner_path LA → exact runner)`);
+      } catch (err) {
+        console.warn("[deeplink] navigate inner_path runner failed:", err);
+      }
+      return true;
+    }
     // stateId may be "day7_checkpoint" or "day14_checkpoint"; extract the key.
     const stateId = parsed.stateId;
     const checkpoint = stateId === "day7_checkpoint"
@@ -234,54 +250,62 @@ function handleWhenReady(url: string, attemptsLeft = 15): void {
   }
 }
 
-// Chant containers: the LA fires while MantraRunner/SankalpRunner is the active
-// screen. Always skip navigation in warm-start — navigating would push a fresh
-// QuickReset on top of the active runner (or reset CycleTransitionsContainer state).
+// Chant containers (quick_chant / quick_reset) → both route to the QuickReset
+// screen. Every LA tap navigates to its respective screen; see onUrl below.
 const CHANT_CONTAINERS = new Set(['quick_chant', 'quick_reset']);
 
-// Runner screen names pushed on the stack by Rhythm / InnerPath flows.
-// We skip navigation for their LA taps ONLY when one of these is the active screen
-// (i.e. a session is in progress). If no runner is on top, navigate normally.
-const RHYTHM_RUNNER_SCREENS = new Set([
-  'RhythmMantraRunner', 'RhythmSankalpRunner', 'RhythmPracticeRunner',
-]);
-const INNER_PATH_RUNNER_SCREENS = new Set([
-  'InnerPathMantraRunner', 'InnerPathSankalpRunner', 'InnerPathPracticeRunner',
-]);
+// Remembers the exact runner the user last entered from Inner Path / Daily
+// Rhythm, so tapping that flow's Live Activity returns to the precise chanting
+// screen (not the overview). In-memory: survives warm-start while the app is
+// alive; on cold-start it's empty and we fall back to the overview screen.
+type RunnerRoute = { name: string; params?: any };
+const lastRunnerRoutes: Record<string, RunnerRoute> = {};
+
+export function rememberRunnerRoute(containerId: string, name: string, params?: any): void {
+  lastRunnerRoutes[containerId] = { name, params };
+}
+
+// Resolve where a Live Activity tap should land. Inner Path / Daily Rhythm taps
+// (?source=la) return to the remembered runner when available.
+function resolveLADestination(parsed: ParsedMitraDeepLink): RunnerRoute | null {
+  const isLATap = parsed.data?.source === 'la';
+  if (parsed.containerId === 'rhythm_home' && isLATap && lastRunnerRoutes['rhythm_home']) {
+    return lastRunnerRoutes['rhythm_home'];
+  }
+  if (parsed.containerId === 'inner_path' && isLATap && lastRunnerRoutes['inner_path']) {
+    return lastRunnerRoutes['inner_path'];
+  }
+  return null;
+}
 
 /**
  * Install the Linking listeners. Returns a cleanup function. Call once
  * at app boot.
  */
 export function attachDeepLinkListeners(): () => void {
-  // Warm-start handler: app was in background when the URL fired (DI tap,
-  // notification, etc.). Logic:
-  //  - quick_chant / quick_reset: always skip — chant session is still alive on stack.
-  //    Works with ?source=la-tagged URLs (rebuilt Swift) AND without (old build).
-  //  - rhythm_home / inner_path: skip only if a runner is the current screen;
-  //    otherwise navigate normally so the user reaches the Rhythm/InnerPath screen.
+  // Warm-start handler: app was in background when the URL fired (DI / LA tap,
+  // notification, etc.). Every LA tap navigates to its respective screen —
+  // quick_chant/quick_reset → QuickReset, rhythm_home → RhythmHome,
+  // inner_path → InnerPath. We only skip the redundant push when the user is
+  // ALREADY on that exact destination screen.
   const onUrl = (event: { url: string } | string | null | undefined) => {
     const url = typeof event === "string" ? event : event?.url;
     if (!url) return;
     const parsed = parseMitraDeepLink(url);
 
-    if (parsed && CHANT_CONTAINERS.has(parsed.containerId)) {
-      console.log('[deeplink] chant LA warm-start — preserving active runner');
-      return;
-    }
-
-    if (parsed?.containerId === 'rhythm_home') {
+    // Skip only when already on the exact destination screen (avoids a no-op push).
+    // For inner_path / rhythm LA taps the destination is the remembered runner.
+    if (parsed) {
       const currentRoute = navigationRef.getCurrentRoute?.();
-      if (currentRoute && RHYTHM_RUNNER_SCREENS.has(currentRoute.name)) {
-        console.log('[deeplink] rhythm LA warm-start — runner active, skipping nav');
-        return;
-      }
-    }
-
-    if (parsed?.containerId === 'inner_path') {
-      const currentRoute = navigationRef.getCurrentRoute?.();
-      if (currentRoute && INNER_PATH_RUNNER_SCREENS.has(currentRoute.name)) {
-        console.log('[deeplink] inner_path LA warm-start — runner active, skipping nav');
+      const runner = resolveLADestination(parsed);
+      const dest = runner
+        ? runner.name
+        : CHANT_CONTAINERS.has(parsed.containerId) ? 'QuickReset'
+        : parsed.containerId === 'rhythm_home' ? 'RhythmHome'
+        : parsed.containerId === 'inner_path' ? 'InnerPath'
+        : null;
+      if (dest && currentRoute?.name === dest) {
+        console.log(`[deeplink] LA warm-start — already on ${dest}, skipping nav`);
         return;
       }
     }

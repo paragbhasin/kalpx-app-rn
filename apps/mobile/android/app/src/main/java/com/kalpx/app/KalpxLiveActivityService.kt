@@ -487,7 +487,7 @@ class KalpxLiveActivityService : Service() {
         //   ◈  A sankalp for today   ← subText (label)
         //      {sankalpTitle}         ← title (main, bold)
         //   │  {sankalpLine}          ← bigText intention line
-        val contentPendingIntent = deepLinkPendingIntent(deepLinkURL, requestCode = 2)
+        val contentPendingIntent = deepLinkPendingIntent("kalpx://mitra/quick_chant/home?source=la", requestCode = 2)
         val bigText = buildString {
             if (sankalpLine.isNotEmpty()) {
                 append("│  ")
@@ -531,7 +531,7 @@ class KalpxLiveActivityService : Service() {
                 append(resetDevanagari)
             }
         }
-        val contentPendingIntent = deepLinkPendingIntent("kalpx://mitra/quick_reset", requestCode = 3)
+        val contentPendingIntent = deepLinkPendingIntent("kalpx://mitra/quick_reset/home?source=la", requestCode = 3)
         return NotificationCompat.Builder(this, CHANNEL_CHANT)
             .setSmallIcon(R.drawable.ic_kalpx_notification)
             .setContentTitle("ॐ  $title")
@@ -579,7 +579,7 @@ class KalpxLiveActivityService : Service() {
                 }
             }
         }
-        val contentPendingIntent = deepLinkPendingIntent("kalpx://mitra/rhythm", requestCode = 4)
+        val contentPendingIntent = deepLinkPendingIntent("kalpx://mitra/rhythm_home/morning?source=la", requestCode = 4)
         return NotificationCompat.Builder(this, CHANNEL_PRACTICE)
             .setSmallIcon(R.drawable.ic_kalpx_notification)
             .setContentTitle("◈  $title")
@@ -634,7 +634,7 @@ class KalpxLiveActivityService : Service() {
                 append(innerPathPracticeTitle)
             }
         }
-        val contentPendingIntent = deepLinkPendingIntent("kalpx://mitra/inner_path", requestCode = 5)
+        val contentPendingIntent = deepLinkPendingIntent("kalpx://mitra/inner_path/home?source=la", requestCode = 5)
         return NotificationCompat.Builder(this, CHANNEL_PRACTICE)
             .setSmallIcon(R.drawable.ic_kalpx_notification)
             .setContentTitle("✦  Inner Path  ·  $dayLabel")

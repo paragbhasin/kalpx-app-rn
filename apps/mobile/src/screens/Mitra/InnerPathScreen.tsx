@@ -82,6 +82,7 @@ import {
   mitraJourneyEntryView,
 } from "../../engine/mitraApi";
 import { liveActivity } from "../../native/liveActivity";
+import { rememberRunnerRoute } from "../../utils/deeplink";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import {
   ingestDailyView,
@@ -722,25 +723,14 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
       ).then((id) => { if (id) innerPathLAActiveRef.current = true; }).catch(() => {});
     }
 
-    if (slot === "mantra") {
-      navigation.navigate("InnerPathMantraRunner" as any, {
-        item,
-        journeyId,
-        dayNumber,
-      });
-    } else if (slot === "sankalp") {
-      navigation.navigate("InnerPathSankalpRunner" as any, {
-        item,
-        journeyId,
-        dayNumber,
-      });
-    } else {
-      navigation.navigate("InnerPathPracticeRunner" as any, {
-        item,
-        journeyId,
-        dayNumber,
-      });
-    }
+    const runnerName =
+      slot === "mantra" ? "InnerPathMantraRunner"
+      : slot === "sankalp" ? "InnerPathSankalpRunner"
+      : "InnerPathPracticeRunner";
+    const runnerParams = { item, journeyId, dayNumber };
+    // Remember this runner so tapping the Inner Path Live Activity returns here.
+    rememberRunnerRoute("inner_path", runnerName, runnerParams);
+    navigation.navigate(runnerName as any, runnerParams);
   };
   const handleBack = () => {
     if (embedded) {

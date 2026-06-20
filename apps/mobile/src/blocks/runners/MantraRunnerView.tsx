@@ -20,6 +20,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import { useKeepAwake } from "expo-keep-awake";
 import { useJapaEngine } from "../../engine/useJapaEngine";
 import type { JapaSourceSurface } from "@kalpx/types";
 
@@ -219,6 +220,8 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   sourceSurface = "inner_path",
   onEngineReady,
 }) => {
+  // Keep the screen awake for the whole chanting session; auto-released on unmount.
+  useKeepAwake();
   const { t } = useTranslation();
   const [selectedTarget, setSelectedTarget] = useState(initialReps || 27);
   const [meaningExpanded, setMeaningExpanded] = useState(false);

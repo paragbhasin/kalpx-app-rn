@@ -54,26 +54,21 @@ struct KalpxInnerPathLiveActivity: Widget {
                     .padding(.bottom, 6)
                 }
             } compactLeading: {
-                let url = URL(string: context.attributes.deepLinkURL) ?? URL(string: "kalpx://mitra/inner_path/home")!
-                Link(destination: url) {
-                    Text("✦")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.laGold)
-                        .padding(.leading, 6)
-                }
+                Text("✦")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.laGold)
+                    .padding(.leading, 6)
             } compactTrailing: {
-                let url = URL(string: context.attributes.deepLinkURL) ?? URL(string: "kalpx://mitra/inner_path/home")!
-                Link(destination: url) {
-                    Text("D\(context.state.dayNumber)")
-                        .font(.system(size: 9, weight: .medium))
-                        .foregroundColor(.white)
-                        .padding(.trailing, 4)
-                }
+                Text("D\(context.state.dayNumber)")
+                    .font(.system(size: 9, weight: .medium))
+                    .foregroundColor(.white)
+                    .padding(.trailing, 4)
             } minimal: {
                 Text("✦")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.laGold)
             }
+            .widgetURL(URL(string: context.attributes.deepLinkURL))
         }
     }
 

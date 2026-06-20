@@ -36,6 +36,7 @@ import {
   postRhythmItemAdd,
 } from "../../engine/mitraApi";
 import { liveActivity } from "../../native/liveActivity";
+import { rememberRunnerRoute } from "../../utils/deeplink";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import { setHomeData } from "../../store/doorSlice";
 import { screenActions } from "../../store/screenSlice";
@@ -413,28 +414,14 @@ export default function RhythmHomeScreen({
       lastLABandRef.current = band;
     }
 
-    if (item.item_type === "mantra") {
-      navigation.navigate("RhythmMantraRunner" as any, {
-        item: enrichedItem,
-        slot: band,
-        journeyId,
-        dayNumber,
-      });
-    } else if (item.item_type === "sankalp") {
-      navigation.navigate("RhythmSankalpRunner" as any, {
-        item: enrichedItem,
-        slot: band,
-        journeyId,
-        dayNumber,
-      });
-    } else {
-      navigation.navigate("RhythmPracticeRunner" as any, {
-        item: enrichedItem,
-        slot: band,
-        journeyId,
-        dayNumber,
-      });
-    }
+    const runnerName =
+      item.item_type === "mantra" ? "RhythmMantraRunner"
+      : item.item_type === "sankalp" ? "RhythmSankalpRunner"
+      : "RhythmPracticeRunner";
+    const runnerParams = { item: enrichedItem, slot: band, journeyId, dayNumber };
+    // Remember this runner so tapping the Daily Rhythm Live Activity returns here.
+    rememberRunnerRoute("rhythm_home", runnerName, runnerParams);
+    navigation.navigate(runnerName as any, runnerParams);
   }
 
   return (

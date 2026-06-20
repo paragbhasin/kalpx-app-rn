@@ -38,6 +38,7 @@ const RudrakshBead = ({ width, height, style }: { width?: number; height?: numbe
 import AudioPlayerBlock, {
   stopAllAudioPlayerSounds,
 } from "../../blocks/AudioPlayerBlock";
+import { LiveActivityPreferenceBanner } from "../../components/LiveActivityPreferenceBanner";
 import LibrarySearchModal, {
   type LibrarySearchItem,
 } from "../../components/LibrarySearchModal";
@@ -481,10 +482,7 @@ export default function QuickResetScreen({
       const pref = preferredLARef.current;
       const canStart = pref === null || (pref.type === 'mantra' && pref.name === activeMantra.title);
       if (canStart) {
-        liveActivity.startReset(
-          activeMantra.title,
-          activeMantra.devanagari ?? "",
-        );
+        liveActivity.startReset(activeMantra.title, activeMantra.devanagari ?? "");
       }
     }
     japaEngine.increment();
@@ -508,7 +506,12 @@ export default function QuickResetScreen({
           AsyncStorage.getItem('kalpx:preferred_la').catch(() => null),
         ]);
         const pref = preferredRaw ? JSON.parse(preferredRaw as string) : null;
-        if (AppState.currentState === 'active' && state.type === 'sankalp' && pref && pref.type === 'sankalp' && pref.name === (state as any).title) {
+        // No preference → dynamic transition to sankalp. Preference set → only if it matches.
+        if (
+          AppState.currentState === 'active' &&
+          state.type === 'sankalp' &&
+          (!pref || (pref.type === 'sankalp' && pref.name === (state as any).title))
+        ) {
           liveActivity.startSankalp((state as any).title, (state as any).line);
         }
       }, 2_000);
@@ -848,6 +851,14 @@ export default function QuickResetScreen({
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
         <View style={styles.background}>
+          <LiveActivityPreferenceBanner
+            experienceType="mantra"
+            experienceName={displayMantra.title ?? ''}
+            onActivate={() => {
+              preferredLARef.current = { type: 'mantra', name: displayMantra.title ?? '' };
+              liveActivity.startReset(displayMantra.title ?? '', displayMantra.devanagari ?? '');
+            }}
+          />
           <ScrollView
             contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }, isTablet && { paddingHorizontal: 48 }]}
             showsVerticalScrollIndicator={false}
@@ -876,6 +887,14 @@ export default function QuickResetScreen({
         style={[styles.safeArea, embedded && styles.embeddedTransparent]}
       >
         <View style={styles.background}>
+          <LiveActivityPreferenceBanner
+            experienceType="mantra"
+            experienceName={selectedMantra.title ?? ''}
+            onActivate={() => {
+              preferredLARef.current = { type: 'mantra', name: selectedMantra.title ?? '' };
+              liveActivity.startReset(selectedMantra.title ?? '', selectedMantra.devanagari ?? '');
+            }}
+          />
           <ScrollView
             contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }, isTablet && { paddingHorizontal: 48 }]}
             showsVerticalScrollIndicator={false}

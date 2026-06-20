@@ -138,6 +138,15 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     }, [updateBackground]),
   );
 
+  // Holds the user's chosen LA preference. When set, it has priority — no other
+  // LA (inner path, sankalp, etc.) may override it, even on explicit actions.
+  const preferredLARef = useRef<{ type: string; name: string } | null>(null);
+  useEffect(() => {
+    AsyncStorage.getItem('kalpx:preferred_la').then(raw => {
+      preferredLARef.current = raw ? JSON.parse(raw) : null;
+    }).catch(() => { preferredLARef.current = null; });
+  }, []);
+
   // Auto-start sankalp LA.
   // No preference → default (start if sankalp type).
   // Preference exists → only start if it matches.
@@ -697,8 +706,9 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     const journeyId = String((sd as any)?.journey_id ?? "");
     const dayNumber = Number((sd as any)?.day_number) || 0;
 
-    // Start Inner Path LA on explicit user action (not on screen mount)
-    if (!innerPathLAActiveRef.current) {
+    // Start Inner Path LA on explicit user action (not on screen mount).
+    // If the user has chosen a preferred LA, it has priority — never override it.
+    if (!innerPathLAActiveRef.current && preferredLARef.current === null) {
       const mantraItem = triadItems.find((t) => t.slot === 'mantra');
       const sankalpItem = triadItems.find((t) => t.slot === 'sankalp');
       const practiceItem = triadItems.find((t) => t.slot === 'practice');

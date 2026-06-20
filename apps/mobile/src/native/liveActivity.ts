@@ -27,6 +27,17 @@ function trackLA(event: string, params?: Record<string, unknown>): void {
 // when the server still returns type:'quick_chant' right after session complete.
 let _quickChantSuppressedUntil = 0;
 
+// Clears every LA type before starting a new one so stale lock-screen widgets don't stack.
+async function endAllActivities(): Promise<void> {
+  if (!KalpxLiveActivityModule) return;
+  await Promise.all([
+    KalpxLiveActivityModule.endActivity().catch(() => {}),
+    KalpxLiveActivityModule.endResetActivity().catch(() => {}),
+    KalpxLiveActivityModule.endRhythmActivity().catch(() => {}),
+    KalpxLiveActivityModule.endInnerPathActivity().catch(() => {}),
+  ]);
+}
+
 // Supported on iOS (ActivityKit) and Android (Foreground Service + Ongoing Notification).
 // On any other platform the methods are no-ops returning null/0.
 const supported = !!KalpxLiveActivityModule && (Platform.OS === "ios" || Platform.OS === "android");
@@ -95,6 +106,7 @@ export const liveActivity = {
       console.log('[LiveActivity] start suppressed — reset just ended');
       return null;
     }
+    await endAllActivities();
     console.log("[LiveActivity] calling start", { mantraName, sessionCount, weekCount, yearCount, totalCount, deepLinkURL });
     return KalpxLiveActivityModule.startActivity(
       mantraName,
@@ -143,6 +155,7 @@ export const liveActivity = {
       if (perm === 'blocked') { promptOpenSettings(); return null; }
       if (perm === 'denied') { console.warn("[LiveActivity] startSankalp skipped — POST_NOTIFICATIONS denied"); return null; }
     }
+    await endAllActivities();
     console.log("[LiveActivity] calling startSankalp", { title, line });
     return KalpxLiveActivityModule.startSankalpActivity(title, line)
       .then((id: string) => {
@@ -175,7 +188,7 @@ export const liveActivity = {
       if (perm === 'denied') { console.warn("[LiveActivity] startReset skipped — POST_NOTIFICATIONS denied"); return null; }
     }
     _quickChantSuppressedUntil = 0;
-    await KalpxLiveActivityModule.endActivity().catch(() => {}); // clear stats LA before showing in-session LA
+    await endAllActivities();
     return KalpxLiveActivityModule.startResetActivity(mantraTitle, devanagari)
       .then((id: string) => {
         trackLA(EVENT_NAMES.LIVE_ACTIVITY_RESET_STARTED);
@@ -205,6 +218,7 @@ export const liveActivity = {
       if (perm === 'blocked') { promptOpenSettings(); return null; }
       if (perm === 'denied') { console.warn("[LiveActivity] startRhythm skipped — POST_NOTIFICATIONS denied"); return null; }
     }
+    await endAllActivities();
     return KalpxLiveActivityModule.startRhythmActivity(band, bandLabel, anchorTitle, anchorType, anchorDevanagari)
       .then((id: string) => {
         trackLA(EVENT_NAMES.LIVE_ACTIVITY_RHYTHM_STARTED, { band, anchor_type: anchorType });
@@ -239,6 +253,7 @@ export const liveActivity = {
       if (perm === 'blocked') { promptOpenSettings(); return null; }
       if (perm === 'denied') { console.warn("[LiveActivity] startInnerPath skipped — POST_NOTIFICATIONS denied"); return null; }
     }
+    await endAllActivities();
     return KalpxLiveActivityModule.startInnerPathActivity(dayNumber, totalDays, mantraTitle, mantraDevanagari, sankalpTitle, practiceTitle)
       .then((id: string) => {
         trackLA(EVENT_NAMES.LIVE_ACTIVITY_INNER_PATH_STARTED, { day_number: dayNumber, total_days: totalDays });

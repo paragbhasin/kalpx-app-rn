@@ -264,6 +264,9 @@ const CommunityMantraRunnerView: React.FC<MantraRunnerViewProps> = ({
         liveActivity.end();
         isLAActiveRef.current = false;
         getLiveActivityState(i18n.language || 'en').then((state) => {
+          const pref = preferredLARef.current;
+          // Preference set → it has priority; don't auto-transition to sankalp.
+          if (pref !== null) return;
           if (AppState.currentState === 'active' && state.type === 'sankalp') {
             liveActivity.startSankalp(state.title, state.line);
           }

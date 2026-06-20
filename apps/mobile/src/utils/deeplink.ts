@@ -20,7 +20,7 @@ import * as Linking from "expo-linking";
 
 import store from "../store";
 import { screenActions, loadScreenWithData } from "../store/screenSlice";
-import { navigate, navigationRef } from "../Shared/Routes/NavigationService";
+import { navigate, navigateInHomeStack, navigationRef } from "../Shared/Routes/NavigationService";
 
 export interface ParsedMitraDeepLink {
   kind: "mitra";
@@ -157,7 +157,7 @@ export function handleMitraDeepLink(url: string | null | undefined): boolean {
     const runner = resolveLADestination(parsed);
     try {
       if (runner) {
-        navigate(runner.name, runner.params);
+        navigateInHomeStack(runner.name, runner.params);
         console.log(`[deeplink] → ${runner.name} (rhythm LA → exact runner)`);
       } else {
         navigate("RhythmHome", VALID_RHYTHM_SLOTS.has(slot) ? { slot } : undefined);
@@ -174,7 +174,7 @@ export function handleMitraDeepLink(url: string | null | undefined): boolean {
     const runner = resolveLADestination(parsed);
     if (runner) {
       try {
-        navigate(runner.name, runner.params);
+        navigateInHomeStack(runner.name, runner.params);
         console.log(`[deeplink] → ${runner.name} (inner_path LA → exact runner)`);
       } catch (err) {
         console.warn("[deeplink] navigate inner_path runner failed:", err);
@@ -266,7 +266,9 @@ export function rememberRunnerRoute(containerId: string, name: string, params?: 
 }
 
 // Resolve where a Live Activity tap should land. Inner Path / Daily Rhythm taps
-// (?source=la) return to the remembered runner when available.
+// (?source=la) return to the exact runner the user last entered. Navigation to
+// these deeply-nested runner screens uses navigateInHomeStack (explicit nested
+// target) since a flat navigate(name) can't resolve them from the container ref.
 function resolveLADestination(parsed: ParsedMitraDeepLink): RunnerRoute | null {
   const isLATap = parsed.data?.source === 'la';
   if (parsed.containerId === 'rhythm_home' && isLATap && lastRunnerRoutes['rhythm_home']) {

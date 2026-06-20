@@ -11,6 +11,7 @@ import {
 } from "../../../engine/mitraApi";
 import { setHomeData } from "../../../store/doorSlice";
 import { useAppRating } from "../../../hooks/useAppRating";
+import { useCompletionReflection } from "./useCompletionReflection";
 
 const BEIGE_BG = require("../../../../assets/beige_bg.webp");
 
@@ -23,6 +24,7 @@ export default function RhythmPracticeCompletion() {
   const COPY = useCompletionCopy("rhythm_practice");
   const [badge, setBadge] = useState<string>(COPY.pending);
   const { recordAndMaybePrompt, renderRatingModal } = useAppRating();
+  const onReflect = useCompletionReflection(COPY.variant, item_id);
 
   useEffect(() => {
     if (completedRef.current) return;
@@ -56,6 +58,9 @@ export default function RhythmPracticeCompletion() {
           badgeLabel={badge}
           ctaLabel={COPY.cta}
           onCtaPress={handleReturn}
+          liveActivity={item_title ? { type: COPY.variant, name: item_title } : undefined}
+          nameCard={item_title ? { label: COPY.nameCardLabel, text: item_title, guideLine: COPY.nameCardGuide } : undefined}
+          reflection={{ prompt: COPY.reflectionPrompt, onSubmit: onReflect }}
           testID={__DEV__ ? "test_rhythm_practice_completion_return" : undefined}
         />
       </ImageBackground>

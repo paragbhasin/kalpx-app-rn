@@ -120,7 +120,7 @@ class KalpxLiveActivityModule(
     // Mirrors: KalpxLiveActivityModule.swift startSankalpActivity(_:line:resolve:reject:)
 
     @ReactMethod
-    fun startSankalpActivity(title: String, line: String, promise: Promise) {
+    fun startSankalpActivity(title: String, line: String, deepLinkURL: String, promise: Promise) {
         if (!areNotificationsEnabled()) {
             promise.reject("DISABLED", "Notifications are disabled — cannot show Live Activity")
             return
@@ -129,6 +129,7 @@ class KalpxLiveActivityModule(
             val intent = serviceIntent(KalpxLiveActivityService.ACTION_START_SANKALP) {
                 putExtra("title", title)
                 putExtra("line", line)
+                putExtra("deepLinkURL", deepLinkURL)
             }
             ContextCompat.startForegroundService(reactContext, intent)
             promise.resolve("sankalp_activity")

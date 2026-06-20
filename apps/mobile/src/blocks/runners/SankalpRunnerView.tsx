@@ -56,6 +56,17 @@ export interface SankalpRunnerViewProps {
   isCommunityRunner?: boolean;
   addLoading?: boolean;
   onAddToPractice?: () => void;
+  // Where this sankalp is running, so its Live Activity deep-links back here.
+  sourceSurface?: 'inner_path' | 'daily_rhythm' | 'quick_reset';
+}
+
+// Live Activity deep link for a sankalp, by the surface it's running on.
+function sankalpDeepLink(surface?: SankalpRunnerViewProps['sourceSurface']): string {
+  switch (surface) {
+    case 'inner_path':   return 'kalpx://mitra/inner_path/home?source=la';
+    case 'daily_rhythm': return 'kalpx://mitra/rhythm_home/morning?source=la';
+    default:             return 'kalpx://mitra/quick_chant/home?source=la';
+  }
 }
 
 const hasContent = (val: any): boolean => {
@@ -144,6 +155,7 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
   isCommunityRunner,
   addLoading,
   onAddToPractice,
+  sourceSurface,
 }) => {
   const { t } = useTranslation();
   // Keep the screen awake for the whole sankalp session; auto-released on unmount.
@@ -280,7 +292,7 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
           experienceType="sankalp"
           experienceName={item.title ?? ''}
           onActivate={() => {
-            liveActivity.startSankalp(item.title ?? '', item.line ?? item.subtitle ?? '');
+            liveActivity.startSankalp(item.title ?? '', item.line ?? item.subtitle ?? '', sankalpDeepLink(sourceSurface));
           }}
         />
       )}

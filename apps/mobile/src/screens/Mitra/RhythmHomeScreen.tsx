@@ -307,7 +307,7 @@ export default function RhythmHomeScreen({
         const pref = preferredRaw ? JSON.parse(preferredRaw) : null;
         if (state.type !== 'sankalp') return;
         if (!pref || (pref.type === 'sankalp' && pref.name === state.title)) {
-          liveActivity.startSankalp(state.title, state.line);
+          liveActivity.startSankalp(state.title, state.line, 'kalpx://mitra/rhythm_home/morning?source=la');
         }
       }).catch(() => {});
     }, [dispatch, i18n.language]),

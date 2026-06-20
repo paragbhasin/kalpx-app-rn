@@ -23,6 +23,7 @@ export default function InnerPathSankalpRunner() {
     <SafeAreaView style={styles.safeArea}>
       <SankalpRunnerView
         item={item}
+        sourceSurface="inner_path"
         onComplete={(durationSec) => {
           navigation.replace("InnerPathSankalpCompletion", {
             item_id: item.item_id,

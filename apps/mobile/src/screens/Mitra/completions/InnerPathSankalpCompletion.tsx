@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { ImageBackground, SafeAreaView, StyleSheet } from "react-native";
 import RunnerCompletionView from "../../../components/RunnerCompletionView";
 import { useCompletionCopy } from "../../../constants/completionCopy";
+import { useCompletionReflection } from "./useCompletionReflection";
 import {
   mitraInnerPathComplete,
   mitraTrackCompletion,
@@ -17,6 +18,7 @@ export default function InnerPathSankalpCompletion() {
   const completedRef = useRef(false);
   const COPY = useCompletionCopy("innerPath_sankalp");
   const [badge, setBadge] = useState<string>(COPY.pending);
+  const onReflect = useCompletionReflection(COPY.variant, item_id);
 
   useEffect(() => {
     if (completedRef.current) return;
@@ -41,6 +43,9 @@ export default function InnerPathSankalpCompletion() {
           badgeLabel={badge}
           ctaLabel={COPY.cta}
           onCtaPress={handleReturn}
+          liveActivity={item_title ? { type: COPY.variant, name: item_title } : undefined}
+          nameCard={item_title ? { label: COPY.nameCardLabel, text: item_title, guideLine: COPY.nameCardGuide } : undefined}
+          reflection={{ prompt: COPY.reflectionPrompt, onSubmit: onReflect }}
           testID={__DEV__ ? "test_ip_sankalp_completion_return" : undefined}
         />
       </ImageBackground>

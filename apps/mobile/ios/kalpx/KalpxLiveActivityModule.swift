@@ -243,6 +243,7 @@ class KalpxLiveActivityModule: NSObject {
     @objc func startSankalpActivity(
         _ title: String,
         line: String,
+        deepLinkURL: String,
         resolve: @escaping RCTPromiseResolveBlock,
         reject: @escaping RCTPromiseRejectBlock
     ) {
@@ -261,7 +262,8 @@ class KalpxLiveActivityModule: NSObject {
             await self.endCurrentRhythmActivity()
             await self.endCurrentInnerPathActivity()
 
-            let attrs = KalpxSankalpAttributes(title: title, deepLinkURL: "kalpx://mitra/quick_chant/home?source=la")
+            let resolvedDeepLink = deepLinkURL.isEmpty ? "kalpx://mitra/quick_chant/home?source=la" : deepLinkURL
+            let attrs = KalpxSankalpAttributes(title: title, deepLinkURL: resolvedDeepLink)
             let state = KalpxSankalpAttributes.ContentState(line: line)
 
             do {

@@ -1,9 +1,11 @@
+import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef } from "react";
 import {
   Image,
   Animated,
   Dimensions,
+  KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
@@ -15,6 +17,8 @@ import {
 import Svg, { Path } from "react-native-svg";
 import { sfs } from "../utils/responsive";
 import { Fonts } from "../theme/fonts";
+import { LiveActivityPreferenceBanner } from "./LiveActivityPreferenceBanner";
+import { VoiceTextInput } from "./VoiceTextInput";
 
 const MantraLotus3d = ({ width, height, opacity, style }: { width?: number; height?: number; opacity?: number; style?: any }) => (
   <Image source={require("../../assets/mantra-lotus-3d.webp")} style={[{ width, height, opacity, resizeMode: "contain" }, style]} />
@@ -39,7 +43,18 @@ interface RunnerCompletionViewProps {
   ctaLabel: string;
   onCtaPress: () => void;
   onRepeat?: () => void;
+  repeatLabel?: string;
   testID?: string;
+  // When set, shows the "Make it your Live Activity?" banner — auto-hidden if
+  // this experience is already the user's preferred Live Activity.
+  liveActivity?: { type: "mantra" | "sankalp" | "practice"; name: string };
+  // The "Today's …" card showing the mantra/sankalp/practice name.
+  nameCard?: { label: string; text: string; guideLine?: string };
+  // The "Anything to carry from this?" reflection input.
+  reflection?: {
+    prompt: string;
+    onSubmit: (text: string, type: "text" | "voice") => void;
+  };
 }
 
 const RunnerCompletionView: React.FC<RunnerCompletionViewProps> = ({
@@ -49,7 +64,11 @@ const RunnerCompletionView: React.FC<RunnerCompletionViewProps> = ({
   ctaLabel,
   onCtaPress,
   onRepeat,
+  repeatLabel = "Repeat",
   testID,
+  liveActivity,
+  nameCard,
+  reflection,
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
@@ -91,80 +110,124 @@ const RunnerCompletionView: React.FC<RunnerCompletionViewProps> = ({
   const checkSize = isTablet ? 72 : 48;
 
   return (
-    <ScrollView
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.scroll}
-      contentContainerStyle={[
-        styles.scrollContent,
-        isTablet && { paddingHorizontal: 48, paddingTop: 32 },
-      ]}
-      showsVerticalScrollIndicator={false}
     >
-      <Animated.View
-        style={[
-          styles.content,
-          { opacity: contentFade },
-          isTablet && { maxWidth: 640, alignSelf: "center", width: "100%" },
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.scrollContent,
+          isTablet && { paddingHorizontal: 48, paddingTop: 32 },
         ]}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <View style={[styles.checkWrap, isTablet && { width: checkSize, height: checkSize, marginBottom: 12 }]}>
-          <Svg width={checkSize} height={checkSize} viewBox="0 0 48 48">
-            <AnimatedPath
-              d="M10 24 L20 34 L38 14"
-              fill="none"
-              stroke="#A68246"
-              strokeWidth={isTablet ? 3 : 2.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeDasharray={`${checkPathLength}`}
-              strokeDashoffset={checkDashOffset as any}
-            />
-          </Svg>
-        </View>
-
-        <Animated.View style={{ opacity: messageOpacity, width: "100%", alignItems: "center" }}>
-          <View style={[styles.messageCard, isTablet && { borderLeftWidth: 3, paddingLeft: 28, paddingVertical: 8, marginBottom: 40 }]}>
-            <Text style={[styles.messageText, isTablet && { fontSize: 36, lineHeight: 52 }]}>{title}</Text>
-            {!!subtitle && (
-              <Text style={[styles.subtextText, isTablet && { fontSize: 20, lineHeight: 30, marginTop: 12 }]}>{subtitle}</Text>
-            )}
+        <Animated.View
+          style={[
+            styles.content,
+            { opacity: contentFade },
+            isTablet && { maxWidth: 640, alignSelf: "center", width: "100%" },
+          ]}
+        >
+          <View style={[styles.checkWrap, isTablet && { width: checkSize, height: checkSize, marginBottom: 12 }]}>
+            <Svg width={checkSize} height={checkSize} viewBox="0 0 48 48">
+              <AnimatedPath
+                d="M10 24 L20 34 L38 14"
+                fill="none"
+                stroke="#A68246"
+                strokeWidth={isTablet ? 3 : 2.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeDasharray={`${checkPathLength}`}
+                strokeDashoffset={checkDashOffset as any}
+              />
+            </Svg>
           </View>
 
-          {!!badgeLabel && (
-            <View style={[styles.badgeWrap, isTablet && { paddingLeft: 28 }]}>
-              <Text style={[styles.badgeText, isTablet && { fontSize: 18 }]}>{badgeLabel}</Text>
+          <Animated.View style={{ opacity: messageOpacity, width: "100%", alignItems: "center" }}>
+            <View style={[styles.messageCard, isTablet && { borderLeftWidth: 3, paddingLeft: 28, paddingVertical: 8, marginBottom: 40 }]}>
+              <Text style={[styles.messageText, isTablet && { fontSize: 36, lineHeight: 52 }]}>{title}</Text>
+              {!!subtitle && (
+                <Text style={[styles.subtextText, isTablet && { fontSize: 20, lineHeight: 30, marginTop: 12 }]}>{subtitle}</Text>
+              )}
             </View>
-          )}
+
+            {!!badgeLabel && (
+              <View style={[styles.badgeWrap, isTablet && { paddingLeft: 28 }]}>
+                <Text style={[styles.badgeText, isTablet && { fontSize: 18 }]}>{badgeLabel}</Text>
+              </View>
+            )}
+
+            {!!liveActivity && (
+              <LiveActivityPreferenceBanner
+                variant="completion"
+                experienceType={liveActivity.type}
+                experienceName={liveActivity.name}
+              />
+            )}
+
+            {!!nameCard && (
+              <View style={styles.nameCard}>
+                <View style={styles.nameCardHeader}>
+                  <View style={styles.nameCardDivider} />
+                  <Text style={styles.nameCardLabel}>{nameCard.label}</Text>
+                  <View style={styles.nameCardDivider} />
+                </View>
+                <Text style={styles.nameCardText}>{`“${nameCard.text}”`}</Text>
+                {!!nameCard.guideLine && (
+                  <>
+                    <Text style={styles.nameCardDots}>• • •</Text>
+                    <Text style={styles.nameCardGuide}>{nameCard.guideLine}</Text>
+                  </>
+                )}
+              </View>
+            )}
+
+            {!!reflection && (
+              <View style={styles.reflectionWrap}>
+                <View style={styles.reflectionHeader}>
+                  <Ionicons name="create-outline" size={18} color="#B0863F" />
+                  <Text style={styles.reflectionTitle}>Anything to carry from this?</Text>
+                </View>
+                <VoiceTextInput
+                  placeholder={reflection.prompt}
+                  onSend={reflection.onSubmit}
+                />
+              </View>
+            )}
+          </Animated.View>
         </Animated.View>
-      </Animated.View>
 
-      <View style={[styles.bottomSection, isTablet && { maxWidth: 640, alignSelf: "center", width: "100%" }]}>
-        <View style={[styles.lotusWrap, isTablet && { minHeight: 340, marginTop: 0, marginBottom: 0 }]}>
-          <MantraLotus3d
-            width={LOTUS_WIDTH}
-            height={LOTUS_HEIGHT}
-            opacity={0.76}
-            style={styles.lotusImage}
-          />
-        </View>
+        <View style={[styles.bottomSection, isTablet && { maxWidth: 640, alignSelf: "center", width: "100%" }]}>
+          <View style={[styles.lotusWrap, isTablet && { minHeight: 340, marginTop: 0, marginBottom: 0 }]}>
+            <MantraLotus3d
+              width={LOTUS_WIDTH}
+              height={LOTUS_HEIGHT}
+              opacity={0.76}
+              style={styles.lotusImage}
+            />
+          </View>
 
-        <View style={[styles.footer, isTablet && { paddingBottom: 60 }]}>
-          <TouchableOpacity
-            style={[styles.primaryCta, isTablet && { maxWidth: 560, paddingVertical: 22 }]}
-            onPress={onCtaPress}
-            activeOpacity={0.8}
-            testID={testID}
-          >
-            <Text style={[styles.primaryCtaText, isTablet && { fontSize: 22, letterSpacing: 0.4 }]}>{ctaLabel}</Text>
-          </TouchableOpacity>
-
-          {!!onRepeat && (
-            <TouchableOpacity style={styles.secondaryCta} onPress={onRepeat} activeOpacity={0.6}>
-              <Text style={[styles.secondaryCtaText, isTablet && { fontSize: 22 }]}>Repeat</Text>
+          <View style={[styles.footer, isTablet && { paddingBottom: 60 }]}>
+            <TouchableOpacity
+              style={[styles.primaryCta, isTablet && { maxWidth: 560, paddingVertical: 22 }]}
+              onPress={onCtaPress}
+              activeOpacity={0.8}
+              testID={testID}
+            >
+              <Text style={[styles.primaryCtaText, isTablet && { fontSize: 22, letterSpacing: 0.4 }]}>{ctaLabel}</Text>
             </TouchableOpacity>
-          )}
+
+            {!!onRepeat && (
+              <TouchableOpacity style={styles.secondaryCta} onPress={onRepeat} activeOpacity={0.6}>
+                <Text style={[styles.secondaryCtaText, isTablet && { fontSize: 22 }]}>{repeatLabel}</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -224,6 +287,74 @@ const styles = StyleSheet.create({
     fontSize: sfs(13),
     color: "#A68246",
     letterSpacing: 0.3,
+  },
+  // --- "Today's …" name card ---
+  nameCard: {
+    width: "100%",
+    backgroundColor: "rgba(255, 250, 240, 0.7)",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#EFE3C8",
+    paddingVertical: 22,
+    paddingHorizontal: 20,
+    marginBottom: 24,
+    alignItems: "center",
+  },
+  nameCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  nameCardDivider: {
+    width: 28,
+    height: 1,
+    backgroundColor: "#DCC79A",
+  },
+  nameCardLabel: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: sfs(13),
+    color: "#A07D3E",
+    letterSpacing: 0.6,
+    marginHorizontal: 12,
+  },
+  nameCardText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: sfs(22),
+    lineHeight: sfs(32),
+    color: "#3A2208",
+    textAlign: "center",
+  },
+  nameCardDots: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: sfs(12),
+    color: "#C9A85F",
+    letterSpacing: 3,
+    marginTop: 16,
+    marginBottom: 12,
+  },
+  nameCardGuide: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: sfs(14),
+    lineHeight: sfs(20),
+    color: "#8A6845",
+    textAlign: "center",
+    fontStyle: "italic",
+  },
+  // --- Reflection input ---
+  reflectionWrap: {
+    width: "100%",
+    marginBottom: 8,
+  },
+  reflectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  reflectionTitle: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: sfs(14),
+    color: "#5C3A12",
+    marginLeft: 8,
   },
   bottomSection: {
     width: "100%",

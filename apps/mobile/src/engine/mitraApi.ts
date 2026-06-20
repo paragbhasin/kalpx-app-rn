@@ -2161,22 +2161,32 @@ export async function postRoomReflection(
 // ---------------------------------------------------------------------------
 // mitraJourneyHomeV3 — GET /api/mitra/v3/journey/home/ (S04 FourDoor surface)
 // ---------------------------------------------------------------------------
-// In-flight dedup: FourDoorHomeContainer fires useEffect(mount) + useFocusEffect
-// nearly simultaneously; without this both hit the server causing 429s.
+// In-flight dedup + short TTL: many screens (Home, RhythmHome, RhythmSetup,
+// Reminders, completions, resumePending…) call this on mount/focus near
+// simultaneously. Previously forceFresh bypassed dedup AND added a _t
+// cache-buster, so every caller hit the server with a unique URL → 429 storms.
+// Now ALL concurrent callers share one in-flight request, and a brief TTL
+// absorbs rapid sequential focuses. forceFresh only skips the TTL cache.
 let _homeV3Inflight: Promise<MitraHomeV3Response> | null = null;
+let _homeV3Cache: { data: MitraHomeV3Response; at: number } | null = null;
+const HOME_V3_TTL_MS = 1500;
 
 export async function mitraJourneyHomeV3(opts?: {
   forceFresh?: boolean;
   locale?: string;
 }): Promise<MitraHomeV3Response> {
-  // forceFresh bypasses dedup (user-initiated refresh must always hit the network)
-  if (!opts?.forceFresh && _homeV3Inflight) return _homeV3Inflight;
+  // Coalesce concurrent callers (mount + focus + multiple screens) onto one request.
+  if (_homeV3Inflight) return _homeV3Inflight;
+  // Serve a very recent result so rapid repeat focuses don't re-hit the server.
+  if (!opts?.forceFresh && _homeV3Cache && Date.now() - _homeV3Cache.at < HOME_V3_TTL_MS) {
+    return Promise.resolve(_homeV3Cache.data);
+  }
   const req = (async () => {
     try {
       const params: Record<string, string | number> = { tz: getTz() };
       if (opts?.locale) params.locale = opts.locale;
-      if (opts?.forceFresh) params._t = Date.now();
       const resp = await api.get<MitraHomeV3Response>("mitra/v3/journey/home/", { params });
+      _homeV3Cache = { data: resp.data, at: Date.now() };
       return resp.data;
     } catch (err: any) {
       throw err;
@@ -2184,7 +2194,7 @@ export async function mitraJourneyHomeV3(opts?: {
       _homeV3Inflight = null;
     }
   })();
-  if (!opts?.forceFresh) _homeV3Inflight = req;
+  _homeV3Inflight = req;
   return req;
 }
 

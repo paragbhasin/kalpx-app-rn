@@ -36,6 +36,7 @@ RCT_EXTERN_METHOD(
 RCT_EXTERN_METHOD(
     startSankalpActivity:(NSString *)title
     line:(NSString *)line
+    deepLinkURL:(NSString *)deepLinkURL
     resolve:(RCTPromiseResolveBlock)resolve
     reject:(RCTPromiseRejectBlock)reject
 )

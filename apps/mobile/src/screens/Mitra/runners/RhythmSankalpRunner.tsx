@@ -23,6 +23,7 @@ export default function RhythmSankalpRunner() {
     <SafeAreaView style={styles.safeArea}>
       <SankalpRunnerView
         item={item}
+        sourceSurface="daily_rhythm"
         onComplete={(durationSec) => {
           navigation.replace("RhythmSankalpCompletion", {
             item_id: item.item_id,

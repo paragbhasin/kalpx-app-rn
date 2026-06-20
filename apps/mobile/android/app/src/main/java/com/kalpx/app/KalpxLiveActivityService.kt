@@ -116,6 +116,7 @@ class KalpxLiveActivityService : Service() {
         private const val KEY_DEEP_LINK      = "kalpx_la_deeplink"
         private const val KEY_SANKALP_TITLE  = "kalpx_la_s_title"
         private const val KEY_SANKALP_LINE   = "kalpx_la_s_line"
+        private const val KEY_SANKALP_DEEP_LINK = "kalpx_la_s_deeplink"
         private const val KEY_IS_COMPLETED   = "kalpx_la_completed"
 
         private const val TYPE_CHANT      = "chant"
@@ -161,6 +162,9 @@ class KalpxLiveActivityService : Service() {
     // Mirrors KalpxSankalpAttributes
     private var sankalpTitle: String = ""
     private var sankalpLine: String  = ""
+    // Context-aware deep link so a sankalp LA returns to where it runs
+    // (inner path / rhythm / quick chant), not always quick chant.
+    private var sankalpDeepLink: String = "kalpx://mitra/quick_chant/home?source=la"
 
     // Mirrors KalpxResetAttributes.ContentState
     private var resetMantraTitle: String = ""
@@ -291,9 +295,10 @@ class KalpxLiveActivityService : Service() {
     }
 
     private fun handleStartSankalp(intent: Intent) {
-        sankalpTitle = intent.getStringExtra("title") ?: ""
-        sankalpLine  = intent.getStringExtra("line") ?: ""
-        activeType   = TYPE_SANKALP
+        sankalpTitle    = intent.getStringExtra("title") ?: ""
+        sankalpLine     = intent.getStringExtra("line") ?: ""
+        sankalpDeepLink = intent.getStringExtra("deepLinkURL") ?: "kalpx://mitra/quick_chant/home?source=la"
+        activeType      = TYPE_SANKALP
 
         persistState()
         // startForeground replaces any existing foreground notification in-place.
@@ -487,7 +492,7 @@ class KalpxLiveActivityService : Service() {
         //   ◈  A sankalp for today   ← subText (label)
         //      {sankalpTitle}         ← title (main, bold)
         //   │  {sankalpLine}          ← bigText intention line
-        val contentPendingIntent = deepLinkPendingIntent("kalpx://mitra/quick_chant/home?source=la", requestCode = 2)
+        val contentPendingIntent = deepLinkPendingIntent(sankalpDeepLink, requestCode = 2)
         val bigText = buildString {
             if (sankalpLine.isNotEmpty()) {
                 append("│  ")
@@ -751,6 +756,7 @@ class KalpxLiveActivityService : Service() {
             putString(KEY_DEEP_LINK, deepLinkURL)
             putString(KEY_SANKALP_TITLE, sankalpTitle)
             putString(KEY_SANKALP_LINE, sankalpLine)
+            putString(KEY_SANKALP_DEEP_LINK, sankalpDeepLink)
             putBoolean(KEY_IS_COMPLETED, isCompleted)
             putString(KEY_RESET_MANTRA, resetMantraTitle)
             putString(KEY_RESET_DEVA, resetDevanagari)
@@ -783,6 +789,7 @@ class KalpxLiveActivityService : Service() {
         deepLinkURL               = prefs.getString(KEY_DEEP_LINK, "kalpx://mitra/quick_chant/home") ?: "kalpx://mitra/quick_chant/home"
         sankalpTitle              = prefs.getString(KEY_SANKALP_TITLE, "") ?: ""
         sankalpLine               = prefs.getString(KEY_SANKALP_LINE, "") ?: ""
+        sankalpDeepLink           = prefs.getString(KEY_SANKALP_DEEP_LINK, "kalpx://mitra/quick_chant/home?source=la") ?: "kalpx://mitra/quick_chant/home?source=la"
         isCompleted               = prefs.getBoolean(KEY_IS_COMPLETED, false)
         resetMantraTitle          = prefs.getString(KEY_RESET_MANTRA, "") ?: ""
         resetDevanagari           = prefs.getString(KEY_RESET_DEVA, "") ?: ""

@@ -145,7 +145,11 @@ export const liveActivity = {
       });
   },
 
-  async startSankalp(title: string, line: string): Promise<string | null> {
+  async startSankalp(
+    title: string,
+    line: string,
+    deepLinkURL: string = 'kalpx://mitra/quick_chant/home?source=la',
+  ): Promise<string | null> {
     if (!supported) {
       console.warn("[LiveActivity] startSankalp skipped — module not found");
       return null;
@@ -156,8 +160,8 @@ export const liveActivity = {
       if (perm === 'denied') { console.warn("[LiveActivity] startSankalp skipped — POST_NOTIFICATIONS denied"); return null; }
     }
     await endAllActivities();
-    console.log("[LiveActivity] calling startSankalp", { title, line });
-    return KalpxLiveActivityModule.startSankalpActivity(title, line)
+    console.log("[LiveActivity] calling startSankalp", { title, line, deepLinkURL });
+    return KalpxLiveActivityModule.startSankalpActivity(title, line, deepLinkURL)
       .then((id: string) => {
         console.log("[LiveActivity] startSankalp OK, id:", id);
         return id;

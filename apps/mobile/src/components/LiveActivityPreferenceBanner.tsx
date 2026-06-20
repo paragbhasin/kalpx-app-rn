@@ -27,9 +27,18 @@ interface Props {
   experienceType: LiveActivityType;
   experienceName: string;
   onActivate?: () => void;
+  // 'completion' renders the calmer inline banner used on completion screens
+  // ("Keep this <noun> close to you. / Make it your Live Activity?").
+  variant?: 'default' | 'completion';
 }
 
-export function LiveActivityPreferenceBanner({ experienceType, experienceName, onActivate }: Props) {
+const NOUN_BY_TYPE: Record<LiveActivityType, string> = {
+  sankalp: 'intention',
+  mantra: 'mantra',
+  practice: 'practice',
+};
+
+export function LiveActivityPreferenceBanner({ experienceType, experienceName, onActivate, variant = 'default' }: Props) {
   const [visible, setVisible] = useState(false);
   const [conflictModal, setConflictModal] = useState(false);
   const [currentLA, setCurrentLA] = useState<PreferredLA | null>(null);
@@ -80,7 +89,125 @@ export function LiveActivityPreferenceBanner({ experienceType, experienceName, o
     dismiss();
   };
 
+  const renderConflictModal = () => (
+    <Modal visible={conflictModal} transparent animationType="fade" onRequestClose={() => setConflictModal(false)}>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalCard}>
+          <View style={styles.modalIconWrap}>
+            <Ionicons name="phone-portrait-outline" size={28} color={Colors.gold} />
+          </View>
+
+          {currentLA ? (
+            <>
+              <Text style={styles.modalTitle}>
+                You already have a preferred{'\n'}Live Activity selected.
+              </Text>
+
+              <Text style={styles.modalLabel}>Current</Text>
+              <View style={styles.modalNameCard}>
+                <Text style={styles.modalNameText}>{currentLA.name}</Text>
+              </View>
+
+              <Text style={styles.modalLabel}>New</Text>
+              <View style={styles.modalNameCard}>
+                <Text style={styles.modalNameText}>{experienceName}</Text>
+              </View>
+
+              <Text style={styles.modalQuestion}>
+                Which would you like to display on your lock screen?
+              </Text>
+
+              <TouchableOpacity
+                style={[styles.radioRow, conflictChoice === 'keep' && styles.radioRowSelected]}
+                onPress={() => setConflictChoice('keep')}
+                activeOpacity={0.8}
+              >
+                <View style={styles.radioOuter}>
+                  {conflictChoice === 'keep' && <View style={styles.radioInner} />}
+                </View>
+                <View style={styles.radioTextBlock}>
+                  <Text style={styles.radioTitle}>Keep Current</Text>
+                  <Text style={styles.radioSub} numberOfLines={1}>{currentLA.name}</Text>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.radioRow, conflictChoice === 'switch' && styles.radioRowSelected]}
+                onPress={() => setConflictChoice('switch')}
+                activeOpacity={0.8}
+              >
+                <View style={styles.radioOuter}>
+                  {conflictChoice === 'switch' && <View style={styles.radioInner} />}
+                </View>
+                <View style={styles.radioTextBlock}>
+                  <Text style={styles.radioTitle}>Switch to New</Text>
+                  <Text style={styles.radioSub} numberOfLines={1}>{experienceName}</Text>
+                </View>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <Text style={styles.modalTitle}>
+                Add as your Live Activity?
+              </Text>
+              <View style={styles.modalNameCard}>
+                <Text style={styles.modalNameText}>{experienceName}</Text>
+              </View>
+              <Text style={styles.modalQuestion}>
+                This will show on your lock screen while you practice.
+              </Text>
+            </>
+          )}
+
+          <View style={styles.modalActions}>
+            <TouchableOpacity
+              style={styles.cancelBtn}
+              onPress={() => setConflictModal(false)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.confirmBtn}
+              onPress={handleConflictConfirm}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.confirmText}>{currentLA ? 'Confirm' : 'Add'}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+
   if (!visible) return null;
+
+  if (variant === 'completion') {
+    return (
+      <>
+        <Animated.View style={[styles.cBanner, { opacity: fadeAnim }]}>
+          <View style={styles.cIconBox}>
+            <Ionicons name="notifications-outline" size={20} color={Colors.gold} />
+          </View>
+          <View style={styles.cTextBlock}>
+            <Text style={styles.cLead}>
+              Keep this {NOUN_BY_TYPE[experienceType]} close to you.
+            </Text>
+            <Text style={styles.cTitle}>Make it your Live Activity?</Text>
+          </View>
+          <View style={styles.cActions}>
+            <TouchableOpacity onPress={dismiss} style={styles.cNotNowBtn} hitSlop={8}>
+              <Text style={styles.cNotNowText}>Not Now</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleYes} style={styles.cYesBtn} hitSlop={8}>
+              <Text style={styles.cYesText}>Make Live Activity</Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+        {renderConflictModal()}
+      </>
+    );
+  }
 
   return (
     <>
@@ -115,99 +242,77 @@ export function LiveActivityPreferenceBanner({ experienceType, experienceName, o
         </View>
       </Animated.View>
 
-      <Modal visible={conflictModal} transparent animationType="fade" onRequestClose={() => setConflictModal(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <View style={styles.modalIconWrap}>
-              <Ionicons name="phone-portrait-outline" size={28} color={Colors.gold} />
-            </View>
-
-            {currentLA ? (
-              <>
-                <Text style={styles.modalTitle}>
-                  You already have a preferred{'\n'}Live Activity selected.
-                </Text>
-
-                <Text style={styles.modalLabel}>Current</Text>
-                <View style={styles.modalNameCard}>
-                  <Text style={styles.modalNameText}>{currentLA.name}</Text>
-                </View>
-
-                <Text style={styles.modalLabel}>New</Text>
-                <View style={styles.modalNameCard}>
-                  <Text style={styles.modalNameText}>{experienceName}</Text>
-                </View>
-
-                <Text style={styles.modalQuestion}>
-                  Which would you like to display on your lock screen?
-                </Text>
-
-                <TouchableOpacity
-                  style={[styles.radioRow, conflictChoice === 'keep' && styles.radioRowSelected]}
-                  onPress={() => setConflictChoice('keep')}
-                  activeOpacity={0.8}
-                >
-                  <View style={styles.radioOuter}>
-                    {conflictChoice === 'keep' && <View style={styles.radioInner} />}
-                  </View>
-                  <View style={styles.radioTextBlock}>
-                    <Text style={styles.radioTitle}>Keep Current</Text>
-                    <Text style={styles.radioSub} numberOfLines={1}>{currentLA.name}</Text>
-                  </View>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[styles.radioRow, conflictChoice === 'switch' && styles.radioRowSelected]}
-                  onPress={() => setConflictChoice('switch')}
-                  activeOpacity={0.8}
-                >
-                  <View style={styles.radioOuter}>
-                    {conflictChoice === 'switch' && <View style={styles.radioInner} />}
-                  </View>
-                  <View style={styles.radioTextBlock}>
-                    <Text style={styles.radioTitle}>Switch to New</Text>
-                    <Text style={styles.radioSub} numberOfLines={1}>{experienceName}</Text>
-                  </View>
-                </TouchableOpacity>
-              </>
-            ) : (
-              <>
-                <Text style={styles.modalTitle}>
-                  Add as your Live Activity?
-                </Text>
-                <View style={styles.modalNameCard}>
-                  <Text style={styles.modalNameText}>{experienceName}</Text>
-                </View>
-                <Text style={styles.modalQuestion}>
-                  This will show on your lock screen while you practice.
-                </Text>
-              </>
-            )}
-
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                style={styles.cancelBtn}
-                onPress={() => setConflictModal(false)}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.cancelText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.confirmBtn}
-                onPress={handleConflictConfirm}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.confirmText}>{currentLA ? 'Confirm' : 'Add'}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      {renderConflictModal()}
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  // --- Completion-screen variant ---
+  cBanner: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FBF3E2',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#ECDFBE',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    marginBottom: 24,
+  },
+  cIconBox: {
+    marginRight: 12,
+    flexShrink: 0,
+  },
+  cTextBlock: {
+    flex: 1,
+    marginRight: 10,
+  },
+  cLead: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    color: '#7A6038',
+    lineHeight: 18,
+  },
+  cTitle: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 14,
+    color: '#3A1F06',
+    marginTop: 1,
+  },
+  cActions: {
+    flexShrink: 0,
+    alignItems: 'flex-end',
+  },
+  cNotNowBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#D4C5A0',
+    marginBottom: 8,
+    minWidth: 92,
+    alignItems: 'center',
+  },
+  cNotNowText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 12,
+    color: '#3A1F06',
+  },
+  cYesBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: Colors.gold,
+    minWidth: 92,
+    alignItems: 'center',
+  },
+  cYesText: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 12,
+    color: '#fff',
+  },
   banner: {
     marginHorizontal: 10,
     marginTop: 8,

@@ -161,7 +161,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
         const pref = preferredRaw ? JSON.parse(preferredRaw) : null;
         if (state.type !== 'sankalp') return;
         if (!pref || (pref.type === 'sankalp' && pref.name === state.title)) {
-          liveActivity.startSankalp(state.title, state.line);
+          liveActivity.startSankalp(state.title, state.line, 'kalpx://mitra/inner_path/home?source=la');
         }
       }).catch(() => {});
     }, []),

@@ -2,9 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef } from "react";
 import {
-  Image,
   Animated,
   Dimensions,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -15,26 +15,40 @@ import {
   useWindowDimensions,
 } from "react-native";
 import Svg, { Path } from "react-native-svg";
-import { sfs } from "../utils/responsive";
 import { Fonts } from "../theme/fonts";
+import { sfs } from "../utils/responsive";
 import { LiveActivityPreferenceBanner } from "./LiveActivityPreferenceBanner";
 import { VoiceTextInput } from "./VoiceTextInput";
 
-const MantraLotus3d = ({ width, height, opacity, style }: { width?: number; height?: number; opacity?: number; style?: any }) => (
-  <Image source={require("../../assets/mantra-lotus-3d.webp")} style={[{ width, height, opacity, resizeMode: "contain" }, style]} />
+const MantraLotus3d = ({
+  width,
+  height,
+  opacity,
+  style,
+}: {
+  width?: number;
+  height?: number;
+  opacity?: number;
+  style?: any;
+}) => (
+  <Image
+    source={require("../../assets/mantra-lotus-3d.webp")}
+    style={[{ width, height, opacity, resizeMode: "contain" }, style]}
+  />
 );
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 const { width: SCREEN_W } = Dimensions.get("window");
 const IS_TABLET = SCREEN_W >= 768;
 
-// Lotus size — much larger on tablet
+// The lotus art lives in the TOP ~30% of a tall, mostly-transparent 2:3 asset.
+// Render it at its natural aspect ratio, then clip to just the bloom + ripple
+// so the transparent lower half doesn't render as dead vertical space.
 const LOTUS_WIDTH = IS_TABLET
-  ? Math.min(SCREEN_W * 0.65, 500)
-  : Math.min(SCREEN_W * 0.92, 360);
-const LOTUS_HEIGHT = IS_TABLET
-  ? Math.min(SCREEN_W * 0.5, 390)
-  : Math.min(SCREEN_W * 0.72, 280);
+  ? Math.min(SCREEN_W * 0.5, 440)
+  : Math.min(SCREEN_W * 0.86, 360);
+const LOTUS_HEIGHT = LOTUS_WIDTH * 1.5; // asset aspect ratio (~2:3)
+const LOTUS_CLIP_HEIGHT = LOTUS_WIDTH * 0.52; // show only the bloom + ripple
 
 interface RunnerCompletionViewProps {
   title: string;
@@ -107,7 +121,7 @@ const RunnerCompletionView: React.FC<RunnerCompletionViewProps> = ({
     outputRange: [checkPathLength, 0],
   });
 
-  const checkSize = isTablet ? 72 : 48;
+  const checkSize = isTablet ? 72 : 30;
 
   return (
     <KeyboardAvoidingView
@@ -130,7 +144,17 @@ const RunnerCompletionView: React.FC<RunnerCompletionViewProps> = ({
             isTablet && { maxWidth: 640, alignSelf: "center", width: "100%" },
           ]}
         >
-          <View style={[styles.checkWrap, isTablet && { width: checkSize, height: checkSize, marginBottom: 12 }]}>
+          <View
+            style={[
+              styles.checkRing,
+              isTablet && {
+                width: 104,
+                height: 104,
+                borderRadius: 52,
+                marginBottom: 22,
+              },
+            ]}
+          >
             <Svg width={checkSize} height={checkSize} viewBox="0 0 48 48">
               <AnimatedPath
                 d="M10 24 L20 34 L38 14"
@@ -145,17 +169,39 @@ const RunnerCompletionView: React.FC<RunnerCompletionViewProps> = ({
             </Svg>
           </View>
 
-          <Animated.View style={{ opacity: messageOpacity, width: "100%", alignItems: "center" }}>
-            <View style={[styles.messageCard, isTablet && { borderLeftWidth: 3, paddingLeft: 28, paddingVertical: 8, marginBottom: 40 }]}>
-              <Text style={[styles.messageText, isTablet && { fontSize: 36, lineHeight: 52 }]}>{title}</Text>
+          <Animated.View
+            style={{
+              opacity: messageOpacity,
+              width: "100%",
+              alignItems: "center",
+            }}
+          >
+            <View style={styles.messageCard}>
+              <Text
+                style={[
+                  styles.messageText,
+                  isTablet && { fontSize: 40, lineHeight: 52 },
+                ]}
+              >
+                {title}
+              </Text>
               {!!subtitle && (
-                <Text style={[styles.subtextText, isTablet && { fontSize: 20, lineHeight: 30, marginTop: 12 }]}>{subtitle}</Text>
+                <Text
+                  style={[
+                    styles.subtextText,
+                    isTablet && { fontSize: 20, lineHeight: 30 },
+                  ]}
+                >
+                  {subtitle}
+                </Text>
               )}
             </View>
 
             {!!badgeLabel && (
-              <View style={[styles.badgeWrap, isTablet && { paddingLeft: 28 }]}>
-                <Text style={[styles.badgeText, isTablet && { fontSize: 18 }]}>{badgeLabel}</Text>
+              <View style={styles.badgeWrap}>
+                <Text style={[styles.badgeText, isTablet && { fontSize: 16 }]}>
+                  {badgeLabel}
+                </Text>
               </View>
             )}
 
@@ -169,6 +215,12 @@ const RunnerCompletionView: React.FC<RunnerCompletionViewProps> = ({
 
             {!!nameCard && (
               <View style={styles.nameCard}>
+                <Ionicons
+                  name="flower-outline"
+                  size={22}
+                  color="#C9A85F"
+                  style={styles.nameCardLotus}
+                />
                 <View style={styles.nameCardHeader}>
                   <View style={styles.nameCardDivider} />
                   <Text style={styles.nameCardLabel}>{nameCard.label}</Text>
@@ -178,17 +230,23 @@ const RunnerCompletionView: React.FC<RunnerCompletionViewProps> = ({
                 {!!nameCard.guideLine && (
                   <>
                     <Text style={styles.nameCardDots}>• • •</Text>
-                    <Text style={styles.nameCardGuide}>{nameCard.guideLine}</Text>
+                    <Text style={styles.nameCardGuide}>
+                      {nameCard.guideLine}
+                    </Text>
                   </>
                 )}
               </View>
             )}
 
             {!!reflection && (
-              <View style={styles.reflectionWrap}>
+              <View style={styles.reflectionCard}>
                 <View style={styles.reflectionHeader}>
-                  <Ionicons name="create-outline" size={18} color="#B0863F" />
-                  <Text style={styles.reflectionTitle}>Anything to carry from this?</Text>
+                  <View style={styles.reflectionIconCircle}>
+                    <Ionicons name="create-outline" size={16} color="#B0863F" />
+                  </View>
+                  <Text style={styles.reflectionTitle}>
+                    Anything to carry from this?
+                  </Text>
                 </View>
                 <VoiceTextInput
                   placeholder={reflection.prompt}
@@ -199,29 +257,56 @@ const RunnerCompletionView: React.FC<RunnerCompletionViewProps> = ({
           </Animated.View>
         </Animated.View>
 
-        <View style={[styles.bottomSection, isTablet && { maxWidth: 640, alignSelf: "center", width: "100%" }]}>
-          <View style={[styles.lotusWrap, isTablet && { minHeight: 340, marginTop: 0, marginBottom: 0 }]}>
-            <MantraLotus3d
-              width={LOTUS_WIDTH}
-              height={LOTUS_HEIGHT}
-              opacity={0.76}
-              style={styles.lotusImage}
-            />
+        <View
+          style={[
+            styles.bottomSection,
+            isTablet && { maxWidth: 640, alignSelf: "center", width: "100%" },
+          ]}
+        >
+          <View style={styles.lotusOuter}>
+            <View style={styles.lotusClip}>
+              <MantraLotus3d
+                width={LOTUS_WIDTH}
+                height={LOTUS_HEIGHT}
+                opacity={0.92}
+              />
+            </View>
           </View>
 
           <View style={[styles.footer, isTablet && { paddingBottom: 60 }]}>
             <TouchableOpacity
-              style={[styles.primaryCta, isTablet && { maxWidth: 560, paddingVertical: 22 }]}
+              style={[
+                styles.primaryCta,
+                isTablet && { maxWidth: 560, paddingVertical: 22 },
+              ]}
               onPress={onCtaPress}
               activeOpacity={0.8}
               testID={testID}
             >
-              <Text style={[styles.primaryCtaText, isTablet && { fontSize: 22, letterSpacing: 0.4 }]}>{ctaLabel}</Text>
+              <Text
+                style={[
+                  styles.primaryCtaText,
+                  isTablet && { fontSize: 22, letterSpacing: 0.4 },
+                ]}
+              >
+                {ctaLabel}
+              </Text>
             </TouchableOpacity>
 
             {!!onRepeat && (
-              <TouchableOpacity style={styles.secondaryCta} onPress={onRepeat} activeOpacity={0.6}>
-                <Text style={[styles.secondaryCtaText, isTablet && { fontSize: 22 }]}>{repeatLabel}</Text>
+              <TouchableOpacity
+                style={styles.secondaryCta}
+                onPress={onRepeat}
+                activeOpacity={0.6}
+              >
+                <Text
+                  style={[
+                    styles.secondaryCtaText,
+                    isTablet && { fontSize: 22 },
+                  ]}
+                >
+                  {repeatLabel}
+                </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -239,54 +324,57 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     paddingHorizontal: 20,
     paddingTop: 12,
-    paddingBottom: 32,
+    paddingBottom: 24,
   },
   content: {
     alignItems: "center",
     width: "100%",
   },
-  checkWrap: {
-    width: 64,
-    height: 64,
+  checkRing: {
+    width: 40,
+    height: 40,
+    borderRadius: 39,
+    borderWidth: 1.5,
+    borderColor: "#E7D09B",
+    backgroundColor: "rgba(255, 252, 244, 0.6)",
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: 18,
   },
   messageCard: {
-    borderLeftWidth: 2,
-    borderLeftColor: "#DAC28E",
-    paddingLeft: 20,
-    paddingVertical: 4,
-    marginBottom: 32,
     width: "100%",
-    alignSelf: "flex-start",
+    alignItems: "center",
+    paddingHorizontal: 8,
+    marginBottom: 16,
   },
   messageText: {
-    fontFamily: Fonts.serif.regular,
-    fontSize: sfs(26),
-    lineHeight: sfs(38),
-    color: "#5C3A12",
+    fontFamily: Fonts.serif.bold,
+    fontSize: sfs(30),
+    lineHeight: sfs(40),
+    color: "#3A2208",
+    textAlign: "center",
   },
   subtextText: {
     fontFamily: Fonts.serif.regular,
     fontSize: sfs(15),
-    lineHeight: sfs(22),
+    lineHeight: sfs(23),
     color: "#8A6845",
-    fontStyle: "italic",
-    marginTop: 8,
+    textAlign: "center",
+    marginTop: 12,
   },
   badgeWrap: {
-    marginBottom: 12,
-    alignSelf: "flex-start",
-    paddingLeft: 20,
+    marginBottom: 22,
+    alignItems: "center",
   },
   badgeText: {
     fontFamily: Fonts.sans.medium,
     fontSize: sfs(13),
     color: "#A68246",
     letterSpacing: 0.3,
+    textAlign: "center",
   },
   // --- "Today's …" name card ---
   nameCard: {
@@ -299,6 +387,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 24,
     alignItems: "center",
+  },
+  nameCardLotus: {
+    marginBottom: 10,
   },
   nameCardHeader: {
     flexDirection: "row",
@@ -340,21 +431,36 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontStyle: "italic",
   },
-  // --- Reflection input ---
-  reflectionWrap: {
+  // --- Reflection card ---
+  reflectionCard: {
     width: "100%",
+    backgroundColor: "rgba(255, 250, 240, 0.7)",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#EFE3C8",
+    paddingTop: 16,
+    paddingHorizontal: 16,
     marginBottom: 8,
   },
   reflectionHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 12,
+  },
+  reflectionIconCircle: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 1.5,
+    borderColor: "#D9B96A",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
   },
   reflectionTitle: {
     fontFamily: Fonts.sans.medium,
     fontSize: sfs(14),
     color: "#5C3A12",
-    marginLeft: 8,
   },
   bottomSection: {
     width: "100%",
@@ -362,22 +468,29 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "flex-end",
   },
-  lotusWrap: {
-    alignItems: "center",
-    justifyContent: "center",
+  // Fills the space between the content and the footer; the lotus blooms at the
+  // bottom of it, right above the CTA.
+  lotusOuter: {
+    flex: 1,
     width: "100%",
-    marginTop: 8,
-    marginBottom: 12,
-    minHeight: 220,
+    alignItems: "center",
+    justifyContent: "flex-end",
+    minHeight: LOTUS_CLIP_HEIGHT,
   },
-  lotusImage: {
-    marginTop: -8,
-    marginBottom: -28,
+  // Fixed-height window that crops the transparent lower half of the asset.
+  lotusClip: {
+    width: "100%",
+    height: LOTUS_CLIP_HEIGHT,
+    alignItems: "center",
+    justifyContent: "flex-start",
+    overflow: "hidden",
+    marginBottom: 8,
   },
   footer: {
     width: "100%",
     alignItems: "center",
-    paddingBottom: 92,
+    paddingTop: 8,
+    paddingBottom: 40,
   },
   primaryCta: {
     backgroundColor: "#FBF5F5",

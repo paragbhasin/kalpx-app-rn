@@ -2165,11 +2165,14 @@ export async function postRoomReflection(
 // Reminders, completions, resumePending…) call this on mount/focus near
 // simultaneously. Previously forceFresh bypassed dedup AND added a _t
 // cache-buster, so every caller hit the server with a unique URL → 429 storms.
-// Now ALL concurrent callers share one in-flight request, and a brief TTL
-// absorbs rapid sequential focuses. forceFresh only skips the TTL cache.
+// Now ALL concurrent callers share one in-flight request, and a TTL absorbs
+// rapid sequential focuses. Note: nearly every caller passes forceFresh:true on
+// mount/focus (not a real user refresh), so forceFresh must ALSO respect the TTL
+// — otherwise the cache never helps and the screen floods the server on every
+// navigation. We cap journey/home at ~1 call per TTL window regardless.
 let _homeV3Inflight: Promise<MitraHomeV3Response> | null = null;
 let _homeV3Cache: { data: MitraHomeV3Response; at: number } | null = null;
-const HOME_V3_TTL_MS = 1500;
+const HOME_V3_TTL_MS = 8000;
 
 export async function mitraJourneyHomeV3(opts?: {
   forceFresh?: boolean;
@@ -2177,8 +2180,9 @@ export async function mitraJourneyHomeV3(opts?: {
 }): Promise<MitraHomeV3Response> {
   // Coalesce concurrent callers (mount + focus + multiple screens) onto one request.
   if (_homeV3Inflight) return _homeV3Inflight;
-  // Serve a very recent result so rapid repeat focuses don't re-hit the server.
-  if (!opts?.forceFresh && _homeV3Cache && Date.now() - _homeV3Cache.at < HOME_V3_TTL_MS) {
+  // Serve a recent result so rapid repeat focuses don't re-hit the server.
+  // Applies even to forceFresh — those callers are focus/mount, not real refreshes.
+  if (_homeV3Cache && Date.now() - _homeV3Cache.at < HOME_V3_TTL_MS) {
     return Promise.resolve(_homeV3Cache.data);
   }
   const req = (async () => {
@@ -2386,13 +2390,31 @@ export type LiveActivityState =
   | { type: 'rhythm'; band: string; band_label: string; anchor_title: string; anchor_type: string; anchor_devanagari: string; band_done: boolean }
   | { type: 'none' };
 
-/** GET mitra/live-activity/state/ — what iOS Live Activity should display right now. */
+/** GET mitra/live-activity/state/ — what iOS Live Activity should display right now.
+ * Called on focus by Home / InnerPath / QuickReset / RhythmHome — and twice each
+ * because of the duplicate-nested HomePage. We coalesce concurrent callers and
+ * serve a brief TTL cache so those bursts hit the server once, not 6×. */
+let _laStateInflight: Promise<LiveActivityState> | null = null;
+let _laStateCache: { data: LiveActivityState; at: number; locale: string } | null = null;
+const LA_STATE_TTL_MS = 8000;
+
 export async function getLiveActivityState(locale?: string): Promise<LiveActivityState> {
-  try {
-    const params = locale ? { locale } : {};
-    const resp = await api.get<LiveActivityState>('mitra/live-activity/state/', { params });
-    return resp.data;
-  } catch {
-    return { type: 'none' };
+  const lc = locale ?? '';
+  if (_laStateInflight) return _laStateInflight;
+  if (_laStateCache && _laStateCache.locale === lc && Date.now() - _laStateCache.at < LA_STATE_TTL_MS) {
+    return Promise.resolve(_laStateCache.data);
   }
+  _laStateInflight = (async () => {
+    try {
+      const params = locale ? { locale } : {};
+      const resp = await api.get<LiveActivityState>('mitra/live-activity/state/', { params });
+      _laStateCache = { data: resp.data, at: Date.now(), locale: lc };
+      return resp.data;
+    } catch {
+      return { type: 'none' as const };
+    } finally {
+      _laStateInflight = null;
+    }
+  })();
+  return _laStateInflight;
 }

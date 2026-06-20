@@ -4,7 +4,28 @@ import * as Device from "expo-device";
 import { Platform } from "react-native";
 import api from "../Networks/axios"; // your axios wrapper
 
+// Run once per app session. Home's useFocusEffect (and the duplicate-nested
+// HomePage) otherwise fire this — plus its coupled timezone PATCH — 5× on boot,
+// tripping the backend rate limit. Module-level guard dedupes across all the
+// component instances a per-component ref can't reach.
+let _registerInFlight = null;
+let _registeredThisSession = false;
+
 export async function registerDeviceToBackend() {
+  if (_registeredThisSession) return;
+  if (_registerInFlight) return _registerInFlight;
+  _registerInFlight = (async () => {
+    try {
+      await _registerDeviceToBackendImpl();
+      _registeredThisSession = true;
+    } finally {
+      _registerInFlight = null;
+    }
+  })();
+  return _registerInFlight;
+}
+
+async function _registerDeviceToBackendImpl() {
   try {
     // 1️⃣ FCM Token
     const fcmToken = await messaging().getToken();

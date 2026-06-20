@@ -175,6 +175,7 @@ export default function Home() {
   const v3AutoRoutedRef = useRef(false);
   const profileFetchingRef = useRef(false);
   const journeyStatusRef = useRef(false);
+  const deviceRegisteredRef = useRef(false);
   const [profileNameFromStorage, setProfileNameFromStorage] = useState<
     string | null
   >(null);
@@ -308,15 +309,18 @@ export default function Home() {
 
   useFocusEffect(
     React.useCallback(() => {
-      // Permission is handled by RemindersScreen when user enables a reminder.
-      // Only register device here if permission is already granted.
+      // Register device once per app session — not on every focus to avoid throttle 429s.
+      if (deviceRegisteredRef.current) return;
       messaging()
         .hasPermission()
         .then((authStatus) => {
           const isGranted =
             authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
             authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-          if (isGranted) registerDeviceToBackend();
+          if (isGranted) {
+            deviceRegisteredRef.current = true;
+            registerDeviceToBackend();
+          }
         })
         .catch(() => {});
     }, []),

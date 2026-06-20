@@ -20,7 +20,7 @@ import * as Linking from "expo-linking";
 
 import store from "../store";
 import { screenActions, loadScreenWithData } from "../store/screenSlice";
-import { navigate } from "../Shared/Routes/NavigationService";
+import { navigate, navigationRef } from "../Shared/Routes/NavigationService";
 
 export interface ParsedMitraDeepLink {
   kind: "mitra";
@@ -221,20 +221,80 @@ export function handleMitraDeepLink(url: string | null | undefined): boolean {
   return true;
 }
 
+// Retry navigating a cold-start URL until the navigator is ready (up to ~3s).
+// navigate() silently no-ops when navigationRef.isReady() is false, so we
+// must poll rather than call it once and hope for the best.
+function handleWhenReady(url: string, attemptsLeft = 15): void {
+  if (navigationRef.isReady()) {
+    handleMitraDeepLink(url);
+  } else if (attemptsLeft > 0) {
+    setTimeout(() => handleWhenReady(url, attemptsLeft - 1), 200);
+  } else {
+    console.warn("[deeplink] navigator never became ready for cold-start URL:", url);
+  }
+}
+
+// Chant containers: the LA fires while MantraRunner/SankalpRunner is the active
+// screen. Always skip navigation in warm-start — navigating would push a fresh
+// QuickReset on top of the active runner (or reset CycleTransitionsContainer state).
+const CHANT_CONTAINERS = new Set(['quick_chant', 'quick_reset']);
+
+// Runner screen names pushed on the stack by Rhythm / InnerPath flows.
+// We skip navigation for their LA taps ONLY when one of these is the active screen
+// (i.e. a session is in progress). If no runner is on top, navigate normally.
+const RHYTHM_RUNNER_SCREENS = new Set([
+  'RhythmMantraRunner', 'RhythmSankalpRunner', 'RhythmPracticeRunner',
+]);
+const INNER_PATH_RUNNER_SCREENS = new Set([
+  'InnerPathMantraRunner', 'InnerPathSankalpRunner', 'InnerPathPracticeRunner',
+]);
+
 /**
  * Install the Linking listeners. Returns a cleanup function. Call once
  * at app boot.
  */
 export function attachDeepLinkListeners(): () => void {
+  // Warm-start handler: app was in background when the URL fired (DI tap,
+  // notification, etc.). Logic:
+  //  - quick_chant / quick_reset: always skip — chant session is still alive on stack.
+  //    Works with ?source=la-tagged URLs (rebuilt Swift) AND without (old build).
+  //  - rhythm_home / inner_path: skip only if a runner is the current screen;
+  //    otherwise navigate normally so the user reaches the Rhythm/InnerPath screen.
   const onUrl = (event: { url: string } | string | null | undefined) => {
     const url = typeof event === "string" ? event : event?.url;
+    if (!url) return;
+    const parsed = parseMitraDeepLink(url);
+
+    if (parsed && CHANT_CONTAINERS.has(parsed.containerId)) {
+      console.log('[deeplink] chant LA warm-start — preserving active runner');
+      return;
+    }
+
+    if (parsed?.containerId === 'rhythm_home') {
+      const currentRoute = navigationRef.getCurrentRoute?.();
+      if (currentRoute && RHYTHM_RUNNER_SCREENS.has(currentRoute.name)) {
+        console.log('[deeplink] rhythm LA warm-start — runner active, skipping nav');
+        return;
+      }
+    }
+
+    if (parsed?.containerId === 'inner_path') {
+      const currentRoute = navigationRef.getCurrentRoute?.();
+      if (currentRoute && INNER_PATH_RUNNER_SCREENS.has(currentRoute.name)) {
+        console.log('[deeplink] inner_path LA warm-start — runner active, skipping nav');
+        return;
+      }
+    }
+
     handleMitraDeepLink(url);
   };
 
-  // Cold-start: app opened via deeplink while not yet running.
+  // Cold-start: app was killed and re-launched via the URL. Always navigate —
+  // there is no active runner to preserve. handleWhenReady retries until the
+  // navigator is ready so the first render doesn't race the navigate() call.
   Linking.getInitialURL()
     .then((url) => {
-      if (url) onUrl(url);
+      if (url) handleWhenReady(url);
     })
     .catch((err) => console.warn("[deeplink] getInitialURL failed:", err));
 

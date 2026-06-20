@@ -202,7 +202,7 @@ class KalpxLiveActivityModule: NSObject {
             await self.endCurrentRhythmActivity()
             await self.endCurrentInnerPathActivity()
 
-            let attrs = KalpxResetAttributes(deepLinkURL: "kalpx://mitra/quick_reset")
+            let attrs = KalpxResetAttributes(deepLinkURL: "kalpx://mitra/quick_reset/home?source=la")
             let state = KalpxResetAttributes.ContentState(
                 mantraTitle: mantraTitle,
                 mantraDevanagari: devanagari
@@ -261,7 +261,7 @@ class KalpxLiveActivityModule: NSObject {
             await self.endCurrentRhythmActivity()
             await self.endCurrentInnerPathActivity()
 
-            let attrs = KalpxSankalpAttributes(title: title, deepLinkURL: self.lastDeepLinkURL)
+            let attrs = KalpxSankalpAttributes(title: title, deepLinkURL: "kalpx://mitra/quick_chant/home?source=la")
             let state = KalpxSankalpAttributes.ContentState(line: line)
 
             do {
@@ -332,7 +332,7 @@ class KalpxLiveActivityModule: NSObject {
             await self.endCurrentRhythmActivity()
             await self.endCurrentInnerPathActivity()
 
-            let attrs = KalpxRhythmAttributes(deepLinkURL: "kalpx://mitra/rhythm")
+            let attrs = KalpxRhythmAttributes(deepLinkURL: "kalpx://mitra/rhythm_home/morning?source=la")
             let state = KalpxRhythmAttributes.ContentState(
                 band: band,
                 bandLabel: bandLabel,
@@ -428,7 +428,7 @@ class KalpxLiveActivityModule: NSObject {
             await self.endCurrentRhythmActivity()
             await self.endCurrentInnerPathActivity()
 
-            let attrs = KalpxInnerPathAttributes(deepLinkURL: "kalpx://mitra/inner_path")
+            let attrs = KalpxInnerPathAttributes(deepLinkURL: "kalpx://mitra/inner_path/home?source=la")
             let state = KalpxInnerPathAttributes.ContentState(
                 dayNumber: dayNumber,
                 totalDays: totalDays,

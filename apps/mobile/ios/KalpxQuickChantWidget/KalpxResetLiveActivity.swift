@@ -45,15 +45,21 @@ struct KalpxResetLiveActivity: Widget {
                     .padding(.bottom, 6)
                 }
             } compactLeading: {
-                Text("ॐ")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.laGold)
-                    .padding(.leading, 6)
+                let url = URL(string: context.attributes.deepLinkURL) ?? URL(string: "kalpx://mitra/quick_reset/home")!
+                Link(destination: url) {
+                    Text("ॐ")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.laGold)
+                        .padding(.leading, 6)
+                }
             } compactTrailing: {
-                Text("Reset")
-                    .font(.system(size: 9, weight: .medium))
-                    .foregroundColor(.white)
-                    .padding(.trailing, 4)
+                let url = URL(string: context.attributes.deepLinkURL) ?? URL(string: "kalpx://mitra/quick_reset/home")!
+                Link(destination: url) {
+                    Text("Reset")
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundColor(.white)
+                        .padding(.trailing, 4)
+                }
             } minimal: {
                 Text("ॐ")
                     .font(.system(size: 12, weight: .medium))

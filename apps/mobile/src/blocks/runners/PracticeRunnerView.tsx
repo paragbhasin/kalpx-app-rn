@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LiveActivityPreferenceBanner } from "../../components/LiveActivityPreferenceBanner";
 import Slider from "@react-native-community/slider";
 import { Audio } from "expo-av";
 import { Minus, Plus, RefreshCw } from "lucide-react-native";
@@ -364,6 +365,10 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
         >
           <View style={{ width: 24, height: 24 }} />
         </TouchableOpacity>
+      )}
+
+      {!isViewOnly && !isCommunityRunner && (
+        <LiveActivityPreferenceBanner experienceType="practice" experienceName={item.title ?? ''} />
       )}
 
       <View style={[styles.visualContainer, isTablet && { maxWidth: 640, alignSelf: 'center', width: '100%' }]}>

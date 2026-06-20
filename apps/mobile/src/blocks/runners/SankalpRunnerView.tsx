@@ -1,5 +1,6 @@
 import { Audio } from "expo-av";
 import React, { useEffect, useRef, useState } from "react";
+import { LiveActivityPreferenceBanner } from "../../components/LiveActivityPreferenceBanner";
 import { useTranslation } from "react-i18next";
 import {
   Image,
@@ -299,6 +300,10 @@ const SankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
         >
           <View style={{ width: 24, height: 24 }} />
         </TouchableOpacity>
+      )}
+
+      {!isViewOnly && !isCommunityRunner && (
+        <LiveActivityPreferenceBanner experienceType="sankalp" experienceName={item.title ?? ''} />
       )}
 
       <View style={[styles.combinedSankalpFlow, isTablet && { maxWidth: 640, alignSelf: 'center' }]}>

@@ -5,6 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { LiveActivityPreferenceBanner } from "../../components/LiveActivityPreferenceBanner";
 import {
   AppState,
   Image,
@@ -23,10 +24,10 @@ import type { JapaSourceSurface } from "@kalpx/types";
 
 function deepLinkFromSurface(surface?: JapaSourceSurface): string {
   switch (surface) {
-    case 'inner_path':   return 'kalpx://mitra/inner_path/home';
-    case 'daily_rhythm': return 'kalpx://mitra/rhythm_home/morning';
-    case 'quick_reset':  return 'kalpx://mitra/quick_reset/home';
-    default:             return 'kalpx://mitra/quick_chant/home'; // routes to QuickReset
+    case 'inner_path':   return 'kalpx://mitra/inner_path/home?source=la';
+    case 'daily_rhythm': return 'kalpx://mitra/rhythm_home/morning?source=la';
+    case 'quick_reset':  return 'kalpx://mitra/quick_reset/home?source=la';
+    default:             return 'kalpx://mitra/quick_chant/home?source=la';
   }
 }
 import { getLiveActivityState } from "../../engine/mitraApi";
@@ -412,6 +413,10 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
         >
           <View style={{ width: 24, height: 24 }} />
         </TouchableOpacity>
+      )}
+
+      {!isViewOnly && !isCommunityRunner && (
+        <LiveActivityPreferenceBanner experienceType="mantra" experienceName={item.title ?? ''} />
       )}
 
       <View style={[styles.combinedMantraFlow, isTablet && { maxWidth: 640, alignSelf: 'center' }]}>

@@ -119,29 +119,35 @@ struct KalpxQuickChantLiveActivity: Widget {
                     .padding(.bottom, 6)
                 }
             } compactLeading: {
-                HStack(spacing: 4) {
-                    Text("ॐ")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(.laGold)
-                        .fixedSize()
-                    Text(context.attributes.mantraName)
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(.white)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                        .minimumScaleFactor(0.7)
-                        .frame(maxWidth: 130, alignment: .leading)
+                let url = URL(string: context.attributes.deepLinkURL) ?? URL(string: "kalpx://mitra/quick_chant/home")!
+                Link(destination: url) {
+                    HStack(spacing: 4) {
+                        Text("ॐ")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.laGold)
+                            .fixedSize()
+                        Text(context.attributes.mantraName)
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                            .minimumScaleFactor(0.7)
+                            .frame(maxWidth: 130, alignment: .leading)
+                    }
                 }
             } compactTrailing: {
-                HStack(spacing: 3) {
-                    Circle()
-                        .fill(Color.laGold)
-                        .frame(width: 5, height: 5)
-                        .shadow(color: .laGold.opacity(0.8), radius: 2)
-                    Text("\(context.state.sessionCount)")
-                        .font(.system(size: 13, weight: .bold, design: .rounded))
-                        .monospacedDigit()
-                        .foregroundColor(.laGold)
+                let url = URL(string: context.attributes.deepLinkURL) ?? URL(string: "kalpx://mitra/quick_chant/home")!
+                Link(destination: url) {
+                    HStack(spacing: 3) {
+                        Circle()
+                            .fill(Color.laGold)
+                            .frame(width: 5, height: 5)
+                            .shadow(color: .laGold.opacity(0.8), radius: 2)
+                        Text("\(context.state.sessionCount)")
+                            .font(.system(size: 13, weight: .bold, design: .rounded))
+                            .monospacedDigit()
+                            .foregroundColor(.laGold)
+                    }
                 }
             } minimal: {
                 Text("\(context.state.sessionCount)")

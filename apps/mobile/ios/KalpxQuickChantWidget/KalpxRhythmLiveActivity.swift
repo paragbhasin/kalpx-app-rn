@@ -45,16 +45,22 @@ struct KalpxRhythmLiveActivity: Widget {
                     .padding(.bottom, 6)
                 }
             } compactLeading: {
-                Text("◈")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.laGold)
-                    .padding(.leading, 6)
+                let url = URL(string: context.attributes.deepLinkURL) ?? URL(string: "kalpx://mitra/rhythm_home/morning")!
+                Link(destination: url) {
+                    Text("◈")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.laGold)
+                        .padding(.leading, 6)
+                }
             } compactTrailing: {
-                Text(context.state.bandLabel)
-                    .font(.system(size: 9, weight: .medium))
-                    .foregroundColor(.white)
-                    .lineLimit(1)
-                    .padding(.trailing, 4)
+                let url = URL(string: context.attributes.deepLinkURL) ?? URL(string: "kalpx://mitra/rhythm_home/morning")!
+                Link(destination: url) {
+                    Text(context.state.bandLabel)
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundColor(.white)
+                        .lineLimit(1)
+                        .padding(.trailing, 4)
+                }
             } minimal: {
                 Text("◈")
                     .font(.system(size: 12, weight: .medium))

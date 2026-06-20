@@ -390,6 +390,10 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   banner: {
+    // Stretch to full width even inside a centered ScrollView content container
+    // (runner screens use alignItems:'center'), otherwise the banner shrinks to
+    // its content and the text overlaps the buttons.
+    alignSelf: "stretch",
     marginHorizontal: 10,
     marginTop: 8,
     marginBottom: 4,

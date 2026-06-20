@@ -267,20 +267,20 @@ const CommunitySankalpRunnerView: React.FC<SankalpRunnerViewProps> = ({
 
   return (
     <View style={styles.container}>
-      {!isViewOnly && (
-        <LiveActivityPreferenceBanner
-          experienceType="sankalp"
-          experienceName={item.title ?? ''}
-          onActivate={() => {
-            liveActivity.startSankalp(item.title ?? '', item.line ?? item.subtitle ?? '');
-          }}
-        />
-      )}
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={[styles.scrollContent, isTablet && { paddingHorizontal: 40 }]}
         showsVerticalScrollIndicator={false}
       >
+        {!isViewOnly && (
+          <LiveActivityPreferenceBanner
+            experienceType="sankalp"
+            experienceName={item.title ?? ''}
+            onActivate={() => {
+              liveActivity.startSankalp(item.title ?? '', item.line ?? item.subtitle ?? '');
+            }}
+          />
+        )}
       {isDevMode && (
         <TouchableOpacity
           testID="test_runner_force_complete"

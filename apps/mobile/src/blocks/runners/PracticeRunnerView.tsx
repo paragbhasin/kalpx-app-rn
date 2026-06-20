@@ -338,23 +338,23 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
 
   return (
     <View style={styles.container}>
-      {!isViewOnly && (
-        <LiveActivityPreferenceBanner
-          experienceType="practice"
-          experienceName={item.title ?? ''}
-          onActivate={() => {
-            liveActivity.startSankalp(
-              item.title ?? '',
-              item.subtitle ?? item.line ?? item.summary ?? '',
-            );
-          }}
-        />
-      )}
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={[styles.scrollContent, isTablet && { paddingHorizontal: 40 }]}
         showsVerticalScrollIndicator={false}
       >
+        {!isViewOnly && (
+          <LiveActivityPreferenceBanner
+            experienceType="practice"
+            experienceName={item.title ?? ''}
+            onActivate={() => {
+              liveActivity.startSankalp(
+                item.title ?? '',
+                item.subtitle ?? item.line ?? item.summary ?? '',
+              );
+            }}
+          />
+        )}
         {isDevMode && (
           <TouchableOpacity
             testID="test_runner_force_complete"

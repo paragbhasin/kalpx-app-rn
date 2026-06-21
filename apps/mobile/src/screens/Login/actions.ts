@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../Networks/axios"; // Adjust the import based on your project structure
-import { registerDeviceToBackend } from "../../utils/registerDevice";
+import { registerDeviceToBackend, resetDeviceRegistrationGuard } from "../../utils/registerDevice";
 export const LOGIN_REQUEST = "LOGIN_REQUEST";
 export const LOGIN_SUCCESS = "LOGIN_SUCCESS";
 export const LOGIN_FAILURE = "LOGIN_FAILURE";
@@ -34,9 +34,10 @@ export const loginUser = (credentials, callback) => async (dispatch) => {
   try {
     const response = await loginApi(credentials);
     console.log("login response:::::", response);
-    AsyncStorage.setItem("access_token", response.data.access_token);
-    AsyncStorage.setItem("refresh_token", response.data.refresh_token);
-    AsyncStorage.setItem("user_id", `${response.data.user.id}`);
+    await AsyncStorage.setItem("access_token", response.data.access_token);
+    await AsyncStorage.setItem("refresh_token", response.data.refresh_token);
+    await AsyncStorage.setItem("user_id", `${response.data.user.id}`);
+    resetDeviceRegistrationGuard();
     await registerDeviceToBackend();
     dispatch(loginSuccess(response.data));
     if (callback) callback({ success: true, data: response.data });
@@ -78,7 +79,8 @@ export const socialLoginUser = (credentials, callback) => async (dispatch) => {
     await AsyncStorage.setItem("access_token", response.data.access_token);
     await AsyncStorage.setItem("refresh_token", response.data.refresh_token);
     await AsyncStorage.setItem("user_id", `${response.data.user.id}`);
-    // await registerDeviceToBackend();
+    resetDeviceRegistrationGuard();
+    await registerDeviceToBackend();
     dispatch(socialLoginSuccess(response.data));
     dispatch(loginSuccess(response.data)); // Sync with main login slice
     callback?.({ success: true, data: response.data });

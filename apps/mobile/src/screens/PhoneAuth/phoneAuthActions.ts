@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../Networks/axios";
-import { registerDeviceToBackend } from "../../utils/registerDevice";
+import { registerDeviceToBackend, resetDeviceRegistrationGuard } from "../../utils/registerDevice";
 import type {
   PhoneOtpRequestPayload,
   PhoneOtpRequestResponse,
@@ -48,6 +48,7 @@ export const verifyPhoneOtp = (
       if (data.user) {
         await AsyncStorage.setItem("user_id", `${(data.user as any).id ?? ""}`);
       }
+      resetDeviceRegistrationGuard();
       await registerDeviceToBackend();
       dispatch(phoneLoginSuccess(data));
     }
@@ -86,6 +87,7 @@ export const loginWithPhone = (
       if (data.user) {
         await AsyncStorage.setItem("user_id", `${(data.user as any).id ?? ""}`);
       }
+      resetDeviceRegistrationGuard();
       await registerDeviceToBackend();
       dispatch(phoneLoginSuccess(data));
     }

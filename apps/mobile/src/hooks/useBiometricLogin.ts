@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import axios from "axios";
 import BASE_URL from "../Networks/baseURL";
 import { BIOMETRIC_TOKEN_KEY, BIOMETRIC_REGISTERED_KEY } from "../utils/biometricKeys";
-import { registerDeviceToBackend } from "../utils/registerDevice";
+import { registerDeviceToBackend, resetDeviceRegistrationGuard } from "../utils/registerDevice";
 
 export function useBiometricLogin() {
   const dispatch = useDispatch();
@@ -74,6 +74,7 @@ export function useBiometricLogin() {
         const user = userId ? { id: Number(userId) } : { id: null };
         dispatch({ type: "LOGIN_SUCCESS", payload: user });
 
+        resetDeviceRegistrationGuard();
         await registerDeviceToBackend();
         await onSuccess();
       } catch (err: any) {

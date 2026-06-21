@@ -16,13 +16,24 @@ export async function registerDeviceToBackend() {
   if (_registerInFlight) return _registerInFlight;
   _registerInFlight = (async () => {
     try {
-      await _registerDeviceToBackendImpl();
-      _registeredThisSession = true;
+      const success = await _registerDeviceToBackendImpl();
+      // Only mark as registered when the backend actually accepted the token.
+      // If FCM token was missing or the request failed, leave the guard unset
+      // so the next call (e.g. after login) can retry.
+      if (success) _registeredThisSession = true;
     } finally {
       _registerInFlight = null;
     }
   })();
   return _registerInFlight;
+}
+
+// Call this immediately before registerDeviceToBackend() in every post-auth
+// flow (login, social login, signup, phone OTP, biometric). This ensures the
+// authenticated registration runs even if a pre-auth guest call already fired.
+export function resetDeviceRegistrationGuard() {
+  _registeredThisSession = false;
+  _registerInFlight = null;
 }
 
 async function _registerDeviceToBackendImpl() {
@@ -31,7 +42,7 @@ async function _registerDeviceToBackendImpl() {
     const fcmToken = await messaging().getToken();
     if (!fcmToken) {
       console.log("❌ No FCM token yet");
-      return;
+      return false;
     }
 
     // 2️⃣ Device ID (unique per device)
@@ -69,8 +80,10 @@ async function _registerDeviceToBackendImpl() {
     } catch (tzError) {
       console.log("⚠️ Timezone confirm failed (non-fatal):", tzError?.message);
     }
+    return true;
   } catch (error) {
     console.log("❌ Device registration failed:", error?.message);
+    return false;
   }
 }
 

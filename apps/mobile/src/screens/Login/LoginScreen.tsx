@@ -29,7 +29,7 @@ import LoadingOverlay from "../../components/LoadingOverlay";
 import TextComponent from "../../components/TextComponent";
 import { RootState } from "../../store";
 import { trackPixelEvent } from "../../utils/facebookEvents";
-import { registerDeviceToBackend } from "../../utils/registerDevice";
+import { registerDeviceToBackend, resetDeviceRegistrationGuard } from "../../utils/registerDevice";
 import { setSkipMitraStart } from "../../utils/postLoginGuard";
 import store from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
@@ -340,6 +340,7 @@ if (key === "pending_classes_data") {
         socialLoginUser({ provider: "google", access_token }, async (res) => {
           setLoading(false);
           if (res.success) {
+                  resetDeviceRegistrationGuard();
                   await registerDeviceToBackend();
               trackPixelEvent("GoogleLoginSuccess", {
   user_id: res.data?.user?.id,
@@ -554,6 +555,7 @@ if (key === "pending_classes_data") {
           }
           return;
         }
+        resetDeviceRegistrationGuard();
         await registerDeviceToBackend();
         await resumePendingIfAny();
       }),

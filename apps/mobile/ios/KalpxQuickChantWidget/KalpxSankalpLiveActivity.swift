@@ -16,7 +16,7 @@ struct KalpxSankalpLiveActivity: Widget {
                             .font(.system(size: 13, weight: .medium))
                             .foregroundColor(.laGold)
                         Text("Your sankalp")
-                            .font(.system(size: 8, weight: .medium))
+                            .font(.system(size: 10, weight: .medium))
                             .foregroundColor(.laGold.opacity(0.7))
                     }
                     .padding(.leading, 4)
@@ -70,7 +70,7 @@ struct KalpxSankalpLiveActivity: Widget {
                     .foregroundColor(.laGold)
                 VStack(alignment: .leading, spacing: 1) {
                     Text("A sankalp for today")
-                        .font(.system(size: 8, weight: .medium))
+                        .font(.system(size: 10, weight: .medium))
                         .foregroundColor(.laMuted)
                     Text(context.attributes.title)
                         .font(.system(size: 15, weight: .bold))

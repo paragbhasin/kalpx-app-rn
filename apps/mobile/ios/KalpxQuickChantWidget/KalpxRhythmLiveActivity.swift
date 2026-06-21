@@ -16,7 +16,7 @@ struct KalpxRhythmLiveActivity: Widget {
                             .font(.system(size: 13, weight: .medium))
                             .foregroundColor(.laGold)
                         Text(context.state.bandLabel)
-                            .font(.system(size: 8, weight: .medium))
+                            .font(.system(size: 10, weight: .medium))
                             .foregroundColor(.laGold.opacity(0.7))
                     }
                     .padding(.leading, 4)
@@ -51,7 +51,7 @@ struct KalpxRhythmLiveActivity: Widget {
                     .padding(.leading, 6)
             } compactTrailing: {
                 Text(context.state.bandLabel)
-                    .font(.system(size: 9, weight: .medium))
+                    .font(.system(size: 10, weight: .medium))
                     .foregroundColor(.white)
                     .lineLimit(1)
                     .padding(.trailing, 4)
@@ -77,7 +77,7 @@ struct KalpxRhythmLiveActivity: Widget {
                     .foregroundColor(.laGold)
                 VStack(alignment: .leading, spacing: 1) {
                     Text("Daily Rhythm")
-                        .font(.system(size: 8, weight: .medium))
+                        .font(.system(size: 10, weight: .medium))
                         .foregroundColor(.laMuted)
                     Text(context.state.bandLabel)
                         .font(.system(size: 12, weight: .semibold))
@@ -100,7 +100,7 @@ struct KalpxRhythmLiveActivity: Widget {
             } else if !context.state.anchorTitle.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(context.state.anchorType.capitalized)
-                        .font(.system(size: 9, weight: .bold))
+                        .font(.system(size: 10, weight: .bold))
                         .foregroundColor(.laMuted)
                         .kerning(1.2)
                     Text(context.state.anchorTitle)

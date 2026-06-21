@@ -16,7 +16,7 @@ struct KalpxResetLiveActivity: Widget {
                             .font(.system(size: 13, weight: .medium))
                             .foregroundColor(.laGold)
                         Text("Return slowly")
-                            .font(.system(size: 8, weight: .medium))
+                            .font(.system(size: 10, weight: .medium))
                             .foregroundColor(.laGold.opacity(0.7))
                     }
                     .padding(.leading, 4)
@@ -51,7 +51,7 @@ struct KalpxResetLiveActivity: Widget {
                     .padding(.leading, 6)
             } compactTrailing: {
                 Text("Reset")
-                    .font(.system(size: 9, weight: .medium))
+                    .font(.system(size: 10, weight: .medium))
                     .foregroundColor(.white)
                     .padding(.trailing, 4)
             } minimal: {
@@ -76,7 +76,7 @@ struct KalpxResetLiveActivity: Widget {
                     .foregroundColor(.laGold)
                 VStack(alignment: .leading, spacing: 1) {
                     Text("A moment of reset")
-                        .font(.system(size: 8, weight: .medium))
+                        .font(.system(size: 10, weight: .medium))
                         .foregroundColor(.laMuted)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)

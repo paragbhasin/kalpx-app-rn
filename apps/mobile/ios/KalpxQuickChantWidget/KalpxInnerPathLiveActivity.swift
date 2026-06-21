@@ -16,14 +16,14 @@ struct KalpxInnerPathLiveActivity: Widget {
                             .font(.system(size: 13, weight: .medium))
                             .foregroundColor(.laGold)
                         Text("Inner Path")
-                            .font(.system(size: 8, weight: .medium))
+                            .font(.system(size: 10, weight: .medium))
                             .foregroundColor(.laGold.opacity(0.7))
                     }
                     .padding(.leading, 4)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     Text("D\(context.state.dayNumber)")
-                        .font(.system(size: 9, weight: .medium))
+                        .font(.system(size: 11, weight: .medium))
                         .foregroundColor(.laMuted)
                         .padding(.trailing, 4)
                 }
@@ -60,7 +60,7 @@ struct KalpxInnerPathLiveActivity: Widget {
                     .padding(.leading, 6)
             } compactTrailing: {
                 Text("D\(context.state.dayNumber)")
-                    .font(.system(size: 9, weight: .medium))
+                    .font(.system(size: 11, weight: .medium))
                     .foregroundColor(.white)
                     .padding(.trailing, 4)
             } minimal: {
@@ -85,7 +85,7 @@ struct KalpxInnerPathLiveActivity: Widget {
                     .foregroundColor(.laGold)
                 VStack(alignment: .leading, spacing: 1) {
                     Text("Inner Path")
-                        .font(.system(size: 8, weight: .medium))
+                        .font(.system(size: 10, weight: .medium))
                         .foregroundColor(.laMuted)
                     Text("Day \(context.state.dayNumber) · \(context.state.totalDays)")
                         .font(.system(size: 12, weight: .semibold))
@@ -143,7 +143,7 @@ struct KalpxInnerPathLiveActivity: Widget {
                 .frame(width: 12)
             VStack(alignment: .leading, spacing: 1) {
                 Text(label)
-                    .font(.system(size: 8, weight: .bold))
+                    .font(.system(size: 9, weight: .bold))
                     .foregroundColor(.laMuted)
                     .kerning(1.0)
                 Text(title)

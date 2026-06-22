@@ -75,6 +75,10 @@ import { RetreatPackageDetailsPage } from "./pages/retreats/RetreatPackageDetail
 import { RetreatsInterestPage } from "./pages/retreats/RetreatsInterestPage";
 import { ProgramLandingPage } from "./pages/programs/ProgramLandingPage";
 import { ProgramSupportPage } from "./pages/programs/ProgramSupportPage";
+import { RequiresStaff } from "./components/RequiresStaff";
+import { ProgramAdminDashboard } from "./pages/programs/ProgramAdminDashboard";
+import { ProgramAdminCreateCampaign } from "./pages/programs/ProgramAdminCreateCampaign";
+import { ProgramAdminCampaignDetail } from "./pages/programs/ProgramAdminCampaignDetail";
 
 const ONBOARDING_TURN_1_PATH =
   "/en/mitra/onboarding?containerId=welcome_onboarding&stateId=turn_1";
@@ -360,6 +364,20 @@ export function AppRoutes() {
       <Route path="/join/:code" element={<ProgramLandingPage />} />
       <Route path="/p/:slug" element={<ProgramLandingPage />} />
       <Route path="/programs/support" element={<ProgramSupportPage />} />
+
+      {/* Practice Distribution OS — Gate 7 (staff-only admin) */}
+      <Route
+        path="/programs/admin/"
+        element={<RequiresStaff><ProgramAdminDashboard /></RequiresStaff>}
+      />
+      <Route
+        path="/programs/admin/new/"
+        element={<RequiresStaff><ProgramAdminCreateCampaign /></RequiresStaff>}
+      />
+      <Route
+        path="/programs/admin/:code/"
+        element={<RequiresStaff><ProgramAdminCampaignDetail /></RequiresStaff>}
+      />
 
       <Route path="*" element={<Navigate to="/en" replace />} />
     </Routes>

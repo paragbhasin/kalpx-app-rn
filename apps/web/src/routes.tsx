@@ -73,6 +73,8 @@ import { RetreatCancellationPage } from "./pages/retreats/RetreatCancellationPag
 import { RetreatDetailsPage } from "./pages/retreats/RetreatDetailsPage";
 import { RetreatPackageDetailsPage } from "./pages/retreats/RetreatPackageDetailsPage";
 import { RetreatsInterestPage } from "./pages/retreats/RetreatsInterestPage";
+import { ProgramLandingPage } from "./pages/programs/ProgramLandingPage";
+import { ProgramSupportPage } from "./pages/programs/ProgramSupportPage";
 
 const ONBOARDING_TURN_1_PATH =
   "/en/mitra/onboarding?containerId=welcome_onboarding&stateId=turn_1";
@@ -353,6 +355,11 @@ export function AppRoutes() {
           </RequiresAuth>
         }
       />
+
+      {/* Practice Distribution OS — Gate 2 (public, no auth required) */}
+      <Route path="/join/:code" element={<ProgramLandingPage />} />
+      <Route path="/p/:slug" element={<ProgramLandingPage />} />
+      <Route path="/programs/support" element={<ProgramSupportPage />} />
 
       <Route path="*" element={<Navigate to="/en" replace />} />
     </Routes>

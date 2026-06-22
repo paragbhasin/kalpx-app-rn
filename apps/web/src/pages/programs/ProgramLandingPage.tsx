@@ -70,7 +70,7 @@ export function ProgramLandingPage() {
         utm_source: params.get('utm_source') || '',
         utm_medium: params.get('utm_medium') || '',
       };
-      navigator.sendBeacon('/api/analytics/event/', JSON.stringify(payload));
+      navigator.sendBeacon('/api/programs/track/', JSON.stringify(payload));
     } catch {
       // analytics failure must never break the landing page
     }

@@ -203,33 +203,66 @@ class KalpxLiveActivityService : Service() {
         super.onCreate()
         createNotificationChannels()
         restoreFromPrefs()
+        // Satisfy the OS 5-second startForeground() requirement as early as possible.
+        // MIUI and other aggressive battery optimizers can delay onStartCommand() delivery
+        // after startForegroundService() — calling startForeground() here in onCreate()
+        // ensures the foreground claim happens before any scheduler delay fires.
+        // onStartCommand() then replaces this with the proper notification.
+        // For END actions (started via startService, not startForegroundService), the
+        // handler calls stopForeground(REMOVE) immediately, so this notification is
+        // dismissed before users see it.
+        startForegroundCompat(
+            if (activeType != TYPE_NONE) when (activeType) {
+                TYPE_CHANT      -> buildChantNotification()
+                TYPE_SANKALP    -> buildSankalpNotification()
+                TYPE_RESET      -> buildResetNotification()
+                TYPE_RHYTHM     -> buildRhythmNotification()
+                TYPE_INNER_PATH -> buildInnerPathNotification()
+                else            -> buildFallbackNotification()
+            } else buildFallbackNotification()
+        )
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when (intent?.action) {
-            ACTION_START_CHANT    -> handleStartChant(intent)
-            ACTION_UPDATE_CHANT   -> handleUpdateChant(intent)
-            ACTION_COMPLETE_CHANT -> handleCompleteChant(intent)
-            ACTION_END            -> handleEnd()
-            ACTION_START_SANKALP  -> handleStartSankalp(intent)
-            ACTION_INCREMENT         -> handleIncrement()
-            ACTION_START_RESET       -> handleStartReset(intent)
-            ACTION_END_RESET         -> handleEndReset()
-            ACTION_START_RHYTHM      -> handleStartRhythm(intent)
-            ACTION_UPDATE_RHYTHM     -> handleUpdateRhythm(intent)
-            ACTION_END_RHYTHM        -> handleEndRhythm()
-            ACTION_START_INNER_PATH  -> handleStartInnerPath(intent)
-            ACTION_UPDATE_INNER_PATH -> handleUpdateInnerPath(intent)
-            ACTION_END_INNER_PATH    -> handleEndInnerPath()
-            null -> {
-                // System restarted the service after kill (shouldn't happen with START_NOT_STICKY,
-                // but guard against it for safety).
-                if (activeType != TYPE_NONE) {
-                    rebuildForegroundFromState()
-                } else {
-                    stopSelf()
+        try {
+            when (intent?.action) {
+                ACTION_START_CHANT    -> handleStartChant(intent)
+                ACTION_UPDATE_CHANT   -> handleUpdateChant(intent)
+                ACTION_COMPLETE_CHANT -> handleCompleteChant(intent)
+                ACTION_END            -> handleEnd()
+                ACTION_START_SANKALP  -> handleStartSankalp(intent)
+                ACTION_INCREMENT         -> handleIncrement()
+                ACTION_START_RESET       -> handleStartReset(intent)
+                ACTION_END_RESET         -> handleEndReset()
+                ACTION_START_RHYTHM      -> handleStartRhythm(intent)
+                ACTION_UPDATE_RHYTHM     -> handleUpdateRhythm(intent)
+                ACTION_END_RHYTHM        -> handleEndRhythm()
+                ACTION_START_INNER_PATH  -> handleStartInnerPath(intent)
+                ACTION_UPDATE_INNER_PATH -> handleUpdateInnerPath(intent)
+                ACTION_END_INNER_PATH    -> handleEndInnerPath()
+                null -> {
+                    // Null action means either a system restart (shouldn't happen with
+                    // START_NOT_STICKY) or a race where the previous session's ACTION_END
+                    // hadn't finished when a new startForegroundService() arrived.
+                    // startForeground() MUST be called before stopSelf() to satisfy the OS.
+                    if (activeType != TYPE_NONE) {
+                        rebuildForegroundFromState()
+                    } else {
+                        startForegroundCompat(buildFallbackNotification())
+                        ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+                        stopSelf()
+                    }
                 }
             }
+        } catch (e: Exception) {
+            // Catch-all: if anything throws before startForeground() is reached, the OS
+            // will fire ForegroundServiceDidNotStartInTimeException after 5 seconds.
+            // Call startForeground() with a minimal notification, then stop cleanly.
+            try {
+                startForegroundCompat(buildFallbackNotification())
+                ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+            } catch (_: Exception) { }
+            stopSelf()
         }
         // NOT_STICKY: don't auto-restart on kill. A chanting session cannot resume
         // without the app, matching iOS behavior where ActivityKit eventually dismisses.
@@ -266,7 +299,7 @@ class KalpxLiveActivityService : Service() {
         isCompleted    = false
 
         persistState()
-        notifManager.notify(NOTIFICATION_ID, buildChantNotification())
+        notifyLive(buildChantNotification())
     }
 
     private fun handleCompleteChant(intent: Intent) {
@@ -281,7 +314,7 @@ class KalpxLiveActivityService : Service() {
         // The service stays alive; JS will call ACTION_END after ~5 seconds.
         // Mirrors iOS: isCompleted=true shows "Practice complete ✓", dismissed on .end(.immediate).
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_DETACH)
-        notifManager.notify(NOTIFICATION_ID, buildChantNotification())
+        notifyLive(buildChantNotification())
     }
 
     private fun handleEnd() {
@@ -320,7 +353,7 @@ class KalpxLiveActivityService : Service() {
             .also { persistStateInto(it) }
             .apply()
 
-        notifManager.notify(NOTIFICATION_ID, buildChantNotification())
+        notifyLive(buildChantNotification())
     }
 
     private fun handleStartReset(intent: Intent) {
@@ -355,7 +388,7 @@ class KalpxLiveActivityService : Service() {
         if (activeType != TYPE_RHYTHM) return
         rhythmBandDone = intent.getBooleanExtra("bandDone", rhythmBandDone)
         persistState()
-        notifManager.notify(NOTIFICATION_ID, buildRhythmNotification())
+        notifyLive(buildRhythmNotification())
     }
 
     private fun handleEndRhythm() {
@@ -387,7 +420,7 @@ class KalpxLiveActivityService : Service() {
         innerPathSankalpDone  = intent.getBooleanExtra("sankalpDone", innerPathSankalpDone)
         innerPathPracticeDone = intent.getBooleanExtra("practiceDone", innerPathPracticeDone)
         persistState()
-        notifManager.notify(NOTIFICATION_ID, buildInnerPathNotification())
+        notifyLive(buildInnerPathNotification())
     }
 
     private fun handleEndInnerPath() {
@@ -663,6 +696,13 @@ class KalpxLiveActivityService : Service() {
             .build()
     }
 
+    private fun buildFallbackNotification(): Notification =
+        NotificationCompat.Builder(this, CHANNEL_CHANT)
+            .setSmallIcon(R.drawable.ic_kalpx_notification)
+            .setContentTitle("Kalpx")
+            .setOngoing(false)
+            .build()
+
     // ── Android 16 Live Updates ───────────────────────────────────────────────
     // Android 16 (API 36) promotes ongoing foreground service notifications to a
     // richer lock-screen card via Notification.setLiveUpdateBehavior(LIVE).
@@ -824,7 +864,10 @@ class KalpxLiveActivityService : Service() {
     // On API 29+ (Android 10+) startForeground MUST include the service type that
     // matches foregroundServiceType in the manifest. On API 34 (Android 14) omitting
     // it throws InvalidForegroundServiceTypeException and the service fails silently.
+    // applyLiveUpdateBehavior() is called here so every startForeground path gets
+    // the Android 16 rich lock-screen card automatically.
     private fun startForegroundCompat(notification: Notification) {
+        applyLiveUpdateBehavior(notification)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(
                 NOTIFICATION_ID,
@@ -834,6 +877,13 @@ class KalpxLiveActivityService : Service() {
         } else {
             startForeground(NOTIFICATION_ID, notification)
         }
+    }
+
+    // Wraps notifManager.notify() so update paths also get the API 36 Live Update
+    // behavior without each call site having to remember to apply it.
+    private fun notifyLive(notification: Notification) {
+        applyLiveUpdateBehavior(notification)
+        notifManager.notify(NOTIFICATION_ID, notification)
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

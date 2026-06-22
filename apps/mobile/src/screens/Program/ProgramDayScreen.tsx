@@ -1,0 +1,366 @@
+/**
+ * ProgramDayScreen — Gate 3 MOB-4.
+ *
+ * Forked from InnerPathScreen concept; DO NOT modify InnerPathScreen.
+ * Loads day content from GET /api/programs/my-active/day/{N}/ and
+ * shows the prescribed mantra, sankalp, and practice for that day.
+ *
+ * On completing all 3 items → "Complete Day" CTA → ProgramCompletionScreen.
+ */
+import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Fonts } from "../../theme/fonts";
+import { fetchProgramDay, type ProgramDayContent, type ProgramDayItem } from "../../engine/programApi";
+
+const SUPPORT_URL = "https://kalpx.com/programs/support";
+
+function ItemCard({
+  item,
+  label,
+  done,
+  onPress,
+}: {
+  item: ProgramDayItem;
+  label: string;
+  done: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.82}
+      onPress={onPress}
+      style={[styles.itemCard, done && styles.itemCardDone]}
+      accessibilityLabel={`${label}: ${item.title}${done ? " (done)" : ""}`}
+    >
+      <View style={styles.itemCardLeft}>
+        <Text style={styles.itemLabel}>{label}</Text>
+        <Text style={styles.itemTitle}>{item.title}</Text>
+        {item.devanagari ? (
+          <Text style={styles.itemDevanagari}>{item.devanagari}</Text>
+        ) : null}
+      </View>
+      <View style={styles.itemCardRight}>
+        {done ? (
+          <Text style={styles.doneCheckmark}>✓</Text>
+        ) : (
+          <Text style={styles.itemArrow}>→</Text>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+export default function ProgramDayScreen() {
+  const navigation = useNavigation<any>();
+  const route = useRoute<any>();
+  const { dayNumber, completedItem } = route.params ?? {};
+
+  const [dayContent, setDayContent] = useState<ProgramDayContent | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Track which items the user has visited in this session
+  const sessionDoneRef = useRef<Set<string>>(new Set());
+  const [sessionDone, setSessionDone] = useState<Set<string>>(new Set());
+
+  // When the runner returns us here with a completedItem param, mark it done
+  useEffect(() => {
+    if (completedItem) {
+      sessionDoneRef.current = new Set([...sessionDoneRef.current, completedItem]);
+      setSessionDone(new Set(sessionDoneRef.current));
+    }
+  }, [completedItem]);
+
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      (async () => {
+        try {
+          setLoading(true);
+          const data = await fetchProgramDay(dayNumber);
+          if (!cancelled) setDayContent(data);
+        } catch (err: any) {
+          if (cancelled) return;
+          const status = err?.response?.status;
+          if (status === 403) setError("Complete the previous day first.");
+          else if (status === 404) setError("Day not found in your program.");
+          else setError("Couldn't load today's practice. Please try again.");
+        } finally {
+          if (!cancelled) setLoading(false);
+        }
+      })();
+      return () => { cancelled = true; };
+    }, [dayNumber]),
+  );
+
+  const handleLaunchRunner = (item: ProgramDayItem) => {
+    const screenMap: Record<string, string> = {
+      mantra: "ProgramMantraRunner",
+      sankalp: "ProgramSankalpRunner",
+      practice: "ProgramPracticeRunner",
+    };
+    const screen = screenMap[item.item_type];
+    if (!screen) return;
+    navigation.navigate(screen, { item, dayNumber });
+  };
+
+  const allItems = dayContent
+    ? [dayContent.mantra, dayContent.sankalp, dayContent.practice].filter(Boolean) as ProgramDayItem[]
+    : [];
+
+  const isItemDone = (item: ProgramDayItem) =>
+    dayContent?.is_completed || sessionDone.has(item.item_id);
+
+  const allDone = allItems.length > 0 && allItems.every(isItemDone);
+
+  const handleCompleteDay = () => {
+    navigation.replace("ProgramCompletionScreen", {
+      dayNumber,
+      completionMessage: dayContent?.completion_message ?? null,
+      programName: null,
+    });
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.center}>
+        <ActivityIndicator size="large" color="#C99317" />
+      </SafeAreaView>
+    );
+  }
+
+  if (error || !dayContent) {
+    return (
+      <SafeAreaView style={styles.center}>
+        <Text style={styles.errorText}>{error ?? "Something went wrong."}</Text>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backBtn}
+        >
+          <Text style={styles.backBtnText}>← Back</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
+  const ITEM_LABELS: Record<string, string> = {
+    mantra: "Mantra",
+    sankalp: "Sankalp",
+    practice: "Practice",
+  };
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon}>
+            <Text style={styles.backIconText}>‹</Text>
+          </TouchableOpacity>
+          <View style={styles.headerCenter}>
+            <Text style={styles.dayLabel}>DAY {dayContent.day_number}</Text>
+            <Text style={styles.themeText}>{dayContent.theme}</Text>
+          </View>
+          <View style={{ width: 40 }} />
+        </View>
+
+        {/* Item cards */}
+        <View style={styles.itemsSection}>
+          {allItems.map((item) => (
+            <ItemCard
+              key={item.item_id}
+              item={item}
+              label={ITEM_LABELS[item.item_type] ?? item.item_type}
+              done={isItemDone(item)}
+              onPress={() => handleLaunchRunner(item)}
+            />
+          ))}
+        </View>
+
+        {/* Reflection prompt */}
+        {dayContent.reflection_prompt ? (
+          <View style={styles.reflectionCard}>
+            <Text style={styles.reflectionLabel}>REFLECTION</Text>
+            <Text style={styles.reflectionText}>{dayContent.reflection_prompt}</Text>
+          </View>
+        ) : null}
+
+        {/* Complete Day CTA */}
+        {allDone ? (
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={handleCompleteDay}
+            style={styles.completeCta}
+            accessibilityLabel="Complete Day"
+          >
+            <Text style={styles.completeCtaText}>Complete Day {dayContent.day_number} →</Text>
+          </TouchableOpacity>
+        ) : (
+          <Text style={styles.progressHint}>
+            {allItems.filter(isItemDone).length}/{allItems.length} done — complete all to finish the day
+          </Text>
+        )}
+
+        {/* Support footer */}
+        <TouchableOpacity
+          style={styles.supportLink}
+          onPress={() => Alert.alert(
+            "Need help?",
+            "Visit kalpx.com/programs/support for help with your program.",
+            [{ text: "OK" }],
+          )}
+          accessibilityLabel="Program support"
+        >
+          <Text style={styles.supportLinkText}>Need help? Get support →</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: "#FAF7F2" },
+  center: { flex: 1, backgroundColor: "#FAF7F2", justifyContent: "center", alignItems: "center", padding: 24 },
+  scroll: { paddingBottom: 60, paddingHorizontal: 20 },
+
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 16,
+    paddingBottom: 20,
+  },
+  backIcon: { width: 40, alignItems: "flex-start" },
+  backIconText: { fontSize: 32, color: "#432104", lineHeight: 36 },
+  headerCenter: { flex: 1, alignItems: "center" },
+  dayLabel: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 11,
+    color: "#9A7548",
+    letterSpacing: 0.06,
+    marginBottom: 4,
+  },
+  themeText: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 20,
+    color: "#432104",
+    textAlign: "center",
+  },
+
+  itemsSection: { gap: 12, marginBottom: 24 },
+
+  itemCard: {
+    backgroundColor: "#FFF8EE",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#E8D9B5",
+    padding: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  itemCardDone: {
+    backgroundColor: "#F0EAD8",
+    borderColor: "#C99317",
+  },
+  itemCardLeft: { flex: 1 },
+  itemLabel: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 11,
+    color: "#9A7548",
+    letterSpacing: 0.05,
+    marginBottom: 4,
+  },
+  itemTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 16,
+    color: "#432104",
+    marginBottom: 2,
+  },
+  itemDevanagari: {
+    fontFamily: Fonts.devanagari.regular,
+    fontSize: 15,
+    color: "#7B6545",
+    lineHeight: 22,
+  },
+  itemCardRight: { marginLeft: 12 },
+  doneCheckmark: { fontSize: 22, color: "#C99317", fontWeight: "700" },
+  itemArrow: { fontSize: 22, color: "#C99317" },
+
+  reflectionCard: {
+    backgroundColor: "#FFF8EE",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E8D9B5",
+    padding: 16,
+    marginBottom: 24,
+  },
+  reflectionLabel: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 10,
+    color: "#9A7548",
+    letterSpacing: 0.06,
+    marginBottom: 6,
+  },
+  reflectionText: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 14,
+    color: "#432104",
+    lineHeight: 21,
+  },
+
+  completeCta: {
+    backgroundColor: "#C99317",
+    borderRadius: 14,
+    paddingVertical: 18,
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  completeCtaText: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 16,
+    color: "#fff",
+  },
+
+  progressHint: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    color: "#9A7548",
+    textAlign: "center",
+    marginBottom: 16,
+  },
+
+  supportLink: { alignItems: "center", paddingVertical: 12 },
+  supportLinkText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 13,
+    color: "#9A7548",
+    textDecorationLine: "underline",
+  },
+
+  errorText: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 15,
+    color: "#432104",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  backBtn: { paddingVertical: 12, paddingHorizontal: 24 },
+  backBtnText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 15,
+    color: "#C99317",
+  },
+});

@@ -1,0 +1,107 @@
+/**
+ * programApi.ts — Practice Distribution OS mobile API layer.
+ *
+ * All calls go through the shared axios instance so auth headers
+ * and timeout config are inherited automatically.
+ */
+
+import api from "../Networks/axios";
+
+export interface ProgramDayItem {
+  item_id: string;
+  item_type: "mantra" | "sankalp" | "practice";
+  title: string;
+  devanagari?: string;
+  iast?: string;
+  description?: string;
+}
+
+export interface ActiveProgramSummary {
+  name: string;
+  status: "active" | "completed";
+  current_day: number;
+  next_day_available: boolean;
+  days_remaining: number;
+  show_day8_transition?: boolean;
+}
+
+export interface ProgramDayContent {
+  day_number: number;
+  theme: string;
+  reflection_prompt: string | null;
+  completion_message: string | null;
+  mantra: ProgramDayItem | null;
+  practice: ProgramDayItem | null;
+  sankalp: ProgramDayItem | null;
+  is_completed: boolean;
+}
+
+export interface ProgramClaimConflict {
+  conflict: true;
+  current_program: { name: string; current_day: number; code: string };
+}
+
+export interface ProgramClaimSuccess {
+  participant_id: string;
+  program_name: string;
+}
+
+export async function fetchActiveProgram(): Promise<ActiveProgramSummary | null> {
+  const res = await api.get("programs/my-active/");
+  return res.data ?? null;
+}
+
+export async function fetchProgramDay(dayNumber: number): Promise<ProgramDayContent> {
+  const res = await api.get(`programs/my-active/day/${dayNumber}/`);
+  return res.data;
+}
+
+export async function completeProgramDay(dayNumber: number): Promise<any> {
+  const res = await api.post(`programs/my-active/day/${dayNumber}/complete/`);
+  return res.data;
+}
+
+export async function claimProgram(
+  code: string,
+  switchFromCode?: string,
+): Promise<ProgramClaimConflict | ProgramClaimSuccess> {
+  const body: any = {};
+  if (switchFromCode) body.switch_from_campaign_code = switchFromCode;
+  const res = await api.post(`programs/${code}/claim/`, body);
+  return res.data;
+}
+
+export async function postDay8Transition(
+  selectedPath: "inner_path" | "daily_rhythm" | "quick_chant" | "share" | "none",
+): Promise<{ redirect_deep_link: string | null }> {
+  const res = await api.post("programs/my-active/day8-transition/", {
+    selected_path: selectedPath,
+  });
+  return res.data;
+}
+
+export async function submitProgramTestimonial(
+  text: string,
+): Promise<any> {
+  const res = await api.post("programs/my-active/testimonial/", {
+    text,
+    consent_to_share: false,
+  });
+  return res.data;
+}
+
+export async function submitProgramMicroFeedback(
+  campaignCode: string,
+  response: string,
+): Promise<any> {
+  const res = await api.post("programs/my-active/feedback/", {
+    campaign_code: campaignCode,
+    response,
+  });
+  return res.data;
+}
+
+export async function recordProgramShare(): Promise<any> {
+  const res = await api.post("programs/my-active/share/");
+  return res.data;
+}

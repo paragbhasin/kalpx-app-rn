@@ -89,6 +89,14 @@ import InnerPathPracticeCompletion from "../screens/Mitra/completions/InnerPathP
 import RhythmMantraCompletion from "../screens/Mitra/completions/RhythmMantraCompletion";
 import RhythmSankalpCompletion from "../screens/Mitra/completions/RhythmSankalpCompletion";
 import RhythmPracticeCompletion from "../screens/Mitra/completions/RhythmPracticeCompletion";
+// Program Distribution OS — Gate 3
+import ProgramInviteClaimScreen from "../screens/Program/ProgramInviteClaimScreen";
+import ProgramDayScreen from "../screens/Program/ProgramDayScreen";
+import ProgramCompletionScreen from "../screens/Program/ProgramCompletionScreen";
+import ProgramDay8TransitionScreen from "../screens/Program/ProgramDay8TransitionScreen";
+import ProgramMantraRunner from "../screens/Program/runners/ProgramMantraRunner";
+import ProgramSankalpRunner from "../screens/Program/runners/ProgramSankalpRunner";
+import ProgramPracticeRunner from "../screens/Program/runners/ProgramPracticeRunner";
 
 const Stack: any = createNativeStackNavigator();
 
@@ -400,6 +408,14 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen name="RhythmMantraCompletion" component={RhythmMantraCompletion} options={{ headerShown: false }} />
     <Stack.Screen name="RhythmSankalpCompletion" component={RhythmSankalpCompletion} options={{ headerShown: false }} />
     <Stack.Screen name="RhythmPracticeCompletion" component={RhythmPracticeCompletion} options={{ headerShown: false }} />
+    {/* Program Distribution OS — Gate 3 screens */}
+    <Stack.Screen name="ProgramInviteClaimScreen" component={ProgramInviteClaimScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="ProgramDayScreen" component={ProgramDayScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="ProgramCompletionScreen" component={ProgramCompletionScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="ProgramDay8TransitionScreen" component={ProgramDay8TransitionScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="ProgramMantraRunner" component={ProgramMantraRunner} options={{ headerShown: false }} />
+    <Stack.Screen name="ProgramSankalpRunner" component={ProgramSankalpRunner} options={{ headerShown: false }} />
+    <Stack.Screen name="ProgramPracticeRunner" component={ProgramPracticeRunner} options={{ headerShown: false }} />
   </Stack.Navigator>
 );
 

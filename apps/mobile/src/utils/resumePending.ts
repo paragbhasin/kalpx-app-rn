@@ -14,6 +14,21 @@ import { setSkipMitraStart } from "./postLoginGuard";
 
 export const resumePendingIfAny = async (navigation: any) => {
   try {
+    // Program Distribution OS: check for pending program code FIRST
+    // so a join deep link captured before login is claimed immediately post-auth.
+    const pendingProgramCode = await AsyncStorage.getItem("pending_program_code");
+    const pendingProgramSource = await AsyncStorage.getItem("pending_program_source");
+    if (pendingProgramCode) {
+      navigation.navigate("AppDrawer" as any);
+      setTimeout(() => {
+        navigation.navigate("ProgramInviteClaimScreen" as any, {
+          code: pendingProgramCode,
+          source: pendingProgramSource ?? "deep_link",
+        });
+      }, 400);
+      return;
+    }
+
     const mitraIntentionPending = await AsyncStorage.getItem("mitra_intention_pending");
     if (mitraIntentionPending) {
       await AsyncStorage.removeItem("mitra_intention_pending");

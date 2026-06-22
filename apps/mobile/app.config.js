@@ -2,7 +2,7 @@ module.exports = {
   expo: {
     name: "kalpx",
     slug: "kalpx",
-    version: "1.1.50",
+    version: "1.1.51",
     orientation: "portrait",
     icon: "./assets/new_logo.png",
     scheme: "kalpx",
@@ -17,6 +17,7 @@ module.exports = {
       bundleIdentifier: "com.kalpx.app",
       usesAppleSignIn: true,
       appleTeamId: "9G5NZ5LBRU",
+      associatedDomains: ["applinks:kalpx.com"],
       googleServicesFile:
         process.env.GOOGLE_SERVICES_PLIST || "../../GoogleService-Info.plist",
       buildNumber: "57",
@@ -42,8 +43,19 @@ module.exports = {
       },
     },
     android: {
-      versionCode: 63,
+      versionCode: 64,
       package: "com.kalpx.app",
+      intentFilters: [
+        {
+          action: "VIEW",
+          autoVerify: true,
+          data: [
+            { scheme: "https", host: "kalpx.com", pathPrefix: "/p" },
+            { scheme: "https", host: "kalpx.com", pathPrefix: "/join" },
+          ],
+          category: ["BROWSABLE", "DEFAULT"],
+        },
+      ],
       blockedPermissions: [
         "android.permission.READ_MEDIA_IMAGES",
         "android.permission.READ_MEDIA_VIDEO",

@@ -97,6 +97,9 @@ import {
   mitraPranaAcknowledge,
   postPranaAcknowledgeDismiss,
 } from "../engine/mitraApi";
+import { fetchActiveProgram, type ActiveProgramSummary } from "../engine/programApi";
+import ProgramCard from "../screens/Home/ProgramCard";
+import ProgramCodeEntryRow from "../screens/Home/ProgramCodeEntryRow";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { setHomeData } from "../store/doorSlice";
 import { Fonts } from "../theme/fonts";
@@ -247,6 +250,9 @@ export default function FourDoorHomeContainer({
   const [selectedFeeling, setSelectedFeeling] = useState<FeelingOption | null>(
     null,
   );
+
+  // Program Distribution OS — active program card + invite code row
+  const [activeProgram, setActiveProgram] = useState<ActiveProgramSummary | null>(null);
   const [feelingLoading, setFeelingLoading] = useState(false);
   const doorStates = (homeData?.door_states ?? {}) as Record<string, any>;
 
@@ -344,6 +350,15 @@ export default function FourDoorHomeContainer({
       updateHeaderHidden(false);
       return () => updateHeaderHidden(false);
     }, [updateBackground, updateHeaderHidden]),
+  );
+
+  // Refresh active program on every focus — catches join/completion state changes
+  useFocusEffect(
+    useCallback(() => {
+      fetchActiveProgram()
+        .then(setActiveProgram)
+        .catch(() => setActiveProgram(null));
+    }, []),
   );
 
   const handleFeelingSelect = useCallback(
@@ -920,6 +935,13 @@ export default function FourDoorHomeContainer({
               </>
             )}
           </View>
+
+          {/* Program Distribution OS — MOB-8 + MOB-2 */}
+          {activeProgram ? (
+            <ProgramCard program={activeProgram} />
+          ) : (
+            <ProgramCodeEntryRow />
+          )}
         </View>
       </ScrollView>
 

@@ -17,6 +17,7 @@
  */
 
 import * as Linking from "expo-linking";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import store from "../store";
 import { screenActions, loadScreenWithData } from "../store/screenSlice";
@@ -237,12 +238,60 @@ export function handleMitraDeepLink(url: string | null | undefined): boolean {
   return true;
 }
 
+/**
+ * Handle kalpx://join/{code} custom-scheme deep links.
+ * Stores the code in AsyncStorage and navigates to ProgramInviteClaimScreen.
+ * Returns true if handled, false otherwise.
+ *
+ * Universal Links (https://kalpx.com/join/{code}) are handled at the
+ * React Native Router level via intentFilters/associatedDomains — they
+ * open the app and arrive here via Linking.getInitialURL().
+ */
+export function handleProgramJoinDeepLink(url: string): boolean {
+  if (!url) return false;
+
+  // Handle custom scheme: kalpx://join/{code}
+  if (url.startsWith("kalpx://join/")) {
+    const code = url.replace("kalpx://join/", "").split("?")[0].trim().toUpperCase();
+    if (!code) return false;
+    void AsyncStorage.setItem("pending_program_code", code);
+    void AsyncStorage.setItem("pending_program_source", "deep_link");
+    try {
+      navigate("ProgramInviteClaimScreen" as any, { code, source: "deep_link" });
+    } catch (err) {
+      console.warn("[deeplink] ProgramInviteClaimScreen navigate failed:", err);
+    }
+    console.log(`[deeplink] → ProgramInviteClaimScreen (code=${code})`);
+    return true;
+  }
+
+  // Handle HTTPS Universal Link: https://kalpx.com/join/{code}
+  if (url.startsWith("https://kalpx.com/join/")) {
+    const code = url.replace("https://kalpx.com/join/", "").split("?")[0].trim().toUpperCase();
+    if (!code) return false;
+    void AsyncStorage.setItem("pending_program_code", code);
+    void AsyncStorage.setItem("pending_program_source", "universal_link");
+    try {
+      navigate("ProgramInviteClaimScreen" as any, { code, source: "universal_link" });
+    } catch (err) {
+      console.warn("[deeplink] ProgramInviteClaimScreen (UL) navigate failed:", err);
+    }
+    console.log(`[deeplink] → ProgramInviteClaimScreen (UL code=${code})`);
+    return true;
+  }
+
+  return false;
+}
+
 // Retry navigating a cold-start URL until the navigator is ready (up to ~3s).
 // navigate() silently no-ops when navigationRef.isReady() is false, so we
 // must poll rather than call it once and hope for the best.
 function handleWhenReady(url: string, attemptsLeft = 15): void {
   if (navigationRef.isReady()) {
-    handleMitraDeepLink(url);
+    // Program join links take priority over Mitra deeplinks
+    if (!handleProgramJoinDeepLink(url)) {
+      handleMitraDeepLink(url);
+    }
   } else if (attemptsLeft > 0) {
     setTimeout(() => handleWhenReady(url, attemptsLeft - 1), 200);
   } else {
@@ -312,7 +361,10 @@ export function attachDeepLinkListeners(): () => void {
       }
     }
 
-    handleMitraDeepLink(url);
+    // Program join links take priority over Mitra deeplinks
+    if (!handleProgramJoinDeepLink(url)) {
+      handleMitraDeepLink(url);
+    }
   };
 
   // Cold-start: app was killed and re-launched via the URL. Always navigate —

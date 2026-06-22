@@ -201,26 +201,26 @@ class KalpxLiveActivityService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        createNotificationChannels()
-        restoreFromPrefs()
-        // Satisfy the OS 5-second startForeground() requirement as early as possible.
-        // MIUI and other aggressive battery optimizers can delay onStartCommand() delivery
-        // after startForegroundService() — calling startForeground() here in onCreate()
-        // ensures the foreground claim happens before any scheduler delay fires.
-        // onStartCommand() then replaces this with the proper notification.
-        // For END actions (started via startService, not startForegroundService), the
-        // handler calls stopForeground(REMOVE) immediately, so this notification is
-        // dismissed before users see it.
-        startForegroundCompat(
-            if (activeType != TYPE_NONE) when (activeType) {
-                TYPE_CHANT      -> buildChantNotification()
-                TYPE_SANKALP    -> buildSankalpNotification()
-                TYPE_RESET      -> buildResetNotification()
-                TYPE_RHYTHM     -> buildRhythmNotification()
-                TYPE_INNER_PATH -> buildInnerPathNotification()
-                else            -> buildFallbackNotification()
-            } else buildFallbackNotification()
-        )
+        // Call startForeground() FIRST — before createNotificationChannels() or
+        // restoreFromPrefs(). Either of those throwing before startForeground() is
+        // called would trigger ForegroundServiceDidNotStartInTimeException after 5s.
+        // The fallback notification is replaced by onStartCommand() immediately after.
+        try { startForegroundCompat(buildFallbackNotification()) } catch (_: Exception) { }
+        try { createNotificationChannels() } catch (_: Exception) { }
+        try { restoreFromPrefs() } catch (_: Exception) { }
+        // Upgrade to the real notification if we have persisted state (process restart).
+        if (activeType != TYPE_NONE) {
+            try {
+                startForegroundCompat(when (activeType) {
+                    TYPE_CHANT      -> buildChantNotification()
+                    TYPE_SANKALP    -> buildSankalpNotification()
+                    TYPE_RESET      -> buildResetNotification()
+                    TYPE_RHYTHM     -> buildRhythmNotification()
+                    TYPE_INNER_PATH -> buildInnerPathNotification()
+                    else            -> buildFallbackNotification()
+                })
+            } catch (_: Exception) { }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

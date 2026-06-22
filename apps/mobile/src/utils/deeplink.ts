@@ -294,13 +294,71 @@ export function handleProgramJoinDeepLink(url: string): boolean {
   return false;
 }
 
+/**
+ * Handle kalpx://program/{code}/day/{N|day8-transition|testimonial} URLs.
+ * These are generated exclusively by the backend push-notification dispatcher
+ * (tasks.py:_program_deep_link) — never used as invite links — so
+ * notification_program_tapped is fired unconditionally for any match.
+ * Returns true if handled, false otherwise.
+ */
+export function handleProgramDeepLink(url: string): boolean {
+  if (!url || !url.startsWith('kalpx://program/')) return false;
+
+  // Strip query string before splitting path segments
+  const bare = url.split('?')[0];
+  const path = bare.replace('kalpx://program/', '');
+  const parts = path.split('/').filter(Boolean);
+  if (parts.length < 2) return false;
+
+  const [code, ...rest] = parts;
+  if (!code) return false;
+  const route = rest.join('/');
+
+  // This scheme is push-notification-only — fire analytics unconditionally.
+  postProgramActivity('notification_program_tapped').catch(() => {});
+
+  if (route === 'day8-transition') {
+    try {
+      navigate('ProgramDay8TransitionScreen' as any);
+    } catch (err) {
+      console.warn('[deeplink] navigate ProgramDay8TransitionScreen failed:', err);
+    }
+    console.log(`[deeplink] → ProgramDay8TransitionScreen (program code=${code})`);
+    return true;
+  }
+
+  if (route.startsWith('day/')) {
+    const dayNumber = parseInt(rest[1], 10);
+    if (Number.isNaN(dayNumber) || dayNumber < 1) return false;
+    try {
+      navigate('ProgramDayScreen' as any, { dayNumber });
+    } catch (err) {
+      console.warn('[deeplink] navigate ProgramDayScreen failed:', err);
+    }
+    console.log(`[deeplink] → ProgramDayScreen (code=${code} day=${dayNumber})`);
+    return true;
+  }
+
+  // Testimonial deep link: no dedicated screen yet — Home is a safe fallback.
+  if (route === 'testimonial') {
+    try {
+      navigate('Home' as any);
+    } catch (err) {
+      console.warn('[deeplink] navigate Home (testimonial fallback) failed:', err);
+    }
+    console.log(`[deeplink] → Home (testimonial fallback, code=${code})`);
+    return true;
+  }
+
+  return false;
+}
+
 // Retry navigating a cold-start URL until the navigator is ready (up to ~3s).
 // navigate() silently no-ops when navigationRef.isReady() is false, so we
 // must poll rather than call it once and hope for the best.
 function handleWhenReady(url: string, attemptsLeft = 15): void {
   if (navigationRef.isReady()) {
-    // Program join links take priority over Mitra deeplinks
-    if (!handleProgramJoinDeepLink(url)) {
+    if (!handleProgramJoinDeepLink(url) && !handleProgramDeepLink(url)) {
       handleMitraDeepLink(url);
     }
   } else if (attemptsLeft > 0) {
@@ -372,8 +430,7 @@ export function attachDeepLinkListeners(): () => void {
       }
     }
 
-    // Program join links take priority over Mitra deeplinks
-    if (!handleProgramJoinDeepLink(url)) {
+    if (!handleProgramJoinDeepLink(url) && !handleProgramDeepLink(url)) {
       handleMitraDeepLink(url);
     }
   };

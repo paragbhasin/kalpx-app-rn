@@ -28,8 +28,13 @@ function trackLA(event: string, params?: Record<string, unknown>): void {
 let _quickChantSuppressedUntil = 0;
 
 // Clears every LA type before starting a new one so stale lock-screen widgets don't stack.
+// iOS needs explicit ends because ActivityKit has separate Activity objects per type.
+// Android uses a single NOTIFICATION_ID — startForeground() replaces in-place, so sending
+// four end intents before each start just causes stop→restart cycles that trigger
+// ForegroundServiceDidNotStartInTimeException on MIUI / aggressive battery optimizers.
 async function endAllActivities(): Promise<void> {
   if (!KalpxLiveActivityModule) return;
+  if (Platform.OS === "android") return;
   await Promise.all([
     KalpxLiveActivityModule.endActivity().catch(() => {}),
     KalpxLiveActivityModule.endResetActivity().catch(() => {}),

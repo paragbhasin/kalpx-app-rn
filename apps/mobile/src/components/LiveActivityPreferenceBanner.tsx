@@ -98,61 +98,47 @@ function LiveActivityPreferenceBannerCore({
       setHeaderRight(null);
       return;
     }
-    if (isIOS) {
-      setHeaderRight(
-        <Animated.View style={[styles.chip, { opacity: fadeAnim }]}>
-          <TouchableOpacity
-            style={styles.chipAddBtn}
-            onPress={() => handleYesRef.current()}
-            hitSlop={8}
-            activeOpacity={0.75}
-          >
-            <Ionicons name="add" size={16} color={Colors.gold} />
-          </TouchableOpacity>
-          <View style={styles.chipMiddle}>
-            <Ionicons name="lock-open-outline" size={11} color={Colors.gold} />
-            <View style={styles.chipTexts}>
-              <Text style={styles.chipTitle}>Keep on Lock Screen</Text>
-              <Text style={styles.chipSub}>See today's practice anytime</Text>
-            </View>
+    const chipStyles = isIOS
+      ? { wrap: styles.chip, add: styles.chipAddBtn, mid: styles.chipMiddle, texts: styles.chipTexts, title: styles.chipTitle, sub: styles.chipSub, close: styles.chipCloseBtn }
+      : { wrap: styles.chipAndroid, add: styles.chipAndroidAddBtn, mid: styles.chipAndroidMiddle, texts: styles.chipAndroidTexts, title: styles.chipAndroidTitle, sub: styles.chipAndroidSub, close: styles.chipAndroidCloseBtn };
+    const addIconSize  = isIOS ? 16 : 14;
+    const lockIconSize = isIOS ? 11 : 10;
+    const closeIconSize = isIOS ? 14 : 12;
+
+    // Both platforms: + button | (lock + two-line text) tappable | × dismiss.
+    // The middle text section is also tappable so the full chip (except ×) opens the modal.
+    setHeaderRight(
+      <Animated.View style={[chipStyles.wrap, { opacity: fadeAnim }]}>
+        <TouchableOpacity
+          style={chipStyles.add}
+          onPress={() => handleYesRef.current()}
+          hitSlop={8}
+          activeOpacity={0.75}
+        >
+          <Ionicons name="add" size={addIconSize} color={Colors.gold} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={chipStyles.mid}
+          onPress={() => handleYesRef.current()}
+          hitSlop={4}
+          activeOpacity={0.75}
+        >
+          <Ionicons name="lock-open-outline" size={lockIconSize} color={Colors.gold} />
+          <View style={chipStyles.texts}>
+            <Text style={chipStyles.title}>Keep on Lock Screen</Text>
+            <Text style={chipStyles.sub}>See today's practice anytime</Text>
           </View>
-          <TouchableOpacity
-            style={styles.chipCloseBtn}
-            onPress={() => dismissRef.current()}
-            hitSlop={8}
-            activeOpacity={0.75}
-          >
-            <Ionicons name="close" size={14} color="#B09870" />
-          </TouchableOpacity>
-        </Animated.View>
-      );
-    } else {
-      // Android: compact single-line chip — fits the shorter Android header (~34px)
-      setHeaderRight(
-        <Animated.View style={[styles.chipAndroid, { opacity: fadeAnim }]}>
-          <TouchableOpacity
-            style={styles.chipAndroidAddBtn}
-            onPress={() => handleYesRef.current()}
-            hitSlop={8}
-            activeOpacity={0.75}
-          >
-            <Ionicons name="add" size={14} color={Colors.gold} />
-          </TouchableOpacity>
-          <View style={styles.chipAndroidMiddle}>
-            <Ionicons name="lock-open-outline" size={10} color={Colors.gold} />
-            <Text style={styles.chipAndroidTitle}>Lock Screen</Text>
-          </View>
-          <TouchableOpacity
-            style={styles.chipAndroidCloseBtn}
-            onPress={() => dismissRef.current()}
-            hitSlop={8}
-            activeOpacity={0.75}
-          >
-            <Ionicons name="close" size={12} color="#B09870" />
-          </TouchableOpacity>
-        </Animated.View>
-      );
-    }
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={chipStyles.close}
+          onPress={() => dismissRef.current()}
+          hitSlop={8}
+          activeOpacity={0.75}
+        >
+          <Ionicons name="close" size={closeIconSize} color="#B09870" />
+        </TouchableOpacity>
+      </Animated.View>
+    );
   }, [visible, isIOS]);
 
   // Clear header slot on unmount
@@ -330,19 +316,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  // --- Android compact chip — single-line, fits the shorter Android header (~34px) ---
+  // --- Android compact chip — two-line, fits the shorter Android header (~34px) ---
+  // Matches the iOS chip structure exactly; only padding/font-size reduced to fit 34px height.
   chipAndroid: {
     flexDirection: "row",
     alignItems: "center",
     marginRight: 8,
     backgroundColor: "#FFF8ED",
-    borderRadius: 8,
+    borderRadius: 9,
     borderWidth: 1,
     borderColor: "#E8D9B5",
     overflow: "hidden",
   },
   chipAndroidAddBtn: {
-    paddingHorizontal: 6,
+    paddingHorizontal: 7,
     paddingVertical: 4,
     borderRightWidth: 1,
     borderRightColor: "#E8D9B5",
@@ -353,13 +340,24 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 6,
-    paddingVertical: 4,
+    paddingVertical: 3,
     gap: 4,
+  },
+  chipAndroidTexts: {
+    flexShrink: 1,
   },
   chipAndroidTitle: {
     fontFamily: Fonts.sans.semiBold,
-    fontSize: 10,
+    fontSize: 9.5,
     color: "#2E1A06",
+    lineHeight: 12,
+  },
+  chipAndroidSub: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 7.5,
+    color: "#9B7E5C",
+    lineHeight: 10,
+    marginTop: 1,
   },
   chipAndroidCloseBtn: {
     paddingHorizontal: 6,

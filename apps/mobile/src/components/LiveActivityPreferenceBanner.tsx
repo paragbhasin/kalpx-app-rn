@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   Modal,
@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
+import { useHeaderRightSlot } from "../context/HeaderRightSlotContext";
 import { useToast } from "../context/ToastContext";
 import { Colors } from "../theme/colors";
 import { Fonts } from "../theme/fonts";
@@ -27,7 +28,6 @@ interface Props {
   experienceName: string;
   onActivate?: () => void;
   // 'completion' renders the calmer inline banner used on completion screens
-  // ("Keep this <noun> close to you. / Make it your Live Activity?").
   variant?: "default" | "completion";
 }
 
@@ -43,12 +43,11 @@ export function LiveActivityPreferenceBanner({
   onActivate,
   variant = "default",
 }: Props) {
+  const { setHeaderRight } = useHeaderRightSlot();
   const [visible, setVisible] = useState(false);
   const [conflictModal, setConflictModal] = useState(false);
   const [currentLA, setCurrentLA] = useState<PreferredLA | null>(null);
-  const [conflictChoice, setConflictChoice] = useState<"keep" | "switch">(
-    "keep",
-  );
+  const [conflictChoice, setConflictChoice] = useState<"keep" | "switch">("keep");
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const { showToast } = useToast();
 
@@ -59,12 +58,8 @@ export function LiveActivityPreferenceBanner({
     (async () => {
       const preferredRaw = await AsyncStorage.getItem(PREFERRED_LA_KEY);
       if (cancelled) return;
-      const pref: PreferredLA | null = preferredRaw
-        ? JSON.parse(preferredRaw)
-        : null;
-      // Don't show banner if this experience is already the preferred LA
-      if (pref && pref.type === experienceType && pref.name === experienceName)
-        return;
+      const pref: PreferredLA | null = preferredRaw ? JSON.parse(preferredRaw) : null;
+      if (pref && pref.type === experienceType && pref.name === experienceName) return;
       setCurrentLA(pref);
       setVisible(true);
       Animated.timing(fadeAnim, {
@@ -73,25 +68,70 @@ export function LiveActivityPreferenceBanner({
         useNativeDriver: true,
       }).start();
     })();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [experienceKey]);
 
-  const dismiss = () => {
+  const dismiss = useCallback(() => {
     Animated.timing(fadeAnim, {
       toValue: 0,
       duration: 200,
       useNativeDriver: true,
-    }).start(() => {
-      setVisible(false);
-    });
-  };
+    }).start(() => setVisible(false));
+  }, [fadeAnim]);
 
-  const handleYes = () => {
+  const handleYes = useCallback(() => {
     setConflictChoice("switch");
     setConflictModal(true);
-  };
+  }, []);
+
+  // Keep refs fresh so the header chip always calls the latest callbacks
+  const handleYesRef = useRef(handleYes);
+  const dismissRef = useRef(dismiss);
+  handleYesRef.current = handleYes;
+  dismissRef.current = dismiss;
+
+  // Inject compact chip into the GlobalScrollLayout header row (default variant only)
+  useEffect(() => {
+    if (variant !== "default") return;
+    if (!visible) {
+      setHeaderRight(null);
+      return;
+    }
+    setHeaderRight(
+      <Animated.View style={[styles.chip, { opacity: fadeAnim }]}>
+        <TouchableOpacity
+          style={styles.chipAddBtn}
+          onPress={() => handleYesRef.current()}
+          hitSlop={8}
+          activeOpacity={0.75}
+        >
+          <Ionicons name="add" size={16} color={Colors.gold} />
+        </TouchableOpacity>
+        <View style={styles.chipMiddle}>
+          <Ionicons name="lock-open-outline" size={11} color={Colors.gold} />
+          <View style={styles.chipTexts}>
+            <Text style={styles.chipTitle}>Keep on Lock Screen</Text>
+            <Text style={styles.chipSub}>See today's practice anytime</Text>
+          </View>
+        </View>
+        <TouchableOpacity
+          style={styles.chipCloseBtn}
+          onPress={() => dismissRef.current()}
+          hitSlop={8}
+          activeOpacity={0.75}
+        >
+          <Ionicons name="close" size={14} color="#B09870" />
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  }, [visible, variant]);
+
+  // Clear header slot on unmount
+  useEffect(() => {
+    return () => {
+      if (variant === "default") setHeaderRight(null);
+    };
+  }, [variant]);
 
   const handleConflictConfirm = () => {
     if (conflictChoice === "switch") {
@@ -121,11 +161,7 @@ export function LiveActivityPreferenceBanner({
       <View style={styles.modalOverlay}>
         <View style={styles.modalCard}>
           <View style={styles.modalIconWrap}>
-            <Ionicons
-              name="phone-portrait-outline"
-              size={28}
-              color={Colors.gold}
-            />
+            <Ionicons name="phone-portrait-outline" size={28} color={Colors.gold} />
           </View>
 
           {currentLA ? (
@@ -149,44 +185,30 @@ export function LiveActivityPreferenceBanner({
               </Text>
 
               <TouchableOpacity
-                style={[
-                  styles.radioRow,
-                  conflictChoice === "keep" && styles.radioRowSelected,
-                ]}
+                style={[styles.radioRow, conflictChoice === "keep" && styles.radioRowSelected]}
                 onPress={() => setConflictChoice("keep")}
                 activeOpacity={0.8}
               >
                 <View style={styles.radioOuter}>
-                  {conflictChoice === "keep" && (
-                    <View style={styles.radioInner} />
-                  )}
+                  {conflictChoice === "keep" && <View style={styles.radioInner} />}
                 </View>
                 <View style={styles.radioTextBlock}>
                   <Text style={styles.radioTitle}>Keep Current</Text>
-                  <Text style={styles.radioSub} numberOfLines={1}>
-                    {currentLA.name}
-                  </Text>
+                  <Text style={styles.radioSub} numberOfLines={1}>{currentLA.name}</Text>
                 </View>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[
-                  styles.radioRow,
-                  conflictChoice === "switch" && styles.radioRowSelected,
-                ]}
+                style={[styles.radioRow, conflictChoice === "switch" && styles.radioRowSelected]}
                 onPress={() => setConflictChoice("switch")}
                 activeOpacity={0.8}
               >
                 <View style={styles.radioOuter}>
-                  {conflictChoice === "switch" && (
-                    <View style={styles.radioInner} />
-                  )}
+                  {conflictChoice === "switch" && <View style={styles.radioInner} />}
                 </View>
                 <View style={styles.radioTextBlock}>
                   <Text style={styles.radioTitle}>Switch to New</Text>
-                  <Text style={styles.radioSub} numberOfLines={1}>
-                    {experienceName}
-                  </Text>
+                  <Text style={styles.radioSub} numberOfLines={1}>{experienceName}</Text>
                 </View>
               </TouchableOpacity>
             </>
@@ -215,9 +237,7 @@ export function LiveActivityPreferenceBanner({
               onPress={handleConflictConfirm}
               activeOpacity={0.8}
             >
-              <Text style={styles.confirmText}>
-                {currentLA ? "Confirm" : "Add"}
-              </Text>
+              <Text style={styles.confirmText}>{currentLA ? "Confirm" : "Add"}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -227,106 +247,106 @@ export function LiveActivityPreferenceBanner({
 
   if (!visible) return null;
 
-  if (variant === "completion") {
-    return (
-      <>
-        <Animated.View style={[styles.cBanner, { opacity: fadeAnim }]}>
-          <View style={styles.cTopRow}>
-            <View style={styles.cIconBox}>
-              <Ionicons
-                name="notifications-outline"
-                size={20}
-                color={Colors.gold}
-              />
-            </View>
-            <View style={styles.cTextBlock}>
-              <Text style={styles.cLead}>
-                Keep this {NOUN_BY_TYPE[experienceType]} close to you.
-              </Text>
-              <Text style={styles.cTitle}>Make it your Live Activity?</Text>
-            </View>
-          </View>
-          <View style={styles.cBottomRow}>
-            <TouchableOpacity
-              onPress={dismiss}
-              style={styles.cNotNowBtn}
-              hitSlop={8}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.cNotNowText}>Not Now</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleYes}
-              style={styles.cYesBtn}
-              hitSlop={8}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.cYesText} numberOfLines={1}>
-                Make Live Activity
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </Animated.View>
-        {renderConflictModal()}
-      </>
-    );
+  // Default variant: chip lives in the GlobalScrollLayout header — only the modal renders here
+  if (variant === "default") {
+    return renderConflictModal();
   }
 
+  // Completion variant: inline two-row card
   return (
     <>
-      <Animated.View style={[styles.banner, { opacity: fadeAnim }]}>
-        {/* Row 1: icon + text + close */}
-        <View style={styles.topRow}>
-          <View style={styles.iconBox}>
-            <Ionicons name="lock-closed" size={18} color={Colors.gold} />
+      <Animated.View style={[styles.cBanner, { opacity: fadeAnim }]}>
+        <View style={styles.cTopRow}>
+          <View style={styles.cIconBox}>
+            <Ionicons name="notifications-outline" size={20} color={Colors.gold} />
           </View>
-          <View style={styles.textBlock}>
-            <Text style={styles.title}>
-              Do you want to add this as your{" "}
-              <Text style={styles.titleHighlight}>Live Activity</Text>?
+          <View style={styles.cTextBlock}>
+            <Text style={styles.cLead}>
+              Keep this {NOUN_BY_TYPE[experienceType]} close to you.
             </Text>
-            <Text style={styles.subtitle}>
-              Stay connected to your practice on your lock screen.
-            </Text>
+            <Text style={styles.cTitle}>Make it your Live Activity?</Text>
           </View>
-          <TouchableOpacity
-            onPress={dismiss}
-            style={styles.closeBtn}
-            hitSlop={10}
-          >
-            <Text style={styles.closeText}>×</Text>
-          </TouchableOpacity>
         </View>
-
-        {/* Row 2: action buttons right-aligned */}
-        <View style={styles.bottomRow}>
+        <View style={styles.cBottomRow}>
           <TouchableOpacity
             onPress={dismiss}
-            style={styles.notNowBtn}
+            style={styles.cNotNowBtn}
             hitSlop={8}
+            activeOpacity={0.8}
           >
-            <Text style={styles.notNowText}>Not Now</Text>
+            <Text style={styles.cNotNowText}>Not Now</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={handleYes}
-            style={styles.yesBtn}
+            style={styles.cYesBtn}
             hitSlop={8}
+            activeOpacity={0.85}
           >
-            <Text style={styles.yesText}>Yes, Add</Text>
+            <Text style={styles.cYesText} numberOfLines={1}>Make Live Activity</Text>
           </TouchableOpacity>
         </View>
       </Animated.View>
-
       {renderConflictModal()}
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  // --- Completion-screen variant (two-row: text, then buttons) ---
+  // --- Default variant: chip injected into GlobalScrollLayout header row ---
+  chip: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 8,
+    backgroundColor: "#FFF8ED",
+    borderRadius: 9,
+    borderWidth: 1,
+    borderColor: "#E8D9B5",
+    overflow: "hidden",
+  },
+  chipAddBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRightWidth: 1,
+    borderRightColor: "#E8D9B5",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  chipMiddle: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 7,
+    paddingVertical: 5,
+    gap: 5,
+  },
+  chipTexts: {
+    flexShrink: 1,
+  },
+  chipTitle: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 10,
+    color: "#2E1A06",
+    lineHeight: 13,
+  },
+  chipSub: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 8.5,
+    color: "#9B7E5C",
+    lineHeight: 12,
+    marginTop: 1,
+  },
+  chipCloseBtn: {
+    paddingHorizontal: 7,
+    paddingVertical: 6,
+    borderLeftWidth: 1,
+    borderLeftColor: "#E8D9B5",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  // --- Completion variant: inline two-row card ---
   cBanner: {
     width: "100%",
-    backgroundColor: "#fffff",
+    backgroundColor: "#FFFDF8",
     borderRadius: 16,
     borderWidth: 1,
     borderColor: "#ECDFBE",
@@ -389,99 +409,8 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#fff",
   },
-  banner: {
-    // Stretch to full width even inside a centered ScrollView content container
-    // (runner screens use alignItems:'center'), otherwise the banner shrinks to
-    // its content and the text overlaps the buttons.
-    alignSelf: "stretch",
-    marginHorizontal: 10,
-    marginTop: 8,
-    marginBottom: 4,
-    backgroundColor: "#FAF5E9",
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#E5D9B8",
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-  },
-  topRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-  },
-  iconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#E5D9B8",
-    backgroundColor: "#FDF8EE",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-    flexShrink: 0,
-  },
-  textBlock: {
-    flex: 1,
-  },
-  title: {
-    fontFamily: Fonts.sans.semiBold,
-    fontSize: 13,
-    color: "#3A1F06",
-    lineHeight: 18,
-  },
-  titleHighlight: {
-    fontFamily: Fonts.sans.semiBold,
-    fontSize: 13,
-    color: Colors.gold,
-  },
-  subtitle: {
-    fontFamily: Fonts.sans.regular,
-    fontSize: 11,
-    color: "#9B7E5C",
-    marginTop: 3,
-    lineHeight: 15,
-  },
-  closeBtn: {
-    paddingLeft: 10,
-    paddingTop: 1,
-    flexShrink: 0,
-  },
-  closeText: {
-    fontSize: 18,
-    color: "#B09870",
-    lineHeight: 20,
-  },
-  bottomRow: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    marginTop: 12,
-  },
-  notNowBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: 8,
-    borderWidth: 1.5,
-    borderColor: "#D4C5A0",
-    marginRight: 8,
-  },
-  notNowText: {
-    fontFamily: Fonts.sans.medium,
-    fontSize: 13,
-    color: "#3A1F06",
-  },
-  yesBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: 8,
-    backgroundColor: Colors.gold,
-  },
-  yesText: {
-    fontFamily: Fonts.sans.semiBold,
-    fontSize: 13,
-    color: "#fff",
-  },
 
-  // Modal
+  // --- Conflict / confirmation modal ---
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.38)",
@@ -498,10 +427,6 @@ const styles = StyleSheet.create({
   },
   modalIconWrap: {
     marginBottom: 12,
-  },
-  modalIcon: {
-    fontSize: 28,
-    color: Colors.gold,
   },
   modalTitle: {
     fontFamily: Fonts.sans.semiBold,

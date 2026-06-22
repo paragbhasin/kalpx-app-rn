@@ -13,6 +13,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { useScrollContext } from "../context/ScrollContext";
+import { HeaderRightSlotProvider, useHeaderRightSlot } from "../context/HeaderRightSlotContext";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { isMitraRouteName } from "../Shared/Routes/mitraRouteNames";
 import { navigationRef } from "../Shared/Routes/NavigationService";
@@ -27,7 +28,8 @@ const TABLET_HEADER_HEIGHT =
   Platform.OS === "android" ? 14 + (StatusBar.currentHeight || 0) : 64;
 const DEFAULT_SURFACE = "#FAF7F2";
 
-const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
+const GlobalScrollLayoutInner = ({ children }: { children: React.ReactNode }) => {
+  const { headerRightNode } = useHeaderRightSlot();
   const { headerY, toggleVisibility } = useScrollContext();
   const currentBackground = useScreenStore((state) => state.currentBackground);
   const isHeaderHidden = useScreenStore((state) => state.isHeaderHidden);
@@ -301,7 +303,7 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
                 : styles.headerSolid),
           ]}
         >
-          {/* Back button + Header in one row. */}
+          {/* Back button + Header + optional right slot in one row. */}
           <View style={styles.headerRow}>
             {showBackButton ? (
               <TouchableOpacity
@@ -324,6 +326,7 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
                 }
               />
             </View>
+            {headerRightNode}
           </View>
         </Animated.View>
       )}
@@ -382,5 +385,11 @@ const styles = StyleSheet.create({
     backgroundColor: DEFAULT_SURFACE,
   },
 });
+
+const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => (
+  <HeaderRightSlotProvider>
+    <GlobalScrollLayoutInner>{children}</GlobalScrollLayoutInner>
+  </HeaderRightSlotProvider>
+);
 
 export default GlobalScrollLayout;

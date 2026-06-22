@@ -406,27 +406,6 @@ const CommunityMantraRunnerView: React.FC<MantraRunnerViewProps> = ({
         contentContainerStyle={[styles.scrollContent, isTablet && { paddingHorizontal: 40 }]}
         showsVerticalScrollIndicator={false}
       >
-        {!isViewOnly && (
-          <LiveActivityPreferenceBanner
-            experienceType="mantra"
-            experienceName={item.title ?? ''}
-            onActivate={() => {
-              if (!isLAActiveRef.current) {
-                isLAActiveRef.current = true;
-              }
-              liveActivity.start(
-                item.title ?? '',
-                item.devanagari ?? '',
-                japaEngine.todayCount,
-                japaEngine.weekCount,
-                japaEngine.lifetimeCount,
-                japaEngine.lifetimeCount,
-                Math.floor(japaEngine.elapsedMs / 1000),
-                deepLinkFromSurface(sourceSurface),
-              );
-            }}
-          />
-        )}
       {isDevMode && (
         <TouchableOpacity
           testID="test_runner_force_complete"
@@ -676,6 +655,27 @@ const CommunityMantraRunnerView: React.FC<MantraRunnerViewProps> = ({
         </TouchableOpacity>
       </View>
     </ScrollView>
+    {!isViewOnly && (
+      <LiveActivityPreferenceBanner
+        experienceType="mantra"
+        experienceName={item.title ?? ''}
+        onActivate={() => {
+          if (!isLAActiveRef.current) {
+            isLAActiveRef.current = true;
+          }
+          liveActivity.start(
+            item.title ?? '',
+            item.devanagari ?? '',
+            japaEngine.todayCount,
+            japaEngine.weekCount,
+            japaEngine.lifetimeCount,
+            japaEngine.lifetimeCount,
+            Math.floor(japaEngine.elapsedMs / 1000),
+            deepLinkFromSurface(sourceSurface),
+          );
+        }}
+      />
+    )}
     </View>
   );
 };

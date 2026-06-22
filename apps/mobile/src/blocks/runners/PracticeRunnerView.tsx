@@ -343,18 +343,6 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
         contentContainerStyle={[styles.scrollContent, isTablet && { paddingHorizontal: 40 }]}
         showsVerticalScrollIndicator={false}
       >
-        {!isViewOnly && (
-          <LiveActivityPreferenceBanner
-            experienceType="practice"
-            experienceName={item.title ?? ''}
-            onActivate={() => {
-              liveActivity.startSankalp(
-                item.title ?? '',
-                item.subtitle ?? item.line ?? item.summary ?? '',
-              );
-            }}
-          />
-        )}
         {isDevMode && (
           <TouchableOpacity
             testID="test_runner_force_complete"
@@ -597,6 +585,18 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
         </TouchableOpacity>
       </View>
       </ScrollView>
+      {!isViewOnly && (
+        <LiveActivityPreferenceBanner
+          experienceType="practice"
+          experienceName={item.title ?? ''}
+          onActivate={() => {
+            liveActivity.startSankalp(
+              item.title ?? '',
+              item.subtitle ?? item.line ?? item.summary ?? '',
+            );
+          }}
+        />
+      )}
     </View>
   );
 };

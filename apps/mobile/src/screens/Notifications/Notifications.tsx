@@ -23,35 +23,57 @@ import { mitraTrackEvent } from "../../engine/mitraApi";
 import styles from "./styles";
 import { useScrollContext } from "../../context/ScrollContext";
 
-// Maps a notification event_type to the screen to navigate to inside the Home tab stack.
+// Maps a notification event_type/category to the screen to navigate to inside the Home tab stack.
 // Returns null for event_types that have no meaningful destination.
 function getNotificationRoute(eventType: string): { screen: string; params?: object } | null {
   const base = eventType.split(":")[0]; // strip colon suffix e.g. "dharma_trigger_headsup:japa_krishna"
 
-  if (base === "mitra_rhythm_morning") return { screen: "RhythmHome", params: { slot: "morning" } };
-  if (base === "mitra_rhythm_evening") return { screen: "RhythmHome", params: { slot: "evening" } };
-  if (base === "mitra_rhythm_night")   return { screen: "RhythmHome", params: { slot: "night" } };
+  // Rhythm reminders — slots are morning / afternoon / night
+  if (base === "mitra_rhythm_morning")   return { screen: "RhythmHome", params: { slot: "morning" } };
+  if (base === "mitra_rhythm_afternoon") return { screen: "RhythmHome", params: { slot: "afternoon" } };
+  if (base === "mitra_rhythm_night")     return { screen: "RhythmHome", params: { slot: "night" } };
 
-  if (base === "mitra_inner_path") return { screen: "InnerPath" };
+  // Inner path reminders — mantra / sankalp / practice / return
+  if (base.startsWith("mitra_inner_path_")) return { screen: "InnerPath" };
 
+  // Mitra conversation triggers
   if (
     base === "mitra_post_conflict_follow" ||
-    base === "mitra_grief_follow" ||
-    base === "mitra_predictive_alert"
+    base === "mitra_grief_follow"         ||
+    base === "mitra_predictive_alert"     ||
+    base === "mitra_checkin_followup"     ||
+    base === "mitra_midday_midday_checkin"
   ) return { screen: "TellMitra" };
 
+  // Community
   if (base === "mitra_community_digest") return { screen: "CommunityLanding" };
 
+  // Daily Dharma
   if (base.startsWith("dharma_")) return { screen: "Dharma" };
 
+  // Quick Chant / Japa
+  if (base === "mitra_quick_chant_reminder") return { screen: "QuickReset" };
+
+  // Everything else lands on Home (morning presence, practice nudges, streaks, re-engagement, etc.)
   if (
-    base === "morning_practice_ready" ||
-    base.startsWith("practice_") ||
-    base.startsWith("streak_") ||
-    base.startsWith("reactivation") ||
-    base === "weekly_recap" ||
-    base === "mitra_gentle_reengagement" ||
-    base === "mitra_post_room_continuity"
+    base === "morning_presence"              ||
+    base === "morning_briefing"              ||
+    base === "morning_practice_ready"        ||
+    base === "mitra_morning"                 ||
+    base === "mitra_morning_briefing"        ||
+    base === "mitra_gentle_reengagement"     ||
+    base === "mitra_post_room_continuity"    ||
+    base === "mitra_midday_midday_practice"  ||
+    base === "mitra_evening_nudge"           ||
+    base === "mitra_evening_done"            ||
+    base === "mitra_day7_checkpoint"         ||
+    base === "mitra_day14_checkpoint"        ||
+    base === "mitra_weekly_reflection"       ||
+    base === "mitra_festival"                ||
+    base.startsWith("practice_")             ||
+    base.startsWith("streak_")               ||
+    base.startsWith("reactivation")          ||
+    base === "weekly_recap"
   ) return { screen: "Home" };
 
   return null;

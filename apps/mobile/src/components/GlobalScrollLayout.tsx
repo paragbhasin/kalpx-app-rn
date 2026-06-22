@@ -29,7 +29,7 @@ const TABLET_HEADER_HEIGHT =
 const DEFAULT_SURFACE = "#FAF7F2";
 
 const GlobalScrollLayoutInner = ({ children }: { children: React.ReactNode }) => {
-  const { headerRightNode } = useHeaderRightSlot();
+  const { headerRightNode, setHeaderRight } = useHeaderRightSlot();
   const { headerY, toggleVisibility } = useScrollContext();
   const currentBackground = useScreenStore((state) => state.currentBackground);
   const isHeaderHidden = useScreenStore((state) => state.isHeaderHidden);
@@ -135,6 +135,12 @@ const GlobalScrollLayoutInner = ({ children }: { children: React.ReactNode }) =>
     ? canGoBackInStack ||
       (!currentScreen?.overlay && history.length > 0 && !isRootScreen)
     : canGoBackInStack && !DIRECT_ROOT_ROUTES.has(leafRouteName ?? "");
+
+  // Clear the header-right slot on every route change so chips from a previous
+  // screen don't bleed into the next screen during navigation transitions.
+  React.useEffect(() => {
+    setHeaderRight(null);
+  }, [leafRouteName]);
 
   // Reset header visibility when back button is not present (mostly root screens)
   React.useEffect(() => {

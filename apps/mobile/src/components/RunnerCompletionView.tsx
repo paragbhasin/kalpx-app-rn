@@ -46,9 +46,9 @@ const IS_TABLET = SCREEN_W >= 768;
 // so the transparent lower half doesn't render as dead vertical space.
 const LOTUS_WIDTH = IS_TABLET
   ? Math.min(SCREEN_W * 0.5, 440)
-  : Math.min(SCREEN_W * 0.86, 360);
+  : Math.min(SCREEN_W * 0.72, 300);
 const LOTUS_HEIGHT = LOTUS_WIDTH * 1.5; // asset aspect ratio (~2:3)
-const LOTUS_CLIP_HEIGHT = LOTUS_WIDTH * 0.52; // show only the bloom + ripple
+const LOTUS_CLIP_HEIGHT = LOTUS_WIDTH * 0.44; // show only the bloom + ripple
 
 interface RunnerCompletionViewProps {
   title: string;
@@ -484,13 +484,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
     overflow: "hidden",
-    marginBottom: 8,
+    marginBottom: 0,
   },
   footer: {
     width: "100%",
     alignItems: "center",
-    paddingTop: 8,
-    paddingBottom: 40,
+    paddingTop: 0,
+    paddingBottom: 24,
   },
   primaryCta: {
     backgroundColor: "#FBF5F5",

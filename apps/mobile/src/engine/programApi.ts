@@ -105,3 +105,10 @@ export async function recordProgramShare(): Promise<any> {
   const res = await api.post("programs/my-active/share/");
   return res.data;
 }
+
+export async function postProgramActivity(
+  eventName: string,
+  props?: { day_number?: number; notification_type?: string; platform?: string; source?: string },
+): Promise<void> {
+  await api.post("programs/my-active/activity/", { event_name: eventName, ...props });
+}

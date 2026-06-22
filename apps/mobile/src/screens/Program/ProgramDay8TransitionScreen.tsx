@@ -20,7 +20,7 @@ import {
   View,
 } from "react-native";
 import { Fonts } from "../../theme/fonts";
-import { postDay8Transition } from "../../engine/programApi";
+import { postDay8Transition, postProgramActivity } from "../../engine/programApi";
 
 const BEIGE_BG = require("../../../assets/beige_bg.webp");
 
@@ -35,7 +35,7 @@ export default function ProgramDay8TransitionScreen() {
     if (viewedRef.current) return;
     viewedRef.current = true;
     // Log view event — fire-and-forget
-    postDay8Transition("none").catch(() => {});
+    postProgramActivity('program_day_8_transition_viewed').catch(() => {});
   }, []);
 
   const handleCta = async (path: CtaPath) => {
@@ -44,6 +44,14 @@ export default function ProgramDay8TransitionScreen() {
     try {
       await postDay8Transition(path);
     } catch {}
+
+    if (path === "inner_path") {
+      postProgramActivity('inner_path_followup_started').catch(() => {});
+    } else if (path === "daily_rhythm") {
+      postProgramActivity('daily_rhythm_followup_started').catch(() => {});
+    } else if (path === "quick_chant") {
+      postProgramActivity('quick_chant_followup_started').catch(() => {});
+    }
 
     setLoading(null);
 

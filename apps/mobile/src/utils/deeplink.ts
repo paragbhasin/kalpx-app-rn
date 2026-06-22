@@ -22,6 +22,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import store from "../store";
 import { screenActions, loadScreenWithData } from "../store/screenSlice";
 import { navigate, navigateInHomeStack, navigationRef } from "../Shared/Routes/NavigationService";
+import { postProgramActivity } from "../engine/programApi";
 
 export interface ParsedMitraDeepLink {
   kind: "mitra";
@@ -254,10 +255,15 @@ export function handleProgramJoinDeepLink(url: string): boolean {
   if (url.startsWith("kalpx://join/")) {
     const code = url.replace("kalpx://join/", "").split("?")[0].trim().toUpperCase();
     if (!code) return false;
+    const sourceMatch = url.match(/[?&]source=([^&]*)/);
+    const urlSource = sourceMatch ? decodeURIComponent(sourceMatch[1]) : 'deep_link';
+    if (urlSource === 'notification') {
+      postProgramActivity('notification_program_tapped').catch(() => {});
+    }
     void AsyncStorage.setItem("pending_program_code", code);
-    void AsyncStorage.setItem("pending_program_source", "deep_link");
+    void AsyncStorage.setItem("pending_program_source", urlSource);
     try {
-      navigate("ProgramInviteClaimScreen" as any, { code, source: "deep_link" });
+      navigate("ProgramInviteClaimScreen" as any, { code, source: urlSource });
     } catch (err) {
       console.warn("[deeplink] ProgramInviteClaimScreen navigate failed:", err);
     }
@@ -269,10 +275,15 @@ export function handleProgramJoinDeepLink(url: string): boolean {
   if (url.startsWith("https://kalpx.com/join/")) {
     const code = url.replace("https://kalpx.com/join/", "").split("?")[0].trim().toUpperCase();
     if (!code) return false;
+    const sourceMatch = url.match(/[?&]source=([^&]*)/);
+    const urlSource = sourceMatch ? decodeURIComponent(sourceMatch[1]) : 'universal_link';
+    if (urlSource === 'notification') {
+      postProgramActivity('notification_program_tapped').catch(() => {});
+    }
     void AsyncStorage.setItem("pending_program_code", code);
-    void AsyncStorage.setItem("pending_program_source", "universal_link");
+    void AsyncStorage.setItem("pending_program_source", urlSource);
     try {
-      navigate("ProgramInviteClaimScreen" as any, { code, source: "universal_link" });
+      navigate("ProgramInviteClaimScreen" as any, { code, source: urlSource });
     } catch (err) {
       console.warn("[deeplink] ProgramInviteClaimScreen (UL) navigate failed:", err);
     }

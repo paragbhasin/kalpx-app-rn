@@ -20,7 +20,7 @@ import {
   View,
 } from "react-native";
 import { Fonts } from "../../theme/fonts";
-import { fetchProgramDay, type ProgramDayContent, type ProgramDayItem } from "../../engine/programApi";
+import { fetchProgramDay, postProgramActivity, type ProgramDayContent, type ProgramDayItem } from "../../engine/programApi";
 
 const SUPPORT_URL = "https://kalpx.com/programs/support";
 
@@ -69,6 +69,8 @@ export default function ProgramDayScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const firedAnalyticsRef = useRef(false);
+
   // Track which items the user has visited in this session
   const sessionDoneRef = useRef<Set<string>>(new Set());
   const [sessionDone, setSessionDone] = useState<Set<string>>(new Set());
@@ -88,7 +90,16 @@ export default function ProgramDayScreen() {
         try {
           setLoading(true);
           const data = await fetchProgramDay(dayNumber);
-          if (!cancelled) setDayContent(data);
+          if (!cancelled) {
+            setDayContent(data);
+            if (!firedAnalyticsRef.current) {
+              firedAnalyticsRef.current = true;
+              postProgramActivity('program_day_started', { day_number: data.day_number }).catch(() => {});
+              if (data.day_number === 2) {
+                postProgramActivity('program_day_2_started', { day_number: 2 }).catch(() => {});
+              }
+            }
+          }
         } catch (err: any) {
           if (cancelled) return;
           const status = err?.response?.status;

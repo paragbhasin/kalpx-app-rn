@@ -5,8 +5,7 @@ import { AppShell } from '../../components/ui/AppShell';
 import { fetchProgramByCode, fetchProgramBySlug, type ProgramCampaignPublic } from '../../engine/programApi';
 import { captureProgramAttribution } from '../../utils/programAttribution';
 
-// Resolve placeholder before shipping: replace with real App Store ID
-const APPLE_APP_STORE_ID = 'REPLACE_ME_APPLE_APP_ID';
+const APPLE_APP_STORE_ID = '6755144623';
 
 // Allowlist-based URL safety: only https:// and mailto: are rendered as hrefs
 function safeHref(url: string | null | undefined, fallback: string): string {

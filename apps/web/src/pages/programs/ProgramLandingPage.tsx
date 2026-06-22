@@ -167,6 +167,17 @@ function PausedBanner() {
 
 // ── Main campaign body ────────────────────────────────────────────────────────
 
+function fireTrackBeacon(event: string, campaignCode: string) {
+  try {
+    navigator.sendBeacon(
+      '/api/programs/track/',
+      JSON.stringify({ event, campaign_code: campaignCode }),
+    );
+  } catch {
+    // analytics failure must never block navigation
+  }
+}
+
 function CampaignBody({ campaign }: { campaign: ProgramCampaignPublic }) {
   const joinUrl = `https://kalpx.com/join/${campaign.code}`;
   const deepLinkUrl = `kalpx://join/${campaign.code}`;
@@ -278,6 +289,7 @@ function CampaignBody({ campaign }: { campaign: ProgramCampaignPublic }) {
         <a
           href={deepLinkUrl}
           aria-label={`Open KalpX app and join with code ${campaign.code}`}
+          onClick={() => fireTrackBeacon('program_join_clicked', campaign.code)}
           style={{
             display: 'inline-block',
             padding: '10px 20px',
@@ -394,6 +406,7 @@ function CampaignBody({ campaign }: { campaign: ProgramCampaignPublic }) {
             textDecoration: 'underline',
           }}
           aria-label="Get support joining this program"
+          onClick={() => fireTrackBeacon('program_support_clicked', campaign.code)}
         >
           Get support →
         </Link>

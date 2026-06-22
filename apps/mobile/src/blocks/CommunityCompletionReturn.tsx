@@ -15,8 +15,9 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {Image, 
+import {Image,
   Animated,
+  Dimensions,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -28,6 +29,11 @@ import {Image,
 import Svg, { Path } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 const MantraLotus3d = ({ width, height, opacity, style }: { width?: number; height?: number; opacity?: number; style?: any }) => <Image source={require("../../assets/mantra-lotus-3d.webp")} style={[{ width, height, opacity, resizeMode: 'contain' }, style]} />;
+
+const { width: SCREEN_W } = Dimensions.get("window");
+const LOTUS_WIDTH = Math.min(SCREEN_W * 0.72, 300);
+const LOTUS_HEIGHT = LOTUS_WIDTH * 1.5;
+const LOTUS_CLIP_HEIGHT = LOTUS_WIDTH * 0.44;
 import { LiveActivityPreferenceBanner } from "../components/LiveActivityPreferenceBanner";
 import { VoiceTextInput } from "../components/VoiceTextInput";
 import RhythmSlotPickerModal, {
@@ -548,8 +554,10 @@ const CommunityCompletionReturn: React.FC<CompletionReturnTransientProps> = ({
             { marginBottom: tabBarHeight + insets.bottom + 24 },
           ]}
         >
-          <View style={styles.lotusWrap}>
-            <MantraLotus3d width={180} height={140} opacity={0.65} />
+          <View style={styles.lotusOuter}>
+            <View style={styles.lotusClip}>
+              <MantraLotus3d width={LOTUS_WIDTH} height={LOTUS_HEIGHT} opacity={0.92} />
+            </View>
           </View>
 
           <View style={styles.footer}>
@@ -576,7 +584,7 @@ const CommunityCompletionReturn: React.FC<CompletionReturnTransientProps> = ({
               <TouchableOpacity
                 style={styles.addPracticeCta}
                 onPress={openRhythmOffer}
-                activeOpacity={0.85}
+                activeOpacity={0.7}
               >
                 <Text
                   style={[
@@ -681,23 +689,15 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
   },
   addPracticeCta: {
-    marginTop: 12,
-    backgroundColor: "rgba(255,248,239,0.92)",
-    borderWidth: 1,
-    borderColor: "#DAC28E",
-    borderRadius: 24,
-    paddingVertical: 14,
-    paddingHorizontal: 40,
-    width: "100%",
-    maxWidth: 280,
-    alignItems: "center",
-    justifyContent: "center",
+    paddingVertical: 10,
+    marginTop: 4,
   },
   addPracticeCtaText: {
-    fontFamily: Fonts.serif.bold,
-    fontSize: 16,
+    fontFamily: Fonts.serif.regular,
+    fontSize: 17,
     color: "#B88413",
-    letterSpacing: 0.2,
+    letterSpacing: 0.3,
+    textDecorationLine: "underline",
   },
   overlay: {
     flex: 1,
@@ -821,12 +821,22 @@ const styles = StyleSheet.create({
   bottomSection: {
     width: "100%",
     alignItems: "center",
-    marginTop: 36,
+    flexGrow: 1,
+    justifyContent: "flex-end",
   },
-  lotusWrap: {
+  lotusOuter: {
+    flex: 1,
+    width: "100%",
     alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
+    justifyContent: "flex-end",
+    minHeight: LOTUS_CLIP_HEIGHT,
+  },
+  lotusClip: {
+    width: "100%",
+    height: LOTUS_CLIP_HEIGHT,
+    alignItems: "center",
+    justifyContent: "flex-start",
+    overflow: "hidden",
   },
   footer: {
     width: "100%",
@@ -856,21 +866,21 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   primaryCta: {
-    backgroundColor: "#FFFCF7",
+    backgroundColor: "#FBF5F5",
     paddingVertical: 16,
     paddingHorizontal: 40,
     borderRadius: 32,
     width: "100%",
-    maxWidth: 280,
+    maxWidth: 420,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "rgba(214, 166, 58, 0.24)",
-    shadowColor: "#C9A84C",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 1,
+    borderWidth: 0.3,
+    borderColor: "#9f9f9f",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 6,
   },
   primaryCtaText: {
     fontFamily: Fonts.sans.regular,

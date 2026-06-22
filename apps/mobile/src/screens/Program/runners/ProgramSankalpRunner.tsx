@@ -27,7 +27,7 @@ export default function ProgramSankalpRunner() {
     <SafeAreaView style={styles.safeArea}>
       <SankalpRunnerView
         item={item}
-        sourceSurface="inner_path"
+        sourceSurface="program"
         onComplete={() => {
           navigation.navigate("ProgramDayScreen", { dayNumber, completedItem: item.item_id });
         }}

@@ -37,7 +37,7 @@ export default function ProgramMantraRunner() {
       <MantraRunnerView
         item={item}
         mantraRef={item.item_id ?? null}
-        sourceSurface="inner_path"
+        sourceSurface="program"
         onEngineReady={(api) => { engineApiRef.current = api; api.refreshStats(); }}
         onComplete={() => {
           navigation.navigate("ProgramDayScreen", { dayNumber, completedItem: item.item_id });

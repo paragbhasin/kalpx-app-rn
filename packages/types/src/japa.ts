@@ -7,7 +7,8 @@ export type JapaSourceSurface =
   | 'inner_path'
   | 'digital_mala'
   | 'watch'
-  | 'live_activity';
+  | 'live_activity'
+  | 'program';
 
 export type JapaGoalType = 'time' | 'count' | 'unlimited';
 

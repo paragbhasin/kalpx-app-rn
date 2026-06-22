@@ -31,11 +31,6 @@ interface Props {
   variant?: "default" | "completion";
 }
 
-const NOUN_BY_TYPE: Record<LiveActivityType, string> = {
-  sankalp: "intention",
-  mantra: "mantra",
-  practice: "practice",
-};
 
 export function LiveActivityPreferenceBanner({
   experienceType,
@@ -90,9 +85,8 @@ export function LiveActivityPreferenceBanner({
   handleYesRef.current = handleYes;
   dismissRef.current = dismiss;
 
-  // Inject compact chip into the GlobalScrollLayout header row (default variant only)
+  // Inject compact chip into the GlobalScrollLayout header row (all variants)
   useEffect(() => {
-    if (variant !== "default") return;
     if (!visible) {
       setHeaderRight(null);
       return;
@@ -124,14 +118,12 @@ export function LiveActivityPreferenceBanner({
         </TouchableOpacity>
       </Animated.View>
     );
-  }, [visible, variant]);
+  }, [visible]);
 
   // Clear header slot on unmount
   useEffect(() => {
-    return () => {
-      if (variant === "default") setHeaderRight(null);
-    };
-  }, [variant]);
+    return () => { setHeaderRight(null); };
+  }, []);
 
   const handleConflictConfirm = () => {
     if (conflictChoice === "switch") {
@@ -247,48 +239,8 @@ export function LiveActivityPreferenceBanner({
 
   if (!visible) return null;
 
-  // Default variant: chip lives in the GlobalScrollLayout header — only the modal renders here
-  if (variant === "default") {
-    return renderConflictModal();
-  }
-
-  // Completion variant: inline two-row card
-  return (
-    <>
-      <Animated.View style={[styles.cBanner, { opacity: fadeAnim }]}>
-        <View style={styles.cTopRow}>
-          <View style={styles.cIconBox}>
-            <Ionicons name="notifications-outline" size={20} color={Colors.gold} />
-          </View>
-          <View style={styles.cTextBlock}>
-            <Text style={styles.cLead}>
-              Keep this {NOUN_BY_TYPE[experienceType]} close to you.
-            </Text>
-            <Text style={styles.cTitle}>Make it your Live Activity?</Text>
-          </View>
-        </View>
-        <View style={styles.cBottomRow}>
-          <TouchableOpacity
-            onPress={dismiss}
-            style={styles.cNotNowBtn}
-            hitSlop={8}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.cNotNowText}>Not Now</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={handleYes}
-            style={styles.cYesBtn}
-            hitSlop={8}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.cYesText} numberOfLines={1}>Make Live Activity</Text>
-          </TouchableOpacity>
-        </View>
-      </Animated.View>
-      {renderConflictModal()}
-    </>
-  );
+  // Chip lives in the GlobalScrollLayout header for all variants — only the modal renders here
+  return renderConflictModal();
 }
 
 const styles = StyleSheet.create({
@@ -341,73 +293,6 @@ const styles = StyleSheet.create({
     borderLeftColor: "#E8D9B5",
     alignItems: "center",
     justifyContent: "center",
-  },
-
-  // --- Completion variant: inline two-row card ---
-  cBanner: {
-    width: "100%",
-    backgroundColor: "#FFFDF8",
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#ECDFBE",
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    marginBottom: 24,
-  },
-  cTopRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  cIconBox: {
-    marginRight: 12,
-    flexShrink: 0,
-  },
-  cTextBlock: {
-    flex: 1,
-  },
-  cLead: {
-    fontFamily: Fonts.sans.regular,
-    fontSize: 13,
-    color: "#7A6038",
-    lineHeight: 18,
-  },
-  cTitle: {
-    fontFamily: Fonts.sans.semiBold,
-    fontSize: 14,
-    color: "#3A1F06",
-    marginTop: 2,
-  },
-  cBottomRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 16,
-  },
-  cNotNowBtn: {
-    paddingHorizontal: 22,
-    paddingVertical: 11,
-    borderRadius: 8,
-    borderWidth: 1.5,
-    borderColor: "#D4C5A0",
-    backgroundColor: "#FFFDF8",
-    marginRight: 10,
-    alignItems: "center",
-  },
-  cNotNowText: {
-    fontFamily: Fonts.sans.medium,
-    fontSize: 13,
-    color: "#3A1F06",
-  },
-  cYesBtn: {
-    flex: 1,
-    paddingVertical: 11,
-    borderRadius: 8,
-    backgroundColor: Colors.gold,
-    alignItems: "center",
-  },
-  cYesText: {
-    fontFamily: Fonts.sans.semiBold,
-    fontSize: 13,
-    color: "#fff",
   },
 
   // --- Conflict / confirmation modal ---

@@ -414,20 +414,15 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     updateScreenData("reps_done", currentType === "mantra" ? chantCount : 1);
     updateScreenData("chant_duration", durationSeconds);
 
-    const completeAction = {
-      type: "complete_runner",
-      target: {
-        container_id: "practice_runner",
-        state_id: "completion_return",
+    executeAction(
+      { type: "complete_runner" },
+      {
+        loadScreen,
+        goBack,
+        setScreenValue: (val: any, k: string) => updateScreenData(k, val),
+        screenState: { ...screenData },
       },
-    };
-
-    executeAction(completeAction, {
-      loadScreen,
-      goBack,
-      setScreenValue: (val: any, k: string) => updateScreenData(k, val),
-      screenState: { ...screenData },
-    });
+    );
   };
 
   const stopCalmMusic = async () => {
@@ -729,21 +724,16 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
         updateScreenData("chant_duration", durationSeconds);
 
         // 2. Use the standard complete_runner action
-        const completeAction = {
-          type: "complete_runner",
-          target: {
-            container_id: "practice_runner",
-            state_id: "completion_return",
-          },
-        };
-
         setTimeout(() => {
-          executeAction(completeAction, {
-            loadScreen,
-            goBack,
-            setScreenValue: (val: any, k: string) => updateScreenData(k, val),
-            screenState: { ...screenData },
-          });
+          executeAction(
+            { type: "complete_runner" },
+            {
+              loadScreen,
+              goBack,
+              setScreenValue: (val: any, k: string) => updateScreenData(k, val),
+              screenState: { ...screenData },
+            },
+          );
         }, 800);
       }
       return nextCount;
@@ -951,10 +941,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     updateScreenData("reps_done", repsCompleted);
     updateScreenData("chant_duration", durationSec);
     executeAction(
-      {
-        type: "complete_runner",
-        target: { container_id: "practice_runner", state_id: "completion_return" },
-      },
+      { type: "complete_runner" },
       {
         loadScreen,
         goBack,

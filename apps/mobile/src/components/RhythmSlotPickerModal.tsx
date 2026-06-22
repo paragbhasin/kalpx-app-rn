@@ -32,6 +32,8 @@ interface Props {
   /** When set, the modal is shown for this practice. Null hides it. */
   offer: RhythmOffer | null;
   onClose: () => void;
+  /** Optional: called instead of internal navigation.navigate("RhythmHome") */
+  onGoToRhythm?: () => void;
 }
 
 const SLOTS: RhythmTimeBand[] = ["morning", "afternoon", "night"];
@@ -44,7 +46,7 @@ const SLOTS: RhythmTimeBand[] = ["morning", "afternoon", "night"];
  *   button to open the rhythm.
  * - Otherwise → lets them add it to a slot (morning / afternoon / night).
  */
-const RhythmSlotPickerModal: React.FC<Props> = ({ offer, onClose }) => {
+const RhythmSlotPickerModal: React.FC<Props> = ({ offer, onClose, onGoToRhythm }) => {
   const { t, i18n } = useTranslation();
   const navigation: any = useNavigation();
   const dispatch: any = useDispatch();
@@ -107,7 +109,11 @@ const RhythmSlotPickerModal: React.FC<Props> = ({ offer, onClose }) => {
 
   const goToRhythm = () => {
     handleClose();
-    navigation.navigate("RhythmHome");
+    if (onGoToRhythm) {
+      onGoToRhythm();
+    } else {
+      navigation.navigate("RhythmHome");
+    }
   };
 
   const handlePickSlot = async (slot: RhythmTimeBand) => {
@@ -127,9 +133,8 @@ const RhythmSlotPickerModal: React.FC<Props> = ({ offer, onClose }) => {
         return;
       }
 
+      const slotItems = rhythm?.[slot]?.items ?? [];
       if (rhythm?.has_rhythm) {
-        // Rhythm exists → add this item to the chosen slot.
-        const slotItems = rhythm?.[slot]?.items ?? [];
         await postRhythmItemAdd({
           slot,
           item_type: offer.item_type as any,
@@ -142,7 +147,6 @@ const RhythmSlotPickerModal: React.FC<Props> = ({ offer, onClose }) => {
           reminder_time: null,
         });
       } else {
-        // No rhythm yet → create one seeded with this single item.
         await postRhythmSetup({
           items: [
             {
@@ -159,8 +163,33 @@ const RhythmSlotPickerModal: React.FC<Props> = ({ offer, onClose }) => {
           ],
         });
       }
-      const fresh = await mitraJourneyHomeV3({ forceFresh: true });
-      dispatch(setHomeData(fresh));
+      // Optimistic update: write the new item into Redux immediately.
+      // The server-side write propagates with a short delay, so a forceFresh
+      // fetch right after the add returns stale data — the item goes missing
+      // in RhythmHome. Injecting it directly avoids that race entirely.
+      // RhythmHome's own useFocusEffect will sync from the server in the background.
+      dispatch(setHomeData({
+        ...home,
+        companion_rhythm: {
+          ...rhythm,
+          has_rhythm: true,
+          [slot]: {
+            ...(rhythm?.[slot] ?? {}),
+            items: [
+              ...slotItems,
+              {
+                item_id: offer.item_id,
+                item_type: offer.item_type,
+                title_snapshot: offer.title,
+                description_snapshot: offer.description,
+                completed_today: false,
+                source: "user_chosen",
+                sort_order: slotItems.length + 1,
+              },
+            ],
+          },
+        },
+      }));
       setAddedSlot(slot);
     } catch (e: any) {
       console.warn("[RhythmSlotPickerModal] add failed", e?.message);

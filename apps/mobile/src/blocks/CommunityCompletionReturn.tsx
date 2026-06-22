@@ -576,6 +576,10 @@ const CommunityCompletionReturn: React.FC<CompletionReturnTransientProps> = ({
       <RhythmSlotPickerModal
         offer={rhythmOffer}
         onClose={() => setRhythmOffer(null)}
+        onGoToRhythm={() => {
+          setRhythmOffer(null);
+          navigation.navigate("RhythmHome");
+        }}
       />
     </KeyboardAvoidingView>
   );

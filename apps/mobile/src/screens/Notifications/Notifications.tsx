@@ -1,4 +1,4 @@
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { AnyAction } from "@reduxjs/toolkit";
 import moment from "moment";
 import React, { useCallback } from "react";
@@ -23,10 +23,45 @@ import { mitraTrackEvent } from "../../engine/mitraApi";
 import styles from "./styles";
 import { useScrollContext } from "../../context/ScrollContext";
 
+// Maps a notification event_type to the screen to navigate to inside the Home tab stack.
+// Returns null for event_types that have no meaningful destination.
+function getNotificationRoute(eventType: string): { screen: string; params?: object } | null {
+  const base = eventType.split(":")[0]; // strip colon suffix e.g. "dharma_trigger_headsup:japa_krishna"
+
+  if (base === "mitra_rhythm_morning") return { screen: "RhythmHome", params: { slot: "morning" } };
+  if (base === "mitra_rhythm_evening") return { screen: "RhythmHome", params: { slot: "evening" } };
+  if (base === "mitra_rhythm_night")   return { screen: "RhythmHome", params: { slot: "night" } };
+
+  if (base === "mitra_inner_path") return { screen: "InnerPath" };
+
+  if (
+    base === "mitra_post_conflict_follow" ||
+    base === "mitra_grief_follow" ||
+    base === "mitra_predictive_alert"
+  ) return { screen: "TellMitra" };
+
+  if (base === "mitra_community_digest") return { screen: "CommunityLanding" };
+
+  if (base.startsWith("dharma_")) return { screen: "Dharma" };
+
+  if (
+    base === "morning_practice_ready" ||
+    base.startsWith("practice_") ||
+    base.startsWith("streak_") ||
+    base.startsWith("reactivation") ||
+    base === "weekly_recap" ||
+    base === "mitra_gentle_reengagement" ||
+    base === "mitra_post_room_continuity"
+  ) return { screen: "Home" };
+
+  return null;
+}
+
 export default function Notifications() {
   const { i18n } = useTranslation();
   const { handleScroll } = useScrollContext();
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
+  const navigation = useNavigation<any>();
 
   const { data, loading, page, hasMore } = useSelector(
     (state: RootState) => state.notificationsReducer
@@ -50,7 +85,7 @@ export default function Notifications() {
     }
   };
 
-  // 📌 Mark single notification read + analytics
+  // 📌 Mark read + navigate to the relevant screen
   const openNotification = (item) => {
     if (!item.read) {
       dispatch(markNotificationsRead([item.id]));
@@ -58,41 +93,58 @@ export default function Notifications() {
         meta: { notification_id: item.id, event_type: item.event_type },
       });
     }
+    const route = getNotificationRoute(item.event_type || "");
+    if (route) {
+      navigation.navigate("HomePage", { screen: route.screen, params: route.params });
+    }
   };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      style={[styles.row, !item.read && styles.unread]}
-      onPress={() => openNotification(item)}
-      activeOpacity={0.7}
-    >
-      <View style={styles.dotWrapper}>
-        {!item.read && <View style={styles.unreadDot} />}
-      </View>
-      <View style={styles.textContainer}>
-        <View style={styles.titleRow}>
-          <TextComponent
-            type="streakSadanaText"
-            style={item.read ? styles.titleRead : styles.title}
-          >
-            {item.title}
-          </TextComponent>
-          <TextComponent
-            type="mediumText"
-            style={item.read ? styles.time : styles.timeUnread}
-          >
-            {moment(item.timestamp).locale(i18n.language.split('-')[0]).format("MMM D, YYYY")}
-          </TextComponent>
+  const renderItem = ({ item }) => {
+    const route = getNotificationRoute(item.event_type || "");
+    return (
+      <TouchableOpacity
+        style={[styles.row, !item.read && styles.unread]}
+        onPress={() => openNotification(item)}
+        activeOpacity={0.7}
+      >
+        <View style={styles.dotWrapper}>
+          {!item.read && <View style={styles.unreadDot} />}
         </View>
-        <TextComponent
-          type="mediumText"
-          style={item.read ? styles.message : styles.messageUnread}
-        >
-          {item.message}
-        </TextComponent>
-      </View>
-    </TouchableOpacity>
-  );
+        <View style={styles.textContainer}>
+          <View style={styles.titleRow}>
+            <TextComponent
+              type="streakSadanaText"
+              style={item.read ? styles.titleRead : styles.title}
+            >
+              {item.title}
+            </TextComponent>
+            <TextComponent
+              type="mediumText"
+              style={item.read ? styles.time : styles.timeUnread}
+            >
+              {moment(item.timestamp).locale(i18n.language.split('-')[0]).format("MMM D, YYYY")}
+            </TextComponent>
+          </View>
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+            <TextComponent
+              type="mediumText"
+              style={[item.read ? styles.message : styles.messageUnread, { flex: 1 }]}
+            >
+              {item.message}
+            </TextComponent>
+            {route && (
+              <Ionicons
+                name="chevron-forward"
+                size={14}
+                color={item.read ? "#bbb" : "#CA8A04"}
+                style={{ marginLeft: 6 }}
+              />
+            )}
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>

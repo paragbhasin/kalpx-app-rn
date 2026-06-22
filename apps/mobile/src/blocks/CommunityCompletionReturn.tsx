@@ -9,6 +9,7 @@
  * manual redirection only (Return to Dashboard / Repeat).
  */
 
+import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
@@ -27,6 +28,7 @@ import {Image,
 import Svg, { Path } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 const MantraLotus3d = ({ width, height, opacity, style }: { width?: number; height?: number; opacity?: number; style?: any }) => <Image source={require("../../assets/mantra-lotus-3d.webp")} style={[{ width, height, opacity, resizeMode: 'contain' }, style]} />;
+import { LiveActivityPreferenceBanner } from "../components/LiveActivityPreferenceBanner";
 import { VoiceTextInput } from "../components/VoiceTextInput";
 import RhythmSlotPickerModal, {
   type RhythmOffer,
@@ -168,6 +170,21 @@ const CommunityCompletionReturn: React.FC<CompletionReturnTransientProps> = ({
   };
 
   const isCommunityRunner = screenData.runner_source === "community";
+  const laItemTitle = (() => {
+    const item = (screenData.runner_active_item || {}) as any;
+    return item.title || item.title_snapshot || item.name || "";
+  })();
+
+  const NAME_CARD_LABEL: Record<string, string> = {
+    mantra:   t("completion.nameCard.mantraLabel",   { defaultValue: "Today's Mantra" }),
+    sankalp:  t("completion.nameCard.sankalpLabel",  { defaultValue: "Today's Intention" }),
+    practice: t("completion.nameCard.practiceLabel", { defaultValue: "Today's Practice" }),
+  };
+  const NAME_CARD_GUIDE: Record<string, string> = {
+    mantra:   t("completion.nameCard.mantraGuide",   { defaultValue: "Let its vibration stay with you through the day." }),
+    sankalp:  t("completion.nameCard.sankalpGuide",  { defaultValue: "Let this guide your thoughts, words and actions." }),
+    practice: t("completion.nameCard.practiceGuide", { defaultValue: "Carry this stillness into your day." }),
+  };
 
   const setScreenValue = (key: string, value: any) => {
     store.dispatch(screenActions.setScreenValue({ key, value }));
@@ -464,6 +481,20 @@ const CommunityCompletionReturn: React.FC<CompletionReturnTransientProps> = ({
               </View>
             )}
 
+            {!!laItemTitle && (
+              <View style={styles.nameCard}>
+                <Ionicons name="flower-outline" size={20} color="#C9A85F" style={styles.nameCardLotus} />
+                <View style={styles.nameCardHeader}>
+                  <View style={styles.nameCardDivider} />
+                  <Text style={styles.nameCardLabel}>{NAME_CARD_LABEL[resolvedVariant]}</Text>
+                  <View style={styles.nameCardDivider} />
+                </View>
+                <Text style={styles.nameCardText}>{`"${laItemTitle}"`}</Text>
+                <Text style={styles.nameCardDots}>• • •</Text>
+                <Text style={styles.nameCardGuide}>{NAME_CARD_GUIDE[resolvedVariant]}</Text>
+              </View>
+            )}
+
             {isRoomSequenceCompletion ? (
               <View style={styles.chipsWrap} testID="completion_reflection_chips">
                 <View style={styles.chipsRow}>
@@ -573,6 +604,14 @@ const CommunityCompletionReturn: React.FC<CompletionReturnTransientProps> = ({
         </View>
       </ScrollView>
 
+      {!!laItemTitle && (
+        <LiveActivityPreferenceBanner
+          variant="completion"
+          experienceType={resolvedVariant}
+          experienceName={laItemTitle}
+        />
+      )}
+
       <RhythmSlotPickerModal
         offer={rhythmOffer}
         onClose={() => setRhythmOffer(null)}
@@ -586,6 +625,61 @@ const CommunityCompletionReturn: React.FC<CompletionReturnTransientProps> = ({
 };
 
 const styles = StyleSheet.create({
+  nameCard: {
+    width: "100%",
+    backgroundColor: "rgba(255, 250, 240, 0.7)",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#EFE3C8",
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  nameCardLotus: {
+    marginBottom: 10,
+  },
+  nameCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 14,
+  },
+  nameCardDivider: {
+    width: 28,
+    height: 1,
+    backgroundColor: "#DCC79A",
+  },
+  nameCardLabel: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 12,
+    color: "#A07D3E",
+    letterSpacing: 0.6,
+    marginHorizontal: 12,
+    textTransform: "uppercase",
+  },
+  nameCardText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 20,
+    lineHeight: 30,
+    color: "#3A2208",
+    textAlign: "center",
+  },
+  nameCardDots: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 11,
+    color: "#C9A85F",
+    letterSpacing: 3,
+    marginTop: 14,
+    marginBottom: 10,
+  },
+  nameCardGuide: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 13,
+    lineHeight: 19,
+    color: "#8A6845",
+    textAlign: "center",
+    fontStyle: "italic",
+  },
   addPracticeCta: {
     marginTop: 12,
     backgroundColor: "rgba(255,248,239,0.92)",

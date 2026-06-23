@@ -13,7 +13,7 @@ const BEIGE_BG = require("../../../../assets/beige_bg.webp");
 export default function ProgramSankalpRunner() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const { item, dayNumber } = route.params;
+  const { item, dayNumber, completedItems = [] } = route.params;
   const updateBackground = useScreenStore((state) => state.updateBackground);
 
   useFocusEffect(
@@ -29,7 +29,8 @@ export default function ProgramSankalpRunner() {
         item={item}
         sourceSurface="program"
         onComplete={() => {
-          navigation.navigate("ProgramDayScreen", { dayNumber, completedItem: item.item_id });
+          const updated = [...new Set([...completedItems, item.item_id])];
+          navigation.navigate("ProgramDayScreen", { dayNumber, completedItems: updated });
         }}
         onBack={() => navigation.goBack()}
         isDevMode={__DEV__}

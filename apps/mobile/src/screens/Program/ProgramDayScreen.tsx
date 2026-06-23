@@ -8,7 +8,7 @@
  * On completing all 3 items → "Complete Day" CTA → ProgramCompletionScreen.
  */
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -63,7 +63,7 @@ function ItemCard({
 export default function ProgramDayScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const { dayNumber, completedItem } = route.params ?? {};
+  const { dayNumber, completedItems } = route.params ?? {};
 
   const [dayContent, setDayContent] = useState<ProgramDayContent | null>(null);
   const [loading, setLoading] = useState(true);
@@ -71,17 +71,9 @@ export default function ProgramDayScreen() {
 
   const firedAnalyticsRef = useRef(false);
 
-  // Track which items the user has visited in this session
-  const sessionDoneRef = useRef<Set<string>>(new Set());
-  const [sessionDone, setSessionDone] = useState<Set<string>>(new Set());
-
-  // When the runner returns us here with a completedItem param, mark it done
-  useEffect(() => {
-    if (completedItem) {
-      sessionDoneRef.current = new Set([...sessionDoneRef.current, completedItem]);
-      setSessionDone(new Set(sessionDoneRef.current));
-    }
-  }, [completedItem]);
+  // completedItems is passed back by each runner and accumulated there.
+  // Reading directly from params avoids any stale-state/remount issues.
+  const sessionDone = new Set<string>(Array.isArray(completedItems) ? completedItems : []);
 
   useFocusEffect(
     useCallback(() => {
@@ -122,7 +114,8 @@ export default function ProgramDayScreen() {
     };
     const screen = screenMap[item.item_type];
     if (!screen) return;
-    navigation.navigate(screen, { item, dayNumber });
+    // Pass current completedItems so the runner can append to the list on complete
+    navigation.navigate(screen, { item, dayNumber, completedItems: Array.from(sessionDone) });
   };
 
   const allItems = dayContent

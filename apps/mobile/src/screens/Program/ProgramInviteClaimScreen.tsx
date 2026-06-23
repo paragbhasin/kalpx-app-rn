@@ -89,6 +89,13 @@ export default function ProgramInviteClaimScreen() {
     } catch (err: any) {
       setClaiming(false);
       const status = err?.response?.status;
+      if (status === 401) {
+        // Not logged in — save code and go to login; resumePendingIfAny will claim after auth
+        await AsyncStorage.setItem("pending_program_code", trimmed);
+        if (source) await AsyncStorage.setItem("pending_program_source", source ?? "deep_link");
+        navigation.navigate("Login" as any);
+        return;
+      }
       if (status === 404) setError("That code wasn't found. Check the code and try again.");
       else if (status === 410) setError("This program has ended.");
       else if (status === 403) setError("This program is no longer accepting new members.");

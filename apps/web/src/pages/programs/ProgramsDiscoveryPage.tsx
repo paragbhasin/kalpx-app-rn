@@ -40,6 +40,13 @@ export function ProgramsDiscoveryPage() {
   // SEO
   useEffect(() => {
     document.title = 'Programs — KalpX';
+    let metaDesc = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.setAttribute('name', 'description');
+      document.head.appendChild(metaDesc);
+    }
+    metaDesc.setAttribute('content', 'Explore spiritual practice programs — Meditation, Yoga, Gita, Ayurveda and more — on KalpX.');
   }, []);
 
   // Fetch programs whenever filters change

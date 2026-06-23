@@ -9,7 +9,7 @@ type LoadState =
   | { kind: 'empty' }
   | { kind: 'error' };
 
-type FilterTab = 'all' | 'upcoming' | 'recurring';
+type FilterTab = 'all' | 'jaap' | 'dhyaan' | 'satsang' | 'classes' | 'family' | 'festival';
 
 const SESSION_TYPE_LABELS: Record<string, string> = {
   jaap: 'Jaap',
@@ -64,12 +64,19 @@ function platformLabel(platform: string): string {
   return PLATFORM_LABELS[platform.toLowerCase()] ?? platform;
 }
 
-function isUpcoming(session: TLPLiveSession): boolean {
-  return ['approved', 'scheduled', 'live'].includes(session.status);
-}
-
 function isRecurring(session: TLPLiveSession): boolean {
   return session.recurrence_type !== 'none' && session.recurrence_type !== 'one_time';
+}
+
+function matchesTypeFilter(session: TLPLiveSession, tab: FilterTab): boolean {
+  if (tab === 'all') return true;
+  if (tab === 'jaap') return session.session_type === 'jaap';
+  if (tab === 'dhyaan') return session.session_type === 'dhyaan';
+  if (tab === 'satsang') return session.session_type === 'satsang';
+  if (tab === 'classes') return ['gita_class', 'yoga', 'ayurveda_talk'].includes(session.session_type);
+  if (tab === 'family') return session.session_type === 'family_session';
+  if (tab === 'festival') return session.session_type === 'festival_session';
+  return true;
 }
 
 export function LiveSessionsListPage() {
@@ -79,6 +86,13 @@ export function LiveSessionsListPage() {
 
   useEffect(() => {
     document.title = 'Live Sessions — KalpX';
+    let metaDesc = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.setAttribute('name', 'description');
+      document.head.appendChild(metaDesc);
+    }
+    metaDesc.setAttribute('content', 'Join live practice sessions — Jaap, Dhyaan, Satsang, Yoga and more — with trusted guides on KalpX.');
   }, []);
 
   useEffect(() => {
@@ -102,11 +116,7 @@ export function LiveSessionsListPage() {
 
   const filteredSessions =
     state.kind === 'loaded'
-      ? state.sessions.filter((s) => {
-          if (activeTab === 'upcoming') return isUpcoming(s);
-          if (activeTab === 'recurring') return isRecurring(s);
-          return true;
-        })
+      ? state.sessions.filter((s) => matchesTypeFilter(s, activeTab))
       : [];
 
   return (
@@ -162,7 +172,17 @@ export function LiveSessionsListPage() {
   );
 }
 
-// ── Filter tabs ───────────────────────────────────────────────────────────────
+// ── Filter chips ──────────────────────────────────────────────────────────────
+
+const FILTER_CHIPS: { key: FilterTab; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'jaap', label: 'Jaap' },
+  { key: 'dhyaan', label: 'Dhyaan' },
+  { key: 'satsang', label: 'Satsang' },
+  { key: 'classes', label: 'Classes' },
+  { key: 'family', label: 'Family' },
+  { key: 'festival', label: 'Festival' },
+];
 
 function FilterTabs({
   active,
@@ -171,38 +191,32 @@ function FilterTabs({
   active: FilterTab;
   onChange: (tab: FilterTab) => void;
 }) {
-  const tabs: { key: FilterTab; label: string }[] = [
-    { key: 'all', label: 'All' },
-    { key: 'upcoming', label: 'Upcoming' },
-    { key: 'recurring', label: 'Recurring' },
-  ];
-
   return (
     <div
       role="tablist"
-      aria-label="Filter sessions"
-      style={{ display: 'flex', gap: 8, marginBottom: 24 }}
+      aria-label="Filter sessions by type"
+      style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}
     >
-      {tabs.map((tab) => (
+      {FILTER_CHIPS.map((chip) => (
         <button
-          key={tab.key}
+          key={chip.key}
           role="tab"
-          aria-selected={active === tab.key}
-          onClick={() => onChange(tab.key)}
+          aria-selected={active === chip.key}
+          onClick={() => onChange(chip.key)}
           style={{
             padding: '7px 16px',
             borderRadius: 'var(--kalpx-r-md)',
-            border: active === tab.key
+            border: active === chip.key
               ? '1px solid var(--kalpx-gold)'
               : '1px solid var(--kalpx-border)',
-            background: active === tab.key ? 'var(--kalpx-chip-bg)' : 'transparent',
-            color: active === tab.key ? 'var(--kalpx-gold)' : 'var(--kalpx-text-soft)',
-            fontWeight: active === tab.key ? 600 : 400,
+            background: active === chip.key ? 'var(--kalpx-chip-bg)' : 'transparent',
+            color: active === chip.key ? 'var(--kalpx-gold)' : 'var(--kalpx-text-soft)',
+            fontWeight: active === chip.key ? 600 : 400,
             fontSize: 13,
             cursor: 'pointer',
           }}
         >
-          {tab.label}
+          {chip.label}
         </button>
       ))}
     </div>
@@ -251,14 +265,13 @@ function EmptyState() {
 }
 
 function EmptyFilterState({ tab }: { tab: FilterTab }) {
-  const messages: Record<FilterTab, string> = {
-    all: 'No sessions available.',
-    upcoming: 'No upcoming sessions right now.',
-    recurring: 'No recurring sessions found.',
-  };
+  const chipLabel = FILTER_CHIPS.find((c) => c.key === tab)?.label ?? tab;
+  const message = tab === 'all'
+    ? 'No sessions available.'
+    : `No ${chipLabel} sessions available right now.`;
   return (
     <div style={{ textAlign: 'center', paddingTop: 48 }}>
-      <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14 }}>{messages[tab]}</p>
+      <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14 }}>{message}</p>
     </div>
   );
 }

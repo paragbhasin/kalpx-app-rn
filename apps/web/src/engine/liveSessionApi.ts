@@ -60,6 +60,7 @@ export interface ProgramTestimonial {
 
 export interface TLPLiveSession {
   code: string;
+  slug: string;
   title: string;
   guide_name: string;
   session_type: string;
@@ -72,6 +73,7 @@ export interface TLPLiveSession {
   registration_enabled: boolean;
   status: string;
   associated_program_code: string | null;
+  is_user_registered: boolean;
 }
 
 export interface TLPLiveSessionDetail extends TLPLiveSession {
@@ -90,8 +92,11 @@ export interface LiveSessionRegistration {
   ok: boolean;
   already_registered: boolean;
   session_code: string;
+  title: string;
   scheduled_at: string;
   reminder_preference: 'all' | 'day_of' | 'none';
+  external_join_url: string | null;
+  external_platform: string;
 }
 
 export interface MyRegistration {

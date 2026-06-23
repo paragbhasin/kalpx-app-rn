@@ -18,6 +18,17 @@ import {
 import { Fonts } from "../../theme/fonts";
 import { fetchLiveSessions, type TLPLiveSession } from "../../engine/liveSessionApi";
 
+const SESSION_TYPE_CHIPS = [
+  { key: "all", label: "All" },
+  { key: "jaap", label: "Jaap" },
+  { key: "dhyaan", label: "Dhyaan" },
+  { key: "satsang", label: "Satsang" },
+  { key: "classes", label: "Classes" },
+  { key: "family_session", label: "Family" },
+  { key: "festival_session", label: "Festival" },
+];
+const CLASS_TYPES = ["gita_class", "yoga", "ayurveda_talk"];
+
 const SESSION_TYPE_LABELS: Record<string, string> = {
   jaap: "Jaap",
   dhyaan: "Dhyaan",
@@ -59,12 +70,25 @@ function formatScheduledAt(iso: string): string {
   }
 }
 
-function SessionCard({ session, onPress }: { session: TLPLiveSession; onPress: () => void }) {
+function SessionCard({
+  session,
+  onPress,
+  onRegister,
+}: {
+  session: TLPLiveSession;
+  onPress: () => void;
+  onRegister: () => void;
+}) {
   const typeLabel =
     SESSION_TYPE_LABELS[session.session_type] ??
     session.session_type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   const statusLabel = STATUS_LABELS[session.status] ?? session.status;
   const statusColor = STATUS_COLORS[session.status] ?? "#432104";
+
+  const showRegisterBtn =
+    session.registration_enabled &&
+    session.status === "scheduled" &&
+    !session.is_user_registered;
 
   return (
     <TouchableOpacity
@@ -88,9 +112,19 @@ function SessionCard({ session, onPress }: { session: TLPLiveSession; onPress: (
 
       <View style={styles.cardFooter}>
         <Text style={styles.scheduledAt}>{formatScheduledAt(session.scheduled_at)}</Text>
-        <View style={styles.platformBadge}>
-          <Text style={styles.platformText}>{session.external_platform}</Text>
-        </View>
+        {showRegisterBtn ? (
+          <TouchableOpacity
+            onPress={onRegister}
+            style={styles.cardRegisterBtn}
+            accessibilityLabel={`Register for ${session.title}`}
+          >
+            <Text style={styles.cardRegisterBtnText}>Register →</Text>
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.platformBadge}>
+            <Text style={styles.platformText}>{session.external_platform}</Text>
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -101,6 +135,7 @@ export default function LiveSessionsListScreen() {
   const [sessions, setSessions] = useState<TLPLiveSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedType, setSelectedType] = useState("all");
 
   useEffect(() => {
     let cancelled = false;
@@ -137,32 +172,72 @@ export default function LiveSessionsListScreen() {
     );
   }
 
+  // Fix 8: exclude draft/submitted from public list
+  const visible = sessions.filter((s) => !["draft", "submitted"].includes(s.status));
+
+  // Fix 4: filter by selected session type
+  const filtered =
+    selectedType === "all"
+      ? visible
+      : selectedType === "classes"
+      ? visible.filter((s) => CLASS_TYPES.includes(s.session_type))
+      : visible.filter((s) => s.session_type === selectedType);
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon}>
-            <Text style={styles.backIconText}>‹</Text>
-          </TouchableOpacity>
-          <View style={styles.headerCenter}>
-            <Text style={styles.screenTitle}>Live Sessions</Text>
-          </View>
-          <View style={{ width: 40 }} />
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon}>
+          <Text style={styles.backIconText}>‹</Text>
+        </TouchableOpacity>
+        <View style={styles.headerCenter}>
+          <Text style={styles.screenTitle}>Live Sessions</Text>
         </View>
+        <View style={{ width: 40 }} />
+      </View>
 
-        {sessions.length === 0 ? (
+      {/* Fix 4: session-type filter chips */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.chipRow}
+      >
+        {SESSION_TYPE_CHIPS.map((chip) => (
+          <TouchableOpacity
+            key={chip.key}
+            onPress={() => setSelectedType(chip.key)}
+            style={[
+              styles.typeChip,
+              selectedType === chip.key && styles.typeChipActive,
+            ]}
+            accessibilityLabel={`Filter by ${chip.label}`}
+          >
+            <Text
+              style={[
+                styles.typeChipText,
+                selectedType === chip.key && styles.typeChipTextActive,
+              ]}
+            >
+              {chip.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        {filtered.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>No upcoming sessions</Text>
             <Text style={styles.emptySubText}>Check back soon for new sessions.</Text>
           </View>
         ) : (
           <View style={styles.list}>
-            {sessions.map((s) => (
+            {filtered.map((s) => (
               <SessionCard
                 key={s.code}
                 session={s}
                 onPress={() => navigation.navigate("LiveSessionDetail", { code: s.code })}
+                onRegister={() => navigation.navigate("LiveSessionDetail", { code: s.code })}
               />
             ))}
           </View>
@@ -181,7 +256,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingTop: 16,
-    paddingBottom: 20,
+    paddingBottom: 12,
+    paddingHorizontal: 20,
   },
   backIcon: { width: 40, alignItems: "flex-start" },
   backIconText: { fontSize: 32, color: "#432104", lineHeight: 36 },
@@ -190,6 +266,30 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif.bold,
     fontSize: 22,
     color: "#432104",
+  },
+
+  chipRow: {
+    paddingHorizontal: 20,
+    paddingBottom: 12,
+    gap: 8,
+    flexDirection: "row",
+  },
+  typeChip: {
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    backgroundColor: "#EDE8E0",
+  },
+  typeChipActive: {
+    backgroundColor: "#C99317",
+  },
+  typeChipText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 12,
+    color: "#432104",
+  },
+  typeChipTextActive: {
+    color: "#fff",
   },
 
   list: { gap: 12 },
@@ -260,6 +360,20 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.medium,
     fontSize: 11,
     color: "#7B6545",
+  },
+
+  cardRegisterBtn: {
+    backgroundColor: "#F0EAD8",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderWidth: 1,
+    borderColor: "#C99317",
+  },
+  cardRegisterBtnText: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 12,
+    color: "#432104",
   },
 
   emptyState: { alignItems: "center", marginTop: 80 },

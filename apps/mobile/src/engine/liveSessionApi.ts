@@ -24,6 +24,7 @@ export interface TLPProgram {
   category?: string;
   language?: string;
   program_type?: string;
+  guide: { display_name: string; guide_type: string; photo_url: string } | null;
 }
 
 export interface TLPGuide {
@@ -69,6 +70,7 @@ export interface TLPLiveSession {
   registration_enabled: boolean;
   status: string;
   associated_program_code: string | null;
+  is_user_registered: boolean;
 }
 
 export interface TLPLiveSessionDetail extends TLPLiveSession {
@@ -79,6 +81,7 @@ export interface TLPLiveSessionDetail extends TLPLiveSession {
   capacity: number | null;
   support_contact_url: string;
   recording_url: string;
+  is_user_registered: boolean;
 }
 
 export interface RegisterForSessionResult {

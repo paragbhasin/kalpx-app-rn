@@ -9,6 +9,7 @@ import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  RefreshControl,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -57,7 +58,7 @@ function ProgramCard({
 
       <View style={styles.leaderRow}>
         <Text style={styles.leaderLabel}>Led by </Text>
-        <Text style={styles.leaderName}>{program.leader_name}</Text>
+        <Text style={styles.leaderName}>{program.guide?.display_name || program.leader_name || ""}</Text>
       </View>
 
       {program.community_name ? (
@@ -109,6 +110,20 @@ export default function ProgramsDiscoveryScreen() {
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedLanguage, setSelectedLanguage] = useState("all");
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadPrograms = React.useCallback(async () => {
+    try {
+      setError(null);
+      const data = await fetchPrograms({
+        category: selectedCategory !== "all" ? selectedCategory : undefined,
+        language: selectedLanguage !== "all" ? selectedLanguage : undefined,
+      });
+      setPrograms(data.programs);
+    } catch {
+      setError("Couldn't load programs. Please try again.");
+    }
+  }, [selectedCategory, selectedLanguage]);
 
   useEffect(() => {
     let cancelled = false;
@@ -129,6 +144,12 @@ export default function ProgramsDiscoveryScreen() {
     })();
     return () => { cancelled = true; };
   }, [selectedCategory, selectedLanguage]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadPrograms();
+    setRefreshing(false);
+  };
 
   if (loading) {
     return (
@@ -220,7 +241,13 @@ export default function ProgramsDiscoveryScreen() {
         ))}
       </ScrollView>
 
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#C99317" />
+        }
+      >
         {programs.length === 0 ? (
           <View style={styles.emptyState}>
             {isFiltered ? (

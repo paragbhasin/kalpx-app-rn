@@ -14,6 +14,7 @@ import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Linking,
   SafeAreaView,
   ScrollView,
@@ -36,6 +37,15 @@ const SESSION_TYPE_LABELS: Record<string, string> = {
   satsang: "Satsang",
   gita_class: "Gita Class",
   yoga: "Yoga",
+};
+
+const PLATFORM_LABELS: Record<string, string> = {
+  zoom: "Zoom",
+  google_meet: "Google Meet",
+  youtube_live: "YouTube Live",
+  instagram_live: "Instagram Live",
+  whatsapp: "WhatsApp",
+  other: "External Link",
 };
 
 const REMINDER_OPTIONS: Array<{ value: "all" | "day_of" | "none"; label: string }> = [
@@ -79,7 +89,10 @@ export default function LiveSessionDetailScreen() {
         try {
           setLoading(true);
           const data = await fetchLiveSessionDetail(code);
-          if (!cancelled) setSession(data);
+          if (!cancelled) {
+            setSession(data);
+            setRegistered(data.is_user_registered || false);
+          }
         } catch (err: any) {
           if (cancelled) return;
           const status = err?.response?.status;
@@ -194,10 +207,23 @@ export default function LiveSessionDetailScreen() {
 
         {/* Guide */}
         <View style={styles.guideCard}>
-          <Text style={styles.guideName}>{session.guide_name}</Text>
-          {session.guide_bio ? (
-            <Text style={styles.guideBio}>{session.guide_bio}</Text>
-          ) : null}
+          <View style={styles.guideRow}>
+            {session.guide_photo_url ? (
+              <Image source={{ uri: session.guide_photo_url }} style={styles.guidePhoto} />
+            ) : (
+              <View style={styles.guideAvatarFallback}>
+                <Text style={styles.guideAvatarInitial}>
+                  {session.guide_name.charAt(0).toUpperCase()}
+                </Text>
+              </View>
+            )}
+            <View style={styles.guideTextBlock}>
+              <Text style={styles.guideName}>{session.guide_name}</Text>
+              {session.guide_bio ? (
+                <Text style={styles.guideBio}>{session.guide_bio}</Text>
+              ) : null}
+            </View>
+          </View>
         </View>
 
         {/* Meta info */}
@@ -205,7 +231,7 @@ export default function LiveSessionDetailScreen() {
           <MetaRow label="When" value={formatScheduledAt(session.scheduled_at, session.timezone)} />
           <MetaRow label="Duration" value={`${session.duration_minutes} minutes`} />
           <MetaRow label="Language" value={session.language} />
-          <MetaRow label="Platform" value={session.external_platform} />
+          <MetaRow label="Platform" value={PLATFORM_LABELS[session.external_platform] || session.external_platform} />
           {session.recurrence_type && session.recurrence_type !== "none" ? (
             <MetaRow
               label="Recurrence"
@@ -399,6 +425,32 @@ const styles = StyleSheet.create({
     borderColor: "#E8D9B5",
     padding: 16,
     marginBottom: 16,
+  },
+  guideRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  guidePhoto: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+  },
+  guideAvatarFallback: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#7B6545",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  guideAvatarInitial: {
+    color: "#FAF7F2",
+    fontSize: 24,
+    fontWeight: "600",
+  },
+  guideTextBlock: {
+    flex: 1,
   },
   guideName: {
     fontFamily: Fonts.sans.semiBold,

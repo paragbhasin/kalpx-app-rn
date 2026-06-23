@@ -97,6 +97,7 @@ function safeUrl(url: string | null | undefined): string | null {
 export function LiveSessionDetailPage() {
   const { code } = useParams<{ code: string }>();
   const [state, setState] = useState<LoadState>({ kind: 'loading' });
+  const [registered, setRegistered] = useState<boolean>(false);
 
   useEffect(() => {
     if (!code) return;
@@ -106,6 +107,7 @@ export function LiveSessionDetailPage() {
         const session = await fetchLiveSessionDetail(code!);
         if (cancelled) return;
         setState({ kind: 'loaded', session });
+        setRegistered(session.is_user_registered || false);
       } catch (err: unknown) {
         if (cancelled) return;
         const status = (err as { response?: { status?: number } })?.response?.status;
@@ -117,10 +119,21 @@ export function LiveSessionDetailPage() {
     return () => { cancelled = true; };
   }, [code]);
 
-  // SEO title — set when session is loaded
+  // SEO title + meta description — set when session is loaded
   useEffect(() => {
     if (state.kind !== 'loaded') return;
-    document.title = `${state.session.title} — KalpX`;
+    const { session } = state;
+    document.title = `${session.title} — KalpX`;
+    const descText = session.description
+      ? session.description.slice(0, 160)
+      : `Live ${sessionTypeLabel(session.session_type)} session with ${session.guide_name} on KalpX.`;
+    let metaDesc = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.setAttribute('name', 'description');
+      document.head.appendChild(metaDesc);
+    }
+    metaDesc.setAttribute('content', descText);
   }, [state.kind === 'loaded' ? (state as Extract<LoadState, { kind: 'loaded' }>).session.title : '']);
 
   return (
@@ -146,7 +159,7 @@ export function LiveSessionDetailPage() {
         {state.kind === 'loading' && <LoadingState />}
         {state.kind === 'not_found' && <NotFoundState />}
         {state.kind === 'error' && <ErrorState />}
-        {state.kind === 'loaded' && <SessionBody session={state.session} />}
+        {state.kind === 'loaded' && <SessionBody session={state.session} initialRegistered={registered} />}
       </main>
     </AppShell>
   );
@@ -195,8 +208,41 @@ function ErrorState() {
 
 // ── Main session body ─────────────────────────────────────────────────────────
 
-function SessionBody({ session }: { session: TLPLiveSessionDetail }) {
-  const [registerState, setRegisterState] = useState<RegisterState>({ kind: 'idle' });
+const RECURRENCE_LABELS: Record<string, string> = {
+  daily: 'daily',
+  weekly: 'weekly',
+  biweekly: 'every 2 weeks',
+  monthly: 'monthly',
+};
+
+function recurrenceLabel(type: string): string {
+  return RECURRENCE_LABELS[type.toLowerCase()] ?? type.replace(/_/g, ' ');
+}
+
+function SessionBody({
+  session,
+  initialRegistered,
+}: {
+  session: TLPLiveSessionDetail;
+  initialRegistered: boolean;
+}) {
+  const [registerState, setRegisterState] = useState<RegisterState>(
+    initialRegistered
+      ? {
+          kind: 'registered',
+          result: {
+            ok: true,
+            already_registered: true,
+            session_code: session.code,
+            title: session.title,
+            scheduled_at: session.scheduled_at,
+            reminder_preference: 'all',
+            external_join_url: null,
+            external_platform: session.external_platform,
+          } satisfies LiveSessionRegistration,
+        }
+      : { kind: 'idle' },
+  );
   const [reminderPref, setReminderPref] = useState<'all' | 'day_of' | 'none'>('all');
 
   async function handleRegister() {
@@ -294,6 +340,23 @@ function SessionBody({ session }: { session: TLPLiveSessionDetail }) {
         bio={session.guide_bio}
         photoUrl={session.guide_photo_url}
       />
+
+      {/* Recurrence info + associated program */}
+      {(session.recurrence_type !== 'once' && session.recurrence_type !== 'none' && session.recurrence_type !== 'one_time') && (
+        <p style={{ fontSize: 13, color: 'var(--kalpx-text-muted)', marginBottom: 12 }}>
+          Repeats {recurrenceLabel(session.recurrence_type)}
+        </p>
+      )}
+      {session.associated_program_code && (
+        <p style={{ fontSize: 13, marginBottom: 20 }}>
+          <Link
+            to={`/programs/${session.associated_program_code}`}
+            style={{ color: 'var(--kalpx-gold)', textDecoration: 'underline' }}
+          >
+            Part of {session.associated_program_code} program →
+          </Link>
+        </p>
+      )}
 
       {/* Meta grid */}
       <section
@@ -431,6 +494,8 @@ function SessionBody({ session }: { session: TLPLiveSessionDetail }) {
 
 // ── Guide card ────────────────────────────────────────────────────────────────
 
+const BIO_TRUNCATE_LENGTH = 300;
+
 function GuideCard({
   name,
   bio,
@@ -441,6 +506,11 @@ function GuideCard({
   photoUrl: string | null;
 }) {
   const safePhoto = safeUrl(photoUrl);
+  const [bioExpanded, setBioExpanded] = useState(false);
+
+  const bioTruncated = bio && bio.length > BIO_TRUNCATE_LENGTH && !bioExpanded
+    ? bio.slice(0, BIO_TRUNCATE_LENGTH) + '…'
+    : bio;
 
   return (
     <div style={{
@@ -493,9 +563,28 @@ function GuideCard({
           {name}
         </p>
         {bio && (
-          <p style={{ fontSize: 13, color: 'var(--kalpx-text-soft)', lineHeight: 1.6 }}>
-            {bio}
-          </p>
+          <>
+            <p style={{ fontSize: 13, color: 'var(--kalpx-text-soft)', lineHeight: 1.6 }}>
+              {bioTruncated}
+            </p>
+            {bio.length > BIO_TRUNCATE_LENGTH && (
+              <button
+                onClick={() => setBioExpanded((v) => !v)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  marginTop: 4,
+                  fontSize: 12,
+                  color: 'var(--kalpx-gold)',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                }}
+              >
+                {bioExpanded ? 'Read less' : 'Read more'}
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>

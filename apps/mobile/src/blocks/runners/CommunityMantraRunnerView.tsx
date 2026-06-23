@@ -18,6 +18,7 @@ import {
   Text,
   TouchableOpacity,
   UIManager,
+  Vibration,
   View,
   useWindowDimensions,
 } from "react-native";
@@ -256,28 +257,13 @@ const CommunityMantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   }, [mantraRef]);
 
   // ── Japa engine — only active when mantraRef is provided ──────────────────
+  // onGoalReached intentionally NOT wired — completion is detected in
+  // handleIncrement based on localCount (starts at 0 per session).
   const japaEngine = useJapaEngine({
     mantraRef: mantraRef ?? null,
     sourceSurface,
     goalType: "count",
     goalValue: selectedTarget,
-    onGoalReached: useCallback(() => {
-      const durationSec = Math.round((Date.now() - sessionStartTimeRef.current) / 1000);
-      if (isLAActiveRef.current && !laCompleteCalledRef.current) {
-        laCompleteCalledRef.current = true;
-        liveActivity.end();
-        isLAActiveRef.current = false;
-        getLiveActivityState(i18n.language || 'en').then((state) => {
-          const pref = preferredLARef.current;
-          // Preference set → it has priority; don't auto-transition to sankalp.
-          if (pref !== null) return;
-          if (AppState.currentState === 'active' && state.type === 'sankalp') {
-            liveActivity.startSankalp(state.title, state.line);
-          }
-        }).catch(() => {});
-      }
-      onCompleteRef.current?.(selectedTarget, durationSec);
-    }, [selectedTarget]),
   });
 
   // chantCount: always use local session count for display so the counter
@@ -355,43 +341,63 @@ const CommunityMantraRunnerView: React.FC<MantraRunnerViewProps> = ({
 
   const handleIncrement = useCallback(() => {
     if (chantCount >= selectedTarget || isCompletingRef.current) return;
+    const nextCount = chantCount + 1;
     if (mantraRef) {
       japaEngine.increment();
-      setLocalCount((prev) => prev + 1);
-      const curToday    = japaEngine.todayCount;
-      const curWeek     = japaEngine.weekCount;
-      const curLifetime = japaEngine.lifetimeCount;
-      const elapsedSec  = Math.floor(japaEngine.elapsedMs / 1000);
-      if (!isLAActiveRef.current) {
-        if (AppState.currentState === 'active') {
-          const pref = preferredLARef.current;
-          const canStart = pref === null || (pref.type === 'mantra' && pref.name === (item.title ?? ''));
-          if (canStart) {
-            isLAActiveRef.current = true;
-            liveActivity.start(
-              item.title ?? '',
-              item.devanagari ?? '',
-              curToday, curWeek, curLifetime, curLifetime, elapsedSec,
-              deepLinkFromSurface(sourceSurface),
-            );
-          }
+      setLocalCount(nextCount);
+
+      if (nextCount >= selectedTarget && !isCompletingRef.current) {
+        isCompletingRef.current = true;
+        const durationSec = Math.round((Date.now() - sessionStartTimeRef.current) / 1000);
+        if (isLAActiveRef.current && !laCompleteCalledRef.current) {
+          laCompleteCalledRef.current = true;
+          liveActivity.end();
+          isLAActiveRef.current = false;
+          getLiveActivityState(i18n.language || 'en').then((state) => {
+            const pref = preferredLARef.current;
+            if (pref !== null) return;
+            if (AppState.currentState === 'active' && state.type === 'sankalp') {
+              liveActivity.startSankalp(state.title, state.line);
+            }
+          }).catch(() => {});
         }
+        setTimeout(() => onCompleteRef.current(selectedTarget, durationSec), 800);
       } else {
-        liveActivity.update(curToday, curWeek, curLifetime, curLifetime, elapsedSec);
+        const curToday    = japaEngine.todayCount;
+        const curWeek     = japaEngine.weekCount;
+        const curLifetime = japaEngine.lifetimeCount;
+        const elapsedSec  = Math.floor(japaEngine.elapsedMs / 1000);
+        if (!isLAActiveRef.current) {
+          if (AppState.currentState === 'active') {
+            const pref = preferredLARef.current;
+            const canStart = pref === null || (pref.type === 'mantra' && pref.name === (item.title ?? ''));
+            if (canStart) {
+              isLAActiveRef.current = true;
+              liveActivity.start(
+                item.title ?? '',
+                item.devanagari ?? '',
+                curToday, curWeek, curLifetime, curLifetime, elapsedSec,
+                deepLinkFromSurface(sourceSurface),
+              );
+            }
+          }
+        } else {
+          liveActivity.update(curToday, curWeek, curLifetime, curLifetime, elapsedSec);
+        }
       }
     } else {
       // Fallback: legacy local-only counting (no engine wired)
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+      Vibration.vibrate(50);
       setLocalCount((prev) => {
-        const nextCount = prev + 1;
-        if (nextCount >= selectedTarget && !isCompletingRef.current) {
+        const next = prev + 1;
+        if (next >= selectedTarget && !isCompletingRef.current) {
           isCompletingRef.current = true;
           const durationSec = Math.round(
             (Date.now() - sessionStartTimeRef.current) / 1000,
           );
-          setTimeout(() => onCompleteRef.current(nextCount, durationSec), 800);
+          setTimeout(() => onCompleteRef.current(next, durationSec), 800);
         }
-        return nextCount;
+        return next;
       });
     }
   }, [chantCount, japaEngine, mantraRef, selectedTarget]);

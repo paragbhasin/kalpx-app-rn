@@ -9,6 +9,7 @@ import {Image,
   StyleSheet,
   Text,
   TouchableOpacity,
+  Vibration,
   View,
 } from "react-native";
 import Animated, {
@@ -139,7 +140,7 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
 
   const handleTap = () => {
     if (isUnlimited || currentCount < targetCount) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+      Vibration.vibrate(50);
       onIncrement();
     }
   };

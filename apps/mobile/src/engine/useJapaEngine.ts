@@ -25,7 +25,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState, AppStateStatus } from 'react-native';
+import { AppState, AppStateStatus, Platform, Vibration } from 'react-native';
 import { v4 as uuidv4 } from 'uuid';
 
 import type {
@@ -608,17 +608,20 @@ export function useJapaEngine({
     sessionCountRef.current = newCount;
     setSessionCount(newCount);
 
-    // Haptic — medium at mala boundary, light otherwise
-    if (newCount % malaRound === 0) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+    // newChants = taps in this session only (excludes today's base from previous sessions)
+    const newChants = Math.max(0, newCount - sessionInitialCount.current);
+
+    // Vibration on every tap; double buzz at mala boundary
+    if (newChants % malaRound === 0) {
+      Vibration.vibrate([0, 80, 60, 80]);
     } else {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+      Vibration.vibrate(50);
     }
 
     persistSession(newCount);
 
-    // Count goal detection
-    if (goalType === 'count' && goalValue && newCount >= goalValue && !goalReachedRef.current) {
+    // Count goal detection — use session-relative count, not cumulative today total
+    if (goalType === 'count' && goalValue && newChants >= goalValue && !goalReachedRef.current) {
       goalReachedRef.current = true;
       onGoalReached?.();
     }

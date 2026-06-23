@@ -21,7 +21,6 @@ import {
   View,
 } from "react-native";
 import { Fonts } from "../../theme/fonts";
-import { recordJoinClick } from "../../engine/liveSessionApi";
 
 function formatScheduledAt(iso: string): string {
   try {
@@ -66,8 +65,17 @@ export default function LiveSessionJoinScreen() {
   const platLabel = platformLabel(externalPlatform ?? "");
 
   const handleJoin = async () => {
-    // Fire-and-forget join click tracking
-    recordJoinClick(sessionCode).catch(() => {});
+    // Guard: externalJoinUrl is passed as a nav param from MySessionsScreen /
+    // LiveSessionDetailScreen. It could be undefined if navigated to via a
+    // deeplink that only supplies a `code`. Failing here is safer than passing
+    // undefined to WebBrowser, which throws an uncaught native error.
+    if (!externalJoinUrl) {
+      Alert.alert("Link unavailable", "Could not retrieve session link. Please try again.");
+      return;
+    }
+    // TLP-A-04: recordJoinClick removed here — it fires once in LiveSessionDetailScreen.
+    // Calling it here too caused a double-fire when navigating DetailScreen → JoinScreen,
+    // inflating attendance_rate analytics.
     try {
       await WebBrowser.openBrowserAsync(externalJoinUrl);
     } catch {
@@ -82,7 +90,7 @@ export default function LiveSessionJoinScreen() {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon} accessibilityLabel="Go back">
             <Text style={styles.backIconText}>‹</Text>
           </TouchableOpacity>
           <View style={{ width: 40 }} />

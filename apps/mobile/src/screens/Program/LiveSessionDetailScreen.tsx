@@ -86,6 +86,11 @@ export default function LiveSessionDetailScreen() {
     useCallback(() => {
       let cancelled = false;
       (async () => {
+        if (!code) {
+          setError("Missing session code.");
+          setLoading(false);
+          return;
+        }
         try {
           setLoading(true);
           const data = await fetchLiveSessionDetail(code);
@@ -93,9 +98,9 @@ export default function LiveSessionDetailScreen() {
             setSession(data);
             setRegistered(data.is_user_registered || false);
           }
-        } catch (err: any) {
+        } catch (err: unknown) {
           if (cancelled) return;
-          const status = err?.response?.status;
+          const status = (err as { response?: { status?: number } })?.response?.status;
           if (status === 404) setError("Session not found.");
           else setError("Couldn't load session details. Please try again.");
         } finally {
@@ -193,7 +198,7 @@ export default function LiveSessionDetailScreen() {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon} accessibilityLabel="Go back">
             <Text style={styles.backIconText}>‹</Text>
           </TouchableOpacity>
           <View style={{ width: 40 }} />

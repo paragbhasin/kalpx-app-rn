@@ -227,7 +227,7 @@ function FilterTabs({
 
 function LoadingState() {
   return (
-    <div style={{ textAlign: 'center', paddingTop: 80 }} aria-busy="true" aria-label="Loading sessions">
+    <div style={{ textAlign: 'center', paddingTop: 80 }} aria-busy="true" aria-live="polite" aria-label="Loading sessions">
       <div style={{
         width: 40, height: 40, borderRadius: '50%',
         border: '3px solid var(--kalpx-border)',
@@ -247,7 +247,13 @@ function ErrorState() {
       <p style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>Something went wrong</p>
       <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14 }}>
         Please refresh or{' '}
-        <a href="https://kalpx.com/support" style={{ color: 'var(--kalpx-gold)' }}>contact support</a>.
+        <a
+          href="https://kalpx.com/support"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Contact KalpX support (opens in new tab)"
+          style={{ color: 'var(--kalpx-gold)' }}
+        >contact support</a>.
       </p>
     </div>
   );

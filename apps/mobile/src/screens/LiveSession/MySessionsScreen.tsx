@@ -184,7 +184,7 @@ export default function MySessionsScreen() {
     <SafeAreaView style={styles.safeArea}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon} accessibilityLabel="Go back">
           <Text style={styles.backIconText}>‹</Text>
         </TouchableOpacity>
         <View style={styles.headerCenter}>
@@ -218,15 +218,26 @@ export default function MySessionsScreen() {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {displayed.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>
-              You haven't registered for any sessions yet.
-            </Text>
-            <TouchableOpacity
-              onPress={() => navigation.navigate("LiveSessionsList")}
-              style={styles.discoverLink}
-            >
-              <Text style={styles.discoverLinkText}>Discover live sessions →</Text>
-            </TouchableOpacity>
+            {activeTab === "past" ? (
+              <Text style={styles.emptyText}>No past sessions yet.</Text>
+            ) : past.length > 0 ? (
+              <Text style={styles.emptyText}>
+                No upcoming sessions.{"\n"}Check out your past sessions below.
+              </Text>
+            ) : (
+              <>
+                <Text style={styles.emptyText}>
+                  You haven't registered for any sessions yet.
+                </Text>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("LiveSessionsList")}
+                  style={styles.discoverLink}
+                  accessibilityLabel="Discover live sessions"
+                >
+                  <Text style={styles.discoverLinkText}>Discover live sessions →</Text>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
         ) : (
           <View style={styles.list}>

@@ -169,7 +169,7 @@ export function LiveSessionDetailPage() {
 
 function LoadingState() {
   return (
-    <div style={{ textAlign: 'center', paddingTop: 80 }} aria-busy="true" aria-label="Loading session">
+    <div style={{ textAlign: 'center', paddingTop: 80 }} aria-busy="true" aria-live="polite" aria-label="Loading session">
       <div style={{
         width: 40, height: 40, borderRadius: '50%',
         border: '3px solid var(--kalpx-border)',
@@ -200,7 +200,13 @@ function ErrorState() {
       <p style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>Something went wrong</p>
       <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14 }}>
         Please refresh or{' '}
-        <a href="https://kalpx.com/support" style={{ color: 'var(--kalpx-gold)' }}>contact support</a>.
+        <a
+          href="https://kalpx.com/support"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Contact KalpX support (opens in new tab)"
+          style={{ color: 'var(--kalpx-gold)' }}
+        >contact support</a>.
       </p>
     </div>
   );
@@ -347,13 +353,13 @@ function SessionBody({
           Repeats {recurrenceLabel(session.recurrence_type)}
         </p>
       )}
-      {session.associated_program_code && (
+      {session.associated_program_slug && (
         <p style={{ fontSize: 13, marginBottom: 20 }}>
           <Link
-            to={`/programs/${session.associated_program_code}`}
+            to={`/programs/${session.associated_program_slug}`}
             style={{ color: 'var(--kalpx-gold)', textDecoration: 'underline' }}
           >
-            Part of {session.associated_program_code} program →
+            Part of {session.associated_program_code ?? session.associated_program_slug} program →
           </Link>
         </p>
       )}
@@ -401,20 +407,24 @@ function SessionBody({
       )}
 
       {/* Approved / scheduled — register */}
-      {isApprovedOrScheduled && session.registration_enabled && (
+      {(isApprovedOrScheduled || isLive) && session.registration_enabled && (
         <RegisterBlock
           registerState={registerState}
           reminderPref={reminderPref}
           onReminderChange={setReminderPref}
           onRegister={handleRegister}
+          onJoinClick={handleJoinClick}
+          externalJoinUrl={session.external_join_url}
+          externalPlatform={session.external_platform}
+          showJoin={isApprovedOrScheduled || isLive}
         />
       )}
       {isApprovedOrScheduled && !session.registration_enabled && (
         <InfoBanner message="Registration is not required for this session. Join directly when it starts." />
       )}
 
-      {/* Live — join */}
-      {isLive && safeUrl(session.external_join_url) && (
+      {/* Live — join (for unregistered users or when registration is disabled) */}
+      {isLive && !session.registration_enabled && safeUrl(session.external_join_url) && (
         <section style={{ marginBottom: 24 }}>
           <button
             onClick={handleJoinClick}
@@ -425,7 +435,7 @@ function SessionBody({
           </button>
         </section>
       )}
-      {isLive && !safeUrl(session.external_join_url) && (
+      {isLive && !session.registration_enabled && !safeUrl(session.external_join_url) && (
         <InfoBanner message="The join link will appear here once the session goes live." />
       )}
 
@@ -598,14 +608,29 @@ function RegisterBlock({
   reminderPref,
   onReminderChange,
   onRegister,
+  onJoinClick,
+  externalJoinUrl,
+  externalPlatform,
+  showJoin,
 }: {
   registerState: RegisterState;
   reminderPref: 'all' | 'day_of' | 'none';
   onReminderChange: (pref: 'all' | 'day_of' | 'none') => void;
   onRegister: () => void;
+  onJoinClick?: () => void;
+  externalJoinUrl?: string | null;
+  externalPlatform?: string;
+  showJoin?: boolean;
 }) {
   // Registered confirmation
   if (registerState.kind === 'registered') {
+    const joinUrl = safeUrl(externalJoinUrl ?? null);
+    const reminderDisplay =
+      reminderPref === 'all'
+        ? 'All reminders'
+        : reminderPref === 'day_of'
+        ? 'Day-of only'
+        : 'No reminders';
     return (
       <div
         role="status"
@@ -620,17 +645,40 @@ function RegisterBlock({
         <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--kalpx-text)', marginBottom: 8 }}>
           You&apos;re registered!
         </p>
-        <p style={{ fontSize: 14, color: 'var(--kalpx-text-soft)', lineHeight: 1.6, marginBottom: 16 }}>
+        <p style={{ fontSize: 14, color: 'var(--kalpx-text-soft)', lineHeight: 1.6, marginBottom: 12 }}>
           {registerState.result.already_registered
             ? 'You were already registered for this session.'
             : "We'll remind you before the session starts."}
         </p>
-        {/* Reminder preference selector (post-registration) */}
-        <ReminderSelector
-          value={reminderPref}
-          onChange={onReminderChange}
-          label="Change reminder preference"
-        />
+        {/* Static reminder display — replaces the editable selector (no API to save changes) */}
+        <p
+          className="reminder-info"
+          style={{ fontSize: 13, color: 'var(--kalpx-text-muted)', marginBottom: joinUrl && showJoin ? 16 : 0 }}
+        >
+          Reminder: {reminderDisplay}
+        </p>
+        {/* Join button — shown when registered and a valid join URL exists */}
+        {joinUrl && showJoin && (
+          <button
+            onClick={onJoinClick}
+            aria-label={`Join session on ${externalPlatform ? platformLabel(externalPlatform) : 'external platform'}`}
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-block',
+              padding: '11px 24px',
+              background: '#2e7d32',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 'var(--kalpx-r-md)',
+              fontWeight: 600,
+              fontSize: 15,
+              cursor: 'pointer',
+              textDecoration: 'none',
+            }}
+          >
+            Join Session →
+          </button>
+        )}
       </div>
     );
   }

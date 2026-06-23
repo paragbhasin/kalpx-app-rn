@@ -46,6 +46,8 @@ export function clearProgramAttribution(): void {
   }
 }
 
+// TODO(Phase 2): captureSessionAttribution is reserved for Phase 2 session-level
+// attribution tracking. It is intentionally not called in Phase 1 — do not remove.
 export function captureSessionAttribution(
   sessionCode: string,
   utmParams: Record<string, string>,

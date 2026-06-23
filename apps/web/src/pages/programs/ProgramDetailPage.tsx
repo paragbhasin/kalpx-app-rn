@@ -107,7 +107,7 @@ export function ProgramDetailPage() {
 
 function LoadingState() {
   return (
-    <div style={{ textAlign: 'center', paddingTop: 80 }} aria-busy="true" aria-label="Loading program">
+    <div style={{ textAlign: 'center', paddingTop: 80 }} aria-busy="true" aria-live="polite" aria-label="Loading program">
       <div
         style={{
           width: 40,
@@ -142,7 +142,13 @@ function ErrorState() {
       <p style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>Something went wrong</p>
       <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14 }}>
         Please refresh or{' '}
-        <a href="https://kalpx.com/support" style={{ color: 'var(--kalpx-gold)' }}>
+        <a
+          href="https://kalpx.com/support"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Contact KalpX support (opens in new tab)"
+          style={{ color: 'var(--kalpx-gold)' }}
+        >
           contact support
         </a>
         .
@@ -447,7 +453,15 @@ function ProgramBody({
           </button>
         </div>
 
-        {/* QR code */}
+        {/* QR code
+          WARNING: api.qrserver.com is a third-party service. The program invite code
+          (embedded in qrUrl = "https://kalpx.com/join/<code>") is sent as a query
+          parameter to their servers. The invite code itself is not a secret (it is
+          displayed in plain text above), but be aware that qrserver.com receives the
+          full join URL in its request logs. If invite codes become sensitive in a future
+          phase, replace with a self-hosted QR generator (e.g. the `qrcode` npm package
+          rendered client-side via canvas/SVG) to avoid any third-party data exposure.
+        */}
         <div
           style={{
             display: 'flex',
@@ -609,8 +623,11 @@ function ProgramBody({
                       · Day {t.source_day}
                     </span>
                   )}
-                  <span style={{ fontSize: 11, color: 'var(--kalpx-gold)', marginLeft: 'auto' }}>
-                    {'★'.repeat(t.rating)}
+                  <span
+                    style={{ fontSize: 11, color: 'var(--kalpx-gold)', marginLeft: 'auto' }}
+                    aria-label={`${Math.min(5, Math.max(1, t.rating))} out of 5 stars`}
+                  >
+                    {'★'.repeat(Math.min(5, Math.max(1, t.rating)))}
                   </span>
                 </footer>
               </blockquote>

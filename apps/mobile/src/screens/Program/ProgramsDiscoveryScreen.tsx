@@ -5,8 +5,8 @@
  * Supports category and language filter chips.
  * "Join Program →" → navigate to ProgramInviteClaimScreen with { code }.
  */
-import { useNavigation } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   RefreshControl,
@@ -125,25 +125,27 @@ export default function ProgramsDiscoveryScreen() {
     }
   }, [selectedCategory, selectedLanguage]);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await fetchPrograms({
-          category: selectedCategory !== "all" ? selectedCategory : undefined,
-          language: selectedLanguage !== "all" ? selectedLanguage : undefined,
-        });
-        if (!cancelled) setPrograms(data.programs);
-      } catch {
-        if (!cancelled) setError("Couldn't load programs. Please try again.");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [selectedCategory, selectedLanguage]);
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      (async () => {
+        try {
+          setLoading(true);
+          setError(null);
+          const data = await fetchPrograms({
+            category: selectedCategory !== "all" ? selectedCategory : undefined,
+            language: selectedLanguage !== "all" ? selectedLanguage : undefined,
+          });
+          if (!cancelled) setPrograms(data.programs);
+        } catch {
+          if (!cancelled) setError("Couldn't load programs. Please try again.");
+        } finally {
+          if (!cancelled) setLoading(false);
+        }
+      })();
+      return () => { cancelled = true; };
+    }, [selectedCategory, selectedLanguage]),
+  );
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -176,7 +178,7 @@ export default function ProgramsDiscoveryScreen() {
     <SafeAreaView style={styles.safeArea}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon} accessibilityLabel="Go back">
           <Text style={styles.backIconText}>‹</Text>
         </TouchableOpacity>
         <View style={styles.headerCenter}>
@@ -224,7 +226,7 @@ export default function ProgramsDiscoveryScreen() {
             key={lang.value}
             onPress={() => setSelectedLanguage(lang.value)}
             style={[
-              styles.langChip,
+              styles.filterChip,
               selectedLanguage === lang.value && styles.filterChipActive,
             ]}
             accessibilityLabel={`Filter by ${lang.label}`}
@@ -336,15 +338,6 @@ const styles = StyleSheet.create({
   filterChipTextActive: {
     color: "#fff",
   },
-  langChip: {
-    borderWidth: 1,
-    borderColor: "#E8D9B5",
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    backgroundColor: "#FFF8EE",
-  },
-
   list: { gap: 16 },
 
   card: {

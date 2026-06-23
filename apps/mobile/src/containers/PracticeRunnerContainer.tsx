@@ -7,6 +7,7 @@ import {
   ChevronRight,
   RefreshCw,
 } from "lucide-react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
@@ -331,8 +332,29 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     screenState?._selected_om_audio ||
     currentStateId ||
     "";
+
+  const offlineKey = activeItemKey ? `prc_count_${activeItemKey}` : null;
+
   useEffect(() => {
-    setCount(0);
+    if (!offlineKey) {
+      setCount(0);
+      setSessionStartTime(Date.now());
+      return;
+    }
+    // Restore persisted count for this item (offline recovery).
+    // Clamp against mantraTarget: if saved >= target the session was already
+    // complete (removeItem may have failed) — reset to 0 so the user isn't stuck.
+    AsyncStorage.getItem(offlineKey).then((raw) => {
+      const saved = raw ? parseInt(raw, 10) : 0;
+      if (isNaN(saved) || saved <= 0) { setCount(0); return; }
+      const tgt = mantraTarget;
+      if (tgt > 0 && saved >= tgt) {
+        AsyncStorage.removeItem(offlineKey).catch(() => {});
+        setCount(0);
+      } else {
+        setCount(saved);
+      }
+    }).catch(() => setCount(0));
     setSessionStartTime(Date.now());
     // Clear the Redux mirror too so downstream consumers don't see stale values.
     if (screenState?.mantra_progress_reps) {
@@ -464,6 +486,13 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
   const isUnlimitedRepCounter =
     !!repCounterBlock?.unlimited || Number(repCounterBlock?.total) === -1;
   const selectedRepCount = Number(screenState.reps_total) || 27;
+  // Computed at component level so the offline restore effect can clamp against it.
+  const mantraTarget = isUnlimitedRepCounter
+    ? -1
+    : Number(screenState.reps_total) ||
+      Number(repCounterBlock?.total) ||
+      schema.target_count ||
+      9;
   const buildActionContext = () => ({
     loadScreen,
     goBack,
@@ -1720,12 +1749,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
   }
 
   if (isMantraRunner) {
-    const target = isUnlimitedRepCounter
-      ? -1
-      : Number(screenState.reps_total) ||
-        Number(repCounterBlock?.total) ||
-        schema.target_count ||
-        9;
+    const target = mantraTarget;
 
     const activeItem = screenState.runner_active_item;
 
@@ -1741,6 +1765,13 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
           onIncrement={() => {
             const next = count + 1;
             setCount(next);
+            if (offlineKey) {
+              if (next >= target) {
+                AsyncStorage.removeItem(offlineKey).catch(() => {});
+              } else {
+                AsyncStorage.setItem(offlineKey, String(next)).catch(() => {});
+              }
+            }
             if (next >= target) {
               const action = schema.on_complete || schema.complete_action;
               if (action) {

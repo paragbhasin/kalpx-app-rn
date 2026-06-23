@@ -12,7 +12,7 @@ type LoadState =
   | { kind: 'error' };
 
 type Category = 'all' | 'Meditation' | 'Yoga' | 'Gita' | 'Family' | 'Festival' | 'Ayurveda';
-type Language = 'all' | 'Hindi' | 'English';
+type Language = 'all' | 'Hindi' | 'English' | 'Telugu';
 
 const CATEGORIES: { key: Category; label: string }[] = [
   { key: 'all', label: 'All' },
@@ -28,6 +28,7 @@ const LANGUAGES: { key: Language; label: string }[] = [
   { key: 'all', label: 'All' },
   { key: 'Hindi', label: 'Hindi' },
   { key: 'English', label: 'English' },
+  { key: 'Telugu', label: 'Telugu' },
 ];
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -125,7 +126,6 @@ export function ProgramsDiscoveryPage() {
           {CATEGORIES.map(({ key, label }) => (
             <button
               key={key}
-              role="button"
               aria-pressed={selectedCategory === key}
               onClick={() => setSelectedCategory(key)}
               style={{
@@ -161,7 +161,6 @@ export function ProgramsDiscoveryPage() {
           {LANGUAGES.map(({ key, label }) => (
             <button
               key={key}
-              role="button"
               aria-pressed={selectedLanguage === key}
               onClick={() => setSelectedLanguage(key)}
               style={{
@@ -200,7 +199,7 @@ export function ProgramsDiscoveryPage() {
 
 function LoadingState() {
   return (
-    <div style={{ textAlign: 'center', paddingTop: 80 }} aria-busy="true" aria-label="Loading programs">
+    <div style={{ textAlign: 'center', paddingTop: 80 }} aria-busy="true" aria-live="polite" aria-label="Loading programs">
       <div
         style={{
           width: 40,
@@ -224,7 +223,13 @@ function ErrorState() {
       <p style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>Something went wrong</p>
       <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14 }}>
         Please refresh the page or{' '}
-        <a href="https://kalpx.com/support" style={{ color: 'var(--kalpx-gold)' }}>
+        <a
+          href="https://kalpx.com/support"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Contact KalpX support (opens in new tab)"
+          style={{ color: 'var(--kalpx-gold)' }}
+        >
           contact support
         </a>
         .

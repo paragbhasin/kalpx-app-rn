@@ -20,6 +20,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+// NOTE (TLP-017): Clipboard from react-native is deprecated since RN 0.59.
+// The codebase-established pattern (see StepModal.tsx) still imports from react-native.
+// Migrate to @react-native-clipboard/clipboard once the package is installed project-wide.
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import { Fonts } from "../../theme/fonts";
@@ -42,6 +45,11 @@ export default function ProgramDetailPreviewScreen() {
     useCallback(() => {
       let cancelled = false;
       (async () => {
+        if (!code) {
+          setError("Missing program code.");
+          setLoading(false);
+          return;
+        }
         try {
           setLoading(true);
           const data = await fetchProgramDetail(code);
@@ -99,7 +107,7 @@ export default function ProgramDetailPreviewScreen() {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon} accessibilityLabel="Go back">
             <Text style={styles.backIconText}>‹</Text>
           </TouchableOpacity>
           <View style={{ width: 40 }} />
@@ -195,7 +203,10 @@ export default function ProgramDetailPreviewScreen() {
                     {bioExpanded ? bio : truncatedBio}
                   </Text>
                   {showReadMore ? (
-                    <TouchableOpacity onPress={() => setBioExpanded(!bioExpanded)}>
+                    <TouchableOpacity
+                      onPress={() => setBioExpanded(!bioExpanded)}
+                      accessibilityLabel={bioExpanded ? "Show less bio" : "Read more bio"}
+                    >
                       <Text style={styles.readMoreText}>
                         {bioExpanded ? "Show less" : "Read more"}
                       </Text>
@@ -223,7 +234,7 @@ export default function ProgramDetailPreviewScreen() {
           <Text style={styles.sectionLabel}>PROGRAM CODE</Text>
           <View style={styles.codeBox}>
             <Text style={styles.codeText}>{code}</Text>
-            <TouchableOpacity onPress={handleCopyCode} style={styles.copyBtn}>
+            <TouchableOpacity onPress={handleCopyCode} style={styles.copyBtn} accessibilityLabel="Copy program code">
               <Text style={styles.copyBtnText}>
                 {codeCopied ? "Copied!" : "Copy code"}
               </Text>

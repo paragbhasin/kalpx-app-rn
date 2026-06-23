@@ -42,6 +42,7 @@ import i18n from "../../config/i18n";
 import { useDispatch, useSelector } from "react-redux";
 import FourDoorHomeContainer from "../../containers/FourDoorHomeContainer";
 import { getLiveActivityState, getQuickResetOpening } from "../../engine/mitraApi";
+import { fetchPrograms, fetchMyRegistrations, type MyRegistration } from "../../engine/liveSessionApi";
 import { liveActivity } from "../../native/liveActivity";
 import { watchConnectivity } from "../../native/watchConnectivity";
 import { handleWatchMessage } from "../../engine/watchSyncHandler";
@@ -168,23 +169,30 @@ function TLPUpcomingSessionWidget({
   }
 
   return (
-    <View style={styles.tlpUpcomingCard}>
+    // TLP-016: outer card is always tappable to navigate to session detail.
+    // The inner "Join Now" button only appears within 30 min of start time.
+    <TouchableOpacity
+      style={styles.tlpUpcomingCard}
+      onPress={onPress}
+      activeOpacity={0.88}
+      accessibilityLabel={`Upcoming session: ${session.title}`}
+    >
       <Text style={styles.tlpUpcomingLabel}>UPCOMING SESSION</Text>
       <Text style={styles.tlpUpcomingTitle} numberOfLines={2}>{session.title}</Text>
       <Text style={styles.tlpUpcomingTime}>{timeLabel}</Text>
       {isJoinable ? (
-        <TouchableOpacity onPress={onPress} style={styles.tlpUpcomingJoinBtn} activeOpacity={0.85}>
+        <TouchableOpacity onPress={onPress} style={styles.tlpUpcomingJoinBtn} activeOpacity={0.85} accessibilityLabel="Join now">
           <Text style={styles.tlpUpcomingJoinBtnText}>Join Now →</Text>
         </TouchableOpacity>
       ) : null}
-    </View>
+    </TouchableOpacity>
   );
 }
 
 // TLP Phase 1 — discover programs card (shows when user has no active program)
 function TLPDiscoverProgramsCard({ count, onPress }: { count: number; onPress: () => void }) {
   return (
-    <TouchableOpacity style={styles.tlpDiscoverCard} onPress={onPress} activeOpacity={0.85}>
+    <TouchableOpacity style={styles.tlpDiscoverCard} onPress={onPress} activeOpacity={0.85} accessibilityLabel="Discover programs">
       <View style={styles.tlpDiscoverLeft}>
         <Text style={styles.tlpDiscoverTitle}>Discover Programs</Text>
         <Text style={styles.tlpDiscoverSub}>{count} program{count !== 1 ? "s" : ""} available</Text>
@@ -261,11 +269,11 @@ export default function Home() {
 
   // TLP Phase 1 — fetch program count and next session for home widgets.
   // Non-blocking: errors are swallowed, widgets simply don't render on failure.
+  // Static imports used (TLP-013: avoid require() inside effects for Metro tree-shaking).
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const { fetchPrograms } = require("../../engine/liveSessionApi");
         const data = await fetchPrograms();
         if (!cancelled && data?.count > 0) setTlpProgramCount(data.count);
       } catch {
@@ -280,20 +288,7 @@ export default function Home() {
     let cancelled = false;
     (async () => {
       try {
-        const { fetchMyRegistrations } = require("../../engine/liveSessionApi");
-        const regs: Array<{
-          session_code: string;
-          title: string;
-          scheduled_at: string;
-          timezone: string;
-          duration_minutes: number;
-          status: string;
-          external_platform: string;
-          external_join_url: string;
-          join_clicked: boolean;
-          reflection_completed: boolean;
-          followup_action: string | null;
-        }> = await fetchMyRegistrations();
+        const regs: MyRegistration[] = await fetchMyRegistrations();
         const now = Date.now();
         const upcoming = regs
           .filter((r) => {

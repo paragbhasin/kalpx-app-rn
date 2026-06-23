@@ -73,6 +73,7 @@ export interface TLPLiveSession {
   registration_enabled: boolean;
   status: string;
   associated_program_code: string | null;
+  associated_program_slug: string | null;
   is_user_registered: boolean;
 }
 
@@ -138,13 +139,13 @@ export async function fetchPrograms(
   return res.data;
 }
 
-export async function fetchProgramDetail(code: string): Promise<TLPProgramDetail> {
-  const res = await api.get<TLPProgramDetail>(`/programs/${code}/`);
+export async function fetchProgramDetail(slug: string): Promise<TLPProgramDetail> {
+  const res = await api.get<TLPProgramDetail>(`/programs/by-slug/${slug}/`);
   return res.data;
 }
 
-export async function fetchProgramTestimonials(code: string): Promise<ProgramTestimonial[]> {
-  const res = await api.get<ProgramTestimonial[]>(`/programs/${code}/testimonials/`);
+export async function fetchProgramTestimonials(slug: string): Promise<ProgramTestimonial[]> {
+  const res = await api.get<ProgramTestimonial[]>(`/programs/by-slug/${slug}/testimonials/`);
   return res.data;
 }
 

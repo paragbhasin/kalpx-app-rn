@@ -4,8 +4,8 @@
  * Lists all live sessions from GET /api/live-sessions/.
  * Tap a row → LiveSessionDetailScreen.
  */
-import { useNavigation } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   SafeAreaView,
@@ -137,21 +137,23 @@ export default function LiveSessionsListScreen() {
   const [error, setError] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState("all");
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        setLoading(true);
-        const data = await fetchLiveSessions();
-        if (!cancelled) setSessions(data.sessions);
-      } catch {
-        if (!cancelled) setError("Couldn't load sessions. Please try again.");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      (async () => {
+        try {
+          setLoading(true);
+          const data = await fetchLiveSessions();
+          if (!cancelled) setSessions(data.sessions);
+        } catch {
+          if (!cancelled) setError("Couldn't load sessions. Please try again.");
+        } finally {
+          if (!cancelled) setLoading(false);
+        }
+      })();
+      return () => { cancelled = true; };
+    }, []),
+  );
 
   if (loading) {
     return (
@@ -187,7 +189,7 @@ export default function LiveSessionsListScreen() {
     <SafeAreaView style={styles.safeArea}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon} accessibilityLabel="Go back">
           <Text style={styles.backIconText}>‹</Text>
         </TouchableOpacity>
         <View style={styles.headerCenter}>

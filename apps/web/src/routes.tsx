@@ -75,6 +75,9 @@ import { RetreatPackageDetailsPage } from "./pages/retreats/RetreatPackageDetail
 import { RetreatsInterestPage } from "./pages/retreats/RetreatsInterestPage";
 import { ProgramLandingPage } from "./pages/programs/ProgramLandingPage";
 import { ProgramSupportPage } from "./pages/programs/ProgramSupportPage";
+import { ProgramsDiscoveryPage } from "./pages/programs/ProgramsDiscoveryPage";
+import { LiveSessionsListPage } from "./pages/programs/LiveSessionsListPage";
+import { LiveSessionDetailPage } from "./pages/programs/LiveSessionDetailPage";
 import { RequiresStaff } from "./components/RequiresStaff";
 import { ProgramAdminDashboard } from "./pages/programs/ProgramAdminDashboard";
 import { ProgramAdminCreateCampaign } from "./pages/programs/ProgramAdminCreateCampaign";
@@ -364,6 +367,11 @@ export function AppRoutes() {
       <Route path="/join/:code" element={<ProgramLandingPage />} />
       <Route path="/p/:slug" element={<ProgramLandingPage />} />
       <Route path="/programs/support" element={<ProgramSupportPage />} />
+
+      {/* TLP — programs discovery and live sessions (public) */}
+      <Route path="/programs/browse/" element={<ProgramsDiscoveryPage />} />
+      <Route path="/live-sessions/" element={<LiveSessionsListPage />} />
+      <Route path="/live-sessions/:code/" element={<LiveSessionDetailPage />} />
 
       {/* Practice Distribution OS — Gate 7 (staff-only admin) */}
       <Route

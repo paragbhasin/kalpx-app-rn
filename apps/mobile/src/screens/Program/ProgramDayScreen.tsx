@@ -20,7 +20,7 @@ import {
   View,
 } from "react-native";
 import { Fonts } from "../../theme/fonts";
-import { fetchProgramDay, postProgramActivity, type ProgramDayContent, type ProgramDayItem } from "../../engine/programApi";
+import { fetchProgramDay, completeProgramDay, postProgramActivity, type ProgramDayContent, type ProgramDayItem } from "../../engine/programApi";
 
 const SUPPORT_URL = "https://kalpx.com/programs/support";
 
@@ -70,6 +70,7 @@ export default function ProgramDayScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const firedAnalyticsRef = useRef(false);
+  const dayCompletedRef = useRef(false);
 
   // completedItems is passed back by each runner and accumulated there.
   // Reading directly from params avoids any stale-state/remount issues.
@@ -125,21 +126,17 @@ export default function ProgramDayScreen() {
   const isItemDone = (item: ProgramDayItem) =>
     dayContent?.is_completed || sessionDone.has(item.item_id);
 
-  // All 3 items completed in this session (not from a previously-completed day)
-  const completedInSession = allItems.length > 0 && allItems.every(i => sessionDone.has(i.item_id));
-
   const allDone = allItems.length > 0 && allItems.every(isItemDone);
 
-  // Auto-navigate to completion screen when user finishes all 3 in this session
+  // All 3 done freshly in this session — call backend once to unlock next day
+  const completedInSession = allItems.length > 0 && allItems.every(i => sessionDone.has(i.item_id));
+
   useEffect(() => {
-    if (completedInSession && !loading && dayContent) {
-      navigation.replace("ProgramCompletionScreen", {
-        dayNumber,
-        completionMessage: dayContent.completion_message ?? null,
-        programName: null,
-      });
+    if (completedInSession && !loading && dayContent && !dayCompletedRef.current) {
+      dayCompletedRef.current = true;
+      completeProgramDay(dayNumber).catch(() => {});
     }
-  }, [completedInSession, loading, dayContent, dayNumber, navigation]);
+  }, [completedInSession, loading, dayContent, dayNumber]);
 
   if (loading) {
     return (
@@ -208,8 +205,12 @@ export default function ProgramDayScreen() {
           </View>
         ) : null}
 
-        {/* Progress hint — auto-navigates to completion when all 3 done */}
-        {!allDone && (
+        {allDone ? (
+          <View style={styles.completionBanner}>
+            <Text style={styles.completionTitle}>Day {dayContent.day_number} Complete ✓</Text>
+            <Text style={styles.completionSub}>Tap any practice below to do it again</Text>
+          </View>
+        ) : (
           <Text style={styles.progressHint}>
             {allItems.filter(isItemDone).length}/{allItems.length} done — complete all to finish the day
           </Text>
@@ -320,6 +321,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#432104",
     lineHeight: 21,
+  },
+
+  completionBanner: {
+    alignItems: "center",
+    paddingVertical: 20,
+    marginBottom: 8,
+  },
+  completionTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 20,
+    color: "#C99317",
+    marginBottom: 6,
+  },
+  completionSub: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    color: "#9A7548",
   },
 
 

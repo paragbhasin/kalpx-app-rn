@@ -114,7 +114,7 @@ const resumePendingIfAny = async () => {
     if (pendingProgramCode) {
       navigation.navigate("AppDrawer" as any);
       setTimeout(() => {
-        navigation.navigate("ProgramInviteClaimScreen" as any, {
+        rootNavigate("ProgramInviteClaimScreen" as any, {
           code: pendingProgramCode,
           source: pendingProgramSource ?? "deep_link",
         });

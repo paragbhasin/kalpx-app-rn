@@ -1,0 +1,236 @@
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { AppShell } from '../../components/ui/AppShell';
+import {
+  fetchGuideDashboard,
+  type GuideDashboard,
+  type GuideProgram,
+  type GuideSession,
+} from '../../engine/liveSessionApi';
+
+type LoadState =
+  | { kind: 'loading' }
+  | { kind: 'loaded'; data: GuideDashboard }
+  | { kind: 'auth_required' }
+  | { kind: 'error' };
+
+function StatCard({ label, value }: { label: string; value: number | string }) {
+  return (
+    <div style={{ padding: '16px', background: 'var(--kalpx-surface)',
+      border: '1px solid var(--kalpx-border)', borderRadius: 10, flex: '1 1 0', minWidth: 100 }}>
+      <p style={{ fontSize: 22, fontWeight: 700, color: 'var(--kalpx-text)', margin: '0 0 4px' }}>
+        {value}
+      </p>
+      <p style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', margin: 0, letterSpacing: '0.04em' }}>
+        {label}
+      </p>
+    </div>
+  );
+}
+
+function ProgramRow({ program }: { program: GuideProgram }) {
+  return (
+    <div style={{ padding: '14px 16px', background: 'var(--kalpx-surface)',
+      border: '1px solid var(--kalpx-border)', borderRadius: 10,
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--kalpx-text)', margin: '0 0 2px',
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {program.title}
+        </p>
+        <p style={{ fontSize: 12, color: 'var(--kalpx-text-muted)', margin: 0 }}>
+          {program.status}
+          {program.is_public ? ' · public' : ' · not public'}
+        </p>
+      </div>
+      <div style={{ display: 'flex', gap: 20, flexShrink: 0 }}>
+        <div style={{ textAlign: 'right' }}>
+          <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--kalpx-text)', margin: 0 }}>
+            {program.joined_count > 0 ? program.joined_count : '—'}
+          </p>
+          <p style={{ fontSize: 10, color: 'var(--kalpx-text-muted)', margin: 0 }}>joined</p>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--kalpx-text)', margin: 0 }}>
+            {program.testimonials_count}
+          </p>
+          <p style={{ fontSize: 10, color: 'var(--kalpx-text-muted)', margin: 0 }}>testimonials</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SessionRow({ session }: { session: GuideSession }) {
+  const date = (() => {
+    try {
+      return new Date(session.scheduled_at).toLocaleDateString('en-IN', {
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+      });
+    } catch { return session.scheduled_at; }
+  })();
+
+  return (
+    <div style={{ padding: '14px 16px', background: 'var(--kalpx-surface)',
+      border: '1px solid var(--kalpx-border)', borderRadius: 10,
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--kalpx-text)', margin: '0 0 2px',
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {session.title}
+        </p>
+        <p style={{ fontSize: 12, color: 'var(--kalpx-text-muted)', margin: 0 }}>
+          {date} · {session.status}
+        </p>
+      </div>
+      <div style={{ display: 'flex', gap: 16, flexShrink: 0 }}>
+        <div style={{ textAlign: 'right' }}>
+          <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--kalpx-text)', margin: 0 }}>
+            {session.registered_count > 0 ? session.registered_count : '—'}
+          </p>
+          <p style={{ fontSize: 10, color: 'var(--kalpx-text-muted)', margin: 0 }}>registered</p>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--kalpx-text)', margin: 0 }}>
+            {session.reflection_count}
+          </p>
+          <p style={{ fontSize: 10, color: 'var(--kalpx-text-muted)', margin: 0 }}>reflected</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function GuideDashboardPage() {
+  const [state, setState] = useState<LoadState>({ kind: 'loading' });
+
+  useEffect(() => {
+    document.title = 'Guide Dashboard — KalpX';
+    let cancelled = false;
+    async function load() {
+      try {
+        const data = await fetchGuideDashboard();
+        if (!cancelled) setState({ kind: 'loaded', data });
+      } catch (e: any) {
+        if (!cancelled) {
+          setState(e?.response?.status === 403 ? { kind: 'auth_required' } : { kind: 'error' });
+        }
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
+  return (
+    <AppShell>
+      <main style={{ maxWidth: 680, margin: '0 auto', padding: '32px 20px 80px' }}>
+        <header style={{ marginBottom: 28 }}>
+          <p style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', letterSpacing: '0.05em',
+            marginBottom: 6, fontWeight: 600 }}>
+            GUIDE DASHBOARD
+          </p>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--kalpx-text)', margin: 0 }}>
+            Your Impact
+          </h1>
+        </header>
+
+        {state.kind === 'loading' && (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--kalpx-text-muted)' }}>
+            Loading…
+          </div>
+        )}
+
+        {state.kind === 'auth_required' && (
+          <div style={{ textAlign: 'center', padding: '60px 0' }}>
+            <p style={{ color: 'var(--kalpx-text-muted)', marginBottom: 16 }}>
+              You need to be a verified guide to view this dashboard.
+            </p>
+            <Link to="/login" style={{ color: 'var(--kalpx-gold)', fontSize: 14 }}>
+              Sign in →
+            </Link>
+          </div>
+        )}
+
+        {state.kind === 'error' && (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--kalpx-text-muted)' }}>
+            Could not load dashboard. Please try again.
+          </div>
+        )}
+
+        {state.kind === 'loaded' && (() => {
+          const { data } = state;
+          const { summary } = data;
+          return (
+            <>
+              {/* Summary stats */}
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 32 }}>
+                <StatCard label="PROGRAMS" value={summary.programs_count} />
+                <StatCard label="TOTAL JOINED" value={summary.total_joined || '< 5'} />
+                <StatCard label="SESSIONS" value={summary.sessions_count} />
+                <StatCard label="TESTIMONIALS" value={summary.testimonials_count} />
+              </div>
+
+              {/* CTA row */}
+              <div style={{ display: 'flex', gap: 10, marginBottom: 32, flexWrap: 'wrap' }}>
+                <Link to="/guide/programs/draft"
+                  style={{ padding: '10px 18px', background: 'var(--kalpx-gold)', color: '#fff',
+                    borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+                  + Submit Program Draft
+                </Link>
+                <Link to="/guide/sessions/draft"
+                  style={{ padding: '10px 18px', border: '1px solid var(--kalpx-gold)',
+                    color: 'var(--kalpx-gold)', borderRadius: 8, fontSize: 13, fontWeight: 600,
+                    textDecoration: 'none' }}>
+                  + Schedule Session
+                </Link>
+              </div>
+
+              {/* Programs */}
+              {data.programs.length > 0 && (
+                <section style={{ marginBottom: 32 }}>
+                  <p style={{ fontSize: 11, letterSpacing: '0.05em', color: 'var(--kalpx-text-muted)',
+                    marginBottom: 12, fontWeight: 600 }}>
+                    YOUR PROGRAMS
+                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {data.programs.map(p => <ProgramRow key={p.code} program={p} />)}
+                  </div>
+                </section>
+              )}
+
+              {/* Upcoming sessions */}
+              {data.upcoming_sessions.length > 0 && (
+                <section>
+                  <p style={{ fontSize: 11, letterSpacing: '0.05em', color: 'var(--kalpx-text-muted)',
+                    marginBottom: 12, fontWeight: 600 }}>
+                    UPCOMING SESSIONS
+                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {data.upcoming_sessions.map(s => <SessionRow key={s.code} session={s} />)}
+                  </div>
+                </section>
+              )}
+
+              {data.programs.length === 0 && data.upcoming_sessions.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '40px 0',
+                  border: '1px dashed var(--kalpx-border)', borderRadius: 12 }}>
+                  <p style={{ color: 'var(--kalpx-text-muted)', fontSize: 14, marginBottom: 12 }}>
+                    No programs or sessions yet.
+                  </p>
+                  <Link to="/guide/programs/draft"
+                    style={{ color: 'var(--kalpx-gold)', fontSize: 14, fontWeight: 600 }}>
+                    Submit your first program →
+                  </Link>
+                </div>
+              )}
+
+              <p style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', marginTop: 32, textAlign: 'center' }}>
+                Counts below 5 participants are shown as — to protect practitioner privacy.
+              </p>
+            </>
+          );
+        })()}
+      </main>
+    </AppShell>
+  );
+}

@@ -79,6 +79,10 @@ import { ProgramsDiscoveryPage } from "./pages/programs/ProgramsDiscoveryPage";
 import { ProgramDetailPage } from "./pages/programs/ProgramDetailPage";
 import { LiveSessionsListPage } from "./pages/programs/LiveSessionsListPage";
 import { LiveSessionDetailPage } from "./pages/programs/LiveSessionDetailPage";
+import { GuidePublicProfilePage } from "./pages/programs/GuidePublicProfilePage";
+import { GuideDashboardPage } from "./pages/programs/GuideDashboardPage";
+import { GuideProgramDraftPage } from "./pages/programs/GuideProgramDraftPage";
+import { GuideSessionDraftPage } from "./pages/programs/GuideSessionDraftPage";
 import { RequiresStaff } from "./components/RequiresStaff";
 import { ProgramAdminDashboard } from "./pages/programs/ProgramAdminDashboard";
 import { ProgramAdminCreateCampaign } from "./pages/programs/ProgramAdminCreateCampaign";
@@ -377,6 +381,13 @@ export function AppRoutes() {
       {/* /sessions/ aliases for Universal Links compatibility */}
       <Route path="/sessions/" element={<LiveSessionsListPage />} />
       <Route path="/sessions/:code/" element={<LiveSessionDetailPage />} />
+      {/* TLP Phase 2 — public guide profiles */}
+      <Route path="/guides/:slug/" element={<GuidePublicProfilePage />} />
+      <Route path="/guides/:slug" element={<GuidePublicProfilePage />} />
+      {/* TLP Phase 2 — guide self-service (auth required via API 403 handling) */}
+      <Route path="/guide/dashboard" element={<RequiresAuth><GuideDashboardPage /></RequiresAuth>} />
+      <Route path="/guide/programs/draft" element={<RequiresAuth><GuideProgramDraftPage /></RequiresAuth>} />
+      <Route path="/guide/sessions/draft" element={<RequiresAuth><GuideSessionDraftPage /></RequiresAuth>} />
 
       {/* Practice Distribution OS — Gate 7 (staff-only admin) */}
       <Route

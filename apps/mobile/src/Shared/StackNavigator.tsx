@@ -105,6 +105,9 @@ import ProgramDetailPreviewScreen from "../screens/Program/ProgramDetailPreviewS
 import LiveSessionJoinScreen from "../screens/LiveSession/LiveSessionJoinScreen";
 import LiveSessionReflectScreen from "../screens/LiveSession/LiveSessionReflectScreen";
 import MySessionsScreen from "../screens/LiveSession/MySessionsScreen";
+// TLP Phase 2 — Guide self-service
+import { GuideProgramDraftScreen } from "../screens/Program/GuideProgramDraftScreen";
+import { GuideSessionDraftScreen } from "../screens/LiveSession/GuideSessionDraftScreen";
 
 const Stack: any = createNativeStackNavigator();
 
@@ -432,6 +435,9 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen name="LiveSessionJoin" component={LiveSessionJoinScreen} options={{ headerShown: false }} />
     <Stack.Screen name="LiveSessionReflect" component={LiveSessionReflectScreen} options={{ headerShown: false }} />
     <Stack.Screen name="MySessions" component={MySessionsScreen} options={{ headerShown: false }} />
+    {/* TLP Phase 2 — Guide self-service */}
+    <Stack.Screen name="GuideProgramDraft" component={GuideProgramDraftScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="GuideSessionDraft" component={GuideSessionDraftScreen} options={{ headerShown: false }} />
   </Stack.Navigator>
 );
 

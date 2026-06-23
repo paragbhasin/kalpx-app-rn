@@ -7,7 +7,11 @@
  *
  * On completing all 3 items → "Complete Day" CTA → ProgramCompletionScreen.
  */
-import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -19,8 +23,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import {
+  completeProgramDay,
+  fetchProgramDay,
+  postProgramActivity,
+  type ProgramDayContent,
+  type ProgramDayItem,
+} from "../../engine/programApi";
 import { Fonts } from "../../theme/fonts";
-import { fetchProgramDay, completeProgramDay, postProgramActivity, type ProgramDayContent, type ProgramDayItem } from "../../engine/programApi";
 
 const SUPPORT_URL = "https://kalpx.com/programs/support";
 
@@ -74,7 +84,9 @@ export default function ProgramDayScreen() {
 
   // completedItems is passed back by each runner and accumulated there.
   // Reading directly from params avoids any stale-state/remount issues.
-  const sessionDone = new Set<string>(Array.isArray(completedItems) ? completedItems : []);
+  const sessionDone = new Set<string>(
+    Array.isArray(completedItems) ? completedItems : [],
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -87,9 +99,13 @@ export default function ProgramDayScreen() {
             setDayContent(data);
             if (!firedAnalyticsRef.current) {
               firedAnalyticsRef.current = true;
-              postProgramActivity('program_day_started', { day_number: data.day_number }).catch(() => {});
+              postProgramActivity("program_day_started", {
+                day_number: data.day_number,
+              }).catch(() => {});
               if (data.day_number === 2) {
-                postProgramActivity('program_day_2_started', { day_number: 2 }).catch(() => {});
+                postProgramActivity("program_day_2_started", {
+                  day_number: 2,
+                }).catch(() => {});
               }
             }
           }
@@ -103,7 +119,9 @@ export default function ProgramDayScreen() {
           if (!cancelled) setLoading(false);
         }
       })();
-      return () => { cancelled = true; };
+      return () => {
+        cancelled = true;
+      };
     }, [dayNumber]),
   );
 
@@ -116,11 +134,17 @@ export default function ProgramDayScreen() {
     const screen = screenMap[item.item_type];
     if (!screen) return;
     // Pass current completedItems so the runner can append to the list on complete
-    navigation.navigate(screen, { item, dayNumber, completedItems: Array.from(sessionDone) });
+    navigation.navigate(screen, {
+      item,
+      dayNumber,
+      completedItems: Array.from(sessionDone),
+    });
   };
 
   const allItems = dayContent
-    ? [dayContent.mantra, dayContent.sankalp, dayContent.practice].filter(Boolean) as ProgramDayItem[]
+    ? ([dayContent.mantra, dayContent.sankalp, dayContent.practice].filter(
+        Boolean,
+      ) as ProgramDayItem[])
     : [];
 
   const isItemDone = (item: ProgramDayItem) =>
@@ -129,10 +153,16 @@ export default function ProgramDayScreen() {
   const allDone = allItems.length > 0 && allItems.every(isItemDone);
 
   // All 3 done freshly in this session — call backend once to unlock next day
-  const completedInSession = allItems.length > 0 && allItems.every(i => sessionDone.has(i.item_id));
+  const completedInSession =
+    allItems.length > 0 && allItems.every((i) => sessionDone.has(i.item_id));
 
   useEffect(() => {
-    if (completedInSession && !loading && dayContent && !dayCompletedRef.current) {
+    if (
+      completedInSession &&
+      !loading &&
+      dayContent &&
+      !dayCompletedRef.current
+    ) {
       dayCompletedRef.current = true;
       completeProgramDay(dayNumber).catch(() => {});
     }
@@ -174,7 +204,10 @@ export default function ProgramDayScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backIcon}
+          >
             <Text style={styles.backIconText}>‹</Text>
           </TouchableOpacity>
           <View style={styles.headerCenter}>
@@ -201,29 +234,38 @@ export default function ProgramDayScreen() {
         {dayContent.reflection_prompt ? (
           <View style={styles.reflectionCard}>
             <Text style={styles.reflectionLabel}>REFLECTION</Text>
-            <Text style={styles.reflectionText}>{dayContent.reflection_prompt}</Text>
+            <Text style={styles.reflectionText}>
+              {dayContent.reflection_prompt}
+            </Text>
           </View>
         ) : null}
 
         {allDone ? (
           <View style={styles.completionBanner}>
-            <Text style={styles.completionTitle}>Day {dayContent.day_number} Complete ✓</Text>
-            <Text style={styles.completionSub}>Tap any practice below to do it again</Text>
+            <Text style={styles.completionTitle}>
+              Day {dayContent.day_number} Complete ✓
+            </Text>
+            <Text style={styles.completionSub}>
+              Tap any practice to do it again
+            </Text>
           </View>
         ) : (
           <Text style={styles.progressHint}>
-            {allItems.filter(isItemDone).length}/{allItems.length} done — complete all to finish the day
+            {allItems.filter(isItemDone).length}/{allItems.length} done —
+            complete all to finish the day
           </Text>
         )}
 
         {/* Support footer */}
         <TouchableOpacity
           style={styles.supportLink}
-          onPress={() => Alert.alert(
-            "Need help?",
-            "Visit kalpx.com/programs/support for help with your program.",
-            [{ text: "OK" }],
-          )}
+          onPress={() =>
+            Alert.alert(
+              "Need help?",
+              "Visit kalpx.com/programs/support for help with your program.",
+              [{ text: "OK" }],
+            )
+          }
           accessibilityLabel="Program support"
         >
           <Text style={styles.supportLinkText}>Need help? Get support →</Text>
@@ -235,7 +277,13 @@ export default function ProgramDayScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "#FAF7F2" },
-  center: { flex: 1, backgroundColor: "#FAF7F2", justifyContent: "center", alignItems: "center", padding: 24 },
+  center: {
+    flex: 1,
+    backgroundColor: "#FAF7F2",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
   scroll: { paddingBottom: 60, paddingHorizontal: 20 },
 
   header: {
@@ -339,7 +387,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#9A7548",
   },
-
 
   progressHint: {
     fontFamily: Fonts.sans.regular,

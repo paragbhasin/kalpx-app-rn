@@ -8,7 +8,7 @@
  * On completing all 3 items → "Complete Day" CTA → ProgramCompletionScreen.
  */
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -125,15 +125,21 @@ export default function ProgramDayScreen() {
   const isItemDone = (item: ProgramDayItem) =>
     dayContent?.is_completed || sessionDone.has(item.item_id);
 
+  // All 3 items completed in this session (not from a previously-completed day)
+  const completedInSession = allItems.length > 0 && allItems.every(i => sessionDone.has(i.item_id));
+
   const allDone = allItems.length > 0 && allItems.every(isItemDone);
 
-  const handleCompleteDay = () => {
-    navigation.replace("ProgramCompletionScreen", {
-      dayNumber,
-      completionMessage: dayContent?.completion_message ?? null,
-      programName: null,
-    });
-  };
+  // Auto-navigate to completion screen when user finishes all 3 in this session
+  useEffect(() => {
+    if (completedInSession && !loading && dayContent) {
+      navigation.replace("ProgramCompletionScreen", {
+        dayNumber,
+        completionMessage: dayContent.completion_message ?? null,
+        programName: null,
+      });
+    }
+  }, [completedInSession, loading, dayContent, dayNumber, navigation]);
 
   if (loading) {
     return (
@@ -202,17 +208,8 @@ export default function ProgramDayScreen() {
           </View>
         ) : null}
 
-        {/* Complete Day CTA */}
-        {allDone ? (
-          <TouchableOpacity
-            activeOpacity={0.85}
-            onPress={handleCompleteDay}
-            style={styles.completeCta}
-            accessibilityLabel="Complete Day"
-          >
-            <Text style={styles.completeCtaText}>Complete Day {dayContent.day_number} →</Text>
-          </TouchableOpacity>
-        ) : (
+        {/* Progress hint — auto-navigates to completion when all 3 done */}
+        {!allDone && (
           <Text style={styles.progressHint}>
             {allItems.filter(isItemDone).length}/{allItems.length} done — complete all to finish the day
           </Text>
@@ -325,18 +322,6 @@ const styles = StyleSheet.create({
     lineHeight: 21,
   },
 
-  completeCta: {
-    backgroundColor: "#C99317",
-    borderRadius: 14,
-    paddingVertical: 18,
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  completeCtaText: {
-    fontFamily: Fonts.sans.semiBold,
-    fontSize: 16,
-    color: "#fff",
-  },
 
   progressHint: {
     fontFamily: Fonts.sans.regular,

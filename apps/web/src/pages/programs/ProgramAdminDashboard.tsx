@@ -3,6 +3,102 @@ import { useNavigate, Link } from 'react-router-dom';
 import { AppShell } from '../../components/ui/AppShell';
 import { api } from '../../lib/api';
 
+function InviteLeaderSection() {
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<{ ok: boolean; msg: string; inviteUrl?: string } | null>(null);
+
+  const handleInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setLoading(true);
+    setResult(null);
+    try {
+      const res = await api.post<{ invite_url: string }>('ops/guide-invites/', { email: email.trim().toLowerCase() });
+      setResult({ ok: true, msg: `Invite sent to ${email}`, inviteUrl: res.data.invite_url });
+      setEmail('');
+    } catch (err: any) {
+      const msg = err?.response?.data?.detail || err?.response?.data?.email?.[0] || 'Failed to send invite.';
+      setResult({ ok: false, msg });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{
+      background: 'var(--kalpx-card-bg)',
+      border: '1px solid var(--kalpx-border)',
+      borderRadius: 10,
+      padding: '18px 20px',
+      marginBottom: 28,
+    }}>
+      <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--kalpx-text)', margin: '0 0 4px' }}>
+        Invite a Leader
+      </h3>
+      <p style={{ fontSize: 13, color: 'var(--kalpx-text-soft)', margin: '0 0 14px' }}>
+        Leaders receive an email with a link to create their account and access the Leader Portal.
+      </p>
+      <form onSubmit={handleInvite} style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="leader@example.com"
+          required
+          style={{
+            flex: '1 1 240px',
+            padding: '9px 14px',
+            border: '1px solid var(--kalpx-border)',
+            borderRadius: 8,
+            fontSize: 14,
+            outline: 'none',
+            background: 'var(--kalpx-bg)',
+            color: 'var(--kalpx-text)',
+          }}
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            padding: '9px 20px',
+            background: 'var(--kalpx-cta)',
+            color: 'var(--kalpx-cta-text)',
+            border: 'none',
+            borderRadius: 8,
+            fontWeight: 600,
+            fontSize: 14,
+            cursor: loading ? 'not-allowed' : 'pointer',
+            opacity: loading ? 0.7 : 1,
+          }}
+        >
+          {loading ? 'Sending…' : 'Send Invite'}
+        </button>
+      </form>
+      {result && (
+        <div style={{
+          marginTop: 12,
+          padding: '10px 14px',
+          borderRadius: 8,
+          background: result.ok ? '#f0fdf4' : '#fee2e2',
+          color: result.ok ? '#166534' : '#991b1b',
+          fontSize: 13,
+        }}>
+          <span>{result.msg}</span>
+          {result.ok && result.inviteUrl && (
+            <div style={{ marginTop: 6 }}>
+              <span style={{ fontWeight: 600 }}>Invite URL (dev only): </span>
+              <a href={result.inviteUrl} target="_blank" rel="noreferrer" style={{ color: '#1d4ed8', wordBreak: 'break-all' }}>
+                {result.inviteUrl}
+              </a>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 type CampaignStatus = 'draft' | 'active' | 'paused' | 'completed' | 'archived';
 type CampaignClassification = 'BREAKOUT' | 'STRONG' | 'ACCEPTABLE' | 'WEAK';
 
@@ -139,6 +235,9 @@ export function ProgramAdminDashboard() {
             + New Campaign
           </Link>
         </div>
+
+        {/* Invite a leader */}
+        <InviteLeaderSection />
 
         {/* Status filter */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>

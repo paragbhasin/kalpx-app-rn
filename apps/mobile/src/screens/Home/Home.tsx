@@ -143,6 +143,57 @@ const FEATURE_ITEMS = [
 // Legacy export for RelatedVideosScreen compatibility
 export const collapseControl = { avoidCollapse: false };
 
+// TLP Phase 1 — upcoming session widget (non-blocking, self-contained)
+function TLPUpcomingSessionWidget({
+  session,
+  onPress,
+}: {
+  session: { session_code: string; title: string; scheduled_at: string; external_platform: string; external_join_url: string };
+  onPress: () => void;
+}) {
+  const now = Date.now();
+  const sessionTime = new Date(session.scheduled_at).getTime();
+  const diffMs = sessionTime - now;
+  const thirtyMin = 30 * 60 * 1000;
+  const isJoinable = diffMs <= thirtyMin;
+
+  let timeLabel = "";
+  try {
+    const d = new Date(session.scheduled_at);
+    timeLabel = d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
+      + " · "
+      + d.toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true }).toUpperCase();
+  } catch {
+    timeLabel = session.scheduled_at;
+  }
+
+  return (
+    <View style={styles.tlpUpcomingCard}>
+      <Text style={styles.tlpUpcomingLabel}>UPCOMING SESSION</Text>
+      <Text style={styles.tlpUpcomingTitle} numberOfLines={2}>{session.title}</Text>
+      <Text style={styles.tlpUpcomingTime}>{timeLabel}</Text>
+      {isJoinable ? (
+        <TouchableOpacity onPress={onPress} style={styles.tlpUpcomingJoinBtn} activeOpacity={0.85}>
+          <Text style={styles.tlpUpcomingJoinBtnText}>Join Now →</Text>
+        </TouchableOpacity>
+      ) : null}
+    </View>
+  );
+}
+
+// TLP Phase 1 — discover programs card (shows when user has no active program)
+function TLPDiscoverProgramsCard({ count, onPress }: { count: number; onPress: () => void }) {
+  return (
+    <TouchableOpacity style={styles.tlpDiscoverCard} onPress={onPress} activeOpacity={0.85}>
+      <View style={styles.tlpDiscoverLeft}>
+        <Text style={styles.tlpDiscoverTitle}>Discover Programs</Text>
+        <Text style={styles.tlpDiscoverSub}>{count} program{count !== 1 ? "s" : ""} available</Text>
+      </View>
+      <Text style={styles.tlpDiscoverArrow}>›</Text>
+    </TouchableOpacity>
+  );
+}
+
 export default function Home() {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
@@ -179,6 +230,15 @@ export default function Home() {
   const [profileNameFromStorage, setProfileNameFromStorage] = useState<
     string | null
   >(null);
+  // TLP Phase 1 — home widgets (non-blocking: never affect existing Home render)
+  const [tlpProgramCount, setTlpProgramCount] = useState<number | null>(null);
+  const [tlpNextSession, setTlpNextSession] = useState<{
+    session_code: string;
+    title: string;
+    scheduled_at: string;
+    external_platform: string;
+    external_join_url: string;
+  } | null>(null);
 
   useEffect(() => {
     AsyncStorage.getItem("profile_name").then((name) => {
@@ -198,6 +258,71 @@ export default function Home() {
     });
     return () => sub.remove();
   }, []);
+
+  // TLP Phase 1 — fetch program count and next session for home widgets.
+  // Non-blocking: errors are swallowed, widgets simply don't render on failure.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { fetchPrograms } = require("../../engine/liveSessionApi");
+        const data = await fetchPrograms();
+        if (!cancelled && data?.count > 0) setTlpProgramCount(data.count);
+      } catch {
+        // non-fatal — home widget optional
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { fetchMyRegistrations } = require("../../engine/liveSessionApi");
+        const regs: Array<{
+          session_code: string;
+          title: string;
+          scheduled_at: string;
+          timezone: string;
+          duration_minutes: number;
+          status: string;
+          external_platform: string;
+          external_join_url: string;
+          join_clicked: boolean;
+          reflection_completed: boolean;
+          followup_action: string | null;
+        }> = await fetchMyRegistrations();
+        const now = Date.now();
+        const upcoming = regs
+          .filter((r) => {
+            const t = new Date(r.scheduled_at).getTime();
+            return (
+              ["approved", "scheduled", "live"].includes(r.status) && t > now
+            );
+          })
+          .sort(
+            (a, b) =>
+              new Date(a.scheduled_at).getTime() -
+              new Date(b.scheduled_at).getTime(),
+          );
+        if (!cancelled && upcoming.length > 0) {
+          const next = upcoming[0];
+          setTlpNextSession({
+            session_code: next.session_code,
+            title: next.title,
+            scheduled_at: next.scheduled_at,
+            external_platform: next.external_platform,
+            external_join_url: next.external_join_url,
+          });
+        }
+      } catch {
+        // non-fatal — home widget optional
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isLoggedIn]);
 
   // Push mantras + path data to Watch once both login and homeData are ready.
   // Merged from two effects to avoid a double-sync burst (isLoggedIn fires first,
@@ -1144,6 +1269,30 @@ export default function Home() {
               : { resizeMode: 'contain' }
             }
           />
+          {/* TLP Phase 1 — upcoming session widget (shows when user has a registered session) */}
+          {tlpNextSession ? (
+            <TLPUpcomingSessionWidget
+              session={tlpNextSession}
+              onPress={() =>
+                navigation.navigate("LiveSessionJoin", {
+                  sessionCode: tlpNextSession.session_code,
+                  title: tlpNextSession.title,
+                  scheduledAt: tlpNextSession.scheduled_at,
+                  externalPlatform: tlpNextSession.external_platform,
+                  externalJoinUrl: tlpNextSession.external_join_url,
+                })
+              }
+            />
+          ) : null}
+
+          {/* TLP Phase 1 — Discover Programs card (no active program) */}
+          {tlpProgramCount !== null && !mitraJourneyId ? (
+            <TLPDiscoverProgramsCard
+              count={tlpProgramCount}
+              onPress={() => navigation.navigate("ProgramsDiscovery")}
+            />
+          ) : null}
+
           <TouchableOpacity
             onPress={handleBeginJourney}
             activeOpacity={0.85}
@@ -1440,5 +1589,77 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
     color: "#5C5648",
+  },
+  // TLP Home Widgets
+  tlpUpcomingCard: {
+    backgroundColor: "#FFF8EE",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#C99317",
+    padding: 16,
+    marginBottom: 16,
+    width: "100%",
+  },
+  tlpUpcomingLabel: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 10,
+    color: "#C99317",
+    letterSpacing: 0.5,
+    marginBottom: 6,
+  },
+  tlpUpcomingTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 15,
+    color: "#432104",
+    marginBottom: 4,
+  },
+  tlpUpcomingTime: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 12,
+    color: "#7B6545",
+    marginBottom: 12,
+  },
+  tlpUpcomingJoinBtn: {
+    backgroundColor: "#C99317",
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: "center",
+  },
+  tlpUpcomingJoinBtnText: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 13,
+    color: "#fff",
+  },
+  tlpDiscoverCard: {
+    backgroundColor: "#F0EAD8",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#E8D9B5",
+    padding: 16,
+    marginBottom: 20,
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  tlpDiscoverLeft: {
+    flex: 1,
+  },
+  tlpDiscoverTitle: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 14,
+    color: "#432104",
+    marginBottom: 2,
+  },
+  tlpDiscoverSub: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 12,
+    color: "#7B6545",
+  },
+  tlpDiscoverArrow: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 20,
+    color: "#C99317",
+    marginLeft: 12,
   },
 });

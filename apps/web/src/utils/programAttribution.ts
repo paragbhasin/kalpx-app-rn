@@ -45,3 +45,22 @@ export function clearProgramAttribution(): void {
     // ignore
   }
 }
+
+export function captureSessionAttribution(
+  sessionCode: string,
+  utmParams: Record<string, string>,
+): void {
+  try {
+    localStorage.setItem('pending_session_code', sessionCode);
+    localStorage.setItem(
+      'session_attribution',
+      JSON.stringify({
+        sessionCode,
+        ...utmParams,
+        captured_at: new Date().toISOString(),
+      }),
+    );
+  } catch {
+    // localStorage unavailable (private browsing iOS) — fail silently
+  }
+}

@@ -240,6 +240,93 @@ export function handleMitraDeepLink(url: string | null | undefined): boolean {
 }
 
 /**
+ * Handle TLP live-session and program deep links.
+ *
+ * kalpx://live-session/{code}               → LiveSessionDetail
+ * kalpx://live-session/{code}/join          → LiveSessionJoin (fetches session first)
+ * kalpx://live-session/{code}/reflect       → LiveSessionReflect
+ * https://kalpx.com/sessions/{code}        → LiveSessionDetail (Universal Link)
+ * https://kalpx.com/programs/{slug}        → ProgramDetailPreview (Universal Link)
+ *
+ * Returns true if handled, false otherwise.
+ */
+export function handleTLPDeepLink(url: string): boolean {
+  if (!url) return false;
+
+  // kalpx://live-session/{code}/reflect
+  if (url.startsWith("kalpx://live-session/")) {
+    const bare = url.split("?")[0];
+    const path = bare.replace("kalpx://live-session/", "");
+    const parts = path.split("/").filter(Boolean);
+    if (parts.length === 0) return false;
+    const code = parts[0];
+    const sub = parts[1];
+
+    if (sub === "reflect") {
+      try {
+        navigate("LiveSessionReflect" as any, { sessionCode: code });
+      } catch (err) {
+        console.warn("[deeplink] LiveSessionReflect navigate failed:", err);
+      }
+      console.log(`[deeplink] → LiveSessionReflect (code=${code})`);
+      return true;
+    }
+
+    if (sub === "join") {
+      // Navigate to LiveSessionJoin. We navigate to LiveSessionDetail first
+      // if we don't have session params; detail screen can forward to join.
+      try {
+        navigate("LiveSessionDetail" as any, { code });
+      } catch (err) {
+        console.warn("[deeplink] LiveSessionDetail (for join) navigate failed:", err);
+      }
+      console.log(`[deeplink] → LiveSessionDetail (pre-join, code=${code})`);
+      return true;
+    }
+
+    // kalpx://live-session/{code} → LiveSessionDetail
+    try {
+      navigate("LiveSessionDetail" as any, { code });
+    } catch (err) {
+      console.warn("[deeplink] LiveSessionDetail navigate failed:", err);
+    }
+    console.log(`[deeplink] → LiveSessionDetail (code=${code})`);
+    return true;
+  }
+
+  // https://kalpx.com/sessions/{code} Universal Link
+  if (url.startsWith("https://kalpx.com/sessions/")) {
+    const bare = url.split("?")[0];
+    const code = bare.replace("https://kalpx.com/sessions/", "").split("/")[0].trim();
+    if (!code) return false;
+    try {
+      navigate("LiveSessionDetail" as any, { code });
+    } catch (err) {
+      console.warn("[deeplink] LiveSessionDetail (UL) navigate failed:", err);
+    }
+    console.log(`[deeplink] → LiveSessionDetail (UL, code=${code})`);
+    return true;
+  }
+
+  // https://kalpx.com/programs/{slug} Universal Link → ProgramDetailPreview
+  if (url.startsWith("https://kalpx.com/programs/")) {
+    const bare = url.split("?")[0];
+    const slug = bare.replace("https://kalpx.com/programs/", "").split("/")[0].trim();
+    if (!slug) return false;
+    try {
+      // slug is treated as code for program detail preview
+      navigate("ProgramDetailPreview" as any, { code: slug });
+    } catch (err) {
+      console.warn("[deeplink] ProgramDetailPreview (UL) navigate failed:", err);
+    }
+    console.log(`[deeplink] → ProgramDetailPreview (UL, slug=${slug})`);
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Handle kalpx://join/{code} custom-scheme deep links.
  * Stores the code in AsyncStorage and navigates to ProgramInviteClaimScreen.
  * Returns true if handled, false otherwise.
@@ -358,7 +445,7 @@ export function handleProgramDeepLink(url: string): boolean {
 // must poll rather than call it once and hope for the best.
 function handleWhenReady(url: string, attemptsLeft = 15): void {
   if (navigationRef.isReady()) {
-    if (!handleProgramJoinDeepLink(url) && !handleProgramDeepLink(url)) {
+    if (!handleProgramJoinDeepLink(url) && !handleProgramDeepLink(url) && !handleTLPDeepLink(url)) {
       handleMitraDeepLink(url);
     }
   } else if (attemptsLeft > 0) {
@@ -430,7 +517,7 @@ export function attachDeepLinkListeners(): () => void {
       }
     }
 
-    if (!handleProgramJoinDeepLink(url) && !handleProgramDeepLink(url)) {
+    if (!handleProgramJoinDeepLink(url) && !handleProgramDeepLink(url) && !handleTLPDeepLink(url)) {
       handleMitraDeepLink(url);
     }
   };

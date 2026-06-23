@@ -2,6 +2,7 @@
  * ProgramsDiscoveryScreen — TLP Phase 1.
  *
  * Lists all programs from GET /api/programs/.
+ * Supports category and language filter chips.
  * "Join Program →" → navigate to ProgramInviteClaimScreen with { code }.
  */
 import { useNavigation } from "@react-navigation/native";
@@ -18,15 +19,33 @@ import {
 import { Fonts } from "../../theme/fonts";
 import { fetchPrograms, type TLPProgram } from "../../engine/liveSessionApi";
 
+const CATEGORIES: { value: string; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "meditation", label: "Meditation" },
+  { value: "yoga", label: "Yoga" },
+  { value: "gita", label: "Gita" },
+  { value: "family", label: "Family" },
+  { value: "festival", label: "Festival" },
+  { value: "ayurveda", label: "Ayurveda" },
+];
+
+const LANGUAGES: { value: string; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "hindi", label: "Hindi" },
+  { value: "english", label: "English" },
+];
+
 function ProgramCard({
   program,
   onJoin,
+  onDetail,
 }: {
   program: TLPProgram;
   onJoin: () => void;
+  onDetail: () => void;
 }) {
   return (
-    <View style={styles.card}>
+    <TouchableOpacity activeOpacity={0.95} onPress={onDetail} style={styles.card}>
       {/* Duration badge */}
       {program.duration_days ? (
         <View style={styles.durationBadge}>
@@ -57,6 +76,11 @@ function ProgramCard({
         </Text>
       ) : null}
 
+      {/* Show joined_count only when >= 5 */}
+      {program.joined_count !== undefined && program.joined_count >= 5 ? (
+        <Text style={styles.joinedCount}>{program.joined_count} joined</Text>
+      ) : null}
+
       <TouchableOpacity
         activeOpacity={0.85}
         onPress={onJoin}
@@ -65,7 +89,7 @@ function ProgramCard({
       >
         <Text style={styles.joinBtnText}>Join Program →</Text>
       </TouchableOpacity>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -83,13 +107,19 @@ export default function ProgramsDiscoveryScreen() {
   const [programs, setPrograms] = useState<TLPProgram[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedLanguage, setSelectedLanguage] = useState("all");
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         setLoading(true);
-        const data = await fetchPrograms();
+        setError(null);
+        const data = await fetchPrograms({
+          category: selectedCategory !== "all" ? selectedCategory : undefined,
+          language: selectedLanguage !== "all" ? selectedLanguage : undefined,
+        });
         if (!cancelled) setPrograms(data.programs);
       } catch {
         if (!cancelled) setError("Couldn't load programs. Please try again.");
@@ -98,7 +128,7 @@ export default function ProgramsDiscoveryScreen() {
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [selectedCategory, selectedLanguage]);
 
   if (loading) {
     return (
@@ -119,24 +149,91 @@ export default function ProgramsDiscoveryScreen() {
     );
   }
 
+  const isFiltered = selectedCategory !== "all" || selectedLanguage !== "all";
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon}>
-            <Text style={styles.backIconText}>‹</Text>
-          </TouchableOpacity>
-          <View style={styles.headerCenter}>
-            <Text style={styles.screenTitle}>Programs</Text>
-          </View>
-          <View style={{ width: 40 }} />
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon}>
+          <Text style={styles.backIconText}>‹</Text>
+        </TouchableOpacity>
+        <View style={styles.headerCenter}>
+          <Text style={styles.screenTitle}>Programs</Text>
         </View>
+        <View style={{ width: 40 }} />
+      </View>
 
+      {/* Category filter chips */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.filterRow}
+      >
+        {CATEGORIES.map((cat) => (
+          <TouchableOpacity
+            key={cat.value}
+            onPress={() => setSelectedCategory(cat.value)}
+            style={[
+              styles.filterChip,
+              selectedCategory === cat.value && styles.filterChipActive,
+            ]}
+            accessibilityLabel={`Filter by ${cat.label}`}
+          >
+            <Text
+              style={[
+                styles.filterChipText,
+                selectedCategory === cat.value && styles.filterChipTextActive,
+              ]}
+            >
+              {cat.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      {/* Language filter chips */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.langRow}
+      >
+        {LANGUAGES.map((lang) => (
+          <TouchableOpacity
+            key={lang.value}
+            onPress={() => setSelectedLanguage(lang.value)}
+            style={[
+              styles.langChip,
+              selectedLanguage === lang.value && styles.filterChipActive,
+            ]}
+            accessibilityLabel={`Filter by ${lang.label}`}
+          >
+            <Text
+              style={[
+                styles.filterChipText,
+                selectedLanguage === lang.value && styles.filterChipTextActive,
+              ]}
+            >
+              {lang.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {programs.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>No programs available</Text>
-            <Text style={styles.emptySubText}>Check back soon for new programs.</Text>
+            {isFiltered ? (
+              <>
+                <Text style={styles.emptyText}>No programs in this category yet.</Text>
+                <Text style={styles.emptySubText}>Try a different filter or check back soon.</Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.emptyText}>No programs available</Text>
+                <Text style={styles.emptySubText}>Check back soon for new programs.</Text>
+              </>
+            )}
           </View>
         ) : (
           <View style={styles.list}>
@@ -144,6 +241,9 @@ export default function ProgramsDiscoveryScreen() {
               <ProgramCard
                 key={p.code}
                 program={p}
+                onDetail={() =>
+                  navigation.navigate("ProgramDetailPreview", { code: p.code })
+                }
                 onJoin={() =>
                   navigation.navigate("ProgramInviteClaimScreen", { code: p.code })
                 }
@@ -165,7 +265,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingTop: 16,
-    paddingBottom: 20,
+    paddingBottom: 12,
+    paddingHorizontal: 20,
   },
   backIcon: { width: 40, alignItems: "flex-start" },
   backIconText: { fontSize: 32, color: "#432104", lineHeight: 36 },
@@ -174,6 +275,47 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif.bold,
     fontSize: 22,
     color: "#432104",
+  },
+
+  filterRow: {
+    paddingHorizontal: 20,
+    paddingBottom: 8,
+    gap: 8,
+    flexDirection: "row",
+  },
+  langRow: {
+    paddingHorizontal: 20,
+    paddingBottom: 12,
+    gap: 8,
+    flexDirection: "row",
+  },
+  filterChip: {
+    borderWidth: 1,
+    borderColor: "#E8D9B5",
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    backgroundColor: "#FFF8EE",
+  },
+  filterChipActive: {
+    backgroundColor: "#432104",
+    borderColor: "#432104",
+  },
+  filterChipText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 12,
+    color: "#7B6545",
+  },
+  filterChipTextActive: {
+    color: "#fff",
+  },
+  langChip: {
+    borderWidth: 1,
+    borderColor: "#E8D9B5",
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    backgroundColor: "#FFF8EE",
   },
 
   list: { gap: 16 },
@@ -243,7 +385,14 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.medium,
     fontSize: 12,
     color: "#9A7548",
-    marginBottom: 16,
+    marginBottom: 8,
+  },
+
+  joinedCount: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 12,
+    color: "#C99317",
+    marginBottom: 12,
   },
 
   joinBtn: {
@@ -264,11 +413,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "#432104",
     marginBottom: 8,
+    textAlign: "center",
   },
   emptySubText: {
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
     color: "#9A7548",
+    textAlign: "center",
   },
 
   errorText: {

@@ -101,6 +101,10 @@ import ProgramPracticeRunner from "../screens/Program/runners/ProgramPracticeRun
 import LiveSessionsListScreen from "../screens/Program/LiveSessionsListScreen";
 import LiveSessionDetailScreen from "../screens/Program/LiveSessionDetailScreen";
 import ProgramsDiscoveryScreen from "../screens/Program/ProgramsDiscoveryScreen";
+import ProgramDetailPreviewScreen from "../screens/Program/ProgramDetailPreviewScreen";
+import LiveSessionJoinScreen from "../screens/LiveSession/LiveSessionJoinScreen";
+import LiveSessionReflectScreen from "../screens/LiveSession/LiveSessionReflectScreen";
+import MySessionsScreen from "../screens/LiveSession/MySessionsScreen";
 
 const Stack: any = createNativeStackNavigator();
 
@@ -424,6 +428,10 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen name="LiveSessionsList" component={LiveSessionsListScreen} options={{ headerShown: false }} />
     <Stack.Screen name="LiveSessionDetail" component={LiveSessionDetailScreen} options={{ headerShown: false }} />
     <Stack.Screen name="ProgramsDiscovery" component={ProgramsDiscoveryScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="ProgramDetailPreview" component={ProgramDetailPreviewScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="LiveSessionJoin" component={LiveSessionJoinScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="LiveSessionReflect" component={LiveSessionReflectScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="MySessions" component={MySessionsScreen} options={{ headerShown: false }} />
   </Stack.Navigator>
 );
 

@@ -78,6 +78,10 @@ export function LiveSessionsListPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    document.title = 'Live Sessions — KalpX';
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
     async function load() {
       try {

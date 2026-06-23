@@ -117,6 +117,12 @@ export function LiveSessionDetailPage() {
     return () => { cancelled = true; };
   }, [code]);
 
+  // SEO title — set when session is loaded
+  useEffect(() => {
+    if (state.kind !== 'loaded') return;
+    document.title = `${state.session.title} — KalpX`;
+  }, [state.kind === 'loaded' ? (state as Extract<LoadState, { kind: 'loaded' }>).session.title : '']);
+
   return (
     <AppShell>
       <main

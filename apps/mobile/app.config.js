@@ -52,6 +52,8 @@ module.exports = {
           data: [
             { scheme: "https", host: "kalpx.com", pathPrefix: "/p" },
             { scheme: "https", host: "kalpx.com", pathPrefix: "/join" },
+            { scheme: "https", host: "kalpx.com", pathPrefix: "/sessions" },
+            { scheme: "https", host: "kalpx.com", pathPrefix: "/programs" },
           ],
           category: ["BROWSABLE", "DEFAULT"],
         },

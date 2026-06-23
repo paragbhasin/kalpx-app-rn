@@ -145,7 +145,9 @@ export function useAuth() {
     invalidateJourneyEntryViewCache();
     store.dispatch(clearDoorState());
     store.dispatch(resetStore());
-    navigate('/en');
+    const opsSession = localStorage.getItem('kalpx:ops_session');
+    localStorage.removeItem('kalpx:ops_session');
+    navigate(opsSession ? '/ops-login' : '/en');
   }, [navigate]);
 
   const socialLoginGoogle = useCallback(

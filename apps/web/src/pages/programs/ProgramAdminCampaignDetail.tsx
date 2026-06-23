@@ -146,7 +146,7 @@ export function ProgramAdminCampaignDetail() {
   }
 
   function copyLink() {
-    const url = `https://kalpx.com/join/${code}`;
+    const url = `${window.location.origin}/join/${code}`;
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -182,7 +182,7 @@ export function ProgramAdminCampaignDetail() {
   }
 
   const m = campaign.metrics;
-  const joinUrl = `https://kalpx.com/join/${campaign.code}`;
+  const joinUrl = `${window.location.origin}/join/${campaign.code}`;
 
   return (
     <AppShell>

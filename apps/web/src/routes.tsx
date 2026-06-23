@@ -87,6 +87,8 @@ import { RequiresStaff } from "./components/RequiresStaff";
 import { ProgramAdminDashboard } from "./pages/programs/ProgramAdminDashboard";
 import { ProgramAdminCreateCampaign } from "./pages/programs/ProgramAdminCreateCampaign";
 import { ProgramAdminCampaignDetail } from "./pages/programs/ProgramAdminCampaignDetail";
+import { OpsLoginPage } from "./pages/auth/OpsLoginPage";
+import { OpsForgotPasswordPage } from "./pages/auth/OpsForgotPasswordPage";
 
 const ONBOARDING_TURN_1_PATH =
   "/en/mitra/onboarding?containerId=welcome_onboarding&stateId=turn_1";
@@ -105,6 +107,8 @@ export function AppRoutes() {
       <Route path="/forgot-password-phone" element={<ForgotPasswordPhonePage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/logout" element={<LogoutPage />} />
+      <Route path="/ops-login" element={<OpsLoginPage />} />
+      <Route path="/ops-forgot-password" element={<OpsForgotPasswordPage />} />
 
       {/* Mitra — home is an open routing hub */}
       <Route path="/en/mitra" element={<MitraHomePage />} />

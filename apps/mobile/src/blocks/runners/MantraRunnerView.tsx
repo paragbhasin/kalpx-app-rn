@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Haptics from "expo-haptics";
 import React, {
   useCallback,
   useEffect,
@@ -380,6 +381,7 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
       }
     } else {
       // Fallback: legacy local-only counting (no engine wired)
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
       setLocalCount((prev) => {
         const nextCount = prev + 1;
         if (nextCount >= selectedTarget && !isCompletingRef.current) {

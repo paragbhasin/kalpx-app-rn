@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronUp, Volume2, VolumeX } from "lucide-react-native";
+import * as Haptics from "expo-haptics";
 import React, { useEffect, useMemo, useState } from "react";
-import {Image, 
+import {Image,
   Dimensions,
   ImageBackground,
   Platform,
@@ -138,6 +139,7 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
 
   const handleTap = () => {
     if (isUnlimited || currentCount < targetCount) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
       onIncrement();
     }
   };

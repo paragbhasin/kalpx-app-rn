@@ -271,6 +271,14 @@ function ProgramReviewQueue() {
                       Request Changes
                     </button>
                   )}
+                  {activeTab === 'rejected' && (
+                    <button
+                      disabled={busy}
+                      onClick={() => doAction(t.id, 'approve')}
+                      style={{ ...actionBtn, background: '#16a34a', opacity: busy ? 0.5 : 1 }}>
+                      Approve
+                    </button>
+                  )}
                 </div>
 
                 {/* Reject remarks */}

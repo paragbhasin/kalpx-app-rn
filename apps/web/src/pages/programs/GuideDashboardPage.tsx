@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AppShell } from '../../components/ui/AppShell';
+import { useAuth } from '../../hooks/useAuth';
 import {
   fetchGuideDashboard,
   type GuideDashboard,
@@ -102,6 +103,7 @@ function SessionRow({ session }: { session: GuideSession }) {
 }
 
 export function GuideDashboardPage() {
+  const { logout } = useAuth();
   const [state, setState] = useState<LoadState>({ kind: 'loading' });
 
   useEffect(() => {
@@ -124,14 +126,22 @@ export function GuideDashboardPage() {
   return (
     <AppShell>
       <main style={{ maxWidth: 680, margin: '0 auto', padding: '32px 20px 80px' }}>
-        <header style={{ marginBottom: 28 }}>
-          <p style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', letterSpacing: '0.05em',
-            marginBottom: 6, fontWeight: 600 }}>
-            GUIDE DASHBOARD
-          </p>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--kalpx-text)', margin: 0 }}>
-            Your Impact
-          </h1>
+        <header style={{ marginBottom: 28, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <div>
+            <p style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', letterSpacing: '0.05em',
+              marginBottom: 6, fontWeight: 600 }}>
+              GUIDE DASHBOARD
+            </p>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--kalpx-text)', margin: 0 }}>
+              Your Impact
+            </h1>
+          </div>
+          <button
+            onClick={logout}
+            style={{ background: 'none', border: '1px solid var(--kalpx-border)', borderRadius: 8,
+              padding: '6px 14px', fontSize: 13, color: 'var(--kalpx-text-muted)', cursor: 'pointer' }}>
+            Sign out
+          </button>
         </header>
 
         {state.kind === 'loading' && (
@@ -145,7 +155,7 @@ export function GuideDashboardPage() {
             <p style={{ color: 'var(--kalpx-text-muted)', marginBottom: 16 }}>
               You need to be a verified guide to view this dashboard.
             </p>
-            <Link to="/login" style={{ color: 'var(--kalpx-gold)', fontSize: 14 }}>
+            <Link to="/guide/login" style={{ color: 'var(--kalpx-gold)', fontSize: 14 }}>
               Sign in →
             </Link>
           </div>

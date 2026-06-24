@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { AppShell } from '../../components/ui/AppShell';
 import { api } from '../../lib/api';
 import { useAuth } from '../../hooks/useAuth';
+
+// ── Invite a Leader ────────────────────────────────────────────────────────────
 
 function InviteLeaderSection() {
   const [email, setEmail] = useState('');
@@ -27,13 +29,7 @@ function InviteLeaderSection() {
   };
 
   return (
-    <div style={{
-      background: 'var(--kalpx-card-bg)',
-      border: '1px solid var(--kalpx-border)',
-      borderRadius: 10,
-      padding: '18px 20px',
-      marginBottom: 28,
-    }}>
+    <div style={sectionCard}>
       <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--kalpx-text)', margin: '0 0 4px' }}>
         Invite a Leader
       </h3>
@@ -47,49 +43,24 @@ function InviteLeaderSection() {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="leader@example.com"
           required
-          style={{
-            flex: '1 1 240px',
-            padding: '9px 14px',
-            border: '1px solid var(--kalpx-border)',
-            borderRadius: 8,
-            fontSize: 14,
-            outline: 'none',
-            background: 'var(--kalpx-bg)',
-            color: 'var(--kalpx-text)',
-          }}
+          style={inputStyle}
         />
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            padding: '9px 20px',
-            background: 'var(--kalpx-cta)',
-            color: 'var(--kalpx-cta-text)',
-            border: 'none',
-            borderRadius: 8,
-            fontWeight: 600,
-            fontSize: 14,
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1,
-          }}
-        >
+        <button type="submit" disabled={loading} style={ctaBtn}>
           {loading ? 'Sending…' : 'Send Invite'}
         </button>
       </form>
       {result && (
         <div style={{
-          marginTop: 12,
-          padding: '10px 14px',
-          borderRadius: 8,
+          marginTop: 12, padding: '10px 14px', borderRadius: 8,
           background: result.ok ? '#f0fdf4' : '#fee2e2',
-          color: result.ok ? '#166534' : '#991b1b',
-          fontSize: 13,
+          color: result.ok ? '#166534' : '#991b1b', fontSize: 13,
         }}>
-          <span>{result.msg}</span>
+          {result.msg}
           {result.ok && result.inviteUrl && (
             <div style={{ marginTop: 6 }}>
               <span style={{ fontWeight: 600 }}>Invite URL (dev only): </span>
-              <a href={result.inviteUrl} target="_blank" rel="noreferrer" style={{ color: '#1d4ed8', wordBreak: 'break-all' }}>
+              <a href={result.inviteUrl} target="_blank" rel="noreferrer"
+                style={{ color: '#1d4ed8', wordBreak: 'break-all' }}>
                 {result.inviteUrl}
               </a>
             </div>
@@ -100,7 +71,7 @@ function InviteLeaderSection() {
   );
 }
 
-// ── Pending template review ────────────────────────────────────────────────────
+// ── Program Review Queue ───────────────────────────────────────────────────────
 
 interface PendingTemplate {
   id: number;
@@ -113,44 +84,36 @@ interface PendingTemplate {
   guide_email: string;
 }
 
-const REVIEW_STATUS_COLOR: Record<string, string> = {
-  submitted: '#0969da',
-  under_review: '#0969da',
-  changes_requested: '#d97706',
-  approved: '#22863a',
-  rejected: '#C0392B',
-};
-
-const REVIEW_STATUS_LABEL: Record<string, string> = {
-  submitted: 'Submitted',
-  under_review: 'Under Review',
-  changes_requested: 'Changes Requested',
-  approved: 'Approved',
-  rejected: 'Rejected',
-};
-
-function PendingTemplateReviewSection() {
+function ProgramReviewQueue() {
   const navigate = useNavigate();
   const [templates, setTemplates] = useState<PendingTemplate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  // Track which template has reject expanded + their remark text
+  const [rejectOpen, setRejectOpen] = useState<Record<number, boolean>>({});
+  const [remarks, setRemarks] = useState<Record<number, string>>({});
   const [actionLoading, setActionLoading] = useState<number | null>(null);
-  const [notes, setNotes] = useState<Record<number, string>>({});
 
   const load = useCallback(() => {
     setLoading(true);
+    setError('');
     api.get('ops/pending-templates/?status=submitted&status=under_review')
       .then((res) => setTemplates(res.data?.templates ?? []))
-      .catch(() => {})
+      .catch(() => setError('Failed to load review queue.'))
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => { load(); }, [load]);
 
-  const handleAction = async (id: number, action: 'approve' | 'request_changes' | 'reject') => {
+  const doAction = async (id: number, action: 'approve' | 'reject') => {
     setActionLoading(id);
     try {
-      await api.post(`ops/pending-templates/${id}/`, { action, notes: notes[id] ?? '' });
+      await api.post(`ops/pending-templates/${id}/`, {
+        action: action === 'reject' ? 'reject' : 'approve',
+        notes: remarks[id] ?? '',
+      });
       setTemplates((prev) => prev.filter((t) => t.id !== id));
+      setRejectOpen((r) => { const n = { ...r }; delete n[id]; return n; });
     } catch {
       alert('Action failed. Please try again.');
     } finally {
@@ -158,225 +121,129 @@ function PendingTemplateReviewSection() {
     }
   };
 
-  if (loading) return null;
-  if (templates.length === 0) return null;
+  const toggleReject = (id: number) => {
+    setRejectOpen((r) => ({ ...r, [id]: !r[id] }));
+  };
+
+  if (loading) return (
+    <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--kalpx-text-muted)' }}>
+      Loading review queue…
+    </div>
+  );
+
+  if (error) return (
+    <div style={{ padding: '14px 16px', background: '#fee2e2', borderRadius: 8, color: '#991b1b', fontSize: 13 }}>
+      {error}
+    </div>
+  );
+
+  if (templates.length === 0) return (
+    <div style={{ padding: '48px 24px', textAlign: 'center', border: '1px dashed var(--kalpx-border)',
+      borderRadius: 12, color: 'var(--kalpx-text-muted)', fontSize: 14 }}>
+      No programs pending review right now.
+    </div>
+  );
 
   return (
-    <div style={{ marginBottom: 32 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--kalpx-text)', margin: 0 }}>
-          Programs Pending Review
-        </h2>
-        <span style={{
-          background: '#fee2e2', color: '#991b1b',
-          fontSize: 12, fontWeight: 700, padding: '2px 8px', borderRadius: 10,
-        }}>
-          {templates.length}
-        </span>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 12 }}>
-        {templates.map((t) => {
-          const color = REVIEW_STATUS_COLOR[t.review_status] ?? '#8B6F4E';
-          const label = REVIEW_STATUS_LABEL[t.review_status] ?? t.review_status;
-          const submittedAt = t.submitted_at
-            ? new Date(t.submitted_at).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
-            : '—';
-          return (
-            <div key={t.id} style={{
-              background: 'var(--kalpx-card-bg)',
-              border: '1px solid #FDE68A',
-              borderRadius: 10,
-              padding: '16px 18px',
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--kalpx-text)', margin: '0 0 4px',
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {t.title || 'Untitled Program'}
-                  </p>
-                  <p style={{ fontSize: 12, color: 'var(--kalpx-text-soft)', margin: '0 0 2px' }}>
-                    {t.guide_name}{t.guide_email ? ` · ${t.guide_email}` : ''} · {t.duration_days} days · {t.language}
-                  </p>
-                  <p style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', margin: 0 }}>
-                    Submitted: {submittedAt}
-                  </p>
-                </div>
-                <span style={{
-                  fontSize: 11, fontWeight: 700, color, background: `${color}18`,
-                  padding: '3px 10px', borderRadius: 12, flexShrink: 0,
-                }}>
-                  {label}
-                </span>
+    <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 14 }}>
+      {templates.map((t) => {
+        const submittedAt = t.submitted_at
+          ? new Date(t.submitted_at).toLocaleString('en-IN', {
+              day: 'numeric', month: 'short', year: 'numeric',
+              hour: '2-digit', minute: '2-digit',
+            })
+          : '—';
+        const isRejecting = !!rejectOpen[t.id];
+        const busy = actionLoading === t.id;
+
+        return (
+          <div key={t.id} style={reviewCard}>
+            {/* Top row: info */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--kalpx-text)', margin: '0 0 4px',
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {t.title || 'Untitled Program'}
+                </p>
+                <p style={{ fontSize: 12, color: 'var(--kalpx-text-soft)', margin: '0 0 2px' }}>
+                  {t.guide_name}{t.guide_email ? ` · ${t.guide_email}` : ''}
+                </p>
+                <p style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', margin: 0 }}>
+                  {t.duration_days} days · {t.language.toUpperCase()} · Submitted {submittedAt}
+                </p>
               </div>
-              {/* Notes input */}
-              <div style={{ marginTop: 12 }}>
-                <input
-                  type="text"
-                  placeholder="Review notes (optional, shown to guide)"
-                  value={notes[t.id] ?? ''}
-                  onChange={(e) => setNotes((n) => ({ ...n, [t.id]: e.target.value }))}
+              <span style={{
+                fontSize: 11, fontWeight: 700, color: '#0969da',
+                background: '#dbeafe', padding: '3px 10px', borderRadius: 12, flexShrink: 0,
+              }}>
+                IN REVIEW
+              </span>
+            </div>
+
+            {/* Action buttons */}
+            <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
+              <button
+                onClick={() => navigate(`/ops/templates/${t.id}/review`)}
+                style={outlineBtn}>
+                View Details
+              </button>
+              <button
+                disabled={busy || isRejecting}
+                onClick={() => doAction(t.id, 'approve')}
+                style={{ ...actionBtn, background: '#16a34a', opacity: (busy || isRejecting) ? 0.5 : 1 }}>
+                {busy && !isRejecting ? 'Approving…' : 'Approve'}
+              </button>
+              <button
+                disabled={busy}
+                onClick={() => toggleReject(t.id)}
+                style={{ ...actionBtn, background: isRejecting ? '#6b7280' : '#dc2626', opacity: busy ? 0.5 : 1 }}>
+                {isRejecting ? 'Cancel' : 'Reject'}
+              </button>
+            </div>
+
+            {/* Reject: inline remarks */}
+            {isRejecting && (
+              <div style={{ marginTop: 12, padding: '12px 14px', background: '#fef2f2',
+                border: '1px solid #fecaca', borderRadius: 8 }}>
+                <p style={{ fontSize: 12, fontWeight: 600, color: '#991b1b', margin: '0 0 8px' }}>
+                  Rejection remarks (required — shown to the leader):
+                </p>
+                <textarea
+                  rows={3}
+                  value={remarks[t.id] ?? ''}
+                  onChange={(e) => setRemarks((r) => ({ ...r, [t.id]: e.target.value }))}
+                  placeholder="Explain what needs to be changed or why this is being rejected…"
                   style={{
-                    width: '100%', padding: '7px 12px', border: '1px solid var(--kalpx-border)',
-                    borderRadius: 7, fontSize: 13, background: 'var(--kalpx-bg)',
-                    color: 'var(--kalpx-text)', boxSizing: 'border-box' as const,
-                    outline: 'none',
+                    width: '100%', padding: '8px 12px', border: '1px solid #fca5a5',
+                    borderRadius: 7, fontSize: 13, resize: 'vertical' as const,
+                    fontFamily: 'inherit', background: '#fff', boxSizing: 'border-box' as const,
+                    color: '#1f2937', outline: 'none',
                   }}
                 />
-              </div>
-              {/* Actions */}
-              <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
                 <button
-                  onClick={() => navigate(`/ops/templates/${t.id}/review`)}
-                  style={{ padding: '6px 14px', border: '1px solid var(--kalpx-border)', background: 'none',
-                    color: 'var(--kalpx-text-soft)', borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-                  View Details
-                </button>
-                <button
-                  disabled={actionLoading === t.id}
-                  onClick={() => handleAction(t.id, 'approve')}
-                  style={{ padding: '6px 14px', border: 'none', background: '#16a34a', color: '#fff',
-                    borderRadius: 7, fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                    opacity: actionLoading === t.id ? 0.6 : 1 }}>
-                  Approve
-                </button>
-                <button
-                  disabled={actionLoading === t.id}
-                  onClick={() => handleAction(t.id, 'request_changes')}
-                  style={{ padding: '6px 14px', border: 'none', background: '#d97706', color: '#fff',
-                    borderRadius: 7, fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                    opacity: actionLoading === t.id ? 0.6 : 1 }}>
-                  Request Changes
-                </button>
-                <button
-                  disabled={actionLoading === t.id}
-                  onClick={() => handleAction(t.id, 'reject')}
-                  style={{ padding: '6px 14px', border: 'none', background: '#dc2626', color: '#fff',
-                    borderRadius: 7, fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                    opacity: actionLoading === t.id ? 0.6 : 1 }}>
-                  Reject
+                  disabled={busy || !(remarks[t.id] ?? '').trim()}
+                  onClick={() => doAction(t.id, 'reject')}
+                  style={{ ...actionBtn, background: '#dc2626', marginTop: 8,
+                    opacity: (busy || !(remarks[t.id] ?? '').trim()) ? 0.5 : 1 }}>
+                  {busy ? 'Rejecting…' : 'Confirm Reject'}
                 </button>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
 
-// ── Campaign list ──────────────────────────────────────────────────────────────
-
-type CampaignStatus = 'draft' | 'active' | 'paused' | 'completed' | 'archived';
-type CampaignClassification = 'BREAKOUT' | 'STRONG' | 'ACCEPTABLE' | 'WEAK';
-
-interface CampaignSummary {
-  code: string;
-  leader_name: string;
-  community_name: string;
-  status: CampaignStatus;
-  metrics: {
-    joined: number;
-    d1_rate_pct: number | null;
-    d7_rate_pct: number | null;
-    support_click_rate_pct: number;
-    support_problem: boolean;
-    kill_signal: boolean;
-    classification: CampaignClassification;
-    rates_suppressed: boolean;
-  };
-}
-
-const STATUS_FILTERS = [
-  { value: '', label: 'All' },
-  { value: 'active', label: 'Active' },
-  { value: 'draft', label: 'Draft' },
-  { value: 'paused', label: 'Paused' },
-  { value: 'archived', label: 'Archived' },
-];
-
-function statusBadgeStyle(status: CampaignStatus): React.CSSProperties {
-  const base: React.CSSProperties = {
-    display: 'inline-block',
-    padding: '2px 8px',
-    borderRadius: 4,
-    fontSize: 12,
-    fontWeight: 600,
-    textTransform: 'uppercase' as const,
-    letterSpacing: 0.5,
-  };
-  switch (status) {
-    case 'active':
-      return { ...base, background: '#dcfce7', color: '#166534' };
-    case 'draft':
-      return { ...base, background: '#f3f4f6', color: '#374151' };
-    case 'paused':
-      return { ...base, background: '#fef3c7', color: '#92400e' };
-    case 'completed':
-      return { ...base, background: '#dbeafe', color: '#1e40af' };
-    case 'archived':
-      return { ...base, background: '#f3f4f6', color: '#6b7280' };
-    default:
-      return { ...base, background: '#f3f4f6', color: '#374151' };
-  }
-}
-
-function classificationBadgeStyle(classification: CampaignClassification): React.CSSProperties {
-  const base: React.CSSProperties = {
-    display: 'inline-block',
-    padding: '2px 8px',
-    borderRadius: 4,
-    fontSize: 11,
-    fontWeight: 700,
-    textTransform: 'uppercase' as const,
-    letterSpacing: 0.5,
-  };
-  switch (classification) {
-    case 'BREAKOUT':
-      return { ...base, background: '#f3e8ff', color: '#6b21a8' };
-    case 'STRONG':
-      return { ...base, background: '#dcfce7', color: '#166534' };
-    case 'ACCEPTABLE':
-      return { ...base, background: '#fef3c7', color: '#92400e' };
-    case 'WEAK':
-      return { ...base, background: '#fee2e2', color: '#991b1b' };
-    default:
-      return { ...base, background: '#f3f4f6', color: '#374151' };
-  }
-}
-
-function formatPct(val: number | null | undefined, suppressed?: boolean): string {
-  if (suppressed) return 'N/A';
-  if (val === null || val === undefined) return '—';
-  return `${val}%`;
-}
+// ── Main page ──────────────────────────────────────────────────────────────────
 
 export function ProgramAdminDashboard() {
-  const navigate = useNavigate();
   const { logout } = useAuth();
-  const [campaigns, setCampaigns] = useState<CampaignSummary[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState('');
-
-  useEffect(() => {
-    setLoading(true);
-    setError(null);
-    const params: Record<string, string> = {};
-    if (statusFilter) params.status = statusFilter;
-
-    api.get('programs/admin/campaigns/', { params })
-      .then((res) => {
-        setCampaigns(res.data?.results ?? res.data ?? []);
-      })
-      .catch((err) => {
-        setError(err?.response?.data?.detail ?? 'Failed to load campaigns.');
-      })
-      .finally(() => setLoading(false));
-  }, [statusFilter]);
 
   return (
     <AppShell>
-      {/* Portal top bar */}
+      {/* Top bar */}
       <div style={{ height: 56, borderBottom: '1px solid var(--kalpx-border)', display: 'flex',
         alignItems: 'center', justifyContent: 'space-between', padding: '0 20px',
         background: 'var(--kalpx-bg)', position: 'sticky', top: 0, zIndex: 50 }}>
@@ -387,167 +254,56 @@ export function ProgramAdminDashboard() {
           Sign out
         </button>
       </div>
-      <main style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 20px 64px' }}>
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--kalpx-text)', margin: 0 }}>
-              Program Campaigns
-            </h1>
-            <p style={{ fontSize: 14, color: 'var(--kalpx-text-soft)', marginTop: 4, marginBottom: 0 }}>
-              Admin view — aggregate metrics only
-            </p>
-          </div>
-          <Link
-            to="/programs/admin/new/"
-            style={{
-              display: 'inline-block',
-              padding: '10px 20px',
-              background: 'var(--kalpx-cta)',
-              color: 'var(--kalpx-cta-text)',
-              borderRadius: 'var(--kalpx-r-md)',
-              fontWeight: 600,
-              fontSize: 14,
-              textDecoration: 'none',
-            }}
-          >
-            + New Campaign
-          </Link>
-        </div>
 
-        {/* Invite a leader */}
+      <main style={{ maxWidth: 780, margin: '0 auto', padding: '32px 20px 80px' }}>
+        <header style={{ marginBottom: 28 }}>
+          <p style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', letterSpacing: '0.05em',
+            marginBottom: 4, fontWeight: 600 }}>
+            OPS DASHBOARD
+          </p>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--kalpx-text)', margin: 0 }}>
+            Program Review Queue
+          </h1>
+        </header>
+
         <InviteLeaderSection />
 
-        {/* Programs pending review */}
-        <PendingTemplateReviewSection />
+        <p style={{ fontSize: 11, letterSpacing: '0.05em', color: 'var(--kalpx-text-muted)',
+          marginBottom: 14, fontWeight: 600 }}>
+          PENDING APPROVAL
+        </p>
 
-        {/* Status filter */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
-          {STATUS_FILTERS.map((f) => (
-            <button
-              key={f.value}
-              onClick={() => setStatusFilter(f.value)}
-              style={{
-                padding: '6px 14px',
-                borderRadius: 20,
-                border: '1px solid',
-                borderColor: statusFilter === f.value ? 'var(--kalpx-gold)' : 'var(--kalpx-border)',
-                background: statusFilter === f.value ? 'var(--kalpx-gold)' : 'transparent',
-                color: statusFilter === f.value ? '#000' : 'var(--kalpx-text-soft)',
-                fontWeight: statusFilter === f.value ? 600 : 400,
-                fontSize: 13,
-                cursor: 'pointer',
-              }}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Content */}
-        {loading ? (
-          <div style={{ padding: 48, textAlign: 'center', color: 'var(--kalpx-text-muted)' }}>
-            Loading campaigns...
-          </div>
-        ) : error ? (
-          <div style={{ padding: 24, background: '#fee2e2', borderRadius: 8, color: '#991b1b' }}>
-            {error}
-          </div>
-        ) : campaigns.length === 0 ? (
-          <div style={{ padding: 64, textAlign: 'center', color: 'var(--kalpx-text-soft)' }}>
-            <p style={{ fontSize: 16, marginBottom: 12 }}>No campaigns yet.</p>
-            <Link
-              to="/programs/admin/new/"
-              style={{ color: 'var(--kalpx-gold)', fontWeight: 600, textDecoration: 'none' }}
-            >
-              Create your first campaign
-            </Link>
-          </div>
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-              <thead>
-                <tr style={{ background: 'var(--kalpx-card-bg)', borderBottom: '2px solid var(--kalpx-border)' }}>
-                  {['Code', 'Leader', 'Community', 'Status', 'Joined', 'D1%', 'D7%', 'Support%', 'Classification'].map((h) => (
-                    <th
-                      key={h}
-                      style={{
-                        padding: '10px 12px',
-                        textAlign: 'left',
-                        fontWeight: 600,
-                        color: 'var(--kalpx-text-soft)',
-                        fontSize: 12,
-                        textTransform: 'uppercase',
-                        letterSpacing: 0.5,
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {campaigns.map((c) => (
-                  <tr
-                    key={c.code}
-                    onClick={() => navigate(`/programs/admin/${c.code}/`)}
-                    style={{
-                      borderBottom: '1px solid var(--kalpx-border)',
-                      cursor: 'pointer',
-                      background: c.metrics?.kill_signal ? '#fffbeb' : 'transparent',
-                      transition: 'background 0.15s',
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLTableRowElement).style.background = c.metrics?.kill_signal ? '#fef3c7' : 'var(--kalpx-chip-bg)';
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLTableRowElement).style.background = c.metrics?.kill_signal ? '#fffbeb' : 'transparent';
-                    }}
-                  >
-                    <td style={{ padding: '12px 12px', fontWeight: 700, fontFamily: 'monospace', color: 'var(--kalpx-text)' }}>
-                      {c.code}
-                    </td>
-                    <td style={{ padding: '12px 12px', color: 'var(--kalpx-text)' }}>
-                      {c.leader_name}
-                    </td>
-                    <td style={{ padding: '12px 12px', color: 'var(--kalpx-text-soft)' }}>
-                      {c.community_name}
-                    </td>
-                    <td style={{ padding: '12px 12px' }}>
-                      <span style={statusBadgeStyle(c.status)}>{c.status}</span>
-                    </td>
-                    <td style={{ padding: '12px 12px', color: 'var(--kalpx-text)' }}>
-                      {c.metrics?.joined ?? '—'}
-                    </td>
-                    <td style={{ padding: '12px 12px', color: 'var(--kalpx-text)' }}>
-                      {formatPct(c.metrics?.d1_rate_pct, c.metrics?.rates_suppressed)}
-                    </td>
-                    <td style={{ padding: '12px 12px', color: 'var(--kalpx-text)' }}>
-                      {formatPct(c.metrics?.d7_rate_pct, c.metrics?.rates_suppressed)}
-                    </td>
-                    <td style={{ padding: '12px 12px' }}>
-                      <span style={{
-                        color: (c.metrics?.support_click_rate_pct ?? 0) > 10 ? '#dc2626' : 'var(--kalpx-text)',
-                        fontWeight: (c.metrics?.support_click_rate_pct ?? 0) > 10 ? 600 : 400,
-                      }}>
-                        {c.metrics?.support_click_rate_pct !== undefined ? `${c.metrics.support_click_rate_pct}%` : '—'}
-                      </span>
-                    </td>
-                    <td style={{ padding: '12px 12px' }}>
-                      {c.metrics?.classification ? (
-                        <span style={classificationBadgeStyle(c.metrics.classification)}>
-                          {c.metrics.classification}
-                        </span>
-                      ) : '—'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <ProgramReviewQueue />
       </main>
     </AppShell>
   );
 }
+
+// ── Styles ─────────────────────────────────────────────────────────────────────
+
+const sectionCard: React.CSSProperties = {
+  background: 'var(--kalpx-card-bg)', border: '1px solid var(--kalpx-border)',
+  borderRadius: 10, padding: '18px 20px', marginBottom: 28,
+};
+const inputStyle: React.CSSProperties = {
+  flex: '1 1 240px', padding: '9px 14px', border: '1px solid var(--kalpx-border)',
+  borderRadius: 8, fontSize: 14, outline: 'none',
+  background: 'var(--kalpx-bg)', color: 'var(--kalpx-text)',
+};
+const ctaBtn: React.CSSProperties = {
+  padding: '9px 20px', background: 'var(--kalpx-cta)', color: 'var(--kalpx-cta-text)',
+  border: 'none', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer',
+};
+const reviewCard: React.CSSProperties = {
+  background: 'var(--kalpx-card-bg)', border: '1px solid #FDE68A',
+  borderRadius: 10, padding: '16px 18px',
+};
+const outlineBtn: React.CSSProperties = {
+  padding: '7px 16px', border: '1px solid var(--kalpx-border)', background: 'none',
+  color: 'var(--kalpx-text-soft)', borderRadius: 7, fontSize: 13, fontWeight: 600,
+  cursor: 'pointer',
+};
+const actionBtn: React.CSSProperties = {
+  padding: '7px 16px', border: 'none', color: '#fff',
+  borderRadius: 7, fontSize: 13, fontWeight: 700, cursor: 'pointer',
+};

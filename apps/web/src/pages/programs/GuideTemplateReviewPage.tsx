@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import {
   fetchMyTemplate,
   GuideTemplate,
@@ -9,6 +9,7 @@ import {
   LibraryPractice,
   LibraryWisdom,
 } from "../../engine/liveSessionApi";
+import { api } from "../../lib/api";
 
 const STATUS_LABEL: Record<string, string> = {
   draft: "Draft",
@@ -30,7 +31,9 @@ const STATUS_COLOR: Record<string, string> = {
 export function GuideTemplateReviewPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const templateId = parseInt(id ?? "0", 10);
+  const isOpsView = location.pathname.startsWith("/ops/");
 
   const [template, setTemplate] = useState<GuideTemplate | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,11 +41,14 @@ export function GuideTemplateReviewPage() {
 
   useEffect(() => {
     if (!templateId) return;
-    fetchMyTemplate(templateId)
+    const fetch = isOpsView
+      ? api.get(`ops/pending-templates/${templateId}/`).then((r) => r.data)
+      : fetchMyTemplate(templateId);
+    fetch
       .then(setTemplate)
       .catch(() => setError("Could not load program."))
       .finally(() => setLoading(false));
-  }, [templateId]);
+  }, [templateId, isOpsView]);
 
   if (loading) return <p style={hint}>Loading…</p>;
   if (error) return <p style={{ color: "#C0392B", padding: 24 }}>{error}</p>;
@@ -55,7 +61,9 @@ export function GuideTemplateReviewPage() {
   return (
     <div style={page}>
       <div style={inner}>
-        <button onClick={() => navigate("/guide/dashboard")} style={backBtn}>← Back to Dashboard</button>
+        <button onClick={() => navigate(isOpsView ? "/programs/admin/" : "/guide/dashboard")} style={backBtn}>
+          ← {isOpsView ? "Back to Review Queue" : "Back to Dashboard"}
+        </button>
 
         <div style={headerRow}>
           <div>

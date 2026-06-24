@@ -85,6 +85,7 @@ import { GuideProgramDraftPage } from "./pages/programs/GuideProgramDraftPage";
 import { GuideSessionDraftPage } from "./pages/programs/GuideSessionDraftPage";
 import { GuideTemplateBrowserPage } from "./pages/programs/GuideTemplateBrowserPage";
 import { GuideTemplateDayEditorPage } from "./pages/programs/GuideTemplateDayEditorPage";
+import { GuideTemplateReviewPage } from "./pages/programs/GuideTemplateReviewPage";
 import { RequiresStaff } from "./components/RequiresStaff";
 import { ProgramAdminDashboard } from "./pages/programs/ProgramAdminDashboard";
 import { ProgramAdminCreateCampaign } from "./pages/programs/ProgramAdminCreateCampaign";
@@ -402,6 +403,9 @@ export function AppRoutes() {
       <Route path="/guide/sessions/draft" element={<RequiresAuth><GuideSessionDraftPage /></RequiresAuth>} />
       <Route path="/guide/templates" element={<RequiresAuth><GuideTemplateBrowserPage /></RequiresAuth>} />
       <Route path="/guide/templates/:id/edit" element={<RequiresAuth><GuideTemplateDayEditorPage /></RequiresAuth>} />
+      <Route path="/guide/templates/:id/review" element={<RequiresAuth><GuideTemplateReviewPage /></RequiresAuth>} />
+      {/* Ops template review — same page, ops fetches via admin endpoint */}
+      <Route path="/ops/templates/:id/review" element={<RequiresStaff><GuideTemplateReviewPage /></RequiresStaff>} />
 
       {/* Practice Distribution OS — Gate 7 (staff-only admin) */}
       <Route

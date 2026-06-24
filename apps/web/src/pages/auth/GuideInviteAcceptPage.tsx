@@ -8,7 +8,7 @@ import "./Auth.css";
 
 interface InviteInfo {
   email: string;
-  is_valid: boolean;
+  expires_at: string;
 }
 
 interface AcceptResponse {
@@ -36,14 +36,19 @@ export function GuideInviteAcceptPage() {
     if (!token) { setInviteError("Invalid invite link."); setLoadingInvite(false); return; }
     api.get<InviteInfo>(`guide/invite/${token}/`)
       .then((res) => {
-        if (!res.data.is_valid) {
+        if (!res.data.email) {
           setInviteError("This invite link has expired or already been used.");
         } else {
           setInviteInfo(res.data);
         }
       })
-      .catch(() => {
-        setInviteError("This invite link is invalid or has expired.");
+      .catch((err) => {
+        const status = err?.response?.status;
+        if (status === 410) {
+          setInviteError("This invite link has expired or already been used.");
+        } else {
+          setInviteError("This invite link is invalid or has expired.");
+        }
       })
       .finally(() => setLoadingInvite(false));
   }, [token]);

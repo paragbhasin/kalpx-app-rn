@@ -2,9 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AppShell } from '../../components/ui/AppShell';
 import { useAuth } from '../../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
+import { api } from '../../lib/api';
 import {
   fetchGuideDashboard,
   type GuideDashboard,
+  type GuideDashboardTemplate,
   type GuideProgram,
   type GuideSession,
 } from '../../engine/liveSessionApi';
@@ -102,9 +105,107 @@ function SessionRow({ session }: { session: GuideSession }) {
   );
 }
 
+const STATUS_COLOR: Record<string, string> = {
+  draft: '#8B6F4E',
+  submitted: '#0969da',
+  under_review: '#0969da',
+  changes_requested: '#d97706',
+  approved: '#22863a',
+  rejected: '#C0392B',
+  active: '#22863a',
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  draft: 'Draft',
+  submitted: 'In Review',
+  under_review: 'Under Review',
+  changes_requested: 'Changes Requested',
+  approved: 'Approved',
+  rejected: 'Rejected',
+  active: 'Active',
+};
+
+function TemplateRow({ tmpl, onEdit, onView, onLaunched }: {
+  tmpl: GuideDashboardTemplate;
+  onEdit: (id: number) => void;
+  onView: (id: number) => void;
+  onLaunched: (joinUrl: string, code: string) => void;
+}) {
+  const color = STATUS_COLOR[tmpl.review_status] ?? '#8B6F4E';
+  const label = STATUS_LABEL[tmpl.review_status] ?? tmpl.review_status;
+  const [launching, setLaunching] = React.useState(false);
+  const [launchError, setLaunchError] = React.useState('');
+
+  const withinGrace = (() => {
+    if (!tmpl.submitted_at) return false;
+    const diffMs = Date.now() - new Date(tmpl.submitted_at).getTime();
+    return diffMs < 60 * 60 * 1000;
+  })();
+
+  const handleLaunch = async () => {
+    setLaunching(true);
+    setLaunchError('');
+    try {
+      const res = await api.post<{ code: string; join_url: string }>(`guide/my-templates/${tmpl.id}/launch/`);
+      onLaunched(res.data.join_url, res.data.code);
+    } catch (err: any) {
+      setLaunchError(err?.response?.data?.detail || 'Launch failed. Please try again.');
+    } finally {
+      setLaunching(false);
+    }
+  };
+
+  return (
+    <div style={{ padding: '14px 16px', background: 'var(--kalpx-surface)',
+      border: '1px solid var(--kalpx-border)', borderRadius: 10, gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--kalpx-text)', margin: '0 0 4px',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {tmpl.title || 'Untitled Program'}
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color, textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>
+              {label}
+            </span>
+            <span style={{ fontSize: 11, color: 'var(--kalpx-text-muted)' }}>· {tmpl.duration_days} days</span>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+          {withinGrace && (
+            <button onClick={() => onEdit(tmpl.id)}
+              style={{ padding: '6px 14px', border: '1px solid var(--kalpx-gold)', background: 'none',
+                color: 'var(--kalpx-gold)', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+              Edit
+            </button>
+          )}
+          {tmpl.review_status === 'approved' && (
+            <button onClick={handleLaunch} disabled={launching}
+              style={{ padding: '6px 18px', background: 'var(--kalpx-gold)', border: 'none',
+                color: '#fff', borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: launching ? 'default' : 'pointer',
+                opacity: launching ? 0.7 : 1 }}>
+              {launching ? 'Launching…' : '🚀 Launch'}
+            </button>
+          )}
+          <button onClick={() => onView(tmpl.id)}
+            style={{ padding: '6px 14px', border: '1px solid var(--kalpx-border)', background: 'none',
+              color: 'var(--kalpx-text-muted)', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+            View Details
+          </button>
+        </div>
+      </div>
+      {launchError && (
+        <p style={{ fontSize: 12, color: '#C0392B', margin: '8px 0 0' }}>{launchError}</p>
+      )}
+    </div>
+  );
+}
+
 export function GuideDashboardPage() {
   const { logout } = useAuth();
+  const navigate = useNavigate();
   const [state, setState] = useState<LoadState>({ kind: 'loading' });
+  const [launchResult, setLaunchResult] = useState<{ joinUrl: string; code: string } | null>(null);
 
   useEffect(() => {
     document.title = 'Guide Dashboard — KalpX';
@@ -204,12 +305,56 @@ export function GuideDashboardPage() {
                 </Link>
               </div>
 
-              {/* Programs */}
+              {/* My Programs in review pipeline (submitted / under_review / approved / changes_requested) */}
+              {(() => {
+                const pipeline = (data.my_templates ?? []).filter(t =>
+                  ['submitted', 'under_review', 'approved', 'changes_requested'].includes(t.review_status)
+                );
+                if (!pipeline.length) return null;
+                return (
+                  <section style={{ marginBottom: 32 }}>
+                    <p style={{ fontSize: 11, letterSpacing: '0.05em', color: 'var(--kalpx-text-muted)',
+                      marginBottom: 12, fontWeight: 600 }}>
+                      MY PROGRAMS
+                    </p>
+                    {launchResult && (
+                      <div style={{ marginBottom: 12, padding: '14px 16px', background: '#f0fdf4',
+                        border: '1px solid #86efac', borderRadius: 10 }}>
+                        <p style={{ fontSize: 13, fontWeight: 700, color: '#166534', margin: '0 0 6px' }}>
+                          Program launched! Share this link with your community:
+                        </p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                          <a href={launchResult.joinUrl} target="_blank" rel="noreferrer"
+                            style={{ fontSize: 13, color: '#1d4ed8', wordBreak: 'break-all' }}>
+                            {launchResult.joinUrl}
+                          </a>
+                          <button
+                            onClick={() => navigator.clipboard.writeText(launchResult.joinUrl)}
+                            style={{ padding: '4px 12px', background: 'var(--kalpx-gold)', border: 'none',
+                              color: '#fff', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}>
+                            Copy link
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {pipeline.map(t => (
+                        <TemplateRow key={t.id} tmpl={t}
+                          onEdit={(id) => navigate(`/guide/templates/${id}/edit`)}
+                          onView={(id) => navigate(`/guide/templates/${id}/review`)}
+                          onLaunched={(joinUrl, code) => setLaunchResult({ joinUrl, code })} />
+                      ))}
+                    </div>
+                  </section>
+                );
+              })()}
+
+              {/* Live Programs (campaigns) */}
               {data.programs.length > 0 && (
                 <section style={{ marginBottom: 32 }}>
                   <p style={{ fontSize: 11, letterSpacing: '0.05em', color: 'var(--kalpx-text-muted)',
                     marginBottom: 12, fontWeight: 600 }}>
-                    YOUR PROGRAMS
+                    LIVE PROGRAMS
                   </p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {data.programs.map(p => <ProgramRow key={p.code} program={p} />)}
@@ -230,7 +375,8 @@ export function GuideDashboardPage() {
                 </section>
               )}
 
-              {data.programs.length === 0 && data.upcoming_sessions.length === 0 && (
+              {data.programs.length === 0 && data.upcoming_sessions.length === 0 &&
+               (data.my_templates ?? []).filter(t => ['submitted','under_review','approved','changes_requested'].includes(t.review_status)).length === 0 && (
                 <div style={{ textAlign: 'center', padding: '40px 0',
                   border: '1px dashed var(--kalpx-border)', borderRadius: 12 }}>
                   <p style={{ color: 'var(--kalpx-text-muted)', fontSize: 14, marginBottom: 12 }}>

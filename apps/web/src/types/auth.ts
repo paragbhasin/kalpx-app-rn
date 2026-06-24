@@ -16,6 +16,7 @@ export type LoginResponse = {
   access?: string;
   refresh?: string;
   role?: string;
+  user_type?: "ops" | "guide" | "user";
   user?: {
     id: number;
     email: string;

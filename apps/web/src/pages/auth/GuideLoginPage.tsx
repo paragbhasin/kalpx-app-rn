@@ -39,15 +39,11 @@ export function GuideLoginPage() {
 
       await storeTokens(webStorage, { accessToken, refreshToken });
 
-      // Verify this user has a verified GuideProfile
-      try {
-        await api.get("guide/dashboard/");
-      } catch (verifyErr: any) {
-        if (verifyErr?.response?.status === 403) {
-          setError("Access denied. This portal is for verified leaders only.");
-          setLoading(false);
-          return;
-        }
+      // Use user_type from login response — avoids feature-flag dependency
+      if (data.user_type !== "guide") {
+        setError("Access denied. This portal is for verified leaders only.");
+        setLoading(false);
+        return;
       }
 
       localStorage.setItem("kalpx:guide_session", "1");

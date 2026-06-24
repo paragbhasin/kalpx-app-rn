@@ -16,6 +16,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Linking,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -29,10 +30,24 @@ import {
   postProgramActivity,
   type ProgramDayContent,
   type ProgramDayItem,
+  type WisdomCard,
 } from "../../engine/programApi";
 import { Fonts } from "../../theme/fonts";
 
 const SUPPORT_URL = "https://kalpx.com/programs/support";
+
+/** Returns a short human-readable title for the card. */
+function getCardTitle(item: ProgramDayItem): string {
+  if (item.item_type === "mantra") {
+    // item_id like "mantra.durga_suktam" → "Durga Suktam"
+    const base = item.item_id.replace(/^mantra\./, "");
+    return base.split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+  }
+  if (item.item_type === "sankalp" && item.line) {
+    return item.line;
+  }
+  return item.title;
+}
 
 function ItemCard({
   item,
@@ -50,14 +65,11 @@ function ItemCard({
       activeOpacity={0.82}
       onPress={onPress}
       style={[styles.itemCard, done && styles.itemCardDone]}
-      accessibilityLabel={`${label}: ${item.title}${done ? " (done)" : ""}`}
+      accessibilityLabel={`${label}: ${getCardTitle(item)}${done ? " (done)" : ""}`}
     >
       <View style={styles.itemCardLeft}>
         <Text style={styles.itemLabel}>{label}</Text>
-        <Text style={styles.itemTitle}>{item.title}</Text>
-        {item.devanagari ? (
-          <Text style={styles.itemDevanagari}>{item.devanagari}</Text>
-        ) : null}
+        <Text style={styles.itemTitle}>{getCardTitle(item)}</Text>
       </View>
       <View style={styles.itemCardRight}>
         {done ? (
@@ -230,6 +242,38 @@ export default function ProgramDayScreen() {
           ))}
         </View>
 
+        {/* Wisdom card */}
+        {dayContent.wisdom_card ? (
+          <View style={styles.wisdomCard}>
+            <Text style={styles.wisdomLabel}>WISDOM</Text>
+            <Text style={styles.wisdomText}>{dayContent.wisdom_card.text}</Text>
+            {dayContent.wisdom_card.source_title ? (
+              <Text style={styles.wisdomSource}>— {dayContent.wisdom_card.source_title}</Text>
+            ) : null}
+          </View>
+        ) : null}
+
+        {/* Live session */}
+        {dayContent.day_join_url ? (
+          <TouchableOpacity
+            style={styles.liveSessionCard}
+            onPress={() => Linking.openURL(dayContent.day_join_url!)}
+            activeOpacity={0.82}
+            accessibilityLabel="Join live session"
+          >
+            <View style={styles.liveSessionLeft}>
+              <Text style={styles.liveSessionLabel}>LIVE SESSION</Text>
+              {dayContent.day_session_time ? (
+                <Text style={styles.liveSessionTime}>
+                  {dayContent.day_session_time}
+                  {dayContent.day_session_timezone ? ` ${dayContent.day_session_timezone}` : ''}
+                </Text>
+              ) : null}
+              <Text style={styles.liveSessionLink}>Tap to join →</Text>
+            </View>
+          </TouchableOpacity>
+        ) : null}
+
         {/* Reflection prompt */}
         {dayContent.reflection_prompt ? (
           <View style={styles.reflectionCard}>
@@ -349,6 +393,61 @@ const styles = StyleSheet.create({
   doneCheckmark: { fontSize: 22, color: "#C99317", fontWeight: "700" },
   itemArrow: { fontSize: 22, color: "#C99317" },
 
+  wisdomCard: {
+    backgroundColor: '#FFF8EE',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E8D9B5',
+    padding: 16,
+    marginBottom: 12,
+  },
+  wisdomLabel: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 10,
+    color: '#9A7548',
+    letterSpacing: 0.06,
+    marginBottom: 8,
+  },
+  wisdomText: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 15,
+    color: '#432104',
+    lineHeight: 22,
+    fontStyle: 'italic',
+  },
+  wisdomSource: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 12,
+    color: '#9A7548',
+    marginTop: 8,
+  },
+  liveSessionCard: {
+    backgroundColor: '#FFF3DC',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#C99317',
+    padding: 16,
+    marginBottom: 12,
+  },
+  liveSessionLeft: { flex: 1 },
+  liveSessionLabel: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 10,
+    color: '#9A7548',
+    letterSpacing: 0.06,
+    marginBottom: 6,
+  },
+  liveSessionTime: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 16,
+    color: '#432104',
+    marginBottom: 4,
+  },
+  liveSessionLink: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 13,
+    color: '#C99317',
+  },
   reflectionCard: {
     backgroundColor: "#FFF8EE",
     borderRadius: 12,

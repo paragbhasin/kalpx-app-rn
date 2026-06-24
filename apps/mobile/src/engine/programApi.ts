@@ -11,6 +11,7 @@ export interface ProgramDayItem {
   item_id: string;
   item_type: "mantra" | "sankalp" | "practice";
   title: string;
+  line?: string;       // sankalp: the actual vow text; use this on cards
   devanagari?: string;
   iast?: string;
   description?: string;
@@ -25,6 +26,12 @@ export interface ActiveProgramSummary {
   show_day8_transition?: boolean;
 }
 
+export interface WisdomCard {
+  item_id: string | null;
+  text: string;
+  source_title: string | null;
+}
+
 export interface ProgramDayContent {
   day_number: number;
   theme: string;
@@ -34,6 +41,10 @@ export interface ProgramDayContent {
   practice: ProgramDayItem | null;
   sankalp: ProgramDayItem | null;
   is_completed: boolean;
+  wisdom_card: WisdomCard | null;
+  day_join_url: string | null;
+  day_session_time: string | null;
+  day_session_timezone: string | null;
 }
 
 export interface ProgramClaimConflict {
@@ -53,6 +64,7 @@ export async function fetchActiveProgram(): Promise<ActiveProgramSummary | null>
 
 export async function fetchProgramDay(dayNumber: number): Promise<ProgramDayContent> {
   const res = await api.get(`programs/my-active/day/${dayNumber}/`);
+  console.log('[ProgramDay] API response:', JSON.stringify(res.data, null, 2));
   return res.data;
 }
 

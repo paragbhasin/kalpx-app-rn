@@ -71,9 +71,9 @@ function InviteLeaderSection() {
   );
 }
 
-// ── Program Review Queue ───────────────────────────────────────────────────────
+// ── Program Review Queue with tabs ─────────────────────────────────────────────
 
-interface PendingTemplate {
+interface ReviewTemplate {
   id: number;
   title: string;
   duration_days: number;
@@ -84,12 +84,32 @@ interface PendingTemplate {
   guide_email: string;
 }
 
+const TAB_STATUSES: Record<string, string[]> = {
+  pending:  ['submitted', 'under_review'],
+  approved: ['approved'],
+  rejected: ['rejected', 'changes_requested'],
+};
+
+const TAB_LABELS: Record<string, string> = {
+  pending:  'Pending',
+  approved: 'Approved',
+  rejected: 'Rejected',
+};
+
+const STATUS_BADGE: Record<string, { color: string; bg: string; label: string }> = {
+  submitted:          { color: '#0969da', bg: '#dbeafe',  label: 'In Review' },
+  under_review:       { color: '#0969da', bg: '#dbeafe',  label: 'Under Review' },
+  approved:           { color: '#16a34a', bg: '#dcfce7',  label: 'Approved' },
+  rejected:           { color: '#dc2626', bg: '#fee2e2',  label: 'Rejected' },
+  changes_requested:  { color: '#d97706', bg: '#fef3c7',  label: 'Changes Requested' },
+};
+
 function ProgramReviewQueue() {
   const navigate = useNavigate();
-  const [templates, setTemplates] = useState<PendingTemplate[]>([]);
+  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected'>('pending');
+  const [allTemplates, setAllTemplates] = useState<ReviewTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  // Track which template has reject expanded + their remark text
   const [rejectOpen, setRejectOpen] = useState<Record<number, boolean>>({});
   const [remarks, setRemarks] = useState<Record<number, string>>({});
   const [actionLoading, setActionLoading] = useState<number | null>(null);
@@ -97,22 +117,22 @@ function ProgramReviewQueue() {
   const load = useCallback(() => {
     setLoading(true);
     setError('');
-    api.get('ops/pending-templates/?status=submitted&status=under_review')
-      .then((res) => setTemplates(res.data?.templates ?? []))
-      .catch(() => setError('Failed to load review queue.'))
+    // Fetch all non-draft templates in one call
+    api.get('ops/pending-templates/?status=submitted&status=under_review&status=approved&status=rejected&status=changes_requested')
+      .then((res) => setAllTemplates(res.data?.templates ?? []))
+      .catch(() => setError('Failed to load programs.'))
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => { load(); }, [load]);
 
-  const doAction = async (id: number, action: 'approve' | 'reject') => {
+  const doAction = async (id: number, action: 'approve' | 'request_changes' | 'reject') => {
     setActionLoading(id);
     try {
-      await api.post(`ops/pending-templates/${id}/`, {
-        action: action === 'reject' ? 'reject' : 'approve',
-        notes: remarks[id] ?? '',
-      });
-      setTemplates((prev) => prev.filter((t) => t.id !== id));
+      await api.post(`ops/pending-templates/${id}/`, { action, notes: remarks[id] ?? '' });
+      // Refresh full list so tabs stay accurate
+      const res = await api.get('ops/pending-templates/?status=submitted&status=under_review&status=approved&status=rejected&status=changes_requested');
+      setAllTemplates(res.data?.templates ?? []);
       setRejectOpen((r) => { const n = { ...r }; delete n[id]; return n; });
     } catch {
       alert('Action failed. Please try again.');
@@ -121,118 +141,172 @@ function ProgramReviewQueue() {
     }
   };
 
-  const toggleReject = (id: number) => {
-    setRejectOpen((r) => ({ ...r, [id]: !r[id] }));
-  };
-
-  if (loading) return (
-    <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--kalpx-text-muted)' }}>
-      Loading review queue…
-    </div>
+  const visibleTemplates = allTemplates.filter((t) =>
+    TAB_STATUSES[activeTab].includes(t.review_status)
   );
 
-  if (error) return (
-    <div style={{ padding: '14px 16px', background: '#fee2e2', borderRadius: 8, color: '#991b1b', fontSize: 13 }}>
-      {error}
-    </div>
-  );
-
-  if (templates.length === 0) return (
-    <div style={{ padding: '48px 24px', textAlign: 'center', border: '1px dashed var(--kalpx-border)',
-      borderRadius: 12, color: 'var(--kalpx-text-muted)', fontSize: 14 }}>
-      No programs pending review right now.
-    </div>
-  );
+  const countFor = (tab: string) =>
+    allTemplates.filter((t) => TAB_STATUSES[tab].includes(t.review_status)).length;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 14 }}>
-      {templates.map((t) => {
-        const submittedAt = t.submitted_at
-          ? new Date(t.submitted_at).toLocaleString('en-IN', {
-              day: 'numeric', month: 'short', year: 'numeric',
-              hour: '2-digit', minute: '2-digit',
-            })
-          : '—';
-        const isRejecting = !!rejectOpen[t.id];
-        const busy = actionLoading === t.id;
+    <>
+      {/* Tab bar */}
+      <div style={{ display: 'flex', gap: 4, marginBottom: 20, borderBottom: '2px solid var(--kalpx-border)' }}>
+        {(['pending', 'approved', 'rejected'] as const).map((tab) => {
+          const count = countFor(tab);
+          const isActive = activeTab === tab;
+          return (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              style={{
+                padding: '8px 16px',
+                background: 'none',
+                border: 'none',
+                borderBottom: isActive ? '2px solid #C99317' : '2px solid transparent',
+                marginBottom: -2,
+                cursor: 'pointer',
+                fontSize: 13,
+                fontWeight: isActive ? 700 : 500,
+                color: isActive ? '#C99317' : 'var(--kalpx-text-muted)',
+                display: 'flex', alignItems: 'center', gap: 6,
+              }}
+            >
+              {TAB_LABELS[tab]}
+              {count > 0 && (
+                <span style={{
+                  fontSize: 11, fontWeight: 700,
+                  background: tab === 'pending' ? '#fee2e2' : tab === 'approved' ? '#dcfce7' : '#f3f4f6',
+                  color: tab === 'pending' ? '#991b1b' : tab === 'approved' ? '#166534' : '#6b7280',
+                  padding: '1px 6px', borderRadius: 10,
+                }}>
+                  {count}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
 
-        return (
-          <div key={t.id} style={reviewCard}>
-            {/* Top row: info */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--kalpx-text)', margin: '0 0 4px',
-                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {t.title || 'Untitled Program'}
-                </p>
-                <p style={{ fontSize: 12, color: 'var(--kalpx-text-soft)', margin: '0 0 2px' }}>
-                  {t.guide_name}{t.guide_email ? ` · ${t.guide_email}` : ''}
-                </p>
-                <p style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', margin: 0 }}>
-                  {t.duration_days} days · {t.language.toUpperCase()} · Submitted {submittedAt}
-                </p>
-              </div>
-              <span style={{
-                fontSize: 11, fontWeight: 700, color: '#0969da',
-                background: '#dbeafe', padding: '3px 10px', borderRadius: 12, flexShrink: 0,
+      {/* Content */}
+      {loading ? (
+        <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--kalpx-text-muted)' }}>
+          Loading…
+        </div>
+      ) : error ? (
+        <div style={{ padding: '14px 16px', background: '#fee2e2', borderRadius: 8, color: '#991b1b', fontSize: 13 }}>
+          {error}
+        </div>
+      ) : visibleTemplates.length === 0 ? (
+        <div style={{ padding: '48px 24px', textAlign: 'center', border: '1px dashed var(--kalpx-border)',
+          borderRadius: 12, color: 'var(--kalpx-text-muted)', fontSize: 14 }}>
+          No {TAB_LABELS[activeTab].toLowerCase()} programs.
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 14 }}>
+          {visibleTemplates.map((t) => {
+            const badge = STATUS_BADGE[t.review_status] ?? { color: '#8B6F4E', bg: '#f5f0e8', label: t.review_status };
+            const submittedAt = t.submitted_at
+              ? new Date(t.submitted_at).toLocaleString('en-IN', {
+                  day: 'numeric', month: 'short', year: 'numeric',
+                  hour: '2-digit', minute: '2-digit',
+                })
+              : '—';
+            const isRejecting = !!rejectOpen[t.id];
+            const busy = actionLoading === t.id;
+
+            return (
+              <div key={t.id} style={{
+                ...reviewCard,
+                borderColor: activeTab === 'approved' ? '#bbf7d0' : activeTab === 'rejected' ? '#fecaca' : '#FDE68A',
               }}>
-                IN REVIEW
-              </span>
-            </div>
+                {/* Info row */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--kalpx-text)', margin: '0 0 4px',
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {t.title || 'Untitled Program'}
+                    </p>
+                    <p style={{ fontSize: 12, color: 'var(--kalpx-text-soft)', margin: '0 0 2px' }}>
+                      {t.guide_name}{t.guide_email ? ` · ${t.guide_email}` : ''}
+                    </p>
+                    <p style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', margin: 0 }}>
+                      {t.duration_days} days · {t.language.toUpperCase()} · Submitted {submittedAt}
+                    </p>
+                  </div>
+                  <span style={{
+                    fontSize: 11, fontWeight: 700, color: badge.color,
+                    background: badge.bg, padding: '3px 10px', borderRadius: 12, flexShrink: 0,
+                  }}>
+                    {badge.label.toUpperCase()}
+                  </span>
+                </div>
 
-            {/* Action buttons */}
-            <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
-              <button
-                onClick={() => navigate(`/ops/templates/${t.id}/review`)}
-                style={outlineBtn}>
-                View Details
-              </button>
-              <button
-                disabled={busy || isRejecting}
-                onClick={() => doAction(t.id, 'approve')}
-                style={{ ...actionBtn, background: '#16a34a', opacity: (busy || isRejecting) ? 0.5 : 1 }}>
-                {busy && !isRejecting ? 'Approving…' : 'Approve'}
-              </button>
-              <button
-                disabled={busy}
-                onClick={() => toggleReject(t.id)}
-                style={{ ...actionBtn, background: isRejecting ? '#6b7280' : '#dc2626', opacity: busy ? 0.5 : 1 }}>
-                {isRejecting ? 'Cancel' : 'Reject'}
-              </button>
-            </div>
+                {/* Actions */}
+                <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
+                  <button onClick={() => navigate(`/ops/templates/${t.id}/review`)} style={outlineBtn}>
+                    View Details
+                  </button>
+                  {activeTab === 'pending' && (
+                    <>
+                      <button
+                        disabled={busy || isRejecting}
+                        onClick={() => doAction(t.id, 'approve')}
+                        style={{ ...actionBtn, background: '#16a34a', opacity: (busy || isRejecting) ? 0.5 : 1 }}>
+                        {busy && !isRejecting ? 'Approving…' : 'Approve'}
+                      </button>
+                      <button
+                        disabled={busy}
+                        onClick={() => setRejectOpen((r) => ({ ...r, [t.id]: !r[t.id] }))}
+                        style={{ ...actionBtn, background: isRejecting ? '#6b7280' : '#dc2626', opacity: busy ? 0.5 : 1 }}>
+                        {isRejecting ? 'Cancel' : 'Reject'}
+                      </button>
+                    </>
+                  )}
+                  {activeTab === 'approved' && (
+                    <button
+                      disabled={busy}
+                      onClick={() => doAction(t.id, 'request_changes')}
+                      style={{ ...actionBtn, background: '#d97706', opacity: busy ? 0.5 : 1 }}>
+                      Request Changes
+                    </button>
+                  )}
+                </div>
 
-            {/* Reject: inline remarks */}
-            {isRejecting && (
-              <div style={{ marginTop: 12, padding: '12px 14px', background: '#fef2f2',
-                border: '1px solid #fecaca', borderRadius: 8 }}>
-                <p style={{ fontSize: 12, fontWeight: 600, color: '#991b1b', margin: '0 0 8px' }}>
-                  Rejection remarks (required — shown to the leader):
-                </p>
-                <textarea
-                  rows={3}
-                  value={remarks[t.id] ?? ''}
-                  onChange={(e) => setRemarks((r) => ({ ...r, [t.id]: e.target.value }))}
-                  placeholder="Explain what needs to be changed or why this is being rejected…"
-                  style={{
-                    width: '100%', padding: '8px 12px', border: '1px solid #fca5a5',
-                    borderRadius: 7, fontSize: 13, resize: 'vertical' as const,
-                    fontFamily: 'inherit', background: '#fff', boxSizing: 'border-box' as const,
-                    color: '#1f2937', outline: 'none',
-                  }}
-                />
-                <button
-                  disabled={busy || !(remarks[t.id] ?? '').trim()}
-                  onClick={() => doAction(t.id, 'reject')}
-                  style={{ ...actionBtn, background: '#dc2626', marginTop: 8,
-                    opacity: (busy || !(remarks[t.id] ?? '').trim()) ? 0.5 : 1 }}>
-                  {busy ? 'Rejecting…' : 'Confirm Reject'}
-                </button>
+                {/* Reject remarks */}
+                {isRejecting && (
+                  <div style={{ marginTop: 12, padding: '12px 14px', background: '#fef2f2',
+                    border: '1px solid #fecaca', borderRadius: 8 }}>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: '#991b1b', margin: '0 0 8px' }}>
+                      Rejection remarks (required — shown to leader):
+                    </p>
+                    <textarea
+                      rows={3}
+                      value={remarks[t.id] ?? ''}
+                      onChange={(e) => setRemarks((r) => ({ ...r, [t.id]: e.target.value }))}
+                      placeholder="Explain what needs to be changed or why this is being rejected…"
+                      style={{
+                        width: '100%', padding: '8px 12px', border: '1px solid #fca5a5',
+                        borderRadius: 7, fontSize: 13, resize: 'vertical' as const,
+                        fontFamily: 'inherit', background: '#fff', boxSizing: 'border-box' as const,
+                        color: '#1f2937', outline: 'none',
+                      }}
+                    />
+                    <button
+                      disabled={busy || !(remarks[t.id] ?? '').trim()}
+                      onClick={() => doAction(t.id, 'reject')}
+                      style={{ ...actionBtn, background: '#dc2626', marginTop: 8,
+                        opacity: (busy || !(remarks[t.id] ?? '').trim()) ? 0.5 : 1 }}>
+                      {busy ? 'Rejecting…' : 'Confirm Reject'}
+                    </button>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
+            );
+          })}
+        </div>
+      )}
+    </>
   );
 }
 
@@ -243,7 +317,6 @@ export function ProgramAdminDashboard() {
 
   return (
     <AppShell>
-      {/* Top bar */}
       <div style={{ height: 56, borderBottom: '1px solid var(--kalpx-border)', display: 'flex',
         alignItems: 'center', justifyContent: 'space-between', padding: '0 20px',
         background: 'var(--kalpx-bg)', position: 'sticky', top: 0, zIndex: 50 }}>
@@ -267,11 +340,6 @@ export function ProgramAdminDashboard() {
         </header>
 
         <InviteLeaderSection />
-
-        <p style={{ fontSize: 11, letterSpacing: '0.05em', color: 'var(--kalpx-text-muted)',
-          marginBottom: 14, fontWeight: 600 }}>
-          PENDING APPROVAL
-        </p>
 
         <ProgramReviewQueue />
       </main>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AppShell } from '../../components/ui/AppShell';
 import { api } from '../../lib/api';
+import { useAuth } from '../../hooks/useAuth';
 
 function InviteLeaderSection() {
   const [email, setEmail] = useState('');
@@ -185,6 +186,7 @@ function formatPct(val: number | null | undefined, suppressed?: boolean): string
 
 export function ProgramAdminDashboard() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [campaigns, setCampaigns] = useState<CampaignSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -219,6 +221,12 @@ export function ProgramAdminDashboard() {
               Admin view — aggregate metrics only
             </p>
           </div>
+          <button
+            onClick={logout}
+            style={{ background: 'none', border: '1px solid var(--kalpx-border)', borderRadius: 8,
+              padding: '6px 14px', fontSize: 13, color: 'var(--kalpx-text-muted)', cursor: 'pointer', marginRight: 8 }}>
+            Sign out
+          </button>
           <Link
             to="/programs/admin/new/"
             style={{

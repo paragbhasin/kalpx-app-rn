@@ -29,6 +29,9 @@ const IMMERSIVE_PREFIXES = [
 // Routes that use AuthLayout — also no shell
 const AUTH_ROUTES = ['/login', '/signup', '/forgot-password', '/reset-password', '/logout'];
 
+// Ops/guide portal routes — have their own chrome (no global header/footer/bottom-nav)
+const PORTAL_PREFIXES = ['/guide/', '/guide', '/ops-login', '/ops/', '/ops', '/programs/admin'];
+
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation();
 
@@ -37,6 +40,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     return pathname === p || pathname.startsWith(prefix);
   });
   const isAuth = AUTH_ROUTES.some((p) => pathname === p || pathname.startsWith(p + '?'));
+  const isPortal = PORTAL_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/') || pathname.startsWith(p + '?'));
   const isMitraHome = pathname === '/en' || pathname === '/en/mitra';
   const isRoomRoute = pathname.startsWith('/en/mitra/room/');
   const { shouldHideChrome } = useScrollDirection();
@@ -45,7 +49,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     if (!isRoomRoute) stopRoomAmbient();
   }, [isRoomRoute]);
 
-  if (isImmersive || isAuth || isMitraHome) {
+  if (isImmersive || isAuth || isMitraHome || isPortal) {
     return <>{children}</>;
   }
 

@@ -210,6 +210,17 @@ export function ProgramAdminDashboard() {
 
   return (
     <AppShell>
+      {/* Portal top bar */}
+      <div style={{ height: 56, borderBottom: '1px solid var(--kalpx-border)', display: 'flex',
+        alignItems: 'center', justifyContent: 'space-between', padding: '0 20px',
+        background: 'var(--kalpx-bg)', position: 'sticky', top: 0, zIndex: 50 }}>
+        <img src="/kalpx-logo.png" alt="KalpX" style={{ height: 30, width: 'auto', marginTop: 8 }} />
+        <button onClick={logout}
+          style={{ background: 'none', border: '1px solid var(--kalpx-border)', borderRadius: 8,
+            padding: '6px 14px', fontSize: 13, color: 'var(--kalpx-text-muted)', cursor: 'pointer' }}>
+          Sign out
+        </button>
+      </div>
       <main style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 20px 64px' }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
@@ -221,12 +232,6 @@ export function ProgramAdminDashboard() {
               Admin view — aggregate metrics only
             </p>
           </div>
-          <button
-            onClick={logout}
-            style={{ background: 'none', border: '1px solid var(--kalpx-border)', borderRadius: 8,
-              padding: '6px 14px', fontSize: 13, color: 'var(--kalpx-text-muted)', cursor: 'pointer', marginRight: 8 }}>
-            Sign out
-          </button>
           <Link
             to="/programs/admin/new/"
             style={{

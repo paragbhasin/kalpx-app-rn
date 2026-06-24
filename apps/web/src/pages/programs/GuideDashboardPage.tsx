@@ -125,23 +125,26 @@ export function GuideDashboardPage() {
 
   return (
     <AppShell>
+      {/* Portal top bar */}
+      <div style={{ height: 56, borderBottom: '1px solid var(--kalpx-border)', display: 'flex',
+        alignItems: 'center', justifyContent: 'space-between', padding: '0 20px',
+        background: 'var(--kalpx-bg)', position: 'sticky', top: 0, zIndex: 50 }}>
+        <img src="/kalpx-logo.png" alt="KalpX" style={{ height: 30, width: 'auto', marginTop: 8 }} />
+        <button onClick={logout}
+          style={{ background: 'none', border: '1px solid var(--kalpx-border)', borderRadius: 8,
+            padding: '6px 14px', fontSize: 13, color: 'var(--kalpx-text-muted)', cursor: 'pointer' }}>
+          Sign out
+        </button>
+      </div>
       <main style={{ maxWidth: 680, margin: '0 auto', padding: '32px 20px 80px' }}>
-        <header style={{ marginBottom: 28, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-          <div>
-            <p style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', letterSpacing: '0.05em',
-              marginBottom: 6, fontWeight: 600 }}>
-              GUIDE DASHBOARD
-            </p>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--kalpx-text)', margin: 0 }}>
-              Your Impact
-            </h1>
-          </div>
-          <button
-            onClick={logout}
-            style={{ background: 'none', border: '1px solid var(--kalpx-border)', borderRadius: 8,
-              padding: '6px 14px', fontSize: 13, color: 'var(--kalpx-text-muted)', cursor: 'pointer' }}>
-            Sign out
-          </button>
+        <header style={{ marginBottom: 28 }}>
+          <p style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', letterSpacing: '0.05em',
+            marginBottom: 6, fontWeight: 600 }}>
+            GUIDE DASHBOARD
+          </p>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--kalpx-text)', margin: 0 }}>
+            Your Impact
+          </h1>
         </header>
 
         {state.kind === 'loading' && (

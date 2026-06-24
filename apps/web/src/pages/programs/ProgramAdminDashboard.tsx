@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AppShell } from '../../components/ui/AppShell';
 import { api } from '../../lib/api';
@@ -99,6 +99,172 @@ function InviteLeaderSection() {
     </div>
   );
 }
+
+// ── Pending template review ────────────────────────────────────────────────────
+
+interface PendingTemplate {
+  id: number;
+  title: string;
+  duration_days: number;
+  language: string;
+  review_status: string;
+  submitted_at: string | null;
+  guide_name: string;
+  guide_email: string;
+}
+
+const REVIEW_STATUS_COLOR: Record<string, string> = {
+  submitted: '#0969da',
+  under_review: '#0969da',
+  changes_requested: '#d97706',
+  approved: '#22863a',
+  rejected: '#C0392B',
+};
+
+const REVIEW_STATUS_LABEL: Record<string, string> = {
+  submitted: 'Submitted',
+  under_review: 'Under Review',
+  changes_requested: 'Changes Requested',
+  approved: 'Approved',
+  rejected: 'Rejected',
+};
+
+function PendingTemplateReviewSection() {
+  const navigate = useNavigate();
+  const [templates, setTemplates] = useState<PendingTemplate[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const [notes, setNotes] = useState<Record<number, string>>({});
+
+  const load = useCallback(() => {
+    setLoading(true);
+    api.get('ops/pending-templates/?status=submitted&status=under_review')
+      .then((res) => setTemplates(res.data?.templates ?? []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleAction = async (id: number, action: 'approve' | 'request_changes' | 'reject') => {
+    setActionLoading(id);
+    try {
+      await api.post(`ops/pending-templates/${id}/`, { action, notes: notes[id] ?? '' });
+      setTemplates((prev) => prev.filter((t) => t.id !== id));
+    } catch {
+      alert('Action failed. Please try again.');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  if (loading) return null;
+  if (templates.length === 0) return null;
+
+  return (
+    <div style={{ marginBottom: 32 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+        <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--kalpx-text)', margin: 0 }}>
+          Programs Pending Review
+        </h2>
+        <span style={{
+          background: '#fee2e2', color: '#991b1b',
+          fontSize: 12, fontWeight: 700, padding: '2px 8px', borderRadius: 10,
+        }}>
+          {templates.length}
+        </span>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 12 }}>
+        {templates.map((t) => {
+          const color = REVIEW_STATUS_COLOR[t.review_status] ?? '#8B6F4E';
+          const label = REVIEW_STATUS_LABEL[t.review_status] ?? t.review_status;
+          const submittedAt = t.submitted_at
+            ? new Date(t.submitted_at).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+            : '—';
+          return (
+            <div key={t.id} style={{
+              background: 'var(--kalpx-card-bg)',
+              border: '1px solid #FDE68A',
+              borderRadius: 10,
+              padding: '16px 18px',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--kalpx-text)', margin: '0 0 4px',
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {t.title || 'Untitled Program'}
+                  </p>
+                  <p style={{ fontSize: 12, color: 'var(--kalpx-text-soft)', margin: '0 0 2px' }}>
+                    {t.guide_name}{t.guide_email ? ` · ${t.guide_email}` : ''} · {t.duration_days} days · {t.language}
+                  </p>
+                  <p style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', margin: 0 }}>
+                    Submitted: {submittedAt}
+                  </p>
+                </div>
+                <span style={{
+                  fontSize: 11, fontWeight: 700, color, background: `${color}18`,
+                  padding: '3px 10px', borderRadius: 12, flexShrink: 0,
+                }}>
+                  {label}
+                </span>
+              </div>
+              {/* Notes input */}
+              <div style={{ marginTop: 12 }}>
+                <input
+                  type="text"
+                  placeholder="Review notes (optional, shown to guide)"
+                  value={notes[t.id] ?? ''}
+                  onChange={(e) => setNotes((n) => ({ ...n, [t.id]: e.target.value }))}
+                  style={{
+                    width: '100%', padding: '7px 12px', border: '1px solid var(--kalpx-border)',
+                    borderRadius: 7, fontSize: 13, background: 'var(--kalpx-bg)',
+                    color: 'var(--kalpx-text)', boxSizing: 'border-box' as const,
+                    outline: 'none',
+                  }}
+                />
+              </div>
+              {/* Actions */}
+              <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => navigate(`/ops/templates/${t.id}/review`)}
+                  style={{ padding: '6px 14px', border: '1px solid var(--kalpx-border)', background: 'none',
+                    color: 'var(--kalpx-text-soft)', borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                  View Details
+                </button>
+                <button
+                  disabled={actionLoading === t.id}
+                  onClick={() => handleAction(t.id, 'approve')}
+                  style={{ padding: '6px 14px', border: 'none', background: '#16a34a', color: '#fff',
+                    borderRadius: 7, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                    opacity: actionLoading === t.id ? 0.6 : 1 }}>
+                  Approve
+                </button>
+                <button
+                  disabled={actionLoading === t.id}
+                  onClick={() => handleAction(t.id, 'request_changes')}
+                  style={{ padding: '6px 14px', border: 'none', background: '#d97706', color: '#fff',
+                    borderRadius: 7, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                    opacity: actionLoading === t.id ? 0.6 : 1 }}>
+                  Request Changes
+                </button>
+                <button
+                  disabled={actionLoading === t.id}
+                  onClick={() => handleAction(t.id, 'reject')}
+                  style={{ padding: '6px 14px', border: 'none', background: '#dc2626', color: '#fff',
+                    borderRadius: 7, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                    opacity: actionLoading === t.id ? 0.6 : 1 }}>
+                  Reject
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Campaign list ──────────────────────────────────────────────────────────────
 
 type CampaignStatus = 'draft' | 'active' | 'paused' | 'completed' | 'archived';
 type CampaignClassification = 'BREAKOUT' | 'STRONG' | 'ACCEPTABLE' | 'WEAK';
@@ -251,6 +417,9 @@ export function ProgramAdminDashboard() {
 
         {/* Invite a leader */}
         <InviteLeaderSection />
+
+        {/* Programs pending review */}
+        <PendingTemplateReviewSection />
 
         {/* Status filter */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>

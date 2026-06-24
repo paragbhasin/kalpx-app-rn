@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "build:dev": "tsc --noEmit && vite build --mode development",
+    "build:dev": "tsc --noEmit && VITE_API_BASE_URL=https://dev.kalpx.com/api VITE_API_IMAGE_BASE_URL=https://dev.kalpx.com vite build --mode development",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

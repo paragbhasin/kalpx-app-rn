@@ -376,3 +376,181 @@ export async function submitRerunRequest(
   );
   return res.data;
 }
+
+// ── Phase 2 — Template Builder ────────────────────────────────────────────────
+
+export interface TemplateDay {
+  day_number: number;
+  theme: string;
+  mantra_ref: string;
+  sankalp_ref: string;
+  practice_ref: string;
+  custom_mantra_title: string;
+  custom_mantra_body: string;
+  custom_sankalp_title: string;
+  custom_sankalp_body: string;
+  custom_practice_title: string;
+  custom_practice_body: string;
+  day_join_url: string;
+  reflection_prompt: string;
+  completion_message: string;
+  share_prompt: string;
+}
+
+export interface GuideTemplate {
+  id: number;
+  slug: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  duration_days: number;
+  language: string;
+  template_type: string;
+  review_status: string;
+  is_editable_by_guide: boolean;
+  locked_at: string | null;
+  audience_tags: string[];
+  program_promise: string;
+  clone_source_slug: string | null;
+  days?: TemplateDay[];
+}
+
+export interface OfficialTemplate {
+  id: number;
+  slug: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  duration_days: number;
+  language: string;
+  audience_tags: string[];
+  program_promise: string;
+  day_themes: string[];
+}
+
+export interface LibraryMantra {
+  item_id: string;
+  title: string;
+  devanagari: string;
+  meaning: string;
+  essence: string;
+  source: string;
+  deity: string;
+  category: string;
+  category_label: string;
+  level: string;
+}
+
+export interface LibrarySankalp {
+  item_id: string;
+  title: string;
+  line: string;
+  insight: string;
+  category: string;
+  category_label: string;
+}
+
+export interface LibraryPractice {
+  item_id: string;
+  title: string;
+  summary: string;
+  duration: string;
+  category: string;
+  category_label: string;
+  level: string;
+  steps: string[];
+}
+
+export interface GuideSubmission {
+  id: number;
+  content_type: string;
+  status: string;
+  submitted_at: string;
+  updated_at: string;
+  data: Record<string, unknown>;
+  reviewer_notes?: string;
+}
+
+export async function fetchOfficialTemplates(): Promise<{ templates: OfficialTemplate[]; count: number }> {
+  const res = await api.get<{ templates: OfficialTemplate[]; count: number }>('/guide/official-templates/');
+  return res.data;
+}
+
+export async function cloneOfficialTemplate(slug: string): Promise<GuideTemplate> {
+  const res = await api.post<GuideTemplate>(`/guide/official-templates/${slug}/clone/`);
+  return res.data;
+}
+
+export async function fetchMyTemplates(): Promise<{ templates: GuideTemplate[]; count: number }> {
+  const res = await api.get<{ templates: GuideTemplate[]; count: number }>('/guide/my-templates/');
+  return res.data;
+}
+
+export async function createBlankTemplate(data: {
+  title: string;
+  duration_days: number;
+  language?: string;
+}): Promise<GuideTemplate> {
+  const res = await api.post<GuideTemplate>('/guide/my-templates/', data);
+  return res.data;
+}
+
+export async function fetchMyTemplate(id: number): Promise<GuideTemplate> {
+  const res = await api.get<GuideTemplate>(`/guide/my-templates/${id}/`);
+  return res.data;
+}
+
+export async function updateMyTemplate(
+  id: number,
+  data: Partial<Pick<GuideTemplate, 'title' | 'subtitle' | 'description' | 'language' | 'audience_tags' | 'program_promise'>>,
+): Promise<GuideTemplate> {
+  const res = await api.patch<GuideTemplate>(`/guide/my-templates/${id}/`, data);
+  return res.data;
+}
+
+export async function updateTemplateDay(
+  templateId: number,
+  dayNumber: number,
+  data: Partial<TemplateDay>,
+): Promise<TemplateDay> {
+  const res = await api.patch<TemplateDay>(`/guide/my-templates/${templateId}/days/${dayNumber}/`, data);
+  return res.data;
+}
+
+export async function submitTemplateForReview(
+  id: number,
+): Promise<{ ok: boolean; review_status: string; message: string }> {
+  const res = await api.post<{ ok: boolean; review_status: string; message: string }>(
+    `/guide/my-templates/${id}/submit/`,
+  );
+  return res.data;
+}
+
+export async function fetchLibraryMantras(params?: {
+  q?: string;
+  category?: string;
+}): Promise<{ items: LibraryMantra[]; count: number }> {
+  const res = await api.get<{ items: LibraryMantra[]; count: number }>('/guide/library/mantras/', { params });
+  return res.data;
+}
+
+export async function fetchLibrarySankalps(params?: {
+  q?: string;
+  category?: string;
+}): Promise<{ items: LibrarySankalp[]; count: number }> {
+  const res = await api.get<{ items: LibrarySankalp[]; count: number }>('/guide/library/sankalps/', { params });
+  return res.data;
+}
+
+export async function fetchLibraryPractices(params?: {
+  q?: string;
+  category?: string;
+}): Promise<{ items: LibraryPractice[]; count: number }> {
+  const res = await api.get<{ items: LibraryPractice[]; count: number }>('/guide/library/practices/', { params });
+  return res.data;
+}
+
+export async function fetchMySubmissions(): Promise<{ submissions: GuideSubmission[]; count: number }> {
+  const res = await api.get<{ submissions: GuideSubmission[]; count: number }>('/guide/my-submissions/');
+  return res.data;
+}

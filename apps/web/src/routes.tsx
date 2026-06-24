@@ -83,6 +83,8 @@ import { GuidePublicProfilePage } from "./pages/programs/GuidePublicProfilePage"
 import { GuideDashboardPage } from "./pages/programs/GuideDashboardPage";
 import { GuideProgramDraftPage } from "./pages/programs/GuideProgramDraftPage";
 import { GuideSessionDraftPage } from "./pages/programs/GuideSessionDraftPage";
+import { GuideTemplateBrowserPage } from "./pages/programs/GuideTemplateBrowserPage";
+import { GuideTemplateDayEditorPage } from "./pages/programs/GuideTemplateDayEditorPage";
 import { RequiresStaff } from "./components/RequiresStaff";
 import { ProgramAdminDashboard } from "./pages/programs/ProgramAdminDashboard";
 import { ProgramAdminCreateCampaign } from "./pages/programs/ProgramAdminCreateCampaign";
@@ -398,6 +400,8 @@ export function AppRoutes() {
       <Route path="/guide/dashboard" element={<RequiresAuth><GuideDashboardPage /></RequiresAuth>} />
       <Route path="/guide/programs/draft" element={<RequiresAuth><GuideProgramDraftPage /></RequiresAuth>} />
       <Route path="/guide/sessions/draft" element={<RequiresAuth><GuideSessionDraftPage /></RequiresAuth>} />
+      <Route path="/guide/templates" element={<RequiresAuth><GuideTemplateBrowserPage /></RequiresAuth>} />
+      <Route path="/guide/templates/:id/edit" element={<RequiresAuth><GuideTemplateDayEditorPage /></RequiresAuth>} />
 
       {/* Practice Distribution OS — Gate 7 (staff-only admin) */}
       <Route

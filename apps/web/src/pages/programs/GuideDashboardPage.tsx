@@ -172,16 +172,22 @@ export function GuideDashboardPage() {
 
               {/* CTA row */}
               <div style={{ display: 'flex', gap: 10, marginBottom: 32, flexWrap: 'wrap' }}>
-                <Link to="/guide/programs/draft"
+                <Link to="/guide/templates"
                   style={{ padding: '10px 18px', background: 'var(--kalpx-gold)', color: '#fff',
                     borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
-                  + Submit Program Draft
+                  + Build a Program
                 </Link>
                 <Link to="/guide/sessions/draft"
                   style={{ padding: '10px 18px', border: '1px solid var(--kalpx-gold)',
                     color: 'var(--kalpx-gold)', borderRadius: 8, fontSize: 13, fontWeight: 600,
                     textDecoration: 'none' }}>
                   + Schedule Session
+                </Link>
+                <Link to="/guide/programs/draft"
+                  style={{ padding: '10px 18px', border: '1px solid #DDD3C0',
+                    color: '#8B6F4E', borderRadius: 8, fontSize: 13, fontWeight: 600,
+                    textDecoration: 'none' }}>
+                  Submit Free-form Draft
                 </Link>
               </div>
 

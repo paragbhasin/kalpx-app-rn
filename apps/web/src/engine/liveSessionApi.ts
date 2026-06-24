@@ -251,6 +251,17 @@ export interface GuideSession {
   reflection_count: number;
 }
 
+export interface GuideDashboardTemplate {
+  id: number;
+  slug: string;
+  title: string;
+  duration_days: number;
+  review_status: string;
+  is_editable_by_guide: boolean;
+  locked_at: string | null;
+  submitted_at: string | null;
+}
+
 export interface GuideDashboard {
   summary: {
     programs_count: number;
@@ -260,6 +271,7 @@ export interface GuideDashboard {
     testimonials_count: number;
   };
   programs: GuideProgram[];
+  my_templates: GuideDashboardTemplate[];
   upcoming_sessions: GuideSession[];
 }
 
@@ -395,9 +407,15 @@ export interface TemplateDay {
   custom_wisdom_body: string;
   day_join_url: string;
   day_session_time: string;
+  day_session_timezone: string;
   reflection_prompt: string;
   completion_message: string;
   share_prompt: string;
+  // Resolved library cards (present when fetching via GuideMyTemplateDetailView)
+  mantra_card?: LibraryMantra | null;
+  sankalp_card?: LibrarySankalp | null;
+  practice_card?: LibraryPractice | null;
+  wisdom_card?: LibraryWisdom | null;
 }
 
 export interface GuideTemplate {
@@ -435,6 +453,7 @@ export interface LibraryMantra {
   item_id: string;
   title: string;
   devanagari: string;
+  iast: string;
   meaning: string;
   essence: string;
   source: string;
@@ -449,6 +468,8 @@ export interface LibrarySankalp {
   title: string;
   line: string;
   insight: string;
+  how_to_live: string[];
+  benefits: string[];
   category: string;
   category_label: string;
 }
@@ -457,11 +478,13 @@ export interface LibraryPractice {
   item_id: string;
   title: string;
   summary: string;
+  essence: string;
   duration: string;
   category: string;
   category_label: string;
   level: string;
   steps: string[];
+  benefits: string[];
 }
 
 export interface LibraryWisdom {

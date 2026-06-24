@@ -394,6 +394,7 @@ export interface TemplateDay {
   custom_practice_body: string;
   custom_wisdom_body: string;
   day_join_url: string;
+  day_session_time: string;
   reflection_prompt: string;
   completion_message: string;
   share_prompt: string;

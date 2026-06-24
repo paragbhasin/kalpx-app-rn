@@ -173,6 +173,38 @@ export function GuideTemplateDayEditorPage() {
 
         {error && <p style={errorText}>{error}</p>}
 
+        {/* Repeat Day 1 shortcut */}
+        {!locked && days.length > 1 && (
+          <div style={repeatBanner}>
+            <span style={{ fontSize: 13, color: "#7A6652" }}>
+              Set Day 1 first, then repeat it across all days in one click.
+            </span>
+            <button
+              style={repeatBtn}
+              onClick={() => {
+                const day1 = days[0];
+                if (!day1) return;
+                const patch: Partial<TemplateDay> = {
+                  mantra_ref: day1.mantra_ref,
+                  custom_mantra_title: day1.custom_mantra_title,
+                  custom_mantra_body: day1.custom_mantra_body,
+                  sankalp_ref: day1.sankalp_ref,
+                  custom_sankalp_title: day1.custom_sankalp_title,
+                  custom_sankalp_body: day1.custom_sankalp_body,
+                  practice_ref: day1.practice_ref,
+                  custom_practice_title: day1.custom_practice_title,
+                  custom_practice_body: day1.custom_practice_body,
+                  wisdom_ref: day1.wisdom_ref,
+                  custom_wisdom_body: day1.custom_wisdom_body,
+                };
+                days.slice(1).forEach((d) => saveDay(d.day_number, patch));
+              }}
+            >
+              Repeat Day 1 for all days →
+            </button>
+          </div>
+        )}
+
         {/* Day rows */}
         <div style={dayGrid}>
           {days.map((day) => (
@@ -315,7 +347,7 @@ function DayRow({ day, locked, onOpenPicker, onApplyToAll, onBlurSave, onLocalCh
         }
       />
 
-      {/* Join URL */}
+      {/* Join URL + Time */}
       <FieldRow label="Live session link for this day (optional)">
         <input
           style={fieldInput}
@@ -325,7 +357,18 @@ function DayRow({ day, locked, onOpenPicker, onApplyToAll, onBlurSave, onLocalCh
           onBlur={() => onBlurSave({ day_join_url: day.day_join_url })}
           placeholder="https://meet.google.com/… or Zoom link"
         />
-        <span style={urlHint}>Leave blank if this day has no live session.</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6 }}>
+          <label style={timeLabel}>Session time</label>
+          <input
+            type="time"
+            style={timeInput}
+            value={day.day_session_time}
+            disabled={locked}
+            onChange={(e) => onLocalChange({ day_session_time: e.target.value })}
+            onBlur={() => onBlurSave({ day_session_time: day.day_session_time })}
+          />
+          <span style={urlHint}>Leave blank if no specific time.</span>
+        </div>
       </FieldRow>
 
       {/* Reflection prompt */}
@@ -515,3 +558,7 @@ const reviewNote: React.CSSProperties = { fontSize: 11, color: "#B5A08A", margin
 const successBox: React.CSSProperties = { background: "#fff", border: "1px solid #DDD3C0", borderRadius: 12, padding: "40px 32px", textAlign: "center" as const, maxWidth: 480, margin: "80px auto" };
 const primaryBtn: React.CSSProperties = { padding: "10px 22px", background: "#C99317", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 14 };
 const hint: React.CSSProperties = { textAlign: "center" as const, color: "#B5A08A", padding: "60px 0", fontSize: 14 };
+const repeatBanner: React.CSSProperties = { display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" as const, gap: 10, background: "#FEF9ED", border: "1px solid #E8D9A0", borderRadius: 10, padding: "12px 18px", marginBottom: 20 };
+const repeatBtn: React.CSSProperties = { padding: "8px 16px", background: "#432104", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 13, whiteSpace: "nowrap" as const };
+const timeLabel: React.CSSProperties = { fontSize: 12, color: "#7A6652", fontWeight: 600, whiteSpace: "nowrap" as const };
+const timeInput: React.CSSProperties = { padding: "6px 10px", borderRadius: 8, border: "1px solid #DDD3C0", fontSize: 13, color: "#432104" };

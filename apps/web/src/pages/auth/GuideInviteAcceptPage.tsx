@@ -74,10 +74,8 @@ export function GuideInviteAcceptPage() {
       localStorage.setItem("kalpx:guide_session", "1");
       navigate("/guide/dashboard", { replace: true });
     } catch (err: any) {
-      const msg =
-        err?.response?.data?.detail ||
-        err?.response?.data?.password?.[0] ||
-        "Something went wrong. Please try again.";
+      const data = err?.response?.data;
+      const msg = data?.detail || data?.error || data?.password?.[0] || "Something went wrong. Please try again.";
       setFormError(msg);
     } finally {
       setSubmitting(false);

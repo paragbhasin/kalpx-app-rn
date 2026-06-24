@@ -30,7 +30,7 @@ const IMMERSIVE_PREFIXES = [
 const AUTH_ROUTES = ['/login', '/signup', '/forgot-password', '/reset-password', '/logout'];
 
 // Ops/guide portal routes — have their own chrome (no global header/footer/bottom-nav)
-const PORTAL_PREFIXES = ['/guide/', '/guide', '/ops-login', '/ops/', '/ops', '/programs/admin'];
+const PORTAL_PREFIXES = ['/guide/', '/guide', '/ops-login', '/ops/', '/ops', '/programs/admin', '/join'];
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation();

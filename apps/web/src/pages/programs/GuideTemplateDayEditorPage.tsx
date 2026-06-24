@@ -10,7 +10,7 @@ import {
   TemplateDay,
   updateTemplateDay,
 } from "../../engine/liveSessionApi";
-import { GuideLibraryPickerModal, LibrarySlot } from "./GuideLibraryPickerModal";
+import { GuideLibraryPickerModal, LibrarySlot, PickerItem } from "./GuideLibraryPickerModal";
 
 interface DayState extends TemplateDay {
   saving: boolean;
@@ -30,6 +30,9 @@ export function GuideTemplateDayEditorPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [pickerTarget, setPickerTarget] = useState<PickerTarget>(null);
+  // slotSelections stores the full display data for each selected library item.
+  // Key: "${dayNumber}-${slot}" e.g. "1-mantra". Lost on page refresh (ephemeral).
+  const [slotSelections, setPickerItems] = useState<Record<string, PickerItem>>({});
 
   useEffect(() => {
     if (!templateId) return;
@@ -44,15 +47,17 @@ export function GuideTemplateDayEditorPage() {
 
   const saveDay = useCallback(
     async (dayNumber: number, patch: Partial<TemplateDay>) => {
+      // Optimistic update — apply patch immediately so UI is instant.
+      // On success we only clear `saving`; we do NOT spread the API response
+      // back onto state, because concurrent saves (e.g. theme blur + mantra pick)
+      // would overwrite each other's results with stale field values.
       setDays((prev) =>
-        prev.map((d) => (d.day_number === dayNumber ? { ...d, saving: true } : d)),
+        prev.map((d) => (d.day_number === dayNumber ? { ...d, ...patch, saving: true } : d)),
       );
       try {
-        const updated = await updateTemplateDay(templateId, dayNumber, patch);
+        await updateTemplateDay(templateId, dayNumber, patch);
         setDays((prev) =>
-          prev.map((d) =>
-            d.day_number === dayNumber ? { ...d, ...updated, saving: false } : d,
-          ),
+          prev.map((d) => (d.day_number === dayNumber ? { ...d, saving: false } : d)),
         );
       } catch {
         setDays((prev) =>
@@ -69,6 +74,10 @@ export function GuideTemplateDayEditorPage() {
     );
   }
 
+  function storePickerItem(dayNumber: number, slot: LibrarySlot, sel: PickerItem) {
+    setPickerItems((prev) => ({ ...prev, [`${dayNumber}-${slot}`]: sel }));
+  }
+
   function applyToAllDays(slot: LibrarySlot, item_id: string, title: string) {
     const patch =
       slot === "mantra"
@@ -79,11 +88,18 @@ export function GuideTemplateDayEditorPage() {
         ? { wisdom_ref: item_id, custom_wisdom_body: "" }
         : { practice_ref: item_id, custom_practice_title: "", custom_practice_body: "" };
 
-    days.forEach((d) => saveDay(d.day_number, patch));
+    days.forEach((d) => {
+      saveDay(d.day_number, patch);
+      // Propagate selection label to all days
+      setPickerItems((prev) => {
+        const src = prev[`${days[0]?.day_number}-${slot}`];
+        return src ? { ...prev, [`${d.day_number}-${slot}`]: src } : prev;
+      });
+    });
     setPickerTarget(null);
   }
 
-  function handleLibrarySelect(item: { item_id: string; title: string }) {
+  function handleLibrarySelect(item: PickerItem) {
     if (!pickerTarget) return;
     const { dayNumber, slot } = pickerTarget;
     const patch =
@@ -95,6 +111,7 @@ export function GuideTemplateDayEditorPage() {
         ? { wisdom_ref: item.item_id, custom_wisdom_body: "" }
         : { practice_ref: item.item_id, custom_practice_title: "", custom_practice_body: "" };
     saveDay(dayNumber, patch);
+    storePickerItem(dayNumber, slot, item);
     setPickerTarget(null);
   }
 
@@ -136,17 +153,6 @@ export function GuideTemplateDayEditorPage() {
 
   return (
     <div style={page}>
-      {pickerTarget && (
-        <GuideLibraryPickerModal
-          slot={pickerTarget.slot}
-          onSelect={(item) => {
-            // Show apply-to-all option inline — handled separately below
-            handleLibrarySelect(item);
-          }}
-          onClose={() => setPickerTarget(null)}
-        />
-      )}
-
       <div style={inner}>
         <button onClick={() => navigate("/guide/templates")} style={backBtn}>← Back to templates</button>
 
@@ -164,6 +170,14 @@ export function GuideTemplateDayEditorPage() {
             </button>
           )}
         </div>
+
+        {pickerTarget && (
+          <GuideLibraryPickerModal
+            slot={pickerTarget.slot}
+            onSelect={handleLibrarySelect}
+            onClose={() => setPickerTarget(null)}
+          />
+        )}
 
         {locked && (
           <div style={lockBanner}>
@@ -196,8 +210,23 @@ export function GuideTemplateDayEditorPage() {
                   custom_practice_body: day1.custom_practice_body,
                   wisdom_ref: day1.wisdom_ref,
                   custom_wisdom_body: day1.custom_wisdom_body,
+                  day_join_url: day1.day_join_url,
+                  day_session_time: day1.day_session_time,
+                  day_session_timezone: day1.day_session_timezone,
                 };
                 days.slice(1).forEach((d) => saveDay(d.day_number, patch));
+                // Copy slot selection labels/details from Day 1 to all other days
+                const slots: LibrarySlot[] = ["mantra", "sankalp", "practice", "wisdom"];
+                setPickerItems((prev) => {
+                  const next = { ...prev };
+                  slots.forEach((slot) => {
+                    const src = prev[`${day1.day_number}-${slot}`];
+                    if (src) {
+                      days.slice(1).forEach((d) => { next[`${d.day_number}-${slot}`] = src; });
+                    }
+                  });
+                  return next;
+                });
               }}
             >
               Repeat Day 1 for all days →
@@ -212,6 +241,7 @@ export function GuideTemplateDayEditorPage() {
               key={day.day_number}
               day={day}
               locked={locked}
+              slotSelections={slotSelections}
               onOpenPicker={(slot) =>
                 setPickerTarget({ dayNumber: day.day_number, slot })
               }
@@ -249,13 +279,16 @@ const STATUS_LABEL: Record<string, string> = {
 interface DayRowProps {
   day: DayState;
   locked: boolean;
+  slotSelections: Record<string, PickerItem>;
   onOpenPicker: (slot: LibrarySlot) => void;
   onApplyToAll: (slot: LibrarySlot, item_id: string, title: string) => void;
   onBlurSave: (patch: Partial<TemplateDay>) => void;
   onLocalChange: (patch: Partial<TemplateDay>) => void;
 }
 
-function DayRow({ day, locked, onOpenPicker, onApplyToAll, onBlurSave, onLocalChange }: DayRowProps) {
+function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlurSave, onLocalChange }: DayRowProps) {
+  const sel = (slot: LibrarySlot) => slotSelections[`${day.day_number}-${slot}`] ?? null;
+
   return (
     <div style={dayCard}>
       <div style={dayHeader}>
@@ -279,6 +312,7 @@ function DayRow({ day, locked, onOpenPicker, onApplyToAll, onBlurSave, onLocalCh
       <SlotRow
         label="Mantra"
         refValue={day.mantra_ref}
+        selection={sel("mantra")}
         customTitle={day.custom_mantra_title}
         customBody={day.custom_mantra_body}
         locked={locked}
@@ -297,6 +331,7 @@ function DayRow({ day, locked, onOpenPicker, onApplyToAll, onBlurSave, onLocalCh
       <SlotRow
         label="Sankalp"
         refValue={day.sankalp_ref}
+        selection={sel("sankalp")}
         customTitle={day.custom_sankalp_title}
         customBody={day.custom_sankalp_body}
         locked={locked}
@@ -315,6 +350,7 @@ function DayRow({ day, locked, onOpenPicker, onApplyToAll, onBlurSave, onLocalCh
       <SlotRow
         label="Practice"
         refValue={day.practice_ref}
+        selection={sel("practice")}
         customTitle={day.custom_practice_title}
         customBody={day.custom_practice_body}
         locked={locked}
@@ -333,6 +369,7 @@ function DayRow({ day, locked, onOpenPicker, onApplyToAll, onBlurSave, onLocalCh
       <SlotRow
         label="Wisdom"
         refValue={day.wisdom_ref}
+        selection={sel("wisdom")}
         customTitle=""
         customBody={day.custom_wisdom_body}
         locked={locked}
@@ -357,7 +394,7 @@ function DayRow({ day, locked, onOpenPicker, onApplyToAll, onBlurSave, onLocalCh
           onBlur={() => onBlurSave({ day_join_url: day.day_join_url })}
           placeholder="https://meet.google.com/… or Zoom link"
         />
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6, flexWrap: "wrap" as const }}>
           <label style={timeLabel}>Session time</label>
           <input
             type="time"
@@ -367,6 +404,33 @@ function DayRow({ day, locked, onOpenPicker, onApplyToAll, onBlurSave, onLocalCh
             onChange={(e) => onLocalChange({ day_session_time: e.target.value })}
             onBlur={() => onBlurSave({ day_session_time: day.day_session_time })}
           />
+          <select
+            style={tzSelect}
+            value={day.day_session_timezone || "IST"}
+            disabled={locked}
+            onChange={(e) => {
+              onLocalChange({ day_session_timezone: e.target.value });
+              onBlurSave({ day_session_timezone: e.target.value });
+            }}
+          >
+            <option value="IST">IST (UTC+5:30)</option>
+            <option value="UTC">UTC</option>
+            <option value="GMT">GMT (UTC+0)</option>
+            <option value="EST">EST (UTC-5)</option>
+            <option value="EDT">EDT (UTC-4)</option>
+            <option value="CST">CST (UTC-6)</option>
+            <option value="CDT">CDT (UTC-5)</option>
+            <option value="MST">MST (UTC-7)</option>
+            <option value="PST">PST (UTC-8)</option>
+            <option value="PDT">PDT (UTC-7)</option>
+            <option value="CET">CET (UTC+1)</option>
+            <option value="CEST">CEST (UTC+2)</option>
+            <option value="GST">GST (UTC+4)</option>
+            <option value="SGT">SGT (UTC+8)</option>
+            <option value="JST">JST (UTC+9)</option>
+            <option value="AEST">AEST (UTC+10)</option>
+            <option value="AEDT">AEDT (UTC+11)</option>
+          </select>
           <span style={urlHint}>Leave blank if no specific time.</span>
         </div>
       </FieldRow>
@@ -391,6 +455,7 @@ function DayRow({ day, locked, onOpenPicker, onApplyToAll, onBlurSave, onLocalCh
 interface SlotRowProps {
   label: string;
   refValue: string;
+  selection: PickerItem | null;
   customTitle: string;
   customBody: string;
   locked: boolean;
@@ -402,7 +467,7 @@ interface SlotRowProps {
 }
 
 function SlotRow({
-  label, refValue, customTitle, customBody, locked,
+  label, refValue, selection, customTitle, customBody, locked,
   onOpenPicker, onApplyToAll, onClearRef, onCustomChange, onCustomBlur,
 }: SlotRowProps) {
   const [mode, setMode] = useState<"library" | "custom">(
@@ -410,6 +475,7 @@ function SlotRow({
   );
   const [localTitle, setLocalTitle] = useState(customTitle);
   const [localBody, setLocalBody] = useState(customBody);
+  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     setLocalTitle(customTitle);
@@ -421,6 +487,10 @@ function SlotRow({
     setMode("custom");
     onClearRef();
   }
+
+  const displayTitle = selection?.title || refValue;
+  const displaySubtitle = selection?.subtitle || "";
+  const displayMeta = selection?.meta || "";
 
   return (
     <FieldRow label={label}>
@@ -445,26 +515,54 @@ function SlotRow({
       {mode === "library" ? (
         <div style={libRow}>
           {refValue ? (
-            <>
-              <span style={selectedItem}>{refValue}</span>
-              {!locked && (
-                <>
-                  <button style={changeBtn} onClick={onOpenPicker}>Change</button>
-                  <button style={changeBtn} onClick={onClearRef}>✕</button>
-                </>
+            <div style={selectedCard}>
+              <div style={selectedCardTop}>
+                <span style={selectedCardTitle}>{displayTitle}</span>
+                <div style={selectedCardActions}>
+                  <button style={detailsBtn} onClick={() => setShowDetails((v) => !v)}>
+                    {showDetails ? "Hide details" : "View details"}
+                  </button>
+                  {!locked && (
+                    <>
+                      <button style={changeBtn} onClick={onOpenPicker}>Change</button>
+                      <button style={changeBtn} onClick={onClearRef}>✕</button>
+                    </>
+                  )}
+                </div>
+              </div>
+              {showDetails && (
+                <div style={detailsPanel}>
+                  {(selection?.details ?? []).map((d) => (
+                    <div key={d.label} style={detailFieldRow}>
+                      <span style={detailFieldLabel}>{d.label}</span>
+                      {Array.isArray(d.value) ? (
+                        <ul style={detailList}>
+                          {(d.value as string[]).map((v, i) => (
+                            <li key={i} style={detailListItem}>{v}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p style={detailFieldValue}>{d.value as string}</p>
+                      )}
+                    </div>
+                  ))}
+                  {(!selection?.details || selection.details.length === 0) && displaySubtitle && (
+                    <p style={detailFieldValue}>{displaySubtitle}</p>
+                  )}
+                </div>
               )}
-            </>
+              {!locked && (
+                <button style={applyAllBtn} onClick={() => onApplyToAll(refValue, displayTitle)}>
+                  Apply to all days
+                </button>
+              )}
+            </div>
           ) : (
             !locked && (
               <button style={pickBtn} onClick={onOpenPicker}>
                 + Pick from library
               </button>
             )
-          )}
-          {refValue && !locked && (
-            <button style={applyAllBtn} onClick={() => onApplyToAll(refValue, refValue)}>
-              Apply to all days
-            </button>
           )}
         </div>
       ) : (
@@ -552,8 +650,19 @@ const modeToggle: React.CSSProperties = { display: "flex", gap: 6, marginBottom:
 const libRow: React.CSSProperties = { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" as const };
 const selectedItem: React.CSSProperties = { fontSize: 12, color: "#432104", background: "#F5EFE5", padding: "4px 10px", borderRadius: 6 };
 const changeBtn: React.CSSProperties = { background: "none", border: "1px solid #DDD3C0", borderRadius: 6, padding: "4px 10px", fontSize: 12, cursor: "pointer", color: "#8B6F4E" };
+const detailsBtn: React.CSSProperties = { background: "none", border: "1px solid #C99317", borderRadius: 6, padding: "4px 10px", fontSize: 12, cursor: "pointer", color: "#C99317", fontWeight: 600 };
 const pickBtn: React.CSSProperties = { background: "#FEF3D0", border: "1px solid #C99317", borderRadius: 8, padding: "7px 14px", fontSize: 12, cursor: "pointer", color: "#7A4E00", fontWeight: 600 };
-const applyAllBtn: React.CSSProperties = { background: "none", border: "none", fontSize: 11, color: "#C99317", cursor: "pointer", textDecoration: "underline" };
+const applyAllBtn: React.CSSProperties = { background: "none", border: "none", fontSize: 11, color: "#C99317", cursor: "pointer", textDecoration: "underline", marginTop: 6 };
+const selectedCard: React.CSSProperties = { background: "#F5EFE5", border: "1px solid #DDD3C0", borderRadius: 8, padding: "10px 12px", width: "100%" };
+const selectedCardTop: React.CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, flexWrap: "wrap" as const };
+const selectedCardTitle: React.CSSProperties = { fontSize: 13, fontWeight: 700, color: "#432104", flex: 1, lineHeight: 1.4 };
+const selectedCardActions: React.CSSProperties = { display: "flex", gap: 6, flexShrink: 0, flexWrap: "wrap" as const };
+const detailsPanel: React.CSSProperties = { marginTop: 10, paddingTop: 10, borderTop: "1px solid #DDD3C0", display: "flex", flexDirection: "column" as const, gap: 10 };
+const detailFieldRow: React.CSSProperties = {};
+const detailFieldLabel: React.CSSProperties = { display: "block", fontSize: 10, fontWeight: 700, color: "#B5A08A", textTransform: "uppercase" as const, letterSpacing: "0.08em", marginBottom: 3 };
+const detailFieldValue: React.CSSProperties = { fontSize: 13, color: "#432104", margin: 0, lineHeight: 1.5 };
+const detailList: React.CSSProperties = { margin: "0", paddingLeft: 18, display: "flex", flexDirection: "column" as const, gap: 4 };
+const detailListItem: React.CSSProperties = { fontSize: 13, color: "#432104", lineHeight: 1.5 };
 const reviewNote: React.CSSProperties = { fontSize: 11, color: "#B5A08A", marginTop: 4 };
 const successBox: React.CSSProperties = { background: "#fff", border: "1px solid #DDD3C0", borderRadius: 12, padding: "40px 32px", textAlign: "center" as const, maxWidth: 480, margin: "80px auto" };
 const primaryBtn: React.CSSProperties = { padding: "10px 22px", background: "#C99317", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 14 };
@@ -562,3 +671,4 @@ const repeatBanner: React.CSSProperties = { display: "flex", alignItems: "center
 const repeatBtn: React.CSSProperties = { padding: "8px 16px", background: "#432104", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 13, whiteSpace: "nowrap" as const };
 const timeLabel: React.CSSProperties = { fontSize: 12, color: "#7A6652", fontWeight: 600, whiteSpace: "nowrap" as const };
 const timeInput: React.CSSProperties = { padding: "6px 10px", borderRadius: 8, border: "1px solid #DDD3C0", fontSize: 13, color: "#432104" };
+const tzSelect: React.CSSProperties = { padding: "6px 10px", borderRadius: 8, border: "1px solid #DDD3C0", fontSize: 13, color: "#432104", background: "#fff", cursor: "pointer" };

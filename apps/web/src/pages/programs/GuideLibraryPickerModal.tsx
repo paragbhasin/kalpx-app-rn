@@ -12,17 +12,27 @@ import {
 
 export type LibrarySlot = "mantra" | "sankalp" | "practice" | "wisdom";
 
-interface PickerItem {
+export interface DetailField {
+  label: string;
+  value: string | string[];
+}
+
+export interface PickerItem {
   item_id: string;
   title: string;
   subtitle: string;
   meta: string;
+  details: DetailField[];
 }
 
 interface Props {
   slot: LibrarySlot;
-  onSelect: (item: { item_id: string; title: string }) => void;
+  onSelect: (item: PickerItem) => void;
   onClose: () => void;
+}
+
+function hasValue(v: string | string[]): boolean {
+  return Array.isArray(v) ? v.length > 0 : !!v;
 }
 
 function toPickerItem(slot: LibrarySlot, raw: LibraryMantra | LibrarySankalp | LibraryPractice | LibraryWisdom): PickerItem {
@@ -33,6 +43,12 @@ function toPickerItem(slot: LibrarySlot, raw: LibraryMantra | LibrarySankalp | L
       title: m.title,
       subtitle: m.devanagari || m.meaning || "",
       meta: [m.deity, m.category_label].filter(Boolean).join(" · "),
+      details: [
+        { label: "Meaning", value: m.meaning },
+        { label: "Essence", value: m.essence },
+        { label: "Devanagari", value: m.devanagari },
+        { label: "IAST", value: m.iast },
+      ].filter(d => hasValue(d.value)),
     };
   }
   if (slot === "sankalp") {
@@ -42,6 +58,11 @@ function toPickerItem(slot: LibrarySlot, raw: LibraryMantra | LibrarySankalp | L
       title: s.title,
       subtitle: s.line || s.insight || "",
       meta: s.category_label,
+      details: [
+        { label: "Essence / Insight", value: s.insight },
+        { label: "How to Live", value: s.how_to_live },
+        { label: "Benefits", value: s.benefits },
+      ].filter(d => hasValue(d.value)),
     };
   }
   if (slot === "wisdom") {
@@ -51,6 +72,10 @@ function toPickerItem(slot: LibrarySlot, raw: LibraryMantra | LibrarySankalp | L
       title: w.text,
       subtitle: w.explanation[0] || "",
       meta: [w.mood, ...w.tags.slice(0, 2)].filter(Boolean).join(" · "),
+      details: [
+        { label: "Explanation", value: w.explanation },
+        { label: "Source", value: w.source_title },
+      ].filter(d => hasValue(d.value)),
     };
   }
   const p = raw as LibraryPractice;
@@ -59,6 +84,11 @@ function toPickerItem(slot: LibrarySlot, raw: LibraryMantra | LibrarySankalp | L
     title: p.title,
     subtitle: p.summary || "",
     meta: [p.category_label, p.duration].filter(Boolean).join(" · "),
+    details: [
+      { label: "Steps", value: p.steps },
+      { label: "Essence", value: p.essence },
+      { label: "Benefits", value: p.benefits },
+    ].filter(d => hasValue(d.value)),
   };
 }
 
@@ -146,7 +176,7 @@ export function GuideLibraryPickerModal({ slot, onSelect, onClose }: Props) {
               <button
                 key={item.item_id}
                 style={itemRow}
-                onClick={() => onSelect({ item_id: item.item_id, title: item.title })}
+                onClick={() => onSelect(item)}
               >
                 <span style={itemTitle}>{item.title}</span>
                 {item.subtitle ? <span style={itemSub}>{item.subtitle.slice(0, 80)}</span> : null}

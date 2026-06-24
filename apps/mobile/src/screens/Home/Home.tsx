@@ -267,10 +267,9 @@ export default function Home() {
     return () => sub.remove();
   }, []);
 
-  // TLP Phase 1 — fetch program count and next session for home widgets.
-  // Non-blocking: errors are swallowed, widgets simply don't render on failure.
-  // Static imports used (TLP-013: avoid require() inside effects for Metro tree-shaking).
+  // TLP Phase 1 — fetch program count for home widget. Only for logged-in users.
   useEffect(() => {
+    if (!isLoggedIn) return;
     let cancelled = false;
     (async () => {
       try {
@@ -281,7 +280,7 @@ export default function Home() {
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [isLoggedIn]);
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -1280,8 +1279,8 @@ export default function Home() {
             />
           ) : null}
 
-          {/* TLP Phase 1 — Discover Programs card (no active program) */}
-          {tlpProgramCount !== null && !mitraJourneyId ? (
+          {/* TLP Phase 1 — Discover Programs card (logged-in, no active program) */}
+          {isLoggedIn && tlpProgramCount !== null && !mitraJourneyId ? (
             <TLPDiscoverProgramsCard
               count={tlpProgramCount}
               onPress={() => navigation.navigate("ProgramsDiscovery")}

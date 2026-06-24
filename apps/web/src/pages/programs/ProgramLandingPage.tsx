@@ -78,6 +78,11 @@ export function ProgramLandingPage() {
 
   return (
     <AppShell>
+      <div style={{ height: 56, borderBottom: '1px solid var(--kalpx-border)', display: 'flex',
+        alignItems: 'center', padding: '0 20px', background: 'var(--kalpx-bg)',
+        position: 'sticky', top: 0, zIndex: 50 }}>
+        <img src="/kalpx-logo.png" alt="KalpX" style={{ height: 30, width: 'auto', marginTop: 8 }} />
+      </div>
       <main
         role="main"
         style={{ maxWidth: 640, margin: '0 auto', padding: '32px 20px 80px' }}

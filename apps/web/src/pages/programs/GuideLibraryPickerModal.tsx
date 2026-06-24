@@ -3,12 +3,14 @@ import {
   fetchLibraryMantras,
   fetchLibraryPractices,
   fetchLibrarySankalps,
+  fetchLibraryWisdoms,
   LibraryMantra,
   LibraryPractice,
   LibrarySankalp,
+  LibraryWisdom,
 } from "../../engine/liveSessionApi";
 
-export type LibrarySlot = "mantra" | "sankalp" | "practice";
+export type LibrarySlot = "mantra" | "sankalp" | "practice" | "wisdom";
 
 interface PickerItem {
   item_id: string;
@@ -23,7 +25,7 @@ interface Props {
   onClose: () => void;
 }
 
-function toPickerItem(slot: LibrarySlot, raw: LibraryMantra | LibrarySankalp | LibraryPractice): PickerItem {
+function toPickerItem(slot: LibrarySlot, raw: LibraryMantra | LibrarySankalp | LibraryPractice | LibraryWisdom): PickerItem {
   if (slot === "mantra") {
     const m = raw as LibraryMantra;
     return {
@@ -42,6 +44,15 @@ function toPickerItem(slot: LibrarySlot, raw: LibraryMantra | LibrarySankalp | L
       meta: s.category_label,
     };
   }
+  if (slot === "wisdom") {
+    const w = raw as LibraryWisdom;
+    return {
+      item_id: w.item_id,
+      title: w.text,
+      subtitle: w.explanation[0] || "",
+      meta: [w.mood, ...w.tags.slice(0, 2)].filter(Boolean).join(" · "),
+    };
+  }
   const p = raw as LibraryPractice;
   return {
     item_id: p.item_id,
@@ -55,6 +66,7 @@ const LABEL: Record<LibrarySlot, string> = {
   mantra: "Mantra",
   sankalp: "Sankalp",
   practice: "Practice",
+  wisdom: "Wisdom",
 };
 
 export function GuideLibraryPickerModal({ slot, onSelect, onClose }: Props) {
@@ -78,6 +90,9 @@ export function GuideLibraryPickerModal({ slot, onSelect, onClose }: Props) {
       } else if (slot === "sankalp") {
         const res = await fetchLibrarySankalps({ q });
         raw = res.items.map((i) => toPickerItem("sankalp", i));
+      } else if (slot === "wisdom") {
+        const res = await fetchLibraryWisdoms({ q });
+        raw = res.items.map((i) => toPickerItem("wisdom", i));
       } else {
         const res = await fetchLibraryPractices({ q });
         raw = res.items.map((i) => toPickerItem("practice", i));

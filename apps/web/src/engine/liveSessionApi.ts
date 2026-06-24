@@ -385,12 +385,14 @@ export interface TemplateDay {
   mantra_ref: string;
   sankalp_ref: string;
   practice_ref: string;
+  wisdom_ref: string;
   custom_mantra_title: string;
   custom_mantra_body: string;
   custom_sankalp_title: string;
   custom_sankalp_body: string;
   custom_practice_title: string;
   custom_practice_body: string;
+  custom_wisdom_body: string;
   day_join_url: string;
   reflection_prompt: string;
   completion_message: string;
@@ -459,6 +461,18 @@ export interface LibraryPractice {
   category_label: string;
   level: string;
   steps: string[];
+}
+
+export interface LibraryWisdom {
+  item_id: string;
+  text: string;
+  explanation: string[];
+  source_title: string;
+  source_ref: string;
+  tags: string[];
+  deities: string[];
+  mood: string;
+  difficulty: number;
 }
 
 export interface GuideSubmission {
@@ -547,6 +561,15 @@ export async function fetchLibraryPractices(params?: {
   category?: string;
 }): Promise<{ items: LibraryPractice[]; count: number }> {
   const res = await api.get<{ items: LibraryPractice[]; count: number }>('/guide/library/practices/', { params });
+  return res.data;
+}
+
+export async function fetchLibraryWisdoms(params?: {
+  q?: string;
+  mood?: string;
+  tag?: string;
+}): Promise<{ items: LibraryWisdom[]; count: number }> {
+  const res = await api.get<{ items: LibraryWisdom[]; count: number }>('/guide/library/wisdoms/', { params });
   return res.data;
 }
 

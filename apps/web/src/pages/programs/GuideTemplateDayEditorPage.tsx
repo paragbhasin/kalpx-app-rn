@@ -75,6 +75,8 @@ export function GuideTemplateDayEditorPage() {
         ? { mantra_ref: item_id, custom_mantra_title: "", custom_mantra_body: "" }
         : slot === "sankalp"
         ? { sankalp_ref: item_id, custom_sankalp_title: "", custom_sankalp_body: "" }
+        : slot === "wisdom"
+        ? { wisdom_ref: item_id, custom_wisdom_body: "" }
         : { practice_ref: item_id, custom_practice_title: "", custom_practice_body: "" };
 
     days.forEach((d) => saveDay(d.day_number, patch));
@@ -89,6 +91,8 @@ export function GuideTemplateDayEditorPage() {
         ? { mantra_ref: item.item_id, custom_mantra_title: "", custom_mantra_body: "" }
         : slot === "sankalp"
         ? { sankalp_ref: item.item_id, custom_sankalp_title: "", custom_sankalp_body: "" }
+        : slot === "wisdom"
+        ? { wisdom_ref: item.item_id, custom_wisdom_body: "" }
         : { practice_ref: item.item_id, custom_practice_title: "", custom_practice_body: "" };
     saveDay(dayNumber, patch);
     setPickerTarget(null);
@@ -290,6 +294,24 @@ function DayRow({ day, locked, onOpenPicker, onApplyToAll, onBlurSave, onLocalCh
         }}
         onCustomBlur={(title, body) =>
           onBlurSave({ custom_practice_title: title, custom_practice_body: body, practice_ref: "" })
+        }
+      />
+
+      {/* Wisdom */}
+      <SlotRow
+        label="Wisdom"
+        refValue={day.wisdom_ref}
+        customTitle=""
+        customBody={day.custom_wisdom_body}
+        locked={locked}
+        onOpenPicker={() => onOpenPicker("wisdom")}
+        onApplyToAll={(id, title) => onApplyToAll("wisdom", id, title)}
+        onClearRef={() => onBlurSave({ wisdom_ref: "" })}
+        onCustomChange={(_title, body) => {
+          onLocalChange({ custom_wisdom_body: body });
+        }}
+        onCustomBlur={(_title, body) =>
+          onBlurSave({ custom_wisdom_body: body, wisdom_ref: "" })
         }
       />
 

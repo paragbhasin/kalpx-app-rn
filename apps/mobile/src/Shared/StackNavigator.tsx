@@ -97,6 +97,7 @@ import ProgramDay8TransitionScreen from "../screens/Program/ProgramDay8Transitio
 import ProgramMantraRunner from "../screens/Program/runners/ProgramMantraRunner";
 import ProgramSankalpRunner from "../screens/Program/runners/ProgramSankalpRunner";
 import ProgramPracticeRunner from "../screens/Program/runners/ProgramPracticeRunner";
+import ProgramWisdomRunner from "../screens/Program/runners/ProgramWisdomRunner";
 // TLP Phase 1 — Trusted Leader Platform
 import LiveSessionsListScreen from "../screens/Program/LiveSessionsListScreen";
 import LiveSessionDetailScreen from "../screens/Program/LiveSessionDetailScreen";
@@ -427,6 +428,7 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen name="ProgramMantraRunner" component={ProgramMantraRunner} options={{ headerShown: false }} />
     <Stack.Screen name="ProgramSankalpRunner" component={ProgramSankalpRunner} options={{ headerShown: false }} />
     <Stack.Screen name="ProgramPracticeRunner" component={ProgramPracticeRunner} options={{ headerShown: false }} />
+    <Stack.Screen name="ProgramWisdomRunner" component={ProgramWisdomRunner} options={{ headerShown: false }} />
     {/* TLP Phase 1 — Trusted Leader Platform */}
     <Stack.Screen name="LiveSessionsList" component={LiveSessionsListScreen} options={{ headerShown: false }} />
     <Stack.Screen name="LiveSessionDetail" component={LiveSessionDetailScreen} options={{ headerShown: false }} />

@@ -242,15 +242,29 @@ export default function ProgramDayScreen() {
           ))}
         </View>
 
-        {/* Wisdom card */}
+        {/* Wisdom card — tappable, opens ProgramWisdomRunner */}
         {dayContent.wisdom_card ? (
-          <View style={styles.wisdomCard}>
-            <Text style={styles.wisdomLabel}>WISDOM</Text>
-            <Text style={styles.wisdomText}>{dayContent.wisdom_card.text}</Text>
-            {dayContent.wisdom_card.source_title ? (
-              <Text style={styles.wisdomSource}>— {dayContent.wisdom_card.source_title}</Text>
-            ) : null}
-          </View>
+          <TouchableOpacity
+            style={styles.wisdomCard}
+            activeOpacity={0.82}
+            onPress={() =>
+              navigation.navigate("ProgramWisdomRunner", {
+                wisdom: dayContent.wisdom_card,
+                dayNumber: dayContent.day_number,
+              })
+            }
+            accessibilityLabel="Wisdom of the Day"
+          >
+            <View style={styles.wisdomCardInner}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.wisdomLabel}>WISDOM OF THE DAY</Text>
+                <Text style={styles.wisdomText} numberOfLines={2}>
+                  {dayContent.wisdom_card.text}
+                </Text>
+              </View>
+              <Text style={styles.itemArrow}>→</Text>
+            </View>
+          </TouchableOpacity>
         ) : null}
 
         {/* Live session */}
@@ -395,24 +409,27 @@ const styles = StyleSheet.create({
 
   wisdomCard: {
     backgroundColor: '#FFF8EE',
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: '#E8D9B5',
-    padding: 16,
+    padding: 18,
     marginBottom: 12,
+  },
+  wisdomCardInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   wisdomLabel: {
     fontFamily: Fonts.sans.medium,
-    fontSize: 10,
+    fontSize: 11,
     color: '#9A7548',
-    letterSpacing: 0.06,
-    marginBottom: 8,
+    letterSpacing: 0.05,
+    marginBottom: 4,
   },
   wisdomText: {
     fontFamily: Fonts.serif.bold,
-    fontSize: 15,
+    fontSize: 16,
     color: '#432104',
-    lineHeight: 22,
     fontStyle: 'italic',
   },
   wisdomSource: {

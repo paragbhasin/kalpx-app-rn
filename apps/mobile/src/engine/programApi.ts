@@ -29,6 +29,7 @@ export interface ActiveProgramSummary {
 export interface WisdomCard {
   item_id: string | null;
   text: string;
+  explanation: string[];
   source_title: string | null;
 }
 
@@ -65,6 +66,9 @@ export async function fetchActiveProgram(): Promise<ActiveProgramSummary | null>
 export async function fetchProgramDay(dayNumber: number): Promise<ProgramDayContent> {
   const res = await api.get(`programs/my-active/day/${dayNumber}/`);
   console.log('[ProgramDay] API response:', JSON.stringify(res.data, null, 2));
+  console.log('[ProgramDay] wisdom_card:', JSON.stringify(res.data.wisdom_card));
+  console.log('[ProgramDay] day_join_url:', res.data.day_join_url);
+  console.log('[ProgramDay] day_session_time:', res.data.day_session_time);
   return res.data;
 }
 

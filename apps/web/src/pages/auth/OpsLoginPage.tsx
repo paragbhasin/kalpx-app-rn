@@ -29,7 +29,7 @@ export function OpsLoginPage() {
     setError("");
 
     try {
-      const recaptcha_token = await getRecaptchaToken("ops_login");
+      const recaptcha_token = import.meta.env.DEV ? "" : await getRecaptchaToken("ops_login");
       const res = await api.post<LoginResponse>("users/login/", { email, password, recaptcha_token });
       const data = res.data;
 

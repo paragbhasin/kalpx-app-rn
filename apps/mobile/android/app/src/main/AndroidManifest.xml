@@ -57,6 +57,13 @@
         <data android:scheme="kalpx"/>
         <data android:scheme="exp+kalpx"/>
       </intent-filter>
+      <intent-filter android:autoVerify="true">
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="https" android:host="kalpx.com" android:pathPrefix="/join"/>
+        <data android:scheme="https" android:host="kalpx.com" android:pathPrefix="/p"/>
+      </intent-filter>
     </activity>
 
     <!-- KalpxLiveActivityService: foreground service backing the chanting/sankalp notification.

@@ -99,7 +99,6 @@ import {
 } from "../engine/mitraApi";
 import { fetchActiveProgram, type ActiveProgramSummary } from "../engine/programApi";
 import ProgramCard from "../screens/Home/ProgramCard";
-import ProgramCodeEntryRow from "../screens/Home/ProgramCodeEntryRow";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { setHomeData } from "../store/doorSlice";
 import { Fonts } from "../theme/fonts";
@@ -939,8 +938,7 @@ export default function FourDoorHomeContainer({
             )}
           </View>
 
-          {/* Program Distribution OS — MOB-8 + MOB-2 */}
-          {!activeProgram && <ProgramCodeEntryRow />}
+          {/* Program Distribution OS — MOB-8 */}
         </View>
       </ScrollView>
 

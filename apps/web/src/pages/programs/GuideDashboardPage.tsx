@@ -57,8 +57,9 @@ function ProgramRow({ program }: { program: GuideProgram }) {
   const navigate = useNavigate();
   const [copied, setCopied] = React.useState(false);
 
+  const _origin = window.location.hostname === 'localhost' ? 'https://dev.kalpx.com' : window.location.origin;
   const joinUrl = program.join_url
-    ? program.join_url.replace("https://kalpx.com", window.location.origin)
+    ? program.join_url.replace("https://kalpx.com", _origin)
     : null;
 
   const handleCopy = () => {

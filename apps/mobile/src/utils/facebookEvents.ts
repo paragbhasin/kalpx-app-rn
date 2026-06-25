@@ -14,7 +14,7 @@ const hash = (value) => {
 
 export async function sendMetaEvent(eventName, customData: any = {}, userInfo : any= {}) {
   if (!FB_ACCESS_TOKEN) {
-    console.error("❌ Missing FB token");
+    if (!__DEV__) console.error("❌ Missing FB token");
     return;
   }
 

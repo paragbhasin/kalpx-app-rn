@@ -129,6 +129,7 @@ const CommunityCompletionReturn: React.FC<CompletionReturnTransientProps> = ({
   // so label is correct even when stacked-instance timing prevents result from being set.
   const isRhythmSource = String(ss.runner_source || '') === 'rhythm_daily';
   const isInnerPathSource = String(ss.practice_launch_surface || '') === 'inner_path';
+  const isRhythmLaunchSurface = String(ss.practice_launch_surface || '') === 'rhythm';
 
   // For rhythm_daily completions, use frozen F-C copy from backend instead of registry.
   const isRoomSequenceCompletion = slot("completion_source") === "room_sequence";
@@ -262,7 +263,18 @@ const CommunityCompletionReturn: React.FC<CompletionReturnTransientProps> = ({
     }
     // Community runner: go back to the community screen the user came from
     // (CommunityLanding / CommunityDetail) rather than the Mitra dashboard.
+    // Exception: if practice was launched from Daily Rhythm context, return there
+    // so the rhythm screen refreshes and reflects the completed state.
     if (isCommunityRunner) {
+      if (isRhythmLaunchSurface) {
+        executeAction({ type: 'return_to_rhythm_home', currentScreen } as any, {
+          loadScreen,
+          goBack,
+          setScreenValue: (value: any, key: string) => setScreenValue(key, value),
+          screenState: { ...screenData },
+        }).catch(() => {});
+        return;
+      }
       if (navigation.canGoBack()) {
         navigation.goBack();
       } else {
@@ -567,7 +579,9 @@ const CommunityCompletionReturn: React.FC<CompletionReturnTransientProps> = ({
               activeOpacity={0.8}
             >
               <Text style={[styles.primaryCtaText, isHindi && { letterSpacing: 0 }]}>
-                {isCommunityRunner
+                {isCommunityRunner && isRhythmLaunchSurface
+                  ? t("completion.returnToMyRhythm")
+                  : isCommunityRunner
                   ? t("completion.returnToCommunity", {
                       defaultValue: "Return to Community",
                     })

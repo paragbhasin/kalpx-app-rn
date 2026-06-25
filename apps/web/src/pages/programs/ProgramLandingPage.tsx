@@ -340,7 +340,7 @@ function CampaignBody({ campaign }: { campaign: ProgramCampaignPublic }) {
           aria-label={`QR code to join program — scan with your phone camera. URL: ${joinUrl}`}
         >
           <QRCodeSVG
-            value={joinUrl}
+            value={deepLinkUrl}
             size={180}
             level="M"
             style={{ display: 'block' }}

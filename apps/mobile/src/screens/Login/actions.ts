@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../Networks/axios"; // Adjust the import based on your project structure
 import { registerDeviceToBackend, resetDeviceRegistrationGuard } from "../../utils/registerDevice";
+import { logEvent, setAnalyticsUser } from "../../utils/initAnalytics";
 export const LOGIN_REQUEST = "LOGIN_REQUEST";
 export const LOGIN_SUCCESS = "LOGIN_SUCCESS";
 export const LOGIN_FAILURE = "LOGIN_FAILURE";
@@ -39,6 +40,8 @@ export const loginUser = (credentials, callback) => async (dispatch) => {
     await AsyncStorage.setItem("user_id", `${response.data.user.id}`);
     resetDeviceRegistrationGuard();
     await registerDeviceToBackend();
+    setAnalyticsUser(response.data.user.id);
+    logEvent("login_completed", { method: "email" });
     dispatch(loginSuccess(response.data));
     if (callback) callback({ success: true, data: response.data });
   } catch (error) {
@@ -81,6 +84,8 @@ export const socialLoginUser = (credentials, callback) => async (dispatch) => {
     await AsyncStorage.setItem("user_id", `${response.data.user.id}`);
     resetDeviceRegistrationGuard();
     await registerDeviceToBackend();
+    setAnalyticsUser(response.data.user.id);
+    logEvent("login_completed", { method: credentials.provider ?? "social" });
     dispatch(socialLoginSuccess(response.data));
     dispatch(loginSuccess(response.data)); // Sync with main login slice
     callback?.({ success: true, data: response.data });

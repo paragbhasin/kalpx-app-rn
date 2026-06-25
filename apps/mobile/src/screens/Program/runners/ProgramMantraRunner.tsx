@@ -10,6 +10,7 @@ import React, { useCallback, useRef } from "react";
 import { SafeAreaView, StyleSheet } from "react-native";
 import MantraRunnerView from "../../../blocks/runners/MantraRunnerView";
 import { useScreenStore } from "../../../engine/useScreenBridge";
+import { trackRitualCompletion } from "../../../utils/firstRitual";
 
 const BEIGE_BG = require("../../../../assets/beige_bg.webp");
 
@@ -40,6 +41,7 @@ export default function ProgramMantraRunner() {
         sourceSurface="program"
         onEngineReady={(api) => { engineApiRef.current = api; api.refreshStats(); }}
         onComplete={() => {
+          trackRitualCompletion("mantra");
           const updated = [...new Set([...completedItems, item.item_id])];
           navigation.navigate("ProgramDayScreen", { dayNumber, completedItems: updated });
         }}

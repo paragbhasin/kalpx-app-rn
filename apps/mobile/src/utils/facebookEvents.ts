@@ -1,10 +1,9 @@
 import SHA256 from "crypto-js/sha256";
 import * as Device from "expo-device";
 
-// ⭐ SECURITY NOTE: NEVER hardcode a user access token (EAAQ...) in production code.
-// This should be a limited-permission App Access Token or an external configuration.
 const FB_APP_ID = "835697332515011";
-const FB_ACCESS_TOKEN = "EAAQ0I4Q6eAwBQGK7ZBnKnkkVW7UWpXlRFwwUUy2rq4xeWW4p7KxIvAnywKo25ZCbnl9MYZC4CZC3vtY43LlvYaZCZARKCHaQu84ophOVcZBZBz4kuzZBEJiDZBDZAbfh6Wdsb3ojOzNsVCBseuoirvMrnVirUw8OZAaEGUUa8TeU2hEaH3RIvSaCVuMtottOxNUZBCwZDZD";// use the one you generated
+// Token loaded from build-time env var — set EXPO_PUBLIC_FACEBOOK_CAPI_TOKEN in eas.json secrets
+const FB_ACCESS_TOKEN = process.env.EXPO_PUBLIC_FACEBOOK_CAPI_TOKEN ?? "";
 
 // Hash user fields (required for matching)
 const hash = (value) => {

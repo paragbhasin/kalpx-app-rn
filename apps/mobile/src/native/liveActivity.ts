@@ -1,5 +1,6 @@
 import { Alert, Linking, NativeModules, Platform, PermissionsAndroid, TurboModuleRegistry } from "react-native";
 import { EVENT_NAMES } from '@kalpx/analytics';
+import { logEvent } from '../utils/initAnalytics';
 
 // New Architecture (RN 0.79 bridgeless): TurboModuleRegistry is the correct
 // way to access TurboModules. NativeModules is kept as fallback for debug/bridge mode.
@@ -15,11 +16,8 @@ const LA_FLAGS = {
   LIVE_ACTIVITY_INNER_PATH_ENABLED: true,
 };
 
-// Thin analytics shim — logs events as structured console output so they are
-// visible in Metro and can be captured by any attached analytics provider.
-// Swap the body for a real SDK call (Firebase Analytics, Amplitude, etc.) when ready.
-function trackLA(event: string, params?: Record<string, unknown>): void {
-  console.log('[LA:analytics]', event, params ?? {});
+function trackLA(event: string, params?: Record<string, string | number | boolean>): void {
+  logEvent(event, params).catch(() => {});
 }
 
 // Suppress quick_chant LA restart for 30s after the user manually ends a session.

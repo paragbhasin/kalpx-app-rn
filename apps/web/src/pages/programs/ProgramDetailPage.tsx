@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import { useParams, Link } from 'react-router-dom';
+import { WEB_ENV } from '../../lib/env';
 import { AppShell } from '../../components/ui/AppShell';
 import { GuideChip } from '../../components/GuideChip';
 import {
@@ -43,6 +45,12 @@ export function ProgramDetailPage() {
         ]);
         if (cancelled) return;
         setState({ kind: 'loaded', program, testimonials });
+        try {
+          navigator.sendBeacon(
+            '/api/programs/track/',
+            JSON.stringify({ event: 'program_detail_viewed', campaign_code: program.code }),
+          );
+        } catch { /* analytics never blocks UX */ }
       } catch (err: unknown) {
         if (cancelled) return;
         const status = (err as { response?: { status?: number } })?.response?.status;
@@ -169,7 +177,8 @@ function ProgramBody({
   const [guideBioExpanded, setGuideBioExpanded] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
 
-  const qrUrl = `https://kalpx.com/join/${program.code}`;
+  const _qrBase = window.location.hostname === 'localhost' ? WEB_ENV.imageBaseUrl.replace('/api', '').replace(/\/$/, '') : window.location.origin;
+  const qrUrl = `${_qrBase}/join/${program.code}`;
   const joinUrl = `/p/${program.slug}`;
   const deepLinkUrl = `kalpx://join/${program.code}`;
   const APPLE_APP_STORE_ID = '6755144623';
@@ -453,15 +462,6 @@ function ProgramBody({
           </button>
         </div>
 
-        {/* QR code
-          WARNING: api.qrserver.com is a third-party service. The program invite code
-          (embedded in qrUrl = "https://kalpx.com/join/<code>") is sent as a query
-          parameter to their servers. The invite code itself is not a secret (it is
-          displayed in plain text above), but be aware that qrserver.com receives the
-          full join URL in its request logs. If invite codes become sensitive in a future
-          phase, replace with a self-hosted QR generator (e.g. the `qrcode` npm package
-          rendered client-side via canvas/SVG) to avoid any third-party data exposure.
-        */}
         <div
           style={{
             display: 'flex',
@@ -472,12 +472,10 @@ function ProgramBody({
             borderRadius: 'var(--kalpx-r-md)',
           }}
         >
-          <img
-            src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrUrl)}`}
-            alt={`QR code for joining ${program.name}. Code: ${program.code}`}
-            width={180}
-            height={180}
-            style={{ display: 'block' }}
+          <QRCodeSVG
+            value={qrUrl}
+            size={180}
+            aria-label={`QR code for joining ${program.name}. Code: ${program.code}`}
           />
         </div>
         <p style={{ fontSize: 12, color: 'var(--kalpx-text-muted)', textAlign: 'center', marginBottom: 16 }}>

@@ -12,6 +12,7 @@ import type {
 } from "@kalpx/types";
 import { useJapaEngine } from "../../engine/useJapaEngine";
 import { liveActivity } from "../../native/liveActivity";
+import { logEvent } from "../../utils/initAnalytics";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -479,6 +480,7 @@ export default function QuickResetScreen({
     if (!isChantingActive) {
       runnerStartedAt.current = Date.now();
       setIsChantingActive(true);
+      logEvent("quick_chant_started", { surface: "quick_reset" }).catch(() => {});
       const pref = preferredLARef.current;
       const canStart = pref === null || (pref.type === 'mantra' && pref.name === activeMantra.title);
       if (canStart) {
@@ -521,6 +523,8 @@ export default function QuickResetScreen({
 
     // Flush the japa engine (sync final count + mark session complete on backend)
     await japaEngine.completeSession();
+
+    logEvent("quick_chant_completed", { surface: "quick_reset" }).catch(() => {});
 
     const result = await postQuickChantComplete({
       mantra_ref: activeMantra.item_id,

@@ -224,6 +224,7 @@ export function SignupPage() {
     setLoading(false);
 
     if (result.success) {
+      try { navigator.sendBeacon('/api/programs/track/', JSON.stringify({ event: 'signup_completed', method: 'email' })); } catch { /* non-fatal */ }
       dispatch(showSnackBar("Account created successfully! Welcome to KalpX."));
       navigate(returnTo);
     } else {

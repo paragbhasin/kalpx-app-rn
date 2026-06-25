@@ -7,6 +7,7 @@ import React, { useCallback } from "react";
 import { SafeAreaView, StyleSheet } from "react-native";
 import PracticeRunnerView from "../../../blocks/runners/PracticeRunnerView";
 import { useScreenStore } from "../../../engine/useScreenBridge";
+import { trackRitualCompletion } from "../../../utils/firstRitual";
 
 const BEIGE_BG = require("../../../../assets/beige_bg.webp");
 
@@ -28,6 +29,7 @@ export default function ProgramPracticeRunner() {
       <PracticeRunnerView
         item={item}
         onComplete={() => {
+          trackRitualCompletion("practice");
           const updated = [...new Set([...completedItems, item.item_id])];
           navigation.navigate("ProgramDayScreen", { dayNumber, completedItems: updated });
         }}

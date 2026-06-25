@@ -7,6 +7,7 @@ import React, { useCallback } from "react";
 import { SafeAreaView, StyleSheet } from "react-native";
 import SankalpRunnerView from "../../../blocks/runners/SankalpRunnerView";
 import { useScreenStore } from "../../../engine/useScreenBridge";
+import { trackRitualCompletion } from "../../../utils/firstRitual";
 
 const BEIGE_BG = require("../../../../assets/beige_bg.webp");
 
@@ -29,6 +30,7 @@ export default function ProgramSankalpRunner() {
         item={item}
         sourceSurface="program"
         onComplete={() => {
+          trackRitualCompletion("sankalp");
           const updated = [...new Set([...completedItems, item.item_id])];
           navigation.navigate("ProgramDayScreen", { dayNumber, completedItems: updated });
         }}

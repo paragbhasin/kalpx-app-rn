@@ -11,7 +11,9 @@ import {
   UIManager,
   View,
 } from "react-native";
+import { LiveActivityPreferenceBanner } from "../../../components/LiveActivityPreferenceBanner";
 import { type WisdomCard } from "../../../engine/programApi";
+import { liveActivity } from "../../../native/liveActivity";
 import { Fonts } from "../../../theme/fonts";
 import { sfs } from "../../../utils/responsive";
 
@@ -63,7 +65,19 @@ const CollapsibleCard = ({
 export default function ProgramWisdomRunner() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const { wisdom, dayNumber }: { wisdom: WisdomCard; dayNumber: number } = route.params;
+  const {
+    wisdom,
+    dayNumber,
+    day_join_url,
+    day_session_time,
+    day_session_timezone,
+  }: {
+    wisdom: WisdomCard;
+    dayNumber: number;
+    day_join_url?: string | null;
+    day_session_time?: string | null;
+    day_session_timezone?: string | null;
+  } = route.params;
 
   const [explanationExpanded, setExplanationExpanded] = useState(true);
   const [sourceExpanded, setSourceExpanded] = useState(false);
@@ -120,6 +134,17 @@ export default function ProgramWisdomRunner() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <LiveActivityPreferenceBanner
+        experienceType="practice"
+        experienceName={wisdom.text ?? "Wisdom of the Day"}
+        onActivate={() => {
+          liveActivity.startSankalp(
+            `Day ${dayNumber} · Wisdom`,
+            wisdom.text ?? "",
+          );
+        }}
+      />
     </SafeAreaView>
   );
 }

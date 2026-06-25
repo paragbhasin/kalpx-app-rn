@@ -69,7 +69,12 @@ export default function ProgramInviteClaimScreen() {
             {
               text: "Keep current",
               style: "cancel",
-              onPress: () => navigation.goBack(),
+              onPress: async () => {
+                // Clear pending code so login/logout doesn't loop back here.
+                await AsyncStorage.removeItem("pending_program_code");
+                await AsyncStorage.removeItem("pending_program_source");
+                navigation.goBack();
+              },
             },
             {
               text: "Switch to new program",
@@ -96,6 +101,11 @@ export default function ProgramInviteClaimScreen() {
         if (source) await AsyncStorage.setItem("pending_program_source", source ?? "deep_link");
         navigation.navigate("Login" as any);
         return;
+      }
+      // Permanent failures — clear pending so login/logout doesn't loop here.
+      if (status === 404 || status === 410 || status === 403) {
+        await AsyncStorage.removeItem("pending_program_code");
+        await AsyncStorage.removeItem("pending_program_source");
       }
       if (status === 404) setError("That code wasn't found. Check the code and try again.");
       else if (status === 410) setError("This program has ended.");

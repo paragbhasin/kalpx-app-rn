@@ -16,6 +16,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Clipboard,
   LayoutAnimation,
   Linking,
   SafeAreaView,
@@ -102,6 +103,7 @@ export default function ProgramDayScreen() {
   const [error, setError] = useState<string | null>(null);
 
   // Reminder accordion
+  const [copiedLink, setCopiedLink] = useState(false);
   const [reminders, setReminders] = useState<ProgramReminders | null>(null);
   const [remindersOpen, setRemindersOpen] = useState(false);
   const [reminderSaving, setReminderSaving] = useState(false);
@@ -346,6 +348,9 @@ export default function ProgramDayScreen() {
               navigation.navigate("ProgramWisdomRunner", {
                 wisdom: dayContent.wisdom_card,
                 dayNumber: dayContent.day_number,
+                day_join_url: dayContent.day_join_url ?? null,
+                day_session_time: dayContent.day_session_time ?? null,
+                day_session_timezone: dayContent.day_session_timezone ?? null,
               })
             }
             accessibilityLabel="Wisdom of the Day"
@@ -379,6 +384,23 @@ export default function ProgramDayScreen() {
                 </Text>
               ) : null}
               <Text style={styles.liveSessionLink}>Tap to join →</Text>
+              <View style={styles.liveSessionUrlRow}>
+                <Text style={styles.liveSessionUrl} numberOfLines={1} ellipsizeMode="middle">
+                  {dayContent.day_join_url}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    Clipboard.setString(dayContent.day_join_url!);
+                    setCopiedLink(true);
+                    setTimeout(() => setCopiedLink(false), 2000);
+                  }}
+                  style={styles.copyBtn}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Text style={styles.copyBtnText}>{copiedLink ? "Copied!" : "Copy"}</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </TouchableOpacity>
         ) : null}
@@ -652,6 +674,31 @@ const styles = StyleSheet.create({
   liveSessionLink: {
     fontFamily: Fonts.sans.medium,
     fontSize: 13,
+    color: '#C99317',
+  },
+  liveSessionUrlRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+    gap: 8,
+  },
+  liveSessionUrl: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 11,
+    color: '#9A7548',
+    flex: 1,
+  },
+  copyBtn: {
+    backgroundColor: '#FFF3DC',
+    borderWidth: 1,
+    borderColor: '#C99317',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  copyBtnText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 11,
     color: '#C99317',
   },
   reflectionCard: {

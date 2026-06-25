@@ -746,6 +746,9 @@ export default function FourDoorHomeContainer({
         >
           {!!error && <Text style={styles.inlineError}>{error}</Text>}
 
+          {/* Program card first when user has active program */}
+          {activeProgram && <ProgramCard program={activeProgram} />}
+
           <DoorCard
             Icon={M3Icon}
             label={t("mitraFourDoor.door.myRhythm")}
@@ -937,11 +940,7 @@ export default function FourDoorHomeContainer({
           </View>
 
           {/* Program Distribution OS — MOB-8 + MOB-2 */}
-          {activeProgram ? (
-            <ProgramCard program={activeProgram} />
-          ) : (
-            <ProgramCodeEntryRow />
-          )}
+          {!activeProgram && <ProgramCodeEntryRow />}
         </View>
       </ScrollView>
 

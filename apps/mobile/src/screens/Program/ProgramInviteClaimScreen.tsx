@@ -23,6 +23,7 @@ import {
 import { Fonts } from "../../theme/fonts";
 import { claimProgram, type ProgramClaimConflict } from "../../engine/programApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { setSkipMitraStart, setForceFourDoorHome } from "../../utils/postLoginGuard";
 
 export default function ProgramInviteClaimScreen() {
   const navigation = useNavigation<any>();
@@ -110,15 +111,24 @@ export default function ProgramInviteClaimScreen() {
           <Text style={styles.successEmoji}>🙏</Text>
           <Text style={styles.successTitle}>You've joined!</Text>
           <Text style={styles.successSubtext}>
-            Welcome to {successName}. Head to Home to start Day 1.
+            Welcome to {successName}. Your Day 1 is ready.
           </Text>
           <TouchableOpacity
             activeOpacity={0.85}
-            onPress={() => navigation.navigate("Home" as any)}
+            onPress={() => {
+              setSkipMitraStart();
+              navigation.reset({
+                index: 1,
+                routes: [
+                  { name: "Home" },
+                  { name: "ProgramDayScreen", params: { dayNumber: 1, completedItems: [] } },
+                ],
+              });
+            }}
             style={styles.successBtn}
-            accessibilityLabel="Go to Home"
+            accessibilityLabel="Start Day 1"
           >
-            <Text style={styles.successBtnText}>Go to Home →</Text>
+            <Text style={styles.successBtnText}>Start Day 1 →</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>

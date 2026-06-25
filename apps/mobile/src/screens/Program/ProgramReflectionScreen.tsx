@@ -1,5 +1,6 @@
 import { useNavigation, useRoute } from "@react-navigation/native";
 import React from "react";
+import { setSkipMitraStart, setForceFourDoorHome } from "../../utils/postLoginGuard";
 import {
   SafeAreaView,
   ScrollView,
@@ -33,7 +34,11 @@ export default function ProgramReflectionScreen() {
         <View style={styles.actions}>
           <TouchableOpacity
             style={styles.primaryBtn}
-            onPress={() => navigation.reset({ index: 0, routes: [{ name: "HomeTabs" }] })}
+            onPress={() => {
+              setSkipMitraStart();
+              setForceFourDoorHome();
+              navigation.reset({ index: 0, routes: [{ name: "Home" }] });
+            }}
           >
             <Text style={styles.primaryBtnText}>Go to Home</Text>
           </TouchableOpacity>

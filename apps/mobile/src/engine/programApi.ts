@@ -22,6 +22,7 @@ export interface ActiveProgramSummary {
   status: "active" | "completed";
   current_day: number;
   next_day_available: boolean;
+  next_day_locked?: boolean;
   days_remaining: number;
   show_day8_transition?: boolean;
 }
@@ -119,6 +120,27 @@ export async function submitProgramMicroFeedback(
 
 export async function recordProgramShare(): Promise<any> {
   const res = await api.post("programs/my-active/share/");
+  return res.data;
+}
+
+export interface ProgramReminders {
+  mantra_reminder_enabled: boolean;
+  mantra_reminder_time: string | null;
+  sankalp_reminder_enabled: boolean;
+  sankalp_reminder_time: string | null;
+  practice_reminder_enabled: boolean;
+  practice_reminder_time: string | null;
+}
+
+export type ProgramRemindersPatch = Partial<ProgramReminders>;
+
+export async function apiGetProgramReminders(): Promise<ProgramReminders> {
+  const res = await api.get('programs/my-active/reminders/');
+  return res.data;
+}
+
+export async function apiPatchProgramReminders(patch: ProgramRemindersPatch): Promise<ProgramReminders> {
+  const res = await api.patch('programs/my-active/reminders/', patch);
   return res.data;
 }
 

@@ -55,7 +55,7 @@ import store, { AppDispatch, RootState } from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
 import { registerDeviceToBackend } from "../../utils/registerDevice";
-import { consumeSkipMitraStart } from "../../utils/postLoginGuard";
+import { consumeSkipMitraStart, consumeForceFourDoorHome } from "../../utils/postLoginGuard";
 import { fetchProfileDetails } from "../Profile/actions";
 import { rfs, rhPad, rs, TABLET_MAX_CARD_WIDTH } from "../../utils/responsive";
 
@@ -227,6 +227,7 @@ export default function Home() {
   );
 
   const [mitraJourneyId, setMitraJourneyId] = useState<string | null>(null);
+  const [forceFourDoor, setForceFourDoor] = useState(false);
   const [hasPartialState, setHasPartialState] = useState(false);
   const [showInnerPathReentry, setShowInnerPathReentry] = useState(false);
   const [checkingJourney, setCheckingJourney] = useState(false);
@@ -328,7 +329,7 @@ export default function Home() {
   const HOME_BACKGROUND = require("../../../assets/new_home.webp");
   const CONTINUE_BG = require("../../../assets/beige_bg.webp");
   const isLandingHome =
-    !hasPartialState && !(isLoggedIn && checkingJourney) && !mitraJourneyId;
+    !hasPartialState && !(isLoggedIn && checkingJourney) && !mitraJourneyId && !forceFourDoor;
 
   // Auto-start Live Activity on home focus.
   // No preference → default behavior (all types auto-start as before).
@@ -535,14 +536,28 @@ export default function Home() {
                 setHasPartialState(true);
               } else {
                 setHasPartialState(false);
-                if (!v3AutoRoutedRef.current && !consumeSkipMitraStart()) {
-                  v3AutoRoutedRef.current = true;
-                  navigation.navigate("MitraStart" as any);
+                if (consumeForceFourDoorHome()) {
+                  setForceFourDoor(true);
+                } else {
+                  // No journey, no companion — check active program before redirecting to Mitra
+                  let hasActiveProgram = false;
+                  try {
+                    const progRes = await api.get("programs/my-active/");
+                    hasActiveProgram = !!(progRes?.data);
+                  } catch { /* ignore */ }
+                  if (hasActiveProgram) {
+                    setForceFourDoor(true);
+                  } else if (!v3AutoRoutedRef.current && !consumeSkipMitraStart()) {
+                    v3AutoRoutedRef.current = true;
+                    navigation.navigate("MitraStart" as any);
+                  }
                 }
               }
             } catch {
               setHasPartialState(false);
-              if (!v3AutoRoutedRef.current && !consumeSkipMitraStart()) {
+              if (consumeForceFourDoorHome()) {
+                setForceFourDoor(true);
+              } else if (!v3AutoRoutedRef.current && !consumeSkipMitraStart()) {
                 v3AutoRoutedRef.current = true;
                 navigation.navigate("MitraStart" as any);
               }
@@ -1169,31 +1184,35 @@ export default function Home() {
 
       {hasPartialState ? (
         // Stream O: partial-state user (has companion data but no active journey) → FourDoor home
-        <FourDoorHomeContainer
-          forceInnerPathReentry={showInnerPathReentry}
-          userName={
-            profileNameFromRedux ||
-            profileNameFromStorage ||
-            user?.name ||
-            user?.firstName ||
-            user?.email?.split("@")[0] ||
-            "friend"
-          }
-        />
-      ) : isLoggedIn && checkingJourney ? null : mitraJourneyId ? ( // welcome page never flashes for users Mitra already knows. // Authenticated user while segment check is in progress — show nothing so the
+        <View style={styles.fourDoorWrapper}>
+          <FourDoorHomeContainer
+            forceInnerPathReentry={showInnerPathReentry}
+            userName={
+              profileNameFromRedux ||
+              profileNameFromStorage ||
+              user?.name ||
+              user?.firstName ||
+              user?.email?.split("@")[0] ||
+              "friend"
+            }
+          />
+        </View>
+      ) : isLoggedIn && checkingJourney ? null : (mitraJourneyId || forceFourDoor) ? ( // welcome page never flashes for users Mitra already knows. // Authenticated user while segment check is in progress — show nothing so the
         // Returning users land on the Four Door home. If Inner Path needs a
         // reentry decision after a gap, InnerPathScreen owns that surface.
-        <FourDoorHomeContainer
-          forceInnerPathReentry={showInnerPathReentry}
-          userName={
-            profileNameFromRedux ||
-            profileNameFromStorage ||
-            user?.name ||
-            user?.firstName ||
-            user?.email?.split("@")[0] ||
-            "friend"
-          }
-        />
+        <View style={styles.fourDoorWrapper}>
+          <FourDoorHomeContainer
+            forceInnerPathReentry={showInnerPathReentry}
+            userName={
+              profileNameFromRedux ||
+              profileNameFromStorage ||
+              user?.name ||
+              user?.firstName ||
+              user?.email?.split("@")[0] ||
+              "friend"
+            }
+          />
+        </View>
       ) : (
         <ScrollView
           contentContainerStyle={[
@@ -1325,6 +1344,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "transparent",
     marginTop: -40,
+  },
+  fourDoorWrapper: {
+    flex: 1,
+    backgroundColor: "#FAF7F2",
+    marginTop: 40,
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,

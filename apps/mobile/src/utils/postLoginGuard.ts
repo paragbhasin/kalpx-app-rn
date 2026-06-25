@@ -13,3 +13,19 @@ export function consumeSkipMitraStart(): boolean {
   }
   return false;
 }
+
+// One-shot flag: set when navigating Home from a program flow so that
+// Home.tsx renders FourDoorHomeContainer even if the user has no journey.
+let _forceFourDoor = false;
+
+export function setForceFourDoorHome() {
+  _forceFourDoor = true;
+}
+
+export function consumeForceFourDoorHome(): boolean {
+  if (_forceFourDoor) {
+    _forceFourDoor = false;
+    return true;
+  }
+  return false;
+}

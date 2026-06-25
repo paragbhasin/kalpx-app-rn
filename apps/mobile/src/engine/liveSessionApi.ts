@@ -152,6 +152,78 @@ export async function recordJoinClick(code: string): Promise<JoinClickResult> {
   return res.data;
 }
 
+// ── Guide dashboard types ─────────────────────────────────────────────────────
+
+export interface GuideProgram {
+  code: string;
+  slug: string;
+  title: string;
+  status: string;
+  is_public: boolean;
+  join_url: string;
+  template_id: number | null;
+  joined_count: number;
+  testimonials_count: number;
+}
+
+export interface GuideSession {
+  code: string;
+  title: string;
+  session_type: string;
+  scheduled_at: string;
+  status: string;
+  registered_count: number;
+  reflection_count: number;
+}
+
+export interface GuideDashboardTemplate {
+  id: number;
+  title: string;
+  duration_days: number;
+  review_status: string;
+  submitted_at: string | null;
+}
+
+export interface GuideDashboard {
+  summary: {
+    programs_count: number;
+    total_joined: number;
+    sessions_count: number;
+    testimonials_count: number;
+  };
+  programs: GuideProgram[];
+  my_templates: GuideDashboardTemplate[];
+  upcoming_sessions: GuideSession[];
+}
+
+export async function fetchGuideDashboard(): Promise<GuideDashboard> {
+  const res = await api.get("guide/dashboard/");
+  return res.data;
+}
+
+export async function fetchGuideMyProfile(): Promise<{ is_guide: boolean }> {
+  const res = await api.get("guide/my-profile/");
+  return res.data;
+}
+
+export interface GuideInviteInfo {
+  email: string;
+  expires_at: string;
+}
+
+export async function fetchGuideInviteInfo(token: string): Promise<GuideInviteInfo> {
+  const res = await api.get(`guide/invite/${token}/`);
+  return res.data;
+}
+
+export async function acceptGuideInvite(
+  token: string,
+  password: string,
+): Promise<{ access_token: string; refresh_token: string; user: { id: number; email: string } }> {
+  const res = await api.post(`guide/invite/${token}/`, { password });
+  return res.data;
+}
+
 // ── Phase 2: Guide self-service API ──────────────────────────────────────────
 
 export interface GuideSubmissionResult {

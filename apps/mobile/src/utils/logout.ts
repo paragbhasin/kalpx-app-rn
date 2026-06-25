@@ -75,7 +75,7 @@ export async function performLogout(): Promise<void> {
   } catch {}
 
   // Remove auth tokens only — targeted removal preserves other keys
-  await AsyncStorage.multiRemove([...AUTH_KEYS_TO_REMOVE]);
+  await AsyncStorage.multiRemove([...AUTH_KEYS_TO_REMOVE, "kalpx_is_guide"]);
 
   // Explicitly restore guestUUID so guest requests continue to work after logout
   if (guestUUID) {

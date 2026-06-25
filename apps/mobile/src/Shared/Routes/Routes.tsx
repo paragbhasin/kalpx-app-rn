@@ -36,6 +36,10 @@ import StreakScreen from "../../screens/Streak/StreakScreen";
 import LandingScreen from "../../screens/WelcomeScreen/LandingScreen";
 import WelcomeScreen from "../../screens/WelcomeScreen/WelcomeScreen";
 import AppDrawerNavigator from "./DrawerNavigator";
+import GuideHomeScreen from "../../screens/Guide/GuideHomeScreen";
+import GuideInviteAcceptScreen from "../../screens/Guide/GuideInviteAcceptScreen";
+import { GuideProgramDraftScreen } from "../../screens/Program/GuideProgramDraftScreen";
+import { GuideSessionDraftScreen } from "../../screens/LiveSession/GuideSessionDraftScreen";
 
 const Stack: any = createNativeStackNavigator();
 
@@ -86,6 +90,10 @@ const Routes = ({ initialRouteName = "AppDrawer" }) => {
       <Stack.Screen name="DailyPracticeSelectList" component={DailyPracticeSelectList} />
       <Stack.Screen name="MitraEngine" component={ScreenRenderer} />
       <Stack.Screen name="MitraPhilosophy" component={MitraPhilosophy} />
+      <Stack.Screen name="GuideHome" component={GuideHomeScreen} />
+      <Stack.Screen name="GuideInviteAccept" component={GuideInviteAcceptScreen} />
+      <Stack.Screen name="GuideProgramDraft" component={GuideProgramDraftScreen} />
+      <Stack.Screen name="GuideSessionDraft" component={GuideSessionDraftScreen} />
     </Stack.Navigator>
   );
 };

@@ -225,6 +225,7 @@ export function LoginPage() {
     if (!result.success) {
       setError(result.error || t("auth.loginFailed"));
     } else {
+      try { navigator.sendBeacon('/api/programs/track/', JSON.stringify({ event: 'login_completed', method: 'email' })); } catch { /* non-fatal */ }
       dispatch(showSnackBar(t("auth.loginSuccess")));
     }
   };

@@ -24,7 +24,7 @@ export function RequiresStaff({ children }: Props) {
   if (status === 'loading') return null;
   if (status === 'not-authed') {
     const returnTo = encodeURIComponent(location.pathname + location.search);
-    return <Navigate to={`/login?returnTo=${returnTo}`} replace />;
+    return <Navigate to={`/ops-login?returnTo=${returnTo}`} replace />;
   }
   if (status === 'not-staff') return <Navigate to="/" replace />;
   return <>{children}</>;

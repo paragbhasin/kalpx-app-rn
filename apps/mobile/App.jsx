@@ -54,6 +54,7 @@ import {
 } from "./src/service/pushNotifications";
 import { attachDeepLinkListeners } from "./src/utils/deeplink";
 import { registerDeviceToBackend } from "./src/utils/registerDevice";
+import { initAnalytics } from "./src/utils/initAnalytics";
 
 import UpdateModal from "./src/components/UpdateModal";
 import { AppLockOverlay } from "./src/components/AppLockOverlay";
@@ -405,6 +406,7 @@ export default function App() {
 
         // Register device in background — must not block splash hide.
         registerDeviceToBackend();
+        initAnalytics().catch(() => {});
       } catch (err) {
         console.warn("Startup sequence error:", err);
         // Fallback: render with system fonts if anything above throws.

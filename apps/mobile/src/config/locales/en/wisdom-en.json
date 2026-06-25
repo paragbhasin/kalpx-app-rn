@@ -9,16 +9,10 @@
       "Begin with two minutes today."
     ],
     "source": {
-      "title": "Meditative teaching (paraphrase)"
+      "title": "Meditative teaching "
     },
-    "tags": [
-      "Stillness",
-      "Focus",
-      "Practice"
-    ],
-    "deities": [
-      "Shiva"
-    ],
+    "tags": ["Stillness", "Focus", "Practice"],
+    "deities": ["Shiva"],
     "mood": "calm",
     "difficulty": 1,
     "weight": 1.1,
@@ -34,14 +28,10 @@
       "Pause, then choose the gentlest true words."
     ],
     "source": {
-      "title": "Gītā ethics (paraphrase)",
+      "title": "Gītā ethics ",
       "ref": "17.15"
     },
-    "tags": [
-      "Truth",
-      "Ahimsa",
-      "Speech"
-    ],
+    "tags": ["Truth", "Ahimsa", "Speech"],
     "mood": "clarity",
     "difficulty": 1,
     "language_level": "simple"
@@ -56,17 +46,10 @@
       "Notice how the heart feels lighter."
     ],
     "source": {
-      "title": "Bhakti reflections (paraphrase)"
+      "title": "Bhakti reflections "
     },
-    "tags": [
-      "Devotion",
-      "Gratitude",
-      "Seva"
-    ],
-    "deities": [
-      "Krishna",
-      "Rama"
-    ],
+    "tags": ["Devotion", "Gratitude", "Seva"],
+    "deities": ["Krishna", "Rama"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -81,13 +64,9 @@
       "Act from steadiness, not from storm."
     ],
     "source": {
-      "title": "Vedānta guidance (paraphrase)"
+      "title": "Vedānta guidance "
     },
-    "tags": [
-      "Viveka",
-      "Dharma",
-      "Focus"
-    ],
+    "tags": ["Viveka", "Dharma", "Focus"],
     "mood": "clarity",
     "difficulty": 2,
     "language_level": "simple"
@@ -102,23 +81,13 @@
       "Strength can wear a gentle face."
     ],
     "source": {
-      "title": "Śākta insight (paraphrase)"
+      "title": "Śākta insight "
     },
-    "tags": [
-      "Shakti",
-      "Boundaries",
-      "Courage",
-      "Compassion"
-    ],
-    "deities": [
-      "Durga",
-      "Lakshmi"
-    ],
+    "tags": ["Shakti", "Boundaries", "Courage", "Compassion"],
+    "deities": ["Durga", "Lakshmi"],
     "mood": "courage",
     "difficulty": 2,
-    "season": [
-      "navratri"
-    ],
+    "season": ["navratri"],
     "language_level": "simple"
   },
   {
@@ -131,17 +100,11 @@
       "Duty with love brings inner peace."
     ],
     "source": {
-      "title": "Bhagavad Gītā (paraphrase)",
+      "title": "Bhagavad Gītā ",
       "ref": "2.47"
     },
-    "tags": [
-      "Dharma",
-      "Duty",
-      "Selflessness"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["Dharma", "Duty", "Selflessness"],
+    "deities": ["Krishna"],
     "mood": "focus",
     "difficulty": 2,
     "language_level": "simple"
@@ -156,17 +119,10 @@
       "Notice the lightness it brings."
     ],
     "source": {
-      "title": "Bhakti teachings (paraphrase)"
+      "title": "Bhakti teachings "
     },
-    "tags": [
-      "Seva",
-      "Compassion",
-      "Selflessness"
-    ],
-    "deities": [
-      "Rama",
-      "Hanuman"
-    ],
+    "tags": ["Seva", "Compassion", "Selflessness"],
+    "deities": ["Rama", "Hanuman"],
     "mood": "compassion",
     "difficulty": 1,
     "weight": 1,
@@ -182,16 +138,10 @@
       "See what wisdom rises within."
     ],
     "source": {
-      "title": "Yoga Sūtras (paraphrase)"
+      "title": "Yoga Sūtras "
     },
-    "tags": [
-      "Stillness",
-      "Clarity",
-      "Practice"
-    ],
-    "deities": [
-      "Shiva"
-    ],
+    "tags": ["Stillness", "Clarity", "Practice"],
+    "deities": ["Shiva"],
     "mood": "calm",
     "difficulty": 1,
     "language_level": "poetic"
@@ -206,13 +156,9 @@
       "Trust the space it creates for growth."
     ],
     "source": {
-      "title": "Vedānta wisdom (paraphrase)"
+      "title": "Vedānta wisdom "
     },
-    "tags": [
-      "Vairāgya",
-      "Courage",
-      "Growth"
-    ],
+    "tags": ["Vairāgya", "Courage", "Growth"],
     "mood": "courage",
     "difficulty": 2,
     "language_level": "simple"
@@ -227,16 +173,10 @@
       "Start with a simple thank you today."
     ],
     "source": {
-      "title": "Bhakti practice (paraphrase)"
+      "title": "Bhakti practice "
     },
-    "tags": [
-      "Gratitude",
-      "awareness",
-      "Devotion"
-    ],
-    "deities": [
-      "Lakshmi"
-    ],
+    "tags": ["Gratitude", "awareness", "Devotion"],
+    "deities": ["Lakshmi"],
     "mood": "gratitude",
     "difficulty": 1,
     "weight": 1.2,
@@ -252,13 +192,9 @@
       "Strength grows in steady endurance."
     ],
     "source": {
-      "title": "Smārta teaching (paraphrase)"
+      "title": "Smārta teaching "
     },
-    "tags": [
-      "patience",
-      "endurance",
-      "Focus"
-    ],
+    "tags": ["patience", "endurance", "Focus"],
     "mood": "calm",
     "difficulty": 2,
     "language_level": "simple"
@@ -273,16 +209,10 @@
       "Notice how it softens your heart."
     ],
     "source": {
-      "title": "Dharma ethics (paraphrase)"
+      "title": "Dharma ethics "
     },
-    "tags": [
-      "Ahimsa",
-      "Compassion",
-      "kindness"
-    ],
-    "deities": [
-      "Rama"
-    ],
+    "tags": ["Ahimsa", "Compassion", "kindness"],
+    "deities": ["Rama"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -297,13 +227,9 @@
       "Test it in one choice today."
     ],
     "source": {
-      "title": "Yoga philosophy (paraphrase)"
+      "title": "Yoga philosophy "
     },
-    "tags": [
-      "balance",
-      "Viveka",
-      "Clarity"
-    ],
+    "tags": ["balance", "Viveka", "Clarity"],
     "mood": "clarity",
     "difficulty": 2,
     "language_level": "simple"
@@ -318,16 +244,10 @@
       "Feel the ease of moving with life."
     ],
     "source": {
-      "title": "Bhakti wisdom (paraphrase)"
+      "title": "Bhakti wisdom "
     },
-    "tags": [
-      "surrender",
-      "Devotion",
-      "trust"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["surrender", "Devotion", "trust"],
+    "deities": ["Krishna"],
     "mood": "calm",
     "difficulty": 2,
     "language_level": "simple"
@@ -342,17 +262,11 @@
       "Let truth guide your steps."
     ],
     "source": {
-      "title": "Bhagavad Gītā (paraphrase)",
+      "title": "Bhagavad Gītā ",
       "ref": "3.25"
     },
-    "tags": [
-      "Dharma",
-      "purpose",
-      "action"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["Dharma", "purpose", "action"],
+    "deities": ["Krishna"],
     "mood": "focus",
     "difficulty": 2,
     "language_level": "simple"
@@ -367,13 +281,9 @@
       "Notice the calm it restores."
     ],
     "source": {
-      "title": "Yoga practice (paraphrase)"
+      "title": "Yoga practice "
     },
-    "tags": [
-      "breath",
-      "presence",
-      "Calm"
-    ],
+    "tags": ["breath", "presence", "Calm"],
     "mood": "calm",
     "difficulty": 1,
     "weight": 1,
@@ -389,17 +299,10 @@
       "See how love breathes in freedom."
     ],
     "source": {
-      "title": "Bhakti insight (paraphrase)"
+      "title": "Bhakti insight "
     },
-    "tags": [
-      "love",
-      "Vairāgya",
-      "Devotion"
-    ],
-    "deities": [
-      "Radha",
-      "Krishna"
-    ],
+    "tags": ["love", "Vairāgya", "Devotion"],
+    "deities": ["Radha", "Krishna"],
     "mood": "compassion",
     "difficulty": 2,
     "language_level": "simple"
@@ -414,13 +317,9 @@
       "Wisdom grows in a humble heart."
     ],
     "source": {
-      "title": "Smārta wisdom (paraphrase)"
+      "title": "Smārta wisdom "
     },
-    "tags": [
-      "humility",
-      "Wisdom",
-      "listening"
-    ],
+    "tags": ["humility", "Wisdom", "listening"],
     "mood": "clarity",
     "difficulty": 2,
     "language_level": "simple"
@@ -435,16 +334,10 @@
       "Feel the glow of selfless giving."
     ],
     "source": {
-      "title": "Bhakti practice (paraphrase)"
+      "title": "Bhakti practice "
     },
-    "tags": [
-      "Seva",
-      "Devotion",
-      "Compassion"
-    ],
-    "deities": [
-      "Hanuman"
-    ],
+    "tags": ["Seva", "Devotion", "Compassion"],
+    "deities": ["Hanuman"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -459,13 +352,9 @@
       "Inner calm outlasts outer chaos."
     ],
     "source": {
-      "title": "Yoga Sūtras (paraphrase)"
+      "title": "Yoga Sūtras "
     },
-    "tags": [
-      "Focus",
-      "Calm",
-      "resilience"
-    ],
+    "tags": ["Focus", "Calm", "resilience"],
     "mood": "focus",
     "difficulty": 2,
     "language_level": "simple"
@@ -480,13 +369,9 @@
       "Feel the peace of letting be."
     ],
     "source": {
-      "title": "Vedānta teaching (paraphrase)"
+      "title": "Vedānta teaching "
     },
-    "tags": [
-      "acceptance",
-      "Peace",
-      "surrender"
-    ],
+    "tags": ["acceptance", "Peace", "surrender"],
     "mood": "calm",
     "difficulty": 2,
     "language_level": "simple"
@@ -501,13 +386,9 @@
       "Light one spark of understanding today."
     ],
     "source": {
-      "title": "Upaniṣads (paraphrase)"
+      "title": "Upaniṣads "
     },
-    "tags": [
-      "knowledge",
-      "Clarity",
-      "Truth"
-    ],
+    "tags": ["knowledge", "Clarity", "Truth"],
     "mood": "clarity",
     "difficulty": 2,
     "language_level": "simple"
@@ -522,13 +403,9 @@
       "Joy grows where attention rests."
     ],
     "source": {
-      "title": "Smārta teaching (paraphrase)"
+      "title": "Smārta teaching "
     },
-    "tags": [
-      "simplicity",
-      "joy",
-      "presence"
-    ],
+    "tags": ["simplicity", "joy", "presence"],
     "mood": "gratitude",
     "difficulty": 1,
     "language_level": "simple"
@@ -543,16 +420,10 @@
       "The heart rests in divine timing."
     ],
     "source": {
-      "title": "Bhakti wisdom (paraphrase)"
+      "title": "Bhakti wisdom "
     },
-    "tags": [
-      "faith",
-      "trust",
-      "Devotion"
-    ],
-    "deities": [
-      "Rama"
-    ],
+    "tags": ["faith", "trust", "Devotion"],
+    "deities": ["Rama"],
     "mood": "calm",
     "difficulty": 1,
     "language_level": "simple"
@@ -567,16 +438,10 @@
       "Let it guide your next step."
     ],
     "source": {
-      "title": "Śaiva teaching (paraphrase)"
+      "title": "Śaiva teaching "
     },
-    "tags": [
-      "Stillness",
-      "strength",
-      "Practice"
-    ],
-    "deities": [
-      "Shiva"
-    ],
+    "tags": ["Stillness", "strength", "Practice"],
+    "deities": ["Shiva"],
     "mood": "calm",
     "difficulty": 1,
     "language_level": "simple"
@@ -591,13 +456,9 @@
       "Try one gentle act today."
     ],
     "source": {
-      "title": "Dharma teaching (paraphrase)"
+      "title": "Dharma teaching "
     },
-    "tags": [
-      "Compassion",
-      "Ahimsa",
-      "healing"
-    ],
+    "tags": ["Compassion", "Ahimsa", "healing"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -612,13 +473,9 @@
       "Start with ten minutes of attention."
     ],
     "source": {
-      "title": "Yoga Sūtras (paraphrase)"
+      "title": "Yoga Sūtras "
     },
-    "tags": [
-      "Focus",
-      "discipline",
-      "destiny"
-    ],
+    "tags": ["Focus", "discipline", "destiny"],
     "mood": "focus",
     "difficulty": 2,
     "language_level": "simple"
@@ -633,16 +490,10 @@
       "Feel the grace of acceptance."
     ],
     "source": {
-      "title": "Bhakti teaching (paraphrase)"
+      "title": "Bhakti teaching "
     },
-    "tags": [
-      "surrender",
-      "grace",
-      "Truth"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["surrender", "grace", "Truth"],
+    "deities": ["Krishna"],
     "mood": "calm",
     "difficulty": 2,
     "language_level": "simple"
@@ -657,13 +508,9 @@
       "Freedom grows in clear seeing."
     ],
     "source": {
-      "title": "Vedānta insight (paraphrase)"
+      "title": "Vedānta insight "
     },
-    "tags": [
-      "awareness",
-      "freedom",
-      "Viveka"
-    ],
+    "tags": ["awareness", "freedom", "Viveka"],
     "mood": "clarity",
     "difficulty": 2,
     "language_level": "simple"
@@ -678,17 +525,10 @@
       "Feel its power in quiet moments."
     ],
     "source": {
-      "title": "Bhakti teaching (paraphrase)"
+      "title": "Bhakti teaching "
     },
-    "tags": [
-      "Devotion",
-      "strength",
-      "faith"
-    ],
-    "deities": [
-      "Krishna",
-      "Rama"
-    ],
+    "tags": ["Devotion", "strength", "faith"],
+    "deities": ["Krishna", "Rama"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -703,13 +543,9 @@
       "Walk it with courage and care."
     ],
     "source": {
-      "title": "Upaniṣads (paraphrase)"
+      "title": "Upaniṣads "
     },
-    "tags": [
-      "Truth",
-      "Viveka",
-      "Clarity"
-    ],
+    "tags": ["Truth", "Viveka", "Clarity"],
     "mood": "clarity",
     "difficulty": 3,
     "language_level": "simple"
@@ -724,16 +560,10 @@
       "Notice how your heart expands."
     ],
     "source": {
-      "title": "Bhakti practice (paraphrase)"
+      "title": "Bhakti practice "
     },
-    "tags": [
-      "Seva",
-      "joy",
-      "Compassion"
-    ],
-    "deities": [
-      "Hanuman"
-    ],
+    "tags": ["Seva", "joy", "Compassion"],
+    "deities": ["Hanuman"],
     "mood": "gratitude",
     "difficulty": 1,
     "language_level": "simple"
@@ -748,13 +578,9 @@
       "Calm anchors you to truth."
     ],
     "source": {
-      "title": "Yoga teaching (paraphrase)"
+      "title": "Yoga teaching "
     },
-    "tags": [
-      "Calm",
-      "resilience",
-      "Peace"
-    ],
+    "tags": ["Calm", "resilience", "Peace"],
     "mood": "calm",
     "difficulty": 2,
     "language_level": "simple"
@@ -769,13 +595,9 @@
       "Clarity follows an honest heart."
     ],
     "source": {
-      "title": "Dharma ethics (paraphrase)"
+      "title": "Dharma ethics "
     },
-    "tags": [
-      "Truth",
-      "honesty",
-      "Clarity"
-    ],
+    "tags": ["Truth", "honesty", "Clarity"],
     "mood": "clarity",
     "difficulty": 1,
     "language_level": "simple"
@@ -790,17 +612,10 @@
       "Feel its timeless warmth within."
     ],
     "source": {
-      "title": "Bhakti wisdom (paraphrase)"
+      "title": "Bhakti wisdom "
     },
-    "tags": [
-      "love",
-      "Devotion",
-      "connection"
-    ],
-    "deities": [
-      "Radha",
-      "Krishna"
-    ],
+    "tags": ["love", "Devotion", "connection"],
+    "deities": ["Radha", "Krishna"],
     "mood": "compassion",
     "difficulty": 2,
     "language_level": "poetic"
@@ -815,13 +630,9 @@
       "Notice the clarity it brings."
     ],
     "source": {
-      "title": "Yoga Sūtras (paraphrase)"
+      "title": "Yoga Sūtras "
     },
-    "tags": [
-      "discipline",
-      "freedom",
-      "Focus"
-    ],
+    "tags": ["discipline", "freedom", "Focus"],
     "mood": "focus",
     "difficulty": 2,
     "language_level": "simple"
@@ -836,16 +647,10 @@
       "Try it in a tough moment today."
     ],
     "source": {
-      "title": "Bhakti practice (paraphrase)"
+      "title": "Bhakti practice "
     },
-    "tags": [
-      "Gratitude",
-      "Peace",
-      "transformation"
-    ],
-    "deities": [
-      "Lakshmi"
-    ],
+    "tags": ["Gratitude", "Peace", "transformation"],
+    "deities": ["Lakshmi"],
     "mood": "gratitude",
     "difficulty": 1,
     "language_level": "simple"
@@ -860,16 +665,10 @@
       "Feel the freedom of being you."
     ],
     "source": {
-      "title": "Śaiva wisdom (paraphrase)"
+      "title": "Śaiva wisdom "
     },
-    "tags": [
-      "Courage",
-      "authenticity",
-      "Truth"
-    ],
-    "deities": [
-      "Shiva"
-    ],
+    "tags": ["Courage", "authenticity", "Truth"],
+    "deities": ["Shiva"],
     "mood": "courage",
     "difficulty": 2,
     "language_level": "simple"
@@ -884,16 +683,10 @@
       "Try it in one small moment."
     ],
     "source": {
-      "title": "Bhakti teaching (paraphrase)"
+      "title": "Bhakti teaching "
     },
-    "tags": [
-      "surrender",
-      "Peace",
-      "trust"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["surrender", "Peace", "trust"],
+    "deities": ["Krishna"],
     "mood": "calm",
     "difficulty": 2,
     "language_level": "simple"
@@ -908,13 +701,9 @@
       "Learn from one conversation."
     ],
     "source": {
-      "title": "Smārta teaching (paraphrase)"
+      "title": "Smārta teaching "
     },
-    "tags": [
-      "listening",
-      "Wisdom",
-      "humility"
-    ],
+    "tags": ["listening", "Wisdom", "humility"],
     "mood": "clarity",
     "difficulty": 1,
     "language_level": "simple"
@@ -929,16 +718,10 @@
       "Feel its quiet, enduring strength."
     ],
     "source": {
-      "title": "Śākta wisdom (paraphrase)"
+      "title": "Śākta wisdom "
     },
-    "tags": [
-      "gentleness",
-      "strength",
-      "Compassion"
-    ],
-    "deities": [
-      "Lakshmi"
-    ],
+    "tags": ["gentleness", "strength", "Compassion"],
+    "deities": ["Lakshmi"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -953,16 +736,10 @@
       "Feel the heart’s courage rise."
     ],
     "source": {
-      "title": "Bhakti teaching (paraphrase)"
+      "title": "Bhakti teaching "
     },
-    "tags": [
-      "faith",
-      "Courage",
-      "trust"
-    ],
-    "deities": [
-      "Rama"
-    ],
+    "tags": ["faith", "Courage", "trust"],
+    "deities": ["Rama"],
     "mood": "courage",
     "difficulty": 1,
     "language_level": "simple"
@@ -977,17 +754,11 @@
       "Move with intention and calm."
     ],
     "source": {
-      "title": "Bhagavad Gītā (paraphrase)",
+      "title": "Bhagavad Gītā ",
       "ref": "2.50"
     },
-    "tags": [
-      "purpose",
-      "Clarity",
-      "Focus"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["purpose", "Clarity", "Focus"],
+    "deities": ["Krishna"],
     "mood": "focus",
     "difficulty": 2,
     "language_level": "simple"
@@ -1002,13 +773,9 @@
       "Presence reveals life’s beauty."
     ],
     "source": {
-      "title": "Yoga teaching (paraphrase)"
+      "title": "Yoga teaching "
     },
-    "tags": [
-      "presence",
-      "joy",
-      "awareness"
-    ],
+    "tags": ["presence", "joy", "awareness"],
     "mood": "gratitude",
     "difficulty": 1,
     "language_level": "simple"
@@ -1023,17 +790,10 @@
       "Feel its power to connect."
     ],
     "source": {
-      "title": "Bhakti wisdom (paraphrase)"
+      "title": "Bhakti wisdom "
     },
-    "tags": [
-      "love",
-      "unity",
-      "Devotion"
-    ],
-    "deities": [
-      "Krishna",
-      "Radha"
-    ],
+    "tags": ["love", "unity", "Devotion"],
+    "deities": ["Krishna", "Radha"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -1048,13 +808,9 @@
       "Trust the process of growth."
     ],
     "source": {
-      "title": "Smārta teaching (paraphrase)"
+      "title": "Smārta teaching "
     },
-    "tags": [
-      "patience",
-      "Wisdom",
-      "Calm"
-    ],
+    "tags": ["patience", "Wisdom", "Calm"],
     "mood": "calm",
     "difficulty": 2,
     "language_level": "simple"
@@ -1069,13 +825,9 @@
       "Try it with kindness today."
     ],
     "source": {
-      "title": "Dharma ethics (paraphrase)"
+      "title": "Dharma ethics "
     },
-    "tags": [
-      "Truth",
-      "Courage",
-      "honesty"
-    ],
+    "tags": ["Truth", "Courage", "honesty"],
     "mood": "courage",
     "difficulty": 2,
     "language_level": "simple"
@@ -1090,13 +842,9 @@
       "Peace grows where less is enough."
     ],
     "source": {
-      "title": "Yoga teaching (paraphrase)"
+      "title": "Yoga teaching "
     },
-    "tags": [
-      "simplicity",
-      "Peace",
-      "Calm"
-    ],
+    "tags": ["simplicity", "Peace", "Calm"],
     "mood": "calm",
     "difficulty": 1,
     "language_level": "simple"
@@ -1111,16 +859,10 @@
       "Feel the lightness it brings."
     ],
     "source": {
-      "title": "Bhakti teaching (paraphrase)"
+      "title": "Bhakti teaching "
     },
-    "tags": [
-      "Devotion",
-      "joy",
-      "surrender"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["Devotion", "joy", "surrender"],
+    "deities": ["Krishna"],
     "mood": "gratitude",
     "difficulty": 1,
     "language_level": "simple"
@@ -1135,16 +877,10 @@
       "Feel its roots in your heart."
     ],
     "source": {
-      "title": "Bhakti practice (paraphrase)"
+      "title": "Bhakti practice "
     },
-    "tags": [
-      "Seva",
-      "strength",
-      "Compassion"
-    ],
-    "deities": [
-      "Hanuman"
-    ],
+    "tags": ["Seva", "strength", "Compassion"],
+    "deities": ["Hanuman"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -1159,13 +895,9 @@
       "Harmony brings peace to the heart."
     ],
     "source": {
-      "title": "Yoga teaching (paraphrase)"
+      "title": "Yoga teaching "
     },
-    "tags": [
-      "harmony",
-      "action",
-      "balance"
-    ],
+    "tags": ["harmony", "action", "balance"],
     "mood": "calm",
     "difficulty": 2,
     "language_level": "simple"
@@ -1180,16 +912,10 @@
       "The soul rests in sacred trust."
     ],
     "source": {
-      "title": "Bhakti teaching (paraphrase)"
+      "title": "Bhakti teaching "
     },
-    "tags": [
-      "Devotion",
-      "Peace",
-      "trust"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["Devotion", "Peace", "trust"],
+    "deities": ["Krishna"],
     "mood": "calm",
     "difficulty": 1,
     "language_level": "simple"
@@ -1204,16 +930,10 @@
       "Feel the strength of giving."
     ],
     "source": {
-      "title": "Bhakti practice (paraphrase)"
+      "title": "Bhakti practice "
     },
-    "tags": [
-      "Seva",
-      "Courage",
-      "Compassion"
-    ],
-    "deities": [
-      "Hanuman"
-    ],
+    "tags": ["Seva", "Courage", "Compassion"],
+    "deities": ["Hanuman"],
     "mood": "courage",
     "difficulty": 1,
     "language_level": "simple"
@@ -1228,13 +948,9 @@
       "Try three breaths with awareness."
     ],
     "source": {
-      "title": "Yoga practice (paraphrase)"
+      "title": "Yoga practice "
     },
-    "tags": [
-      "breath",
-      "Clarity",
-      "presence"
-    ],
+    "tags": ["breath", "Clarity", "presence"],
     "mood": "clarity",
     "difficulty": 1,
     "language_level": "simple"
@@ -1249,16 +965,10 @@
       "Start with one thank you today."
     ],
     "source": {
-      "title": "Bhakti practice (paraphrase)"
+      "title": "Bhakti practice "
     },
-    "tags": [
-      "Gratitude",
-      "joy",
-      "awareness"
-    ],
-    "deities": [
-      "Lakshmi"
-    ],
+    "tags": ["Gratitude", "joy", "awareness"],
+    "deities": ["Lakshmi"],
     "mood": "gratitude",
     "difficulty": 1,
     "language_level": "simple"
@@ -1273,16 +983,10 @@
       "Discover it in silence today."
     ],
     "source": {
-      "title": "Śaiva teaching (paraphrase)"
+      "title": "Śaiva teaching "
     },
-    "tags": [
-      "Stillness",
-      "Power",
-      "Calm"
-    ],
-    "deities": [
-      "Shiva"
-    ],
+    "tags": ["Stillness", "Power", "Calm"],
+    "deities": ["Shiva"],
     "mood": "calm",
     "difficulty": 1,
     "language_level": "simple"
@@ -1297,16 +1001,10 @@
       "Try it in one interaction today."
     ],
     "source": {
-      "title": "Dharma teaching (paraphrase)"
+      "title": "Dharma teaching "
     },
-    "tags": [
-      "kindness",
-      "Ahimsa",
-      "Compassion"
-    ],
-    "deities": [
-      "Rama"
-    ],
+    "tags": ["kindness", "Ahimsa", "Compassion"],
+    "deities": ["Rama"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -1321,17 +1019,11 @@
       "Choose one dharmic act today."
     ],
     "source": {
-      "title": "Bhagavad Gītā (paraphrase)",
+      "title": "Bhagavad Gītā ",
       "ref": "3.8"
     },
-    "tags": [
-      "Dharma",
-      "strength",
-      "Duty"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["Dharma", "strength", "Duty"],
+    "deities": ["Krishna"],
     "mood": "focus",
     "difficulty": 2,
     "language_level": "simple"
@@ -1346,16 +1038,10 @@
       "Feel it in a single moment."
     ],
     "source": {
-      "title": "Bhakti teaching (paraphrase)"
+      "title": "Bhakti teaching "
     },
-    "tags": [
-      "surrender",
-      "Calm",
-      "trust"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["surrender", "Calm", "trust"],
+    "deities": ["Krishna"],
     "mood": "calm",
     "difficulty": 2,
     "language_level": "simple"
@@ -1370,13 +1056,9 @@
       "Wisdom grows in steady moments."
     ],
     "source": {
-      "title": "Smārta teaching (paraphrase)"
+      "title": "Smārta teaching "
     },
-    "tags": [
-      "patience",
-      "Wisdom",
-      "Calm"
-    ],
+    "tags": ["patience", "Wisdom", "Calm"],
     "mood": "calm",
     "difficulty": 2,
     "language_level": "simple"
@@ -1391,17 +1073,10 @@
       "Feel its warmth in your heart."
     ],
     "source": {
-      "title": "Bhakti wisdom (paraphrase)"
+      "title": "Bhakti wisdom "
     },
-    "tags": [
-      "love",
-      "unity",
-      "Devotion"
-    ],
-    "deities": [
-      "Radha",
-      "Krishna"
-    ],
+    "tags": ["love", "unity", "Devotion"],
+    "deities": ["Radha", "Krishna"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -1416,13 +1091,9 @@
       "Try it in a small moment today."
     ],
     "source": {
-      "title": "Dharma ethics (paraphrase)"
+      "title": "Dharma ethics "
     },
-    "tags": [
-      "Truth",
-      "Courage",
-      "Clarity"
-    ],
+    "tags": ["Truth", "Courage", "Clarity"],
     "mood": "courage",
     "difficulty": 2,
     "language_level": "simple"
@@ -1437,13 +1108,9 @@
       "Find it in one tough moment."
     ],
     "source": {
-      "title": "Yoga Sūtras (paraphrase)"
+      "title": "Yoga Sūtras "
     },
-    "tags": [
-      "resilience",
-      "Calm",
-      "strength"
-    ],
+    "tags": ["resilience", "Calm", "strength"],
     "mood": "focus",
     "difficulty": 2,
     "language_level": "simple"
@@ -1458,16 +1125,10 @@
       "Feel its gentle warmth within."
     ],
     "source": {
-      "title": "Bhakti practice (paraphrase)"
+      "title": "Bhakti practice "
     },
-    "tags": [
-      "Gratitude",
-      "Peace",
-      "joy"
-    ],
-    "deities": [
-      "Lakshmi"
-    ],
+    "tags": ["Gratitude", "Peace", "joy"],
+    "deities": ["Lakshmi"],
     "mood": "gratitude",
     "difficulty": 1,
     "language_level": "simple"
@@ -1482,16 +1143,10 @@
       "Wisdom speaks in the stillness."
     ],
     "source": {
-      "title": "Śaiva teaching (paraphrase)"
+      "title": "Śaiva teaching "
     },
-    "tags": [
-      "Silence",
-      "Wisdom",
-      "Stillness"
-    ],
-    "deities": [
-      "Shiva"
-    ],
+    "tags": ["Silence", "Wisdom", "Stillness"],
+    "deities": ["Shiva"],
     "mood": "calm",
     "difficulty": 2,
     "language_level": "poetic"
@@ -1506,16 +1161,10 @@
       "Feel its light in your heart."
     ],
     "source": {
-      "title": "Bhakti practice (paraphrase)"
+      "title": "Bhakti practice "
     },
-    "tags": [
-      "Seva",
-      "joy",
-      "Compassion"
-    ],
-    "deities": [
-      "Hanuman"
-    ],
+    "tags": ["Seva", "joy", "Compassion"],
+    "deities": ["Hanuman"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -1530,17 +1179,11 @@
       "Choose one clear act today."
     ],
     "source": {
-      "title": "Bhagavad Gītā (paraphrase)",
+      "title": "Bhagavad Gītā ",
       "ref": "2.31"
     },
-    "tags": [
-      "Dharma",
-      "Clarity",
-      "Duty"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["Dharma", "Clarity", "Duty"],
+    "deities": ["Krishna"],
     "mood": "focus",
     "difficulty": 2,
     "language_level": "simple"
@@ -1555,16 +1198,10 @@
       "Try one kind deed today."
     ],
     "source": {
-      "title": "Dharma teaching (paraphrase)"
+      "title": "Dharma teaching "
     },
-    "tags": [
-      "kindness",
-      "Ahimsa",
-      "Compassion"
-    ],
-    "deities": [
-      "Rama"
-    ],
+    "tags": ["kindness", "Ahimsa", "Compassion"],
+    "deities": ["Rama"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -1579,13 +1216,9 @@
       "Presence anchors your heart."
     ],
     "source": {
-      "title": "Yoga practice (paraphrase)"
+      "title": "Yoga practice "
     },
-    "tags": [
-      "breath",
-      "presence",
-      "Calm"
-    ],
+    "tags": ["breath", "presence", "Calm"],
     "mood": "calm",
     "difficulty": 1,
     "language_level": "simple"
@@ -1600,16 +1233,10 @@
       "Feel the calm it brings today."
     ],
     "source": {
-      "title": "Bhakti teaching (paraphrase)"
+      "title": "Bhakti teaching "
     },
-    "tags": [
-      "surrender",
-      "trust",
-      "Calm"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["surrender", "trust", "Calm"],
+    "deities": ["Krishna"],
     "mood": "calm",
     "difficulty": 2,
     "language_level": "simple"
@@ -1624,16 +1251,10 @@
       "Wisdom shines in the silence."
     ],
     "source": {
-      "title": "Śaiva teaching (paraphrase)"
+      "title": "Śaiva teaching "
     },
-    "tags": [
-      "Wisdom",
-      "Stillness",
-      "Clarity"
-    ],
-    "deities": [
-      "Shiva"
-    ],
+    "tags": ["Wisdom", "Stillness", "Clarity"],
+    "deities": ["Shiva"],
     "mood": "clarity",
     "difficulty": 2,
     "language_level": "simple"
@@ -1648,17 +1269,10 @@
       "Feel its power to connect."
     ],
     "source": {
-      "title": "Bhakti wisdom (paraphrase)"
+      "title": "Bhakti wisdom "
     },
-    "tags": [
-      "love",
-      "unity",
-      "Devotion"
-    ],
-    "deities": [
-      "Radha",
-      "Krishna"
-    ],
+    "tags": ["love", "unity", "Devotion"],
+    "deities": ["Radha", "Krishna"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -1673,13 +1287,9 @@
       "Calm grows in quiet endurance."
     ],
     "source": {
-      "title": "Smārta teaching (paraphrase)"
+      "title": "Smārta teaching "
     },
-    "tags": [
-      "patience",
-      "Calm",
-      "strength"
-    ],
+    "tags": ["patience", "Calm", "strength"],
     "mood": "calm",
     "difficulty": 2,
     "language_level": "simple"
@@ -1694,16 +1304,10 @@
       "Truth shines in fearless calm."
     ],
     "source": {
-      "title": "Śaiva teaching (paraphrase)"
+      "title": "Śaiva teaching "
     },
-    "tags": [
-      "Courage",
-      "Silence",
-      "Truth"
-    ],
-    "deities": [
-      "Shiva"
-    ],
+    "tags": ["Courage", "Silence", "Truth"],
+    "deities": ["Shiva"],
     "mood": "courage",
     "difficulty": 2,
     "language_level": "simple"
@@ -1718,16 +1322,10 @@
       "Feel its warmth today."
     ],
     "source": {
-      "title": "Bhakti practice (paraphrase)"
+      "title": "Bhakti practice "
     },
-    "tags": [
-      "Gratitude",
-      "joy",
-      "awareness"
-    ],
-    "deities": [
-      "Lakshmi"
-    ],
+    "tags": ["Gratitude", "joy", "awareness"],
+    "deities": ["Lakshmi"],
     "mood": "gratitude",
     "difficulty": 1,
     "language_level": "simple"
@@ -1742,13 +1340,9 @@
       "See truth in the quiet heart."
     ],
     "source": {
-      "title": "Yoga Sūtras (paraphrase)"
+      "title": "Yoga Sūtras "
     },
-    "tags": [
-      "Stillness",
-      "Clarity",
-      "Calm"
-    ],
+    "tags": ["Stillness", "Clarity", "Calm"],
     "mood": "calm",
     "difficulty": 1,
     "language_level": "poetic"
@@ -1763,16 +1357,10 @@
       "Feel its joy in giving today."
     ],
     "source": {
-      "title": "Bhakti practice (paraphrase)"
+      "title": "Bhakti practice "
     },
-    "tags": [
-      "Seva",
-      "connection",
-      "Compassion"
-    ],
-    "deities": [
-      "Hanuman"
-    ],
+    "tags": ["Seva", "connection", "Compassion"],
+    "deities": ["Hanuman"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -1787,17 +1375,11 @@
       "Peace follows a righteous path."
     ],
     "source": {
-      "title": "Bhagavad Gītā (paraphrase)",
+      "title": "Bhagavad Gītā ",
       "ref": "2.38"
     },
-    "tags": [
-      "Dharma",
-      "Peace",
-      "Duty"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["Dharma", "Peace", "Duty"],
+    "deities": ["Krishna"],
     "mood": "focus",
     "difficulty": 2,
     "language_level": "simple"
@@ -1812,16 +1394,10 @@
       "Feel its power in giving."
     ],
     "source": {
-      "title": "Dharma teaching (paraphrase)"
+      "title": "Dharma teaching "
     },
-    "tags": [
-      "kindness",
-      "Ahimsa",
-      "healing"
-    ],
-    "deities": [
-      "Rama"
-    ],
+    "tags": ["kindness", "Ahimsa", "healing"],
+    "deities": ["Rama"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -1836,13 +1412,9 @@
       "Calm flows where breath leads."
     ],
     "source": {
-      "title": "Yoga practice (paraphrase)"
+      "title": "Yoga practice "
     },
-    "tags": [
-      "breath",
-      "Calm",
-      "presence"
-    ],
+    "tags": ["breath", "Calm", "presence"],
     "mood": "calm",
     "difficulty": 1,
     "language_level": "simple"
@@ -1857,16 +1429,10 @@
       "Feel its calm today."
     ],
     "source": {
-      "title": "Bhakti teaching (paraphrase)"
+      "title": "Bhakti teaching "
     },
-    "tags": [
-      "surrender",
-      "Peace",
-      "trust"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["surrender", "Peace", "trust"],
+    "deities": ["Krishna"],
     "mood": "calm",
     "difficulty": 2,
     "language_level": "simple"
@@ -1881,13 +1447,9 @@
       "Choose with care today."
     ],
     "source": {
-      "title": "Vedānta teaching (paraphrase)"
+      "title": "Vedānta teaching "
     },
-    "tags": [
-      "Wisdom",
-      "action",
-      "Viveka"
-    ],
+    "tags": ["Wisdom", "action", "Viveka"],
     "mood": "clarity",
     "difficulty": 2,
     "language_level": "simple"
@@ -1902,17 +1464,10 @@
       "Feel its timeless warmth."
     ],
     "source": {
-      "title": "Bhakti wisdom (paraphrase)"
+      "title": "Bhakti wisdom "
     },
-    "tags": [
-      "love",
-      "Devotion",
-      "unity"
-    ],
-    "deities": [
-      "Radha",
-      "Krishna"
-    ],
+    "tags": ["love", "Devotion", "unity"],
+    "deities": ["Radha", "Krishna"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "poetic"
@@ -1927,13 +1482,9 @@
       "Power grows in steady waiting."
     ],
     "source": {
-      "title": "Smārta teaching (paraphrase)"
+      "title": "Smārta teaching "
     },
-    "tags": [
-      "patience",
-      "Power",
-      "Calm"
-    ],
+    "tags": ["patience", "Power", "Calm"],
     "mood": "calm",
     "difficulty": 2,
     "language_level": "simple"
@@ -1948,13 +1499,9 @@
       "Feel the soul’s clarity shine."
     ],
     "source": {
-      "title": "Dharma ethics (paraphrase)"
+      "title": "Dharma ethics "
     },
-    "tags": [
-      "honesty",
-      "Courage",
-      "Truth"
-    ],
+    "tags": ["honesty", "Courage", "Truth"],
     "mood": "courage",
     "difficulty": 2,
     "language_level": "simple"
@@ -1969,13 +1516,9 @@
       "Find it in one challenge today."
     ],
     "source": {
-      "title": "Yoga Sūtras (paraphrase)"
+      "title": "Yoga Sūtras "
     },
-    "tags": [
-      "steadiness",
-      "strength",
-      "resilience"
-    ],
+    "tags": ["steadiness", "strength", "resilience"],
     "mood": "focus",
     "difficulty": 2,
     "language_level": "simple"
@@ -1990,16 +1533,10 @@
       "Try it in one moment today."
     ],
     "source": {
-      "title": "Bhakti practice (paraphrase)"
+      "title": "Bhakti practice "
     },
-    "tags": [
-      "Gratitude",
-      "Clarity",
-      "joy"
-    ],
-    "deities": [
-      "Lakshmi"
-    ],
+    "tags": ["Gratitude", "Clarity", "joy"],
+    "deities": ["Lakshmi"],
     "mood": "gratitude",
     "difficulty": 1,
     "language_level": "simple"
@@ -2014,16 +1551,10 @@
       "Strength grows in inner calm."
     ],
     "source": {
-      "title": "Śaiva teaching (paraphrase)"
+      "title": "Śaiva teaching "
     },
-    "tags": [
-      "Silence",
-      "strength",
-      "Calm"
-    ],
-    "deities": [
-      "Shiva"
-    ],
+    "tags": ["Silence", "strength", "Calm"],
+    "deities": ["Shiva"],
     "mood": "calm",
     "difficulty": 1,
     "language_level": "simple"
@@ -2038,16 +1569,10 @@
       "Feel its glow in giving today."
     ],
     "source": {
-      "title": "Bhakti practice (paraphrase)"
+      "title": "Bhakti practice "
     },
-    "tags": [
-      "Seva",
-      "light",
-      "Compassion"
-    ],
-    "deities": [
-      "Hanuman"
-    ],
+    "tags": ["Seva", "light", "Compassion"],
+    "deities": ["Hanuman"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -2062,17 +1587,11 @@
       "It leads to lasting peace."
     ],
     "source": {
-      "title": "Bhagavad Gītā (paraphrase)",
+      "title": "Bhagavad Gītā ",
       "ref": "3.3"
     },
-    "tags": [
-      "Dharma",
-      "guidance",
-      "Duty"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["Dharma", "guidance", "Duty"],
+    "deities": ["Krishna"],
     "mood": "focus",
     "difficulty": 2,
     "language_level": "simple"
@@ -2087,16 +1606,10 @@
       "Try it in one interaction."
     ],
     "source": {
-      "title": "Dharma teaching (paraphrase)"
+      "title": "Dharma teaching "
     },
-    "tags": [
-      "kindness",
-      "Ahimsa",
-      "Compassion"
-    ],
-    "deities": [
-      "Rama"
-    ],
+    "tags": ["kindness", "Ahimsa", "Compassion"],
+    "deities": ["Rama"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -2111,13 +1624,9 @@
       "Try it in a busy moment."
     ],
     "source": {
-      "title": "Yoga practice (paraphrase)"
+      "title": "Yoga practice "
     },
-    "tags": [
-      "breath",
-      "life",
-      "presence"
-    ],
+    "tags": ["breath", "life", "presence"],
     "mood": "calm",
     "difficulty": 1,
     "language_level": "simple"
@@ -2132,16 +1641,10 @@
       "Feel its peace today."
     ],
     "source": {
-      "title": "Bhakti teaching (paraphrase)"
+      "title": "Bhakti teaching "
     },
-    "tags": [
-      "surrender",
-      "freedom",
-      "trust"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["surrender", "freedom", "trust"],
+    "deities": ["Krishna"],
     "mood": "calm",
     "difficulty": 2,
     "language_level": "simple"
@@ -2156,16 +1659,10 @@
       "Wisdom shines in the calm."
     ],
     "source": {
-      "title": "Śaiva teaching (paraphrase)"
+      "title": "Śaiva teaching "
     },
-    "tags": [
-      "Wisdom",
-      "Silence",
-      "Clarity"
-    ],
-    "deities": [
-      "Shiva"
-    ],
+    "tags": ["Wisdom", "Silence", "Clarity"],
+    "deities": ["Shiva"],
     "mood": "clarity",
     "difficulty": 2,
     "language_level": "simple"
@@ -2180,17 +1677,10 @@
       "Feel its warmth in giving."
     ],
     "source": {
-      "title": "Bhakti wisdom (paraphrase)"
+      "title": "Bhakti wisdom "
     },
-    "tags": [
-      "love",
-      "Devotion",
-      "unity"
-    ],
-    "deities": [
-      "Radha",
-      "Krishna"
-    ],
+    "tags": ["love", "Devotion", "unity"],
+    "deities": ["Radha", "Krishna"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -2205,13 +1695,9 @@
       "Clarity grows in steady waiting."
     ],
     "source": {
-      "title": "Smārta teaching (paraphrase)"
+      "title": "Smārta teaching "
     },
-    "tags": [
-      "patience",
-      "Clarity",
-      "Calm"
-    ],
+    "tags": ["patience", "Clarity", "Calm"],
     "mood": "calm",
     "difficulty": 2,
     "language_level": "simple"
@@ -2226,16 +1712,10 @@
       "Feel the soul’s fearless light."
     ],
     "source": {
-      "title": "Bhakti teaching (paraphrase)"
+      "title": "Bhakti teaching "
     },
-    "tags": [
-      "Courage",
-      "Devotion",
-      "faith"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["Courage", "Devotion", "faith"],
+    "deities": ["Krishna"],
     "mood": "courage",
     "difficulty": 2,
     "language_level": "simple"
@@ -2250,16 +1730,10 @@
       "Try it in one challenge today."
     ],
     "source": {
-      "title": "Bhakti practice (paraphrase)"
+      "title": "Bhakti practice "
     },
-    "tags": [
-      "Gratitude",
-      "strength",
-      "joy"
-    ],
-    "deities": [
-      "Lakshmi"
-    ],
+    "tags": ["Gratitude", "strength", "joy"],
+    "deities": ["Lakshmi"],
     "mood": "gratitude",
     "difficulty": 1,
     "language_level": "simple"
@@ -2274,16 +1748,10 @@
       "Peace grows in inner silence."
     ],
     "source": {
-      "title": "Śaiva teaching (paraphrase)"
+      "title": "Śaiva teaching "
     },
-    "tags": [
-      "Stillness",
-      "Peace",
-      "Calm"
-    ],
-    "deities": [
-      "Shiva"
-    ],
+    "tags": ["Stillness", "Peace", "Calm"],
+    "deities": ["Shiva"],
     "mood": "calm",
     "difficulty": 1,
     "language_level": "simple"
@@ -2298,16 +1766,10 @@
       "Feel its joy in giving today."
     ],
     "source": {
-      "title": "Bhakti practice (paraphrase)"
+      "title": "Bhakti practice "
     },
-    "tags": [
-      "Seva",
-      "unity",
-      "Compassion"
-    ],
-    "deities": [
-      "Hanuman"
-    ],
+    "tags": ["Seva", "unity", "Compassion"],
+    "deities": ["Hanuman"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -2322,17 +1784,11 @@
       "Harmony follows a dharmic path."
     ],
     "source": {
-      "title": "Bhagavad Gītā (paraphrase)",
+      "title": "Bhagavad Gītā ",
       "ref": "2.50"
     },
-    "tags": [
-      "Dharma",
-      "harmony",
-      "Duty"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["Dharma", "harmony", "Duty"],
+    "deities": ["Krishna"],
     "mood": "focus",
     "difficulty": 2,
     "language_level": "simple"
@@ -2347,16 +1803,10 @@
       "Try it in one interaction."
     ],
     "source": {
-      "title": "Dharma teaching (paraphrase)"
+      "title": "Dharma teaching "
     },
-    "tags": [
-      "kindness",
-      "Ahimsa",
-      "healing"
-    ],
-    "deities": [
-      "Rama"
-    ],
+    "tags": ["kindness", "Ahimsa", "healing"],
+    "deities": ["Rama"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -2371,13 +1821,9 @@
       "Strength flows where breath leads."
     ],
     "source": {
-      "title": "Yoga practice (paraphrase)"
+      "title": "Yoga practice "
     },
-    "tags": [
-      "breath",
-      "strength",
-      "presence"
-    ],
+    "tags": ["breath", "strength", "presence"],
     "mood": "calm",
     "difficulty": 1,
     "language_level": "simple"
@@ -2392,16 +1838,10 @@
       "Feel its peace today."
     ],
     "source": {
-      "title": "Bhakti teaching (paraphrase)"
+      "title": "Bhakti teaching "
     },
-    "tags": [
-      "surrender",
-      "light",
-      "trust"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["surrender", "light", "trust"],
+    "deities": ["Krishna"],
     "mood": "calm",
     "difficulty": 2,
     "language_level": "simple"
@@ -2416,13 +1856,9 @@
       "Wisdom shines in steady time."
     ],
     "source": {
-      "title": "Smārta teaching (paraphrase)"
+      "title": "Smārta teaching "
     },
-    "tags": [
-      "Wisdom",
-      "patience",
-      "Clarity"
-    ],
+    "tags": ["Wisdom", "patience", "Clarity"],
     "mood": "clarity",
     "difficulty": 2,
     "language_level": "simple"
@@ -2437,17 +1873,10 @@
       "Feel its power in giving."
     ],
     "source": {
-      "title": "Bhakti wisdom (paraphrase)"
+      "title": "Bhakti wisdom "
     },
-    "tags": [
-      "love",
-      "strength",
-      "Devotion"
-    ],
-    "deities": [
-      "Radha",
-      "Krishna"
-    ],
+    "tags": ["love", "strength", "Devotion"],
+    "deities": ["Radha", "Krishna"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -2462,16 +1891,10 @@
       "Try it in one tough moment."
     ],
     "source": {
-      "title": "Śaiva teaching (paraphrase)"
+      "title": "Śaiva teaching "
     },
-    "tags": [
-      "Courage",
-      "Peace",
-      "Calm"
-    ],
-    "deities": [
-      "Shiva"
-    ],
+    "tags": ["Courage", "Peace", "Calm"],
+    "deities": ["Shiva"],
     "mood": "courage",
     "difficulty": 2,
     "language_level": "simple"
@@ -2486,16 +1909,10 @@
       "Try it in one challenge today."
     ],
     "source": {
-      "title": "Bhakti practice (paraphrase)"
+      "title": "Bhakti practice "
     },
-    "tags": [
-      "Gratitude",
-      "Peace",
-      "healing"
-    ],
-    "deities": [
-      "Lakshmi"
-    ],
+    "tags": ["Gratitude", "Peace", "healing"],
+    "deities": ["Lakshmi"],
     "mood": "gratitude",
     "difficulty": 1,
     "language_level": "simple"
@@ -2510,16 +1927,10 @@
       "Clarity shines in stillness."
     ],
     "source": {
-      "title": "Śaiva teaching (paraphrase)"
+      "title": "Śaiva teaching "
     },
-    "tags": [
-      "Silence",
-      "Clarity",
-      "Stillness"
-    ],
-    "deities": [
-      "Shiva"
-    ],
+    "tags": ["Silence", "Clarity", "Stillness"],
+    "deities": ["Shiva"],
     "mood": "clarity",
     "difficulty": 2,
     "language_level": "simple"
@@ -2534,16 +1945,10 @@
       "Feel its strength in giving."
     ],
     "source": {
-      "title": "Bhakti practice (paraphrase)"
+      "title": "Bhakti practice "
     },
-    "tags": [
-      "Seva",
-      "strength",
-      "Compassion"
-    ],
-    "deities": [
-      "Hanuman"
-    ],
+    "tags": ["Seva", "strength", "Compassion"],
+    "deities": ["Hanuman"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -2558,17 +1963,11 @@
       "Light follows a dharmic heart."
     ],
     "source": {
-      "title": "Bhagavad Gītā (paraphrase)",
+      "title": "Bhagavad Gītā ",
       "ref": "3.20"
     },
-    "tags": [
-      "Dharma",
-      "light",
-      "Duty"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["Dharma", "light", "Duty"],
+    "deities": ["Krishna"],
     "mood": "focus",
     "difficulty": 2,
     "language_level": "simple"
@@ -2583,16 +1982,10 @@
       "Try it in one moment today."
     ],
     "source": {
-      "title": "Dharma teaching (paraphrase)"
+      "title": "Dharma teaching "
     },
-    "tags": [
-      "kindness",
-      "Ahimsa",
-      "unity"
-    ],
-    "deities": [
-      "Rama"
-    ],
+    "tags": ["kindness", "Ahimsa", "unity"],
+    "deities": ["Rama"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -2607,13 +2000,9 @@
       "Peace flows where breath leads."
     ],
     "source": {
-      "title": "Yoga practice (paraphrase)"
+      "title": "Yoga practice "
     },
-    "tags": [
-      "breath",
-      "Peace",
-      "Calm"
-    ],
+    "tags": ["breath", "Peace", "Calm"],
     "mood": "calm",
     "difficulty": 1,
     "language_level": "simple"
@@ -2628,16 +2017,10 @@
       "Feel its grace today."
     ],
     "source": {
-      "title": "Bhakti teaching (paraphrase)"
+      "title": "Bhakti teaching "
     },
-    "tags": [
-      "surrender",
-      "grace",
-      "trust"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["surrender", "grace", "trust"],
+    "deities": ["Krishna"],
     "mood": "calm",
     "difficulty": 2,
     "language_level": "simple"
@@ -2652,13 +2035,9 @@
       "Try it in one choice today."
     ],
     "source": {
-      "title": "Vedānta teaching (paraphrase)"
+      "title": "Vedānta teaching "
     },
-    "tags": [
-      "Wisdom",
-      "Clarity",
-      "Viveka"
-    ],
+    "tags": ["Wisdom", "Clarity", "Viveka"],
     "mood": "clarity",
     "difficulty": 2,
     "language_level": "simple"
@@ -2673,17 +2052,10 @@
       "Feel its peace in giving."
     ],
     "source": {
-      "title": "Bhakti wisdom (paraphrase)"
+      "title": "Bhakti wisdom "
     },
-    "tags": [
-      "love",
-      "Peace",
-      "Devotion"
-    ],
-    "deities": [
-      "Radha",
-      "Krishna"
-    ],
+    "tags": ["love", "Peace", "Devotion"],
+    "deities": ["Radha", "Krishna"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -2698,13 +2070,9 @@
       "Peace grows in steady waiting."
     ],
     "source": {
-      "title": "Smārta teaching (paraphrase)"
+      "title": "Smārta teaching "
     },
-    "tags": [
-      "patience",
-      "Peace",
-      "Calm"
-    ],
+    "tags": ["patience", "Peace", "Calm"],
     "mood": "calm",
     "difficulty": 2,
     "language_level": "simple"
@@ -2719,13 +2087,9 @@
       "Courage guides the soul’s way."
     ],
     "source": {
-      "title": "Dharma ethics (paraphrase)"
+      "title": "Dharma ethics "
     },
-    "tags": [
-      "Courage",
-      "Clarity",
-      "Truth"
-    ],
+    "tags": ["Courage", "Clarity", "Truth"],
     "mood": "courage",
     "difficulty": 2,
     "language_level": "simple"
@@ -2740,16 +2104,10 @@
       "Try it in one moment today."
     ],
     "source": {
-      "title": "Bhakti practice (paraphrase)"
+      "title": "Bhakti practice "
     },
-    "tags": [
-      "Gratitude",
-      "light",
-      "joy"
-    ],
-    "deities": [
-      "Lakshmi"
-    ],
+    "tags": ["Gratitude", "light", "joy"],
+    "deities": ["Lakshmi"],
     "mood": "gratitude",
     "difficulty": 1,
     "language_level": "simple"
@@ -2764,16 +2122,10 @@
       "Peace grows in inner stillness."
     ],
     "source": {
-      "title": "Śaiva teaching (paraphrase)"
+      "title": "Śaiva teaching "
     },
-    "tags": [
-      "Silence",
-      "Peace",
-      "Calm"
-    ],
-    "deities": [
-      "Shiva"
-    ],
+    "tags": ["Silence", "Peace", "Calm"],
+    "deities": ["Shiva"],
     "mood": "calm",
     "difficulty": 1,
     "language_level": "simple"
@@ -2788,16 +2140,10 @@
       "Feel its peace in giving today."
     ],
     "source": {
-      "title": "Bhakti practice (paraphrase)"
+      "title": "Bhakti practice "
     },
-    "tags": [
-      "Seva",
-      "Peace",
-      "Compassion"
-    ],
-    "deities": [
-      "Hanuman"
-    ],
+    "tags": ["Seva", "Peace", "Compassion"],
+    "deities": ["Hanuman"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -2812,17 +2158,11 @@
       "Strength follows a dharmic path."
     ],
     "source": {
-      "title": "Bhagavad Gītā (paraphrase)",
+      "title": "Bhagavad Gītā ",
       "ref": "2.40"
     },
-    "tags": [
-      "Dharma",
-      "strength",
-      "Duty"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["Dharma", "strength", "Duty"],
+    "deities": ["Krishna"],
     "mood": "focus",
     "difficulty": 2,
     "language_level": "simple"
@@ -2837,16 +2177,10 @@
       "Try it in one moment today."
     ],
     "source": {
-      "title": "Dharma teaching (paraphrase)"
+      "title": "Dharma teaching "
     },
-    "tags": [
-      "kindness",
-      "Ahimsa",
-      "Peace"
-    ],
-    "deities": [
-      "Rama"
-    ],
+    "tags": ["kindness", "Ahimsa", "Peace"],
+    "deities": ["Rama"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"
@@ -2861,13 +2195,9 @@
       "Clarity flows where breath leads."
     ],
     "source": {
-      "title": "Yoga practice (paraphrase)"
+      "title": "Yoga practice "
     },
-    "tags": [
-      "breath",
-      "Clarity",
-      "presence"
-    ],
+    "tags": ["breath", "Clarity", "presence"],
     "mood": "calm",
     "difficulty": 1,
     "language_level": "simple"
@@ -2882,16 +2212,10 @@
       "Feel its strength today."
     ],
     "source": {
-      "title": "Bhakti teaching (paraphrase)"
+      "title": "Bhakti teaching "
     },
-    "tags": [
-      "surrender",
-      "strength",
-      "trust"
-    ],
-    "deities": [
-      "Krishna"
-    ],
+    "tags": ["surrender", "strength", "trust"],
+    "deities": ["Krishna"],
     "mood": "calm",
     "difficulty": 2,
     "language_level": "simple"
@@ -2906,13 +2230,9 @@
       "Try it in one choice today."
     ],
     "source": {
-      "title": "Vedānta teaching (paraphrase)"
+      "title": "Vedānta teaching "
     },
-    "tags": [
-      "Wisdom",
-      "Peace",
-      "Clarity"
-    ],
+    "tags": ["Wisdom", "Peace", "Clarity"],
     "mood": "clarity",
     "difficulty": 2,
     "language_level": "simple"
@@ -2927,17 +2247,10 @@
       "Feel its light in giving."
     ],
     "source": {
-      "title": "Bhakti wisdom (paraphrase)"
+      "title": "Bhakti wisdom "
     },
-    "tags": [
-      "love",
-      "light",
-      "Devotion"
-    ],
-    "deities": [
-      "Radha",
-      "Krishna"
-    ],
+    "tags": ["love", "light", "Devotion"],
+    "deities": ["Radha", "Krishna"],
     "mood": "compassion",
     "difficulty": 1,
     "language_level": "simple"

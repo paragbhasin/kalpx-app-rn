@@ -23,6 +23,7 @@ import store from "../store";
 import { screenActions, loadScreenWithData } from "../store/screenSlice";
 import { navigate, navigateInHomeStack, navigationRef } from "../Shared/Routes/NavigationService";
 import { postProgramActivity } from "../engine/programApi";
+import { setSkipMitraStart, setForceFourDoorHome } from "./postLoginGuard";
 
 export interface ParsedMitraDeepLink {
   kind: "mitra";
@@ -349,6 +350,8 @@ export function handleProgramJoinDeepLink(url: string): boolean {
     }
     void AsyncStorage.setItem("pending_program_code", code);
     void AsyncStorage.setItem("pending_program_source", urlSource);
+    setSkipMitraStart();
+    setForceFourDoorHome();
     try {
       navigate("ProgramInviteClaimScreen" as any, { code, source: urlSource });
     } catch (err) {
@@ -369,6 +372,8 @@ export function handleProgramJoinDeepLink(url: string): boolean {
     }
     void AsyncStorage.setItem("pending_program_code", code);
     void AsyncStorage.setItem("pending_program_source", urlSource);
+    setSkipMitraStart();
+    setForceFourDoorHome();
     try {
       navigate("ProgramInviteClaimScreen" as any, { code, source: urlSource });
     } catch (err) {
@@ -443,6 +448,10 @@ export function handleProgramDeepLink(url: string): boolean {
 // Retry navigating a cold-start URL until the navigator is ready (up to ~3s).
 // navigate() silently no-ops when navigationRef.isReady() is false, so we
 // must poll rather than call it once and hope for the best.
+//
+// For join deep links, setSkipMitraStart() is called immediately (before the
+// navigator is ready) so that Home.tsx's journey check never redirects to
+// MitraStart while the claim screen is being prepared.
 function handleWhenReady(url: string, attemptsLeft = 15): void {
   if (navigationRef.isReady()) {
     if (!handleProgramJoinDeepLink(url) && !handleProgramDeepLink(url) && !handleTLPDeepLink(url)) {
@@ -525,9 +534,17 @@ export function attachDeepLinkListeners(): () => void {
   // Cold-start: app was killed and re-launched via the URL. Always navigate —
   // there is no active runner to preserve. handleWhenReady retries until the
   // navigator is ready so the first render doesn't race the navigate() call.
+  //
+  // For join links: set the Mitra skip flag immediately so Home.tsx doesn't
+  // redirect to MitraStart while we wait for the navigator to become ready.
   Linking.getInitialURL()
     .then((url) => {
-      if (url) handleWhenReady(url);
+      if (!url) return;
+      if (url.startsWith("kalpx://join/") || url.startsWith("https://kalpx.com/join/")) {
+        setSkipMitraStart();
+        setForceFourDoorHome();
+      }
+      handleWhenReady(url);
     })
     .catch((err) => console.warn("[deeplink] getInitialURL failed:", err));
 

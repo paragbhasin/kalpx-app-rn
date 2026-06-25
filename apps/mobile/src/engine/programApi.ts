@@ -11,6 +11,7 @@ export interface ProgramDayItem {
   item_id: string;
   item_type: "mantra" | "sankalp" | "practice";
   title: string;
+  line?: string;       // sankalp: the actual vow text; use this on cards
   devanagari?: string;
   iast?: string;
   description?: string;
@@ -21,8 +22,16 @@ export interface ActiveProgramSummary {
   status: "active" | "completed";
   current_day: number;
   next_day_available: boolean;
+  next_day_locked?: boolean;
   days_remaining: number;
   show_day8_transition?: boolean;
+}
+
+export interface WisdomCard {
+  item_id: string | null;
+  text: string;
+  explanation: string[];
+  source_title: string | null;
 }
 
 export interface ProgramDayContent {
@@ -34,6 +43,10 @@ export interface ProgramDayContent {
   practice: ProgramDayItem | null;
   sankalp: ProgramDayItem | null;
   is_completed: boolean;
+  wisdom_card: WisdomCard | null;
+  day_join_url: string | null;
+  day_session_time: string | null;
+  day_session_timezone: string | null;
 }
 
 export interface ProgramClaimConflict {
@@ -53,6 +66,10 @@ export async function fetchActiveProgram(): Promise<ActiveProgramSummary | null>
 
 export async function fetchProgramDay(dayNumber: number): Promise<ProgramDayContent> {
   const res = await api.get(`programs/my-active/day/${dayNumber}/`);
+  console.log('[ProgramDay] API response:', JSON.stringify(res.data, null, 2));
+  console.log('[ProgramDay] wisdom_card:', JSON.stringify(res.data.wisdom_card));
+  console.log('[ProgramDay] day_join_url:', res.data.day_join_url);
+  console.log('[ProgramDay] day_session_time:', res.data.day_session_time);
   return res.data;
 }
 
@@ -103,6 +120,27 @@ export async function submitProgramMicroFeedback(
 
 export async function recordProgramShare(): Promise<any> {
   const res = await api.post("programs/my-active/share/");
+  return res.data;
+}
+
+export interface ProgramReminders {
+  mantra_reminder_enabled: boolean;
+  mantra_reminder_time: string | null;
+  sankalp_reminder_enabled: boolean;
+  sankalp_reminder_time: string | null;
+  practice_reminder_enabled: boolean;
+  practice_reminder_time: string | null;
+}
+
+export type ProgramRemindersPatch = Partial<ProgramReminders>;
+
+export async function apiGetProgramReminders(): Promise<ProgramReminders> {
+  const res = await api.get('programs/my-active/reminders/');
+  return res.data;
+}
+
+export async function apiPatchProgramReminders(patch: ProgramRemindersPatch): Promise<ProgramReminders> {
+  const res = await api.patch('programs/my-active/reminders/', patch);
   return res.data;
 }
 

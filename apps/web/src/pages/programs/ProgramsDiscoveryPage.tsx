@@ -65,6 +65,7 @@ export function ProgramsDiscoveryPage() {
           setState({ kind: 'empty' });
         } else {
           setState({ kind: 'loaded', programs, count });
+          try { navigator.sendBeacon('/api/programs/track/', JSON.stringify({ event: 'programs_page_viewed' })); } catch { /* non-fatal */ }
         }
       } catch {
         if (!cancelled) setState({ kind: 'error' });

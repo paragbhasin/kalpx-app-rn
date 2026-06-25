@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../Networks/axios";
 import { registerDeviceToBackend, resetDeviceRegistrationGuard } from "../../utils/registerDevice";
 import { loginSuccess } from "../Login/actions";
+import { logEvent, setAnalyticsUser } from "../../utils/initAnalytics";
 
 export const SIGNUP_REQUEST = "SIGNUP_REQUEST";
 export const SIGNUP_SUCCESS = "SIGNUP_SUCCESS";
@@ -64,6 +65,10 @@ export const signupUser = (credentials, callback) => async (dispatch) => {
     await AsyncStorage.setItem("refresh_token", response.refresh_token);
     resetDeviceRegistrationGuard();
     await registerDeviceToBackend();
+    if (response.data?.user?.id) {
+      setAnalyticsUser(response.data.user.id);
+    }
+    logEvent("signup_completed", { method: "email" });
     dispatch(signupSuccess(response.data));
     dispatch(loginSuccess(response.data)); // Sync with main login slice
     if (callback) callback({ success: true, data: response.data });

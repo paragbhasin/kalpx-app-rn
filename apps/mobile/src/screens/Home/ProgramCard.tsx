@@ -7,7 +7,7 @@
  */
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native";
 import { Fonts } from "../../theme/fonts";
 import { type ActiveProgramSummary } from "../../engine/programApi";
 
@@ -19,10 +19,17 @@ export default function ProgramCard({ program }: ProgramCardProps) {
   const navigation = useNavigation<any>();
 
   const isCompleted = program.status === "completed" && program.show_day8_transition;
+  const isNextDayLocked = !isCompleted && !!program.next_day_locked;
 
   const handlePress = () => {
     if (isCompleted) {
       navigation.navigate("ProgramDay8TransitionScreen" as any);
+    } else if (isNextDayLocked) {
+      Alert.alert(
+        `Day ${program.current_day} Complete ✓`,
+        `Come back tomorrow for Day ${program.current_day + 1}.`,
+        [{ text: "OK" }]
+      );
     } else {
       const nextDay = program.next_day_available
         ? program.current_day + 1
@@ -33,12 +40,14 @@ export default function ProgramCard({ program }: ProgramCardProps) {
 
   return (
     <TouchableOpacity
-      activeOpacity={0.85}
+      activeOpacity={isNextDayLocked ? 1 : 0.85}
       onPress={handlePress}
-      style={styles.card}
+      style={[styles.card, isNextDayLocked && styles.cardLocked]}
       accessibilityLabel={
         isCompleted
           ? `${program.name} — complete. Choose your next step.`
+          : isNextDayLocked
+          ? `${program.name} — Day ${program.current_day} complete. Come back tomorrow.`
           : `${program.name} — Day ${program.current_day}. Continue your practice.`
       }
       testID="program_card"
@@ -48,13 +57,21 @@ export default function ProgramCard({ program }: ProgramCardProps) {
         <Text style={styles.name} numberOfLines={1}>{program.name}</Text>
         {isCompleted ? (
           <Text style={styles.status}>Complete · Choose your next step</Text>
+        ) : isNextDayLocked ? (
+          <Text style={styles.status}>
+            Day {program.current_day} Complete ✓ · Come back tomorrow for Day {program.current_day + 1}
+          </Text>
         ) : (
           <Text style={styles.status}>
             Day {program.current_day + 1} · Continue your practice
           </Text>
         )}
       </View>
-      <Text style={styles.arrow}>→</Text>
+      {isNextDayLocked ? (
+        <Text style={styles.lock}>🔒</Text>
+      ) : (
+        <Text style={styles.arrow}>→</Text>
+      )}
     </TouchableOpacity>
   );
 }
@@ -93,4 +110,6 @@ const styles = StyleSheet.create({
     color: "#7B6545",
   },
   arrow: { fontSize: 20, color: "#C99317" },
+  cardLocked: { opacity: 0.75 },
+  lock: { fontSize: 18 },
 });

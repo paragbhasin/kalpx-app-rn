@@ -23,6 +23,7 @@ import {
 import { Fonts } from "../../theme/fonts";
 import { claimProgram, type ProgramClaimConflict } from "../../engine/programApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { setSkipMitraStart, setForceFourDoorHome } from "../../utils/postLoginGuard";
 
 export default function ProgramInviteClaimScreen() {
   const navigation = useNavigation<any>();
@@ -68,7 +69,12 @@ export default function ProgramInviteClaimScreen() {
             {
               text: "Keep current",
               style: "cancel",
-              onPress: () => navigation.goBack(),
+              onPress: async () => {
+                // Clear pending code so login/logout doesn't loop back here.
+                await AsyncStorage.removeItem("pending_program_code");
+                await AsyncStorage.removeItem("pending_program_source");
+                navigation.goBack();
+              },
             },
             {
               text: "Switch to new program",
@@ -96,6 +102,11 @@ export default function ProgramInviteClaimScreen() {
         navigation.navigate("Login" as any);
         return;
       }
+      // Permanent failures — clear pending so login/logout doesn't loop here.
+      if (status === 404 || status === 410 || status === 403) {
+        await AsyncStorage.removeItem("pending_program_code");
+        await AsyncStorage.removeItem("pending_program_source");
+      }
       if (status === 404) setError("That code wasn't found. Check the code and try again.");
       else if (status === 410) setError("This program has ended.");
       else if (status === 403) setError("This program is no longer accepting new members.");
@@ -110,15 +121,24 @@ export default function ProgramInviteClaimScreen() {
           <Text style={styles.successEmoji}>🙏</Text>
           <Text style={styles.successTitle}>You've joined!</Text>
           <Text style={styles.successSubtext}>
-            Welcome to {successName}. Head to Home to start Day 1.
+            Welcome to {successName}. Your Day 1 is ready.
           </Text>
           <TouchableOpacity
             activeOpacity={0.85}
-            onPress={() => navigation.navigate("Home" as any)}
+            onPress={() => {
+              setSkipMitraStart();
+              navigation.reset({
+                index: 1,
+                routes: [
+                  { name: "Home" },
+                  { name: "ProgramDayScreen", params: { dayNumber: 1, completedItems: [] } },
+                ],
+              });
+            }}
             style={styles.successBtn}
-            accessibilityLabel="Go to Home"
+            accessibilityLabel="Start Day 1"
           >
-            <Text style={styles.successBtnText}>Go to Home →</Text>
+            <Text style={styles.successBtnText}>Start Day 1 →</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>

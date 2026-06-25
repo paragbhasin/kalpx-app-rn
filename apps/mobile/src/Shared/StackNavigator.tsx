@@ -94,9 +94,11 @@ import ProgramInviteClaimScreen from "../screens/Program/ProgramInviteClaimScree
 import ProgramDayScreen from "../screens/Program/ProgramDayScreen";
 import ProgramCompletionScreen from "../screens/Program/ProgramCompletionScreen";
 import ProgramDay8TransitionScreen from "../screens/Program/ProgramDay8TransitionScreen";
+import ProgramReflectionScreen from "../screens/Program/ProgramReflectionScreen";
 import ProgramMantraRunner from "../screens/Program/runners/ProgramMantraRunner";
 import ProgramSankalpRunner from "../screens/Program/runners/ProgramSankalpRunner";
 import ProgramPracticeRunner from "../screens/Program/runners/ProgramPracticeRunner";
+import ProgramWisdomRunner from "../screens/Program/runners/ProgramWisdomRunner";
 // TLP Phase 1 — Trusted Leader Platform
 import LiveSessionsListScreen from "../screens/Program/LiveSessionsListScreen";
 import LiveSessionDetailScreen from "../screens/Program/LiveSessionDetailScreen";
@@ -105,6 +107,9 @@ import ProgramDetailPreviewScreen from "../screens/Program/ProgramDetailPreviewS
 import LiveSessionJoinScreen from "../screens/LiveSession/LiveSessionJoinScreen";
 import LiveSessionReflectScreen from "../screens/LiveSession/LiveSessionReflectScreen";
 import MySessionsScreen from "../screens/LiveSession/MySessionsScreen";
+// TLP Phase 2 — Guide self-service
+import { GuideProgramDraftScreen } from "../screens/Program/GuideProgramDraftScreen";
+import { GuideSessionDraftScreen } from "../screens/LiveSession/GuideSessionDraftScreen";
 
 const Stack: any = createNativeStackNavigator();
 
@@ -421,9 +426,11 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen name="ProgramDayScreen" component={ProgramDayScreen} options={{ headerShown: false }} />
     <Stack.Screen name="ProgramCompletionScreen" component={ProgramCompletionScreen} options={{ headerShown: false }} />
     <Stack.Screen name="ProgramDay8TransitionScreen" component={ProgramDay8TransitionScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="ProgramReflectionScreen" component={ProgramReflectionScreen} options={{ headerShown: false }} />
     <Stack.Screen name="ProgramMantraRunner" component={ProgramMantraRunner} options={{ headerShown: false }} />
     <Stack.Screen name="ProgramSankalpRunner" component={ProgramSankalpRunner} options={{ headerShown: false }} />
     <Stack.Screen name="ProgramPracticeRunner" component={ProgramPracticeRunner} options={{ headerShown: false }} />
+    <Stack.Screen name="ProgramWisdomRunner" component={ProgramWisdomRunner} options={{ headerShown: false }} />
     {/* TLP Phase 1 — Trusted Leader Platform */}
     <Stack.Screen name="LiveSessionsList" component={LiveSessionsListScreen} options={{ headerShown: false }} />
     <Stack.Screen name="LiveSessionDetail" component={LiveSessionDetailScreen} options={{ headerShown: false }} />
@@ -432,6 +439,9 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen name="LiveSessionJoin" component={LiveSessionJoinScreen} options={{ headerShown: false }} />
     <Stack.Screen name="LiveSessionReflect" component={LiveSessionReflectScreen} options={{ headerShown: false }} />
     <Stack.Screen name="MySessions" component={MySessionsScreen} options={{ headerShown: false }} />
+    {/* TLP Phase 2 — Guide self-service */}
+    <Stack.Screen name="GuideProgramDraft" component={GuideProgramDraftScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="GuideSessionDraft" component={GuideSessionDraftScreen} options={{ headerShown: false }} />
   </Stack.Navigator>
 );
 

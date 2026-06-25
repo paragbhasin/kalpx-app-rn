@@ -6,6 +6,7 @@ import { handleMitraDeepLink } from '../utils/deeplink';
 import { markNotificationsRead } from '../screens/Notifications/actions';
 import { mitraTrackEvent } from '../engine/mitraApi';
 import store from '../store';
+import { logEvent } from '../utils/initAnalytics';
 
 /**
  * Fire a best-effort receipt to the backend notification receipt endpoint.
@@ -47,8 +48,9 @@ export async function checkExistingPermission() {
 }
 
 // Ask for permission + get FCM token
-export async function requestPushPermission() {
+export async function requestPushPermission(surface = 'default') {
   try {
+    logEvent('notification_permission_prompted', { surface });
     const authStatus = await messaging().requestPermission();
     const enabled =
       authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
@@ -56,8 +58,10 @@ export async function requestPushPermission() {
 
     if (!enabled) {
       console.log("Push permission not granted");
+      logEvent('notification_permission_denied', { surface });
       return null;
     }
+    logEvent('notification_permission_granted', { surface });
 
     // Get FCM token
     const fcmToken = await messaging().getToken();

@@ -145,7 +145,11 @@ export function useAuth() {
     invalidateJourneyEntryViewCache();
     store.dispatch(clearDoorState());
     store.dispatch(resetStore());
-    navigate('/en');
+    const opsSession = localStorage.getItem('kalpx:ops_session');
+    const guideSession = localStorage.getItem('kalpx:guide_session');
+    localStorage.removeItem('kalpx:ops_session');
+    localStorage.removeItem('kalpx:guide_session');
+    navigate(opsSession ? '/ops-login' : guideSession ? '/guide/login' : '/en');
   }, [navigate]);
 
   const socialLoginGoogle = useCallback(

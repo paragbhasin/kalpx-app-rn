@@ -5,10 +5,13 @@ import { storeTokens } from "@kalpx/auth";
 import { webStorage } from "../../lib/webStorage";
 import { api } from "../../lib/api";
 import type { LoginResponse } from "../../types/auth";
+import { useRecaptcha } from "../../hooks/useRecaptcha";
+import { getRecaptchaToken } from "../../lib/recaptcha";
 import "./Auth.css";
 
 export function GuideLoginPage() {
   const navigate = useNavigate();
+  useRecaptcha();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -26,7 +29,8 @@ export function GuideLoginPage() {
     setError("");
 
     try {
-      const res = await api.post<LoginResponse>("users/login/", { email, password });
+      const recaptcha_token = await getRecaptchaToken("guide_login");
+      const res = await api.post<LoginResponse>("users/login/", { email, password, recaptcha_token });
       const data = res.data;
 
       const accessToken = data.access_token ?? data.access;

@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { RequiresAuth } from "./components/RequiresAuth";
+import { RequiresGuideAuth } from "./components/RequiresGuideAuth";
 import { RequiresJourney } from "./components/RequiresJourney";
 import { ForgotPasswordPage } from "./pages/auth/ForgotPasswordPage";
 import { ForgotPasswordPhonePage } from "./pages/auth/ForgotPasswordPhonePage";
@@ -398,12 +399,12 @@ export function AppRoutes() {
       <Route path="/guides/:slug/" element={<GuidePublicProfilePage />} />
       <Route path="/guides/:slug" element={<GuidePublicProfilePage />} />
       {/* TLP Phase 2 — guide self-service (auth required via API 403 handling) */}
-      <Route path="/guide/dashboard" element={<RequiresAuth><GuideDashboardPage /></RequiresAuth>} />
-      <Route path="/guide/programs/draft" element={<RequiresAuth><GuideProgramDraftPage /></RequiresAuth>} />
-      <Route path="/guide/sessions/draft" element={<RequiresAuth><GuideSessionDraftPage /></RequiresAuth>} />
-      <Route path="/guide/templates" element={<RequiresAuth><GuideTemplateBrowserPage /></RequiresAuth>} />
-      <Route path="/guide/templates/:id/edit" element={<RequiresAuth><GuideTemplateDayEditorPage /></RequiresAuth>} />
-      <Route path="/guide/templates/:id/review" element={<RequiresAuth><GuideTemplateReviewPage /></RequiresAuth>} />
+      <Route path="/guide/dashboard" element={<RequiresGuideAuth><GuideDashboardPage /></RequiresGuideAuth>} />
+      <Route path="/guide/programs/draft" element={<RequiresGuideAuth><GuideProgramDraftPage /></RequiresGuideAuth>} />
+      <Route path="/guide/sessions/draft" element={<RequiresGuideAuth><GuideSessionDraftPage /></RequiresGuideAuth>} />
+      <Route path="/guide/templates" element={<RequiresGuideAuth><GuideTemplateBrowserPage /></RequiresGuideAuth>} />
+      <Route path="/guide/templates/:id/edit" element={<RequiresGuideAuth><GuideTemplateDayEditorPage /></RequiresGuideAuth>} />
+      <Route path="/guide/templates/:id/review" element={<RequiresGuideAuth><GuideTemplateReviewPage /></RequiresGuideAuth>} />
       {/* Ops template review — same page, ops fetches via admin endpoint */}
       <Route path="/ops/templates/:id/review" element={<RequiresStaff><GuideTemplateReviewPage /></RequiresStaff>} />
 

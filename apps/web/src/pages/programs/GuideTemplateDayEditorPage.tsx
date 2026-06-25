@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   fetchMyTemplate,
@@ -33,6 +33,8 @@ export function GuideTemplateDayEditorPage() {
   // slotSelections stores the full display data for each selected library item.
   // Key: "${dayNumber}-${slot}" e.g. "1-mantra". Lost on page refresh (ephemeral).
   const [slotSelections, setPickerItems] = useState<Record<string, PickerItem>>({});
+  const [activeDay, setActiveDay] = useState(1);
+  const dayRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
   useEffect(() => {
     if (!templateId) return;
@@ -116,6 +118,19 @@ export function GuideTemplateDayEditorPage() {
   }
 
   async function handleSubmit() {
+    // Validate: every day must have at least one slot filled
+    const emptyDays = days.filter((d) => {
+      const hasRef = d.mantra_ref || d.sankalp_ref || d.practice_ref || d.wisdom_ref;
+      const hasCustom = d.custom_mantra_body || d.custom_sankalp_body ||
+        d.custom_practice_body || d.custom_wisdom_body;
+      return !hasRef && !hasCustom;
+    });
+    if (emptyDays.length > 0) {
+      const nums = emptyDays.map((d) => `Day ${d.day_number}`).join(", ");
+      setError(`Each day needs at least one content slot (Mantra, Sankalp, Practice, or Wisdom). Missing: ${nums}`);
+      return;
+    }
+    setError("");
     setSubmitting(true);
     try {
       await submitTemplateForReview(templateId);
@@ -151,9 +166,59 @@ export function GuideTemplateDayEditorPage() {
   const canSubmit =
     template?.review_status === "draft" || template?.review_status === "changes_requested";
 
+  const navBarHeight = days.length > 1 ? 56 : 0;
+
   return (
     <div style={page}>
-      <div style={inner}>
+      {/* Fixed day navigator — always visible at top when template has multiple days */}
+      {days.length > 1 && (
+        <div style={dayNavBar}>
+          <div style={dayNavScroll}>
+            {days.map((day) => {
+              const hasContent = day.mantra_ref || day.sankalp_ref || day.practice_ref || day.wisdom_ref ||
+                day.custom_mantra_body || day.custom_sankalp_body || day.custom_practice_body || day.custom_wisdom_body;
+              const isActive = activeDay === day.day_number;
+              return (
+                <button
+                  key={day.day_number}
+                  onClick={() => {
+                    setActiveDay(day.day_number);
+                    const el = dayRefs.current[day.day_number];
+                    if (el) {
+                      const top = el.getBoundingClientRect().top + window.scrollY - navBarHeight - 8;
+                      window.scrollTo({ top, behavior: "smooth" });
+                    }
+                  }}
+                  style={{
+                    padding: "6px 14px",
+                    borderRadius: 20,
+                    border: isActive ? "2px solid #C99317" : "2px solid #E8DECE",
+                    background: isActive ? "#C99317" : hasContent ? "#FFF8EC" : "#fff",
+                    color: isActive ? "#fff" : hasContent ? "#7A5C00" : "#B5A08A",
+                    fontSize: 12,
+                    fontWeight: isActive ? 700 : 500,
+                    cursor: "pointer",
+                    whiteSpace: "nowrap" as const,
+                    flexShrink: 0,
+                    position: "relative" as const,
+                  }}
+                >
+                  Day {day.day_number}
+                  {hasContent && !isActive && (
+                    <span style={{
+                      position: "absolute" as const, top: -3, right: -3,
+                      width: 7, height: 7, borderRadius: "50%",
+                      background: "#C99317", border: "1.5px solid #fff",
+                    }} />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div style={{ ...inner, paddingTop: navBarHeight + 24 }}>
         <button onClick={() => navigate("/guide/templates")} style={backBtn}>← Back to templates</button>
 
         <div style={headerRow}>
@@ -237,18 +302,22 @@ export function GuideTemplateDayEditorPage() {
         {/* Day rows */}
         <div style={dayGrid}>
           {days.map((day) => (
-            <DayRow
+            <div
               key={day.day_number}
-              day={day}
-              locked={locked}
-              slotSelections={slotSelections}
-              onOpenPicker={(slot) =>
-                setPickerTarget({ dayNumber: day.day_number, slot })
-              }
-              onApplyToAll={(slot, item_id, title) => applyToAllDays(slot, item_id, title)}
-              onBlurSave={(patch) => saveDay(day.day_number, patch)}
-              onLocalChange={(patch) => updateDayLocal(day.day_number, patch)}
-            />
+              ref={(el) => { dayRefs.current[day.day_number] = el; }}
+            >
+              <DayRow
+                day={day}
+                locked={locked}
+                slotSelections={slotSelections}
+                onOpenPicker={(slot) =>
+                  setPickerTarget({ dayNumber: day.day_number, slot })
+                }
+                onApplyToAll={(slot, item_id, title) => applyToAllDays(slot, item_id, title)}
+                onBlurSave={(patch) => saveDay(day.day_number, patch)}
+                onLocalChange={(patch) => updateDayLocal(day.day_number, patch)}
+              />
+            </div>
           ))}
         </div>
 
@@ -637,6 +706,17 @@ const submitBtn: React.CSSProperties = { padding: "10px 22px", background: "#432
 const lockBanner: React.CSSProperties = { background: "#FEF3D0", border: "1px solid #C99317", borderRadius: 8, padding: "10px 16px", fontSize: 13, color: "#7A4E00", marginBottom: 20 };
 const errorText: React.CSSProperties = { color: "#C0392B", fontSize: 13, marginBottom: 16 };
 const dayGrid: React.CSSProperties = { display: "flex", flexDirection: "column" as const, gap: 20 };
+const dayNavBar: React.CSSProperties = {
+  position: "fixed" as const, top: 0, left: 0, right: 0, zIndex: 100,
+  background: "#FAF7F2", borderBottom: "1px solid #E8DECE",
+  padding: "8px 16px",
+};
+const dayNavScroll: React.CSSProperties = {
+  display: "flex", gap: 8, overflowX: "auto" as const,
+  maxWidth: 720, margin: "0 auto",
+  scrollbarWidth: "none" as const,
+  msOverflowStyle: "none" as const,
+};
 const dayCard: React.CSSProperties = { background: "#fff", border: "1px solid #E8DECE", borderRadius: 12, padding: "18px 22px" };
 const dayHeader: React.CSSProperties = { display: "flex", alignItems: "center", gap: 10, marginBottom: 14 };
 const dayNumber: React.CSSProperties = { fontSize: 14, fontWeight: 800, color: "#432104" };

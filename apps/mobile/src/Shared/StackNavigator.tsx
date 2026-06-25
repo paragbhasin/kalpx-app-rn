@@ -94,6 +94,7 @@ import ProgramInviteClaimScreen from "../screens/Program/ProgramInviteClaimScree
 import ProgramDayScreen from "../screens/Program/ProgramDayScreen";
 import ProgramCompletionScreen from "../screens/Program/ProgramCompletionScreen";
 import ProgramDay8TransitionScreen from "../screens/Program/ProgramDay8TransitionScreen";
+import ProgramReflectionScreen from "../screens/Program/ProgramReflectionScreen";
 import ProgramMantraRunner from "../screens/Program/runners/ProgramMantraRunner";
 import ProgramSankalpRunner from "../screens/Program/runners/ProgramSankalpRunner";
 import ProgramPracticeRunner from "../screens/Program/runners/ProgramPracticeRunner";
@@ -425,6 +426,7 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen name="ProgramDayScreen" component={ProgramDayScreen} options={{ headerShown: false }} />
     <Stack.Screen name="ProgramCompletionScreen" component={ProgramCompletionScreen} options={{ headerShown: false }} />
     <Stack.Screen name="ProgramDay8TransitionScreen" component={ProgramDay8TransitionScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="ProgramReflectionScreen" component={ProgramReflectionScreen} options={{ headerShown: false }} />
     <Stack.Screen name="ProgramMantraRunner" component={ProgramMantraRunner} options={{ headerShown: false }} />
     <Stack.Screen name="ProgramSankalpRunner" component={ProgramSankalpRunner} options={{ headerShown: false }} />
     <Stack.Screen name="ProgramPracticeRunner" component={ProgramPracticeRunner} options={{ headerShown: false }} />

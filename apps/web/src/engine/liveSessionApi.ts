@@ -234,6 +234,8 @@ export interface GuideProgram {
   title: string;
   status: string;
   is_public: boolean;
+  join_url: string;
+  template_id: number | null;
   joined_count: number;
   testimonials_count: number;
   created_at: string;

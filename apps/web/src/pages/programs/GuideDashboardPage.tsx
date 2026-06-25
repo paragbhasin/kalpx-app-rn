@@ -54,6 +54,21 @@ function StatCard({ label, value }: { label: string; value: number | string }) {
 }
 
 function ProgramRow({ program }: { program: GuideProgram }) {
+  const navigate = useNavigate();
+  const [copied, setCopied] = React.useState(false);
+
+  const joinUrl = program.join_url
+    ? program.join_url.replace("https://kalpx.com", window.location.origin)
+    : null;
+
+  const handleCopy = () => {
+    if (!joinUrl) return;
+    navigator.clipboard.writeText(joinUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
   return (
     <div
       style={{
@@ -62,76 +77,99 @@ function ProgramRow({ program }: { program: GuideProgram }) {
         border: "1px solid var(--kalpx-border)",
         borderRadius: 10,
         display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 12,
+        flexDirection: "column",
+        gap: 10,
       }}
     >
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <p
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p
+            style={{
+              fontSize: 14,
+              fontWeight: 600,
+              color: "var(--kalpx-text)",
+              margin: "0 0 2px",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {program.title}
+          </p>
+          <p
+            style={{ fontSize: 12, color: "var(--kalpx-text-muted)", margin: 0 }}
+          >
+            {program.status}
+            {program.is_public ? " · public" : " · not public"}
+          </p>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 20, flexShrink: 0 }}>
+          <div style={{ textAlign: "right" }}>
+            <p style={{ fontSize: 16, fontWeight: 700, color: "var(--kalpx-text)", margin: 0 }}>
+              {program.joined_count}
+            </p>
+            <p style={{ fontSize: 10, color: "var(--kalpx-text-muted)", margin: 0 }}>joined</p>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <p style={{ fontSize: 16, fontWeight: 700, color: "var(--kalpx-text)", margin: 0 }}>
+              {program.testimonials_count}
+            </p>
+            <p style={{ fontSize: 10, color: "var(--kalpx-text-muted)", margin: 0 }}>testimonials</p>
+          </div>
+          {program.template_id && (
+            <button
+              onClick={() => navigate(`/guide/templates/${program.template_id}/review`)}
+              style={{
+                padding: "6px 14px",
+                border: "1px solid var(--kalpx-border)",
+                background: "none",
+                color: "var(--kalpx-text-muted)",
+                borderRadius: 8,
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              View
+            </button>
+          )}
+        </div>
+      </div>
+
+      {joinUrl && (
+        <div
           style={{
-            fontSize: 14,
-            fontWeight: 600,
-            color: "var(--kalpx-text)",
-            margin: "0 0 2px",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            background: "#F7F3ED",
+            border: "1px solid var(--kalpx-border)",
+            borderRadius: 8,
+            padding: "8px 12px",
           }}
         >
-          {program.title}
-        </p>
-        <p
-          style={{ fontSize: 12, color: "var(--kalpx-text-muted)", margin: 0 }}
-        >
-          {program.status}
-          {program.is_public ? " · public" : " · not public"}
-        </p>
-      </div>
-      <div style={{ display: "flex", gap: 20, flexShrink: 0 }}>
-        <div style={{ textAlign: "right" }}>
-          <p
+          <p style={{ flex: 1, fontSize: 12, color: "#1d4ed8", margin: 0, wordBreak: "break-all", lineHeight: 1.4 }}>
+            {joinUrl}
+          </p>
+          <button
+            onClick={handleCopy}
             style={{
-              fontSize: 16,
-              fontWeight: 700,
-              color: "var(--kalpx-text)",
-              margin: 0,
+              flexShrink: 0,
+              padding: "4px 12px",
+              background: copied ? "#22863a" : "var(--kalpx-gold)",
+              border: "none",
+              color: "#fff",
+              borderRadius: 6,
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "background 0.2s",
             }}
           >
-            {program.joined_count > 0 ? program.joined_count : "—"}
-          </p>
-          <p
-            style={{
-              fontSize: 10,
-              color: "var(--kalpx-text-muted)",
-              margin: 0,
-            }}
-          >
-            joined
-          </p>
+            {copied ? "Copied!" : "Copy link"}
+          </button>
         </div>
-        <div style={{ textAlign: "right" }}>
-          <p
-            style={{
-              fontSize: 16,
-              fontWeight: 700,
-              color: "var(--kalpx-text)",
-              margin: 0,
-            }}
-          >
-            {program.testimonials_count}
-          </p>
-          <p
-            style={{
-              fontSize: 10,
-              color: "var(--kalpx-text-muted)",
-              margin: 0,
-            }}
-          >
-            testimonials
-          </p>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -554,7 +592,7 @@ export function GuideDashboardPage() {
                   <StatCard label="PROGRAMS" value={summary.programs_count} />
                   <StatCard
                     label="TOTAL JOINED"
-                    value={summary.total_joined || "< 5"}
+                    value={summary.total_joined}
                   />
                   <StatCard label="SESSIONS" value={summary.sessions_count} />
                   <StatCard
@@ -819,17 +857,6 @@ export function GuideDashboardPage() {
                     </div>
                   )}
 
-                <p
-                  style={{
-                    fontSize: 11,
-                    color: "var(--kalpx-text-muted)",
-                    marginTop: 32,
-                    textAlign: "center",
-                  }}
-                >
-                  Counts below 5 participants are shown as — to protect
-                  practitioner privacy.
-                </p>
               </>
             );
           })()}

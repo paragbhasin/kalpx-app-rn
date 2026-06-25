@@ -198,12 +198,17 @@ function DayReviewCard({ day }: { day: TemplateDay }) {
             </div>
           </div>
           <p style={fieldLabel}>Google Meet / Join Link</p>
-          <input
-            disabled
-            value={day.day_join_url || ""}
-            placeholder="Not set"
-            style={disabledInput}
-          />
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <input
+              disabled
+              value={day.day_join_url || ""}
+              placeholder="Not set"
+              style={{ ...disabledInput, flex: 1 }}
+            />
+            {day.day_join_url && (
+              <CopyButton text={day.day_join_url} />
+            )}
+          </div>
 
           {/* Reflection */}
           {(day.reflection_prompt !== undefined) && (
@@ -365,6 +370,27 @@ function FieldRow({ label, value, multiline }: { label: string; value: string; m
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return <p style={sectionLabelStyle}>{children}</p>;
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = React.useState(false);
+  return (
+    <button
+      onClick={() => navigator.clipboard.writeText(text).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })}
+      style={{
+        flexShrink: 0, padding: "8px 14px",
+        background: copied ? "#22863a" : "#C99317",
+        border: "none", color: "#fff", borderRadius: 8,
+        fontSize: 12, fontWeight: 600, cursor: "pointer",
+        transition: "background 0.2s",
+      }}
+    >
+      {copied ? "Copied!" : "Copy"}
+    </button>
+  );
 }
 
 // ── Styles ─────────────────────────────────────────────────────────────────────

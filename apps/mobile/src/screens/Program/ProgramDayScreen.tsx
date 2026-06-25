@@ -177,6 +177,13 @@ export default function ProgramDayScreen() {
     ) {
       dayCompletedRef.current = true;
       completeProgramDay(dayNumber).catch(() => {});
+      // Navigate to reflection screen after a short delay so user sees all checkmarks
+      setTimeout(() => {
+        navigation.navigate("ProgramReflectionScreen", {
+          dayNumber,
+          reflectionPrompt: dayContent.reflection_prompt || null,
+        });
+      }, 800);
     }
   }, [completedInSession, loading, dayContent, dayNumber]);
 

@@ -7,6 +7,7 @@ import store from "../store";
 import { clearDoorState } from "../store/doorSlice";
 import api from "../Networks/axios";
 import { BIOMETRIC_TOKEN_KEY, BIOMETRIC_REGISTERED_KEY } from "./biometricKeys";
+import { clearAnalyticsUser } from "./initAnalytics";
 
 const AUTH_KEYS_TO_REMOVE = ["access_token", "refresh_token"] as const;
 const GUEST_UUID_KEY = "guestUUID";
@@ -81,6 +82,7 @@ export async function performLogout(): Promise<void> {
     await AsyncStorage.setItem(GUEST_UUID_KEY, guestUUID);
   }
 
+  clearAnalyticsUser();
   store.dispatch(clearDoorState());
   store.dispatch({ type: "RESET_APP" });
 }

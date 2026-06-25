@@ -4,6 +4,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { AppShell } from '../../components/ui/AppShell';
 import { fetchProgramByCode, fetchProgramBySlug, type ProgramCampaignPublic } from '../../engine/programApi';
 import { captureProgramAttribution } from '../../utils/programAttribution';
+import { WEB_ENV } from '../../lib/env';
 
 const APPLE_APP_STORE_ID = '6755144623';
 
@@ -78,6 +79,11 @@ export function ProgramLandingPage() {
 
   return (
     <AppShell>
+      <div style={{ height: 56, borderBottom: '1px solid var(--kalpx-border)', display: 'flex',
+        alignItems: 'center', padding: '0 20px', background: 'var(--kalpx-bg)',
+        position: 'sticky', top: 0, zIndex: 50 }}>
+        <img src="/kalpx-logo.png" alt="KalpX" style={{ height: 30, width: 'auto', marginTop: 8 }} />
+      </div>
       <main
         role="main"
         style={{ maxWidth: 640, margin: '0 auto', padding: '32px 20px 80px' }}
@@ -179,7 +185,7 @@ function fireTrackBeacon(event: string, campaignCode: string) {
 }
 
 function CampaignBody({ campaign }: { campaign: ProgramCampaignPublic }) {
-  const joinUrl = `https://kalpx.com/join/${campaign.code}`;
+  const joinUrl = `${window.location.hostname === 'localhost' ? WEB_ENV.imageBaseUrl.replace('/api', '').replace(/\/$/, '') : window.location.origin}/join/${campaign.code}`;
   const deepLinkUrl = `kalpx://join/${campaign.code}`;
   const supportUrl = `/programs/support?code=${campaign.code}${
     campaign.support_contact_url
@@ -269,6 +275,7 @@ function CampaignBody({ campaign }: { campaign: ProgramCampaignPublic }) {
             rel="noopener noreferrer"
             aria-label="Download KalpX on the App Store"
             style={storeButtonStyle}
+            onClick={() => fireTrackBeacon('app_store_clicked', campaign.code)}
           >
             App Store
           </a>
@@ -278,6 +285,7 @@ function CampaignBody({ campaign }: { campaign: ProgramCampaignPublic }) {
             rel="noopener noreferrer"
             aria-label="Get KalpX on Google Play"
             style={storeButtonStyle}
+            onClick={() => fireTrackBeacon('play_store_clicked', campaign.code)}
           >
             Google Play
           </a>
@@ -289,7 +297,16 @@ function CampaignBody({ campaign }: { campaign: ProgramCampaignPublic }) {
         <a
           href={deepLinkUrl}
           aria-label={`Open KalpX app and join with code ${campaign.code}`}
-          onClick={() => fireTrackBeacon('program_join_clicked', campaign.code)}
+          onClick={(e) => {
+            e.preventDefault();
+            fireTrackBeacon('program_join_clicked', campaign.code);
+            window.location.href = deepLinkUrl;
+            // If app isn't installed, the page stays active — fall back to store after 1.5s
+            setTimeout(() => {
+              const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+              window.location.href = isIOS ? appStoreUrl : playStoreUrl;
+            }, 1500);
+          }}
           style={{
             display: 'inline-block',
             padding: '10px 20px',

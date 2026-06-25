@@ -108,6 +108,12 @@ export function LiveSessionDetailPage() {
         if (cancelled) return;
         setState({ kind: 'loaded', session });
         setRegistered(session.is_user_registered || false);
+        try {
+          navigator.sendBeacon(
+            '/api/programs/track/',
+            JSON.stringify({ event: 'live_session_landing_viewed', session_code: session.code }),
+          );
+        } catch { /* analytics never blocks UX */ }
       } catch (err: unknown) {
         if (cancelled) return;
         const status = (err as { response?: { status?: number } })?.response?.status;

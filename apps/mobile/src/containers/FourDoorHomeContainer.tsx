@@ -99,7 +99,6 @@ import {
 } from "../engine/mitraApi";
 import { fetchActiveProgram, type ActiveProgramSummary } from "../engine/programApi";
 import ProgramCard from "../screens/Home/ProgramCard";
-import ProgramCodeEntryRow from "../screens/Home/ProgramCodeEntryRow";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { setHomeData } from "../store/doorSlice";
 import { Fonts } from "../theme/fonts";
@@ -746,6 +745,9 @@ export default function FourDoorHomeContainer({
         >
           {!!error && <Text style={styles.inlineError}>{error}</Text>}
 
+          {/* Program card first when user has active program */}
+          {activeProgram && <ProgramCard program={activeProgram} />}
+
           <DoorCard
             Icon={M3Icon}
             label={t("mitraFourDoor.door.myRhythm")}
@@ -936,12 +938,7 @@ export default function FourDoorHomeContainer({
             )}
           </View>
 
-          {/* Program Distribution OS — MOB-8 + MOB-2 */}
-          {activeProgram ? (
-            <ProgramCard program={activeProgram} />
-          ) : (
-            <ProgramCodeEntryRow />
-          )}
+          {/* Program Distribution OS — MOB-8 */}
         </View>
       </ScrollView>
 

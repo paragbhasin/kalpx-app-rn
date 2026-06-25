@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { RequiresAuth } from "./components/RequiresAuth";
+import { RequiresGuideAuth } from "./components/RequiresGuideAuth";
 import { RequiresJourney } from "./components/RequiresJourney";
 import { ForgotPasswordPage } from "./pages/auth/ForgotPasswordPage";
 import { ForgotPasswordPhonePage } from "./pages/auth/ForgotPasswordPhonePage";
@@ -79,10 +80,22 @@ import { ProgramsDiscoveryPage } from "./pages/programs/ProgramsDiscoveryPage";
 import { ProgramDetailPage } from "./pages/programs/ProgramDetailPage";
 import { LiveSessionsListPage } from "./pages/programs/LiveSessionsListPage";
 import { LiveSessionDetailPage } from "./pages/programs/LiveSessionDetailPage";
+import { GuidePublicProfilePage } from "./pages/programs/GuidePublicProfilePage";
+import { GuideDashboardPage } from "./pages/programs/GuideDashboardPage";
+import { GuideProgramDraftPage } from "./pages/programs/GuideProgramDraftPage";
+import { GuideSessionDraftPage } from "./pages/programs/GuideSessionDraftPage";
+import { GuideTemplateBrowserPage } from "./pages/programs/GuideTemplateBrowserPage";
+import { GuideTemplateDayEditorPage } from "./pages/programs/GuideTemplateDayEditorPage";
+import { GuideTemplateReviewPage } from "./pages/programs/GuideTemplateReviewPage";
 import { RequiresStaff } from "./components/RequiresStaff";
 import { ProgramAdminDashboard } from "./pages/programs/ProgramAdminDashboard";
 import { ProgramAdminCreateCampaign } from "./pages/programs/ProgramAdminCreateCampaign";
 import { ProgramAdminCampaignDetail } from "./pages/programs/ProgramAdminCampaignDetail";
+import { OpsLoginPage } from "./pages/auth/OpsLoginPage";
+import { OpsForgotPasswordPage } from "./pages/auth/OpsForgotPasswordPage";
+import { GuideLoginPage } from "./pages/auth/GuideLoginPage";
+import { GuideForgotPasswordPage } from "./pages/auth/GuideForgotPasswordPage";
+import { GuideInviteAcceptPage } from "./pages/auth/GuideInviteAcceptPage";
 
 const ONBOARDING_TURN_1_PATH =
   "/en/mitra/onboarding?containerId=welcome_onboarding&stateId=turn_1";
@@ -101,6 +114,11 @@ export function AppRoutes() {
       <Route path="/forgot-password-phone" element={<ForgotPasswordPhonePage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/logout" element={<LogoutPage />} />
+      <Route path="/ops-login" element={<OpsLoginPage />} />
+      <Route path="/ops-forgot-password" element={<OpsForgotPasswordPage />} />
+      <Route path="/guide/login" element={<GuideLoginPage />} />
+      <Route path="/guide/forgot-password" element={<GuideForgotPasswordPage />} />
+      <Route path="/guide/invite/:token" element={<GuideInviteAcceptPage />} />
 
       {/* Mitra — home is an open routing hub */}
       <Route path="/en/mitra" element={<MitraHomePage />} />
@@ -377,6 +395,18 @@ export function AppRoutes() {
       {/* /sessions/ aliases for Universal Links compatibility */}
       <Route path="/sessions/" element={<LiveSessionsListPage />} />
       <Route path="/sessions/:code/" element={<LiveSessionDetailPage />} />
+      {/* TLP Phase 2 — public guide profiles */}
+      <Route path="/guides/:slug/" element={<GuidePublicProfilePage />} />
+      <Route path="/guides/:slug" element={<GuidePublicProfilePage />} />
+      {/* TLP Phase 2 — guide self-service (auth required via API 403 handling) */}
+      <Route path="/guide/dashboard" element={<RequiresGuideAuth><GuideDashboardPage /></RequiresGuideAuth>} />
+      <Route path="/guide/programs/draft" element={<RequiresGuideAuth><GuideProgramDraftPage /></RequiresGuideAuth>} />
+      <Route path="/guide/sessions/draft" element={<RequiresGuideAuth><GuideSessionDraftPage /></RequiresGuideAuth>} />
+      <Route path="/guide/templates" element={<RequiresGuideAuth><GuideTemplateBrowserPage /></RequiresGuideAuth>} />
+      <Route path="/guide/templates/:id/edit" element={<RequiresGuideAuth><GuideTemplateDayEditorPage /></RequiresGuideAuth>} />
+      <Route path="/guide/templates/:id/review" element={<RequiresGuideAuth><GuideTemplateReviewPage /></RequiresGuideAuth>} />
+      {/* Ops template review — same page, ops fetches via admin endpoint */}
+      <Route path="/ops/templates/:id/review" element={<RequiresStaff><GuideTemplateReviewPage /></RequiresStaff>} />
 
       {/* Practice Distribution OS — Gate 7 (staff-only admin) */}
       <Route

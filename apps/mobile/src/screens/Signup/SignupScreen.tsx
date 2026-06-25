@@ -32,6 +32,7 @@ import type { PhoneAuthResult } from "../PhoneAuth/phoneAuthActions";
 import { PHONE_AUTH_COUNTRIES, DEFAULT_PHONE_COUNTRY } from "@kalpx/types";
 import type { PhoneCountryCode, PhoneOtpRequestResponse } from "@kalpx/types";
 import { useToast } from "../../context/ToastContext";
+import { logEvent } from "../../utils/initAnalytics";
 import styles from "./styles";
 
 const PHONE_COUNTRY_OPTIONS = [...PHONE_AUTH_COUNTRIES];
@@ -84,6 +85,10 @@ export default function SignupScreen({ navigation }) {
     if (!formikValuesRef.current) formikValuesRef.current = {};
     formikValuesRef.current.actionType = actionType;
   };
+
+  useEffect(() => {
+    logEvent("signup_started", { method: "email" }).catch(() => {});
+  }, []);
 
   // OTP Timer
   useEffect(() => {

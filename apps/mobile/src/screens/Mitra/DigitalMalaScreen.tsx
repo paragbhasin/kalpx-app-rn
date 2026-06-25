@@ -28,6 +28,7 @@ import { Image } from "react-native";
 
 import { useJapaEngine } from "../../engine/useJapaEngine";
 import { useScreenStore } from "../../engine/useScreenBridge";
+import { logEvent } from "../../utils/initAnalytics";
 import { Fonts } from "../../theme/fonts";
 import { platformShadow } from "../../theme/shadows";
 
@@ -64,6 +65,7 @@ export default function DigitalMalaScreen() {
   const goalValue = GOAL_OPTIONS.find((o) => o.mode === goalMode)?.value ?? null;
 
   const onGoalReachedRef = useRef<(() => void) | null>(null);
+  const sessionStartedRef = useRef(false);
   const japaEngine = useJapaEngine({
     mantraRef: routeMantraRef,
     sourceSurface: "digital_mala",
@@ -75,6 +77,7 @@ export default function DigitalMalaScreen() {
   useEffect(() => {
     onGoalReachedRef.current = () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      logEvent("quick_chant_completed", { surface: "digital_mala" }).catch(() => {});
       setSessionComplete(true);
     };
   });
@@ -133,6 +136,7 @@ export default function DigitalMalaScreen() {
   useEffect(() => {
     onGoalReachedRef.current = () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      logEvent("quick_chant_completed", { surface: "digital_mala" }).catch(() => {});
       setSessionComplete(true);
     };
   });
@@ -214,7 +218,13 @@ export default function DigitalMalaScreen() {
             </Animated.View>
 
             <TouchableOpacity
-              onPress={japaEngine.increment}
+              onPress={() => {
+                if (!sessionStartedRef.current) {
+                  sessionStartedRef.current = true;
+                  logEvent("quick_chant_started", { surface: "digital_mala" }).catch(() => {});
+                }
+                japaEngine.increment();
+              }}
               activeOpacity={0.85}
               style={styles.tapBtn}
             >

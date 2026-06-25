@@ -151,3 +151,46 @@ export async function recordJoinClick(code: string): Promise<JoinClickResult> {
   const res = await api.post(`live-sessions/${code}/join-click/`);
   return res.data;
 }
+
+// ── Phase 2: Guide self-service API ──────────────────────────────────────────
+
+export interface GuideSubmissionResult {
+  submission_id: number;
+  status: string;
+  estimated_review_days: number;
+  message: string;
+}
+
+export async function submitProgramDraft(data: {
+  title: string;
+  category: string;
+  duration_days: number | string;
+  description: string;
+  language: string;
+  target_audience?: string;
+  daily_structure?: string;
+  start_type?: string;
+  desired_start_date?: string;
+  support_needs?: string;
+  notes_to_kalpx?: string;
+}): Promise<GuideSubmissionResult> {
+  const res = await api.post("guide/programs/draft/", data);
+  return res.data;
+}
+
+export async function submitSessionDraft(data: {
+  title: string;
+  session_type: string;
+  description: string;
+  external_join_url: string;
+  external_platform: string;
+  scheduled_at: string;
+  timezone: string;
+  duration_minutes?: number;
+  recurrence?: string;
+  language?: string;
+  notes_to_kalpx?: string;
+}): Promise<GuideSubmissionResult> {
+  const res = await api.post("guide/sessions/draft/", data);
+  return res.data;
+}

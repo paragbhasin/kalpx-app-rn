@@ -10,13 +10,14 @@ import React, { useCallback, useRef } from "react";
 import { SafeAreaView, StyleSheet } from "react-native";
 import MantraRunnerView from "../../../blocks/runners/MantraRunnerView";
 import { useScreenStore } from "../../../engine/useScreenBridge";
+import { trackRitualCompletion } from "../../../utils/firstRitual";
 
 const BEIGE_BG = require("../../../../assets/beige_bg.webp");
 
 export default function ProgramMantraRunner() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const { item, dayNumber } = route.params;
+  const { item, dayNumber, completedItems = [] } = route.params;
   const updateBackground = useScreenStore((state) => state.updateBackground);
 
   const engineApiRef = useRef<{ syncNow: () => Promise<void>; refreshStats: () => Promise<void> } | null>(null);
@@ -40,7 +41,9 @@ export default function ProgramMantraRunner() {
         sourceSurface="program"
         onEngineReady={(api) => { engineApiRef.current = api; api.refreshStats(); }}
         onComplete={() => {
-          navigation.navigate("ProgramDayScreen", { dayNumber, completedItem: item.item_id });
+          trackRitualCompletion("mantra");
+          const updated = [...new Set([...completedItems, item.item_id])];
+          navigation.navigate("ProgramDayScreen", { dayNumber, completedItems: updated });
         }}
         onBack={() => navigation.goBack()}
         isDevMode={__DEV__}

@@ -47,6 +47,18 @@ import { Ionicons } from "@expo/vector-icons";
 
 const SUPPORT_URL = "https://kalpx.com/programs/support";
 
+/** Converts "HH:MM" (24-hour) to "H:MM AM/PM". Returns original string if unparseable. */
+function formatSessionTime(time: string): string {
+  const parts = time.split(":");
+  if (parts.length < 2) return time;
+  const h = parseInt(parts[0], 10);
+  const m = parts[1];
+  if (isNaN(h)) return time;
+  const period = h >= 12 ? "PM" : "AM";
+  const hour12 = h % 12 === 0 ? 12 : h % 12;
+  return `${hour12}:${m} ${period}`;
+}
+
 /** Returns a short human-readable title for the card. */
 function getCardTitle(item: ProgramDayItem): string {
   if (item.item_type === "mantra") {
@@ -379,7 +391,7 @@ export default function ProgramDayScreen() {
               <Text style={styles.liveSessionLabel}>LIVE SESSION</Text>
               {dayContent.day_session_time ? (
                 <Text style={styles.liveSessionTime}>
-                  {dayContent.day_session_time}
+                  {formatSessionTime(dayContent.day_session_time)}
                   {dayContent.day_session_timezone ? ` ${dayContent.day_session_timezone}` : ''}
                 </Text>
               ) : null}

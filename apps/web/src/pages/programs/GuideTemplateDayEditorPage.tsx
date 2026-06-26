@@ -96,7 +96,7 @@ export function GuideTemplateDayEditorPage() {
         : slot === "sankalp"
         ? { sankalp_ref: item_id, custom_sankalp_title: "", custom_sankalp_body: "" }
         : slot === "wisdom"
-        ? { wisdom_ref: item_id, custom_wisdom_body: "" }
+        ? { wisdom_ref: item_id, custom_wisdom_title: "", custom_wisdom_body: "" }
         : { practice_ref: item_id, custom_practice_title: "", custom_practice_body: "" };
 
     days.forEach((d) => {
@@ -119,7 +119,7 @@ export function GuideTemplateDayEditorPage() {
         : slot === "sankalp"
         ? { sankalp_ref: item.item_id, custom_sankalp_title: "", custom_sankalp_body: "" }
         : slot === "wisdom"
-        ? { wisdom_ref: item.item_id, custom_wisdom_body: "" }
+        ? { wisdom_ref: item.item_id, custom_wisdom_title: "", custom_wisdom_body: "" }
         : { practice_ref: item.item_id, custom_practice_title: "", custom_practice_body: "" };
     saveDay(dayNumber, patch);
     storePickerItem(dayNumber, slot, item);
@@ -448,17 +448,17 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         label="Wisdom"
         refValue={day.wisdom_ref}
         selection={sel("wisdom")}
-        customTitle=""
+        customTitle={day.custom_wisdom_title || ""}
         customBody={day.custom_wisdom_body}
         locked={locked}
         onOpenPicker={() => onOpenPicker("wisdom")}
         onApplyToAll={(id, title) => onApplyToAll("wisdom", id, title)}
         onClearRef={() => onBlurSave({ wisdom_ref: "" })}
-        onCustomChange={(_title, body) => {
-          onLocalChange({ custom_wisdom_body: body });
+        onCustomChange={(title, body) => {
+          onLocalChange({ custom_wisdom_title: title, custom_wisdom_body: body });
         }}
-        onCustomBlur={(_title, body) =>
-          onBlurSave({ custom_wisdom_body: body, wisdom_ref: "" })
+        onCustomBlur={(title, body) =>
+          onBlurSave({ custom_wisdom_title: title, custom_wisdom_body: body, wisdom_ref: "" })
         }
       />
 

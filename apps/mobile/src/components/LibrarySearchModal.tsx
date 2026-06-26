@@ -90,6 +90,13 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
   const inputRef = useRef<TextInput | null>(null);
   const PAGE_SIZE = 20;
 
+  // Refs so loadMore always reads the latest state without stale closures
+  const hasMoreRef = useRef(false);
+  const currentOffsetRef = useRef(0);
+  const searchQueryRef = useRef("");
+  const loadingRef = useRef(false);
+  const loadingMoreRef = useRef(false);
+
   const fetchPage = useCallback(
     async (query: string, offset: number, append: boolean) => {
       const lang = i18n.language || "en";
@@ -99,35 +106,34 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
       if (lockedItemType) {
         const res = await mitraLibrarySearch(query, lockedItemType, lang, offset);
         newItems = (res?.results || []).map((item: any) => ({ ...item, _type: lockedItemType }));
-        more = res?.hasMore ?? false;
+        // Infer hasMore from page size — works on both old and new backend versions
+        more = newItems.length >= PAGE_SIZE;
       } else if (selectedType === "all") {
         const [mantras, sankalps, practices] = await Promise.allSettled([
           mitraLibrarySearch(query, "mantra", lang, offset),
           mitraLibrarySearch(query, "sankalp", lang, offset),
           mitraLibrarySearch(query, "practice", lang, offset),
         ]);
-        newItems = [
-          ...(mantras.status === "fulfilled"
-            ? (mantras.value?.results || []).map((i: any) => ({ ...i, _type: "mantra" }))
-            : []),
-          ...(sankalps.status === "fulfilled"
-            ? (sankalps.value?.results || []).map((i: any) => ({ ...i, _type: "sankalp" }))
-            : []),
-          ...(practices.status === "fulfilled"
-            ? (practices.value?.results || []).map((i: any) => ({ ...i, _type: "practice" }))
-            : []),
-        ];
-        more =
-          (mantras.status === "fulfilled" && mantras.value?.hasMore) ||
-          (sankalps.status === "fulfilled" && sankalps.value?.hasMore) ||
-          (practices.status === "fulfilled" && practices.value?.hasMore);
+        const mantrasItems = mantras.status === "fulfilled"
+          ? (mantras.value?.results || []).map((i: any) => ({ ...i, _type: "mantra" }))
+          : [];
+        const sankalpsItems = sankalps.status === "fulfilled"
+          ? (sankalps.value?.results || []).map((i: any) => ({ ...i, _type: "sankalp" }))
+          : [];
+        const practicesItems = practices.status === "fulfilled"
+          ? (practices.value?.results || []).map((i: any) => ({ ...i, _type: "practice" }))
+          : [];
+        newItems = [...mantrasItems, ...sankalpsItems, ...practicesItems];
+        more = mantrasItems.length >= PAGE_SIZE ||
+               sankalpsItems.length >= PAGE_SIZE ||
+               practicesItems.length >= PAGE_SIZE;
       } else {
         const effectiveType = ["mantra", "sankalp", "practice"].includes(selectedType)
           ? selectedType
           : "practice";
         const res = await mitraLibrarySearch(query, effectiveType, lang, offset);
         newItems = (res?.results || []).map((item: any) => ({ ...item, _type: effectiveType }));
-        more = res?.hasMore ?? false;
+        more = newItems.length >= PAGE_SIZE;
       }
 
       if (append) {
@@ -135,8 +141,11 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
       } else {
         setResults(newItems);
       }
+      const nextOffset = offset + newItems.length;
       setHasMore(more);
-      setCurrentOffset(offset + newItems.length);
+      setCurrentOffset(nextOffset);
+      hasMoreRef.current = more;
+      currentOffsetRef.current = nextOffset;
     },
     [selectedType, lockedItemType],
   );
@@ -144,35 +153,43 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
   const performSearch = useCallback(
     async (query: string) => {
       if (!lockedItemType && query.length === 1) return;
+      loadingRef.current = true;
       setLoading(true);
+      hasMoreRef.current = false;
+      currentOffsetRef.current = 0;
+      searchQueryRef.current = query;
       try {
         await fetchPage(query, 0, false);
       } catch (err) {
         console.error("[LibrarySearch] Failed:", err);
       } finally {
+        loadingRef.current = false;
         setLoading(false);
       }
     },
     [fetchPage, lockedItemType],
   );
 
+  // Stable callback — reads from refs, no stale closure on currentOffset/hasMore
   const loadMore = useCallback(async () => {
-    if (!hasMore || loadingMore || loading) return;
+    if (!hasMoreRef.current || loadingMoreRef.current || loadingRef.current) return;
+    loadingMoreRef.current = true;
     setLoadingMore(true);
     try {
-      await fetchPage(searchQuery.trim(), currentOffset, true);
+      await fetchPage(searchQueryRef.current, currentOffsetRef.current, true);
     } catch (err) {
       console.error("[LibrarySearch] loadMore failed:", err);
     } finally {
+      loadingMoreRef.current = false;
       setLoadingMore(false);
     }
-  }, [hasMore, loadingMore, loading, fetchPage, searchQuery, currentOffset]);
+  }, [fetchPage]);
 
-  // Load the list whenever the sheet opens, the query changes, or the active
-  // tab changes.
+  // Load the list whenever the sheet opens, the query changes, or the active tab changes.
   useEffect(() => {
     if (!isVisible) return;
     const q = searchQuery.trim();
+    searchQueryRef.current = q;
     if (!lockedItemType && q.length === 1) return;
     const delay = q.length === 0 ? 0 : 350;
     const timer = setTimeout(() => {
@@ -189,6 +206,11 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
     setSelectedType(lockedItemType ?? "all");
     setCurrentOffset(0);
     setHasMore(false);
+    hasMoreRef.current = false;
+    currentOffsetRef.current = 0;
+    searchQueryRef.current = "";
+    loadingRef.current = false;
+    loadingMoreRef.current = false;
   }, [isVisible]); // lockedItemType is a stable prop; intentionally excluded from deps
 
   const selectType = (type: string) => {

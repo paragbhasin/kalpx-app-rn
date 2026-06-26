@@ -230,7 +230,7 @@ export const hi = {
     shift: 'बदलाव',
     shiftLabel: 'मित्र ने यह इसलिए चुना: {shift}',
     frameSankalp: 'यह {frame} है',
-    frameItem: '{title} — {frame}',
+    frameItem: '{title} — {frame} है',
     usefulFor: 'उपयोगी है',
     rootedIn: 'आधारित है',
     footer: 'यह गृहकार्य नहीं है। यह साधना है — एक दैनिक अभ्यास जो समय के साथ कुछ वास्तविक बनाता है।',

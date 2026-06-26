@@ -42,7 +42,8 @@
     "travel": "यात्रा",
     "pooja": "पूजा",
     "retreat": "विश्राम",
-    "classes": "कक्षाएँ"
+    "classes": "कक्षाएँ",
+    "socialExplore": "पोस्ट"
   },
   "streak": {
     "sankalp": "संकल्प",
@@ -178,6 +179,7 @@
     "brand": "KalpX",
     "heading": "अपनी जड़ों से जुड़ें",
     "google": "Google से लॉगिन करें",
+    "apple": "Apple से Login करें",
     "cardTitleLine1": "अपने",
     "cardTitleLine2": "खाते में लॉगिन करें",
     "subTitle": "दिव्य यात्रा का अनुभव करें",
@@ -211,7 +213,13 @@
     "verify": "वेरिफाई करें",
     "submit": "जमा करें",
     "backTo": "वापस जाएँ ",
-    "login": "लॉगिन"
+    "login": "लॉगिन",
+    "resetPassword": "पासवर्ड बदलें",
+    "passwordsMustMatch": "दोनों पासवर्ड एक जैसे होने चाहिए",
+    "confirmPasswordRequired": "पासवर्ड दोबारा डालें",
+    "passwordRequired": "पासवर्ड डालें",
+    "passwordMin": "पासवर्ड कम से कम 6 अक्षर का होना चाहिए",
+    "codeRequired": "Verification code डालें"
   },
   "signup": {
     "getStarted": "शुरू करें",
@@ -246,6 +254,7 @@
     "name": "नेहा जैस",
     "level": "शुरुआती स्तर",
     "menu": {
+      "login": "Login करें",
       "myProfile": "मेरी प्रोफ़ाइल",
       "setReminders": "रिमाइंडर सेट करें",
       "myPractices": "मेरे अभ्यास",
@@ -265,6 +274,7 @@
   },
   "common": {
     "cancel": "रद्द करें",
+    "processing": "हो रहा है...",
     "yes": "हाँ",
     "delete": "हटाएँ",
     "confirm": "पुष्टि करें",
@@ -720,7 +730,14 @@
     "ageGroup": "उम्र",
     "categories": "श्रेणियां",
     "languages": "सूचना भाषा",
-    "updateProfile": "प्रोफ़ाइल अपडेट करें"
+    "updateProfile": "प्रोफ़ाइल अपडेट करें",
+    "chooseTZ": "अपना timezone चुनें",
+    "languageInstruction": "सभी notifications चुनी हुई भाषा में आएंगे",
+    "Reminders": "रिमाइंडर",
+    "emailNotifications": "Email notifications",
+    "pushNotifications": "Push notifications",
+    "continue": "आगे बढ़ें",
+    "chooseHeader": "भाषा और timezone चुनें"
   },
   "mySadhana": {
     "findPeace": "दैनिक साधना से शांति और स्पष्टता प्राप्त करें",
@@ -794,6 +811,7 @@
     "streakCount": "{{count}} दिनों की निरंतर साधना",
     "welcomeText": "आपकी प्रोफ़ाइल में स्वागत है। अपने विवरण और साधनाएँ संपादित करें।",
     "progressSummary": "{{total}} में से {{completed}} साधनाएँ पूर्ण की गईं",
+    "progressSummaryDate": "आज: {{date}}",
     "addPractices": "साधना जोड़ें",
     "daily": "दैनिक",
     "setupInstruction": "अपनी दिनचर्या में जोड़ने के लिए मंत्र या साधनाएँ चुनें",
@@ -815,6 +833,7 @@
     "addedPracticesLabel": "जोड़े गए अभ्यास ({{count}})",
     "addedPracticesDesc": "इन्हें सहेजने के बाद जोड़ दिया जाएगा",
     "addedTitle": "जोड़ा गया",
+    "addedTag": "जोड़ा गया",
     "readyToExpand": "अपने अभ्यास का विस्तार करने के लिए तैयार हैं?",
     "expandDesc": "अपनी दिनचर्या को गहरा करने के लिए नए मंत्र या अभ्यास जोड़ें।",
     "addMorePractice": "और अभ्यास जोड़ें",
@@ -2836,5 +2855,19 @@
     "daysEngaged": "जुड़े दिन",
     "fullyCompleted": "पूरे किए दिन",
     "dailyRhythm": "रोज़ की लय"
+  },
+  "notificationPermission": {
+    "undetermined": {
+      "title": "अपनी लय से जुड़े रहें",
+      "body": "अपने मंत्र, संकल्प और रोज़ की साधना के लिए gentle reminders पाएं।",
+      "primaryCta": "Reminder की अनुमति दें",
+      "secondaryCta": "बाद में"
+    },
+    "denied": {
+      "title": "अभी notifications बंद हैं",
+      "body": "Gentle reminders पाने के लिए अपनी device settings में KalpX को notifications की अनुमति दें।",
+      "primaryCta": "Settings खोलें",
+      "secondaryCta": "अभी नहीं"
+    }
   }
 }

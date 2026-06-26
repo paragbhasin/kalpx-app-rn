@@ -266,3 +266,171 @@ export async function submitSessionDraft(data: {
   const res = await api.post("guide/sessions/draft/", data);
   return res.data;
 }
+
+// ── Guide Template Builder ─────────────────────────────────────────────────────
+
+export interface OfficialTemplate {
+  id: number;
+  slug: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  duration_days: number;
+  language: string;
+  audience_tags: string[];
+  program_promise: string;
+  day_themes: string[];
+}
+
+export interface TemplateDay {
+  day_number: number;
+  theme: string;
+  mantra_ref: string;
+  sankalp_ref: string;
+  practice_ref: string;
+  wisdom_ref: string;
+  custom_mantra_title: string;
+  custom_mantra_body: string;
+  custom_sankalp_title: string;
+  custom_sankalp_body: string;
+  custom_practice_title: string;
+  custom_practice_body: string;
+  custom_wisdom_body: string;
+  day_join_url: string;
+  day_session_time: string;
+  day_session_timezone: string;
+  reflection_prompt: string;
+}
+
+export interface GuideTemplate {
+  id: number;
+  slug: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  duration_days: number;
+  language: string;
+  template_type: string;
+  review_status: string;
+  is_editable_by_guide: boolean;
+  locked_at: string | null;
+  audience_tags: string[];
+  program_promise: string;
+  clone_source_slug: string | null;
+  days?: TemplateDay[];
+}
+
+export type LibrarySlot = "mantra" | "sankalp" | "practice" | "wisdom";
+
+export interface LibraryDetailField {
+  label: string;
+  value: string | string[];
+}
+
+export interface LibraryPickerItem {
+  item_id: string;
+  title: string;
+  subtitle: string;
+  meta: string;
+  details: LibraryDetailField[];
+}
+
+export async function fetchOfficialTemplates(): Promise<{ templates: OfficialTemplate[]; count: number }> {
+  const res = await api.get("guide/official-templates/");
+  return res.data;
+}
+
+export async function cloneOfficialTemplate(slug: string): Promise<GuideTemplate> {
+  const res = await api.post(`guide/official-templates/${slug}/clone/`);
+  return res.data;
+}
+
+export async function createBlankTemplate(data: { title: string; duration_days: number }): Promise<GuideTemplate> {
+  const res = await api.post("guide/my-templates/", data);
+  return res.data;
+}
+
+export async function fetchMyTemplate(id: number): Promise<GuideTemplate> {
+  const res = await api.get(`guide/my-templates/${id}/`);
+  return res.data;
+}
+
+export async function updateTemplateDay(templateId: number, dayNumber: number, data: Partial<TemplateDay>): Promise<TemplateDay> {
+  const res = await api.patch(`guide/my-templates/${templateId}/days/${dayNumber}/`, data);
+  return res.data;
+}
+
+export async function submitTemplateForReview(templateId: number): Promise<void> {
+  await api.post(`guide/my-templates/${templateId}/submit/`);
+}
+
+function hasVal(v: string | string[]): boolean {
+  return Array.isArray(v) ? v.length > 0 : !!v;
+}
+
+export async function fetchLibraryItems(slot: LibrarySlot, search?: string): Promise<LibraryPickerItem[]> {
+  const path =
+    slot === "mantra" ? "guide/library/mantras/" :
+    slot === "sankalp" ? "guide/library/sankalps/" :
+    slot === "wisdom" ? "guide/library/wisdoms/" :
+    "guide/library/practices/";
+  const res = await api.get(path, search ? { params: { search } } : undefined);
+  const items = res.data.items ?? [];
+  return items.map((i: any): LibraryPickerItem => {
+    if (slot === "mantra") {
+      const details: LibraryDetailField[] = [
+        { label: "Meaning", value: i.meaning },
+        { label: "Essence", value: i.essence },
+        { label: "Devanagari", value: i.devanagari },
+        { label: "IAST", value: i.iast },
+      ].filter((d) => hasVal(d.value));
+      return {
+        item_id: i.item_id,
+        title: i.title,
+        subtitle: i.devanagari || i.meaning || "",
+        meta: [i.deity, i.category_label].filter(Boolean).join(" · "),
+        details,
+      };
+    }
+    if (slot === "sankalp") {
+      const details: LibraryDetailField[] = [
+        { label: "Essence / Insight", value: i.insight },
+        { label: "How to Live", value: i.how_to_live },
+        { label: "Benefits", value: i.benefits },
+      ].filter((d) => hasVal(d.value));
+      return {
+        item_id: i.item_id,
+        title: i.title,
+        subtitle: i.line || i.insight || "",
+        meta: i.category_label || "",
+        details,
+      };
+    }
+    if (slot === "wisdom") {
+      const details: LibraryDetailField[] = [
+        { label: "Explanation", value: i.explanation ?? [] },
+        { label: "Source", value: i.source_title },
+      ].filter((d) => hasVal(d.value));
+      return {
+        item_id: i.item_id,
+        title: i.text || i.title,
+        subtitle: (i.explanation ?? [])[0] || "",
+        meta: [i.mood, ...(i.tags ?? []).slice(0, 2)].filter(Boolean).join(" · "),
+        details,
+      };
+    }
+    // practice
+    const details: LibraryDetailField[] = [
+      { label: "Steps", value: i.steps ?? [] },
+      { label: "Essence", value: i.essence },
+      { label: "Benefits", value: i.benefits },
+    ].filter((d) => hasVal(d.value));
+    return {
+      item_id: i.item_id,
+      title: i.title,
+      subtitle: i.summary || "",
+      meta: [i.category_label, i.duration].filter(Boolean).join(" · "),
+      details,
+    };
+  });
+}

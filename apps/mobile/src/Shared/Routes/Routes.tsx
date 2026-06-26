@@ -38,6 +38,8 @@ import WelcomeScreen from "../../screens/WelcomeScreen/WelcomeScreen";
 import AppDrawerNavigator from "./DrawerNavigator";
 import GuideHomeScreen from "../../screens/Guide/GuideHomeScreen";
 import GuideInviteAcceptScreen from "../../screens/Guide/GuideInviteAcceptScreen";
+import GuideTemplateBrowserScreen from "../../screens/Guide/GuideTemplateBrowserScreen";
+import GuideTemplateDayEditorScreen from "../../screens/Guide/GuideTemplateDayEditorScreen";
 import { GuideProgramDraftScreen } from "../../screens/Program/GuideProgramDraftScreen";
 import { GuideSessionDraftScreen } from "../../screens/LiveSession/GuideSessionDraftScreen";
 
@@ -92,6 +94,8 @@ const Routes = ({ initialRouteName = "AppDrawer" }) => {
       <Stack.Screen name="MitraPhilosophy" component={MitraPhilosophy} />
       <Stack.Screen name="GuideHome" component={GuideHomeScreen} />
       <Stack.Screen name="GuideInviteAccept" component={GuideInviteAcceptScreen} />
+      <Stack.Screen name="GuideTemplateBrowser" component={GuideTemplateBrowserScreen} />
+      <Stack.Screen name="GuideTemplateDayEditor" component={GuideTemplateDayEditorScreen} />
       <Stack.Screen name="GuideProgramDraft" component={GuideProgramDraftScreen} />
       <Stack.Screen name="GuideSessionDraft" component={GuideSessionDraftScreen} />
     </Stack.Navigator>

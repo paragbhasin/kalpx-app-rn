@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Clipboard,
-  Linking,
   RefreshControl,
   SafeAreaView,
   ScrollView,
@@ -21,9 +20,7 @@ import {
   type GuideSession,
 } from "../../engine/liveSessionApi";
 import { performLogout } from "../../utils/logout";
-import { ENV } from "../../Networks/baseURL";
-
-const WEB_BASE = ENV === "prod" ? "https://kalpx.com" : "https://dev.kalpx.com";
+import api from "../../Networks/axios";
 
 type LoadState =
   | { kind: "loading" }
@@ -59,7 +56,7 @@ function StatCard({ label, value }: { label: string; value: number }) {
   );
 }
 
-function ProgramRow({ program }: { program: GuideProgram }) {
+function ProgramRow({ program, onView }: { program: GuideProgram; onView?: () => void }) {
   const [copied, setCopied] = useState(false);
   const joinUrl = program.join_url || "";
 
@@ -73,7 +70,7 @@ function ProgramRow({ program }: { program: GuideProgram }) {
   return (
     <View style={styles.row}>
       <View style={styles.rowHeader}>
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={styles.rowTitle} numberOfLines={1}>{program.title}</Text>
           <Text style={styles.rowMeta}>
             {program.status}{program.is_public ? " · public" : " · not public"}
@@ -88,6 +85,11 @@ function ProgramRow({ program }: { program: GuideProgram }) {
             <Text style={styles.statPillNum}>{program.testimonials_count}</Text>
             <Text style={styles.statPillLabel}>testimonials</Text>
           </View>
+          {!!program.template_id && !!onView && (
+            <TouchableOpacity style={styles.ghostRowBtn} onPress={onView}>
+              <Text style={styles.ghostRowBtnText}>View</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
       {!!joinUrl && (
@@ -97,7 +99,7 @@ function ProgramRow({ program }: { program: GuideProgram }) {
             style={[styles.copyBtn, copied && styles.copyBtnDone]}
             onPress={handleCopy}
           >
-            <Text style={styles.copyBtnText}>{copied ? "Copied!" : "Copy"}</Text>
+            <Text style={styles.copyBtnText}>{copied ? "Copied!" : "Copy link"}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -143,16 +145,71 @@ function SessionRow({ session }: { session: GuideSession }) {
   );
 }
 
-function TemplateRow({ tmpl }: { tmpl: GuideDashboardTemplate }) {
+function TemplateRow({
+  tmpl,
+  onEdit,
+  onView,
+  onLaunched,
+}: {
+  tmpl: GuideDashboardTemplate;
+  onEdit: (id: number) => void;
+  onView: (id: number) => void;
+  onLaunched: (joinUrl: string) => void;
+}) {
   const color = STATUS_COLOR[tmpl.review_status] ?? "#8B6F4E";
   const label = STATUS_LABEL[tmpl.review_status] ?? tmpl.review_status;
+  const [launching, setLaunching] = useState(false);
+  const [launchError, setLaunchError] = useState("");
+
+  const withinGrace = (() => {
+    if (!tmpl.submitted_at) return false;
+    return Date.now() - new Date(tmpl.submitted_at).getTime() < 60 * 60 * 1000;
+  })();
+
+  const handleLaunch = async () => {
+    setLaunching(true);
+    setLaunchError("");
+    try {
+      const res = await api.post<{ code: string; join_url: string }>(`guide/my-templates/${tmpl.id}/launch/`);
+      onLaunched(res.data.join_url);
+    } catch (e: any) {
+      setLaunchError(e?.response?.data?.detail || "Launch failed. Please try again.");
+    } finally {
+      setLaunching(false);
+    }
+  };
+
   return (
     <View style={styles.row}>
-      <Text style={styles.rowTitle} numberOfLines={1}>{tmpl.title || "Untitled Program"}</Text>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 4 }}>
-        <Text style={[styles.statusBadge, { color }]}>{label}</Text>
-        <Text style={styles.rowMeta}>· {tmpl.duration_days} days</Text>
+      <View style={styles.rowHeader}>
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text style={styles.rowTitle} numberOfLines={1}>{tmpl.title || "Untitled Program"}</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 3 }}>
+            <Text style={[styles.statusBadge, { color }]}>{label}</Text>
+            <Text style={styles.rowMeta}>· {tmpl.duration_days} days</Text>
+          </View>
+        </View>
+        <View style={styles.rowBtns}>
+          {withinGrace && (
+            <TouchableOpacity style={styles.goldRowBtn} onPress={() => onEdit(tmpl.id)}>
+              <Text style={styles.goldRowBtnText}>Edit</Text>
+            </TouchableOpacity>
+          )}
+          {tmpl.review_status === "approved" && (
+            <TouchableOpacity
+              style={[styles.launchBtn, launching && { opacity: 0.6 }]}
+              onPress={handleLaunch}
+              disabled={launching}
+            >
+              <Text style={styles.launchBtnText}>{launching ? "Launching…" : "🚀 Launch"}</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity style={styles.ghostRowBtn} onPress={() => onView(tmpl.id)}>
+            <Text style={styles.ghostRowBtnText}>View Details</Text>
+          </TouchableOpacity>
+        </View>
       </View>
+      {!!launchError && <Text style={styles.launchError}>{launchError}</Text>}
     </View>
   );
 }
@@ -161,6 +218,7 @@ export default function GuideHomeScreen() {
   const navigation = useNavigation<any>();
   const [state, setState] = useState<LoadState>({ kind: "loading" });
   const [refreshing, setRefreshing] = useState(false);
+  const [launchResult, setLaunchResult] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -236,13 +294,13 @@ export default function GuideHomeScreen() {
               <View style={styles.ctaRow}>
                 <TouchableOpacity
                   style={styles.ctaPrimary}
-                  onPress={() => Linking.openURL(`${WEB_BASE}/guide/templates`)}
+                  onPress={() => navigation.navigate("GuideTemplateBrowser")}
                 >
                   <Text style={styles.ctaPrimaryText}>+ Build a Program</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.ctaSecondary}
-                  onPress={() => Linking.openURL(`${WEB_BASE}/guide/sessions/draft`)}
+                  onPress={() => navigation.navigate("GuideSessionDraft")}
                 >
                   <Text style={styles.ctaSecondaryText}>+ Schedule Session</Text>
                 </TouchableOpacity>
@@ -252,7 +310,29 @@ export default function GuideHomeScreen() {
               {pipeline.length > 0 && (
                 <View style={styles.section}>
                   <Text style={styles.sectionLabel}>MY PROGRAMS</Text>
-                  {pipeline.map((t) => <TemplateRow key={t.id} tmpl={t} />)}
+                  {launchResult && (
+                    <View style={styles.launchSuccess}>
+                      <Text style={styles.launchSuccessTitle}>Program launched! Share this link:</Text>
+                      <View style={styles.joinUrlRow}>
+                        <Text style={styles.joinUrlText} numberOfLines={1}>{launchResult}</Text>
+                        <TouchableOpacity
+                          style={styles.copyBtn}
+                          onPress={() => { Clipboard.setString(launchResult); }}
+                        >
+                          <Text style={styles.copyBtnText}>Copy link</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  )}
+                  {pipeline.map((t) => (
+                    <TemplateRow
+                      key={t.id}
+                      tmpl={t}
+                      onEdit={(id) => navigation.navigate("GuideTemplateDayEditor", { templateId: id })}
+                      onView={(id) => navigation.navigate("GuideTemplateDayEditor", { templateId: id })}
+                      onLaunched={(joinUrl) => { setLaunchResult(joinUrl); load(); }}
+                    />
+                  ))}
                 </View>
               )}
 
@@ -260,7 +340,13 @@ export default function GuideHomeScreen() {
               {data.programs.length > 0 && (
                 <View style={styles.section}>
                   <Text style={styles.sectionLabel}>LIVE PROGRAMS</Text>
-                  {data.programs.map((p) => <ProgramRow key={p.code} program={p} />)}
+                  {data.programs.map((p) => (
+                    <ProgramRow
+                      key={p.code}
+                      program={p}
+                      onView={p.template_id ? () => navigation.navigate("GuideTemplateDayEditor", { templateId: p.template_id }) : undefined}
+                    />
+                  ))}
                 </View>
               )}
 
@@ -275,7 +361,7 @@ export default function GuideHomeScreen() {
               {data.programs.length === 0 && data.upcoming_sessions.length === 0 && pipeline.length === 0 && (
                 <View style={styles.emptyBox}>
                   <Text style={styles.emptyText}>No programs or sessions yet.</Text>
-                  <TouchableOpacity onPress={() => Linking.openURL(`${WEB_BASE}/guide/templates`)}>
+                  <TouchableOpacity onPress={() => navigation.navigate("GuideTemplateBrowser")}>
                     <Text style={styles.emptyLink}>Submit your first program →</Text>
                   </TouchableOpacity>
                 </View>
@@ -370,11 +456,21 @@ const styles = StyleSheet.create({
   rowHeader: { flexDirection: "row", alignItems: "center", gap: 12 },
   rowTitle: { fontSize: 14, fontWeight: "600", color: "#432104", marginBottom: 2 },
   rowMeta: { fontSize: 12, color: "#9e9b97" },
-  rowStats: { flexDirection: "row", gap: 16 },
+  rowStats: { flexDirection: "row", gap: 14, alignItems: "center" },
   statPill: { alignItems: "flex-end" },
   statPillNum: { fontSize: 15, fontWeight: "700", color: "#432104" },
   statPillLabel: { fontSize: 10, color: "#9e9b97" },
   statusBadge: { fontSize: 11, fontWeight: "700", letterSpacing: 0.4, textTransform: "uppercase" },
+  rowBtns: { flexDirection: "row", gap: 6, flexShrink: 0, flexWrap: "wrap", alignItems: "center" },
+  goldRowBtn: { borderWidth: 1, borderColor: "#c9a84c", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 5 },
+  goldRowBtnText: { fontSize: 12, fontWeight: "600", color: "#c9a84c" },
+  ghostRowBtn: { borderWidth: 1, borderColor: "#e8dfc8", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 5 },
+  ghostRowBtnText: { fontSize: 12, fontWeight: "600", color: "#9e9b97" },
+  launchBtn: { backgroundColor: "#c9a84c", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 5 },
+  launchBtnText: { fontSize: 12, fontWeight: "700", color: "#fff" },
+  launchError: { fontSize: 12, color: "#c0392b", marginTop: 6 },
+  launchSuccess: { backgroundColor: "#f0fdf4", borderWidth: 1, borderColor: "#86efac", borderRadius: 10, padding: 14, marginBottom: 10 },
+  launchSuccessTitle: { fontSize: 13, fontWeight: "700", color: "#166534", marginBottom: 8 },
 
   joinUrlRow: {
     flexDirection: "row",

@@ -80,68 +80,96 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState<LibraryItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [currentOffset, setCurrentOffset] = useState(0);
   const [addingId, setAddingId] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string>(lockedItemType ?? "all");
   // When set, the detail panel for this item replaces the browse/search list.
   const [detailItem, setDetailItem] = useState<any | null>(null);
   const inputRef = useRef<TextInput | null>(null);
+  const PAGE_SIZE = 20;
+
+  const fetchPage = useCallback(
+    async (query: string, offset: number, append: boolean) => {
+      const lang = i18n.language || "en";
+      let newItems: LibraryItem[] = [];
+      let more = false;
+
+      if (lockedItemType) {
+        const res = await mitraLibrarySearch(query, lockedItemType, lang, offset);
+        newItems = (res?.results || []).map((item: any) => ({ ...item, _type: lockedItemType }));
+        more = res?.hasMore ?? false;
+      } else if (selectedType === "all") {
+        const [mantras, sankalps, practices] = await Promise.allSettled([
+          mitraLibrarySearch(query, "mantra", lang, offset),
+          mitraLibrarySearch(query, "sankalp", lang, offset),
+          mitraLibrarySearch(query, "practice", lang, offset),
+        ]);
+        newItems = [
+          ...(mantras.status === "fulfilled"
+            ? (mantras.value?.results || []).map((i: any) => ({ ...i, _type: "mantra" }))
+            : []),
+          ...(sankalps.status === "fulfilled"
+            ? (sankalps.value?.results || []).map((i: any) => ({ ...i, _type: "sankalp" }))
+            : []),
+          ...(practices.status === "fulfilled"
+            ? (practices.value?.results || []).map((i: any) => ({ ...i, _type: "practice" }))
+            : []),
+        ];
+        more =
+          (mantras.status === "fulfilled" && mantras.value?.hasMore) ||
+          (sankalps.status === "fulfilled" && sankalps.value?.hasMore) ||
+          (practices.status === "fulfilled" && practices.value?.hasMore);
+      } else {
+        const effectiveType = ["mantra", "sankalp", "practice"].includes(selectedType)
+          ? selectedType
+          : "practice";
+        const res = await mitraLibrarySearch(query, effectiveType, lang, offset);
+        newItems = (res?.results || []).map((item: any) => ({ ...item, _type: effectiveType }));
+        more = res?.hasMore ?? false;
+      }
+
+      if (append) {
+        setResults((prev) => [...prev, ...newItems]);
+      } else {
+        setResults(newItems);
+      }
+      setHasMore(more);
+      setCurrentOffset(offset + newItems.length);
+    },
+    [selectedType, lockedItemType],
+  );
 
   const performSearch = useCallback(
     async (query: string) => {
-      // Empty query browses the default list (locked or free mode). A single
-      // character is too noisy to search, so keep the current list as-is.
-      if (!lockedItemType && query.length === 1) {
-        return;
-      }
-
+      if (!lockedItemType && query.length === 1) return;
       setLoading(true);
       try {
-        const lang = i18n.language || "en";
-        if (lockedItemType) {
-          const res = await mitraLibrarySearch(query, lockedItemType, lang);
-          setResults(
-            (res?.results || []).map((item: any) => ({ ...item, _type: lockedItemType })),
-          );
-        } else if (selectedType === "all") {
-          const [mantras, sankalps, practices] = await Promise.allSettled([
-            mitraLibrarySearch(query, "mantra", lang),
-            mitraLibrarySearch(query, "sankalp", lang),
-            mitraLibrarySearch(query, "practice", lang),
-          ]);
-          const merged: LibraryItem[] = [
-            ...(mantras.status === "fulfilled"
-              ? (mantras.value?.results || []).map((i: any) => ({ ...i, _type: "mantra" }))
-              : []),
-            ...(sankalps.status === "fulfilled"
-              ? (sankalps.value?.results || []).map((i: any) => ({ ...i, _type: "sankalp" }))
-              : []),
-            ...(practices.status === "fulfilled"
-              ? (practices.value?.results || []).map((i: any) => ({ ...i, _type: "practice" }))
-              : []),
-          ];
-          setResults(merged);
-        } else {
-          const effectiveType = ["mantra", "sankalp", "practice"].includes(selectedType)
-            ? selectedType
-            : "practice";
-          const res = await mitraLibrarySearch(query, effectiveType, lang);
-          setResults(
-            (res?.results || []).map((item: any) => ({ ...item, _type: effectiveType })),
-          );
-        }
+        await fetchPage(query, 0, false);
       } catch (err) {
         console.error("[LibrarySearch] Failed:", err);
       } finally {
         setLoading(false);
       }
     },
-    [selectedType, lockedItemType],
+    [fetchPage, lockedItemType],
   );
 
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loadingMore || loading) return;
+    setLoadingMore(true);
+    try {
+      await fetchPage(searchQuery.trim(), currentOffset, true);
+    } catch (err) {
+      console.error("[LibrarySearch] loadMore failed:", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [hasMore, loadingMore, loading, fetchPage, searchQuery, currentOffset]);
+
   // Load the list whenever the sheet opens, the query changes, or the active
-  // tab changes. Empty query → browse the default list (no Search press needed);
-  // 2+ chars → search within the selected type. performSearch carries
-  // selectedType in its deps, so switching tabs re-runs this and re-browses.
+  // tab changes.
   useEffect(() => {
     if (!isVisible) return;
     const q = searchQuery.trim();
@@ -159,6 +187,8 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
     setSearchQuery("");
     setDetailItem(null);
     setSelectedType(lockedItemType ?? "all");
+    setCurrentOffset(0);
+    setHasMore(false);
   }, [isVisible]); // lockedItemType is a stable prop; intentionally excluded from deps
 
   const selectType = (type: string) => {
@@ -511,6 +541,15 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
                 }
                 contentContainerStyle={styles.listContent}
                 keyboardShouldPersistTaps="handled"
+                onEndReached={loadMore}
+                onEndReachedThreshold={0.4}
+                ListFooterComponent={
+                  loadingMore ? (
+                    <View style={{ paddingVertical: 16, alignItems: "center" }}>
+                      <ActivityIndicator size="small" color="#C99317" />
+                    </View>
+                  ) : null
+                }
                 ListEmptyComponent={
                   <Text style={styles.emptyText}>
                     {searchQuery.trim().length >= 2

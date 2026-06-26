@@ -604,15 +604,16 @@ export async function mitraLibrarySearch(
   query: string,
   itemType?: string,
   locale?: string,
+  offset: number = 0,
 ): Promise<any> {
   try {
     const res = await api.get("mitra/library/search/", {
-      params: { q: query, itemType, limit: 5, locale: locale || "en" },
+      params: { q: query, itemType, limit: 20, offset, locale: locale || "en" },
     });
     return res.data;
   } catch (err: any) {
     console.error("[MITRA] library search failed:", err.message);
-    return { results: [] };
+    return { results: [], hasMore: false };
   }
 }
 

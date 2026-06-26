@@ -18,6 +18,7 @@ import {
   fetchLibraryItems,
   fetchMyTemplate,
   GuideTemplate,
+  LibraryCard,
   LibraryDetailField,
   LibraryPickerItem,
   LibrarySlot,
@@ -25,6 +26,65 @@ import {
   TemplateDay,
   updateTemplateDay,
 } from "../../engine/liveSessionApi";
+
+function hasVal(v: string | string[] | undefined | null): boolean {
+  if (!v) return false;
+  return Array.isArray(v) ? v.length > 0 : !!v;
+}
+
+function cardToSelection(slot: LibrarySlot, card: LibraryCard): SlotSelection {
+  if (slot === "mantra") {
+    return {
+      item_id: card.item_id,
+      title: card.title ?? card.item_id,
+      subtitle: card.devanagari || card.meaning || "",
+      meta: [card.deity, card.category_label].filter(Boolean).join(" · "),
+      details: [
+        { label: "Meaning", value: card.meaning ?? "" },
+        { label: "Essence", value: card.essence ?? "" },
+        { label: "Devanagari", value: card.devanagari ?? "" },
+        { label: "IAST", value: card.iast ?? "" },
+      ].filter((d) => hasVal(d.value)),
+    };
+  }
+  if (slot === "sankalp") {
+    return {
+      item_id: card.item_id,
+      title: card.title ?? card.item_id,
+      subtitle: card.line || card.insight || "",
+      meta: card.category_label ?? "",
+      details: [
+        { label: "Essence / Insight", value: card.insight ?? "" },
+        { label: "How to Live", value: card.how_to_live ?? "" },
+        { label: "Benefits", value: card.benefits ?? "" },
+      ].filter((d) => hasVal(d.value)),
+    };
+  }
+  if (slot === "wisdom") {
+    return {
+      item_id: card.item_id,
+      title: card.text || card.title || card.item_id,
+      subtitle: (card.explanation ?? [])[0] || "",
+      meta: [card.mood, ...(card.tags ?? []).slice(0, 2)].filter(Boolean).join(" · "),
+      details: [
+        { label: "Explanation", value: card.explanation ?? [] },
+        { label: "Source", value: card.source_title ?? "" },
+      ].filter((d) => hasVal(d.value)),
+    };
+  }
+  // practice
+  return {
+    item_id: card.item_id,
+    title: card.title ?? card.item_id,
+    subtitle: "",
+    meta: [card.category_label, card.duration].filter(Boolean).join(" · "),
+    details: [
+      { label: "Steps", value: card.steps ?? [] },
+      { label: "Essence", value: card.essence ?? "" },
+      { label: "Benefits", value: card.benefits ?? "" },
+    ].filter((d) => hasVal(d.value)),
+  };
+}
 import { Fonts } from "../../theme/fonts";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -89,6 +149,7 @@ export default function GuideTemplateDayEditorScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const templateId: number = route.params?.templateId ?? 0;
+  const viewOnly: boolean = !!route.params?.viewOnly;
 
   const [template, setTemplate] = useState<GuideTemplate | null>(null);
   const [days, setDays] = useState<DayState[]>([]);
@@ -107,7 +168,18 @@ export default function GuideTemplateDayEditorScreen() {
     fetchMyTemplate(templateId)
       .then((tmpl) => {
         setTemplate(tmpl);
-        setDays((tmpl.days ?? []).map((d) => ({ ...d, saving: false })));
+        const loadedDays = (tmpl.days ?? []).map((d) => ({ ...d, saving: false }));
+        setDays(loadedDays);
+
+        // Seed slotSelections from _card fields already resolved by backend — no extra API calls
+        const seeded: Record<string, SlotSelection> = {};
+        loadedDays.forEach((d) => {
+          if (d.mantra_card)   seeded[`${d.day_number}-mantra`]   = cardToSelection("mantra",   d.mantra_card);
+          if (d.sankalp_card)  seeded[`${d.day_number}-sankalp`]  = cardToSelection("sankalp",  d.sankalp_card);
+          if (d.practice_card) seeded[`${d.day_number}-practice`] = cardToSelection("practice", d.practice_card);
+          if (d.wisdom_card)   seeded[`${d.day_number}-wisdom`]   = cardToSelection("wisdom",   d.wisdom_card);
+        });
+        if (Object.keys(seeded).length > 0) setSlotSelections(seeded);
       })
       .catch(() => setError("Could not load template."))
       .finally(() => setLoading(false));
@@ -237,8 +309,8 @@ export default function GuideTemplateDayEditorScreen() {
     );
   }
 
-  const locked = !!template?.locked_at;
-  const canSubmit = template?.review_status === "draft" || template?.review_status === "changes_requested";
+  const locked = viewOnly || !!template?.locked_at;
+  const canSubmit = !viewOnly && (template?.review_status === "draft" || template?.review_status === "changes_requested");
   const statusColor = STATUS_COLOR[template?.review_status ?? ""] ?? "#8B6F4E";
 
   return (
@@ -289,7 +361,12 @@ export default function GuideTemplateDayEditorScreen() {
 
           {!!error && <Text style={s.errorText}>{error}</Text>}
 
-          {locked && (
+          {viewOnly && (
+            <View style={s.lockBanner}>
+              <Text style={s.lockBannerText}>View only — all fields are read-only.</Text>
+            </View>
+          )}
+          {!viewOnly && locked && (
             <View style={s.lockBanner}>
               <Text style={s.lockBannerText}>
                 This template is locked — a campaign is running. Create a new version to make changes.

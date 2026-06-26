@@ -282,6 +282,28 @@ export interface OfficialTemplate {
   day_themes: string[];
 }
 
+export interface LibraryCard {
+  item_id: string;
+  title?: string;
+  text?: string;           // wisdom uses `text` not `title`
+  devanagari?: string;
+  iast?: string;
+  meaning?: string;
+  essence?: string;
+  insight?: string;
+  line?: string;
+  how_to_live?: string;
+  benefits?: string;
+  steps?: string[];
+  explanation?: string[];
+  source_title?: string;
+  deity?: string;
+  category_label?: string;
+  duration?: string;
+  mood?: string;
+  tags?: string[];
+}
+
 export interface TemplateDay {
   day_number: number;
   theme: string;
@@ -300,6 +322,11 @@ export interface TemplateDay {
   day_session_time: string;
   day_session_timezone: string;
   reflection_prompt: string;
+  // Resolved library cards from backend (present in detail view)
+  mantra_card?: LibraryCard | null;
+  sankalp_card?: LibraryCard | null;
+  practice_card?: LibraryCard | null;
+  wisdom_card?: LibraryCard | null;
 }
 
 export interface GuideTemplate {

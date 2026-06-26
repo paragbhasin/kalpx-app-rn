@@ -72,9 +72,7 @@ function ProgramRow({ program, onView }: { program: GuideProgram; onView?: () =>
       <View style={styles.rowHeader}>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={styles.rowTitle} numberOfLines={1}>{program.title}</Text>
-          <Text style={styles.rowMeta}>
-            {program.status}{program.is_public ? " · public" : " · not public"}
-          </Text>
+          <Text style={styles.rowMeta}>{program.status}</Text>
         </View>
         <View style={styles.rowStats}>
           <View style={styles.statPill}>
@@ -329,7 +327,7 @@ export default function GuideHomeScreen() {
                       key={t.id}
                       tmpl={t}
                       onEdit={(id) => navigation.navigate("GuideTemplateDayEditor", { templateId: id })}
-                      onView={(id) => navigation.navigate("GuideTemplateDayEditor", { templateId: id })}
+                      onView={(id) => navigation.navigate("GuideTemplateDayEditor", { templateId: id, viewOnly: true })}
                       onLaunched={(joinUrl) => { setLaunchResult(joinUrl); load(); }}
                     />
                   ))}
@@ -344,7 +342,7 @@ export default function GuideHomeScreen() {
                     <ProgramRow
                       key={p.code}
                       program={p}
-                      onView={p.template_id ? () => navigation.navigate("GuideTemplateDayEditor", { templateId: p.template_id }) : undefined}
+                      onView={p.template_id ? () => navigation.navigate("GuideTemplateDayEditor", { templateId: p.template_id, viewOnly: true }) : undefined}
                     />
                   ))}
                 </View>

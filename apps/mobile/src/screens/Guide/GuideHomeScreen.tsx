@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Clipboard,
+  Linking,
   RefreshControl,
   SafeAreaView,
   ScrollView,
@@ -20,6 +21,9 @@ import {
   type GuideSession,
 } from "../../engine/liveSessionApi";
 import { performLogout } from "../../utils/logout";
+import { ENV } from "../../Networks/baseURL";
+
+const WEB_BASE = ENV === "prod" ? "https://kalpx.com" : "https://dev.kalpx.com";
 
 type LoadState =
   | { kind: "loading" }
@@ -232,13 +236,13 @@ export default function GuideHomeScreen() {
               <View style={styles.ctaRow}>
                 <TouchableOpacity
                   style={styles.ctaPrimary}
-                  onPress={() => navigation.navigate("GuideProgramDraft")}
+                  onPress={() => Linking.openURL(`${WEB_BASE}/guide/templates`)}
                 >
                   <Text style={styles.ctaPrimaryText}>+ Build a Program</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.ctaSecondary}
-                  onPress={() => navigation.navigate("GuideSessionDraft")}
+                  onPress={() => Linking.openURL(`${WEB_BASE}/guide/sessions/draft`)}
                 >
                   <Text style={styles.ctaSecondaryText}>+ Schedule Session</Text>
                 </TouchableOpacity>
@@ -271,7 +275,7 @@ export default function GuideHomeScreen() {
               {data.programs.length === 0 && data.upcoming_sessions.length === 0 && pipeline.length === 0 && (
                 <View style={styles.emptyBox}>
                   <Text style={styles.emptyText}>No programs or sessions yet.</Text>
-                  <TouchableOpacity onPress={() => navigation.navigate("GuideProgramDraft")}>
+                  <TouchableOpacity onPress={() => Linking.openURL(`${WEB_BASE}/guide/templates`)}>
                     <Text style={styles.emptyLink}>Submit your first program →</Text>
                   </TouchableOpacity>
                 </View>

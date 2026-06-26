@@ -283,6 +283,7 @@ export function GuideTemplateDayEditorPage() {
                   custom_practice_title: day1.custom_practice_title,
                   custom_practice_body: day1.custom_practice_body,
                   wisdom_ref: day1.wisdom_ref,
+                  custom_wisdom_title: day1.custom_wisdom_title,
                   custom_wisdom_body: day1.custom_wisdom_body,
                   day_join_url: day1.day_join_url,
                   day_session_time: day1.day_session_time,

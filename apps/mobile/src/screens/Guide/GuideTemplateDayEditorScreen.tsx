@@ -219,7 +219,7 @@ export default function GuideTemplateDayEditorScreen() {
         : slot === "sankalp"
         ? { sankalp_ref: item.item_id, custom_sankalp_title: "", custom_sankalp_body: "" }
         : slot === "wisdom"
-        ? { wisdom_ref: item.item_id, custom_wisdom_body: "" }
+        ? { wisdom_ref: item.item_id, custom_wisdom_title: "", custom_wisdom_body: "" }
         : { practice_ref: item.item_id, custom_practice_title: "", custom_practice_body: "" };
     saveDay(dayNumber, patch);
     setSlotSelections((prev) => ({ ...prev, [`${dayNumber}-${slot}`]: item }));
@@ -230,7 +230,7 @@ export default function GuideTemplateDayEditorScreen() {
     const patch =
       slot === "mantra" ? { mantra_ref: item_id, custom_mantra_title: "", custom_mantra_body: "" }
       : slot === "sankalp" ? { sankalp_ref: item_id, custom_sankalp_title: "", custom_sankalp_body: "" }
-      : slot === "wisdom" ? { wisdom_ref: item_id, custom_wisdom_body: "" }
+      : slot === "wisdom" ? { wisdom_ref: item_id, custom_wisdom_title: "", custom_wisdom_body: "" }
       : { practice_ref: item_id, custom_practice_title: "", custom_practice_body: "" };
     days.forEach((d) => saveDay(d.day_number, patch));
     setSlotSelections((prev) => {
@@ -248,7 +248,7 @@ export default function GuideTemplateDayEditorScreen() {
       mantra_ref: day1.mantra_ref, custom_mantra_title: day1.custom_mantra_title, custom_mantra_body: day1.custom_mantra_body,
       sankalp_ref: day1.sankalp_ref, custom_sankalp_title: day1.custom_sankalp_title, custom_sankalp_body: day1.custom_sankalp_body,
       practice_ref: day1.practice_ref, custom_practice_title: day1.custom_practice_title, custom_practice_body: day1.custom_practice_body,
-      wisdom_ref: day1.wisdom_ref, custom_wisdom_body: day1.custom_wisdom_body,
+      wisdom_ref: day1.wisdom_ref, custom_wisdom_title: day1.custom_wisdom_title, custom_wisdom_body: day1.custom_wisdom_body,
       day_join_url: day1.day_join_url, day_session_time: day1.day_session_time, day_session_timezone: day1.day_session_timezone,
     };
     days.slice(1).forEach((d) => saveDay(d.day_number, patch));
@@ -522,15 +522,15 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         slot="wisdom"
         refValue={day.wisdom_ref}
         selection={sel("wisdom")}
-        customTitle=""
+        customTitle={day.custom_wisdom_title || ""}
         customBody={day.custom_wisdom_body}
         locked={locked}
         dayNumber={day.day_number}
         onOpenPicker={() => onOpenPicker("wisdom")}
         onApplyToAll={(id) => onApplyToAll("wisdom", id)}
         onClearRef={() => onBlurSave({ wisdom_ref: "" })}
-        onCustomChange={(_t, body) => onLocalChange({ custom_wisdom_body: body })}
-        onCustomBlur={(_t, body) => onBlurSave({ custom_wisdom_body: body, wisdom_ref: "" })}
+        onCustomChange={(t, body) => onLocalChange({ custom_wisdom_title: t, custom_wisdom_body: body })}
+        onCustomBlur={(t, body) => onBlurSave({ custom_wisdom_title: t, custom_wisdom_body: body, wisdom_ref: "" })}
       />
 
       {/* Live session link */}

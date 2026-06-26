@@ -406,6 +406,7 @@ export interface TemplateDay {
   custom_sankalp_body: string;
   custom_practice_title: string;
   custom_practice_body: string;
+  custom_wisdom_title: string;
   custom_wisdom_body: string;
   day_join_url: string;
   day_session_time: string;

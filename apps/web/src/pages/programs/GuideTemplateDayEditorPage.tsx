@@ -545,12 +545,26 @@ function SlotRow({
   const [localTitle, setLocalTitle] = useState(customTitle);
   const [localBody, setLocalBody] = useState(customBody);
   const [showDetails, setShowDetails] = useState(false);
+  const saveTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Sync from parent only when an external change arrives (e.g. Apply to all days).
+  // Guard against self-inflicted loops: skip if both values are already current.
   useEffect(() => {
-    setLocalTitle(customTitle);
-    setLocalBody(customBody);
+    if (customTitle !== localTitle) setLocalTitle(customTitle);
+    if (customBody !== localBody) setLocalBody(customBody);
     if (customBody) setMode("custom");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customTitle, customBody]);
+
+  const scheduleSave = (title: string, body: string) => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => onCustomBlur(title, body), 800);
+  };
+
+  const flushSave = (title: string, body: string) => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    onCustomBlur(title, body);
+  };
 
   function switchToCustom() {
     setMode("custom");
@@ -642,10 +656,12 @@ function SlotRow({
             value={localTitle}
             disabled={locked}
             onChange={(e) => {
-              setLocalTitle(e.target.value);
-              onCustomChange(e.target.value, localBody);
+              const t = e.target.value;
+              setLocalTitle(t);
+              onCustomChange(t, localBody);
+              scheduleSave(t, localBody);
             }}
-            onBlur={() => onCustomBlur(localTitle, localBody)}
+            onBlur={() => flushSave(localTitle, localBody)}
           />
           <textarea
             style={textArea}
@@ -653,10 +669,12 @@ function SlotRow({
             value={localBody}
             disabled={locked}
             onChange={(e) => {
-              setLocalBody(e.target.value);
-              onCustomChange(localTitle, e.target.value);
+              const b = e.target.value;
+              setLocalBody(b);
+              onCustomChange(localTitle, b);
+              scheduleSave(localTitle, b);
             }}
-            onBlur={() => onCustomBlur(localTitle, localBody)}
+            onBlur={() => flushSave(localTitle, localBody)}
           />
           <p style={reviewNote}>
             Your custom content will be reviewed by KalpX before the program goes live.

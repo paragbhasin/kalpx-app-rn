@@ -145,11 +145,11 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     paddingVertical: 16,
     paddingHorizontal: 18,
-    gap: 12,
   },
-  headerLeft: { flex: 1 },
+  headerLeft: { flex: 1, paddingRight: 12 },
   label: {
     fontFamily: Fonts.sans.medium,
     fontSize: 10,

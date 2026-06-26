@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.kalpx.app",
+      "sha256_cert_fingerprints": [
+        "47:AD:9E:0D:A6:F9:AC:7E:34:19:EF:1E:1F:1C:A4:B1:F4:DE:98:58:60:F1:9E:54:4C:E9:D1:8C:02:09:5A:E8",
+        "26:E8:0B:8F:57:E5:08:D2:67:A8:83:42:06:D2:B2:22:64:3A:DF:CA:6D:C2:62:D9:09:40:59:B2:0F:6F:0E:B9"
+      ]
+    }
+  }
+]

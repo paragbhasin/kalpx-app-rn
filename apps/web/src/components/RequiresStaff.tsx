@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { isAuthenticated } from '@kalpx/auth';
 import { webStorage } from '../lib/webStorage';
-import { getUserProfile } from '../lib/userApi';
 
 interface Props { children: React.ReactNode; }
 
@@ -14,9 +13,8 @@ export function RequiresStaff({ children }: Props) {
     async function check() {
       const authed = await isAuthenticated(webStorage);
       if (!authed) { setStatus('not-authed'); return; }
-      const profile = await getUserProfile();
-      const isStaff = (profile as any)?.user?.is_staff === true;
-      setStatus(isStaff ? 'staff' : 'not-staff');
+      const isOps = localStorage.getItem('kalpx:ops_session') === '1';
+      setStatus(isOps ? 'staff' : 'not-staff');
     }
     check();
   }, []);

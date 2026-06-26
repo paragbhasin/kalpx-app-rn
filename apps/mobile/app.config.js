@@ -17,7 +17,7 @@ module.exports = {
       bundleIdentifier: "com.kalpx.app",
       usesAppleSignIn: true,
       appleTeamId: "9G5NZ5LBRU",
-      associatedDomains: ["applinks:kalpx.com"],
+      associatedDomains: ["applinks:kalpx.com", "applinks:dev.kalpx.com"],
       googleServicesFile:
         process.env.GOOGLE_SERVICES_PLIST || "../../GoogleService-Info.plist",
       buildNumber: "57",
@@ -54,6 +54,8 @@ module.exports = {
             { scheme: "https", host: "kalpx.com", pathPrefix: "/join" },
             { scheme: "https", host: "kalpx.com", pathPrefix: "/sessions" },
             { scheme: "https", host: "kalpx.com", pathPrefix: "/programs" },
+            { scheme: "https", host: "kalpx.com", pathPrefix: "/guide/invite" },
+            { scheme: "https", host: "dev.kalpx.com", pathPrefix: "/guide/invite" },
           ],
           category: ["BROWSABLE", "DEFAULT"],
         },

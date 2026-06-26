@@ -106,6 +106,15 @@ export default function LoginScreen({ navigation }) {
     handleBiometricLogin,
   } = useBiometricLogin();
 
+const navigatePostLogin = async (userType?: string) => {
+  if (userType === "guide") {
+    await AsyncStorage.setItem("kalpx_is_guide", "1");
+    navigation.navigate("GuideHome" as any);
+    return;
+  }
+  await resumePendingIfAny();
+};
+
 const resumePendingIfAny = async () => {
   try {
     // Program join: if user tapped Join before logging in, claim now
@@ -369,7 +378,7 @@ if (key === "pending_classes_data") {
               );
             }
             await AsyncStorage.setItem("showLocationConfirm", "true");
-            await resumePendingIfAny();
+            await navigatePostLogin(res.data?.user_type);
           } else {
             setLoginError(res.error || "Google login failed");
           }
@@ -435,7 +444,7 @@ if (key === "pending_classes_data") {
     email: res.data?.user?.email,
   });
               await AsyncStorage.setItem("showLocationConfirm", "true");
-              await resumePendingIfAny();
+              await navigatePostLogin(res.data?.user_type);
             } else {
               setLoginError(res.error || "Apple login failed");
             }
@@ -538,7 +547,7 @@ if (key === "pending_classes_data") {
             await SecureStore.deleteItemAsync("userPassword");
           }
           await AsyncStorage.setItem("showLocationConfirm", "true");
-          await resumePendingIfAny();
+          await navigatePostLogin(result.data?.user_type);
           // navigation.navigate('HomePage', { screen: 'Home'});
           // navigation.navigate('HomePage', { screen: 'Home'});
           // navigation.navigate("AppDrawer");
@@ -571,7 +580,7 @@ if (key === "pending_classes_data") {
         }
         resetDeviceRegistrationGuard();
         await registerDeviceToBackend();
-        await resumePendingIfAny();
+        await navigatePostLogin();
       }),
     );
   };

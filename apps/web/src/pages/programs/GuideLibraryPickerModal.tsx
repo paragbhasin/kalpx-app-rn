@@ -35,7 +35,7 @@ function hasValue(v: string | string[]): boolean {
   return Array.isArray(v) ? v.length > 0 : !!v;
 }
 
-function toPickerItem(slot: LibrarySlot, raw: LibraryMantra | LibrarySankalp | LibraryPractice | LibraryWisdom): PickerItem {
+export function toPickerItem(slot: LibrarySlot, raw: LibraryMantra | LibrarySankalp | LibraryPractice | LibraryWisdom): PickerItem {
   if (slot === "mantra") {
     const m = raw as LibraryMantra;
     return {

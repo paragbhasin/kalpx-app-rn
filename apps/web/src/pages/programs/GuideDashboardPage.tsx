@@ -101,7 +101,6 @@ function ProgramRow({ program }: { program: GuideProgram }) {
             style={{ fontSize: 12, color: "var(--kalpx-text-muted)", margin: 0 }}
           >
             {program.status}
-            {program.is_public ? " · public" : " · not public"}
           </p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 20, flexShrink: 0 }}>

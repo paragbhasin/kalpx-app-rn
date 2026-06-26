@@ -341,6 +341,35 @@ export function handleTLPDeepLink(url: string): boolean {
 }
 
 /**
+ * Handle kalpx://guide/invite/{token} and https://kalpx.com/guide/invite/{token}.
+ * Routes to GuideInviteAcceptScreen so the guide can set their password.
+ * Returns true if handled, false otherwise.
+ */
+export function handleGuideInviteDeepLink(url: string): boolean {
+  if (!url) return false;
+
+  let token: string | null = null;
+
+  if (url.startsWith("kalpx://guide/invite/")) {
+    token = url.replace("kalpx://guide/invite/", "").split("?")[0].trim();
+  } else if (url.startsWith("https://kalpx.com/guide/invite/")) {
+    token = url.replace("https://kalpx.com/guide/invite/", "").split("?")[0].trim();
+  } else if (url.startsWith("https://dev.kalpx.com/guide/invite/")) {
+    token = url.replace("https://dev.kalpx.com/guide/invite/", "").split("?")[0].trim();
+  }
+
+  if (!token) return false;
+
+  try {
+    navigate("GuideInviteAccept" as any, { token });
+  } catch (err) {
+    console.warn("[deeplink] GuideInviteAccept navigate failed:", err);
+  }
+  console.log(`[deeplink] → GuideInviteAccept (token=${token})`);
+  return true;
+}
+
+/**
  * Handle kalpx://join/{code} custom-scheme deep links.
  * Stores the code in AsyncStorage and navigates to ProgramInviteClaimScreen.
  * Returns true if handled, false otherwise.
@@ -467,7 +496,7 @@ export function handleProgramDeepLink(url: string): boolean {
 // MitraStart while the claim screen is being prepared.
 function handleWhenReady(url: string, attemptsLeft = 15): void {
   if (navigationRef.isReady()) {
-    if (!handleProgramJoinDeepLink(url) && !handleProgramDeepLink(url) && !handleTLPDeepLink(url)) {
+    if (!handleGuideInviteDeepLink(url) && !handleProgramJoinDeepLink(url) && !handleProgramDeepLink(url) && !handleTLPDeepLink(url)) {
       handleMitraDeepLink(url);
     }
   } else if (attemptsLeft > 0) {
@@ -539,7 +568,7 @@ export function attachDeepLinkListeners(): () => void {
       }
     }
 
-    if (!handleProgramJoinDeepLink(url) && !handleProgramDeepLink(url) && !handleTLPDeepLink(url)) {
+    if (!handleGuideInviteDeepLink(url) && !handleProgramJoinDeepLink(url) && !handleProgramDeepLink(url) && !handleTLPDeepLink(url)) {
       handleMitraDeepLink(url);
     }
   };

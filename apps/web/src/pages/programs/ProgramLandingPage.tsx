@@ -187,6 +187,21 @@ function fireTrackBeacon(event: string, campaignCode: string) {
 function CampaignBody({ campaign }: { campaign: ProgramCampaignPublic }) {
   const joinUrl = `${window.location.hostname === 'localhost' ? WEB_ENV.imageBaseUrl.replace('/api', '').replace(/\/$/, '') : window.location.origin}/join/${campaign.code}`;
   const deepLinkUrl = `kalpx://join/${campaign.code}`;
+
+  // On mobile: auto-attempt deep link on load. If app installed → opens app.
+  // After 1.5s if no app → redirect to App Store / Play Store.
+  React.useEffect(() => {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (!isMobile) return;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const appStoreUrl = `https://apps.apple.com/app/kalpx/id${APPLE_APP_STORE_ID}?utm_source=kalpx&utm_medium=program&utm_campaign=${campaign.code}`;
+    const playStoreUrl = `https://play.google.com/store/apps/details?id=com.kalpx.app&utm_source=kalpx&utm_medium=program&utm_campaign=${campaign.code}`;
+    window.location.href = deepLinkUrl;
+    const timer = setTimeout(() => {
+      window.location.href = isIOS ? appStoreUrl : playStoreUrl;
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [deepLinkUrl]);
   const supportUrl = `/programs/support?code=${campaign.code}${
     campaign.support_contact_url
       ? `&support_url=${encodeURIComponent(campaign.support_contact_url)}&support_label=${encodeURIComponent(campaign.support_contact_label || 'Contact support')}`

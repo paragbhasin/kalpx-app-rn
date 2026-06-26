@@ -17,6 +17,8 @@ interface AcceptResponse {
   user: { id: number; email: string; is_guide: boolean };
 }
 
+const isMobile = () => /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
 export function GuideInviteAcceptPage() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
@@ -24,6 +26,7 @@ export function GuideInviteAcceptPage() {
   const [inviteInfo, setInviteInfo] = useState<InviteInfo | null>(null);
   const [inviteError, setInviteError] = useState("");
   const [loadingInvite, setLoadingInvite] = useState(true);
+  const [appRedirectDone, setAppRedirectDone] = useState(false);
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -31,6 +34,10 @@ export function GuideInviteAcceptPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+
+  const openInApp = () => {
+    window.location.href = `kalpx://guide/invite/${token}`;
+  };
 
   useEffect(() => {
     if (!token) { setInviteError("Invalid invite link."); setLoadingInvite(false); return; }
@@ -40,6 +47,12 @@ export function GuideInviteAcceptPage() {
           setInviteError("This invite link has expired or already been used.");
         } else {
           setInviteInfo(res.data);
+          // Auto-try opening the app on mobile — custom scheme always works
+          // regardless of Universal Links config or build type.
+          if (isMobile()) {
+            window.location.href = `kalpx://guide/invite/${token}`;
+            setAppRedirectDone(true);
+          }
         }
       })
       .catch((err) => {
@@ -138,6 +151,25 @@ export function GuideInviteAcceptPage() {
                   Invite for <strong>{inviteInfo?.email}</strong>
                 </span>
               </div>
+
+              {appRedirectDone && (
+                <div style={{ marginBottom: 20, textAlign: "center" }}>
+                  <button
+                    type="button"
+                    onClick={openInApp}
+                    style={{
+                      width: "100%", padding: "12px 0", background: "var(--kalpx-gold)",
+                      color: "#fff", border: "none", borderRadius: 8,
+                      fontSize: 15, fontWeight: 700, cursor: "pointer", marginBottom: 10,
+                    }}
+                  >
+                    Open in KalpX App
+                  </button>
+                  <p style={{ fontSize: 13, color: "var(--kalpx-text-soft)", marginBottom: 0 }}>
+                    No app? Set your password below to continue on web.
+                  </p>
+                </div>
+              )}
 
               <form onSubmit={handleSubmit} className="auth-form">
                 <div className="form-group">

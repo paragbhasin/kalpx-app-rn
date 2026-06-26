@@ -206,6 +206,28 @@ function AppInner({ initialRoute, navigationRef }) {
         // backend to sync. Both 404-tolerant via the slice.
         dispatch(restoreCompanionState());
         dispatch(fetchCompanionState());
+
+        // Guide mode: if flag is set, re-verify with backend then navigate.
+        const isGuideFlag = await AsyncStorage.getItem("kalpx_is_guide");
+        if (isGuideFlag === "1") {
+          try {
+            const { default: api } = await import("./src/Networks/axios");
+            await api.get("guide/my-profile/");
+            // Still a guide — navigate when navigator is ready
+            const tryNav = (attempts = 15) => {
+              const { navigationRef } = require("./src/Shared/Routes/NavigationService");
+              if (navigationRef.isReady()) {
+                navigationRef.navigate("GuideHome");
+              } else if (attempts > 0) {
+                setTimeout(() => tryNav(attempts - 1), 200);
+              }
+            };
+            tryNav();
+          } catch {
+            // No longer a guide (role revoked) — clear flag and stay on normal home
+            await AsyncStorage.removeItem("kalpx_is_guide");
+          }
+        }
       } catch (err) {
         console.warn("[BOOT] login hydration failed:", err?.message);
       }

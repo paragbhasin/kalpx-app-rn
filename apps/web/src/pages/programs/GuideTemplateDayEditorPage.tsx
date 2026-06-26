@@ -10,7 +10,7 @@ import {
   TemplateDay,
   updateTemplateDay,
 } from "../../engine/liveSessionApi";
-import { GuideLibraryPickerModal, LibrarySlot, PickerItem } from "./GuideLibraryPickerModal";
+import { GuideLibraryPickerModal, LibrarySlot, PickerItem, toPickerItem } from "./GuideLibraryPickerModal";
 
 interface DayState extends TemplateDay {
   saving: boolean;
@@ -42,6 +42,15 @@ export function GuideTemplateDayEditorPage() {
       .then((tmpl) => {
         setTemplate(tmpl);
         setDays((tmpl.days ?? []).map((d) => ({ ...d, saving: false })));
+        // Seed slotSelections from resolved _card fields returned by the backend
+        const seeded: Record<string, PickerItem> = {};
+        (tmpl.days ?? []).forEach((d) => {
+          if (d.mantra_card)   seeded[`${d.day_number}-mantra`]   = toPickerItem("mantra",   d.mantra_card);
+          if (d.sankalp_card)  seeded[`${d.day_number}-sankalp`]  = toPickerItem("sankalp",  d.sankalp_card);
+          if (d.practice_card) seeded[`${d.day_number}-practice`] = toPickerItem("practice", d.practice_card);
+          if (d.wisdom_card)   seeded[`${d.day_number}-wisdom`]   = toPickerItem("wisdom",   d.wisdom_card);
+        });
+        if (Object.keys(seeded).length > 0) setPickerItems(seeded);
       })
       .catch(() => setError("Could not load template."))
       .finally(() => setLoading(false));

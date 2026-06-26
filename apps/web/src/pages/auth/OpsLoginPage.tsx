@@ -5,10 +5,13 @@ import { storeTokens } from "@kalpx/auth";
 import { webStorage } from "../../lib/webStorage";
 import { api } from "../../lib/api";
 import type { LoginResponse } from "../../types/auth";
+import { useRecaptcha } from "../../hooks/useRecaptcha";
+import { getRecaptchaToken } from "../../lib/recaptcha";
 import "./Auth.css";
 
 export function OpsLoginPage() {
   const navigate = useNavigate();
+  useRecaptcha();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -26,11 +29,11 @@ export function OpsLoginPage() {
     setError("");
 
     try {
-      const res = await api.post<LoginResponse>("users/login/", { email, password });
+      const recaptcha_token = import.meta.env.DEV ? "" : await getRecaptchaToken("ops_login");
+      const res = await api.post<LoginResponse>("users/login/", { email, password, recaptcha_token });
       const data = res.data;
 
-      const isStaff = data.user?.is_staff === true;
-      if (!isStaff) {
+      if (data.user_type !== "ops") {
         setError("Access denied. This portal is for KalpX ops team only.");
         setLoading(false);
         return;

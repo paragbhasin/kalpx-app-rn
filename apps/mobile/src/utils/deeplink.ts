@@ -324,6 +324,19 @@ export function handleTLPDeepLink(url: string): boolean {
     return true;
   }
 
+  // https://kalpx.com/p/{slug} Universal Link — short program URL. App Links
+  // claims this prefix; navigate to Home as a safe fallback so the app opens
+  // to a coherent state rather than staying on whatever screen was active.
+  if (url.startsWith("https://kalpx.com/p/")) {
+    try {
+      navigate("Home" as any, {});
+    } catch (err) {
+      console.warn("[deeplink] Home fallback (p/ UL) navigate failed:", err);
+    }
+    console.log(`[deeplink] → Home (p/ UL fallback, url=${url})`);
+    return true;
+  }
+
   return false;
 }
 

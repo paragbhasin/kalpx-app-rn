@@ -456,7 +456,12 @@ export function GuideDashboardPage() {
     async function load() {
       try {
         const data = await fetchGuideDashboard();
-        if (!cancelled) setState({ kind: "loaded", data });
+        if (cancelled) return;
+        if (!data?.summary) {
+          setState({ kind: "error" });
+          return;
+        }
+        setState({ kind: "loaded", data });
       } catch (e: any) {
         if (!cancelled) {
           setState(

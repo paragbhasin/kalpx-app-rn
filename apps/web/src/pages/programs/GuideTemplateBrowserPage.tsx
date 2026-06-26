@@ -121,20 +121,20 @@ export function GuideTemplateBrowserPage() {
               <div key={t.slug} style={card}>
                 <div style={cardHeader}>
                   <span style={cardDuration}>{t.duration_days} days</span>
-                  {t.audience_tags.slice(0, 2).map((tag) => (
+                  {(t.audience_tags ?? []).slice(0, 2).map((tag) => (
                     <span key={tag} style={audienceTag}>{tag}</span>
                   ))}
                 </div>
                 <h2 style={cardTitle}>{t.title}</h2>
                 {t.subtitle && <p style={cardSub}>{t.subtitle}</p>}
                 {t.program_promise && <p style={promise}>{t.program_promise}</p>}
-                {t.day_themes.length > 0 && (
+                {(t.day_themes ?? []).length > 0 && (
                   <div style={dayList}>
-                    {t.day_themes.slice(0, 3).map((theme, i) => (
+                    {(t.day_themes ?? []).slice(0, 3).map((theme, i) => (
                       <span key={i} style={dayPill}>Day {i + 1}: {theme}</span>
                     ))}
-                    {t.day_themes.length > 3 && (
-                      <span style={dayPill}>+{t.day_themes.length - 3} more</span>
+                    {(t.day_themes ?? []).length > 3 && (
+                      <span style={dayPill}>+{(t.day_themes ?? []).length - 3} more</span>
                     )}
                   </div>
                 )}

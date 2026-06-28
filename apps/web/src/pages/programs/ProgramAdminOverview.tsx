@@ -13,6 +13,18 @@ interface GrowthSection {
   dau_proxy: number;
   wau_proxy: number;
   dau_note: string;
+  first_open_7d: number | null;
+  install_to_signup_rate_pct: number | null;
+  install_note: string;
+}
+
+interface SignupToFirstRitual {
+  total_new_30d: number;
+  first_ritual_within_1d: number;
+  first_ritual_within_7d: number;
+  rate_1d_pct: number;
+  rate_7d_pct: number;
+  note: string;
 }
 
 interface ActivationSection {
@@ -29,6 +41,7 @@ interface ActivationSection {
   users_used_tell_mitra_7d: number;
   users_completed_program_day_1_7d: number;
   users_with_any_ritual_7d: number;
+  signup_to_first_ritual: SignupToFirstRitual;
   activation_note: string;
 }
 
@@ -60,6 +73,14 @@ interface DeviceTokensSection {
   adoption_note: string;
 }
 
+interface NotificationToRitual {
+  tapped_7d: number;
+  completed_ritual_after_tap_7d: number;
+  rate_pct: number | null;
+  window_hours: number;
+  note: string;
+}
+
 interface NotificationsSection {
   states_present_30d: string[];
   last_24h: Record<string, number>;
@@ -68,14 +89,14 @@ interface NotificationsSection {
   tap_rate_7d_pct: number | null;
   send_success_rate_pct: number | null;
   suppression_reasons_7d: { reason: string; count: number }[];
+  notification_to_ritual: NotificationToRitual;
   tap_rate_note: string;
 }
 
-interface RitualsSection {
-  quick_chant: Record<string, number>;
-  rhythm: Record<string, number>;
-  inner_path: Record<string, number>;
-  tell_mitra: Record<string, number>;
+interface CrossSurface {
+  users_2plus_active_days_7d: number;
+  users_3plus_active_days_7d: number;
+  source: string;
 }
 
 interface RetentionSection {
@@ -83,7 +104,15 @@ interface RetentionSection {
   active_yesterday: number;
   active_7d_proxy: number;
   users_2plus_days_7d_rhythm: number;
+  cross_surface: CrossSurface;
   note: string;
+}
+
+interface RitualsSection {
+  quick_chant: Record<string, number>;
+  rhythm: Record<string, number>;
+  inner_path: Record<string, number>;
+  tell_mitra: Record<string, number>;
 }
 
 interface ProgramsSection {
@@ -107,6 +136,7 @@ interface AttributionSection {
   by_source_channel: { value: string; count: number }[];
   by_utm_source: { value: string; count: number }[];
   unknown_source_count: number;
+  unknown_source_rate_pct: number;
   referred_users: number;
   install_note: string;
 }
@@ -119,7 +149,27 @@ interface MobileAnalyticsSection {
   app_version_in_events: boolean;
   ios_blocker: string;
   track_b_branch: string;
+  eas_secret_action_required: string;
   note: string;
+}
+
+interface GapItem {
+  id: string;
+  priority: 'P0' | 'P1' | 'P2';
+  label: string;
+  status: 'not_wired' | 'partial' | 'wired';
+  requires_mobile: boolean;
+  blocker: string | null;
+  next_action: string;
+}
+
+interface GapsSection {
+  p0_count: number;
+  p1_count: number;
+  p2_count: number;
+  wired_this_session: string[];
+  items: GapItem[];
+  plan_file: string;
 }
 
 interface GrowthSummary {
@@ -135,7 +185,7 @@ interface GrowthSummary {
   attribution: AttributionSection;
   quality: { [k: string]: string };
   mobile_analytics: MobileAnalyticsSection;
-  gaps: string[];
+  gaps: GapsSection;
 }
 
 type SectionData = GrowthSummary[keyof GrowthSummary];
@@ -264,6 +314,130 @@ function pct(val: number | null | undefined): string {
   return `${val}%`;
 }
 
+function PriorityBadge({ p }: { p: 'P0' | 'P1' | 'P2' }) {
+  const styles: Record<string, React.CSSProperties> = {
+    P0: { background: '#fee2e2', color: '#991b1b', fontWeight: 800 },
+    P1: { background: '#fef3c7', color: '#92400e', fontWeight: 700 },
+    P2: { background: '#f3f4f6', color: '#6b7280', fontWeight: 600 },
+  };
+  return (
+    <span style={{ padding: '2px 8px', borderRadius: 4, fontSize: 11, ...styles[p] }}>
+      {p}
+    </span>
+  );
+}
+
+function StatusBadge({ s }: { s: string }) {
+  if (s === 'wired') return <span style={{ padding: '2px 8px', borderRadius: 4, fontSize: 11, background: '#dcfce7', color: '#166534', fontWeight: 700 }}>WIRED</span>;
+  if (s === 'partial') return <span style={{ padding: '2px 8px', borderRadius: 4, fontSize: 11, background: '#fef3c7', color: '#92400e', fontWeight: 700 }}>PARTIAL</span>;
+  return <span style={{ padding: '2px 8px', borderRadius: 4, fontSize: 11, background: '#fee2e2', color: '#991b1b', fontWeight: 700 }}>NOT WIRED</span>;
+}
+
+// ── Measurement Gaps & Closure Plan section ────────────────────────────────────
+
+function MeasurementGapsSection({ gaps }: { gaps: GapsSection }) {
+  const p0Items = gaps.items.filter(g => g.priority === 'P0');
+
+  return (
+    <div style={{
+      marginBottom: 24,
+      borderRadius: 8,
+      border: '2px solid #fca5a5',
+      overflow: 'hidden',
+    }}>
+      <div style={{
+        padding: '14px 20px',
+        background: '#fef2f2',
+        borderBottom: '1px solid #fca5a5',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: 8,
+      }}>
+        <div>
+          <span style={{ fontWeight: 800, fontSize: 15, color: '#991b1b' }}>
+            Measurement Gaps &amp; Closure Plan
+          </span>
+          <span style={{ fontSize: 12, color: '#9ca3af', marginLeft: 10 }}>
+            Not cosmetic — every gap has a closure plan in audit/founder_command_center_gap_closure_plan.md
+          </span>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <span style={{ padding: '4px 12px', background: '#fee2e2', color: '#991b1b', borderRadius: 6, fontSize: 13, fontWeight: 800 }}>
+            P0: {gaps.p0_count}
+          </span>
+          <span style={{ padding: '4px 12px', background: '#fef3c7', color: '#92400e', borderRadius: 6, fontSize: 13, fontWeight: 700 }}>
+            P1: {gaps.p1_count}
+          </span>
+          <span style={{ padding: '4px 12px', background: '#f3f4f6', color: '#6b7280', borderRadius: 6, fontSize: 13, fontWeight: 600 }}>
+            P2: {gaps.p2_count}
+          </span>
+        </div>
+      </div>
+
+      {/* P0 gaps — shown as action items, not footnotes */}
+      {p0Items.length > 0 && (
+        <div style={{ padding: '0 20px 4px' }}>
+          <div style={{ marginTop: 12, marginBottom: 8, fontSize: 11, fontWeight: 700, color: '#991b1b', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+            P0 — Blocking Founder Decisions
+          </div>
+          {p0Items.map(g => (
+            <div key={g.id} style={{
+              marginBottom: 10, padding: '10px 14px',
+              background: '#fff7ed', borderRadius: 6,
+              border: '1px solid #fed7aa',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <PriorityBadge p="P0" />
+                <StatusBadge s={g.status} />
+                {g.requires_mobile && (
+                  <span style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600 }}>NEEDS MOBILE BUILD</span>
+                )}
+                <span style={{ fontWeight: 700, fontSize: 13, color: '#c2410c' }}>{g.label}</span>
+              </div>
+              {g.blocker && (
+                <div style={{ fontSize: 12, color: '#c2410c', marginBottom: 4 }}>
+                  <strong>Blocker:</strong> {g.blocker}
+                </div>
+              )}
+              <div style={{ fontSize: 12, color: '#374151' }}>
+                <strong>Next action:</strong> {g.next_action}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* P1/P2 summary */}
+      <div style={{ padding: '8px 20px 14px' }}>
+        <div style={{ marginTop: 4, marginBottom: 8, fontSize: 11, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+          P1 / P2 — Deferred (No Mobile Build Required Unless Noted)
+        </div>
+        {gaps.items.filter(g => g.priority !== 'P0').map(g => (
+          <div key={g.id} style={{
+            display: 'flex', alignItems: 'flex-start', gap: 8,
+            padding: '6px 0', borderBottom: '1px solid var(--kalpx-border, #e5e7eb)',
+            fontSize: 12,
+          }}>
+            <PriorityBadge p={g.priority} />
+            <StatusBadge s={g.status} />
+            <div style={{ flex: 1 }}>
+              <span style={{ fontWeight: 600, color: 'var(--kalpx-text)' }}>{g.label}</span>
+              {g.requires_mobile && <span style={{ fontSize: 11, color: '#9ca3af', marginLeft: 6 }}>+mobile</span>}
+            </div>
+          </div>
+        ))}
+        {gaps.wired_this_session.length > 0 && (
+          <div style={{ marginTop: 10, fontSize: 12, color: '#166534', fontWeight: 600 }}>
+            ✓ Wired in V1: {gaps.wired_this_session.join(' · ')}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Main component ─────────────────────────────────────────────────────────────
 
 export function ProgramAdminOverview() {
@@ -338,6 +512,11 @@ export function ProgramAdminOverview() {
               <Stat label="Program D7 Rate" value={pct(data.programs.d7_rate_pct)} />
             </div>
 
+            {/* MEASUREMENT GAPS — prominent, not a footnote */}
+            {!isErrorSection(data.gaps) && (
+              <MeasurementGapsSection gaps={data.gaps} />
+            )}
+
             {/* Growth */}
             <SectionCard title="Growth" error={isErrorSection(data.growth) ? data.growth.error : undefined}>
               <Row label="Total active users" value={data.growth.total_users} />
@@ -346,6 +525,15 @@ export function ProgramAdminOverview() {
               <Row label="New last 30 days" value={data.growth.new_30d} />
               <Row label="DAU proxy" value={data.growth.dau_proxy} note={data.growth.dau_note} />
               <Row label="WAU proxy" value={data.growth.wau_proxy} />
+              <Row
+                label="First open 7d (Firebase)"
+                value={data.growth.first_open_7d !== null ? data.growth.first_open_7d : '— not wired (G001)'}
+              />
+              <Row
+                label="Install → signup rate"
+                value={data.growth.install_to_signup_rate_pct !== null ? pct(data.growth.install_to_signup_rate_pct) : '— not wired (G001+G002)'}
+              />
+              <Note>{data.growth.install_note}</Note>
             </SectionCard>
 
             {/* Activation */}
@@ -364,7 +552,18 @@ export function ProgramAdminOverview() {
               <Row label="Tell Mitra messages" value={data.activation.users_used_tell_mitra_7d} />
               <Row label="Program Day 1 completions" value={data.activation.users_completed_program_day_1_7d} />
               <Row label="Any ritual" value={data.activation.users_with_any_ritual_7d} />
-              <Note>{data.activation.activation_note}</Note>
+              <SectionLabel>Signup → First Ritual (30-day cohort)</SectionLabel>
+              {(() => {
+                const sfr = data.activation.signup_to_first_ritual;
+                return (
+                  <>
+                    <Row label="New users (last 30d)" value={sfr.total_new_30d} />
+                    <Row label="First ritual within 1 day" value={`${sfr.first_ritual_within_1d} (${pct(sfr.rate_1d_pct)})`} />
+                    <Row label="First ritual within 7 days" value={`${sfr.first_ritual_within_7d} (${pct(sfr.rate_7d_pct)})`} />
+                    <Note>{sfr.note}</Note>
+                  </>
+                );
+              })()}
             </SectionCard>
 
             {/* Push Reachability */}
@@ -375,7 +574,7 @@ export function ProgramAdminOverview() {
               <SectionLabel>Timezone health (IANA validated)</SectionLabel>
               <Row label="Valid IANA timezone users" value={data.push_reachability.valid_timezone_users} note="pytz validated" />
               <Row label="Confirmed timezone users" value={data.push_reachability.confirmed_timezone_users} note="device/user-set source" />
-              <Row label="Default-but-valid timezone users" value={data.push_reachability.default_but_valid_timezone_users} note="source=default, timezone valid" />
+              <Row label="Default-but-valid timezone users" value={data.push_reachability.default_but_valid_timezone_users} />
               <Row
                 label="Invalid timezone users"
                 value={data.push_reachability.invalid_timezone_users}
@@ -383,11 +582,10 @@ export function ProgramAdminOverview() {
               />
               {data.push_reachability.invalid_timezone_users > 0 && (
                 <div style={{ marginTop: 8, padding: '8px 12px', background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 6, fontSize: 12, color: '#c2410c' }}>
-                  ⚠ {data.push_reachability.invalid_timezone_users} users have non-IANA timezone strings — these users are excluded from push reachability.
+                  {data.push_reachability.invalid_timezone_users} users have non-IANA timezone strings — excluded from push reachability.
                 </div>
               )}
               <Note>{data.push_reachability.push_reachability_note}</Note>
-              <Note>{data.push_reachability.iana_validation}</Note>
             </SectionCard>
 
             {/* Device Tokens */}
@@ -414,6 +612,18 @@ export function ProgramAdminOverview() {
               <Row label="Tap rate (24h)" value={pct(data.notifications.tap_rate_24h_pct)} />
               <Row label="Tap rate (7d)" value={pct(data.notifications.tap_rate_7d_pct)} />
               <Row label="Send success rate (24h)" value={pct(data.notifications.send_success_rate_pct)} />
+              <SectionLabel>Notification → Ritual Return (7d)</SectionLabel>
+              {(() => {
+                const ntr = data.notifications.notification_to_ritual;
+                return (
+                  <>
+                    <Row label="Notifications tapped" value={ntr.tapped_7d} />
+                    <Row label="Ritual completed within 2h of tap" value={ntr.completed_ritual_after_tap_7d} />
+                    <Row label="Tap-to-ritual rate" value={ntr.rate_pct !== null ? pct(ntr.rate_pct) : '—'} />
+                    <Note>{ntr.note}</Note>
+                  </>
+                );
+              })()}
               <SectionLabel>Last 24h by state</SectionLabel>
               {Object.entries(data.notifications.last_24h).map(([state, count]) => (
                 <Row key={state} label={state} value={count} />
@@ -428,7 +638,6 @@ export function ProgramAdminOverview() {
                   <Row key={r.reason} label={r.reason} value={r.count} />
                 ))}
               <Note>States present (30d): {data.notifications.states_present_30d.join(', ') || 'none'}</Note>
-              <Note>{data.notifications.tap_rate_note}</Note>
             </SectionCard>
 
             {/* Rituals */}
@@ -456,7 +665,10 @@ export function ProgramAdminOverview() {
               <Row label="Active today (proxy)" value={data.retention.active_today} />
               <Row label="Active yesterday (proxy)" value={data.retention.active_yesterday} />
               <Row label="Active last 7 days (proxy)" value={data.retention.active_7d_proxy} />
-              <Row label="Users 2+ active days in 7d (rhythm proxy)" value={data.retention.users_2plus_days_7d_rhythm} />
+              <SectionLabel>Cross-Surface Repeat Users (7d)</SectionLabel>
+              <Row label="2+ active days (all surfaces)" value={data.retention.cross_surface.users_2plus_active_days_7d} note={data.retention.cross_surface.source} />
+              <Row label="3+ active days (all surfaces)" value={data.retention.cross_surface.users_3plus_active_days_7d} />
+              <Row label="2+ active days (Rhythm only)" value={data.retention.users_2plus_days_7d_rhythm} note="legacy comparison" />
               <Note>{data.retention.note}</Note>
             </SectionCard>
 
@@ -469,10 +681,10 @@ export function ProgramAdminOverview() {
               <Row label="D3 completions" value={data.programs.d3_total} />
               <Row label="D7 completions" value={data.programs.d7_total} />
               <Row label="Overall D7 rate" value={pct(data.programs.d7_rate_pct)} />
-              <Row label="Shares (ProgramShare model)" value={data.programs.shares_total} />
-              <Row label="Testimonials (ProgramTestimonial model)" value={data.programs.testimonials_total} />
+              <Row label="Shares (ProgramShare)" value={data.programs.shares_total} />
+              <Row label="Testimonials (ProgramTestimonial)" value={data.programs.testimonials_total} />
               <Row label="Kill signals (≥15 joined, 0 D3)" value={data.programs.kill_signal_count} />
-              <Row label="Support problems (>10% click rate)" value={data.programs.support_problem_count} />
+              <Row label="Support problems (>10% click)" value={data.programs.support_problem_count} />
               <SectionLabel>Classification</SectionLabel>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {Object.entries(data.programs.classification_counts).map(([cls, count]) => (
@@ -499,7 +711,7 @@ export function ProgramAdminOverview() {
             {/* Attribution */}
             <SectionCard title="Attribution" error={isErrorSection(data.attribution) ? data.attribution.error : undefined}>
               <Row label="Referred users" value={data.attribution.referred_users} />
-              <Row label="No source recorded" value={data.attribution.unknown_source_count} />
+              <Row label="No source recorded" value={`${data.attribution.unknown_source_count} (${pct(data.attribution.unknown_source_rate_pct)})`} />
               <SectionLabel>By source channel</SectionLabel>
               {data.attribution.by_source_channel.map((r) => (
                 <Row key={r.value} label={r.value} value={r.count} />
@@ -513,33 +725,29 @@ export function ProgramAdminOverview() {
               <Note>{data.attribution.install_note}</Note>
             </SectionCard>
 
+            {/* Mobile Analytics Readiness */}
+            <SectionCard title="Mobile Analytics Readiness">
+              <Row label="iOS Firebase Analytics" value={<Bool v={data.mobile_analytics.ios_firebase_enabled} />} />
+              <Row label="Android Firebase Analytics" value={<Bool v={data.mobile_analytics.android_firebase_enabled} />} />
+              <Row label="initAnalytics() called on launch" value={<Bool v={data.mobile_analytics.init_analytics_called_on_launch} />} />
+              <Row label="platform in events" value={<Bool v={data.mobile_analytics.platform_in_events} />} />
+              <Row label="app_version in events" value={<Bool v={data.mobile_analytics.app_version_in_events} />} />
+              <Row label="iOS blocker" value={data.mobile_analytics.ios_blocker} />
+              <Row label="Track B branch" value={data.mobile_analytics.track_b_branch} />
+              {data.mobile_analytics.eas_secret_action_required && (
+                <div style={{ marginTop: 10, padding: '10px 14px', background: '#fef3c7', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#92400e' }}>
+                  <strong>Action required (Parag):</strong> {data.mobile_analytics.eas_secret_action_required}
+                </div>
+              )}
+              <Note>{data.mobile_analytics.note}</Note>
+            </SectionCard>
+
             {/* Quality */}
             <SectionCard title="Quality">
               <Row label="Generic notification fallbacks" value={data.quality.generic_notification_fallbacks} />
               <Row label="API errors" value={data.quality.api_errors} />
               <Row label="Crash data" value={data.quality.crash_data} />
               <Note>{data.quality.note}</Note>
-            </SectionCard>
-
-            {/* Mobile Analytics Readiness */}
-            <SectionCard title="Mobile Analytics Readiness">
-              <Row label="iOS Firebase Analytics enabled" value={<Bool v={data.mobile_analytics.ios_firebase_enabled} />} />
-              <Row label="Android Firebase Analytics enabled" value={<Bool v={data.mobile_analytics.android_firebase_enabled} />} />
-              <Row label="initAnalytics() called on launch" value={<Bool v={data.mobile_analytics.init_analytics_called_on_launch} />} />
-              <Row label="platform in events" value={<Bool v={data.mobile_analytics.platform_in_events} />} />
-              <Row label="app_version in events" value={<Bool v={data.mobile_analytics.app_version_in_events} />} />
-              <Row label="iOS blocker" value={data.mobile_analytics.ios_blocker} />
-              <Row label="Track B branch" value={data.mobile_analytics.track_b_branch} />
-              <Note>{data.mobile_analytics.note}</Note>
-            </SectionCard>
-
-            {/* Known Gaps */}
-            <SectionCard title="Known Gaps">
-              <ul style={{ margin: 0, paddingLeft: 20, lineHeight: 1.8, color: 'var(--kalpx-text-soft)' }}>
-                {data.gaps.map((gap, i) => (
-                  <li key={i}>{gap}</li>
-                ))}
-              </ul>
             </SectionCard>
           </>
         )}

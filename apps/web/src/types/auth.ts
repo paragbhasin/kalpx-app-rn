@@ -17,6 +17,7 @@ export type LoginResponse = {
   refresh?: string;
   role?: string;
   user_type?: "ops" | "guide" | "user";
+  is_superuser?: boolean;
   user?: {
     id: number;
     email: string;

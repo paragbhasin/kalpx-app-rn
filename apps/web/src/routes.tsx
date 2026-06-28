@@ -88,6 +88,7 @@ import { GuideTemplateBrowserPage } from "./pages/programs/GuideTemplateBrowserP
 import { GuideTemplateDayEditorPage } from "./pages/programs/GuideTemplateDayEditorPage";
 import { GuideTemplateReviewPage } from "./pages/programs/GuideTemplateReviewPage";
 import { RequiresStaff } from "./components/RequiresStaff";
+import { RequiresFounder } from "./components/RequiresFounder";
 import { ProgramAdminDashboard } from "./pages/programs/ProgramAdminDashboard";
 import { ProgramAdminCampaignList } from "./pages/programs/ProgramAdminCampaignList";
 import { ProgramAdminOverview } from "./pages/programs/ProgramAdminOverview";
@@ -417,7 +418,7 @@ export function AppRoutes() {
       />
       <Route
         path="/programs/admin/overview/"
-        element={<RequiresStaff><ProgramAdminOverview /></RequiresStaff>}
+        element={<RequiresFounder><ProgramAdminOverview /></RequiresFounder>}
       />
       <Route
         path="/programs/admin/campaigns/"

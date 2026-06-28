@@ -20,6 +20,7 @@ export default function RhythmPracticeRunner() {
               item_id: item.item_id,
               item_type: "practice",
               item_title: item.title || item.title_snapshot,
+              item_subtitle: item.subtitle ?? item.line ?? item.summary ?? '',
               slot,
               journeyId,
               dayNumber,

@@ -28,6 +28,7 @@ export default function InnerPathPracticeRunner() {
             item_id: item.item_id,
             item_type: "practice",
             item_title: item.title,
+            item_subtitle: item.subtitle ?? item.line ?? item.summary ?? '',
             journeyId,
             dayNumber,
           });

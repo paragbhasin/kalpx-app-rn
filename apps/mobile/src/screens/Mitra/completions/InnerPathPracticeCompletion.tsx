@@ -15,7 +15,7 @@ const BEIGE_BG = require("../../../../assets/beige_bg.webp");
 export default function InnerPathPracticeCompletion() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const { item_id, item_title, journeyId, dayNumber } = route.params;
+  const { item_id, item_title, item_subtitle, journeyId, dayNumber } = route.params;
   const completedRef = useRef(false);
   const COPY = useCompletionCopy("innerPath_practice");
   const [badge, setBadge] = useState<string>(COPY.pending);
@@ -47,7 +47,7 @@ export default function InnerPathPracticeCompletion() {
           liveActivity={item_title ? {
             type: COPY.variant,
             name: item_title,
-            onActivate: () => liveActivity.startSankalp(item_title, '', 'kalpx://mitra/inner_path/home?source=la').catch(() => {}),
+            onActivate: () => liveActivity.startSankalp(item_title, item_subtitle ?? '', 'kalpx://mitra/inner_path/home?source=la').catch(() => {}),
           } : undefined}
           nameCard={item_title ? { label: COPY.nameCardLabel, text: item_title, guideLine: COPY.nameCardGuide } : undefined}
           reflection={{ prompt: COPY.reflectionPrompt, onSubmit: onReflect }}

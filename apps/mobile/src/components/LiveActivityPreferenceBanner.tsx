@@ -24,11 +24,15 @@ export type LiveActivityType = "mantra" | "sankalp" | "practice";
 interface PreferredLA {
   type: LiveActivityType;
   name: string;
+  line?: string;
 }
 
 interface Props {
   experienceType: LiveActivityType;
   experienceName: string;
+  // Short subtitle/description shown as the LA line on the lock screen (e.g. item.subtitle).
+  // Persisted alongside name so useFocusEffect auto-restart can restore it.
+  experienceLine?: string;
   onActivate?: () => void;
   // 'completion' renders the calmer inline banner used on completion screens
   variant?: "default" | "completion";
@@ -42,6 +46,7 @@ export function LiveActivityPreferenceBanner(props: Props) {
 function LiveActivityPreferenceBannerCore({
   experienceType,
   experienceName,
+  experienceLine,
   onActivate,
   variant = "default",
 }: Props) {
@@ -152,7 +157,7 @@ function LiveActivityPreferenceBannerCore({
     if (conflictChoice === "switch") {
       AsyncStorage.setItem(
         PREFERRED_LA_KEY,
-        JSON.stringify({ type: experienceType, name: experienceName }),
+        JSON.stringify({ type: experienceType, name: experienceName, line: experienceLine ?? '' }),
       ).catch(() => {});
       onActivate?.();
       logEvent(EVENT_NAMES.LIVE_ACTIVITY_ANCHOR_SELECTED, {

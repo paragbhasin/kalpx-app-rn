@@ -313,7 +313,7 @@ export default function RhythmHomeScreen({
         const deepLink = band ? `kalpx://mitra/rhythm_home/${band}?source=la` : 'kalpx://mitra/rhythm_home?source=la';
         if (pref?.type === 'practice') {
           // Practice anchor: show the practice on lock screen; server state type is irrelevant
-          liveActivity.startSankalp(pref.name, '', deepLink);
+          liveActivity.startSankalp(pref.name, pref.line ?? '', deepLink);
           return;
         }
         if (state.type !== 'sankalp') return;

@@ -161,7 +161,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
         const pref = preferredRaw ? JSON.parse(preferredRaw) : null;
         if (pref?.type === 'practice') {
           // Practice anchor: show the practice on lock screen; server state type is irrelevant
-          liveActivity.startSankalp(pref.name, '', 'kalpx://mitra/inner_path/home?source=la');
+          liveActivity.startSankalp(pref.name, pref.line ?? '', 'kalpx://mitra/inner_path/home?source=la');
           return;
         }
         if (state.type !== 'sankalp') return;

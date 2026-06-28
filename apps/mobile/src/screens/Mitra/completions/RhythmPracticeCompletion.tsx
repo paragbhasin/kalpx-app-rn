@@ -20,7 +20,7 @@ export default function RhythmPracticeCompletion() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const dispatch = useDispatch();
-  const { item_id, item_title, slot, journeyId, dayNumber } = route.params;
+  const { item_id, item_title, item_subtitle, slot, journeyId, dayNumber } = route.params;
   const completedRef = useRef(false);
   const COPY = useCompletionCopy("rhythm_practice");
   const [badge, setBadge] = useState<string>(COPY.pending);
@@ -62,7 +62,7 @@ export default function RhythmPracticeCompletion() {
           liveActivity={item_title ? {
             type: COPY.variant,
             name: item_title,
-            onActivate: () => liveActivity.startSankalp(item_title, '', `kalpx://mitra/rhythm_home/${slot}?source=la`).catch(() => {}),
+            onActivate: () => liveActivity.startSankalp(item_title, item_subtitle ?? '', `kalpx://mitra/rhythm_home/${slot}?source=la`).catch(() => {}),
           } : undefined}
           nameCard={item_title ? { label: COPY.nameCardLabel, text: item_title, guideLine: COPY.nameCardGuide } : undefined}
           reflection={{ prompt: COPY.reflectionPrompt, onSubmit: onReflect }}

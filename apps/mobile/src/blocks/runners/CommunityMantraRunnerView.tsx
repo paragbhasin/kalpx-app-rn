@@ -34,8 +34,10 @@ function deepLinkFromSurface(surface?: JapaSourceSurface): string {
     default:             return 'kalpx://mitra/quick_chant/home'; // routes to QuickReset
   }
 }
+import { EVENT_NAMES } from '@kalpx/analytics';
 import { getLiveActivityState } from "../../engine/mitraApi";
 import { liveActivity } from "../../native/liveActivity";
+import { logEvent } from "../../utils/initAnalytics";
 import i18n from "../../config/i18n";
 import Animated, {
   Easing,
@@ -351,15 +353,24 @@ const CommunityMantraRunnerView: React.FC<MantraRunnerViewProps> = ({
         const durationSec = Math.round((Date.now() - sessionStartTimeRef.current) / 1000);
         if (isLAActiveRef.current && !laCompleteCalledRef.current) {
           laCompleteCalledRef.current = true;
-          liveActivity.end();
-          isLAActiveRef.current = false;
-          getLiveActivityState(i18n.language || 'en').then((state) => {
-            const pref = preferredLARef.current;
-            if (pref !== null) return;
-            if (AppState.currentState === 'active' && state.type === 'sankalp') {
-              liveActivity.startSankalp(state.title, state.line);
+          const pref = preferredLARef.current;
+          const isAnchor = pref?.type === 'mantra' && pref?.name === (item.title ?? '');
+          if (isAnchor) {
+            // Anchor mode: preferred mantra — keep LA alive on lock screen after completion
+            logEvent(EVENT_NAMES.LIVE_ACTIVITY_CHANT_KEPT_AS_ANCHOR, { activity_type: 'mantra' }).catch(() => {});
+          } else {
+            // Session mode: end LA and potentially transition to sankalp anchor
+            liveActivity.end();
+            isLAActiveRef.current = false;
+            logEvent(EVENT_NAMES.LIVE_ACTIVITY_CHANT_ENDED_SESSION, { activity_type: 'mantra' }).catch(() => {});
+            if (pref === null) {
+              getLiveActivityState(i18n.language || 'en').then((state) => {
+                if (AppState.currentState === 'active' && state.type === 'sankalp') {
+                  liveActivity.startSankalp(state.title, state.line);
+                }
+              }).catch(() => {});
             }
-          }).catch(() => {});
+          }
         }
         setTimeout(() => onCompleteRef.current(selectedTarget, durationSec), 800);
       } else {
@@ -373,12 +384,14 @@ const CommunityMantraRunnerView: React.FC<MantraRunnerViewProps> = ({
             const canStart = pref === null || (pref.type === 'mantra' && pref.name === (item.title ?? ''));
             if (canStart) {
               isLAActiveRef.current = true;
+              const laMode = pref !== null ? 'anchor' : 'session';
               liveActivity.start(
                 item.title ?? '',
                 item.devanagari ?? '',
                 curToday, curWeek, curLifetime, curLifetime, elapsedSec,
                 deepLinkFromSurface(sourceSurface),
               );
+              logEvent(EVENT_NAMES.LIVE_ACTIVITY_CHANT_STARTED, { activity_type: 'mantra', mode: laMode }).catch(() => {});
             }
           }
         } else {

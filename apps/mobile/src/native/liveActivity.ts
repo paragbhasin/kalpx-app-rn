@@ -25,11 +25,17 @@ function trackLA(event: string, params?: Record<string, string | number | boolea
 // when the server still returns type:'quick_chant' right after session complete.
 let _quickChantSuppressedUntil = 0;
 
-// Clears every LA type before starting a new one so stale lock-screen widgets don't stack.
+// Clears every session LA type before starting a new one so stale lock-screen widgets don't stack.
 // iOS needs explicit ends because ActivityKit has separate Activity objects per type.
 // Android uses a single NOTIFICATION_ID — startForeground() replaces in-place, so sending
 // four end intents before each start just causes stop→restart cycles that trigger
 // ForegroundServiceDidNotStartInTimeException on MIUI / aggressive battery optimizers.
+//
+// INTENTIONAL: Sankalp is NOT included here because it is an anchor Live Activity.
+// Quick Chant has Dynamic Island priority and ends Sankalp itself (Swift startActivity
+// calls endCurrentSankalpActivity). All other session LAs (Reset/Rhythm/InnerPath)
+// end Sankalp at the Swift level too. JS-layer must not kill the Sankalp anchor
+// proactively — it should only be replaced when the user starts a new anchor.
 async function endAllActivities(): Promise<void> {
   if (!KalpxLiveActivityModule) return;
   if (Platform.OS === "android") return;
@@ -167,6 +173,7 @@ export const liveActivity = {
     return KalpxLiveActivityModule.startSankalpActivity(title, line, deepLinkURL)
       .then((id: string) => {
         console.log("[LiveActivity] startSankalp OK, id:", id);
+        trackLA(EVENT_NAMES.LIVE_ACTIVITY_SANKALP_STARTED, { activity_type: 'sankalp', mode: 'anchor' });
         return id;
       })
       .catch((err: any) => {

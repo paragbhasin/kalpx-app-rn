@@ -1,6 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { EVENT_NAMES } from '@kalpx/analytics';
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { logEvent } from "../utils/initAnalytics";
 import {
   Animated,
   Modal,
@@ -153,6 +155,11 @@ function LiveActivityPreferenceBannerCore({
         JSON.stringify({ type: experienceType, name: experienceName }),
       ).catch(() => {});
       onActivate?.();
+      logEvent(EVENT_NAMES.LIVE_ACTIVITY_ANCHOR_SELECTED, {
+        activity_type: experienceType,
+        mode: 'anchor',
+        was_switch: currentLA != null ? 'true' : 'false',
+      }).catch(() => {});
       showToast(
         currentLA ? "Live Activity Switched!" : "Live Activity Added!",
         3500,
@@ -232,7 +239,7 @@ function LiveActivityPreferenceBannerCore({
                 <Text style={styles.modalNameText}>{experienceName}</Text>
               </View>
               <Text style={styles.modalQuestion}>
-                This will show on your lock screen while you practice.
+                This can stay on your lock screen for several hours as a gentle reminder. iOS may remove it automatically.
               </Text>
             </>
           )}

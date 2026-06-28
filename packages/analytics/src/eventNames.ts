@@ -92,6 +92,17 @@ export const EVENT_NAMES = {
   LIVE_ACTIVITY_INNER_PATH_UPDATED: 'live_activity_inner_path_updated',
   LIVE_ACTIVITY_INNER_PATH_ENDED: 'live_activity_inner_path_ended',
 
+  // Live Activity — Quick Chant / Mantra
+  LIVE_ACTIVITY_CHANT_STARTED: 'live_activity_chant_started',
+  LIVE_ACTIVITY_CHANT_ENDED_SESSION: 'live_activity_chant_ended_session',
+  LIVE_ACTIVITY_CHANT_KEPT_AS_ANCHOR: 'live_activity_chant_kept_as_anchor',
+
+  // Live Activity — Sankalp (anchor-only; never ends on completion)
+  LIVE_ACTIVITY_SANKALP_STARTED: 'live_activity_sankalp_started',
+
+  // Live Activity — Anchor preference selection
+  LIVE_ACTIVITY_ANCHOR_SELECTED: 'live_activity_anchor_selected',
+
   // Backend API event types (passed as event_name to /mitra/track-event/)
   API_TRACK_EVENT: 'track_event',
   API_TRACK_COMPLETION: 'track_completion',

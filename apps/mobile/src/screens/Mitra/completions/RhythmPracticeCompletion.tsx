@@ -9,6 +9,7 @@ import {
   mitraRhythmComplete,
   mitraTrackCompletion,
 } from "../../../engine/mitraApi";
+import { liveActivity } from "../../../native/liveActivity";
 import { setHomeData } from "../../../store/doorSlice";
 import { useAppRating } from "../../../hooks/useAppRating";
 import { useCompletionReflection } from "./useCompletionReflection";
@@ -58,7 +59,11 @@ export default function RhythmPracticeCompletion() {
           badgeLabel={badge}
           ctaLabel={COPY.cta}
           onCtaPress={handleReturn}
-          liveActivity={item_title ? { type: COPY.variant, name: item_title } : undefined}
+          liveActivity={item_title ? {
+            type: COPY.variant,
+            name: item_title,
+            onActivate: () => liveActivity.startSankalp(item_title, '', 'kalpx://mitra/rhythm_home/morning?source=la').catch(() => {}),
+          } : undefined}
           nameCard={item_title ? { label: COPY.nameCardLabel, text: item_title, guideLine: COPY.nameCardGuide } : undefined}
           reflection={{ prompt: COPY.reflectionPrompt, onSubmit: onReflect }}
           testID={__DEV__ ? "test_rhythm_practice_completion_return" : undefined}

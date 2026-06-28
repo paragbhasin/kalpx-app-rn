@@ -25,16 +25,28 @@ interface ActivationSection {
   activation_rate_pct: number;
   users_completed_quick_chant_7d: number;
   users_completed_rhythm_7d: number;
+  users_started_inner_path_7d: number;
   users_used_tell_mitra_7d: number;
+  users_completed_program_day_1_7d: number;
   users_with_any_ritual_7d: number;
-  users_with_valid_timezone: number;
-  users_with_confirmed_timezone: number;
-  timezone_note: string;
-  gaps: string[];
+  activation_note: string;
 }
 
 interface PushReachabilitySection {
-  total_tokens: number;
+  linked_device_token_users: number;
+  valid_timezone_users: number;
+  confirmed_timezone_users: number;
+  default_but_valid_timezone_users: number;
+  invalid_timezone_users: number;
+  push_enabled_users: number;
+  push_reachable_users: number;
+  push_reachable_rate_pct: number;
+  iana_validation: string;
+  push_reachability_note: string;
+}
+
+interface DeviceTokensSection {
+  total: number;
   linked: number;
   orphan: number;
   linked_rate_pct: number;
@@ -45,22 +57,17 @@ interface PushReachabilitySection {
   new_linked_24h: number;
   new_linked_7d: number;
   orphan_by_age: { lt_1d: number; '1_to_7d': number; '7_to_30d': number; gt_30d: number };
-  linked_device_token_users: number;
-  valid_timezone_users: number;
-  push_enabled_users: number;
-  push_reachable_users: number;
-  push_reachable_rate_pct: number;
   adoption_note: string;
 }
 
 interface NotificationsSection {
+  states_present_30d: string[];
   last_24h: Record<string, number>;
   last_7d: Record<string, number>;
   tap_rate_24h_pct: number | null;
   tap_rate_7d_pct: number | null;
   send_success_rate_pct: number | null;
   suppression_reasons_7d: { reason: string; count: number }[];
-  states_present_30d: string[];
   tap_rate_note: string;
 }
 
@@ -120,6 +127,7 @@ interface GrowthSummary {
   growth: GrowthSection;
   activation: ActivationSection;
   push_reachability: PushReachabilitySection;
+  device_tokens: DeviceTokensSection;
   notifications: NotificationsSection;
   rituals: RitualsSection;
   retention: RetentionSection;
@@ -133,7 +141,7 @@ interface GrowthSummary {
 type SectionData = GrowthSummary[keyof GrowthSummary];
 
 function isErrorSection(v: SectionData): v is { error: string; note: string } {
-  return typeof v === 'object' && v !== null && 'error' in v;
+  return typeof v === 'object' && v !== null && !Array.isArray(v) && 'error' in v;
 }
 
 // ── UI helpers ─────────────────────────────────────────────────────────────────
@@ -147,9 +155,7 @@ function AdminNav() {
     ['Template Queue', '/programs/admin/'],
   ];
   return (
-    <div style={{
-      display: 'flex', gap: 2, marginBottom: 24, flexWrap: 'wrap',
-    }}>
+    <div style={{ display: 'flex', gap: 2, marginBottom: 24, flexWrap: 'wrap' }}>
       {links.map(([label, path]) => {
         const active = window.location.pathname === path;
         return (
@@ -229,6 +235,14 @@ function Row({ label, value, note }: { label: string; value: string | number | R
   );
 }
 
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ marginTop: 12, marginBottom: 6, fontWeight: 600, fontSize: 12, color: 'var(--kalpx-text-soft)', textTransform: 'uppercase', letterSpacing: 0.4 }}>
+      {children}
+    </div>
+  );
+}
+
 function Bool({ v }: { v: boolean }) {
   return (
     <span style={{
@@ -241,7 +255,11 @@ function Bool({ v }: { v: boolean }) {
   );
 }
 
-function pct(val: number | null): string {
+function Note({ children }: { children: React.ReactNode }) {
+  return <div style={{ marginTop: 8, fontSize: 12, color: '#9ca3af' }}>{children}</div>;
+}
+
+function pct(val: number | null | undefined): string {
   if (val === null || val === undefined) return '—';
   return `${val}%`;
 }
@@ -308,16 +326,16 @@ export function ProgramAdminOverview() {
 
         {data && (
           <>
-            {/* Summary cards */}
+            {/* Top 8 summary cards */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 28 }}>
-              <Stat label="Total Users" value={data.growth.total_users} sub={`+${data.growth.new_7d} this week`} />
+              <Stat label="New Users 7d" value={data.growth.new_7d} sub={`+${data.growth.new_today} today`} />
               <Stat label="DAU Proxy" value={data.growth.dau_proxy} sub="ritual activity" />
-              <Stat label="Activation" value={pct(data.activation.activation_rate_pct)} sub="any ritual ever" />
-              <Stat label="Push Reachable" value={pct(data.push_reachability.push_reachable_rate_pct)} warn={data.push_reachability.push_reachable_rate_pct < 50} />
-              <Stat label="Active Programs" value={data.programs.active_campaigns} />
+              <Stat label="Push Reachable %" value={pct(data.push_reachability.push_reachable_rate_pct)} warn={data.push_reachability.push_reachable_rate_pct < 50} />
+              <Stat label="Ritual Users 7d" value={data.activation.users_with_any_ritual_7d} sub="any ritual" />
+              <Stat label="Program Joins 7d" value={data.programs.joins_7d} />
               <Stat label="Notif Tap 7d" value={pct(data.notifications.tap_rate_7d_pct)} />
-              <Stat label="Orphan Tokens" value={data.push_reachability.orphan} warn={data.push_reachability.orphan > 100} />
-              <Stat label="D7 Rate" value={pct(data.programs.d7_rate_pct)} />
+              <Stat label="Orphan Tokens" value={data.device_tokens.orphan} warn={data.device_tokens.orphan > 100} />
+              <Stat label="Program D7 Rate" value={pct(data.programs.d7_rate_pct)} />
             </div>
 
             {/* Growth */}
@@ -332,42 +350,63 @@ export function ProgramAdminOverview() {
 
             {/* Activation */}
             <SectionCard title="Activation" error={isErrorSection(data.activation) ? data.activation.error : undefined}>
-              <Row label="Users ever completed quick chant" value={data.activation.users_ever_completed_quick_chant} />
-              <Row label="Users ever completed rhythm" value={data.activation.users_ever_completed_rhythm} />
-              <Row label="Users ever started inner path" value={data.activation.users_ever_started_inner_path} />
-              <Row label="Users ever used Tell Mitra" value={data.activation.users_ever_used_tell_mitra} />
-              <Row label="Users ever completed program Day 1" value={data.activation.users_ever_completed_program_day_1} />
-              <Row label="Users with any ritual (all time)" value={`${data.activation.users_with_any_ritual} (${pct(data.activation.activation_rate_pct)})`} />
-              <Row label="Quick chant completions (7d users)" value={data.activation.users_completed_quick_chant_7d} />
-              <Row label="Rhythm completions (7d users)" value={data.activation.users_completed_rhythm_7d} />
-              <Row label="Tell Mitra (7d users)" value={data.activation.users_used_tell_mitra_7d} />
-              <Row label="Any ritual (7d users)" value={data.activation.users_with_any_ritual_7d} />
-              <Row label="Users with valid timezone" value={data.activation.users_with_valid_timezone} note="non-empty IANA" />
-              <Row label="Users with confirmed timezone" value={data.activation.users_with_confirmed_timezone} note="device/user-set" />
-              {data.activation.gaps?.length > 0 && (
-                <div style={{ marginTop: 10, fontSize: 12, color: '#9ca3af' }}>
-                  Gaps: {data.activation.gaps.join(' · ')}
-                </div>
-              )}
+              <SectionLabel>All-time distinct users</SectionLabel>
+              <Row label="Completed quick chant (ever)" value={data.activation.users_ever_completed_quick_chant} />
+              <Row label="Completed rhythm (ever)" value={data.activation.users_ever_completed_rhythm} />
+              <Row label="Started inner path (ever)" value={data.activation.users_ever_started_inner_path} />
+              <Row label="Used Tell Mitra (ever)" value={data.activation.users_ever_used_tell_mitra} />
+              <Row label="Completed program Day 1 (ever)" value={data.activation.users_ever_completed_program_day_1} />
+              <Row label="Any ritual (ever)" value={`${data.activation.users_with_any_ritual} (${pct(data.activation.activation_rate_pct)})`} />
+              <SectionLabel>Last 7 days</SectionLabel>
+              <Row label="Quick chant completions" value={data.activation.users_completed_quick_chant_7d} />
+              <Row label="Rhythm completions" value={data.activation.users_completed_rhythm_7d} />
+              <Row label="Inner path starts" value={data.activation.users_started_inner_path_7d} />
+              <Row label="Tell Mitra messages" value={data.activation.users_used_tell_mitra_7d} />
+              <Row label="Program Day 1 completions" value={data.activation.users_completed_program_day_1_7d} />
+              <Row label="Any ritual" value={data.activation.users_with_any_ritual_7d} />
+              <Note>{data.activation.activation_note}</Note>
             </SectionCard>
 
             {/* Push Reachability */}
             <SectionCard title="Push Reachability" error={isErrorSection(data.push_reachability) ? data.push_reachability.error : undefined}>
-              <Row label="Push reachable users" value={`${data.push_reachability.push_reachable_users} (${pct(data.push_reachability.push_reachable_rate_pct)})`} note="linked token + valid tz + push on" />
-              <Row label="Users with linked token" value={data.push_reachability.linked_device_token_users} />
-              <Row label="Users with valid timezone" value={data.push_reachability.valid_timezone_users} />
+              <Row label="Push reachable users" value={`${data.push_reachability.push_reachable_users} (${pct(data.push_reachability.push_reachable_rate_pct)})`} note="linked token + valid IANA tz + push on" />
+              <Row label="Users with linked device token" value={data.push_reachability.linked_device_token_users} />
               <Row label="Users with push enabled" value={data.push_reachability.push_enabled_users} />
-              <Row label="Total tokens" value={data.push_reachability.total_tokens} />
-              <Row label="Linked tokens" value={`${data.push_reachability.linked} (${pct(data.push_reachability.linked_rate_pct)})`} />
-              <Row label="Orphan tokens" value={`${data.push_reachability.orphan} (${pct(data.push_reachability.orphan_rate_pct)})`} />
-              <Row label="iOS" value={`${data.push_reachability.ios.linked} linked, ${data.push_reachability.ios.orphan} orphan`} />
-              <Row label="Android" value={`${data.push_reachability.android.linked} linked, ${data.push_reachability.android.orphan} orphan`} />
-              <Row label="New linked (24h)" value={data.push_reachability.new_linked_24h} />
-              <Row label="New linked (7d)" value={data.push_reachability.new_linked_7d} />
-              <div style={{ marginTop: 10, fontSize: 12, color: '#9ca3af' }}>
-                Orphan age: &lt;1d: {data.push_reachability.orphan_by_age.lt_1d} · 1–7d: {data.push_reachability.orphan_by_age['1_to_7d']} · 7–30d: {data.push_reachability.orphan_by_age['7_to_30d']} · &gt;30d: {data.push_reachability.orphan_by_age.gt_30d}
-              </div>
-              <div style={{ marginTop: 6, fontSize: 12, color: '#9ca3af' }}>{data.push_reachability.adoption_note}</div>
+              <SectionLabel>Timezone health (IANA validated)</SectionLabel>
+              <Row label="Valid IANA timezone users" value={data.push_reachability.valid_timezone_users} note="pytz validated" />
+              <Row label="Confirmed timezone users" value={data.push_reachability.confirmed_timezone_users} note="device/user-set source" />
+              <Row label="Default-but-valid timezone users" value={data.push_reachability.default_but_valid_timezone_users} note="source=default, timezone valid" />
+              <Row
+                label="Invalid timezone users"
+                value={data.push_reachability.invalid_timezone_users}
+                note="data quality issue"
+              />
+              {data.push_reachability.invalid_timezone_users > 0 && (
+                <div style={{ marginTop: 8, padding: '8px 12px', background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 6, fontSize: 12, color: '#c2410c' }}>
+                  ⚠ {data.push_reachability.invalid_timezone_users} users have non-IANA timezone strings — these users are excluded from push reachability.
+                </div>
+              )}
+              <Note>{data.push_reachability.push_reachability_note}</Note>
+              <Note>{data.push_reachability.iana_validation}</Note>
+            </SectionCard>
+
+            {/* Device Tokens */}
+            <SectionCard title="Device Tokens" error={isErrorSection(data.device_tokens) ? data.device_tokens.error : undefined}>
+              <Row label="Total tokens" value={data.device_tokens.total} />
+              <Row label="Linked tokens" value={`${data.device_tokens.linked} (${pct(data.device_tokens.linked_rate_pct)})`} />
+              <Row label="Orphan tokens" value={`${data.device_tokens.orphan} (${pct(data.device_tokens.orphan_rate_pct)})`} />
+              <Row label="New linked (24h)" value={data.device_tokens.new_linked_24h} />
+              <Row label="New linked (7d)" value={data.device_tokens.new_linked_7d} />
+              <SectionLabel>By platform</SectionLabel>
+              <Row label="iOS" value={`${data.device_tokens.ios.linked} linked · ${data.device_tokens.ios.orphan} orphan`} />
+              <Row label="Android" value={`${data.device_tokens.android.linked} linked · ${data.device_tokens.android.orphan} orphan`} />
+              <Row label="Web" value={`${data.device_tokens.web.linked} linked · ${data.device_tokens.web.orphan} orphan`} />
+              <SectionLabel>Orphan age</SectionLabel>
+              <Row label="&lt; 1 day" value={data.device_tokens.orphan_by_age.lt_1d} />
+              <Row label="1–7 days" value={data.device_tokens.orphan_by_age['1_to_7d']} />
+              <Row label="7–30 days" value={data.device_tokens.orphan_by_age['7_to_30d']} />
+              <Row label="&gt; 30 days" value={data.device_tokens.orphan_by_age.gt_30d} />
+              <Note>{data.device_tokens.adoption_note}</Note>
             </SectionCard>
 
             {/* Notifications */}
@@ -375,40 +414,38 @@ export function ProgramAdminOverview() {
               <Row label="Tap rate (24h)" value={pct(data.notifications.tap_rate_24h_pct)} />
               <Row label="Tap rate (7d)" value={pct(data.notifications.tap_rate_7d_pct)} />
               <Row label="Send success rate (24h)" value={pct(data.notifications.send_success_rate_pct)} />
-              <div style={{ marginTop: 12, marginBottom: 6, fontWeight: 600, fontSize: 12, color: 'var(--kalpx-text-soft)', textTransform: 'uppercase', letterSpacing: 0.4 }}>Last 24h by state</div>
+              <SectionLabel>Last 24h by state</SectionLabel>
               {Object.entries(data.notifications.last_24h).map(([state, count]) => (
                 <Row key={state} label={state} value={count} />
               ))}
               {Object.keys(data.notifications.last_24h).length === 0 && (
                 <div style={{ color: '#9ca3af', fontSize: 13 }}>No notifications in last 24h</div>
               )}
-              <div style={{ marginTop: 12, marginBottom: 6, fontWeight: 600, fontSize: 12, color: 'var(--kalpx-text-soft)', textTransform: 'uppercase', letterSpacing: 0.4 }}>Suppression reasons (7d)</div>
+              <SectionLabel>Suppression reasons (7d)</SectionLabel>
               {data.notifications.suppression_reasons_7d.length === 0
                 ? <div style={{ color: '#9ca3af', fontSize: 13 }}>None</div>
                 : data.notifications.suppression_reasons_7d.map((r) => (
                   <Row key={r.reason} label={r.reason} value={r.count} />
                 ))}
-              <div style={{ marginTop: 10, fontSize: 12, color: '#9ca3af' }}>
-                States present (30d): {data.notifications.states_present_30d.join(', ') || 'none'}
-              </div>
-              <div style={{ marginTop: 4, fontSize: 12, color: '#9ca3af' }}>{data.notifications.tap_rate_note}</div>
+              <Note>States present (30d): {data.notifications.states_present_30d.join(', ') || 'none'}</Note>
+              <Note>{data.notifications.tap_rate_note}</Note>
             </SectionCard>
 
             {/* Rituals */}
             <SectionCard title="Ritual Engagement" error={isErrorSection(data.rituals) ? data.rituals.error : undefined}>
-              <div style={{ marginBottom: 8, fontWeight: 600, fontSize: 12, color: 'var(--kalpx-text-soft)', textTransform: 'uppercase', letterSpacing: 0.4 }}>Quick Chant / Japa</div>
+              <SectionLabel>Quick Chant / Japa</SectionLabel>
               <Row label="Sessions today" value={data.rituals.quick_chant.sessions_today} />
               <Row label="Completed today" value={data.rituals.quick_chant.completed_today} />
               <Row label="Sessions (7d)" value={data.rituals.quick_chant.sessions_7d} />
               <Row label="Completed (7d)" value={data.rituals.quick_chant.completed_7d} />
-              <div style={{ marginTop: 12, marginBottom: 8, fontWeight: 600, fontSize: 12, color: 'var(--kalpx-text-soft)', textTransform: 'uppercase', letterSpacing: 0.4 }}>Rhythm</div>
+              <SectionLabel>Rhythm</SectionLabel>
               <Row label="Completions today" value={data.rituals.rhythm.completions_today} />
               <Row label="Completions (7d)" value={data.rituals.rhythm.completions_7d} />
               <Row label="Completions (30d)" value={data.rituals.rhythm.completions_30d} />
-              <div style={{ marginTop: 12, marginBottom: 8, fontWeight: 600, fontSize: 12, color: 'var(--kalpx-text-soft)', textTransform: 'uppercase', letterSpacing: 0.4 }}>Inner Path</div>
+              <SectionLabel>Inner Path</SectionLabel>
               <Row label="Activity events (7d)" value={data.rituals.inner_path.activity_events_7d} />
               <Row label="User-day pairs (7d)" value={data.rituals.inner_path.user_day_pairs_7d} />
-              <div style={{ marginTop: 12, marginBottom: 8, fontWeight: 600, fontSize: 12, color: 'var(--kalpx-text-soft)', textTransform: 'uppercase', letterSpacing: 0.4 }}>Tell Mitra</div>
+              <SectionLabel>Tell Mitra</SectionLabel>
               <Row label="Messages today" value={data.rituals.tell_mitra.messages_today} />
               <Row label="Messages (7d)" value={data.rituals.tell_mitra.messages_7d} />
               <Row label="Active users (7d)" value={data.rituals.tell_mitra.active_users_7d} />
@@ -420,11 +457,11 @@ export function ProgramAdminOverview() {
               <Row label="Active yesterday (proxy)" value={data.retention.active_yesterday} />
               <Row label="Active last 7 days (proxy)" value={data.retention.active_7d_proxy} />
               <Row label="Users 2+ active days in 7d (rhythm proxy)" value={data.retention.users_2plus_days_7d_rhythm} />
-              <div style={{ marginTop: 10, fontSize: 12, color: '#9ca3af' }}>{data.retention.note}</div>
+              <Note>{data.retention.note}</Note>
             </SectionCard>
 
             {/* Programs */}
-            <SectionCard title="Programs">
+            <SectionCard title="Programs" error={isErrorSection(data.programs) ? data.programs.error : undefined}>
               <Row label="Active campaigns" value={data.programs.active_campaigns} />
               <Row label="Total joins" value={data.programs.total_joins} />
               <Row label="Joins (7d)" value={data.programs.joins_7d} />
@@ -432,11 +469,12 @@ export function ProgramAdminOverview() {
               <Row label="D3 completions" value={data.programs.d3_total} />
               <Row label="D7 completions" value={data.programs.d7_total} />
               <Row label="Overall D7 rate" value={pct(data.programs.d7_rate_pct)} />
-              <Row label="Shares (ProgramShare)" value={data.programs.shares_total} />
-              <Row label="Testimonials" value={data.programs.testimonials_total} />
-              <Row label="Kill signals" value={data.programs.kill_signal_count} />
-              <Row label="Support problems" value={data.programs.support_problem_count} />
-              <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+              <Row label="Shares (ProgramShare model)" value={data.programs.shares_total} />
+              <Row label="Testimonials (ProgramTestimonial model)" value={data.programs.testimonials_total} />
+              <Row label="Kill signals (≥15 joined, 0 D3)" value={data.programs.kill_signal_count} />
+              <Row label="Support problems (>10% click rate)" value={data.programs.support_problem_count} />
+              <SectionLabel>Classification</SectionLabel>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {Object.entries(data.programs.classification_counts).map(([cls, count]) => (
                   <span key={cls} style={{ padding: '3px 10px', borderRadius: 4, fontSize: 12, fontWeight: 700, ...clsBadgeStyle(cls as Classification) }}>
                     {cls}: {count}
@@ -445,7 +483,7 @@ export function ProgramAdminOverview() {
               </div>
               {data.programs.top_5_by_d7_rate.length > 0 && (
                 <>
-                  <div style={{ marginTop: 16, marginBottom: 6, fontWeight: 600, fontSize: 12, color: 'var(--kalpx-text-soft)', textTransform: 'uppercase', letterSpacing: 0.4 }}>Top 5 by D7 rate</div>
+                  <SectionLabel>Top 5 by D7 rate</SectionLabel>
                   {data.programs.top_5_by_d7_rate.map((r) => (
                     <Row key={r.code} label={`${r.code} (${r.status})`} value={`${r.joined} joined · D7: ${pct(r.d7_rate_pct)} · ${r.classification}`} />
                   ))}
@@ -462,17 +500,17 @@ export function ProgramAdminOverview() {
             <SectionCard title="Attribution" error={isErrorSection(data.attribution) ? data.attribution.error : undefined}>
               <Row label="Referred users" value={data.attribution.referred_users} />
               <Row label="No source recorded" value={data.attribution.unknown_source_count} />
-              <div style={{ marginTop: 12, marginBottom: 6, fontWeight: 600, fontSize: 12, color: 'var(--kalpx-text-soft)', textTransform: 'uppercase', letterSpacing: 0.4 }}>By source channel</div>
+              <SectionLabel>By source channel</SectionLabel>
               {data.attribution.by_source_channel.map((r) => (
                 <Row key={r.value} label={r.value} value={r.count} />
               ))}
-              <div style={{ marginTop: 12, marginBottom: 6, fontWeight: 600, fontSize: 12, color: 'var(--kalpx-text-soft)', textTransform: 'uppercase', letterSpacing: 0.4 }}>By UTM source (top 20)</div>
+              <SectionLabel>By UTM source (top 20)</SectionLabel>
               {data.attribution.by_utm_source.length === 0
                 ? <div style={{ color: '#9ca3af', fontSize: 13 }}>No UTM data</div>
                 : data.attribution.by_utm_source.map((r) => (
                   <Row key={r.value} label={r.value} value={r.count} />
                 ))}
-              <div style={{ marginTop: 10, fontSize: 12, color: '#9ca3af' }}>{data.attribution.install_note}</div>
+              <Note>{data.attribution.install_note}</Note>
             </SectionCard>
 
             {/* Quality */}
@@ -480,7 +518,7 @@ export function ProgramAdminOverview() {
               <Row label="Generic notification fallbacks" value={data.quality.generic_notification_fallbacks} />
               <Row label="API errors" value={data.quality.api_errors} />
               <Row label="Crash data" value={data.quality.crash_data} />
-              <div style={{ marginTop: 10, fontSize: 12, color: '#9ca3af' }}>{data.quality.note}</div>
+              <Note>{data.quality.note}</Note>
             </SectionCard>
 
             {/* Mobile Analytics Readiness */}
@@ -492,10 +530,10 @@ export function ProgramAdminOverview() {
               <Row label="app_version in events" value={<Bool v={data.mobile_analytics.app_version_in_events} />} />
               <Row label="iOS blocker" value={data.mobile_analytics.ios_blocker} />
               <Row label="Track B branch" value={data.mobile_analytics.track_b_branch} />
-              <div style={{ marginTop: 10, fontSize: 12, color: '#9ca3af' }}>{data.mobile_analytics.note}</div>
+              <Note>{data.mobile_analytics.note}</Note>
             </SectionCard>
 
-            {/* Gaps */}
+            {/* Known Gaps */}
             <SectionCard title="Known Gaps">
               <ul style={{ margin: 0, paddingLeft: 20, lineHeight: 1.8, color: 'var(--kalpx-text-soft)' }}>
                 {data.gaps.map((gap, i) => (

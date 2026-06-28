@@ -90,6 +90,7 @@ import { GuideTemplateReviewPage } from "./pages/programs/GuideTemplateReviewPag
 import { RequiresStaff } from "./components/RequiresStaff";
 import { ProgramAdminDashboard } from "./pages/programs/ProgramAdminDashboard";
 import { ProgramAdminCampaignList } from "./pages/programs/ProgramAdminCampaignList";
+import { ProgramAdminOverview } from "./pages/programs/ProgramAdminOverview";
 import { ProgramAdminCreateCampaign } from "./pages/programs/ProgramAdminCreateCampaign";
 import { ProgramAdminCampaignDetail } from "./pages/programs/ProgramAdminCampaignDetail";
 import { OpsLoginPage } from "./pages/auth/OpsLoginPage";
@@ -413,6 +414,10 @@ export function AppRoutes() {
       <Route
         path="/programs/admin/"
         element={<RequiresStaff><ProgramAdminDashboard /></RequiresStaff>}
+      />
+      <Route
+        path="/programs/admin/overview/"
+        element={<RequiresStaff><ProgramAdminOverview /></RequiresStaff>}
       />
       <Route
         path="/programs/admin/campaigns/"

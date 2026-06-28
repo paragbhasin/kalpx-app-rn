@@ -62,7 +62,7 @@ export default function RhythmPracticeCompletion() {
           liveActivity={item_title ? {
             type: COPY.variant,
             name: item_title,
-            onActivate: () => liveActivity.startSankalp(item_title, '', 'kalpx://mitra/rhythm_home/morning?source=la').catch(() => {}),
+            onActivate: () => liveActivity.startSankalp(item_title, '', `kalpx://mitra/rhythm_home/${slot}?source=la`).catch(() => {}),
           } : undefined}
           nameCard={item_title ? { label: COPY.nameCardLabel, text: item_title, guideLine: COPY.nameCardGuide } : undefined}
           reflection={{ prompt: COPY.reflectionPrompt, onSubmit: onReflect }}

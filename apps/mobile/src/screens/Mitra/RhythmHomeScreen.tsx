@@ -308,11 +308,17 @@ export default function RhythmHomeScreen({
       ]).then(([state, preferredRaw]) => {
         if (AppState.currentState !== 'active') return;
         const pref = preferredRaw ? JSON.parse(preferredRaw) : null;
+        const band = completedRhythmBandRef.current;
+        completedRhythmBandRef.current = null;
+        const deepLink = band ? `kalpx://mitra/rhythm_home/${band}?source=la` : 'kalpx://mitra/rhythm_home?source=la';
+        if (pref?.type === 'practice') {
+          // Practice anchor: show the practice on lock screen; server state type is irrelevant
+          liveActivity.startSankalp(pref.name, '', deepLink);
+          return;
+        }
         if (state.type !== 'sankalp') return;
-        if (!pref || (pref.type === 'sankalp' && pref.name === state.title) || pref.type === 'practice') {
-          const band = completedRhythmBandRef.current ?? 'morning';
-          completedRhythmBandRef.current = null;
-          liveActivity.startSankalp(state.title, state.line, `kalpx://mitra/rhythm_home/${band}?source=la`);
+        if (!pref || (pref.type === 'sankalp' && pref.name === state.title)) {
+          liveActivity.startSankalp(state.title, state.line, deepLink);
         }
       }).catch(() => {});
     }, [dispatch, i18n.language]),

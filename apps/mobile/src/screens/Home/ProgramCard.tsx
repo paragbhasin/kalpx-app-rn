@@ -33,8 +33,7 @@ function lockedHint(unlockDate: string): string {
   const target = new Date(unlockDate + "T00:00:00");
   const diffDays = Math.round((target.getTime() - today.getTime()) / 86400000);
   if (diffDays === 1) return "Unlocks tomorrow";
-  if (diffDays === 2) return "Unlocks in 2 days";
-  return `Unlocks ${unlockDate}`;
+  return "";
 }
 
 function getDayIcon(s: DayStatus) {
@@ -148,7 +147,7 @@ export default function ProgramCard({ program }: ProgramCardProps) {
                       {day.status === "completed_later" && (
                         <Text style={styles.dayHintLate}>Done on a later day</Text>
                       )}
-                      {day.status === "locked" && (
+                      {day.status === "locked" && !!lockedHint(day.unlock_date) && (
                         <Text style={styles.dayHint}>{lockedHint(day.unlock_date)}</Text>
                       )}
                     </View>

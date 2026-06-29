@@ -13,7 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { fetchDayReflection, saveDayReflection } from "../../engine/programApi";
+import { saveDayReflection } from "../../engine/programApi";
 
 const MAX_CHARS = 500;
 const DEFAULT_PROMPT =
@@ -33,12 +33,8 @@ export default function ProgramReflectionScreen() {
   const inputRef = useRef<TextInput>(null);
 
   useEffect(() => {
-    if (!dayNumber) { setLoading(false); return; }
-    fetchDayReflection(dayNumber)
-      .then((t) => { setText(t); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [dayNumber]);
+    setLoading(false);
+  }, []);
 
   const handleSave = async () => {
     if (saving) return;

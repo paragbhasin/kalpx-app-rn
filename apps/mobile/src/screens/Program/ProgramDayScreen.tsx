@@ -63,14 +63,26 @@ function getCardTitle(item: ProgramDayItem): string {
   return item.title;
 }
 
-function getCardSubtitle(item: ProgramDayItem, dayContent: any): string | null {
-  if (item.item_type === "mantra" && dayContent?.mantra_count) {
-    return `${dayContent.mantra_count}×`;
+function fmt12h(hhmm: string): string {
+  const [h, m] = hhmm.split(":").map(Number);
+  const period = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, "0")} ${period}`;
+}
+
+function getCardSubtitle(item: ProgramDayItem, dayContent: ProgramDayContent | null): string | null {
+  if (!dayContent) return null;
+  const parts: string[] = [];
+  if (item.item_type === "mantra") {
+    if (dayContent.mantra_count) parts.push(`${dayContent.mantra_count}×`);
+    if (dayContent.mantra_reminder_time) parts.push(`⏰ ${fmt12h(dayContent.mantra_reminder_time)}`);
+  } else if (item.item_type === "practice") {
+    if (dayContent.practice_duration_minutes) parts.push(`${dayContent.practice_duration_minutes} min`);
+    if (dayContent.practice_reminder_time) parts.push(`⏰ ${fmt12h(dayContent.practice_reminder_time)}`);
+  } else if (item.item_type === "sankalp") {
+    if (dayContent.sankalp_reminder_time) parts.push(`⏰ ${fmt12h(dayContent.sankalp_reminder_time)}`);
   }
-  if (item.item_type === "practice" && dayContent?.practice_duration_minutes) {
-    return `${dayContent.practice_duration_minutes} min`;
-  }
-  return null;
+  return parts.length > 0 ? parts.join("  ·  ") : null;
 }
 
 function ItemCard({

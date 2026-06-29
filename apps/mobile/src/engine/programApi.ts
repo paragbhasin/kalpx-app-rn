@@ -59,6 +59,9 @@ export interface ProgramDayContent {
   day_session_timezone: string | null;
   mantra_count: number | null;
   practice_duration_minutes: number | null;
+  mantra_reminder_time: string | null;
+  sankalp_reminder_time: string | null;
+  practice_reminder_time: string | null;
 }
 
 export interface ProgramClaimConflict {

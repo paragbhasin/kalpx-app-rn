@@ -480,8 +480,10 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         onClearRef={() => onBlurSave({ mantra_ref: "" })}
         onCustomChange={(title, body) => onLocalChange({ custom_mantra_title: title, custom_mantra_body: body })}
         onCustomBlur={(title, body) => onBlurSave({ custom_mantra_title: title, custom_mantra_body: body, mantra_ref: "" })}
-        extraDetails={!locked ? (
-          <View style={{ marginTop: 12 }}>
+      />
+      {!locked && (
+        <View style={s.slotSettings}>
+          <View>
             <Text style={s.extraDetailsLabel}>CHANT COUNT FOR PARTICIPANTS</Text>
             <View style={s.pillRow}>
               {[1, 9, 27, 54, 108].map((n) => (
@@ -495,8 +497,21 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
               ))}
             </View>
           </View>
-        ) : null}
-      />
+          <View style={{ marginTop: 10 }}>
+            <Text style={s.extraDetailsLabel}>SUGGESTED REMINDER TIME</Text>
+            <TextInput
+              style={s.durationInput}
+              value={day.mantra_reminder_time ?? ''}
+              onChangeText={(v) => onLocalChange({ mantra_reminder_time: v || null })}
+              onEndEditing={() => onBlurSave({ mantra_reminder_time: day.mantra_reminder_time || null })}
+              placeholder="HH:MM"
+              placeholderTextColor="#B5A08A"
+              keyboardType="numbers-and-punctuation"
+              maxLength={5}
+            />
+          </View>
+        </View>
+      )}
 
       {/* Sankalp */}
       <SlotRow
@@ -514,6 +529,23 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         onCustomChange={(title, body) => onLocalChange({ custom_sankalp_title: title, custom_sankalp_body: body })}
         onCustomBlur={(title, body) => onBlurSave({ custom_sankalp_title: title, custom_sankalp_body: body, sankalp_ref: "" })}
       />
+      {!locked && (
+        <View style={s.slotSettings}>
+          <View>
+            <Text style={s.extraDetailsLabel}>SUGGESTED REMINDER TIME</Text>
+            <TextInput
+              style={s.durationInput}
+              value={day.sankalp_reminder_time ?? ''}
+              onChangeText={(v) => onLocalChange({ sankalp_reminder_time: v || null })}
+              onEndEditing={() => onBlurSave({ sankalp_reminder_time: day.sankalp_reminder_time || null })}
+              placeholder="HH:MM"
+              placeholderTextColor="#B5A08A"
+              keyboardType="numbers-and-punctuation"
+              maxLength={5}
+            />
+          </View>
+        </View>
+      )}
 
       {/* Practice */}
       <SlotRow
@@ -530,9 +562,11 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         onClearRef={() => onBlurSave({ practice_ref: "" })}
         onCustomChange={(title, body) => onLocalChange({ custom_practice_title: title, custom_practice_body: body })}
         onCustomBlur={(title, body) => onBlurSave({ custom_practice_title: title, custom_practice_body: body, practice_ref: "" })}
-        extraDetails={!locked ? (
-          <View style={{ marginTop: 12 }}>
-            <Text style={s.extraDetailsLabel}>PRACTICE DURATION (MINUTES)</Text>
+      />
+      {!locked && (
+        <View style={s.slotSettings}>
+          <View>
+            <Text style={s.extraDetailsLabel}>DURATION (MINUTES)</Text>
             <TextInput
               style={s.durationInput}
               value={day.practice_duration_minutes != null ? String(day.practice_duration_minutes) : ""}
@@ -547,8 +581,21 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
               maxLength={3}
             />
           </View>
-        ) : null}
-      />
+          <View>
+            <Text style={s.extraDetailsLabel}>SUGGESTED REMINDER TIME</Text>
+            <TextInput
+              style={s.durationInput}
+              value={day.practice_reminder_time ?? ''}
+              onChangeText={(v) => onLocalChange({ practice_reminder_time: v || null })}
+              onEndEditing={() => onBlurSave({ practice_reminder_time: day.practice_reminder_time || null })}
+              placeholder="HH:MM"
+              placeholderTextColor="#B5A08A"
+              keyboardType="numbers-and-punctuation"
+              maxLength={5}
+            />
+          </View>
+        </View>
+      )}
 
       {/* Wisdom */}
       <SlotRow
@@ -635,10 +682,9 @@ interface SlotRowProps {
   onClearRef: () => void;
   onCustomChange: (title: string, body: string) => void;
   onCustomBlur: (title: string, body: string) => void;
-  extraDetails?: React.ReactNode;
 }
 
-function SlotRow({ label, refValue, selection, customTitle, customBody, locked, onOpenPicker, onApplyToAll, onClearRef, onCustomChange, onCustomBlur, extraDetails }: SlotRowProps) {
+function SlotRow({ label, refValue, selection, customTitle, customBody, locked, onOpenPicker, onApplyToAll, onClearRef, onCustomChange, onCustomBlur }: SlotRowProps) {
   const [mode, setMode] = useState<"library" | "custom">(customBody ? "custom" : "library");
   const [localTitle, setLocalTitle] = useState(customTitle);
   const [localBody, setLocalBody] = useState(customBody);
@@ -715,7 +761,6 @@ function SlotRow({ label, refValue, selection, customTitle, customBody, locked, 
                         <Text style={s.detailFieldValue}>{selection.subtitle}</Text>
                       )
                   }
-                  {extraDetails}
                 </View>
               )}
 
@@ -969,7 +1014,8 @@ const s = StyleSheet.create({
   detailListItem: { fontSize: 13, color: "#432104", lineHeight: 19, marginLeft: 4, fontFamily: Fonts.sans.regular },
   applyAllBtn: { marginTop: 8 },
   applyAllText: { fontSize: 11, color: "#C99317", textDecorationLine: "underline", fontFamily: Fonts.sans.regular },
-  extraDetailsLabel: { fontSize: 10, fontWeight: "700", color: "#B5A08A", letterSpacing: 0.8, marginBottom: 6, fontFamily: Fonts.sans.bold },
+  slotSettings: { backgroundColor: "#FAF7F2", borderRadius: 8, borderWidth: 1, borderColor: "#EDE4D0", padding: 12, marginTop: 6, marginBottom: 4 },
+  extraDetailsLabel: { fontSize: 10, fontWeight: "700", color: "#9A7548", letterSpacing: 0.8, marginBottom: 6, fontFamily: Fonts.sans.bold },
   pillRow: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
   pill: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: "#DDD3C0", backgroundColor: "transparent" },
   pillActive: { backgroundColor: "#C99317", borderColor: "#C99317" },

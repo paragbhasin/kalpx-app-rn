@@ -404,18 +404,18 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         onCustomBlur={(title, body) =>
           onBlurSave({ custom_mantra_title: title, custom_mantra_body: body, mantra_ref: "" })
         }
-        extraDetails={!locked && (
-          <div style={{ marginTop: 12 }}>
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#9A7548', letterSpacing: '0.05em' }}>
-              CHANT COUNT FOR PARTICIPANTS
-            </span>
-            <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+      />
+      {!locked && (
+        <div style={slotSettingsRow}>
+          <div>
+            <div style={settingsLabel}>CHANT COUNT FOR PARTICIPANTS</div>
+            <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
               {[1, 9, 27, 54, 108].map((n) => (
                 <button
                   key={n}
                   onClick={() => onBlurSave({ mantra_count: day.mantra_count === n ? null : n })}
                   style={{
-                    padding: '4px 12px', borderRadius: 20, fontSize: 13, cursor: 'pointer',
+                    padding: '3px 10px', borderRadius: 20, fontSize: 12, cursor: 'pointer',
                     border: `1px solid ${day.mantra_count === n ? '#C99317' : '#D4C4A8'}`,
                     background: day.mantra_count === n ? '#C99317' : 'transparent',
                     color: day.mantra_count === n ? '#fff' : '#7B6545',
@@ -425,8 +425,18 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
               ))}
             </div>
           </div>
-        )}
-      />
+          <div>
+            <div style={settingsLabel}>SUGGESTED REMINDER TIME</div>
+            <input
+              type="time"
+              value={day.mantra_reminder_time ?? ''}
+              onChange={(e) => onLocalChange({ mantra_reminder_time: e.target.value || null })}
+              onBlur={(e) => onBlurSave({ mantra_reminder_time: e.target.value || null })}
+              style={timeInput}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Sankalp */}
       <SlotRow
@@ -446,6 +456,20 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
           onBlurSave({ custom_sankalp_title: title, custom_sankalp_body: body, sankalp_ref: "" })
         }
       />
+      {!locked && (
+        <div style={slotSettingsRow}>
+          <div>
+            <div style={settingsLabel}>SUGGESTED REMINDER TIME</div>
+            <input
+              type="time"
+              value={day.sankalp_reminder_time ?? ''}
+              onChange={(e) => onLocalChange({ sankalp_reminder_time: e.target.value || null })}
+              onBlur={(e) => onBlurSave({ sankalp_reminder_time: e.target.value || null })}
+              style={timeInput}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Practice */}
       <SlotRow
@@ -464,12 +488,12 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         onCustomBlur={(title, body) =>
           onBlurSave({ custom_practice_title: title, custom_practice_body: body, practice_ref: "" })
         }
-        extraDetails={!locked && (
-          <div style={{ marginTop: 12 }}>
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#9A7548', letterSpacing: '0.05em' }}>
-              PRACTICE DURATION FOR PARTICIPANTS
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+      />
+      {!locked && (
+        <div style={slotSettingsRow}>
+          <div>
+            <div style={settingsLabel}>DURATION FOR PARTICIPANTS</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
               <input
                 type="number"
                 min={1}
@@ -478,13 +502,23 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
                 placeholder="—"
                 onChange={(e) => onLocalChange({ practice_duration_minutes: e.target.value ? Number(e.target.value) : null })}
                 onBlur={(e) => onBlurSave({ practice_duration_minutes: e.target.value ? Number(e.target.value) : null })}
-                style={{ width: 64, padding: '4px 8px', border: '1px solid #D4C4A8', borderRadius: 8, fontSize: 14, textAlign: 'center' }}
+                style={{ width: 60, padding: '4px 8px', border: '1px solid #D4C4A8', borderRadius: 8, fontSize: 13, textAlign: 'center' as const }}
               />
-              <span style={{ fontSize: 13, color: '#7B6545' }}>minutes</span>
+              <span style={{ fontSize: 12, color: '#7B6545' }}>min</span>
             </div>
           </div>
-        )}
-      />
+          <div>
+            <div style={settingsLabel}>SUGGESTED REMINDER TIME</div>
+            <input
+              type="time"
+              value={day.practice_reminder_time ?? ''}
+              onChange={(e) => onLocalChange({ practice_reminder_time: e.target.value || null })}
+              onBlur={(e) => onBlurSave({ practice_reminder_time: e.target.value || null })}
+              style={timeInput}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Wisdom */}
       <SlotRow
@@ -585,12 +619,11 @@ interface SlotRowProps {
   onClearRef: () => void;
   onCustomChange: (title: string, body: string) => void;
   onCustomBlur: (title: string, body: string) => void;
-  extraDetails?: React.ReactNode;
 }
 
 function SlotRow({
   label, refValue, selection, customTitle, customBody, locked,
-  onOpenPicker, onApplyToAll, onClearRef, onCustomChange, onCustomBlur, extraDetails,
+  onOpenPicker, onApplyToAll, onClearRef, onCustomChange, onCustomBlur,
 }: SlotRowProps) {
   const [mode, setMode] = useState<"library" | "custom">(
     customBody ? "custom" : "library",
@@ -685,7 +718,6 @@ function SlotRow({
                   {(!selection?.details || selection.details.length === 0) && displaySubtitle && (
                     <p style={detailFieldValue}>{displaySubtitle}</p>
                   )}
-                  {extraDetails}
                 </div>
               )}
               {!locked && (
@@ -816,6 +848,9 @@ const detailFieldValue: React.CSSProperties = { fontSize: 13, color: "#432104", 
 const detailList: React.CSSProperties = { margin: "0", paddingLeft: 18, display: "flex", flexDirection: "column" as const, gap: 4 };
 const detailListItem: React.CSSProperties = { fontSize: 13, color: "#432104", lineHeight: 1.5 };
 const reviewNote: React.CSSProperties = { fontSize: 11, color: "#B5A08A", marginTop: 4 };
+const slotSettingsRow: React.CSSProperties = { display: "flex", gap: 20, flexWrap: "wrap" as const, marginTop: 8, marginBottom: 4, padding: "10px 12px", background: "#FAF7F2", borderRadius: 8, border: "1px solid #EDE4D0" };
+const settingsLabel: React.CSSProperties = { fontSize: 10, fontWeight: 700, color: "#9A7548", letterSpacing: "0.07em", marginBottom: 4 };
+const timeInput: React.CSSProperties = { border: "1px solid #D4C4A8", borderRadius: 8, padding: "4px 8px", fontSize: 13, color: "#432104" };
 const successBox: React.CSSProperties = { background: "#fff", border: "1px solid #DDD3C0", borderRadius: 12, padding: "40px 32px", textAlign: "center" as const, maxWidth: 480, margin: "80px auto" };
 const primaryBtn: React.CSSProperties = { padding: "10px 22px", background: "#C99317", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 14 };
 const hint: React.CSSProperties = { textAlign: "center" as const, color: "#B5A08A", padding: "60px 0", fontSize: 14 };

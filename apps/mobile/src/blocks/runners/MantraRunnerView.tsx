@@ -640,8 +640,8 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
         )}
         {!isViewOnly && lockCount && (
           <View style={styles.lockedCountRow}>
-            <View style={styles.repPillSelected}>
-              <Text style={styles.repPillTextSelected}>{selectedTarget} ✓</Text>
+            <View style={styles.lockedCountCircle}>
+              <Text style={styles.lockedCountText}>{selectedTarget} ✓</Text>
             </View>
           </View>
         )}
@@ -888,6 +888,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 20,
     marginBottom: 25,
+  },
+  lockedCountCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "#b89450",
+    borderColor: "#b89450",
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  lockedCountText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: sfs(16),
+    color: "#fff",
   },
   repPillsContainer: {
     flexDirection: "row",

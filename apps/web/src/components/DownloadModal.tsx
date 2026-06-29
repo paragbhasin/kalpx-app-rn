@@ -1,8 +1,10 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useDownloadModal } from "../hooks/useDownloadModal";
+import { useTranslation } from "../lib/i18n";
 
 export function DownloadModal() {
+  const { t } = useTranslation();
   const { visible, close, openAppStore, openPlayStore, schedule, cancel } =
     useDownloadModal();
   const { pathname } = useLocation();
@@ -102,7 +104,7 @@ export function DownloadModal() {
               color: "#8E591A",
             }}
           >
-            Connect to your Roots
+            {t('downloadModal.connectRoots')}
           </div>
           <div
             style={{
@@ -113,7 +115,7 @@ export function DownloadModal() {
               color: "#000",
             }}
           >
-            Begin your KalpX Journey
+            {t('downloadModal.beginJourney')}
           </div>
           <div
             style={{
@@ -123,7 +125,7 @@ export function DownloadModal() {
               color: "#000",
             }}
           >
-            Carry your daily mantra, sankalp, wisdom wherever you are
+            {t('downloadModal.carryWisdom')}
           </div>
           <div
             style={{
@@ -133,7 +135,7 @@ export function DownloadModal() {
               color: "#9C6B00",
             }}
           >
-            Get the KalpX App
+            {t('downloadModal.getApp')}
           </div>
 
           {/* Store buttons */}
@@ -162,9 +164,9 @@ export function DownloadModal() {
             >
               <img src="/apple-black.svg" alt="" width={16} />
               <span style={{ color: "#fff", textAlign: "left", lineHeight: 1.3 }}>
-                <span style={{ fontSize: 12 }}>Download on the</span>
+                <span style={{ fontSize: 12 }}>{t('downloadModal.downloadOn')}</span>
                 <br />
-                <span style={{ fontSize: 18, fontWeight: 600 }}>App Store</span>
+                <span style={{ fontSize: 18, fontWeight: 600 }}>{t('downloadModal.appStore')}</span>
               </span>
             </button>
 
@@ -184,9 +186,9 @@ export function DownloadModal() {
             >
               <img src="/playstore.svg" alt="" width={18} />
               <span style={{ color: "#fff", textAlign: "left", lineHeight: 1.3 }}>
-                <span style={{ fontSize: 12 }}>Get it on</span>
+                <span style={{ fontSize: 12 }}>{t('downloadModal.getItOn')}</span>
                 <br />
-                <span style={{ fontSize: 18, fontWeight: 600 }}>Google Play</span>
+                <span style={{ fontSize: 18, fontWeight: 600 }}>{t('downloadModal.googlePlay')}</span>
               </span>
             </button>
           </div>

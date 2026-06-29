@@ -1,5 +1,6 @@
 import { AlertCircle, CheckCircle2, Sun } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from '../../../lib/i18n';
 // Icon mapping (matches RN Ionicons):
 //   alert-circle-outline → AlertCircle
 //   checkmark-circle-outline → CheckCircle2
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function QuickSupportBlock({ onAction }: Props) {
+  const { t } = useTranslation();
   const [roomSheetOpen, setRoomSheetOpen] = useState(false);
 
   return (
@@ -52,7 +54,7 @@ export function QuickSupportBlock({ onAction }: Props) {
             touchAction: "manipulation",
           }}
         >
-          <AlertCircle size={18} strokeWidth={1.6} />I Feel Triggered
+          <AlertCircle size={18} strokeWidth={1.6} />{t('quickSupport.iFeelTriggered')}
         </button>
 
         {/* Chip 2 — checkmark-circle-outline → CheckCircle2 */}
@@ -78,7 +80,7 @@ export function QuickSupportBlock({ onAction }: Props) {
           }}
         >
           <CheckCircle2 size={18} strokeWidth={1.6} />
-          Quick Check-in
+          {t('quickSupport.quickCheckin')}
         </button>
 
         {/* Chip 3 — sunny-outline → Sun */}
@@ -113,7 +115,7 @@ export function QuickSupportBlock({ onAction }: Props) {
           }}
         >
           <Sun size={18} strokeWidth={1.6} />
-          I'm in a good place
+          {t('quickSupport.inAGoodPlace')}
         </button>
       </div>
 
@@ -134,7 +136,7 @@ export function QuickSupportBlock({ onAction }: Props) {
           padding: "4px 0",
         }}
       >
-        More ways to be supported →
+        {t('quickSupport.moreWaysToBeSupported')}
       </button>
 
       {roomSheetOpen && (

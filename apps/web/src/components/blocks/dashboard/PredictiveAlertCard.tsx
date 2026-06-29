@@ -18,6 +18,7 @@
  */
 
 import React, { useState } from 'react';
+import { useTranslation } from '../../../lib/i18n';
 
 type Alert = {
   id: number | string;
@@ -114,6 +115,7 @@ const ADD_BTN_STYLE: React.CSSProperties = {
 };
 
 export function PredictiveAlertCard({ alert, onDismiss, onAccept, onAddToday }: Props) {
+  const { t } = useTranslation();
   const copy = (typeof alert.copy_text === 'string' && alert.copy_text.trim())
     ? alert.copy_text.trim()
     : (typeof alert.copy === 'string' ? alert.copy.trim() : '');
@@ -133,7 +135,7 @@ export function PredictiveAlertCard({ alert, onDismiss, onAccept, onAddToday }: 
       {safeExplanation && (
         <>
           <button style={WHY_LINK_STYLE} onClick={() => setWhyOpen(o => !o)}>
-            {whyOpen ? 'Hide' : 'Show me why'}
+            {whyOpen ? t('predictiveAlert.hide') : t('predictiveAlert.showMeWhy')}
           </button>
           {whyOpen && (
             <p data-testid="safe-explanation" style={EXPLANATION_STYLE}>
@@ -148,21 +150,21 @@ export function PredictiveAlertCard({ alert, onDismiss, onAccept, onAddToday }: 
           style={PRIMARY_BTN_STYLE}
           onClick={() => onAccept(alert.id, alert.suggested_prep_context)}
         >
-          See suggestion
+          {t('predictiveAlert.seeSuggestion')}
         </button>
         {onAddToday && (
           <button
             style={ADD_BTN_STYLE}
             onClick={() => onAddToday(alert.id)}
           >
-            Add to today
+            {t('predictiveAlert.addToToday')}
           </button>
         )}
         <button
           style={SECONDARY_BTN_STYLE}
           onClick={() => onDismiss(alert.id)}
         >
-          Not today
+          {t('predictiveAlert.notToday')}
         </button>
       </div>
     </div>

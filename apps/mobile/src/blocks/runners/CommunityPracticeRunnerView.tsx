@@ -589,11 +589,13 @@ const CommunityPracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
       <LiveActivityPreferenceBanner
         experienceType="practice"
         experienceName={item.title ?? ''}
-        experienceLine={item.subtitle ?? item.line ?? item.summary ?? ''}
+        experienceLine={item.subtitle || item.line || item.summary || ''}
         onActivate={() => {
           liveActivity.startSankalp(
             item.title ?? '',
-            item.subtitle ?? item.line ?? item.summary ?? '',
+            item.subtitle || item.line || item.summary || '',
+            undefined,
+            'practice',
           );
         }}
       />

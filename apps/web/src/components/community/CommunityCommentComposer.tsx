@@ -1,6 +1,7 @@
 import { communityCommentSchema } from "@kalpx/validation";
 import { Send } from "lucide-react";
 import React, { useState } from "react";
+import { useTranslation } from "../../lib/i18n";
 
 interface CommunityCommentComposerProps {
   postId: number | string;
@@ -24,13 +25,16 @@ export function CommunityCommentComposer({
   error = null,
   onSubmit,
   onRequireAuth,
-  placeholder = "Write a comment…",
-  submitLabel = "Post",
+  placeholder,
+  submitLabel,
   variant = "default",
   autoFocus = false,
   leadingAvatarSrc,
   leadingAvatarLabel = "K",
 }: CommunityCommentComposerProps) {
+  const { t } = useTranslation();
+  const effectivePlaceholder = placeholder ?? t('communityComment.writeCommentPlaceholder');
+  const effectiveSubmitLabel = submitLabel ?? t('communityComment.postButton');
   const [content, setContent] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -42,7 +46,7 @@ export function CommunityCommentComposer({
     }
     const result = communityCommentSchema.safeParse({ content });
     if (!result.success) {
-      setValidationError(result.error.errors[0]?.message ?? "Invalid comment");
+      setValidationError(result.error.errors[0]?.message ?? t('communityComment.invalidComment'));
       return;
     }
     setValidationError(null);
@@ -64,7 +68,7 @@ export function CommunityCommentComposer({
         onClick={onRequireAuth}
       >
         <p style={{ fontSize: 13, color: "#b06840", margin: 0 }}>
-          Sign in to leave a comment
+          {t('communityComment.signInToComment')}
         </p>
       </div>
     );
@@ -90,7 +94,7 @@ export function CommunityCommentComposer({
           <input
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder={placeholder}
+            placeholder={effectivePlaceholder}
             maxLength={1000}
             autoFocus={autoFocus}
             style={{
@@ -119,7 +123,7 @@ export function CommunityCommentComposer({
               cursor: submitting || !content.trim() ? "not-allowed" : "pointer",
               flexShrink: 0,
             }}
-            aria-label={submitLabel}
+            aria-label={effectiveSubmitLabel}
           >
             <Send size={15} fill="currentColor" />
           </button>
@@ -139,7 +143,7 @@ export function CommunityCommentComposer({
         {leadingAvatarSrc ? (
           <img
             src={leadingAvatarSrc}
-            alt="Your avatar"
+            alt={t('communityComment.yourAvatarAlt')}
             style={{
               width: 25,
               height: 25,
@@ -183,7 +187,7 @@ export function CommunityCommentComposer({
           <input
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder={placeholder}
+            placeholder={effectivePlaceholder}
             maxLength={1000}
             autoFocus={autoFocus}
             style={{
@@ -212,7 +216,7 @@ export function CommunityCommentComposer({
               cursor: submitting || !content.trim() ? "not-allowed" : "pointer",
               flexShrink: 0,
             }}
-            aria-label={submitLabel}
+            aria-label={effectiveSubmitLabel}
           >
             <Send size={15} fill="currentColor" />
           </button>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { GuideChip } from './GuideChip';
+import { useTranslation } from '../lib/i18n';
 
 export interface ProgramCardGuide {
   displayName: string;
@@ -61,6 +62,7 @@ export function ProgramCard({
   joinedCount,
   programPromise,
 }: ProgramCardProps) {
+  const { t } = useTranslation();
   const detailUrl = `/programs/${slug}`;
   const joinUrl = `/p/${slug}`;
 
@@ -99,7 +101,7 @@ export function ProgramCard({
       {guide ? (
         <div style={{ marginBottom: 10 }}>
           <span style={{ fontSize: 12, color: 'var(--kalpx-text-muted)', marginRight: 6 }}>
-            Offered by
+            {t('programs.offeredBy')}
           </span>
           <GuideChip
             displayName={guide.displayName}
@@ -133,7 +135,7 @@ export function ProgramCard({
             marginBottom: 14,
           }}
         >
-          {joinedCount.toLocaleString()} joined
+          {t('programs.joined').replace('{n}', joinedCount.toLocaleString())}
         </p>
       )}
 
@@ -154,7 +156,7 @@ export function ProgramCard({
             textDecoration: 'none',
           }}
         >
-          Learn More
+          {t('programs.learnMore')}
         </Link>
         <Link
           to={joinUrl}
@@ -171,7 +173,7 @@ export function ProgramCard({
             textDecoration: 'none',
           }}
         >
-          Join Program
+          {t('programs.joinProgram')}
         </Link>
       </div>
 

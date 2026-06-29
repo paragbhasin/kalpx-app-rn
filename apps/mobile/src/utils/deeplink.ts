@@ -82,6 +82,8 @@ const DIRECT_ROUTE_CONTAINERS: Record<string, string> = {
   quick_checkin: "QuickCheckin",
   browse_rooms: "BrowseRooms",
   quick_chant: "QuickReset",
+  community: "CommunityLanding",
+  dharma: "Dharma",
 };
 
 // Safe room IDs that may be routed to RoomContainer via deeplink.
@@ -337,6 +339,43 @@ export function handleTLPDeepLink(url: string): boolean {
     return true;
   }
 
+  // Legacy web URL fallbacks — keep handling these so any already-queued
+  // notifications (before the backend moved to kalpx:// deep links) still
+  // land on a sensible screen rather than doing nothing.
+
+  // Community notifications → CommunityLanding
+  if (url.startsWith("https://kalpx.com/en/community")) {
+    try {
+      navigate("CommunityLanding" as any);
+    } catch (err) {
+      console.warn("[deeplink] CommunityLanding (legacy UL) navigate failed:", err);
+    }
+    console.log(`[deeplink] → CommunityLanding (legacy community URL)`);
+    return true;
+  }
+
+  // Dharma notifications → Dharma screen
+  if (url.startsWith("https://kalpx.com/daily-dharma") || url.startsWith("https://www.kalpx.com/daily-dharma")) {
+    try {
+      navigate("Dharma" as any);
+    } catch (err) {
+      console.warn("[deeplink] Dharma (legacy UL) navigate failed:", err);
+    }
+    console.log(`[deeplink] → Dharma (legacy dharma URL)`);
+    return true;
+  }
+
+  // Practice / generic notifications that used https://kalpx.com → Home
+  if (url === "https://kalpx.com" || url === "http://kalpx.com" || url === "https://www.kalpx.com") {
+    try {
+      navigate("Home" as any);
+    } catch (err) {
+      console.warn("[deeplink] Home (legacy kalpx.com) navigate failed:", err);
+    }
+    console.log(`[deeplink] → Home (legacy kalpx.com fallback)`);
+    return true;
+  }
+
   return false;
 }
 
@@ -494,7 +533,9 @@ export function handleProgramDeepLink(url: string): boolean {
 // For join deep links, setSkipMitraStart() is called immediately (before the
 // navigator is ready) so that Home.tsx's journey check never redirects to
 // MitraStart while the claim screen is being prepared.
-function handleWhenReady(url: string, attemptsLeft = 15): void {
+//
+// Exported so notification handlers can use the same retry + full-chain logic.
+export function handleWhenReady(url: string, attemptsLeft = 15): void {
   if (navigationRef.isReady()) {
     if (!handleGuideInviteDeepLink(url) && !handleProgramJoinDeepLink(url) && !handleProgramDeepLink(url) && !handleTLPDeepLink(url)) {
       handleMitraDeepLink(url);

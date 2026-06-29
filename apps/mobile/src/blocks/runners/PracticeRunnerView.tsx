@@ -80,6 +80,7 @@ export interface PracticeItem {
 export interface PracticeRunnerViewProps {
   item: PracticeItem;
   isViewOnly?: boolean;
+  lockDuration?: boolean;
   runnerStartTimeKey?: number | string | null;
   onComplete: (durationSec: number) => void;
   onBack: () => void;
@@ -87,6 +88,7 @@ export interface PracticeRunnerViewProps {
   isCommunityRunner?: boolean;
   addLoading?: boolean;
   onAddToPractice?: () => void;
+  liveActivityDeepLink?: string;
 }
 
 const hasContent = (val: any): boolean => {
@@ -159,6 +161,7 @@ const CommunityActionBar: React.FC<{ addLoading?: boolean; onAdd?: () => void }>
 const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
   item,
   isViewOnly,
+  lockDuration,
   runnerStartTimeKey,
   onComplete,
   onBack,
@@ -166,6 +169,7 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
   isCommunityRunner,
   addLoading,
   onAddToPractice,
+  liveActivityDeepLink,
 }) => {
   const { t } = useTranslation();
   // Keep the screen awake for the whole practice session; auto-released on unmount.
@@ -414,51 +418,64 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
             ]}
           >
             {!isPracticeTimerRunning ? (
-              <>
-                <Text style={styles.practiceTimerHeading}>{t("practiceRunner.howLongPause")}</Text>
-                <Text style={styles.practiceTimerValue}>{selectedPracticeMinutes} {t("practiceRunner.minLabel")}</Text>
-                <View style={styles.practiceSliderRow}>
+              lockDuration ? (
+                <>
+                  <Text style={styles.practiceTimerValue}>{selectedPracticeMinutes} {t("practiceRunner.minLabel")}</Text>
                   <TouchableOpacity
-                    style={styles.practiceAdjustButton}
-                    onPress={() => updatePracticeMinutes(selectedPracticeMinutes - 1)}
-                    activeOpacity={0.8}
+                    style={[styles.practicePrimaryButton, { marginTop: 16 }]}
+                    onPress={startPracticeTimer}
+                    activeOpacity={0.85}
                   >
-                    <Minus size={18} color="#8A5A12" />
+                    <Text style={styles.practicePrimaryButtonText}>{t("practiceRunner.begin")}</Text>
                   </TouchableOpacity>
-                  <View style={styles.practiceSliderWrap}>
-                    <Slider
-                      style={styles.practiceSlider}
-                      minimumValue={1}
-                      maximumValue={10}
-                      step={1}
-                      value={selectedPracticeMinutes}
-                      onValueChange={updatePracticeMinutes}
-                      minimumTrackTintColor="#D4A017"
-                      maximumTrackTintColor="#E8D8B5"
-                      thumbTintColor="#D4A017"
-                    />
+                </>
+              ) : (
+                <>
+                  <Text style={styles.practiceTimerHeading}>{t("practiceRunner.howLongPause")}</Text>
+                  <Text style={styles.practiceTimerValue}>{selectedPracticeMinutes} {t("practiceRunner.minLabel")}</Text>
+                  <View style={styles.practiceSliderRow}>
+                    <TouchableOpacity
+                      style={styles.practiceAdjustButton}
+                      onPress={() => updatePracticeMinutes(selectedPracticeMinutes - 1)}
+                      activeOpacity={0.8}
+                    >
+                      <Minus size={18} color="#8A5A12" />
+                    </TouchableOpacity>
+                    <View style={styles.practiceSliderWrap}>
+                      <Slider
+                        style={styles.practiceSlider}
+                        minimumValue={1}
+                        maximumValue={10}
+                        step={1}
+                        value={selectedPracticeMinutes}
+                        onValueChange={updatePracticeMinutes}
+                        minimumTrackTintColor="#D4A017"
+                        maximumTrackTintColor="#E8D8B5"
+                        thumbTintColor="#D4A017"
+                      />
+                    </View>
+                    <TouchableOpacity
+                      style={styles.practiceAdjustButton}
+                      onPress={() => updatePracticeMinutes(selectedPracticeMinutes + 1)}
+                      activeOpacity={0.8}
+                    >
+                      <Plus size={18} color="#8A5A12" />
+                    </TouchableOpacity>
+                  </View>
+                  <View style={styles.practiceTimerScale}>
+                    <Text style={styles.practiceTimerScaleLabel}>{t("practiceRunner.minMin")}</Text>
+                    <Text style={styles.practiceTimerScaleHint}>{t("practiceRunner.dragToAdjust")}</Text>
+                    <Text style={styles.practiceTimerScaleLabel}>{t("practiceRunner.maxMin")}</Text>
                   </View>
                   <TouchableOpacity
-                    style={styles.practiceAdjustButton}
-                    onPress={() => updatePracticeMinutes(selectedPracticeMinutes + 1)}
-                    activeOpacity={0.8}
+                    style={styles.practicePrimaryButton}
+                    onPress={startPracticeTimer}
+                    activeOpacity={0.85}
                   >
-                    <Plus size={18} color="#8A5A12" />
+                    <Text style={styles.practicePrimaryButtonText}>{t("practiceRunner.begin")}</Text>
                   </TouchableOpacity>
-                </View>
-                <View style={styles.practiceTimerScale}>
-                  <Text style={styles.practiceTimerScaleLabel}>{t("practiceRunner.minMin")}</Text>
-                  <Text style={styles.practiceTimerScaleHint}>{t("practiceRunner.dragToAdjust")}</Text>
-                  <Text style={styles.practiceTimerScaleLabel}>{t("practiceRunner.maxMin")}</Text>
-                </View>
-                <TouchableOpacity
-                  style={styles.practicePrimaryButton}
-                  onPress={startPracticeTimer}
-                  activeOpacity={0.85}
-                >
-                  <Text style={styles.practicePrimaryButtonText}>{t("practiceRunner.begin")}</Text>
-                </TouchableOpacity>
-              </>
+                </>
+              )
             ) : (
               <>
                 <View style={[styles.practiceTimerVisual, isTablet && { width: timerSize + 40, height: timerSize + 40 }]}>
@@ -589,11 +606,14 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
         <LiveActivityPreferenceBanner
           experienceType="practice"
           experienceName={item.title ?? ''}
-          experienceLine={item.subtitle ?? item.line ?? item.summary ?? ''}
+          experienceLine={item.subtitle || item.line || item.summary || ''}
+          experienceDeepLink={liveActivityDeepLink}
           onActivate={() => {
             liveActivity.startSankalp(
               item.title ?? '',
-              item.subtitle ?? item.line ?? item.summary ?? '',
+              item.subtitle || item.line || item.summary || '',
+              liveActivityDeepLink,
+              'practice',
             );
           }}
         />

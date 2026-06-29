@@ -15,12 +15,13 @@ export default function RhythmPracticeRunner() {
       <ImageBackground source={BEIGE_BG} style={styles.bg}>
         <PracticeRunnerView
           item={item}
+          liveActivityDeepLink={`kalpx://mitra/rhythm_home/${slot}?source=la`}
           onComplete={(durationSec) => {
             navigation.replace("RhythmPracticeCompletion", {
               item_id: item.item_id,
               item_type: "practice",
               item_title: item.title || item.title_snapshot,
-              item_subtitle: item.subtitle ?? item.line ?? item.summary ?? '',
+              item_subtitle: item.subtitle || item.line || item.summary || '',
               slot,
               journeyId,
               dayNumber,

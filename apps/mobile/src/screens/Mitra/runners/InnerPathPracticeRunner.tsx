@@ -23,12 +23,13 @@ export default function InnerPathPracticeRunner() {
     <SafeAreaView style={styles.safeArea}>
       <PracticeRunnerView
         item={item}
+        liveActivityDeepLink="kalpx://mitra/inner_path/home?source=la"
         onComplete={(durationSec) => {
           navigation.replace("InnerPathPracticeCompletion", {
             item_id: item.item_id,
             item_type: "practice",
             item_title: item.title,
-            item_subtitle: item.subtitle ?? item.line ?? item.summary ?? '',
+            item_subtitle: item.subtitle || item.line || item.summary || '',
             journeyId,
             dayNumber,
           });

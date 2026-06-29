@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { TimePickerModal } from "../../components/TimePickerModal";
 import {
   ActivityIndicator,
   FlatList,
@@ -159,6 +160,7 @@ export default function GuideTemplateDayEditorScreen() {
   const [submitted, setSubmitted] = useState(false);
   const [pickerTarget, setPickerTarget] = useState<PickerTarget>(null);
   const [slotSelections, setSlotSelections] = useState<Record<string, SlotSelection>>({});
+  const [reminderPickerTarget, setReminderPickerTarget] = useState<{ slot: 'mantra' | 'sankalp' | 'practice'; dayNumber: number } | null>(null);
   const [activeDay, setActiveDay] = useState(1);
   const scrollRef = useRef<ScrollView>(null);
   const dayOffsets = useRef<Record<number, number>>({});
@@ -213,25 +215,33 @@ export default function GuideTemplateDayEditorScreen() {
   function handleLibrarySelect(item: LibraryPickerItem) {
     if (!pickerTarget) return;
     const { dayNumber, slot } = pickerTarget;
+    const srcDay = days.find((d) => d.day_number === dayNumber);
     const patch =
       slot === "mantra"
-        ? { mantra_ref: item.item_id, custom_mantra_title: "", custom_mantra_body: "" }
+        ? { mantra_ref: item.item_id, custom_mantra_title: "", custom_mantra_body: "",
+            ...(!srcDay?.mantra_reminder_time ? { mantra_reminder_time: '06:00' } : {}) }
         : slot === "sankalp"
-        ? { sankalp_ref: item.item_id, custom_sankalp_title: "", custom_sankalp_body: "" }
+        ? { sankalp_ref: item.item_id, custom_sankalp_title: "", custom_sankalp_body: "",
+            ...(!srcDay?.sankalp_reminder_time ? { sankalp_reminder_time: '08:00' } : {}) }
         : slot === "wisdom"
         ? { wisdom_ref: item.item_id, custom_wisdom_title: "", custom_wisdom_body: "" }
-        : { practice_ref: item.item_id, custom_practice_title: "", custom_practice_body: "" };
+        : { practice_ref: item.item_id, custom_practice_title: "", custom_practice_body: "",
+            ...(!srcDay?.practice_reminder_time ? { practice_reminder_time: '18:00' } : {}) };
     saveDay(dayNumber, patch);
     setSlotSelections((prev) => ({ ...prev, [`${dayNumber}-${slot}`]: item }));
     setPickerTarget(null);
   }
 
-  function applyToAllDays(slot: LibrarySlot, item_id: string) {
+  function applyToAllDays(slot: LibrarySlot, item_id: string, sourceDayNumber?: number) {
+    const src = sourceDayNumber ? days.find((d) => d.day_number === sourceDayNumber) : days[0];
     const patch =
-      slot === "mantra" ? { mantra_ref: item_id, custom_mantra_title: "", custom_mantra_body: "" }
-      : slot === "sankalp" ? { sankalp_ref: item_id, custom_sankalp_title: "", custom_sankalp_body: "" }
-      : slot === "wisdom" ? { wisdom_ref: item_id, custom_wisdom_title: "", custom_wisdom_body: "" }
-      : { practice_ref: item_id, custom_practice_title: "", custom_practice_body: "" };
+      slot === "mantra"
+        ? { mantra_ref: item_id, custom_mantra_title: "", custom_mantra_body: "", mantra_count: src?.mantra_count ?? null, mantra_reminder_time: src?.mantra_reminder_time ?? null }
+        : slot === "sankalp"
+          ? { sankalp_ref: item_id, custom_sankalp_title: "", custom_sankalp_body: "", sankalp_reminder_time: src?.sankalp_reminder_time ?? null }
+          : slot === "wisdom"
+            ? { wisdom_ref: item_id, custom_wisdom_title: "", custom_wisdom_body: "" }
+            : { practice_ref: item_id, custom_practice_title: "", custom_practice_body: "", practice_duration_minutes: src?.practice_duration_minutes ?? null, practice_reminder_time: src?.practice_reminder_time ?? null };
     days.forEach((d) => saveDay(d.day_number, patch));
     setSlotSelections((prev) => {
       const next = { ...prev };
@@ -250,6 +260,9 @@ export default function GuideTemplateDayEditorScreen() {
       practice_ref: day1.practice_ref, custom_practice_title: day1.custom_practice_title, custom_practice_body: day1.custom_practice_body,
       wisdom_ref: day1.wisdom_ref, custom_wisdom_title: day1.custom_wisdom_title, custom_wisdom_body: day1.custom_wisdom_body,
       day_join_url: day1.day_join_url, day_session_time: day1.day_session_time, day_session_timezone: day1.day_session_timezone,
+      mantra_count: day1.mantra_count, practice_duration_minutes: day1.practice_duration_minutes,
+      mantra_reminder_time: day1.mantra_reminder_time, sankalp_reminder_time: day1.sankalp_reminder_time,
+      practice_reminder_time: day1.practice_reminder_time, reflection_prompt: day1.reflection_prompt,
     };
     days.slice(1).forEach((d) => saveDay(d.day_number, patch));
     setSlotSelections((prev) => {
@@ -402,9 +415,10 @@ export default function GuideTemplateDayEditorScreen() {
                 locked={locked}
                 slotSelections={slotSelections}
                 onOpenPicker={(slot) => setPickerTarget({ dayNumber: day.day_number, slot })}
-                onApplyToAll={(slot, item_id) => applyToAllDays(slot, item_id)}
+                onApplyToAll={(slot, item_id) => applyToAllDays(slot, item_id, day.day_number)}
                 onBlurSave={(patch) => saveDay(day.day_number, patch)}
                 onLocalChange={(patch) => updateDayLocal(day.day_number, patch)}
+                onOpenReminderPicker={(slot) => setReminderPickerTarget({ slot, dayNumber: day.day_number })}
               />
             </View>
           ))}
@@ -426,6 +440,28 @@ export default function GuideTemplateDayEditorScreen() {
           onClose={() => setPickerTarget(null)}
         />
       )}
+
+      {/* Reminder time picker — screen-level so Modal is never nested */}
+      <TimePickerModal
+        visible={reminderPickerTarget !== null}
+        initialTime={
+          reminderPickerTarget
+            ? (() => {
+                const day = days.find(d => d.day_number === reminderPickerTarget.dayNumber);
+                const saved = day ? (day[`${reminderPickerTarget.slot}_reminder_time` as keyof DayState] as string | null) : null;
+                return (saved ?? REMINDER_DEFAULTS[reminderPickerTarget.slot]) + ':00';
+              })()
+            : null
+        }
+        onConfirm={(timeStr) => {
+          if (!reminderPickerTarget) return;
+          const hhmm = timeStr.slice(0, 5);
+          updateDayLocal(reminderPickerTarget.dayNumber, { [`${reminderPickerTarget.slot}_reminder_time`]: hhmm } as any);
+          saveDay(reminderPickerTarget.dayNumber, { [`${reminderPickerTarget.slot}_reminder_time`]: hhmm } as any);
+          setReminderPickerTarget(null);
+        }}
+        onCancel={() => setReminderPickerTarget(null)}
+      />
     </SafeAreaView>
   );
 }
@@ -435,6 +471,7 @@ export default function GuideTemplateDayEditorScreen() {
 interface DayRowProps {
   day: DayState;
   locked: boolean;
+  onOpenReminderPicker: (slot: 'mantra' | 'sankalp' | 'practice') => void;
   slotSelections: Record<string, SlotSelection>;
   onOpenPicker: (slot: LibrarySlot) => void;
   onApplyToAll: (slot: LibrarySlot, item_id: string) => void;
@@ -442,7 +479,20 @@ interface DayRowProps {
   onLocalChange: (patch: Partial<TemplateDay>) => void;
 }
 
-function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlurSave, onLocalChange }: DayRowProps) {
+const REMINDER_DEFAULTS: Record<'mantra' | 'sankalp' | 'practice', string> = {
+  mantra: '06:00',
+  sankalp: '08:00',
+  practice: '18:00',
+};
+
+function fmtGuide12h(hhmm: string): string {
+  const [h, m] = hhmm.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+}
+
+function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlurSave, onLocalChange, onOpenReminderPicker }: DayRowProps) {
   const sel = (slot: LibrarySlot) => slotSelections[`${day.day_number}-${slot}`] ?? null;
 
   return (
@@ -481,6 +531,30 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         onCustomChange={(title, body) => onLocalChange({ custom_mantra_title: title, custom_mantra_body: body })}
         onCustomBlur={(title, body) => onBlurSave({ custom_mantra_title: title, custom_mantra_body: body, mantra_ref: "" })}
       />
+      {!locked && !!(day.mantra_ref || day.custom_mantra_body) && (
+        <View style={s.slotSettings}>
+          <View>
+            <Text style={s.extraDetailsLabel}>CHANT COUNT FOR PARTICIPANTS</Text>
+            <View style={s.pillRow}>
+              {[1, 9, 27, 54, 108].map((n) => (
+                <TouchableOpacity
+                  key={n}
+                  onPress={() => onBlurSave({ mantra_count: day.mantra_count === n ? null : n })}
+                  style={[s.pill, day.mantra_count === n && s.pillActive]}
+                >
+                  <Text style={[s.pillText, day.mantra_count === n && s.pillTextActive]}>{n}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+          <View style={{ marginTop: 10 }}>
+            <Text style={s.extraDetailsLabel}>SUGGESTED REMINDER TIME</Text>
+            <TouchableOpacity style={s.timePill} onPress={() => onOpenReminderPicker('mantra')}>
+              <Text style={s.timePillText}>{fmtGuide12h(day.mantra_reminder_time ?? REMINDER_DEFAULTS.mantra)}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
       {/* Sankalp */}
       <SlotRow
@@ -498,6 +572,16 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         onCustomChange={(title, body) => onLocalChange({ custom_sankalp_title: title, custom_sankalp_body: body })}
         onCustomBlur={(title, body) => onBlurSave({ custom_sankalp_title: title, custom_sankalp_body: body, sankalp_ref: "" })}
       />
+      {!locked && !!(day.sankalp_ref || day.custom_sankalp_body) && (
+        <View style={s.slotSettings}>
+          <View>
+            <Text style={s.extraDetailsLabel}>SUGGESTED REMINDER TIME</Text>
+            <TouchableOpacity style={s.timePill} onPress={() => onOpenReminderPicker('sankalp')}>
+              <Text style={s.timePillText}>{fmtGuide12h(day.sankalp_reminder_time ?? REMINDER_DEFAULTS.sankalp)}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
       {/* Practice */}
       <SlotRow
@@ -515,6 +599,32 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         onCustomChange={(title, body) => onLocalChange({ custom_practice_title: title, custom_practice_body: body })}
         onCustomBlur={(title, body) => onBlurSave({ custom_practice_title: title, custom_practice_body: body, practice_ref: "" })}
       />
+      {!locked && !!(day.practice_ref || day.custom_practice_body) && (
+        <View style={s.slotSettings}>
+          <View>
+            <Text style={s.extraDetailsLabel}>DURATION (MINUTES)</Text>
+            <TextInput
+              style={s.durationInput}
+              value={day.practice_duration_minutes != null ? String(day.practice_duration_minutes) : ""}
+              onChangeText={(v) => {
+                const n = parseInt(v, 10);
+                onLocalChange({ practice_duration_minutes: isNaN(n) ? null : n });
+              }}
+              onEndEditing={() => onBlurSave({ practice_duration_minutes: day.practice_duration_minutes })}
+              placeholder="e.g. 10"
+              placeholderTextColor="#B5A08A"
+              keyboardType="number-pad"
+              maxLength={3}
+            />
+          </View>
+          <View>
+            <Text style={s.extraDetailsLabel}>SUGGESTED REMINDER TIME</Text>
+            <TouchableOpacity style={s.timePill} onPress={() => onOpenReminderPicker('practice')}>
+              <Text style={s.timePillText}>{fmtGuide12h(day.practice_reminder_time ?? REMINDER_DEFAULTS.practice)}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
       {/* Wisdom */}
       <SlotRow
@@ -580,7 +690,11 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
           placeholder="What are you grateful for today?"
           placeholderTextColor="#B5A08A"
         />
+        <Text style={s.fieldHint}>
+          Ask one thoughtful question that helps participants reflect on today's practice. Participants can write and save their answer privately.
+        </Text>
       </FieldRow>
+
     </View>
   );
 }
@@ -933,6 +1047,16 @@ const s = StyleSheet.create({
   detailListItem: { fontSize: 13, color: "#432104", lineHeight: 19, marginLeft: 4, fontFamily: Fonts.sans.regular },
   applyAllBtn: { marginTop: 8 },
   applyAllText: { fontSize: 11, color: "#C99317", textDecorationLine: "underline", fontFamily: Fonts.sans.regular },
+  slotSettings: { backgroundColor: "#FAF7F2", borderRadius: 8, borderWidth: 1, borderColor: "#EDE4D0", padding: 12, marginTop: 6, marginBottom: 4 },
+  extraDetailsLabel: { fontSize: 10, fontWeight: "700", color: "#9A7548", letterSpacing: 0.8, marginBottom: 6, fontFamily: Fonts.sans.bold },
+  pillRow: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
+  pill: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: "#DDD3C0", backgroundColor: "transparent" },
+  pillActive: { backgroundColor: "#C99317", borderColor: "#C99317" },
+  pillText: { fontSize: 13, color: "#7B6545", fontFamily: Fonts.sans.regular },
+  pillTextActive: { color: "#fff", fontWeight: "700" },
+  durationInput: { borderWidth: 1, borderColor: "#DDD3C0", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, fontSize: 14, color: "#432104", fontFamily: Fonts.sans.regular, width: 100 },
+  timePill: { backgroundColor: "#C99317", borderRadius: 8, paddingHorizontal: 14, paddingVertical: 8, alignSelf: "flex-start" as const },
+  timePillText: { fontFamily: Fonts.sans.medium, fontSize: 14, color: "#fff", fontWeight: "700" },
   pickBtn: { backgroundColor: "#FEF3D0", borderWidth: 1, borderColor: "#C99317", borderRadius: 8, paddingHorizontal: 14, paddingVertical: 8, alignSelf: "flex-start" },
   pickBtnText: { fontSize: 12, fontWeight: "700", color: "#7A4E00", fontFamily: Fonts.sans.bold },
   reviewNote: { fontSize: 11, color: "#B5A08A", marginTop: 4, fontFamily: Fonts.sans.regular },
@@ -970,4 +1094,5 @@ const s = StyleSheet.create({
   pickerItemSub: { fontSize: 12, color: "#7A6652", marginBottom: 2, fontFamily: Fonts.sans.regular },
   pickerItemMeta: { fontSize: 11, color: "#B5A08A", fontFamily: Fonts.sans.regular },
   hint: { textAlign: "center", color: "#B5A08A", padding: 40, fontSize: 14, fontFamily: Fonts.sans.regular },
+  fieldHint: { fontSize: 12, color: "#9A8470", marginTop: 6, lineHeight: 17, fontFamily: Fonts.sans.regular },
 });

@@ -14,16 +14,6 @@ interface RoomRow {
   backing: string;
 }
 
-// Order-locked per RN spec (§14.3). Colors match RN ROOM_ROWS exactly.
-const ROOM_ROWS: RoomRow[] = [
-  { room_id: 'room_stillness',  name: 'Find Calm',           label: "I'm overwhelmed",            accent: '#B9A98D', backing: '#F6F2EA' },
-  { room_id: 'room_connection', name: 'Feel Connected',       label: "I feel alone",               accent: '#C8A698', backing: '#F7EFEB' },
-  { room_id: 'room_release',    name: 'Set It Down',          label: "Something is heavy",         accent: '#9A9A9A', backing: '#F1F0EE' },
-  { room_id: 'room_clarity',    name: 'Find Clarity',         label: "I'm not sure / I want clarity", accent: '#A9B2B6', backing: '#F0F2F3' },
-  { room_id: 'room_growth',     name: 'Take the Next Step',   label: "I want to grow as a person", accent: '#9C7F5A', backing: '#F4EDE2' },
-  { room_id: 'room_joy',        name: "Notice What's Good",   label: "I'm in a good place",        accent: '#C9A84C', backing: '#FBF4DC' },
-];
-
 interface Props {
   onEnterRoom: (roomId: string) => void;
   onClose: () => void;
@@ -31,6 +21,16 @@ interface Props {
 
 export function RoomEntrySheet({ onEnterRoom, onClose }: Props) {
   const { t } = useTranslation();
+
+  // Order-locked per RN spec (§14.3). Colors match RN ROOM_ROWS exactly.
+  const ROOM_ROWS: RoomRow[] = [
+    { room_id: 'room_stillness',  name: t('roomEntry.findCalmName'),        label: t('roomEntry.overwhelmedLabel'),  accent: '#B9A98D', backing: '#F6F2EA' },
+    { room_id: 'room_connection', name: t('roomEntry.feelConnectedName'),    label: t('roomEntry.aloneLabel'),        accent: '#C8A698', backing: '#F7EFEB' },
+    { room_id: 'room_release',    name: t('roomEntry.setItDownName'),        label: t('roomEntry.somethingHeavyLabel'), accent: '#9A9A9A', backing: '#F1F0EE' },
+    { room_id: 'room_clarity',    name: t('roomEntry.findClarityName'),      label: t('roomEntry.notSureLabel'),      accent: '#A9B2B6', backing: '#F0F2F3' },
+    { room_id: 'room_growth',     name: t('roomEntry.takeNextStepName'),     label: t('roomEntry.wantToGrowLabel'),   accent: '#9C7F5A', backing: '#F4EDE2' },
+    { room_id: 'room_joy',        name: t('roomEntry.noticeWhatsGoodName'),  label: t('roomEntry.goodPlaceLabel'),    accent: '#C9A84C', backing: '#FBF4DC' },
+  ];
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();

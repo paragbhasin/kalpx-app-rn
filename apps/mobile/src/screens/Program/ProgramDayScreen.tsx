@@ -7,6 +7,7 @@
  *
  * On completing all 3 items → "Complete Day" CTA → ProgramCompletionScreen.
  */
+import { Ionicons } from "@expo/vector-icons";
 import {
   useFocusEffect,
   useNavigation,
@@ -27,23 +28,21 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { TimePickerModal } from "../../components/TimePickerModal";
 import {
+  apiGetProgramReminders,
+  apiPatchProgramReminders,
   completeProgramDay,
   fetchProgramDay,
   postProgramActivity,
-  apiGetProgramReminders,
-  apiPatchProgramReminders,
   type ProgramDayContent,
   type ProgramDayItem,
   type ProgramReminders,
-  type ProgramRemindersPatch,
-  type WisdomCard,
+  type ProgramRemindersPatch
 } from "../../engine/programApi";
-import { Fonts } from "../../theme/fonts";
-import { setSkipMitraStart, setForceFourDoorHome } from "../../utils/postLoginGuard";
 import { useNotificationPermissionGate } from "../../hooks/useNotificationPermissionGate";
-import { TimePickerModal } from "../../components/TimePickerModal";
-import { Ionicons } from "@expo/vector-icons";
+import { Fonts } from "../../theme/fonts";
+import { setForceFourDoorHome, setSkipMitraStart } from "../../utils/postLoginGuard";
 
 const SUPPORT_URL = "https://kalpx.com/programs/support";
 
@@ -61,26 +60,42 @@ function formatSessionTime(time: string): string {
 
 /** Returns a short human-readable title for the card. */
 function getCardTitle(item: ProgramDayItem): string {
-  if (item.item_type === "mantra") {
-    // item_id like "mantra.durga_suktam" → "Durga Suktam"
-    const base = item.item_id.replace(/^mantra\./, "");
-    return base.split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
-  }
-  if (item.item_type === "sankalp" && item.line) {
-    return item.line;
-  }
   return item.title;
+}
+
+function fmt12h(hhmm: string): string {
+  const [h, m] = hhmm.split(":").map(Number);
+  const period = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, "0")} ${period}`;
+}
+
+function getCardSubtitle(item: ProgramDayItem, dayContent: ProgramDayContent | null): string | null {
+  if (!dayContent) return null;
+  const parts: string[] = [];
+  if (item.item_type === "mantra") {
+    if (dayContent.mantra_count) parts.push(`${dayContent.mantra_count}×`);
+    if (dayContent.mantra_reminder_time) parts.push(`⏰ ${fmt12h(dayContent.mantra_reminder_time)}`);
+  } else if (item.item_type === "practice") {
+    if (dayContent.practice_duration_minutes) parts.push(`${dayContent.practice_duration_minutes} min`);
+    if (dayContent.practice_reminder_time) parts.push(`⏰ ${fmt12h(dayContent.practice_reminder_time)}`);
+  } else if (item.item_type === "sankalp") {
+    if (dayContent.sankalp_reminder_time) parts.push(`⏰ ${fmt12h(dayContent.sankalp_reminder_time)}`);
+  }
+  return parts.length > 0 ? parts.join("  ·  ") : null;
 }
 
 function ItemCard({
   item,
   label,
   done,
+  subtitle,
   onPress,
 }: {
   item: ProgramDayItem;
   label: string;
   done: boolean;
+  subtitle?: string | null;
   onPress: () => void;
 }) {
   return (
@@ -93,6 +108,7 @@ function ItemCard({
       <View style={styles.itemCardLeft}>
         <Text style={styles.itemLabel}>{label}</Text>
         <Text style={styles.itemTitle}>{getCardTitle(item)}</Text>
+        {subtitle ? <Text style={styles.itemSubtitle}>{subtitle}</Text> : null}
       </View>
       <View style={styles.itemCardRight}>
         {done ? (
@@ -113,6 +129,9 @@ export default function ProgramDayScreen() {
   const [dayContent, setDayContent] = useState<ProgramDayContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Wisdom inline dropdown
+  const [wisdomOpen, setWisdomOpen] = useState(false);
 
   // Reminder accordion
   const [copiedLink, setCopiedLink] = useState(false);
@@ -178,6 +197,7 @@ export default function ProgramDayScreen() {
     try {
       const updated = await apiPatchProgramReminders({ [`${key}_reminder_time`]: timeStr } as ProgramRemindersPatch);
       setReminders(updated);
+      setDayContent((prev) => prev ? { ...prev, [`${key}_reminder_time`]: timeStr.slice(0, 5) } : prev);
     } catch {
       // non-fatal
     } finally {
@@ -247,11 +267,18 @@ export default function ProgramDayScreen() {
     };
     const screen = screenMap[item.item_type];
     if (!screen) return;
-    // Pass current completedItems so the runner can append to the list on complete
+    const extraParams: Record<string, any> = {};
+    if (item.item_type === "mantra" && dayContent?.mantra_count) {
+      extraParams.mantraCount = dayContent.mantra_count;
+    }
+    if (item.item_type === "practice" && dayContent?.practice_duration_minutes) {
+      extraParams.practiceDurationMinutes = dayContent.practice_duration_minutes;
+    }
     navigation.navigate(screen, {
       item,
       dayNumber,
       completedItems: Array.from(sessionDone),
+      ...extraParams,
     });
   };
 
@@ -329,11 +356,36 @@ export default function ProgramDayScreen() {
             onPress={() => { setSkipMitraStart(); setForceFourDoorHome(); navigation.goBack(); }}
             style={styles.backIcon}
           >
-            <Text style={styles.backIconText}>‹</Text>
+            {/* <Text style={styles.backIconText}>‹</Text> */}
           </TouchableOpacity>
           <View style={styles.headerCenter}>
             <Text style={styles.dayLabel}>DAY {dayContent.day_number}</Text>
             <Text style={styles.themeText}>{dayContent.theme}</Text>
+            {dayContent.wisdom_card ? (
+              <TouchableOpacity
+                onPress={() => setWisdomOpen(v => !v)}
+                activeOpacity={0.82}
+                style={styles.wisdomInline}
+              >
+                <Text style={styles.wisdomInlineLabel}>WISDOM OF THE DAY</Text>
+                <View style={styles.wisdomInlineRow}>
+                  <Text style={styles.wisdomInlineTitle} numberOfLines={wisdomOpen ? undefined : 2}>
+                    {dayContent.wisdom_card.text}
+                  </Text>
+                  <Ionicons
+                    name={wisdomOpen ? "chevron-up" : "chevron-down"}
+                    size={14}
+                    color="#9A7548"
+                    style={{ marginLeft: 6 }}
+                  />
+                </View>
+                {wisdomOpen && (dayContent.wisdom_card.explanation?.[0] ?? null) ? (
+                  <Text style={styles.wisdomInlineBody}>
+                    {dayContent.wisdom_card.explanation![0]}
+                  </Text>
+                ) : null}
+              </TouchableOpacity>
+            ) : null}
           </View>
           <View style={{ width: 40 }} />
         </View>
@@ -346,38 +398,11 @@ export default function ProgramDayScreen() {
               item={item}
               label={ITEM_LABELS[item.item_type] ?? item.item_type}
               done={isItemDone(item)}
+              subtitle={getCardSubtitle(item, dayContent)}
               onPress={() => handleLaunchRunner(item)}
             />
           ))}
         </View>
-
-        {/* Wisdom card — tappable, opens ProgramWisdomRunner */}
-        {dayContent.wisdom_card ? (
-          <TouchableOpacity
-            style={styles.wisdomCard}
-            activeOpacity={0.82}
-            onPress={() =>
-              navigation.navigate("ProgramWisdomRunner", {
-                wisdom: dayContent.wisdom_card,
-                dayNumber: dayContent.day_number,
-                day_join_url: dayContent.day_join_url ?? null,
-                day_session_time: dayContent.day_session_time ?? null,
-                day_session_timezone: dayContent.day_session_timezone ?? null,
-              })
-            }
-            accessibilityLabel="Wisdom of the Day"
-          >
-            <View style={styles.wisdomCardInner}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.wisdomLabel}>WISDOM OF THE DAY</Text>
-                <Text style={styles.wisdomText} numberOfLines={2}>
-                  {dayContent.wisdom_card.text}
-                </Text>
-              </View>
-              <Text style={styles.itemArrow}>→</Text>
-            </View>
-          </TouchableOpacity>
-        ) : null}
 
         {/* Live session */}
         {dayContent.day_join_url ? (
@@ -419,12 +444,22 @@ export default function ProgramDayScreen() {
 
         {/* Reflection prompt */}
         {dayContent.reflection_prompt ? (
-          <View style={styles.reflectionCard}>
-            <Text style={styles.reflectionLabel}>REFLECTION</Text>
+          <TouchableOpacity
+            activeOpacity={0.82}
+            style={styles.reflectionCard}
+            onPress={() =>
+              navigation.navigate("ProgramReflectionScreen", {
+                dayNumber,
+                reflectionPrompt: dayContent.reflection_prompt,
+              })
+            }
+          >
+            <Text style={styles.reflectionLabel}>🌼 REFLECTION</Text>
             <Text style={styles.reflectionText}>
               {dayContent.reflection_prompt}
             </Text>
-          </View>
+            <Text style={styles.reflectionHint}>Tap to write your reflection →</Text>
+          </TouchableOpacity>
         ) : null}
 
         {/* Reminders accordion */}
@@ -620,6 +655,12 @@ const styles = StyleSheet.create({
     color: "#432104",
     marginBottom: 2,
   },
+  itemSubtitle: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 12,
+    color: "#9A7548",
+    marginTop: 2,
+  },
   itemDevanagari: {
     fontFamily: Fonts.devanagari.regular,
     fontSize: 15,
@@ -630,36 +671,43 @@ const styles = StyleSheet.create({
   doneCheckmark: { fontSize: 22, color: "#C99317", fontWeight: "700" },
   itemArrow: { fontSize: 22, color: "#C99317" },
 
-  wisdomCard: {
+  wisdomInline: {
+    marginTop: 12,
+    alignSelf: 'stretch',
     backgroundColor: '#FFF8EE',
     borderRadius: 14,
     borderWidth: 1,
     borderColor: '#E8D9B5',
-    padding: 18,
-    marginBottom: 12,
-  },
-  wisdomCardInner: {
-    flexDirection: 'row',
+    padding: 14,
     alignItems: 'center',
   },
-  wisdomLabel: {
+  wisdomInlineLabel: {
     fontFamily: Fonts.sans.medium,
-    fontSize: 11,
+    fontSize: 10,
     color: '#9A7548',
-    letterSpacing: 0.05,
-    marginBottom: 4,
+    letterSpacing: 0.08,
+    textAlign: 'center',
+    marginBottom: 5,
   },
-  wisdomText: {
+  wisdomInlineRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  wisdomInlineTitle: {
     fontFamily: Fonts.serif.bold,
-    fontSize: 16,
+    fontSize: 15,
     color: '#432104',
-    fontStyle: 'italic',
+    textAlign: 'center',
+    flexShrink: 1,
   },
-  wisdomSource: {
+  wisdomInlineBody: {
+    marginTop: 10,
     fontFamily: Fonts.sans.regular,
-    fontSize: 12,
-    color: '#9A7548',
-    marginTop: 8,
+    fontSize: 13,
+    color: '#7B6545',
+    lineHeight: 20,
+    textAlign: 'center',
   },
   liveSessionCard: {
     backgroundColor: '#FFF3DC',
@@ -733,6 +781,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#432104",
     lineHeight: 21,
+  },
+  reflectionHint: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 12,
+    color: "#C99317",
+    marginTop: 10,
   },
 
   completionBanner: {

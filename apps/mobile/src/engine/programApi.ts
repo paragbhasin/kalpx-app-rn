@@ -17,6 +17,14 @@ export interface ProgramDayItem {
   description?: string;
 }
 
+export type DayStatus = "locked" | "today" | "completed" | "missed" | "completed_later";
+
+export interface ProgramDayStatus {
+  day_number: number;
+  status: DayStatus;
+  unlock_date: string;
+}
+
 export interface ActiveProgramSummary {
   name: string;
   status: "active" | "completed";
@@ -24,6 +32,8 @@ export interface ActiveProgramSummary {
   next_day_available: boolean;
   next_day_locked?: boolean;
   days_remaining: number;
+  total_days?: number;
+  day_statuses?: ProgramDayStatus[];
   show_day8_transition?: boolean;
 }
 
@@ -47,6 +57,11 @@ export interface ProgramDayContent {
   day_join_url: string | null;
   day_session_time: string | null;
   day_session_timezone: string | null;
+  mantra_count: number | null;
+  practice_duration_minutes: number | null;
+  mantra_reminder_time: string | null;
+  sankalp_reminder_time: string | null;
+  practice_reminder_time: string | null;
 }
 
 export interface ProgramClaimConflict {
@@ -71,6 +86,15 @@ export async function fetchProgramDay(dayNumber: number): Promise<ProgramDayCont
   console.log('[ProgramDay] day_join_url:', res.data.day_join_url);
   console.log('[ProgramDay] day_session_time:', res.data.day_session_time);
   return res.data;
+}
+
+export async function fetchDayReflection(dayNumber: number): Promise<string> {
+  const res = await api.get(`programs/my-active/day/${dayNumber}/reflection/`);
+  return res.data.text ?? '';
+}
+
+export async function saveDayReflection(dayNumber: number, text: string): Promise<void> {
+  await api.post(`programs/my-active/day/${dayNumber}/reflection/`, { text });
 }
 
 export async function completeProgramDay(dayNumber: number): Promise<any> {

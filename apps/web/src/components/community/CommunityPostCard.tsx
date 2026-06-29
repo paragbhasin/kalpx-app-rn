@@ -24,6 +24,7 @@ import {
   unsaveCommunityPost,
 } from "../../engine/communityApi";
 import { fetchLibraryItem } from "../../engine/mitraApi";
+import { useTranslation } from "../../lib/i18n";
 import { WEB_ENV } from "../../lib/env";
 import { webStorage } from "../../lib/webStorage";
 import { store } from "../../store";
@@ -219,6 +220,7 @@ interface CommunityPostCardProps {
 
 function getLinkedItemSubtitle(
   linkedItem?: CommunityPost["linked_item"],
+  t?: (key: string) => string,
 ): string {
   if (!linkedItem?.type) return "";
   const [categoryRaw, itemTypeRaw] = linkedItem.type.split(":");
@@ -228,23 +230,23 @@ function getLinkedItemSubtitle(
 
   if (itemType === "mantra") {
     return isGeneral
-      ? "Add this mantra to your daily rhythm."
-      : "Add this to your daily practice - progress happens gently";
+      ? (t?.('communityPostCard.addMantraToRhythm') ?? "Add this mantra to your daily rhythm.")
+      : (t?.('communityPostCard.addToDailyPractice') ?? "Add this to your daily practice - progress happens gently");
   }
 
   if (itemType === "sankalp") {
     return isGeneral
-      ? "Carry this sankalp with you through the day."
-      : "Add this to your daily practice - progress happens gently";
+      ? (t?.('communityPostCard.carrySankalpThroughDay') ?? "Carry this sankalp with you through the day.")
+      : (t?.('communityPostCard.addToDailyPractice') ?? "Add this to your daily practice - progress happens gently");
   }
 
   if (itemType === "practice") {
     return isGeneral
-      ? "Bring this practice into your day."
-      : "Add this to your daily practice - progress happens gently";
+      ? (t?.('communityPostCard.bringPracticeIntoDay') ?? "Bring this practice into your day.")
+      : (t?.('communityPostCard.addToDailyPractice') ?? "Add this to your daily practice - progress happens gently");
   }
 
-  return "Add this to your daily practice - progress happens gently";
+  return t?.('communityPostCard.addToDailyPractice') ?? "Add this to your daily practice - progress happens gently";
 }
 
 function inferMediaType(value?: string | null): "image" | "video" {
@@ -346,6 +348,7 @@ export function CommunityPostCard({
   onVisibilityChange,
 }: CommunityPostCardProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const text = getPostText(post);
   const author = getPostAuthor(post);
   const [isExpanded, setIsExpanded] = useState(detailMode);
@@ -490,7 +493,7 @@ export function CommunityPostCard({
   };
 
   const buildShareText = () => {
-    const title = String((post as any).title || "KalpX Community Post");
+    const title = String((post as any).title || t('communityPostCard.defaultPostTitle'));
     const content = String(post.content || text || "").trim();
     if (!content) return title;
     const preview =
@@ -500,7 +503,7 @@ export function CommunityPostCard({
 
   const handleShare = async () => {
     const shareUrl = buildShareUrl();
-    const shareTitle = String((post as any).title || "KalpX Community Post");
+    const shareTitle = String((post as any).title || t('communityPostCard.defaultPostTitle'));
     const shareText = buildShareText();
 
     try {
@@ -526,18 +529,18 @@ export function CommunityPostCard({
         });
         setShareCount((prev) => prev + 1);
         if (copiedToClipboard) {
-          window.alert("Post link copied.");
+          window.alert(t('communityPostCard.postLinkCopied'));
         }
         return;
       }
 
       if (copiedToClipboard) {
         setShareCount((prev) => prev + 1);
-        window.alert("Post link copied.");
+        window.alert(t('communityPostCard.postLinkCopied'));
         return;
       }
 
-      window.prompt("Copy this link:", shareUrl);
+      window.prompt(t('communityPostCard.copyThisLink'), shareUrl);
     } catch (error: any) {
       if (error?.name === "AbortError") return;
       console.error("Share failed:", error?.message || error);
@@ -549,20 +552,20 @@ export function CommunityPostCard({
     try {
       const diff = Date.now() - new Date(post.created_at).getTime();
       const mins = Math.floor(diff / 60000);
-      if (mins < 1) return "just now";
-      if (mins < 60) return `${mins}m ago`;
+      if (mins < 1) return t('communityPostCard.timeJustNow');
+      if (mins < 60) return t('communityPostCard.timeMinutesAgo').replace('{count}', String(mins));
       const hrs = Math.floor(mins / 60);
-      if (hrs < 24) return `${hrs}h ago`;
+      if (hrs < 24) return t('communityPostCard.timeHoursAgo').replace('{count}', String(hrs));
       const days = Math.floor(hrs / 24);
-      if (days < 30) return `${days}d ago`;
+      if (days < 30) return t('communityPostCard.timeDaysAgo').replace('{count}', String(days));
       const months = Math.floor(days / 30);
-      if (months < 12) return `${months} mo ago`;
+      if (months < 12) return t('communityPostCard.timeMonthsAgo').replace('{count}', String(months));
       const years = Math.floor(months / 12);
-      return `${years} yr ago`;
+      return t('communityPostCard.timeYearsAgo').replace('{count}', String(years));
     } catch {
       return "";
     }
-  }, [post.created_at]);
+  }, [post.created_at, t]);
 
   const slides = useMemo(() => {
     if (post.slide_layouts?.length) {
@@ -653,7 +656,7 @@ export function CommunityPostCard({
   const previewText =
     !shouldTruncate || isExpanded ? text : `${text.slice(0, 180).trimEnd()}...`;
   const linkedItemTitle = post.linked_item?.name?.trim() || "";
-  const linkedItemSubtitle = getLinkedItemSubtitle(post.linked_item);
+  const linkedItemSubtitle = getLinkedItemSubtitle(post.linked_item, t);
   const linkedItemType = normalizeLinkedItemType(
     post.linked_item?.type,
     String(post.linked_item?.id || ""),
@@ -794,7 +797,7 @@ export function CommunityPostCard({
       setMenuOpen(false);
       setReportOpen(false);
       if (typeof window !== "undefined") {
-        window.alert("Reported. Thank you for flagging this post.");
+        window.alert(t('communityPostCard.reportedThankYou'));
       }
     }
   };
@@ -916,7 +919,7 @@ export function CommunityPostCard({
           >
             <img
               src={communityAvatar}
-              alt={post.community_name ?? "Community"}
+              alt={post.community_name ?? t('communityPostCard.communityFallback')}
               style={{
                 width: 32,
                 height: 32,
@@ -955,7 +958,7 @@ export function CommunityPostCard({
                     textOverflow: "ellipsis",
                   }}
                 >
-                  {post.community_name || "Community"}
+                  {post.community_name || t('communityPostCard.communityFallback')}
                 </div>
                 <span style={{ color: "#7c7c7c", fontSize: 14 }}>•</span>
                 <div
@@ -983,7 +986,7 @@ export function CommunityPostCard({
                     textOverflow: "ellipsis",
                   }}
                 >
-                  {post.community_name || "Community"}
+                  {post.community_name || t('communityPostCard.communityFallback')}
                 </div>
                 <div
                   style={{
@@ -1029,7 +1032,7 @@ export function CommunityPostCard({
             }}
             disabled={joinLoading}
           >
-            {joinLoading ? "..." : isJoined ? "Joined" : "Join"}
+            {joinLoading ? "..." : isJoined ? t('communityPostCard.joinedButton') : t('communityPostCard.joinButton')}
           </button>
           <button
             type="button"
@@ -1099,7 +1102,7 @@ export function CommunityPostCard({
               style={menuItemStyle}
             >
               <Bookmark size={21} color="#333" />
-              <span>{isSaved ? "Unsave" : "Save"}</span>
+              <span>{isSaved ? t('communityPostCard.unsaveMenuItem') : t('communityPostCard.saveMenuItem')}</span>
             </button>
             <button
               type="button"
@@ -1110,7 +1113,7 @@ export function CommunityPostCard({
               style={{ ...menuItemStyle, borderTop: "1px solid #f2f2f2" }}
             >
               <EyeOff size={21} color="#333" />
-              <span>{showHiddenPost ? "Unhide" : "Hide"}</span>
+              <span>{showHiddenPost ? t('communityPostCard.unhideMenuItem') : t('communityPostCard.hideMenuItem')}</span>
             </button>
             <button
               type="button"
@@ -1126,7 +1129,7 @@ export function CommunityPostCard({
               }}
             >
               <Flag size={21} color="#ff3b30" />
-              <span>Report</span>
+              <span>{t('communityPostCard.reportMenuItem')}</span>
             </button>
           </div>
         </>
@@ -1134,7 +1137,7 @@ export function CommunityPostCard({
 
       <CommunityReportModal
         open={reportOpen}
-        title="Report Post"
+        title={t('communityPostCard.reportPostTitle')}
         onClose={() => setReportOpen(false)}
         onSubmit={async (reason, details) => {
           await handleReport(reason, details);
@@ -1160,7 +1163,7 @@ export function CommunityPostCard({
             textTransform: "uppercase",
           }}
         >
-          Pinned
+          {t('communityPostCard.pinnedBadge')}
         </div>
       )}
 
@@ -1496,7 +1499,7 @@ export function CommunityPostCard({
                 cursor: "pointer",
               }}
             >
-              {isExpanded ? "Read less" : "Read more"}
+              {isExpanded ? t('communityPostCard.readLess') : t('communityPostCard.readMore')}
             </button>
           )}
         </div>

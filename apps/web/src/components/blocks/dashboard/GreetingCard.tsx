@@ -1,3 +1,5 @@
+import { useTranslation } from '../../../lib/i18n';
+
 interface Props {
   sd: Record<string, any>;
 }
@@ -13,9 +15,10 @@ function isSameCalendarDay(tsMs: number, nowMs: number): boolean {
 }
 
 export function GreetingCard({ sd }: Props) {
+  const { t } = useTranslation();
   const greet = sd.greeting || {};
   const userName: string = greet.user_name || sd.user_name || "";
-  const displayName: string = userName || "friend";
+  const displayName: string = userName || t('greetingCard.fallbackName');
   const context: string = greet.supporting_line || sd.greeting_context || "";
   const tone: string = greet.tone_line || sd.tone_line || "";
   const joyCarry = sd.joy_carry;
@@ -57,7 +60,7 @@ export function GreetingCard({ sd }: Props) {
             margin: "0 0 4px",
           }}
         >
-          Welcome, {displayName}.
+          {t('greetingCard.welcomeUser').replace('{displayName}', displayName || t('greetingCard.fallbackName'))}
         </h1>
         {context && (
           <p
@@ -99,7 +102,7 @@ export function GreetingCard({ sd }: Props) {
               letterSpacing: "0.2px",
             }}
           >
-            {carryLabel} — held today
+            {carryLabel} {t('greetingCard.heldToday')}
           </div>
         )}
       </div>

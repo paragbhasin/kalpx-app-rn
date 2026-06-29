@@ -17,7 +17,7 @@ const BEIGE_BG = require("../../../../assets/beige_bg.webp");
 export default function ProgramMantraRunner() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const { item, dayNumber, completedItems = [] } = route.params;
+  const { item, dayNumber, completedItems = [], mantraCount } = route.params;
   const updateBackground = useScreenStore((state) => state.updateBackground);
 
   const engineApiRef = useRef<{ syncNow: () => Promise<void>; refreshStats: () => Promise<void> } | null>(null);
@@ -39,6 +39,8 @@ export default function ProgramMantraRunner() {
         item={item}
         mantraRef={item.item_id ?? null}
         sourceSurface="program"
+        initialReps={mantraCount ?? undefined}
+        lockCount={!!mantraCount}
         onEngineReady={(api) => { engineApiRef.current = api; api.refreshStats(); }}
         onComplete={() => {
           trackRitualCompletion("mantra");

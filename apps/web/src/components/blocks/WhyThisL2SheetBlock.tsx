@@ -1,5 +1,6 @@
 import React from 'react';
 import { isRoomWhyThisContext } from '@kalpx/contracts';
+import { useTranslation } from '../../lib/i18n';
 
 interface Props {
   block?: Record<string, any>;
@@ -10,6 +11,7 @@ interface Props {
 const GO_DEEPER_TYPES = ['mantra', 'sankalp', 'practice'];
 
 export function WhyThisL2SheetBlock({ screenData, onAction }: Props) {
+  const { t } = useTranslation();
   const sd = screenData || {};
   const principle = sd.why_this_principle || null;
   const principleId = sd.why_this?.principle_id ?? null;
@@ -19,9 +21,9 @@ export function WhyThisL2SheetBlock({ screenData, onAction }: Props) {
   const sourceLine: string =
     (principle?.principle_banner as any)?.source_line ||
     (isRoomCtx ? null : principle?.tradition) ||
-    'A thought from the tradition.';
-  const headerLabel = isRoomCtx ? sourceLine : 'WHY THIS';
-  const ctaLabel = isRoomCtx ? 'Let this stay with me' : 'Got it';
+    t('whyThisL2Sheet.defaultSourceLine');
+  const headerLabel = isRoomCtx ? sourceLine : t('whyThisL2Sheet.whyThisHeader');
+  const ctaLabel = isRoomCtx ? t('whyThisL2Sheet.letThisStayWithMe') : t('whyThisL2Sheet.gotIt');
 
   function handleDismiss() {
     onAction?.({ type: 'dismiss_why_this' });
@@ -54,7 +56,7 @@ export function WhyThisL2SheetBlock({ screenData, onAction }: Props) {
           <div style={{ width: '100%', maxWidth: 480, background: 'var(--kalpx-card-bg)', borderRadius: '16px 16px 0 0', padding: '12px 20px 40px' }}>
             {/* Handle bar */}
             <div style={{ width: 44, height: 4, borderRadius: 2, background: '#d9cfb8', margin: '0 auto 20px' }} />
-            <p style={{ color: 'var(--kalpx-text-muted)', fontSize: 14, textAlign: 'center', marginTop: 16 }}>Principle not available.</p>
+            <p style={{ color: 'var(--kalpx-text-muted)', fontSize: 14, textAlign: 'center', marginTop: 16 }}>{t('whyThisL2Sheet.principleNotAvailable')}</p>
             <div style={{ textAlign: 'center', marginTop: 24 }}>
               <button onClick={handleDismiss} style={gotItStyle}>{ctaLabel}</button>
             </div>
@@ -142,7 +144,7 @@ export function WhyThisL2SheetBlock({ screenData, onAction }: Props) {
                 marginBottom: 20,
               }}
             >
-              Go Deeper →
+              {t('whyThisL2Sheet.goDeeper')}
             </button>
           )}
 

@@ -414,6 +414,11 @@ export interface TemplateDay {
   reflection_prompt: string;
   completion_message: string;
   share_prompt: string;
+  mantra_count: number | null;
+  practice_duration_minutes: number | null;
+  mantra_reminder_time: string | null;
+  sankalp_reminder_time: string | null;
+  practice_reminder_time: string | null;
   // Resolved library cards (present when fetching via GuideMyTemplateDetailView)
   mantra_card?: LibraryMantra | null;
   sankalp_card?: LibrarySankalp | null;

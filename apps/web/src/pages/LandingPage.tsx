@@ -1,13 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { PageShell } from '../components/PageShell';
+import { useTranslation } from '../lib/i18n';
 
 export function LandingPage() {
+  const { t } = useTranslation();
   return (
     <PageShell centered>
       <div style={{ textAlign: 'center', padding: 32 }}>
         <h1 style={{ fontSize: 32, fontWeight: 300, marginBottom: 8 }}>KalpX</h1>
-        <p style={{ color: '#888', marginBottom: 32 }}>Your spiritual companion</p>
+        <p style={{ color: '#888', marginBottom: 32 }}>{t('landing.tagline')}</p>
         <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
           <Link
             to="/en/mitra"
@@ -19,7 +21,7 @@ export function LandingPage() {
               fontWeight: 500,
             }}
           >
-            Open Mitra
+            {t('landing.openMitra')}
           </Link>
           <Link
             to="/login"
@@ -29,7 +31,7 @@ export function LandingPage() {
               borderRadius: 8,
             }}
           >
-            Sign in
+            {t('landing.signIn')}
           </Link>
         </div>
       </div>

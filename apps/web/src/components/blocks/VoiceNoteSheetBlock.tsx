@@ -4,6 +4,7 @@
  * Voice failure must not block trigger/checkin/room completion.
  */
 import React, { useState } from 'react';
+import { useTranslation } from '../../lib/i18n';
 
 const canRecord =
   typeof navigator !== 'undefined' &&
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function VoiceNoteSheetBlock({ onAction }: Props) {
+  const { t } = useTranslation();
   const [text, setText] = useState('');
 
   const submit = () => {
@@ -28,13 +30,13 @@ export function VoiceNoteSheetBlock({ onAction }: Props) {
     return (
       <div style={{ padding: '32px 24px' }} data-testid="voice-note-sheet">
         <p style={{ color: '#2C2A26', marginBottom: 16, lineHeight: 1.6 }}>
-          What's present for you right now?
+          {t('voiceNoteSheet.whatsPresent')}
         </p>
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
           data-testid="voice-note-text-input"
-          placeholder="Write whatever is here..."
+          placeholder={t('voiceNoteSheet.writeFallbackPlaceholder')}
           style={{
             width: '100%',
             minHeight: 100,
@@ -51,7 +53,7 @@ export function VoiceNoteSheetBlock({ onAction }: Props) {
           onClick={submit}
           style={{ padding: '12px 24px', borderRadius: 8, border: 'none', background: '#C9A84C', color: '#fff', cursor: 'pointer' }}
         >
-          Done
+          {t('voiceNoteSheet.done')}
         </button>
       </div>
     );
@@ -60,13 +62,13 @@ export function VoiceNoteSheetBlock({ onAction }: Props) {
   return (
     <div style={{ padding: '32px 24px', textAlign: 'center' }} data-testid="voice-note-sheet">
       <p style={{ color: '#2C2A26', fontSize: 16, marginBottom: 24 }}>
-        Voice recording is available but not configured yet.
+        {t('voiceNoteSheet.voiceNotConfigured')}
       </p>
       <button
         onClick={submit}
         style={{ padding: '12px 24px', borderRadius: 8, border: 'none', background: '#C9A84C', color: '#fff', cursor: 'pointer' }}
       >
-        Continue without recording
+        {t('voiceNoteSheet.continueWithoutRecording')}
       </button>
     </div>
   );

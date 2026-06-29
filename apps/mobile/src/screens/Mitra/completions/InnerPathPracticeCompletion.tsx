@@ -47,7 +47,7 @@ export default function InnerPathPracticeCompletion() {
           liveActivity={item_title ? {
             type: COPY.variant,
             name: item_title,
-            onActivate: () => liveActivity.startSankalp(item_title, item_subtitle ?? '', 'kalpx://mitra/inner_path/home?source=la').catch(() => {}),
+            onActivate: () => liveActivity.startSankalp(item_title, item_subtitle || '', 'kalpx://mitra/inner_path/home?source=la', 'practice').catch(() => {}),
           } : undefined}
           nameCard={item_title ? { label: COPY.nameCardLabel, text: item_title, guideLine: COPY.nameCardGuide } : undefined}
           reflection={{ prompt: COPY.reflectionPrompt, onSubmit: onReflect }}

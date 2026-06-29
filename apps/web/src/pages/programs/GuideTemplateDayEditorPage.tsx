@@ -3,14 +3,16 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   fetchMyTemplate,
   GuideTemplate,
-  LibraryMantra,
-  LibraryPractice,
-  LibrarySankalp,
   submitTemplateForReview,
   TemplateDay,
-  updateTemplateDay,
+  updateTemplateDay
 } from "../../engine/liveSessionApi";
-import { GuideLibraryPickerModal, LibrarySlot, PickerItem, toPickerItem } from "./GuideLibraryPickerModal";
+import {
+  GuideLibraryPickerModal,
+  LibrarySlot,
+  PickerItem,
+  toPickerItem,
+} from "./GuideLibraryPickerModal";
 
 interface DayState extends TemplateDay {
   saving: boolean;
@@ -32,7 +34,9 @@ export function GuideTemplateDayEditorPage() {
   const [pickerTarget, setPickerTarget] = useState<PickerTarget>(null);
   // slotSelections stores the full display data for each selected library item.
   // Key: "${dayNumber}-${slot}" e.g. "1-mantra". Lost on page refresh (ephemeral).
-  const [slotSelections, setPickerItems] = useState<Record<string, PickerItem>>({});
+  const [slotSelections, setPickerItems] = useState<Record<string, PickerItem>>(
+    {},
+  );
   const [activeDay, setActiveDay] = useState(1);
   const dayRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
@@ -45,10 +49,26 @@ export function GuideTemplateDayEditorPage() {
         // Seed slotSelections from resolved _card fields returned by the backend
         const seeded: Record<string, PickerItem> = {};
         (tmpl.days ?? []).forEach((d) => {
-          if (d.mantra_card)   seeded[`${d.day_number}-mantra`]   = toPickerItem("mantra",   d.mantra_card);
-          if (d.sankalp_card)  seeded[`${d.day_number}-sankalp`]  = toPickerItem("sankalp",  d.sankalp_card);
-          if (d.practice_card) seeded[`${d.day_number}-practice`] = toPickerItem("practice", d.practice_card);
-          if (d.wisdom_card)   seeded[`${d.day_number}-wisdom`]   = toPickerItem("wisdom",   d.wisdom_card);
+          if (d.mantra_card)
+            seeded[`${d.day_number}-mantra`] = toPickerItem(
+              "mantra",
+              d.mantra_card,
+            );
+          if (d.sankalp_card)
+            seeded[`${d.day_number}-sankalp`] = toPickerItem(
+              "sankalp",
+              d.sankalp_card,
+            );
+          if (d.practice_card)
+            seeded[`${d.day_number}-practice`] = toPickerItem(
+              "practice",
+              d.practice_card,
+            );
+          if (d.wisdom_card)
+            seeded[`${d.day_number}-wisdom`] = toPickerItem(
+              "wisdom",
+              d.wisdom_card,
+            );
         });
         if (Object.keys(seeded).length > 0) setPickerItems(seeded);
       })
@@ -63,16 +83,22 @@ export function GuideTemplateDayEditorPage() {
       // back onto state, because concurrent saves (e.g. theme blur + mantra pick)
       // would overwrite each other's results with stale field values.
       setDays((prev) =>
-        prev.map((d) => (d.day_number === dayNumber ? { ...d, ...patch, saving: true } : d)),
+        prev.map((d) =>
+          d.day_number === dayNumber ? { ...d, ...patch, saving: true } : d,
+        ),
       );
       try {
         await updateTemplateDay(templateId, dayNumber, patch);
         setDays((prev) =>
-          prev.map((d) => (d.day_number === dayNumber ? { ...d, saving: false } : d)),
+          prev.map((d) =>
+            d.day_number === dayNumber ? { ...d, saving: false } : d,
+          ),
         );
       } catch {
         setDays((prev) =>
-          prev.map((d) => (d.day_number === dayNumber ? { ...d, saving: false } : d)),
+          prev.map((d) =>
+            d.day_number === dayNumber ? { ...d, saving: false } : d,
+          ),
         );
       }
     },
@@ -85,19 +111,45 @@ export function GuideTemplateDayEditorPage() {
     );
   }
 
-  function storePickerItem(dayNumber: number, slot: LibrarySlot, sel: PickerItem) {
+  function storePickerItem(
+    dayNumber: number,
+    slot: LibrarySlot,
+    sel: PickerItem,
+  ) {
     setPickerItems((prev) => ({ ...prev, [`${dayNumber}-${slot}`]: sel }));
   }
 
-  function applyToAllDays(slot: LibrarySlot, item_id: string, title: string) {
+  function applyToAllDays(slot: LibrarySlot, item_id: string, title: string, sourceDayNumber?: number) {
+    const src = sourceDayNumber ? days.find((d) => d.day_number === sourceDayNumber) : days[0];
     const patch =
       slot === "mantra"
-        ? { mantra_ref: item_id, custom_mantra_title: "", custom_mantra_body: "" }
+        ? {
+            mantra_ref: item_id,
+            custom_mantra_title: "",
+            custom_mantra_body: "",
+            mantra_count: src?.mantra_count ?? null,
+            mantra_reminder_time: src?.mantra_reminder_time ?? null,
+          }
         : slot === "sankalp"
-        ? { sankalp_ref: item_id, custom_sankalp_title: "", custom_sankalp_body: "" }
-        : slot === "wisdom"
-        ? { wisdom_ref: item_id, custom_wisdom_title: "", custom_wisdom_body: "" }
-        : { practice_ref: item_id, custom_practice_title: "", custom_practice_body: "" };
+          ? {
+              sankalp_ref: item_id,
+              custom_sankalp_title: "",
+              custom_sankalp_body: "",
+              sankalp_reminder_time: src?.sankalp_reminder_time ?? null,
+            }
+          : slot === "wisdom"
+            ? {
+                wisdom_ref: item_id,
+                custom_wisdom_title: "",
+                custom_wisdom_body: "",
+              }
+            : {
+                practice_ref: item_id,
+                custom_practice_title: "",
+                custom_practice_body: "",
+                practice_duration_minutes: src?.practice_duration_minutes ?? null,
+                practice_reminder_time: src?.practice_reminder_time ?? null,
+              };
 
     days.forEach((d) => {
       saveDay(d.day_number, patch);
@@ -113,14 +165,35 @@ export function GuideTemplateDayEditorPage() {
   function handleLibrarySelect(item: PickerItem) {
     if (!pickerTarget) return;
     const { dayNumber, slot } = pickerTarget;
+    const srcDay = days.find((d) => d.day_number === dayNumber);
     const patch =
       slot === "mantra"
-        ? { mantra_ref: item.item_id, custom_mantra_title: "", custom_mantra_body: "" }
+        ? {
+            mantra_ref: item.item_id,
+            custom_mantra_title: "",
+            custom_mantra_body: "",
+            // Seed default reminder time if none saved yet
+            ...(!srcDay?.mantra_reminder_time ? { mantra_reminder_time: "06:00" } : {}),
+          }
         : slot === "sankalp"
-        ? { sankalp_ref: item.item_id, custom_sankalp_title: "", custom_sankalp_body: "" }
-        : slot === "wisdom"
-        ? { wisdom_ref: item.item_id, custom_wisdom_title: "", custom_wisdom_body: "" }
-        : { practice_ref: item.item_id, custom_practice_title: "", custom_practice_body: "" };
+          ? {
+              sankalp_ref: item.item_id,
+              custom_sankalp_title: "",
+              custom_sankalp_body: "",
+              ...(!srcDay?.sankalp_reminder_time ? { sankalp_reminder_time: "08:00" } : {}),
+            }
+          : slot === "wisdom"
+            ? {
+                wisdom_ref: item.item_id,
+                custom_wisdom_title: "",
+                custom_wisdom_body: "",
+              }
+            : {
+                practice_ref: item.item_id,
+                custom_practice_title: "",
+                custom_practice_body: "",
+                ...(!srcDay?.practice_reminder_time ? { practice_reminder_time: "18:00" } : {}),
+              };
     saveDay(dayNumber, patch);
     storePickerItem(dayNumber, slot, item);
     setPickerTarget(null);
@@ -129,14 +202,20 @@ export function GuideTemplateDayEditorPage() {
   async function handleSubmit() {
     // Validate: every day must have at least one slot filled
     const emptyDays = days.filter((d) => {
-      const hasRef = d.mantra_ref || d.sankalp_ref || d.practice_ref || d.wisdom_ref;
-      const hasCustom = d.custom_mantra_body || d.custom_sankalp_body ||
-        d.custom_practice_body || d.custom_wisdom_body;
+      const hasRef =
+        d.mantra_ref || d.sankalp_ref || d.practice_ref || d.wisdom_ref;
+      const hasCustom =
+        d.custom_mantra_body ||
+        d.custom_sankalp_body ||
+        d.custom_practice_body ||
+        d.custom_wisdom_body;
       return !hasRef && !hasCustom;
     });
     if (emptyDays.length > 0) {
       const nums = emptyDays.map((d) => `Day ${d.day_number}`).join(", ");
-      setError(`Each day needs at least one content slot (Mantra, Sankalp, Practice, or Wisdom). Missing: ${nums}`);
+      setError(
+        `Each day needs at least one content slot (Mantra, Sankalp, Practice, or Wisdom). Missing: ${nums}`,
+      );
       return;
     }
     setError("");
@@ -145,7 +224,9 @@ export function GuideTemplateDayEditorPage() {
       await submitTemplateForReview(templateId);
       setSubmitted(true);
     } catch (e: any) {
-      setError(e?.response?.data?.detail ?? "Could not submit. Please try again.");
+      setError(
+        e?.response?.data?.detail ?? "Could not submit. Please try again.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -158,11 +239,17 @@ export function GuideTemplateDayEditorPage() {
       <div style={page}>
         <div style={inner}>
           <div style={successBox}>
-            <h2 style={{ color: "#432104", margin: "0 0 8px" }}>Submitted for Review 🙏</h2>
+            <h2 style={{ color: "#432104", margin: "0 0 8px" }}>
+              Submitted for Review 🙏
+            </h2>
             <p style={{ color: "#7A6652", margin: "0 0 20px", fontSize: 14 }}>
-              KalpX will review your program within 3–5 business days. You'll be notified once approved.
+              KalpX will review your program within 3–5 business days. You'll be
+              notified once approved.
             </p>
-            <button style={primaryBtn} onClick={() => navigate("/guide/dashboard")}>
+            <button
+              style={primaryBtn}
+              onClick={() => navigate("/guide/dashboard")}
+            >
               Back to Dashboard
             </button>
           </div>
@@ -173,7 +260,8 @@ export function GuideTemplateDayEditorPage() {
 
   const locked = !!template?.locked_at;
   const canSubmit =
-    template?.review_status === "draft" || template?.review_status === "changes_requested";
+    template?.review_status === "draft" ||
+    template?.review_status === "changes_requested";
 
   const navBarHeight = days.length > 1 ? 56 : 0;
 
@@ -184,8 +272,15 @@ export function GuideTemplateDayEditorPage() {
         <div style={dayNavBar}>
           <div style={dayNavScroll}>
             {days.map((day) => {
-              const hasContent = day.mantra_ref || day.sankalp_ref || day.practice_ref || day.wisdom_ref ||
-                day.custom_mantra_body || day.custom_sankalp_body || day.custom_practice_body || day.custom_wisdom_body;
+              const hasContent =
+                day.mantra_ref ||
+                day.sankalp_ref ||
+                day.practice_ref ||
+                day.wisdom_ref ||
+                day.custom_mantra_body ||
+                day.custom_sankalp_body ||
+                day.custom_practice_body ||
+                day.custom_wisdom_body;
               const isActive = activeDay === day.day_number;
               return (
                 <button
@@ -194,16 +289,30 @@ export function GuideTemplateDayEditorPage() {
                     setActiveDay(day.day_number);
                     const el = dayRefs.current[day.day_number];
                     if (el) {
-                      const top = el.getBoundingClientRect().top + window.scrollY - navBarHeight - 8;
+                      const top =
+                        el.getBoundingClientRect().top +
+                        window.scrollY -
+                        navBarHeight -
+                        8;
                       window.scrollTo({ top, behavior: "smooth" });
                     }
                   }}
                   style={{
                     padding: "6px 14px",
                     borderRadius: 20,
-                    border: isActive ? "2px solid #C99317" : "2px solid #E8DECE",
-                    background: isActive ? "#C99317" : hasContent ? "#FFF8EC" : "#fff",
-                    color: isActive ? "#fff" : hasContent ? "#7A5C00" : "#B5A08A",
+                    border: isActive
+                      ? "2px solid #C99317"
+                      : "2px solid #E8DECE",
+                    background: isActive
+                      ? "#C99317"
+                      : hasContent
+                        ? "#FFF8EC"
+                        : "#fff",
+                    color: isActive
+                      ? "#fff"
+                      : hasContent
+                        ? "#7A5C00"
+                        : "#B5A08A",
                     fontSize: 12,
                     fontWeight: isActive ? 700 : 500,
                     cursor: "pointer",
@@ -214,11 +323,18 @@ export function GuideTemplateDayEditorPage() {
                 >
                   Day {day.day_number}
                   {hasContent && !isActive && (
-                    <span style={{
-                      position: "absolute" as const, top: -3, right: -3,
-                      width: 7, height: 7, borderRadius: "50%",
-                      background: "#C99317", border: "1.5px solid #fff",
-                    }} />
+                    <span
+                      style={{
+                        position: "absolute" as const,
+                        top: -3,
+                        right: -3,
+                        width: 7,
+                        height: 7,
+                        borderRadius: "50%",
+                        background: "#C99317",
+                        border: "1.5px solid #fff",
+                      }}
+                    />
                   )}
                 </button>
               );
@@ -228,18 +344,25 @@ export function GuideTemplateDayEditorPage() {
       )}
 
       <div style={{ ...inner, paddingTop: navBarHeight + 24 }}>
-        <button onClick={() => navigate("/guide/templates")} style={backBtn}>← Back to templates</button>
+        <button onClick={() => navigate("/guide/templates")} style={backBtn}>
+          ← Back to templates
+        </button>
 
         <div style={headerRow}>
           <div>
             <p style={eyebrow}>GUIDE TOOLS · TEMPLATE BUILDER</p>
             <h1 style={heading}>{template?.title ?? "Edit Program"}</h1>
             <p style={reviewBadge(template?.review_status ?? "")}>
-              {STATUS_LABEL[template?.review_status ?? ""] ?? template?.review_status}
+              {STATUS_LABEL[template?.review_status ?? ""] ??
+                template?.review_status}
             </p>
           </div>
           {!locked && canSubmit && (
-            <button style={submitBtn} onClick={handleSubmit} disabled={submitting}>
+            <button
+              style={submitBtn}
+              onClick={handleSubmit}
+              disabled={submitting}
+            >
               {submitting ? "Submitting…" : "Submit for Review"}
             </button>
           )}
@@ -255,7 +378,8 @@ export function GuideTemplateDayEditorPage() {
 
         {locked && (
           <div style={lockBanner}>
-            This template is locked — a campaign is already running from it. Create a new version to make changes.
+            This template is locked — a campaign is already running from it.
+            Create a new version to make changes.
           </div>
         )}
 
@@ -288,16 +412,29 @@ export function GuideTemplateDayEditorPage() {
                   day_join_url: day1.day_join_url,
                   day_session_time: day1.day_session_time,
                   day_session_timezone: day1.day_session_timezone,
+                  mantra_count: day1.mantra_count,
+                  practice_duration_minutes: day1.practice_duration_minutes,
+                  mantra_reminder_time: day1.mantra_reminder_time,
+                  sankalp_reminder_time: day1.sankalp_reminder_time,
+                  practice_reminder_time: day1.practice_reminder_time,
+                  reflection_prompt: day1.reflection_prompt,
                 };
                 days.slice(1).forEach((d) => saveDay(d.day_number, patch));
                 // Copy slot selection labels/details from Day 1 to all other days
-                const slots: LibrarySlot[] = ["mantra", "sankalp", "practice", "wisdom"];
+                const slots: LibrarySlot[] = [
+                  "mantra",
+                  "sankalp",
+                  "practice",
+                  "wisdom",
+                ];
                 setPickerItems((prev) => {
                   const next = { ...prev };
                   slots.forEach((slot) => {
                     const src = prev[`${day1.day_number}-${slot}`];
                     if (src) {
-                      days.slice(1).forEach((d) => { next[`${d.day_number}-${slot}`] = src; });
+                      days.slice(1).forEach((d) => {
+                        next[`${d.day_number}-${slot}`] = src;
+                      });
                     }
                   });
                   return next;
@@ -314,7 +451,9 @@ export function GuideTemplateDayEditorPage() {
           {days.map((day) => (
             <div
               key={day.day_number}
-              ref={(el) => { dayRefs.current[day.day_number] = el; }}
+              ref={(el) => {
+                dayRefs.current[day.day_number] = el;
+              }}
             >
               <DayRow
                 day={day}
@@ -323,7 +462,9 @@ export function GuideTemplateDayEditorPage() {
                 onOpenPicker={(slot) =>
                   setPickerTarget({ dayNumber: day.day_number, slot })
                 }
-                onApplyToAll={(slot, item_id, title) => applyToAllDays(slot, item_id, title)}
+                onApplyToAll={(slot, item_id, title) =>
+                  applyToAllDays(slot, item_id, title, day.day_number)
+                }
                 onBlurSave={(patch) => saveDay(day.day_number, patch)}
                 onLocalChange={(patch) => updateDayLocal(day.day_number, patch)}
               />
@@ -333,7 +474,11 @@ export function GuideTemplateDayEditorPage() {
 
         {!locked && canSubmit && (
           <div style={{ textAlign: "center" as const, marginTop: 32 }}>
-            <button style={submitBtn} onClick={handleSubmit} disabled={submitting}>
+            <button
+              style={submitBtn}
+              onClick={handleSubmit}
+              disabled={submitting}
+            >
               {submitting ? "Submitting…" : "Submit for Review"}
             </button>
           </div>
@@ -365,8 +510,17 @@ interface DayRowProps {
   onLocalChange: (patch: Partial<TemplateDay>) => void;
 }
 
-function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlurSave, onLocalChange }: DayRowProps) {
-  const sel = (slot: LibrarySlot) => slotSelections[`${day.day_number}-${slot}`] ?? null;
+function DayRow({
+  day,
+  locked,
+  slotSelections,
+  onOpenPicker,
+  onApplyToAll,
+  onBlurSave,
+  onLocalChange,
+}: DayRowProps) {
+  const sel = (slot: LibrarySlot) =>
+    slotSelections[`${day.day_number}-${slot}`] ?? null;
 
   return (
     <div style={dayCard}>
@@ -399,12 +553,67 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         onApplyToAll={(id, title) => onApplyToAll("mantra", id, title)}
         onClearRef={() => onBlurSave({ mantra_ref: "" })}
         onCustomChange={(title, body) => {
-          onLocalChange({ custom_mantra_title: title, custom_mantra_body: body });
+          onLocalChange({
+            custom_mantra_title: title,
+            custom_mantra_body: body,
+          });
         }}
         onCustomBlur={(title, body) =>
-          onBlurSave({ custom_mantra_title: title, custom_mantra_body: body, mantra_ref: "" })
+          onBlurSave({
+            custom_mantra_title: title,
+            custom_mantra_body: body,
+            mantra_ref: "",
+          })
         }
       />
+      {!!(day.mantra_ref || day.custom_mantra_body) && (
+        <div style={slotSettingsRow}>
+          <div>
+            <div style={settingsLabel}>CHANT COUNT FOR PARTICIPANTS</div>
+            <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
+              {[1, 9, 27, 54, 108].map((n) => (
+                <button
+                  key={n}
+                  disabled={locked}
+                  onClick={() =>
+                    onBlurSave({
+                      mantra_count: day.mantra_count === n ? null : n,
+                    })
+                  }
+                  style={{
+                    padding: "3px 10px",
+                    borderRadius: 20,
+                    fontSize: 12,
+                    cursor: "pointer",
+                    border: `1px solid ${day.mantra_count === n ? "#C99317" : "#D4C4A8"}`,
+                    background:
+                      day.mantra_count === n ? "#C99317" : "transparent",
+                    color: day.mantra_count === n ? "#fff" : "#7B6545",
+                    fontWeight: day.mantra_count === n ? 700 : 400,
+                  }}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div style={settingsLabel}>SUGGESTED REMINDER TIME</div>
+            <input
+              type="time"
+              disabled={locked}
+              value={day.mantra_reminder_time ?? "06:00"}
+              onChange={(e) =>
+                onLocalChange({ mantra_reminder_time: e.target.value || null })
+              }
+              onBlur={(e) =>
+                onBlurSave({ mantra_reminder_time: e.target.value || "06:00" })
+              }
+              style={timeInput}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Sankalp */}
       <SlotRow
@@ -418,12 +627,38 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         onApplyToAll={(id, title) => onApplyToAll("sankalp", id, title)}
         onClearRef={() => onBlurSave({ sankalp_ref: "" })}
         onCustomChange={(title, body) => {
-          onLocalChange({ custom_sankalp_title: title, custom_sankalp_body: body });
+          onLocalChange({
+            custom_sankalp_title: title,
+            custom_sankalp_body: body,
+          });
         }}
         onCustomBlur={(title, body) =>
-          onBlurSave({ custom_sankalp_title: title, custom_sankalp_body: body, sankalp_ref: "" })
+          onBlurSave({
+            custom_sankalp_title: title,
+            custom_sankalp_body: body,
+            sankalp_ref: "",
+          })
         }
       />
+      {!!(day.sankalp_ref || day.custom_sankalp_body) && (
+        <div style={slotSettingsRow}>
+          <div>
+            <div style={settingsLabel}>SUGGESTED REMINDER TIME</div>
+            <input
+              type="time"
+              disabled={locked}
+              value={day.sankalp_reminder_time ?? "08:00"}
+              onChange={(e) =>
+                onLocalChange({ sankalp_reminder_time: e.target.value || null })
+              }
+              onBlur={(e) =>
+                onBlurSave({ sankalp_reminder_time: e.target.value || "08:00" })
+              }
+              style={timeInput}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Practice */}
       <SlotRow
@@ -437,12 +672,85 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         onApplyToAll={(id, title) => onApplyToAll("practice", id, title)}
         onClearRef={() => onBlurSave({ practice_ref: "" })}
         onCustomChange={(title, body) => {
-          onLocalChange({ custom_practice_title: title, custom_practice_body: body });
+          onLocalChange({
+            custom_practice_title: title,
+            custom_practice_body: body,
+          });
         }}
         onCustomBlur={(title, body) =>
-          onBlurSave({ custom_practice_title: title, custom_practice_body: body, practice_ref: "" })
+          onBlurSave({
+            custom_practice_title: title,
+            custom_practice_body: body,
+            practice_ref: "",
+          })
         }
       />
+      {!!(day.practice_ref || day.custom_practice_body) && (
+        <div style={slotSettingsRow}>
+          <div>
+            <div style={settingsLabel}>DURATION FOR PARTICIPANTS</div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                marginTop: 4,
+              }}
+            >
+              <input
+                type="number"
+                min={1}
+                max={60}
+                disabled={locked}
+                value={day.practice_duration_minutes ?? ""}
+                placeholder="—"
+                onChange={(e) =>
+                  onLocalChange({
+                    practice_duration_minutes: e.target.value
+                      ? Number(e.target.value)
+                      : null,
+                  })
+                }
+                onBlur={(e) =>
+                  onBlurSave({
+                    practice_duration_minutes: e.target.value
+                      ? Number(e.target.value)
+                      : null,
+                  })
+                }
+                style={{
+                  width: 60,
+                  padding: "4px 8px",
+                  border: "1px solid #D4C4A8",
+                  borderRadius: 8,
+                  fontSize: 13,
+                  textAlign: "center" as const,
+                }}
+              />
+              <span style={{ fontSize: 12, color: "#7B6545" }}>min</span>
+            </div>
+          </div>
+          <div>
+            <div style={settingsLabel}>SUGGESTED REMINDER TIME</div>
+            <input
+              type="time"
+              disabled={locked}
+              value={day.practice_reminder_time ?? "18:00"}
+              onChange={(e) =>
+                onLocalChange({
+                  practice_reminder_time: e.target.value || null,
+                })
+              }
+              onBlur={(e) =>
+                onBlurSave({
+                  practice_reminder_time: e.target.value || "18:00",
+                })
+              }
+              style={timeInput}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Wisdom */}
       <SlotRow
@@ -456,10 +764,17 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         onApplyToAll={(id, title) => onApplyToAll("wisdom", id, title)}
         onClearRef={() => onBlurSave({ wisdom_ref: "" })}
         onCustomChange={(title, body) => {
-          onLocalChange({ custom_wisdom_title: title, custom_wisdom_body: body });
+          onLocalChange({
+            custom_wisdom_title: title,
+            custom_wisdom_body: body,
+          });
         }}
         onCustomBlur={(title, body) =>
-          onBlurSave({ custom_wisdom_title: title, custom_wisdom_body: body, wisdom_ref: "" })
+          onBlurSave({
+            custom_wisdom_title: title,
+            custom_wisdom_body: body,
+            wisdom_ref: "",
+          })
         }
       />
 
@@ -473,15 +788,27 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
           onBlur={() => onBlurSave({ day_join_url: day.day_join_url })}
           placeholder="https://meet.google.com/… or Zoom link"
         />
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6, flexWrap: "wrap" as const }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            marginTop: 6,
+            flexWrap: "wrap" as const,
+          }}
+        >
           <label style={timeLabel}>Session time</label>
           <input
             type="time"
-            style={timeInput}
+            style={sessionTimeInput}
             value={day.day_session_time}
             disabled={locked}
-            onChange={(e) => onLocalChange({ day_session_time: e.target.value })}
-            onBlur={() => onBlurSave({ day_session_time: day.day_session_time })}
+            onChange={(e) =>
+              onLocalChange({ day_session_time: e.target.value })
+            }
+            onBlur={() =>
+              onBlurSave({ day_session_time: day.day_session_time })
+            }
           />
           <select
             style={tzSelect}
@@ -521,9 +848,15 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
           value={day.reflection_prompt}
           disabled={locked}
           onChange={(e) => onLocalChange({ reflection_prompt: e.target.value })}
-          onBlur={() => onBlurSave({ reflection_prompt: day.reflection_prompt })}
+          onBlur={() =>
+            onBlurSave({ reflection_prompt: day.reflection_prompt })
+          }
           placeholder="What are you grateful for today?"
         />
+        <span style={urlHint}>
+          Ask one thoughtful question that helps participants reflect on today's
+          practice.
+        </span>
       </FieldRow>
     </div>
   );
@@ -546,8 +879,17 @@ interface SlotRowProps {
 }
 
 function SlotRow({
-  label, refValue, selection, customTitle, customBody, locked,
-  onOpenPicker, onApplyToAll, onClearRef, onCustomChange, onCustomBlur,
+  label,
+  refValue,
+  selection,
+  customTitle,
+  customBody,
+  locked,
+  onOpenPicker,
+  onApplyToAll,
+  onClearRef,
+  onCustomChange,
+  onCustomBlur,
 }: SlotRowProps) {
   const [mode, setMode] = useState<"library" | "custom">(
     customBody ? "custom" : "library",
@@ -563,7 +905,7 @@ function SlotRow({
     if (customTitle !== localTitle) setLocalTitle(customTitle);
     if (customBody !== localBody) setLocalBody(customBody);
     if (customBody) setMode("custom");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customTitle, customBody]);
 
   const scheduleSave = (title: string, body: string) => {
@@ -596,10 +938,7 @@ function SlotRow({
           >
             From library
           </button>
-          <button
-            style={modeBtn(mode === "custom")}
-            onClick={switchToCustom}
-          >
+          <button style={modeBtn(mode === "custom")} onClick={switchToCustom}>
             Write my own
           </button>
         </div>
@@ -612,13 +951,20 @@ function SlotRow({
               <div style={selectedCardTop}>
                 <span style={selectedCardTitle}>{displayTitle}</span>
                 <div style={selectedCardActions}>
-                  <button style={detailsBtn} onClick={() => setShowDetails((v) => !v)}>
+                  <button
+                    style={detailsBtn}
+                    onClick={() => setShowDetails((v) => !v)}
+                  >
                     {showDetails ? "Hide details" : "View details"}
                   </button>
                   {!locked && (
                     <>
-                      <button style={changeBtn} onClick={onOpenPicker}>Change</button>
-                      <button style={changeBtn} onClick={onClearRef}>✕</button>
+                      <button style={changeBtn} onClick={onOpenPicker}>
+                        Change
+                      </button>
+                      <button style={changeBtn} onClick={onClearRef}>
+                        ✕
+                      </button>
                     </>
                   )}
                 </div>
@@ -631,7 +977,9 @@ function SlotRow({
                       {Array.isArray(d.value) ? (
                         <ul style={detailList}>
                           {(d.value as string[]).map((v, i) => (
-                            <li key={i} style={detailListItem}>{v}</li>
+                            <li key={i} style={detailListItem}>
+                              {v}
+                            </li>
                           ))}
                         </ul>
                       ) : (
@@ -639,13 +987,17 @@ function SlotRow({
                       )}
                     </div>
                   ))}
-                  {(!selection?.details || selection.details.length === 0) && displaySubtitle && (
-                    <p style={detailFieldValue}>{displaySubtitle}</p>
-                  )}
+                  {(!selection?.details || selection.details.length === 0) &&
+                    displaySubtitle && (
+                      <p style={detailFieldValue}>{displaySubtitle}</p>
+                    )}
                 </div>
               )}
               {!locked && (
-                <button style={applyAllBtn} onClick={() => onApplyToAll(refValue, displayTitle)}>
+                <button
+                  style={applyAllBtn}
+                  onClick={() => onApplyToAll(refValue, displayTitle)}
+                >
                   Apply to all days
                 </button>
               )}
@@ -687,7 +1039,8 @@ function SlotRow({
             onBlur={() => flushSave(localTitle, localBody)}
           />
           <p style={reviewNote}>
-            Your custom content will be reviewed by KalpX before the program goes live.
+            Your custom content will be reviewed by KalpX before the program
+            goes live.
           </p>
         </div>
       )}
@@ -695,7 +1048,13 @@ function SlotRow({
   );
 }
 
-function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
+function FieldRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div style={fieldRow}>
       <p style={fieldLabel}>{label}</p>
@@ -706,17 +1065,30 @@ function FieldRow({ label, children }: { label: string; children: React.ReactNod
 
 function reviewBadge(status: string): React.CSSProperties {
   const color =
-    status === "approved" || status === "active" ? "#22863a"
-    : status === "submitted" || status === "under_review" ? "#0969da"
-    : status === "changes_requested" ? "#d97706"
-    : status === "rejected" ? "#C0392B"
-    : "#8B6F4E";
-  return { display: "inline-block" as const, fontSize: 12, fontWeight: 600, color, marginTop: 4 };
+    status === "approved" || status === "active"
+      ? "#22863a"
+      : status === "submitted" || status === "under_review"
+        ? "#0969da"
+        : status === "changes_requested"
+          ? "#d97706"
+          : status === "rejected"
+            ? "#C0392B"
+            : "#8B6F4E";
+  return {
+    display: "inline-block" as const,
+    fontSize: 12,
+    fontWeight: 600,
+    color,
+    marginTop: 4,
+  };
 }
 
 function modeBtn(active: boolean): React.CSSProperties {
   return {
-    padding: "4px 12px", fontSize: 12, borderRadius: 20, cursor: "pointer",
+    padding: "4px 12px",
+    fontSize: 12,
+    borderRadius: 20,
+    cursor: "pointer",
     background: active ? "#C99317" : "none",
     color: active ? "#fff" : "#8B6F4E",
     border: active ? "none" : "1px solid #DDD3C0",
@@ -724,59 +1096,357 @@ function modeBtn(active: boolean): React.CSSProperties {
   };
 }
 
-const page: React.CSSProperties = { minHeight: "100vh", background: "#FAF7F2", padding: "0 16px 80px" };
-const inner: React.CSSProperties = { maxWidth: 720, margin: "0 auto", paddingTop: 24 };
-const backBtn: React.CSSProperties = { background: "none", border: "none", cursor: "pointer", color: "#8B6F4E", fontSize: 13, padding: 0, marginBottom: 20 };
-const headerRow: React.CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, flexWrap: "wrap" as const, gap: 12 };
-const eyebrow: React.CSSProperties = { fontSize: 10, letterSpacing: "1.2px", color: "#8B6F4E", textTransform: "uppercase" as const, marginBottom: 4 };
-const heading: React.CSSProperties = { fontSize: 22, fontWeight: 800, color: "#432104", margin: "0 0 4px" };
-const submitBtn: React.CSSProperties = { padding: "10px 22px", background: "#432104", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 13 };
-const lockBanner: React.CSSProperties = { background: "#FEF3D0", border: "1px solid #C99317", borderRadius: 8, padding: "10px 16px", fontSize: 13, color: "#7A4E00", marginBottom: 20 };
-const errorText: React.CSSProperties = { color: "#C0392B", fontSize: 13, marginBottom: 16 };
-const dayGrid: React.CSSProperties = { display: "flex", flexDirection: "column" as const, gap: 20 };
+const page: React.CSSProperties = {
+  minHeight: "100vh",
+  background: "#FAF7F2",
+  padding: "0 16px 80px",
+};
+const inner: React.CSSProperties = {
+  maxWidth: 720,
+  margin: "0 auto",
+  paddingTop: 24,
+};
+const backBtn: React.CSSProperties = {
+  background: "none",
+  border: "none",
+  cursor: "pointer",
+  color: "#8B6F4E",
+  fontSize: 13,
+  padding: 0,
+  marginBottom: 20,
+};
+const headerRow: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
+  marginBottom: 24,
+  flexWrap: "wrap" as const,
+  gap: 12,
+};
+const eyebrow: React.CSSProperties = {
+  fontSize: 10,
+  letterSpacing: "1.2px",
+  color: "#8B6F4E",
+  textTransform: "uppercase" as const,
+  marginBottom: 4,
+};
+const heading: React.CSSProperties = {
+  fontSize: 22,
+  fontWeight: 800,
+  color: "#432104",
+  margin: "0 0 4px",
+};
+const submitBtn: React.CSSProperties = {
+  padding: "10px 22px",
+  background: "#432104",
+  color: "#fff",
+  border: "none",
+  borderRadius: 8,
+  cursor: "pointer",
+  fontWeight: 700,
+  fontSize: 13,
+};
+const lockBanner: React.CSSProperties = {
+  background: "#FEF3D0",
+  border: "1px solid #C99317",
+  borderRadius: 8,
+  padding: "10px 16px",
+  fontSize: 13,
+  color: "#7A4E00",
+  marginBottom: 20,
+};
+const errorText: React.CSSProperties = {
+  color: "#C0392B",
+  fontSize: 13,
+  marginBottom: 16,
+};
+const dayGrid: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column" as const,
+  gap: 20,
+};
 const dayNavBar: React.CSSProperties = {
-  position: "fixed" as const, top: 0, left: 0, right: 0, zIndex: 100,
-  background: "#FAF7F2", borderBottom: "1px solid #E8DECE",
+  position: "fixed" as const,
+  top: 0,
+  left: 0,
+  right: 0,
+  zIndex: 100,
+  background: "#FAF7F2",
+  borderBottom: "1px solid #E8DECE",
   padding: "8px 16px",
 };
 const dayNavScroll: React.CSSProperties = {
-  display: "flex", gap: 8, overflowX: "auto" as const,
-  maxWidth: 720, margin: "0 auto",
+  display: "flex",
+  gap: 8,
+  overflowX: "auto" as const,
+  maxWidth: 720,
+  margin: "0 auto",
   scrollbarWidth: "none" as const,
   msOverflowStyle: "none" as const,
 };
-const dayCard: React.CSSProperties = { background: "#fff", border: "1px solid #E8DECE", borderRadius: 12, padding: "18px 22px" };
-const dayHeader: React.CSSProperties = { display: "flex", alignItems: "center", gap: 10, marginBottom: 14 };
-const dayNumber: React.CSSProperties = { fontSize: 14, fontWeight: 800, color: "#432104" };
+const dayCard: React.CSSProperties = {
+  background: "#fff",
+  border: "1px solid #E8DECE",
+  borderRadius: 12,
+  padding: "18px 22px",
+};
+const dayHeader: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 10,
+  marginBottom: 14,
+};
+const dayNumber: React.CSSProperties = {
+  fontSize: 14,
+  fontWeight: 800,
+  color: "#432104",
+};
 const savingDot: React.CSSProperties = { fontSize: 11, color: "#B5A08A" };
 const fieldRow: React.CSSProperties = { marginBottom: 14 };
-const fieldLabel: React.CSSProperties = { fontSize: 11, fontWeight: 700, color: "#8B6F4E", textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: 6 };
-const fieldInput: React.CSSProperties = { width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #DDD3C0", fontSize: 13, color: "#432104", boxSizing: "border-box" as const };
-const textArea: React.CSSProperties = { ...fieldInput, minHeight: 72, resize: "vertical" as const, fontFamily: "inherit" };
-const urlHint: React.CSSProperties = { fontSize: 11, color: "#B5A08A", marginTop: 3 };
-const modeToggle: React.CSSProperties = { display: "flex", gap: 6, marginBottom: 8 };
-const libRow: React.CSSProperties = { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" as const };
-const selectedItem: React.CSSProperties = { fontSize: 12, color: "#432104", background: "#F5EFE5", padding: "4px 10px", borderRadius: 6 };
-const changeBtn: React.CSSProperties = { background: "none", border: "1px solid #DDD3C0", borderRadius: 6, padding: "4px 10px", fontSize: 12, cursor: "pointer", color: "#8B6F4E" };
-const detailsBtn: React.CSSProperties = { background: "none", border: "1px solid #C99317", borderRadius: 6, padding: "4px 10px", fontSize: 12, cursor: "pointer", color: "#C99317", fontWeight: 600 };
-const pickBtn: React.CSSProperties = { background: "#FEF3D0", border: "1px solid #C99317", borderRadius: 8, padding: "7px 14px", fontSize: 12, cursor: "pointer", color: "#7A4E00", fontWeight: 600 };
-const applyAllBtn: React.CSSProperties = { background: "none", border: "none", fontSize: 11, color: "#C99317", cursor: "pointer", textDecoration: "underline", marginTop: 6 };
-const selectedCard: React.CSSProperties = { background: "#F5EFE5", border: "1px solid #DDD3C0", borderRadius: 8, padding: "10px 12px", width: "100%" };
-const selectedCardTop: React.CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, flexWrap: "wrap" as const };
-const selectedCardTitle: React.CSSProperties = { fontSize: 13, fontWeight: 700, color: "#432104", flex: 1, lineHeight: 1.4 };
-const selectedCardActions: React.CSSProperties = { display: "flex", gap: 6, flexShrink: 0, flexWrap: "wrap" as const };
-const detailsPanel: React.CSSProperties = { marginTop: 10, paddingTop: 10, borderTop: "1px solid #DDD3C0", display: "flex", flexDirection: "column" as const, gap: 10 };
+const fieldLabel: React.CSSProperties = {
+  fontSize: 11,
+  fontWeight: 700,
+  color: "#8B6F4E",
+  textTransform: "uppercase" as const,
+  letterSpacing: "0.06em",
+  marginBottom: 6,
+};
+const fieldInput: React.CSSProperties = {
+  width: "100%",
+  padding: "8px 12px",
+  borderRadius: 8,
+  border: "1px solid #DDD3C0",
+  fontSize: 16,
+  color: "#432104",
+  boxSizing: "border-box" as const,
+};
+const textArea: React.CSSProperties = {
+  ...fieldInput,
+  minHeight: 72,
+  resize: "vertical" as const,
+  fontFamily: "inherit",
+};
+const urlHint: React.CSSProperties = {
+  fontSize: 11,
+  color: "#B5A08A",
+  marginTop: 3,
+};
+const modeToggle: React.CSSProperties = {
+  display: "flex",
+  gap: 6,
+  marginBottom: 8,
+};
+const libRow: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+  flexWrap: "wrap" as const,
+};
+const selectedItem: React.CSSProperties = {
+  fontSize: 12,
+  color: "#432104",
+  background: "#F5EFE5",
+  padding: "4px 10px",
+  borderRadius: 6,
+};
+const changeBtn: React.CSSProperties = {
+  background: "none",
+  border: "1px solid #DDD3C0",
+  borderRadius: 6,
+  padding: "4px 10px",
+  fontSize: 12,
+  cursor: "pointer",
+  color: "#8B6F4E",
+};
+const detailsBtn: React.CSSProperties = {
+  background: "none",
+  border: "1px solid #C99317",
+  borderRadius: 6,
+  padding: "4px 10px",
+  fontSize: 12,
+  cursor: "pointer",
+  color: "#C99317",
+  fontWeight: 600,
+};
+const pickBtn: React.CSSProperties = {
+  background: "#FEF3D0",
+  border: "1px solid #C99317",
+  borderRadius: 8,
+  padding: "7px 14px",
+  fontSize: 12,
+  cursor: "pointer",
+  color: "#7A4E00",
+  fontWeight: 600,
+};
+const applyAllBtn: React.CSSProperties = {
+  background: "none",
+  border: "none",
+  fontSize: 11,
+  color: "#C99317",
+  cursor: "pointer",
+  textDecoration: "underline",
+  marginTop: 6,
+};
+const selectedCard: React.CSSProperties = {
+  background: "#F5EFE5",
+  border: "1px solid #DDD3C0",
+  borderRadius: 8,
+  padding: "10px 12px",
+  width: "100%",
+};
+const selectedCardTop: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
+  gap: 8,
+  flexWrap: "wrap" as const,
+};
+const selectedCardTitle: React.CSSProperties = {
+  fontSize: 13,
+  fontWeight: 700,
+  color: "#432104",
+  flex: 1,
+  lineHeight: 1.4,
+};
+const selectedCardActions: React.CSSProperties = {
+  display: "flex",
+  gap: 6,
+  flexShrink: 0,
+  flexWrap: "wrap" as const,
+};
+const detailsPanel: React.CSSProperties = {
+  marginTop: 10,
+  paddingTop: 10,
+  borderTop: "1px solid #DDD3C0",
+  display: "flex",
+  flexDirection: "column" as const,
+  gap: 10,
+};
 const detailFieldRow: React.CSSProperties = {};
-const detailFieldLabel: React.CSSProperties = { display: "block", fontSize: 10, fontWeight: 700, color: "#B5A08A", textTransform: "uppercase" as const, letterSpacing: "0.08em", marginBottom: 3 };
-const detailFieldValue: React.CSSProperties = { fontSize: 13, color: "#432104", margin: 0, lineHeight: 1.5 };
-const detailList: React.CSSProperties = { margin: "0", paddingLeft: 18, display: "flex", flexDirection: "column" as const, gap: 4 };
-const detailListItem: React.CSSProperties = { fontSize: 13, color: "#432104", lineHeight: 1.5 };
-const reviewNote: React.CSSProperties = { fontSize: 11, color: "#B5A08A", marginTop: 4 };
-const successBox: React.CSSProperties = { background: "#fff", border: "1px solid #DDD3C0", borderRadius: 12, padding: "40px 32px", textAlign: "center" as const, maxWidth: 480, margin: "80px auto" };
-const primaryBtn: React.CSSProperties = { padding: "10px 22px", background: "#C99317", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 14 };
-const hint: React.CSSProperties = { textAlign: "center" as const, color: "#B5A08A", padding: "60px 0", fontSize: 14 };
-const repeatBanner: React.CSSProperties = { display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" as const, gap: 10, background: "#FEF9ED", border: "1px solid #E8D9A0", borderRadius: 10, padding: "12px 18px", marginBottom: 20 };
-const repeatBtn: React.CSSProperties = { padding: "8px 16px", background: "#432104", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 13, whiteSpace: "nowrap" as const };
-const timeLabel: React.CSSProperties = { fontSize: 12, color: "#7A6652", fontWeight: 600, whiteSpace: "nowrap" as const };
-const timeInput: React.CSSProperties = { padding: "6px 10px", borderRadius: 8, border: "1px solid #DDD3C0", fontSize: 13, color: "#432104" };
-const tzSelect: React.CSSProperties = { padding: "6px 10px", borderRadius: 8, border: "1px solid #DDD3C0", fontSize: 13, color: "#432104", background: "#fff", cursor: "pointer" };
+const detailFieldLabel: React.CSSProperties = {
+  display: "block",
+  fontSize: 10,
+  fontWeight: 700,
+  color: "#B5A08A",
+  textTransform: "uppercase" as const,
+  letterSpacing: "0.08em",
+  marginBottom: 3,
+};
+const detailFieldValue: React.CSSProperties = {
+  fontSize: 13,
+  color: "#432104",
+  margin: 0,
+  lineHeight: 1.5,
+};
+const detailList: React.CSSProperties = {
+  margin: "0",
+  paddingLeft: 18,
+  display: "flex",
+  flexDirection: "column" as const,
+  gap: 4,
+};
+const detailListItem: React.CSSProperties = {
+  fontSize: 13,
+  color: "#432104",
+  lineHeight: 1.5,
+};
+const reviewNote: React.CSSProperties = {
+  fontSize: 11,
+  color: "#B5A08A",
+  marginTop: 4,
+};
+const slotSettingsRow: React.CSSProperties = {
+  display: "flex",
+  gap: 20,
+  flexWrap: "wrap" as const,
+  marginTop: 8,
+  marginBottom: 4,
+  padding: "10px 12px",
+  background: "#FAF7F2",
+  borderRadius: 8,
+  border: "1px solid #EDE4D0",
+};
+const settingsLabel: React.CSSProperties = {
+  fontSize: 10,
+  fontWeight: 700,
+  color: "#9A7548",
+  letterSpacing: "0.07em",
+  marginBottom: 4,
+};
+const timeInput: React.CSSProperties = {
+  border: "1px solid #D4C4A8",
+  borderRadius: 8,
+  padding: "4px 8px",
+  fontSize: 16,
+  color: "#432104",
+};
+const successBox: React.CSSProperties = {
+  background: "#fff",
+  border: "1px solid #DDD3C0",
+  borderRadius: 12,
+  padding: "40px 32px",
+  textAlign: "center" as const,
+  maxWidth: 480,
+  margin: "80px auto",
+};
+const primaryBtn: React.CSSProperties = {
+  padding: "10px 22px",
+  background: "#C99317",
+  color: "#fff",
+  border: "none",
+  borderRadius: 8,
+  cursor: "pointer",
+  fontWeight: 700,
+  fontSize: 14,
+};
+const hint: React.CSSProperties = {
+  textAlign: "center" as const,
+  color: "#B5A08A",
+  padding: "60px 0",
+  fontSize: 14,
+};
+const repeatBanner: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  flexWrap: "wrap" as const,
+  gap: 10,
+  background: "#FEF9ED",
+  border: "1px solid #E8D9A0",
+  borderRadius: 10,
+  padding: "12px 18px",
+  marginBottom: 20,
+};
+const repeatBtn: React.CSSProperties = {
+  padding: "8px 16px",
+  background: "#432104",
+  color: "#fff",
+  border: "none",
+  borderRadius: 8,
+  cursor: "pointer",
+  fontWeight: 700,
+  fontSize: 13,
+  whiteSpace: "nowrap" as const,
+};
+const timeLabel: React.CSSProperties = {
+  fontSize: 12,
+  color: "#7A6652",
+  fontWeight: 600,
+  whiteSpace: "nowrap" as const,
+};
+const sessionTimeInput: React.CSSProperties = {
+  padding: "6px 10px",
+  borderRadius: 8,
+  border: "1px solid #DDD3C0",
+  fontSize: 16,
+  color: "#432104",
+};
+const tzSelect: React.CSSProperties = {
+  padding: "6px 10px",
+  borderRadius: 8,
+  border: "1px solid #DDD3C0",
+  fontSize: 13,
+  color: "#432104",
+  background: "#fff",
+  cursor: "pointer",
+};

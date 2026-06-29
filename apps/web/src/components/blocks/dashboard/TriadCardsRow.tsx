@@ -1,5 +1,6 @@
 import { Flower2, Leaf, Music } from "lucide-react";
 import React from "react";
+import { useTranslation } from '../../../lib/i18n';
 // Icon mapping (matches RN Ionicons):
 //   musical-notes → Music
 //   leaf         → Leaf
@@ -53,6 +54,7 @@ interface TriadItem {
 }
 
 export function TriadCardsRow({ sd, onAction }: Props) {
+  const { t } = useTranslation();
   const triadArr: any[] = Array.isArray(sd.today?.triad) ? sd.today.triad : [];
   const completed: string[] = Array.isArray(sd.completed_today)
     ? sd.completed_today
@@ -170,7 +172,7 @@ export function TriadCardsRow({ sd, onAction }: Props) {
                 padding: 6,
                 opacity: 0.7,
               }}
-              aria-label="More info"
+              aria-label={t('triadCards.moreInfo')}
             >
               ⓘ
             </button>
@@ -189,7 +191,7 @@ export function TriadCardsRow({ sd, onAction }: Props) {
                 lineHeight: 1.2,
               }}
             >
-              {SLOT_LABELS[item.slot]}
+              {item.slot === 'mantra' ? t('triadCards.labelMantra') : item.slot === 'sankalp' ? t('triadCards.labelSankalp') : t('triadCards.labelPractice')}
             </p>
 
             {/* Serif bold title */}

@@ -25,6 +25,7 @@ interface PreferredLA {
   type: LiveActivityType;
   name: string;
   line?: string;
+  deepLink?: string;
 }
 
 interface Props {
@@ -33,6 +34,8 @@ interface Props {
   // Short subtitle/description shown as the LA line on the lock screen (e.g. item.subtitle).
   // Persisted alongside name so useFocusEffect auto-restart can restore it.
   experienceLine?: string;
+  // Deep link URL for tapping the LA from lock screen. Persisted so useFocusEffect can restore it.
+  experienceDeepLink?: string;
   onActivate?: () => void;
   // 'completion' renders the calmer inline banner used on completion screens
   variant?: "default" | "completion";
@@ -47,6 +50,7 @@ function LiveActivityPreferenceBannerCore({
   experienceType,
   experienceName,
   experienceLine,
+  experienceDeepLink,
   onActivate,
   variant = "default",
 }: Props) {
@@ -67,7 +71,19 @@ function LiveActivityPreferenceBannerCore({
       const preferredRaw = await AsyncStorage.getItem(PREFERRED_LA_KEY);
       if (cancelled) return;
       const pref: PreferredLA | null = preferredRaw ? JSON.parse(preferredRaw) : null;
-      if (pref && pref.type === experienceType && pref.name === experienceName) return;
+      if (pref && pref.type === experienceType && pref.name === experienceName) {
+        // Silently backfill line/deepLink if stored pref is missing them (old format).
+        // Also restart the running LA so the subtitle appears immediately.
+        const needsUpdate = (!pref.line && experienceLine) || (!pref.deepLink && experienceDeepLink);
+        if (needsUpdate) {
+          AsyncStorage.setItem(
+            PREFERRED_LA_KEY,
+            JSON.stringify({ ...pref, line: experienceLine ?? pref.line ?? '', deepLink: experienceDeepLink ?? pref.deepLink ?? '' }),
+          ).catch(() => {});
+          onActivate?.();
+        }
+        return;
+      }
       setCurrentLA(pref);
       setVisible(true);
       Animated.timing(fadeAnim, {
@@ -157,7 +173,7 @@ function LiveActivityPreferenceBannerCore({
     if (conflictChoice === "switch") {
       AsyncStorage.setItem(
         PREFERRED_LA_KEY,
-        JSON.stringify({ type: experienceType, name: experienceName, line: experienceLine ?? '' }),
+        JSON.stringify({ type: experienceType, name: experienceName, line: experienceLine ?? '', deepLink: experienceDeepLink ?? '' }),
       ).catch(() => {});
       onActivate?.();
       logEvent(EVENT_NAMES.LIVE_ACTIVITY_ANCHOR_SELECTED, {

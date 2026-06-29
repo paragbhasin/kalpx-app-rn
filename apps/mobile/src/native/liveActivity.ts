@@ -158,6 +158,7 @@ export const liveActivity = {
     title: string,
     line: string,
     deepLinkURL: string = 'kalpx://mitra/quick_chant/home?source=la',
+    anchorType: string = 'sankalp',
   ): Promise<string | null> {
     if (!supported) {
       console.warn("[LiveActivity] startSankalp skipped — module not found");
@@ -169,11 +170,11 @@ export const liveActivity = {
       if (perm === 'denied') { console.warn("[LiveActivity] startSankalp skipped — POST_NOTIFICATIONS denied"); return null; }
     }
     await endAllActivities();
-    console.log("[LiveActivity] calling startSankalp", { title, line, deepLinkURL });
-    return KalpxLiveActivityModule.startSankalpActivity(title, line, deepLinkURL)
+    console.log("[LiveActivity] calling startSankalp", { title, line, deepLinkURL, anchorType });
+    return KalpxLiveActivityModule.startSankalpActivity(title, line, deepLinkURL, anchorType)
       .then((id: string) => {
         console.log("[LiveActivity] startSankalp OK, id:", id);
-        trackLA(EVENT_NAMES.LIVE_ACTIVITY_SANKALP_STARTED, { activity_type: 'sankalp', mode: 'anchor' });
+        trackLA(EVENT_NAMES.LIVE_ACTIVITY_SANKALP_STARTED, { activity_type: anchorType, mode: 'anchor' });
         return id;
       })
       .catch((err: any) => {

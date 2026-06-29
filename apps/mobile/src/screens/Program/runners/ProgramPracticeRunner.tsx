@@ -14,7 +14,7 @@ const BEIGE_BG = require("../../../../assets/beige_bg.webp");
 export default function ProgramPracticeRunner() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const { item, dayNumber, completedItems = [] } = route.params;
+  const { item, dayNumber, completedItems = [], practiceDurationMinutes } = route.params;
   const updateBackground = useScreenStore((state) => state.updateBackground);
 
   useFocusEffect(
@@ -27,7 +27,8 @@ export default function ProgramPracticeRunner() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <PracticeRunnerView
-        item={item}
+        item={practiceDurationMinutes ? { ...item, duration_min: practiceDurationMinutes } : item}
+        lockDuration={!!practiceDurationMinutes}
         onComplete={() => {
           trackRitualCompletion("practice");
           const updated = [...new Set([...completedItems, item.item_id])];

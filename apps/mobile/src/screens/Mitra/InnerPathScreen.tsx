@@ -160,8 +160,9 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
         if (AppState.currentState !== 'active') return;
         const pref = preferredRaw ? JSON.parse(preferredRaw) : null;
         if (pref?.type === 'practice') {
-          // Practice anchor: show the practice on lock screen; server state type is irrelevant
-          liveActivity.startSankalp(pref.name, pref.line ?? '', 'kalpx://mitra/inner_path/home?source=la');
+          // Practice anchor: show the practice on lock screen; server state type is irrelevant.
+          // Prefer stored deepLink (has the correct surface) over the generic fallback.
+          liveActivity.startSankalp(pref.name, pref.line ?? '', pref.deepLink || 'kalpx://mitra/inner_path/home?source=la', pref.type);
           return;
         }
         if (state.type !== 'sankalp') return;

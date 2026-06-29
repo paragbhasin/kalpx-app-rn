@@ -215,14 +215,18 @@ export default function GuideTemplateDayEditorScreen() {
   function handleLibrarySelect(item: LibraryPickerItem) {
     if (!pickerTarget) return;
     const { dayNumber, slot } = pickerTarget;
+    const srcDay = days.find((d) => d.day_number === dayNumber);
     const patch =
       slot === "mantra"
-        ? { mantra_ref: item.item_id, custom_mantra_title: "", custom_mantra_body: "" }
+        ? { mantra_ref: item.item_id, custom_mantra_title: "", custom_mantra_body: "",
+            ...(!srcDay?.mantra_reminder_time ? { mantra_reminder_time: '06:00' } : {}) }
         : slot === "sankalp"
-        ? { sankalp_ref: item.item_id, custom_sankalp_title: "", custom_sankalp_body: "" }
+        ? { sankalp_ref: item.item_id, custom_sankalp_title: "", custom_sankalp_body: "",
+            ...(!srcDay?.sankalp_reminder_time ? { sankalp_reminder_time: '08:00' } : {}) }
         : slot === "wisdom"
         ? { wisdom_ref: item.item_id, custom_wisdom_title: "", custom_wisdom_body: "" }
-        : { practice_ref: item.item_id, custom_practice_title: "", custom_practice_body: "" };
+        : { practice_ref: item.item_id, custom_practice_title: "", custom_practice_body: "",
+            ...(!srcDay?.practice_reminder_time ? { practice_reminder_time: '18:00' } : {}) };
     saveDay(dayNumber, patch);
     setSlotSelections((prev) => ({ ...prev, [`${dayNumber}-${slot}`]: item }));
     setPickerTarget(null);

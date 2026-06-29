@@ -149,10 +149,10 @@ function DayReviewCard({ day }: { day: TemplateDay }) {
             customBody={day.custom_mantra_body}
             renderCard={(c) => <MantraCard card={c as LibraryMantra} />}
           />
-          {(day.mantra_card || day.custom_mantra_body) && (day.mantra_count || day.mantra_reminder_time) && (
+          {(day.mantra_ref || day.mantra_card || day.custom_mantra_body) && (day.mantra_count != null || !!day.mantra_reminder_time) && (
             <div style={slotMetaRow}>
-              {day.mantra_count && <span style={slotMetaChip}>Chant count: <b>{day.mantra_count}×</b></span>}
-              {day.mantra_reminder_time && <span style={slotMetaChip}>Reminder: <b>{fmt12h(day.mantra_reminder_time)}</b></span>}
+              {day.mantra_count != null && <span style={slotMetaChip}>Chant count: <b>{day.mantra_count}×</b></span>}
+              {!!day.mantra_reminder_time && <span style={slotMetaChip}>Reminder: <b>{fmt12h(day.mantra_reminder_time!)}</b></span>}
             </div>
           )}
 
@@ -164,9 +164,9 @@ function DayReviewCard({ day }: { day: TemplateDay }) {
             customBody={day.custom_sankalp_body}
             renderCard={(c) => <SankalpCard card={c as LibrarySankalp} />}
           />
-          {(day.sankalp_card || day.custom_sankalp_body) && day.sankalp_reminder_time && (
+          {(day.sankalp_ref || day.sankalp_card || day.custom_sankalp_body) && !!day.sankalp_reminder_time && (
             <div style={slotMetaRow}>
-              <span style={slotMetaChip}>Reminder: <b>{fmt12h(day.sankalp_reminder_time)}</b></span>
+              <span style={slotMetaChip}>Reminder: <b>{fmt12h(day.sankalp_reminder_time!)}</b></span>
             </div>
           )}
 
@@ -178,10 +178,10 @@ function DayReviewCard({ day }: { day: TemplateDay }) {
             customBody={day.custom_practice_body}
             renderCard={(c) => <PracticeCard card={c as LibraryPractice} />}
           />
-          {(day.practice_card || day.custom_practice_body) && (day.practice_duration_minutes || day.practice_reminder_time) && (
+          {(day.practice_ref || day.practice_card || day.custom_practice_body) && (day.practice_duration_minutes != null || !!day.practice_reminder_time) && (
             <div style={slotMetaRow}>
-              {day.practice_duration_minutes && <span style={slotMetaChip}>Duration: <b>{day.practice_duration_minutes} min</b></span>}
-              {day.practice_reminder_time && <span style={slotMetaChip}>Reminder: <b>{fmt12h(day.practice_reminder_time)}</b></span>}
+              {day.practice_duration_minutes != null && <span style={slotMetaChip}>Duration: <b>{day.practice_duration_minutes} min</b></span>}
+              {!!day.practice_reminder_time && <span style={slotMetaChip}>Reminder: <b>{fmt12h(day.practice_reminder_time!)}</b></span>}
             </div>
           )}
 

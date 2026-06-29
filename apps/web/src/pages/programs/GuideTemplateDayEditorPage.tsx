@@ -165,18 +165,22 @@ export function GuideTemplateDayEditorPage() {
   function handleLibrarySelect(item: PickerItem) {
     if (!pickerTarget) return;
     const { dayNumber, slot } = pickerTarget;
+    const srcDay = days.find((d) => d.day_number === dayNumber);
     const patch =
       slot === "mantra"
         ? {
             mantra_ref: item.item_id,
             custom_mantra_title: "",
             custom_mantra_body: "",
+            // Seed default reminder time if none saved yet
+            ...(!srcDay?.mantra_reminder_time ? { mantra_reminder_time: "06:00" } : {}),
           }
         : slot === "sankalp"
           ? {
               sankalp_ref: item.item_id,
               custom_sankalp_title: "",
               custom_sankalp_body: "",
+              ...(!srcDay?.sankalp_reminder_time ? { sankalp_reminder_time: "08:00" } : {}),
             }
           : slot === "wisdom"
             ? {
@@ -188,6 +192,7 @@ export function GuideTemplateDayEditorPage() {
                 practice_ref: item.item_id,
                 custom_practice_title: "",
                 custom_practice_body: "",
+                ...(!srcDay?.practice_reminder_time ? { practice_reminder_time: "18:00" } : {}),
               };
     saveDay(dayNumber, patch);
     storePickerItem(dayNumber, slot, item);

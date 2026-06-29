@@ -213,7 +213,7 @@ const searchRow: React.CSSProperties = {
 };
 const searchInput: React.CSSProperties = {
   flex: 1, padding: "8px 12px", borderRadius: 8, border: "1px solid #DDD3C0",
-  fontSize: 14, outline: "none",
+  fontSize: 16, outline: "none",
 };
 const searchBtn: React.CSSProperties = {
   padding: "8px 16px", background: "#C99317", color: "#fff", border: "none",

@@ -60,14 +60,6 @@ function formatSessionTime(time: string): string {
 
 /** Returns a short human-readable title for the card. */
 function getCardTitle(item: ProgramDayItem): string {
-  if (item.item_type === "mantra") {
-    // item_id like "mantra.durga_suktam" → "Durga Suktam"
-    const base = item.item_id.replace(/^mantra\./, "");
-    return base.split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
-  }
-  if (item.item_type === "sankalp" && item.line) {
-    return item.line;
-  }
   return item.title;
 }
 

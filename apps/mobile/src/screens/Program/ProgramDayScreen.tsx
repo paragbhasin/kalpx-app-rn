@@ -7,6 +7,7 @@
  *
  * On completing all 3 items → "Complete Day" CTA → ProgramCompletionScreen.
  */
+import { Ionicons } from "@expo/vector-icons";
 import {
   useFocusEffect,
   useNavigation,
@@ -27,23 +28,21 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { TimePickerModal } from "../../components/TimePickerModal";
 import {
+  apiGetProgramReminders,
+  apiPatchProgramReminders,
   completeProgramDay,
   fetchProgramDay,
   postProgramActivity,
-  apiGetProgramReminders,
-  apiPatchProgramReminders,
   type ProgramDayContent,
   type ProgramDayItem,
   type ProgramReminders,
-  type ProgramRemindersPatch,
-  type WisdomCard,
+  type ProgramRemindersPatch
 } from "../../engine/programApi";
-import { Fonts } from "../../theme/fonts";
-import { setSkipMitraStart, setForceFourDoorHome } from "../../utils/postLoginGuard";
 import { useNotificationPermissionGate } from "../../hooks/useNotificationPermissionGate";
-import { TimePickerModal } from "../../components/TimePickerModal";
-import { Ionicons } from "@expo/vector-icons";
+import { Fonts } from "../../theme/fonts";
+import { setForceFourDoorHome, setSkipMitraStart } from "../../utils/postLoginGuard";
 
 const SUPPORT_URL = "https://kalpx.com/programs/support";
 
@@ -113,6 +112,9 @@ export default function ProgramDayScreen() {
   const [dayContent, setDayContent] = useState<ProgramDayContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Wisdom inline dropdown
+  const [wisdomOpen, setWisdomOpen] = useState(false);
 
   // Reminder accordion
   const [copiedLink, setCopiedLink] = useState(false);
@@ -329,11 +331,35 @@ export default function ProgramDayScreen() {
             onPress={() => { setSkipMitraStart(); setForceFourDoorHome(); navigation.goBack(); }}
             style={styles.backIcon}
           >
-            <Text style={styles.backIconText}>‹</Text>
+            {/* <Text style={styles.backIconText}>‹</Text> */}
           </TouchableOpacity>
           <View style={styles.headerCenter}>
             <Text style={styles.dayLabel}>DAY {dayContent.day_number}</Text>
             <Text style={styles.themeText}>{dayContent.theme}</Text>
+            {dayContent.wisdom_card ? (
+              <TouchableOpacity
+                onPress={() => setWisdomOpen(v => !v)}
+                activeOpacity={0.75}
+                style={styles.wisdomInline}
+              >
+                <View style={styles.wisdomInlineRow}>
+                  <Text style={styles.wisdomInlineTitle} numberOfLines={wisdomOpen ? undefined : 1}>
+                    {dayContent.wisdom_card.text}
+                  </Text>
+                  <Ionicons
+                    name={wisdomOpen ? "chevron-up" : "chevron-down"}
+                    size={12}
+                    color="#9A7548"
+                    style={{ marginLeft: 4 }}
+                  />
+                </View>
+                {wisdomOpen && (
+                  <Text style={styles.wisdomInlineBody}>
+                    {dayContent.wisdom_card.explanation?.[0] ?? dayContent.wisdom_card.text}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            ) : null}
           </View>
           <View style={{ width: 40 }} />
         </View>
@@ -350,34 +376,6 @@ export default function ProgramDayScreen() {
             />
           ))}
         </View>
-
-        {/* Wisdom card — tappable, opens ProgramWisdomRunner */}
-        {dayContent.wisdom_card ? (
-          <TouchableOpacity
-            style={styles.wisdomCard}
-            activeOpacity={0.82}
-            onPress={() =>
-              navigation.navigate("ProgramWisdomRunner", {
-                wisdom: dayContent.wisdom_card,
-                dayNumber: dayContent.day_number,
-                day_join_url: dayContent.day_join_url ?? null,
-                day_session_time: dayContent.day_session_time ?? null,
-                day_session_timezone: dayContent.day_session_timezone ?? null,
-              })
-            }
-            accessibilityLabel="Wisdom of the Day"
-          >
-            <View style={styles.wisdomCardInner}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.wisdomLabel}>WISDOM OF THE DAY</Text>
-                <Text style={styles.wisdomText} numberOfLines={2}>
-                  {dayContent.wisdom_card.text}
-                </Text>
-              </View>
-              <Text style={styles.itemArrow}>→</Text>
-            </View>
-          </TouchableOpacity>
-        ) : null}
 
         {/* Live session */}
         {dayContent.day_join_url ? (
@@ -630,36 +628,31 @@ const styles = StyleSheet.create({
   doneCheckmark: { fontSize: 22, color: "#C99317", fontWeight: "700" },
   itemArrow: { fontSize: 22, color: "#C99317" },
 
-  wisdomCard: {
-    backgroundColor: '#FFF8EE',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#E8D9B5',
-    padding: 18,
-    marginBottom: 12,
+  wisdomInline: {
+    marginTop: 10,
+    alignItems: 'center',
+    paddingHorizontal: 8,
   },
-  wisdomCardInner: {
+  wisdomInlineRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  wisdomLabel: {
-    fontFamily: Fonts.sans.medium,
-    fontSize: 11,
+  wisdomInlineTitle: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 13,
     color: '#9A7548',
-    letterSpacing: 0.05,
-    marginBottom: 4,
-  },
-  wisdomText: {
-    fontFamily: Fonts.serif.bold,
-    fontSize: 16,
-    color: '#432104',
     fontStyle: 'italic',
+    textAlign: 'center',
+    flexShrink: 1,
   },
-  wisdomSource: {
-    fontFamily: Fonts.sans.regular,
-    fontSize: 12,
-    color: '#9A7548',
+  wisdomInlineBody: {
     marginTop: 8,
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    color: '#7B6545',
+    lineHeight: 20,
+    textAlign: 'center',
   },
   liveSessionCard: {
     backgroundColor: '#FFF3DC',

@@ -17,7 +17,10 @@ import { liveActivity } from "../../../native/liveActivity";
 import { Fonts } from "../../../theme/fonts";
 import { sfs } from "../../../utils/responsive";
 
-if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
@@ -91,12 +94,14 @@ export default function ProgramWisdomRunner() {
       >
         <View style={styles.flow}>
           {/* Back button */}
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backRow}>
+          {/* <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backRow}>
             <Text style={styles.backText}>‹ Back</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           {/* Day label */}
-          <Text style={styles.dayLabel}>DAY {dayNumber} · WISDOM OF THE DAY</Text>
+          <Text style={styles.dayLabel}>
+            DAY {dayNumber} · WISDOM OF THE DAY
+          </Text>
 
           {/* Main wisdom quote */}
           <View style={styles.quoteCard}>
@@ -129,7 +134,10 @@ export default function ProgramWisdomRunner() {
           ) : null}
 
           {/* Close */}
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backLink}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backLink}
+          >
             <Text style={styles.backLinkText}>← Back to Day</Text>
           </TouchableOpacity>
         </View>

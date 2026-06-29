@@ -339,7 +339,7 @@ export default function ProgramDayScreen() {
             {dayContent.wisdom_card ? (
               <TouchableOpacity
                 onPress={() => setWisdomOpen(v => !v)}
-                activeOpacity={0.75}
+                activeOpacity={0.82}
                 style={styles.wisdomInline}
               >
                 <Text style={styles.wisdomInlineLabel}>WISDOM OF THE DAY</Text>
@@ -349,9 +349,9 @@ export default function ProgramDayScreen() {
                   </Text>
                   <Ionicons
                     name={wisdomOpen ? "chevron-up" : "chevron-down"}
-                    size={13}
+                    size={14}
                     color="#9A7548"
-                    style={{ marginLeft: 5 }}
+                    style={{ marginLeft: 6 }}
                   />
                 </View>
                 {wisdomOpen && (dayContent.wisdom_card.explanation?.[0] ?? null) ? (
@@ -630,9 +630,14 @@ const styles = StyleSheet.create({
   itemArrow: { fontSize: 22, color: "#C99317" },
 
   wisdomInline: {
-    marginTop: 10,
+    marginTop: 12,
+    alignSelf: 'stretch',
+    backgroundColor: '#FFF8EE',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E8D9B5',
+    padding: 14,
     alignItems: 'center',
-    paddingHorizontal: 12,
   },
   wisdomInlineLabel: {
     fontFamily: Fonts.sans.medium,
@@ -640,7 +645,7 @@ const styles = StyleSheet.create({
     color: '#9A7548',
     letterSpacing: 0.08,
     textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: 5,
   },
   wisdomInlineRow: {
     flexDirection: 'row',
@@ -649,13 +654,13 @@ const styles = StyleSheet.create({
   },
   wisdomInlineTitle: {
     fontFamily: Fonts.serif.bold,
-    fontSize: 14,
+    fontSize: 15,
     color: '#432104',
     textAlign: 'center',
     flexShrink: 1,
   },
   wisdomInlineBody: {
-    marginTop: 8,
+    marginTop: 10,
     fontFamily: Fonts.sans.regular,
     fontSize: 13,
     color: '#7B6545',

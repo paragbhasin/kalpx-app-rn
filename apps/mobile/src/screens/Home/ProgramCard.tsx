@@ -39,7 +39,7 @@ function lockedHint(unlockDate: string): string {
 
 function getDayIcon(s: DayStatus) {
   if (s === "completed") return <Text style={styles.iconDone}>✓</Text>;
-  if (s === "completed_later") return <Text style={styles.iconDoneLate}>✓</Text>;
+  if (s === "completed_later") return <View style={styles.iconLateDot} />;
   if (s === "today") return <View style={styles.iconActiveDot} />;
   if (s === "missed") return <Text style={styles.iconMissed}>!</Text>;
   return <Text style={styles.iconLock}>🔒</Text>;
@@ -278,10 +278,11 @@ const styles = StyleSheet.create({
     color: "#2E7D32",
     fontWeight: "700",
   },
-  iconDoneLate: {
-    fontSize: 15,
-    color: "#2980B9",
-    fontWeight: "700",
+  iconLateDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#2980B9",
   },
   iconActiveDot: {
     width: 10,

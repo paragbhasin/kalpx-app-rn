@@ -46,6 +46,11 @@ export default function ProgramReflectionScreen() {
     try {
       await saveDayReflection(dayNumber, text.trim());
       setSaved(true);
+      setTimeout(() => {
+        setSkipMitraStart();
+        setForceFourDoorHome();
+        navigation.reset({ index: 0, routes: [{ name: "Home" }] });
+      }, 900);
     } catch {
       // silent — user can retry
     } finally {

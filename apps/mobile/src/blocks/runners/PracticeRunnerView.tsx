@@ -87,6 +87,7 @@ export interface PracticeRunnerViewProps {
   isCommunityRunner?: boolean;
   addLoading?: boolean;
   onAddToPractice?: () => void;
+  liveActivityDeepLink?: string;
 }
 
 const hasContent = (val: any): boolean => {
@@ -166,6 +167,7 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
   isCommunityRunner,
   addLoading,
   onAddToPractice,
+  liveActivityDeepLink,
 }) => {
   const { t } = useTranslation();
   // Keep the screen awake for the whole practice session; auto-released on unmount.
@@ -589,11 +591,14 @@ const PracticeRunnerView: React.FC<PracticeRunnerViewProps> = ({
         <LiveActivityPreferenceBanner
           experienceType="practice"
           experienceName={item.title ?? ''}
-          experienceLine={item.subtitle ?? item.line ?? item.summary ?? ''}
+          experienceLine={item.subtitle || item.line || item.summary || ''}
+          experienceDeepLink={liveActivityDeepLink}
           onActivate={() => {
             liveActivity.startSankalp(
               item.title ?? '',
-              item.subtitle ?? item.line ?? item.summary ?? '',
+              item.subtitle || item.line || item.summary || '',
+              liveActivityDeepLink,
+              'practice',
             );
           }}
         />

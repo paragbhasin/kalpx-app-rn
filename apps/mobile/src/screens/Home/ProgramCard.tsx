@@ -136,11 +136,17 @@ export default function ProgramCard({ program }: ProgramCardProps) {
                       <Text style={[styles.dayLabel, getDayLabelStyle(day.status)]}>
                         Day {day.day_number}
                       </Text>
+                      {day.status === "completed" && (
+                        <Text style={styles.dayHintDone}>Completed</Text>
+                      )}
+                      {day.status === "today" && (
+                        <Text style={styles.dayHintToday}>Today</Text>
+                      )}
                       {day.status === "missed" && (
                         <Text style={styles.dayHintMissed}>Missed</Text>
                       )}
                       {day.status === "completed_later" && (
-                        <Text style={styles.dayHintLate}>Completed</Text>
+                        <Text style={styles.dayHintLate}>Completed Later</Text>
                       )}
                       {day.status === "locked" && (
                         <Text style={styles.dayHint}>{lockedHint(day.unlock_date)}</Text>
@@ -274,7 +280,7 @@ const styles = StyleSheet.create({
   },
   iconDoneLate: {
     fontSize: 15,
-    color: "#9A7548",
+    color: "#2980B9",
     fontWeight: "700",
   },
   iconActiveDot: {
@@ -298,7 +304,7 @@ const styles = StyleSheet.create({
     color: "#432104",
   },
   dayLabelDone: { color: "#4A6741" },
-  dayLabelLate: { color: "#9A7548" },
+  dayLabelLate: { color: "#2980B9" },
   dayLabelActive: { color: "#8B5E00", fontFamily: Fonts.sans.bold },
   dayLabelMissed: { color: "#C0392B" },
   dayLabelLocked: { color: "#B5A08A" },
@@ -306,6 +312,18 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.regular,
     fontSize: 11,
     color: "#B5A08A",
+    marginTop: 2,
+  },
+  dayHintDone: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 11,
+    color: "#4A6741",
+    marginTop: 2,
+  },
+  dayHintToday: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 11,
+    color: "#8B5E00",
     marginTop: 2,
   },
   dayHintMissed: {
@@ -317,7 +335,7 @@ const styles = StyleSheet.create({
   dayHintLate: {
     fontFamily: Fonts.sans.regular,
     fontSize: 11,
-    color: "#9A7548",
+    color: "#2980B9",
     marginTop: 2,
   },
   dayArrow: {

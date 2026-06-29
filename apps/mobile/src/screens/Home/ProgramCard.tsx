@@ -27,6 +27,16 @@ interface ProgramCardProps {
   program: ActiveProgramSummary;
 }
 
+function lockedHint(unlockDate: string): string {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(unlockDate + "T00:00:00");
+  const diffDays = Math.round((target.getTime() - today.getTime()) / 86400000);
+  if (diffDays === 1) return "Unlocks tomorrow";
+  if (diffDays === 2) return "Unlocks in 2 days";
+  return `Unlocks ${unlockDate}`;
+}
+
 function getDayIcon(s: DayStatus) {
   if (s === "completed") return <Text style={styles.iconDone}>✓</Text>;
   if (s === "completed_later") return <Text style={styles.iconDoneLate}>✓</Text>;
@@ -133,7 +143,7 @@ export default function ProgramCard({ program }: ProgramCardProps) {
                         <Text style={styles.dayHintLate}>Completed late</Text>
                       )}
                       {day.status === "locked" && (
-                        <Text style={styles.dayHint}>Unlocks {day.unlock_date}</Text>
+                        <Text style={styles.dayHint}>{lockedHint(day.unlock_date)}</Text>
                       )}
                     </View>
                     {tappable && <Text style={styles.dayArrow}>→</Text>}

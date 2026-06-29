@@ -336,30 +336,6 @@ export default function ProgramDayScreen() {
           <View style={styles.headerCenter}>
             <Text style={styles.dayLabel}>DAY {dayContent.day_number}</Text>
             <Text style={styles.themeText}>{dayContent.theme}</Text>
-            {dayContent.wisdom_card ? (
-              <TouchableOpacity
-                onPress={() => setWisdomOpen(v => !v)}
-                activeOpacity={0.75}
-                style={styles.wisdomInline}
-              >
-                <View style={styles.wisdomInlineRow}>
-                  <Text style={styles.wisdomInlineTitle} numberOfLines={wisdomOpen ? undefined : 1}>
-                    {dayContent.wisdom_card.text}
-                  </Text>
-                  <Ionicons
-                    name={wisdomOpen ? "chevron-up" : "chevron-down"}
-                    size={12}
-                    color="#9A7548"
-                    style={{ marginLeft: 4 }}
-                  />
-                </View>
-                {wisdomOpen && (
-                  <Text style={styles.wisdomInlineBody}>
-                    {dayContent.wisdom_card.explanation?.[0] ?? dayContent.wisdom_card.text}
-                  </Text>
-                )}
-              </TouchableOpacity>
-            ) : null}
           </View>
           <View style={{ width: 40 }} />
         </View>
@@ -376,6 +352,33 @@ export default function ProgramDayScreen() {
             />
           ))}
         </View>
+
+        {/* Wisdom accordion card */}
+        {dayContent.wisdom_card ? (
+          <TouchableOpacity
+            style={styles.wisdomCard}
+            activeOpacity={0.82}
+            onPress={() => setWisdomOpen(v => !v)}
+          >
+            <Text style={styles.wisdomLabel}>WISDOM OF THE DAY</Text>
+            <View style={styles.wisdomCardRow}>
+              <Text style={styles.wisdomTitle} numberOfLines={wisdomOpen ? undefined : 2}>
+                {dayContent.wisdom_card.text}
+              </Text>
+              <Ionicons
+                name={wisdomOpen ? "chevron-up" : "chevron-down"}
+                size={18}
+                color="#9A7548"
+                style={{ marginLeft: 10 }}
+              />
+            </View>
+            {wisdomOpen && (dayContent.wisdom_card.explanation?.[0] ?? null) ? (
+              <Text style={styles.wisdomBody}>
+                {dayContent.wisdom_card.explanation![0]}
+              </Text>
+            ) : null}
+          </TouchableOpacity>
+        ) : null}
 
         {/* Live session */}
         {dayContent.day_join_url ? (
@@ -628,31 +631,37 @@ const styles = StyleSheet.create({
   doneCheckmark: { fontSize: 22, color: "#C99317", fontWeight: "700" },
   itemArrow: { fontSize: 22, color: "#C99317" },
 
-  wisdomInline: {
-    marginTop: 10,
-    alignItems: 'center',
-    paddingHorizontal: 8,
+  wisdomCard: {
+    backgroundColor: '#FFF8EE',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E8D9B5',
+    padding: 18,
+    marginBottom: 12,
   },
-  wisdomInlineRow: {
+  wisdomLabel: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 11,
+    color: '#9A7548',
+    letterSpacing: 0.05,
+    marginBottom: 6,
+  },
+  wisdomCardRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
   },
-  wisdomInlineTitle: {
-    fontFamily: Fonts.serif.regular,
-    fontSize: 13,
-    color: '#9A7548',
-    fontStyle: 'italic',
-    textAlign: 'center',
-    flexShrink: 1,
+  wisdomTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 16,
+    color: '#432104',
+    flex: 1,
   },
-  wisdomInlineBody: {
-    marginTop: 8,
+  wisdomBody: {
+    marginTop: 12,
     fontFamily: Fonts.sans.regular,
-    fontSize: 13,
+    fontSize: 14,
     color: '#7B6545',
-    lineHeight: 20,
-    textAlign: 'center',
+    lineHeight: 22,
   },
   liveSessionCard: {
     backgroundColor: '#FFF3DC',

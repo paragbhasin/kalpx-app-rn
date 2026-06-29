@@ -57,6 +57,8 @@ export interface ProgramDayContent {
   day_join_url: string | null;
   day_session_time: string | null;
   day_session_timezone: string | null;
+  mantra_count: number | null;
+  practice_duration_minutes: number | null;
 }
 
 export interface ProgramClaimConflict {

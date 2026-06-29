@@ -480,6 +480,22 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         onClearRef={() => onBlurSave({ mantra_ref: "" })}
         onCustomChange={(title, body) => onLocalChange({ custom_mantra_title: title, custom_mantra_body: body })}
         onCustomBlur={(title, body) => onBlurSave({ custom_mantra_title: title, custom_mantra_body: body, mantra_ref: "" })}
+        extraDetails={!locked ? (
+          <View style={{ marginTop: 12 }}>
+            <Text style={s.extraDetailsLabel}>CHANT COUNT FOR PARTICIPANTS</Text>
+            <View style={s.pillRow}>
+              {[1, 9, 27, 54, 108].map((n) => (
+                <TouchableOpacity
+                  key={n}
+                  onPress={() => onBlurSave({ mantra_count: day.mantra_count === n ? null : n })}
+                  style={[s.pill, day.mantra_count === n && s.pillActive]}
+                >
+                  <Text style={[s.pillText, day.mantra_count === n && s.pillTextActive]}>{n}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        ) : null}
       />
 
       {/* Sankalp */}
@@ -514,6 +530,24 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         onClearRef={() => onBlurSave({ practice_ref: "" })}
         onCustomChange={(title, body) => onLocalChange({ custom_practice_title: title, custom_practice_body: body })}
         onCustomBlur={(title, body) => onBlurSave({ custom_practice_title: title, custom_practice_body: body, practice_ref: "" })}
+        extraDetails={!locked ? (
+          <View style={{ marginTop: 12 }}>
+            <Text style={s.extraDetailsLabel}>PRACTICE DURATION (MINUTES)</Text>
+            <TextInput
+              style={s.durationInput}
+              value={day.practice_duration_minutes != null ? String(day.practice_duration_minutes) : ""}
+              onChangeText={(v) => {
+                const n = parseInt(v, 10);
+                onLocalChange({ practice_duration_minutes: isNaN(n) ? null : n });
+              }}
+              onEndEditing={() => onBlurSave({ practice_duration_minutes: day.practice_duration_minutes })}
+              placeholder="e.g. 10"
+              placeholderTextColor="#B5A08A"
+              keyboardType="number-pad"
+              maxLength={3}
+            />
+          </View>
+        ) : null}
       />
 
       {/* Wisdom */}
@@ -601,9 +635,10 @@ interface SlotRowProps {
   onClearRef: () => void;
   onCustomChange: (title: string, body: string) => void;
   onCustomBlur: (title: string, body: string) => void;
+  extraDetails?: React.ReactNode;
 }
 
-function SlotRow({ label, refValue, selection, customTitle, customBody, locked, onOpenPicker, onApplyToAll, onClearRef, onCustomChange, onCustomBlur }: SlotRowProps) {
+function SlotRow({ label, refValue, selection, customTitle, customBody, locked, onOpenPicker, onApplyToAll, onClearRef, onCustomChange, onCustomBlur, extraDetails }: SlotRowProps) {
   const [mode, setMode] = useState<"library" | "custom">(customBody ? "custom" : "library");
   const [localTitle, setLocalTitle] = useState(customTitle);
   const [localBody, setLocalBody] = useState(customBody);
@@ -680,6 +715,7 @@ function SlotRow({ label, refValue, selection, customTitle, customBody, locked, 
                         <Text style={s.detailFieldValue}>{selection.subtitle}</Text>
                       )
                   }
+                  {extraDetails}
                 </View>
               )}
 
@@ -933,6 +969,13 @@ const s = StyleSheet.create({
   detailListItem: { fontSize: 13, color: "#432104", lineHeight: 19, marginLeft: 4, fontFamily: Fonts.sans.regular },
   applyAllBtn: { marginTop: 8 },
   applyAllText: { fontSize: 11, color: "#C99317", textDecorationLine: "underline", fontFamily: Fonts.sans.regular },
+  extraDetailsLabel: { fontSize: 10, fontWeight: "700", color: "#B5A08A", letterSpacing: 0.8, marginBottom: 6, fontFamily: Fonts.sans.bold },
+  pillRow: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
+  pill: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: "#DDD3C0", backgroundColor: "transparent" },
+  pillActive: { backgroundColor: "#C99317", borderColor: "#C99317" },
+  pillText: { fontSize: 13, color: "#7B6545", fontFamily: Fonts.sans.regular },
+  pillTextActive: { color: "#fff", fontWeight: "700" },
+  durationInput: { borderWidth: 1, borderColor: "#DDD3C0", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, fontSize: 14, color: "#432104", fontFamily: Fonts.sans.regular, width: 100 },
   pickBtn: { backgroundColor: "#FEF3D0", borderWidth: 1, borderColor: "#C99317", borderRadius: 8, paddingHorizontal: 14, paddingVertical: 8, alignSelf: "flex-start" },
   pickBtnText: { fontSize: 12, fontWeight: "700", color: "#7A4E00", fontFamily: Fonts.sans.bold },
   reviewNote: { fontSize: 11, color: "#B5A08A", marginTop: 4, fontFamily: Fonts.sans.regular },

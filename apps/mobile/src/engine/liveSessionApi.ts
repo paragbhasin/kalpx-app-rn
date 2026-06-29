@@ -323,6 +323,8 @@ export interface TemplateDay {
   day_session_time: string;
   day_session_timezone: string;
   reflection_prompt: string;
+  mantra_count: number | null;
+  practice_duration_minutes: number | null;
   // Resolved library cards from backend (present in detail view)
   mantra_card?: LibraryCard | null;
   sankalp_card?: LibraryCard | null;

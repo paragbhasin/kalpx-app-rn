@@ -404,6 +404,28 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         onCustomBlur={(title, body) =>
           onBlurSave({ custom_mantra_title: title, custom_mantra_body: body, mantra_ref: "" })
         }
+        extraDetails={!locked && (
+          <div style={{ marginTop: 12 }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#9A7548', letterSpacing: '0.05em' }}>
+              CHANT COUNT FOR PARTICIPANTS
+            </span>
+            <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+              {[1, 9, 27, 54, 108].map((n) => (
+                <button
+                  key={n}
+                  onClick={() => onBlurSave({ mantra_count: day.mantra_count === n ? null : n })}
+                  style={{
+                    padding: '4px 12px', borderRadius: 20, fontSize: 13, cursor: 'pointer',
+                    border: `1px solid ${day.mantra_count === n ? '#C99317' : '#D4C4A8'}`,
+                    background: day.mantra_count === n ? '#C99317' : 'transparent',
+                    color: day.mantra_count === n ? '#fff' : '#7B6545',
+                    fontWeight: day.mantra_count === n ? 700 : 400,
+                  }}
+                >{n}</button>
+              ))}
+            </div>
+          </div>
+        )}
       />
 
       {/* Sankalp */}
@@ -442,6 +464,26 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         onCustomBlur={(title, body) =>
           onBlurSave({ custom_practice_title: title, custom_practice_body: body, practice_ref: "" })
         }
+        extraDetails={!locked && (
+          <div style={{ marginTop: 12 }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#9A7548', letterSpacing: '0.05em' }}>
+              PRACTICE DURATION FOR PARTICIPANTS
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+              <input
+                type="number"
+                min={1}
+                max={60}
+                value={day.practice_duration_minutes ?? ''}
+                placeholder="—"
+                onChange={(e) => onLocalChange({ practice_duration_minutes: e.target.value ? Number(e.target.value) : null })}
+                onBlur={(e) => onBlurSave({ practice_duration_minutes: e.target.value ? Number(e.target.value) : null })}
+                style={{ width: 64, padding: '4px 8px', border: '1px solid #D4C4A8', borderRadius: 8, fontSize: 14, textAlign: 'center' }}
+              />
+              <span style={{ fontSize: 13, color: '#7B6545' }}>minutes</span>
+            </div>
+          </div>
+        )}
       />
 
       {/* Wisdom */}
@@ -543,11 +585,12 @@ interface SlotRowProps {
   onClearRef: () => void;
   onCustomChange: (title: string, body: string) => void;
   onCustomBlur: (title: string, body: string) => void;
+  extraDetails?: React.ReactNode;
 }
 
 function SlotRow({
   label, refValue, selection, customTitle, customBody, locked,
-  onOpenPicker, onApplyToAll, onClearRef, onCustomChange, onCustomBlur,
+  onOpenPicker, onApplyToAll, onClearRef, onCustomChange, onCustomBlur, extraDetails,
 }: SlotRowProps) {
   const [mode, setMode] = useState<"library" | "custom">(
     customBody ? "custom" : "library",
@@ -642,6 +685,7 @@ function SlotRow({
                   {(!selection?.details || selection.details.length === 0) && displaySubtitle && (
                     <p style={detailFieldValue}>{displaySubtitle}</p>
                   )}
+                  {extraDetails}
                 </div>
               )}
               {!locked && (

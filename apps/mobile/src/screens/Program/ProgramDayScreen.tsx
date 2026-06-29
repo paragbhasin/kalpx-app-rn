@@ -63,15 +63,27 @@ function getCardTitle(item: ProgramDayItem): string {
   return item.title;
 }
 
+function getCardSubtitle(item: ProgramDayItem, dayContent: any): string | null {
+  if (item.item_type === "mantra" && dayContent?.mantra_count) {
+    return `${dayContent.mantra_count}×`;
+  }
+  if (item.item_type === "practice" && dayContent?.practice_duration_minutes) {
+    return `${dayContent.practice_duration_minutes} min`;
+  }
+  return null;
+}
+
 function ItemCard({
   item,
   label,
   done,
+  subtitle,
   onPress,
 }: {
   item: ProgramDayItem;
   label: string;
   done: boolean;
+  subtitle?: string | null;
   onPress: () => void;
 }) {
   return (
@@ -84,6 +96,7 @@ function ItemCard({
       <View style={styles.itemCardLeft}>
         <Text style={styles.itemLabel}>{label}</Text>
         <Text style={styles.itemTitle}>{getCardTitle(item)}</Text>
+        {subtitle ? <Text style={styles.itemSubtitle}>{subtitle}</Text> : null}
       </View>
       <View style={styles.itemCardRight}>
         {done ? (
@@ -241,11 +254,18 @@ export default function ProgramDayScreen() {
     };
     const screen = screenMap[item.item_type];
     if (!screen) return;
-    // Pass current completedItems so the runner can append to the list on complete
+    const extraParams: Record<string, any> = {};
+    if (item.item_type === "mantra" && dayContent?.mantra_count) {
+      extraParams.mantraCount = dayContent.mantra_count;
+    }
+    if (item.item_type === "practice" && dayContent?.practice_duration_minutes) {
+      extraParams.practiceDurationMinutes = dayContent.practice_duration_minutes;
+    }
     navigation.navigate(screen, {
       item,
       dayNumber,
       completedItems: Array.from(sessionDone),
+      ...extraParams,
     });
   };
 
@@ -365,6 +385,7 @@ export default function ProgramDayScreen() {
               item={item}
               label={ITEM_LABELS[item.item_type] ?? item.item_type}
               done={isItemDone(item)}
+              subtitle={getCardSubtitle(item, dayContent)}
               onPress={() => handleLaunchRunner(item)}
             />
           ))}
@@ -610,6 +631,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#432104",
     marginBottom: 2,
+  },
+  itemSubtitle: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 12,
+    color: "#9A7548",
+    marginTop: 2,
   },
   itemDevanagari: {
     fontFamily: Fonts.devanagari.regular,

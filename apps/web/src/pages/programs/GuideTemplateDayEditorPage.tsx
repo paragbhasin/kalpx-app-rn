@@ -553,7 +553,7 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
           <label style={timeLabel}>Session time</label>
           <input
             type="time"
-            style={timeInput}
+            style={sessionTimeInput}
             value={day.day_session_time}
             disabled={locked}
             onChange={(e) => onLocalChange({ day_session_time: e.target.value })}
@@ -857,5 +857,5 @@ const hint: React.CSSProperties = { textAlign: "center" as const, color: "#B5A08
 const repeatBanner: React.CSSProperties = { display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" as const, gap: 10, background: "#FEF9ED", border: "1px solid #E8D9A0", borderRadius: 10, padding: "12px 18px", marginBottom: 20 };
 const repeatBtn: React.CSSProperties = { padding: "8px 16px", background: "#432104", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 13, whiteSpace: "nowrap" as const };
 const timeLabel: React.CSSProperties = { fontSize: 12, color: "#7A6652", fontWeight: 600, whiteSpace: "nowrap" as const };
-const timeInput: React.CSSProperties = { padding: "6px 10px", borderRadius: 8, border: "1px solid #DDD3C0", fontSize: 13, color: "#432104" };
+const sessionTimeInput: React.CSSProperties = { padding: "6px 10px", borderRadius: 8, border: "1px solid #DDD3C0", fontSize: 13, color: "#432104" };
 const tzSelect: React.CSSProperties = { padding: "6px 10px", borderRadius: 8, border: "1px solid #DDD3C0", fontSize: 13, color: "#432104", background: "#fff", cursor: "pointer" };

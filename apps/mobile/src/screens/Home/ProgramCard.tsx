@@ -146,7 +146,7 @@ export default function ProgramCard({ program }: ProgramCardProps) {
                         <Text style={styles.dayHintMissed}>Missed</Text>
                       )}
                       {day.status === "completed_later" && (
-                        <Text style={styles.dayHintLate}>Completed Later</Text>
+                        <Text style={styles.dayHintLate}>Done on a later day</Text>
                       )}
                       {day.status === "locked" && (
                         <Text style={styles.dayHint}>{lockedHint(day.unlock_date)}</Text>

@@ -600,6 +600,9 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
           onBlur={() => onBlurSave({ reflection_prompt: day.reflection_prompt })}
           placeholder="What are you grateful for today?"
         />
+        <span style={urlHint}>
+          Ask one thoughtful question that helps participants reflect on today's practice. They can write and save their answer privately in the app.
+        </span>
       </FieldRow>
     </div>
   );

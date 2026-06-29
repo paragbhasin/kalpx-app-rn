@@ -88,6 +88,15 @@ export async function fetchProgramDay(dayNumber: number): Promise<ProgramDayCont
   return res.data;
 }
 
+export async function fetchDayReflection(dayNumber: number): Promise<string> {
+  const res = await api.get(`programs/my-active/day/${dayNumber}/reflection/`);
+  return res.data.text ?? '';
+}
+
+export async function saveDayReflection(dayNumber: number, text: string): Promise<void> {
+  await api.post(`programs/my-active/day/${dayNumber}/reflection/`, { text });
+}
+
 export async function completeProgramDay(dayNumber: number): Promise<any> {
   const res = await api.post(`programs/my-active/day/${dayNumber}/complete/`);
   return res.data;

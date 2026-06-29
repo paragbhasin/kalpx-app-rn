@@ -443,12 +443,22 @@ export default function ProgramDayScreen() {
 
         {/* Reflection prompt */}
         {dayContent.reflection_prompt ? (
-          <View style={styles.reflectionCard}>
-            <Text style={styles.reflectionLabel}>REFLECTION</Text>
+          <TouchableOpacity
+            activeOpacity={0.82}
+            style={styles.reflectionCard}
+            onPress={() =>
+              navigation.navigate("ProgramReflectionScreen", {
+                dayNumber,
+                reflectionPrompt: dayContent.reflection_prompt,
+              })
+            }
+          >
+            <Text style={styles.reflectionLabel}>🌼 REFLECTION</Text>
             <Text style={styles.reflectionText}>
               {dayContent.reflection_prompt}
             </Text>
-          </View>
+            <Text style={styles.reflectionHint}>Tap to write your reflection →</Text>
+          </TouchableOpacity>
         ) : null}
 
         {/* Reminders accordion */}
@@ -770,6 +780,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#432104",
     lineHeight: 21,
+  },
+  reflectionHint: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 12,
+    color: "#C99317",
+    marginTop: 10,
   },
 
   completionBanner: {

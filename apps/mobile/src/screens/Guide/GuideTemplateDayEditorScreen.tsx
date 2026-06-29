@@ -679,6 +679,9 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
           placeholder="What are you grateful for today?"
           placeholderTextColor="#B5A08A"
         />
+        <Text style={s.fieldHint}>
+          Ask one thoughtful question that helps participants reflect on today's practice. Participants can write and save their answer privately.
+        </Text>
       </FieldRow>
 
     </View>
@@ -1080,4 +1083,5 @@ const s = StyleSheet.create({
   pickerItemSub: { fontSize: 12, color: "#7A6652", marginBottom: 2, fontFamily: Fonts.sans.regular },
   pickerItemMeta: { fontSize: 11, color: "#B5A08A", fontFamily: Fonts.sans.regular },
   hint: { textAlign: "center", color: "#B5A08A", padding: 40, fontSize: 14, fontFamily: Fonts.sans.regular },
+  fieldHint: { fontSize: 12, color: "#9A8470", marginTop: 6, lineHeight: 17, fontFamily: Fonts.sans.regular },
 });

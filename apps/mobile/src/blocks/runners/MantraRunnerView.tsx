@@ -28,13 +28,17 @@ import type { JapaSourceSurface } from "@kalpx/types";
 
 function deepLinkFromSurface(surface?: JapaSourceSurface): string {
   switch (surface) {
-    case 'inner_path':   return 'kalpx://mitra/inner_path/home?source=la';
-    case 'daily_rhythm': return 'kalpx://mitra/rhythm_home/morning?source=la';
-    case 'quick_reset':  return 'kalpx://mitra/quick_reset/home?source=la';
-    default:             return 'kalpx://mitra/quick_chant/home?source=la';
+    case "inner_path":
+      return "kalpx://mitra/inner_path/home?source=la";
+    case "daily_rhythm":
+      return "kalpx://mitra/rhythm_home/morning?source=la";
+    case "quick_reset":
+      return "kalpx://mitra/quick_reset/home?source=la";
+    default:
+      return "kalpx://mitra/quick_chant/home?source=la";
   }
 }
-import { EVENT_NAMES } from '@kalpx/analytics';
+import { EVENT_NAMES } from "@kalpx/analytics";
 import { getLiveActivityState } from "../../engine/mitraApi";
 import { liveActivity } from "../../native/liveActivity";
 import { logEvent } from "../../utils/initAnalytics";
@@ -49,7 +53,20 @@ import Animated, {
 import { ChevronDown, ChevronUp } from "lucide-react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 import { useTranslation } from "react-i18next";
-const RudrakshSvg = ({ width, height, style }: { width?: number; height?: number; style?: any }) => <Image source={require("../../../assets/rudraksh.webp")} style={[{ width, height, resizeMode: 'contain' }, style]} />;
+const RudrakshSvg = ({
+  width,
+  height,
+  style,
+}: {
+  width?: number;
+  height?: number;
+  style?: any;
+}) => (
+  <Image
+    source={require("../../../assets/rudraksh.webp")}
+    style={[{ width, height, resizeMode: "contain" }, style]}
+  />
+);
 import AudioPlayerBlock from "../AudioPlayerBlock";
 import { stopRoomAmbientAudio } from "../../engine/roomAmbientAudio";
 import { Fonts } from "../../theme/fonts";
@@ -249,9 +266,13 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   }, [onComplete]);
 
   useEffect(() => {
-    AsyncStorage.getItem('kalpx:preferred_la').then(raw => {
-      preferredLARef.current = raw ? JSON.parse(raw) : null;
-    }).catch(() => { preferredLARef.current = null; });
+    AsyncStorage.getItem("kalpx:preferred_la")
+      .then((raw) => {
+        preferredLARef.current = raw ? JSON.parse(raw) : null;
+      })
+      .catch(() => {
+        preferredLARef.current = null;
+      });
   }, []);
 
   // Reset LA tracking on new session
@@ -357,52 +378,82 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
       // triggers completion regardless of previous session totals.
       if (nextCount >= selectedTarget && !isCompletingRef.current) {
         isCompletingRef.current = true;
-        const durationSec = Math.round((Date.now() - sessionStartTimeRef.current) / 1000);
+        const durationSec = Math.round(
+          (Date.now() - sessionStartTimeRef.current) / 1000,
+        );
         if (isLAActiveRef.current && !laCompleteCalledRef.current) {
           laCompleteCalledRef.current = true;
           const pref = preferredLARef.current;
-          const isAnchor = pref?.type === 'mantra' && pref?.name === (item.title ?? '');
+          const isAnchor =
+            pref?.type === "mantra" && pref?.name === (item.title ?? "");
           if (isAnchor) {
             // Anchor mode: preferred mantra — keep LA alive on lock screen after completion
-            logEvent(EVENT_NAMES.LIVE_ACTIVITY_CHANT_KEPT_AS_ANCHOR, { activity_type: 'mantra' }).catch(() => {});
+            logEvent(EVENT_NAMES.LIVE_ACTIVITY_CHANT_KEPT_AS_ANCHOR, {
+              activity_type: "mantra",
+            }).catch(() => {});
           } else {
             // Session mode: end LA and potentially transition to sankalp anchor
             liveActivity.end();
             isLAActiveRef.current = false;
-            logEvent(EVENT_NAMES.LIVE_ACTIVITY_CHANT_ENDED_SESSION, { activity_type: 'mantra' }).catch(() => {});
+            logEvent(EVENT_NAMES.LIVE_ACTIVITY_CHANT_ENDED_SESSION, {
+              activity_type: "mantra",
+            }).catch(() => {});
             if (pref === null) {
-              getLiveActivityState(i18n.language || 'en').then((state) => {
-                if (AppState.currentState === 'active' && state.type === 'sankalp') {
-                  liveActivity.startSankalp(state.title, state.line);
-                }
-              }).catch(() => {});
+              getLiveActivityState(i18n.language || "en")
+                .then((state) => {
+                  if (
+                    AppState.currentState === "active" &&
+                    state.type === "sankalp"
+                  ) {
+                    liveActivity.startSankalp(state.title, state.line);
+                  }
+                })
+                .catch(() => {});
             }
           }
         }
-        setTimeout(() => onCompleteRef.current(selectedTarget, durationSec), 800);
+        setTimeout(
+          () => onCompleteRef.current(selectedTarget, durationSec),
+          800,
+        );
       } else {
-        const curToday    = japaEngine.todayCount;
-        const curWeek     = japaEngine.weekCount;
+        const curToday = japaEngine.todayCount;
+        const curWeek = japaEngine.weekCount;
         const curLifetime = japaEngine.lifetimeCount;
-        const elapsedSec  = Math.floor(japaEngine.elapsedMs / 1000);
+        const elapsedSec = Math.floor(japaEngine.elapsedMs / 1000);
         if (!isLAActiveRef.current) {
-          if (AppState.currentState === 'active') {
+          if (AppState.currentState === "active") {
             const pref = preferredLARef.current;
-            const canStart = pref === null || (pref.type === 'mantra' && pref.name === (item.title ?? ''));
+            const canStart =
+              pref === null ||
+              (pref.type === "mantra" && pref.name === (item.title ?? ""));
             if (canStart) {
               isLAActiveRef.current = true;
-              const laMode = pref !== null ? 'anchor' : 'session';
+              const laMode = pref !== null ? "anchor" : "session";
               liveActivity.start(
-                item.title ?? '',
-                item.devanagari ?? '',
-                curToday, curWeek, curLifetime, curLifetime, elapsedSec,
+                item.title ?? "",
+                item.devanagari ?? "",
+                curToday,
+                curWeek,
+                curLifetime,
+                curLifetime,
+                elapsedSec,
                 deepLinkFromSurface(sourceSurface),
               );
-              logEvent(EVENT_NAMES.LIVE_ACTIVITY_CHANT_STARTED, { activity_type: 'mantra', mode: laMode }).catch(() => {});
+              logEvent(EVENT_NAMES.LIVE_ACTIVITY_CHANT_STARTED, {
+                activity_type: "mantra",
+                mode: laMode,
+              }).catch(() => {});
             }
           }
         } else {
-          liveActivity.update(curToday, curWeek, curLifetime, curLifetime, elapsedSec);
+          liveActivity.update(
+            curToday,
+            curWeek,
+            curLifetime,
+            curLifetime,
+            elapsedSec,
+          );
         }
       }
     } else {
@@ -431,7 +482,10 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
     <View style={styles.container}>
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={[styles.scrollContent, isTablet && { paddingHorizontal: 40 }]}
+        contentContainerStyle={[
+          styles.scrollContent,
+          isTablet && { paddingHorizontal: 40 },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         {isDevMode && (
@@ -462,245 +516,288 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
           </TouchableOpacity>
         )}
 
-      <View style={[styles.combinedMantraFlow, isTablet && { maxWidth: 640, alignSelf: 'center' }]}>
-        <Text style={[styles.mantraTitle, { marginBottom: 12 }]}>
-          {item.title}
-        </Text>
-
-        {(!!item.deity || !!item.source) && (
-          <Text style={styles.mantraTraditionLine}>
-            {item.deity && item.source
-              ? `${item.deity} — ${item.source}`
-              : item.deity || item.source}
+        <View
+          style={[
+            styles.combinedMantraFlow,
+            isTablet && { maxWidth: 640, alignSelf: "center" },
+          ]}
+        >
+          <Text style={[styles.mantraTitle, { marginBottom: 12 }]}>
+            {item.title}
           </Text>
-        )}
 
-        {!isViewOnly && (
-          <>
-            <View style={styles.progressCounter}>
-              <Text style={styles.currentCountText}>{chantCount}</Text>
-              <Text style={styles.totalCountText}> / {selectedTarget}</Text>
-            </View>
+          {(!!item.deity || !!item.source) && (
+            <Text style={styles.mantraTraditionLine}>
+              {item.deity && item.source
+                ? `${item.deity} — ${item.source}`
+                : item.deity || item.source}
+            </Text>
+          )}
 
-            {mantraRef &&
-              (japaEngine.todayCount > 0 ||
-                japaEngine.weekCount > 0 ||
-                japaEngine.yearCount > 0 ||
-                japaEngine.lifetimeCount > 0) && (
-                <View style={styles.japaStatsRow}>
-                  {japaEngine.todayCount > 0 && (
-                    <Text style={styles.japaStatItem}>
-                      Today {japaEngine.todayCount.toLocaleString()}
-                    </Text>
-                  )}
-                  {japaEngine.weekCount > 0 && (
-                    <Text style={styles.japaStatItem}>
-                      Week {japaEngine.weekCount.toLocaleString()}
-                    </Text>
-                  )}
-                  {japaEngine.yearCount > 0 && (
-                    <Text style={styles.japaStatItem}>
-                      Year {japaEngine.yearCount.toLocaleString()}
-                    </Text>
-                  )}
-                  {japaEngine.lifetimeCount > 0 && (
-                    <Text style={styles.japaStatItem}>
-                      Lifetime {japaEngine.lifetimeCount.toLocaleString()}
-                    </Text>
-                  )}
-                </View>
-              )}
-
-            <View style={[styles.interactionArea, isTablet && { width: interactionSize, height: interactionSize }]}>
-              <View style={[styles.glowOuter, isTablet && { width: 290, height: 290, borderRadius: 145 }]}>
-                <View style={[styles.glowMiddle, isTablet && { width: 250, height: 250, borderRadius: 125 }]}>
-                  <View style={[styles.glowInner, isTablet && { width: 190, height: 190, borderRadius: 95 }]} />
-                </View>
+          {!isViewOnly && (
+            <>
+              <View style={styles.progressCounter}>
+                <Text style={styles.currentCountText}>{chantCount}</Text>
+                <Text style={styles.totalCountText}> / {selectedTarget}</Text>
               </View>
 
-              <Animated.View style={[styles.beadsRing, animatedRingStyle]}>
-                <View style={styles.ringCircle} />
-                {beads.map((bead) => {
-                  const tapped = isBeadTapped(bead.index);
-                  const active = isBeadActive(bead.index);
-                  return (
-                    <View
-                      key={bead.index}
-                      style={[
-                        styles.beadWrapper,
-                        {
-                          transform: [
-                            { translateX: bead.x },
-                            { translateY: bead.y },
-                            { scale: tapped ? 0.6 : 1 },
-                          ],
-                          opacity: tapped ? 0.2 : 1,
-                        },
-                      ]}
-                    >
-                      <TouchableOpacity
-                        onPress={handleIncrement}
-                        disabled={tapped}
-                        style={styles.beadInner}
-                        activeOpacity={1}
-                      >
-                        <RudrakshSvg width={30} height={30} />
-                        {active && <View style={styles.beadPointer} />}
-                      </TouchableOpacity>
-                    </View>
-                  );
-                })}
-              </Animated.View>
-
-              <Animated.View
-                style={[styles.centerTapTarget, animatedCenterStyle, isTablet && { width: 140, height: 140, borderRadius: 70 }]}
-              >
-                <TouchableOpacity
-                  style={styles.tapTouchable}
-                  onPress={handleIncrement}
-                  activeOpacity={0.8}
-                >
-                  <View style={styles.tapContent}>
-                    <Text style={styles.tapText}>TAP</Text>
-                    <Text style={styles.subTap}>HERE</Text>
-                    <View style={styles.tapCheck}>
-                      <Svg
-                        width={24}
-                        height={24}
-                        viewBox="0 0 24 24"
-                        fill="none"
-                      >
-                        <Circle
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="#B89450"
-                          strokeWidth="1"
-                        />
-                        <Path
-                          d="M8 12L11 15L16 9"
-                          stroke="#B89450"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </Svg>
-                    </View>
+              {mantraRef &&
+                (japaEngine.todayCount > 0 ||
+                  japaEngine.weekCount > 0 ||
+                  japaEngine.yearCount > 0 ||
+                  japaEngine.lifetimeCount > 0) && (
+                  <View style={styles.japaStatsRow}>
+                    {japaEngine.todayCount > 0 && (
+                      <Text style={styles.japaStatItem}>
+                        Today {japaEngine.todayCount.toLocaleString()}
+                      </Text>
+                    )}
+                    {japaEngine.weekCount > 0 && (
+                      <Text style={styles.japaStatItem}>
+                        Week {japaEngine.weekCount.toLocaleString()}
+                      </Text>
+                    )}
+                    {japaEngine.yearCount > 0 && (
+                      <Text style={styles.japaStatItem}>
+                        Year {japaEngine.yearCount.toLocaleString()}
+                      </Text>
+                    )}
+                    {japaEngine.lifetimeCount > 0 && (
+                      <Text style={styles.japaStatItem}>
+                        Lifetime {japaEngine.lifetimeCount.toLocaleString()}
+                      </Text>
+                    )}
                   </View>
-                </TouchableOpacity>
-              </Animated.View>
-            </View>
-          </>
-        )}
+                )}
 
-        <View style={styles.topCardsRow}>
-          {item.iast && (
-            <MantraTextCard
-              text={item.iast}
-              expanded={iastExpanded}
-              onToggle={() => setIastExpanded(!iastExpanded)}
-            />
-          )}
-          {item.devanagari && (
-            <MantraTextCard
-              text={item.devanagari}
-              isDevanagari
-              expanded={devanagariExpanded}
-              onToggle={() => setDevanagariExpanded(!devanagariExpanded)}
-            />
-          )}
-        </View>
-
-        {!isViewOnly && !lockCount && (
-          <View style={styles.repPillsContainer}>
-            {[1, 9, 27, 54, 108].map((option) => {
-              const isSelected = option === selectedTarget;
-              return (
-                <TouchableOpacity
-                  key={option}
-                  style={[styles.repPill, isSelected && styles.repPillSelected]}
-                  onPress={() => {
-                    setSelectedTarget(option);
-                    setLocalCount(0);
-                  }}
+              <View
+                style={[
+                  styles.interactionArea,
+                  isTablet && {
+                    width: interactionSize,
+                    height: interactionSize,
+                  },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.glowOuter,
+                    isTablet && { width: 290, height: 290, borderRadius: 145 },
+                  ]}
                 >
-                  <Text
+                  <View
                     style={[
-                      styles.repPillText,
-                      isSelected && styles.repPillTextSelected,
+                      styles.glowMiddle,
+                      isTablet && {
+                        width: 250,
+                        height: 250,
+                        borderRadius: 125,
+                      },
                     ]}
                   >
-                    {option}
-                    {isSelected && " ✓"}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+                    <View
+                      style={[
+                        styles.glowInner,
+                        isTablet && {
+                          width: 190,
+                          height: 190,
+                          borderRadius: 95,
+                        },
+                      ]}
+                    />
+                  </View>
+                </View>
+
+                <Animated.View style={[styles.beadsRing, animatedRingStyle]}>
+                  <View style={styles.ringCircle} />
+                  {beads.map((bead) => {
+                    const tapped = isBeadTapped(bead.index);
+                    const active = isBeadActive(bead.index);
+                    return (
+                      <View
+                        key={bead.index}
+                        style={[
+                          styles.beadWrapper,
+                          {
+                            transform: [
+                              { translateX: bead.x },
+                              { translateY: bead.y },
+                              { scale: tapped ? 0.6 : 1 },
+                            ],
+                            opacity: tapped ? 0.2 : 1,
+                          },
+                        ]}
+                      >
+                        <TouchableOpacity
+                          onPress={handleIncrement}
+                          disabled={tapped}
+                          style={styles.beadInner}
+                          activeOpacity={1}
+                        >
+                          <RudrakshSvg width={30} height={30} />
+                          {active && <View style={styles.beadPointer} />}
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  })}
+                </Animated.View>
+
+                <Animated.View
+                  style={[
+                    styles.centerTapTarget,
+                    animatedCenterStyle,
+                    isTablet && { width: 140, height: 140, borderRadius: 70 },
+                  ]}
+                >
+                  <TouchableOpacity
+                    style={styles.tapTouchable}
+                    onPress={handleIncrement}
+                    activeOpacity={0.8}
+                  >
+                    <View style={styles.tapContent}>
+                      <Text style={styles.tapText}>TAP</Text>
+                      <Text style={styles.subTap}>HERE</Text>
+                      <View style={styles.tapCheck}>
+                        <Svg
+                          width={24}
+                          height={24}
+                          viewBox="0 0 24 24"
+                          fill="none"
+                        >
+                          <Circle
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="#B89450"
+                            strokeWidth="1"
+                          />
+                          <Path
+                            d="M8 12L11 15L16 9"
+                            stroke="#B89450"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </Svg>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                </Animated.View>
+              </View>
+            </>
+          )}
+
+          <View style={styles.topCardsRow}>
+            {item.iast && (
+              <MantraTextCard
+                text={item.iast}
+                expanded={iastExpanded}
+                onToggle={() => setIastExpanded(!iastExpanded)}
+              />
+            )}
+            {item.devanagari && (
+              <MantraTextCard
+                text={item.devanagari}
+                isDevanagari
+                expanded={devanagariExpanded}
+                onToggle={() => setDevanagariExpanded(!devanagariExpanded)}
+              />
+            )}
           </View>
-        )}
-        {!isViewOnly && lockCount && (
-          <View style={styles.lockedCountRow}>
-            <View style={styles.lockedCountCircle}>
-              <Text style={styles.lockedCountText}>{selectedTarget} ✓</Text>
+
+          {!isViewOnly && !lockCount && (
+            <View style={styles.repPillsContainer}>
+              {[1, 9, 27, 54, 108].map((option) => {
+                const isSelected = option === selectedTarget;
+                return (
+                  <TouchableOpacity
+                    key={option}
+                    style={[
+                      styles.repPill,
+                      isSelected && styles.repPillSelected,
+                    ]}
+                    onPress={() => {
+                      setSelectedTarget(option);
+                      setLocalCount(0);
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.repPillText,
+                        isSelected && styles.repPillTextSelected,
+                      ]}
+                    >
+                      {option}
+                      {isSelected && " ✓"}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
-          </View>
-        )}
+          )}
+          {!isViewOnly && lockCount && (
+            <View style={styles.lockedCountRow}>
+              <View style={styles.lockedCountCircle}>
+                <Text style={styles.lockedCountText}>{selectedTarget}</Text>
+              </View>
+            </View>
+          )}
 
-        {!!audioUrl && (
-          <View
-            style={{ width: "100%", marginBottom: 30, paddingHorizontal: 10 }}
-          >
-            <AudioPlayerBlock
-              block={{
-                audio_url: audioUrl,
-                label: item.title || "Mantra Audio",
-              }}
-            />
-          </View>
-        )}
-
-        <View style={styles.collapsibleSectionsCombined}>
-          {hasContent(item.meaning) || hasContent(item.summary) ? (
-            <CollapsibleCard
-              label={t("quickReset.meaning")}
-              expanded={meaningExpanded}
-              onToggle={() => setMeaningExpanded(!meaningExpanded)}
+          {!!audioUrl && (
+            <View
+              style={{ width: "100%", marginBottom: 30, paddingHorizontal: 10 }}
             >
-              <Text style={styles.cardText}>
-                {item.meaning || item.summary}
-              </Text>
-            </CollapsibleCard>
-          ) : null}
+              <AudioPlayerBlock
+                block={{
+                  audio_url: audioUrl,
+                  label: item.title || "Mantra Audio",
+                }}
+              />
+            </View>
+          )}
 
-          <View style={{ height: 12 }} />
+          <View style={styles.collapsibleSectionsCombined}>
+            {hasContent(item.meaning) || hasContent(item.summary) ? (
+              <CollapsibleCard
+                label={t("quickReset.meaning")}
+                expanded={meaningExpanded}
+                onToggle={() => setMeaningExpanded(!meaningExpanded)}
+              >
+                <Text style={styles.cardText}>
+                  {item.meaning || item.summary}
+                </Text>
+              </CollapsibleCard>
+            ) : null}
 
-          {hasContent(item.essence) || hasContent(item.insight) ? (
-            <CollapsibleCard
-              label={t("quickReset.essence")}
-              expanded={essenceExpanded}
-              onToggle={() => setEssenceExpanded(!essenceExpanded)}
-            >
-              <Text style={styles.cardText}>{item.essence}</Text>
-            </CollapsibleCard>
-          ) : null}
+            <View style={{ height: 12 }} />
+
+            {hasContent(item.essence) || hasContent(item.insight) ? (
+              <CollapsibleCard
+                label={t("quickReset.essence")}
+                expanded={essenceExpanded}
+                onToggle={() => setEssenceExpanded(!essenceExpanded)}
+              >
+                <Text style={styles.cardText}>{item.essence}</Text>
+              </CollapsibleCard>
+            ) : null}
+          </View>
+
+          <TouchableOpacity onPress={onBack} style={styles.backLink}>
+            <Text style={styles.backLinkText}>{t("quickReset.back")}</Text>
+          </TouchableOpacity>
         </View>
-
-        <TouchableOpacity onPress={onBack} style={styles.backLink}>
-          <Text style={styles.backLinkText}>{t("quickReset.back")}</Text>
-        </TouchableOpacity>
-      </View>
       </ScrollView>
       {!isViewOnly && (
         <LiveActivityPreferenceBanner
           experienceType="mantra"
-          experienceName={item.title ?? ''}
+          experienceName={item.title ?? ""}
           onActivate={() => {
             if (!isLAActiveRef.current) {
               isLAActiveRef.current = true;
             }
             liveActivity.start(
-              item.title ?? '',
-              item.devanagari ?? '',
+              item.title ?? "",
+              item.devanagari ?? "",
               japaEngine.todayCount,
               japaEngine.weekCount,
               japaEngine.lifetimeCount,
@@ -754,7 +851,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "baseline",
     marginTop: -30,
-    marginBottom:30
+    marginBottom: 30,
   },
   currentCountText: {
     fontSize: sfs(64),
@@ -890,8 +987,8 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
   lockedCountCircle: {
-    width: 64,
-    height: 64,
+    width: 40,
+    height: 40,
     borderRadius: 32,
     backgroundColor: "#b89450",
     borderColor: "#b89450",

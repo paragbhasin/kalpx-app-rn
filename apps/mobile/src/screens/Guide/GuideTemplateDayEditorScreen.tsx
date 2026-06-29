@@ -469,7 +469,7 @@ interface DayRowProps {
 }
 
 const REMINDER_DEFAULTS: Record<'mantra' | 'sankalp' | 'practice', string> = {
-  mantra: '07:00',
+  mantra: '06:00',
   sankalp: '08:00',
   practice: '18:00',
 };

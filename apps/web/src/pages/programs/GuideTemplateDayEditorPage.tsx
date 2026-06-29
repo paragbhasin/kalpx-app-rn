@@ -429,9 +429,9 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
             <div style={settingsLabel}>SUGGESTED REMINDER TIME</div>
             <input
               type="time"
-              value={day.mantra_reminder_time ?? '07:00'}
+              value={day.mantra_reminder_time ?? '06:00'}
               onChange={(e) => onLocalChange({ mantra_reminder_time: e.target.value || null })}
-              onBlur={(e) => onBlurSave({ mantra_reminder_time: e.target.value || '07:00' })}
+              onBlur={(e) => onBlurSave({ mantra_reminder_time: e.target.value || '06:00' })}
               style={timeInput}
             />
           </div>

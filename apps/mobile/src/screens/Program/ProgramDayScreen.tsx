@@ -197,6 +197,7 @@ export default function ProgramDayScreen() {
     try {
       const updated = await apiPatchProgramReminders({ [`${key}_reminder_time`]: timeStr } as ProgramRemindersPatch);
       setReminders(updated);
+      setDayContent((prev) => prev ? { ...prev, [`${key}_reminder_time`]: timeStr.slice(0, 5) } : prev);
     } catch {
       // non-fatal
     } finally {

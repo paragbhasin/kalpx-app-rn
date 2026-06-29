@@ -35,7 +35,7 @@ export default function ProgramReflectionScreen() {
   useEffect(() => {
     if (!dayNumber) { setLoading(false); return; }
     fetchDayReflection(dayNumber)
-      .then((t) => { setText(t); setSaved(!!t); })
+      .then((t) => { setText(t); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [dayNumber]);

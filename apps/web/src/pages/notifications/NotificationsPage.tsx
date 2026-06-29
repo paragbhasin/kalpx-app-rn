@@ -9,15 +9,16 @@ import {
 } from '../../store/notificationsInboxSlice';
 import { AppShell, LoadingState, EmptyState } from '../../components/ui';
 import { trackEvent } from '../../engine/mitraApi';
+import { useTranslation } from '../../lib/i18n';
 
-function formatRelativeTime(timestamp: string): string {
+function formatRelativeTime(timestamp: string, t: (key: string) => string): string {
   const now = Date.now();
   const then = new Date(timestamp).getTime();
   const diff = Math.floor((now - then) / 1000);
-  if (diff < 60) return 'just now';
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
+  if (diff < 60) return t('notificationsPage.justNow');
+  if (diff < 3600) return t('notificationsPage.minutesAgo').replace('{n}', String(Math.floor(diff / 60)));
+  if (diff < 86400) return t('notificationsPage.hoursAgo').replace('{n}', String(Math.floor(diff / 3600)));
+  return t('notificationsPage.daysAgo').replace('{n}', String(Math.floor(diff / 86400)));
 }
 
 export function NotificationsPage() {
@@ -25,6 +26,7 @@ export function NotificationsPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const state = useSelector((s: RootState) => s.notificationsInbox);
+  const { t } = useTranslation();
 
   useEffect(() => {
     dispatch(resetNotificationsInbox());
@@ -66,9 +68,9 @@ export function NotificationsPage() {
               marginBottom: 12,
             }}
           >
-            ← Back
+            {t('notificationsPage.back')}
           </button>
-          <h1 style={{ fontSize: 26, fontWeight: 800, color: 'var(--kalpx-text)' }}>Notifications</h1>
+          <h1 style={{ fontSize: 26, fontWeight: 800, color: 'var(--kalpx-text)' }}>{t('notificationsPage.title')}</h1>
         </div>
 
         {/* Loading skeleton */}
@@ -93,14 +95,14 @@ export function NotificationsPage() {
                 cursor: 'pointer',
               }}
             >
-              Retry
+              {t('notificationsPage.retry')}
             </button>
           </div>
         )}
 
         {/* Empty state */}
         {!state.loading && !state.error && state.data.length === 0 && (
-          <EmptyState icon="🔔" message="No notifications yet." />
+          <EmptyState icon="🔔" message={t('notificationsPage.empty')} />
         )}
 
         {/* Notification items */}
@@ -145,7 +147,7 @@ export function NotificationsPage() {
                 {item.title}
               </p>
               <p style={{ fontSize: 13, color: 'var(--kalpx-text-soft)', marginBottom: 4 }}>{item.message}</p>
-              <p style={{ fontSize: 11, color: 'var(--kalpx-text-muted)' }}>{formatRelativeTime(item.timestamp)}</p>
+              <p style={{ fontSize: 11, color: 'var(--kalpx-text-muted)' }}>{formatRelativeTime(item.timestamp, t)}</p>
             </div>
           </div>
         ))}
@@ -166,7 +168,7 @@ export function NotificationsPage() {
                 cursor: 'pointer',
               }}
             >
-              Load more
+              {t('notificationsPage.loadMore')}
             </button>
           </div>
         )}
@@ -174,7 +176,7 @@ export function NotificationsPage() {
         {/* Inline loading for pagination */}
         {state.loading && state.data.length > 0 && (
           <div style={{ textAlign: 'center', padding: '16px 0', color: 'var(--kalpx-text-soft)', fontSize: 14 }}>
-            Loading…
+            {t('notificationsPage.loading')}
           </div>
         )}
       </div>

@@ -12,6 +12,7 @@ import {
   getCommunityGlobalSearch,
   type CommunityGlobalSearchResult,
 } from "../../engine/communityApi";
+import { useTranslation } from "../../lib/i18n";
 
 interface CommunityTopBarProps {
   activeLabel?:
@@ -34,6 +35,20 @@ export function CommunityTopBar({
 }: CommunityTopBarProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
+
+  const navLabelMap: Record<string, string> = {
+    'Home': t('communityTopBar.navHome'),
+    'Top': t('communityTopBar.navTop'),
+    'Popular': t('communityTopBar.navPopular'),
+    'Explore': t('communityTopBar.navExplore'),
+    'Your Activity': t('communityTopBar.yourActivity'),
+    'Communities': t('communityTopBar.menuCommunities'),
+    'Privacy Policy': t('communityTopBar.menuPrivacyPolicy'),
+    'User Agreements': t('communityTopBar.menuUserAgreements'),
+    'KalpX Rules': t('communityTopBar.menuKalpxRules'),
+    'About KalpX': t('communityTopBar.menuAboutKalpx'),
+  };
   const [menuOpen, setMenuOpen] = useState(false);
   const [recentOpen, setRecentOpen] = useState(true);
   const [resourcesOpen, setResourcesOpen] = useState(true);
@@ -150,7 +165,7 @@ export function CommunityTopBar({
         setSearchResults(results);
       } catch (err: any) {
         if (err?.name === "CanceledError" || err?.name === "AbortError") return;
-        setSearchError("Failed to perform search");
+        setSearchError(t('communityTopBar.searchFailed'));
         setSearchResults({ communities: [], posts: [], users: [] });
       } finally {
         if (abortRef.current === controller) {
@@ -288,7 +303,7 @@ export function CommunityTopBar({
                 ref={inputRef}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search communities, posts, users..."
+                placeholder={t('communityTopBar.searchPlaceholder')}
                 style={{
                   flex: 1,
                   border: "none",
@@ -343,7 +358,7 @@ export function CommunityTopBar({
                   lineHeight: 1,
                 }}
               >
-                Community
+                {t('communityTopBar.communityHeading')}
               </button>
 
               <button
@@ -367,7 +382,7 @@ export function CommunityTopBar({
                   textUnderlineOffset: 2,
                 }}
               >
-                <span>{resolvedActiveLabel}</span>
+                <span>{navLabelMap[resolvedActiveLabel] ?? resolvedActiveLabel}</span>
                 {menuOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
               </button>
             </div>
@@ -439,7 +454,7 @@ export function CommunityTopBar({
           <div style={{ maxWidth: 620, margin: "0 auto", minHeight: 120 }}>
             {searchLoading && searchQuery.length > 0 && (
               <div style={{ padding: "20px 16px", color: "#7b7468" }}>
-                Loading search results...
+                {t('communityTopBar.searchLoading')}
               </div>
             )}
 
@@ -463,7 +478,7 @@ export function CommunityTopBar({
                   style={{ margin: "0 auto 10px" }}
                 />
                 <div style={{ fontSize: 15 }}>
-                  Type to search communities, posts, and users
+                  {t('communityTopBar.searchEmptyPrompt')}
                 </div>
               </div>
             )}
@@ -480,7 +495,7 @@ export function CommunityTopBar({
                     fontSize: 15,
                   }}
                 >
-                  No results found for "{searchQuery}"
+                  {t('communityTopBar.searchNoResults').replace('{searchQuery}', searchQuery)}
                 </div>
               )}
 
@@ -557,7 +572,7 @@ export function CommunityTopBar({
                             item.content ||
                             item.username ||
                             item.display_name ||
-                            "Result"}
+                            t('communityTopBar.searchResultFallback')}
                         </div>
                         <div
                           style={{
@@ -570,10 +585,10 @@ export function CommunityTopBar({
                           }}
                         >
                           {item.type === "community"
-                            ? `${item.member_count || 0} members`
+                            ? t('communityTopBar.searchResultMemberCount').replace('{count}', String(item.member_count || 0))
                             : item.type === "post"
-                              ? `in ${item.community_name || "Community"}`
-                              : "User"}
+                              ? t('communityTopBar.searchResultInCommunity').replace('{communityName}', item.community_name || 'Community')
+                              : t('communityTopBar.searchResultUserLabel')}
                         </div>
                       </div>
                     </button>
@@ -652,7 +667,7 @@ export function CommunityTopBar({
                       transition: "background-color 0.2s",
                     }}
                   >
-                    {item.label}
+                    {navLabelMap[item.label] ?? item.label}
                   </button>
                 ))}
               </div>
@@ -744,14 +759,14 @@ export function CommunityTopBar({
                   transition: "background-color 0.2s",
                 }}
               >
-                Your Activity
+                {t('communityTopBar.yourActivity')}
               </button>
 
               <SectionDivider />
 
               <div style={{ padding: "16px 0 16px" }}>
                 <SectionHeader
-                  title="RESOURCES"
+                  title={t('communityTopBar.resourcesSection')}
                   open={resourcesOpen}
                   onClick={() => setResourcesOpen((value) => !value)}
                 />
@@ -783,7 +798,7 @@ export function CommunityTopBar({
                           transition: "background-color 0.2s",
                         }}
                       >
-                        {item}
+                        {navLabelMap[item] ?? item}
                       </button>
                     ))}
                   </div>

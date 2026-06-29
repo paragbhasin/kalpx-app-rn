@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from '../../lib/i18n';
 
 type Phase = "intro" | "reflection" | "summary" | "decisions";
 
@@ -23,6 +24,7 @@ function ButtonLoadingLabel({
   loading: boolean;
   label: string;
 }) {
+  const { t } = useTranslation();
   if (!loading) return <>{label}</>;
   return (
     <span
@@ -44,12 +46,13 @@ function ButtonLoadingLabel({
           animation: "kalpx-spin 0.85s linear infinite",
         }}
       />
-      <span>Loading…</span>
+      <span>{t('cycleReflection.loading')}</span>
     </span>
   );
 }
 
 export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<Phase>("intro");
   const [selectedDay, setSelectedDay] = useState<number>(day);
   const [showJourneyView, setShowJourneyView] = useState(false);
@@ -122,12 +125,12 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
 
   const weeklyGroups = useMemo(
     () => [
-      { label: "Week 1", days: [1, 2, 3, 4, 5, 6, 7] },
+      { label: t('cycleReflection.week1Label'), days: [1, 2, 3, 4, 5, 6, 7] },
       ...(totalDays > 7
-        ? [{ label: "Week 2", days: [8, 9, 10, 11, 12, 13, 14] }]
+        ? [{ label: t('cycleReflection.week2Label'), days: [8, 9, 10, 11, 12, 13, 14] }]
         : []),
     ],
-    [totalDays],
+    [totalDays, t],
   );
 
   const dayActivity = useMemo(
@@ -177,18 +180,18 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
 
   if (phase === "intro") {
     const eyebrow =
-      cp.eyebrow || (day === 7 ? "Day 7 Checkpoint" : "Day 14 Checkpoint");
+      cp.eyebrow || (day === 7 ? t('cycleReflection.day7Eyebrow') : t('cycleReflection.day14Eyebrow'));
     const headline =
       cp.intro_headline ||
       cp.headline ||
-      (day === 7 ? "A Week Complete" : "Two Weeks. Something Settled.");
+      (day === 7 ? t('cycleReflection.day7IntroHeadline') : t('cycleReflection.day14IntroHeadline'));
     const body =
       cp.intro_body ||
       cp.body ||
       (day === 7
-        ? "Take a moment to reflect on your journey."
-        : "Can I show you what has changed?");
-    const ctaLabel = cp.intro_cta_label || "Continue";
+        ? t('cycleReflection.day7IntroBody')
+        : t('cycleReflection.day14IntroBody'));
+    const ctaLabel = cp.intro_cta_label || t('cycleReflection.continueButton');
 
     return (
       <div
@@ -287,7 +290,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
 
   // ── Reflection ────────────────────────────────────────────────────
   if (phase === "reflection" || phase === "summary") {
-    const graphCta = cp.graph_cta || "Continue to Choices";
+    const graphCta = cp.graph_cta || t('cycleReflection.continueToChoices');
 
     let narrativeText = mitraReflection;
     if (!narrativeText && cp.narrative_template) {
@@ -296,7 +299,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
         .replace("{total_days}", String(totalDays));
     }
     if (!narrativeText) {
-      narrativeText = `${completedCount} of ${totalDays} days held with intention.`;
+      narrativeText = t('cycleReflection.narrativeFallback').replace('{completedCount}', String(completedCount)).replace('{totalDays}', String(totalDays));
     }
 
     if (phase === "reflection" && day === 14) {
@@ -321,7 +324,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                   fontWeight: 700,
                 }}
               >
-                {cp.day_picker_title || "Your 14-Day Journey"}
+                {cp.day_picker_title || t('cycleReflection.day14JourneyTitle')}
               </p>
               <p
                 style={{
@@ -330,7 +333,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                   lineHeight: 1.6,
                 }}
               >
-                {cp.day_picker_subtitle || "Tap a day to see your progress"}
+                {cp.day_picker_subtitle || t('cycleReflection.dayPickerSubtitle')}
               </p>
             </div>
 
@@ -414,7 +417,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                               color: "var(--kalpx-text-soft)",
                             }}
                           >
-                            Day {dayNum}
+                            {t('cycleReflection.dayLabel').replace('{n}', String(dayNum))}
                           </span>
                         </button>
                       );
@@ -439,7 +442,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                 cursor: "pointer",
               }}
             >
-              Continue
+              {t('cycleReflection.continueButton')}
             </button>
           </div>
 
@@ -498,7 +501,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                           cursor: "pointer",
                         }}
                       >
-                        {tab === "day" ? "Day" : "Weekly"}
+                        {tab === "day" ? t('cycleReflection.tabDay') : t('cycleReflection.tabWeekly')}
                       </button>
                     ))}
                   </div>
@@ -526,27 +529,27 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                   >
                     {[
                       {
-                        label: "Engaged",
+                        label: t('cycleReflection.statEngaged'),
                         color: "#2D7A5F",
                         value: dayActivity.engaged,
                       },
                       {
-                        label: "Fully Completed",
+                        label: t('cycleReflection.statFullyCompleted'),
                         color: "#D9A557",
                         value: dayActivity.completed,
                       },
                       {
-                        label: "Mantra",
+                        label: t('cycleReflection.statMantra'),
                         color: "#8B6BCB",
                         value: dayActivity.mantra,
                       },
                       {
-                        label: "Sankalp",
+                        label: t('cycleReflection.statSankalp'),
                         color: "#2D7A5F",
                         value: dayActivity.sankalp,
                       },
                       {
-                        label: "Core",
+                        label: t('cycleReflection.statCore'),
                         color: "#E7774E",
                         value: dayActivity.practice,
                       },
@@ -637,7 +640,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                             color: "var(--kalpx-text-soft)",
                           }}
                         >
-                          <span>Engaged</span>
+                          <span>{t('cycleReflection.statEngaged')}</span>
                           <strong style={{ color: "var(--kalpx-text)" }}>
                             {week.engaged}
                           </strong>
@@ -651,7 +654,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                             marginTop: 8,
                           }}
                         >
-                          <span>Fully Completed</span>
+                          <span>{t('cycleReflection.statFullyCompleted')}</span>
                           <strong style={{ color: "var(--kalpx-text)" }}>
                             {week.completed}
                           </strong>
@@ -689,7 +692,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                   fontWeight: 700,
                 }}
               >
-                {cp.day_picker_title || "Your 7-Day Journey"}
+                {cp.day_picker_title || t('cycleReflection.day7JourneyTitle')}
               </p>
               <p
                 style={{
@@ -698,7 +701,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                   lineHeight: 1.6,
                 }}
               >
-                {cp.day_picker_subtitle || "Tap a day to see your progress"}
+                {cp.day_picker_subtitle || t('cycleReflection.dayPickerSubtitle')}
               </p>
             </div>
 
@@ -718,7 +721,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                   marginBottom: 20,
                 }}
               >
-                Week 1
+                {t('cycleReflection.week1Label')}
               </p>
               <div
                 style={{
@@ -779,7 +782,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                           color: "var(--kalpx-text-soft)",
                         }}
                       >
-                        Day {dayNum}
+                        {t('cycleReflection.dayLabel').replace('{n}', String(dayNum))}
                       </span>
                     </button>
                   );
@@ -802,7 +805,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                 cursor: "pointer",
               }}
             >
-              Skip
+              {t('cycleReflection.skipButton')}
             </button>
           </div>
 
@@ -861,7 +864,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                           cursor: "pointer",
                         }}
                       >
-                        {tab === "day" ? "Day" : "Weekly"}
+                        {tab === "day" ? t('cycleReflection.tabDay') : t('cycleReflection.tabWeekly')}
                       </button>
                     ))}
                   </div>
@@ -889,27 +892,27 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                   >
                     {[
                       {
-                        label: "Engaged",
+                        label: t('cycleReflection.statEngaged'),
                         color: "#2D7A5F",
                         value: dayActivity.engaged,
                       },
                       {
-                        label: "Fully Completed",
+                        label: t('cycleReflection.statFullyCompleted'),
                         color: "#D9A557",
                         value: dayActivity.completed,
                       },
                       {
-                        label: "Mantra",
+                        label: t('cycleReflection.statMantra'),
                         color: "#8B6BCB",
                         value: dayActivity.mantra,
                       },
                       {
-                        label: "Sankalp",
+                        label: t('cycleReflection.statSankalp'),
                         color: "#2D7A5F",
                         value: dayActivity.sankalp,
                       },
                       {
-                        label: "Core",
+                        label: t('cycleReflection.statCore'),
                         color: "#E7774E",
                         value: dayActivity.practice,
                       },
@@ -1000,7 +1003,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                             color: "var(--kalpx-text-soft)",
                           }}
                         >
-                          <span>Engaged</span>
+                          <span>{t('cycleReflection.statEngaged')}</span>
                           <strong style={{ color: "var(--kalpx-text)" }}>
                             {week.engaged}
                           </strong>
@@ -1014,7 +1017,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                             marginTop: 8,
                           }}
                         >
-                          <span>Fully Completed</span>
+                          <span>{t('cycleReflection.statFullyCompleted')}</span>
                           <strong style={{ color: "var(--kalpx-text)" }}>
                             {week.completed}
                           </strong>
@@ -1033,16 +1036,16 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
     if (phase === "summary") {
       const summaryTagline =
         day === 7
-          ? cp.surface_label || "DAY 7 • MIDPOINT"
-          : cp.surface_label || "DAY 14 • EVOLUTION PIVOT";
+          ? cp.surface_label || t('cycleReflection.day7SurfaceLabel')
+          : cp.surface_label || t('cycleReflection.day14SurfaceLabel');
       const summaryTitle =
-        day === 7 ? "Day 7 Reflection" : cp.summary_label || "What Has Grown";
+        day === 7 ? t('cycleReflection.day7SummaryTitle') : cp.summary_label || t('cycleReflection.day14SummaryTitle');
       const continuityTitle =
-        day === 7 ? "7-Day Continuity Mirror" : "14-Day Progress Graph";
+        day === 7 ? t('cycleReflection.day7ContinuityTitle') : t('cycleReflection.day14ContinuityTitle');
       const continuitySubtitle =
         day === 7
-          ? "Your engagement over the last 7 days"
-          : "Engaged and fully completed across the full cycle";
+          ? t('cycleReflection.day7ContinuitySubtitle')
+          : t('cycleReflection.day14ContinuitySubtitle');
       const summaryBody =
         mitraReflection ||
         cp.body_narrative ||
@@ -1115,7 +1118,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                     whiteSpace: "nowrap",
                   }}
                 >
-                  Engaged
+                  {t('cycleReflection.statEngaged')}
                 </div>
               )}
             </div>
@@ -1132,11 +1135,11 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
             >
               {[
                 {
-                  label: "Days Engaged",
+                  label: t('cycleReflection.daysEngaged'),
                   value: `${engagedTotal} / ${totalDays}`,
                 },
                 {
-                  label: "Fully Completed",
+                  label: t('cycleReflection.statFullyCompleted'),
                   value: `${completedTotal} / ${totalDays}`,
                 },
               ].map((item) => (
@@ -1212,8 +1215,8 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
               }}
             >
               {[
-                { label: "Engaged", color: "#432104" },
-                { label: "Completed", color: "#D9914A" },
+                { label: t('cycleReflection.statEngaged'), color: "#432104" },
+                { label: t('cycleReflection.graphLegendCompleted'), color: "#D9914A" },
               ].map((item) => (
                 <div
                   key={item.label}
@@ -1292,9 +1295,9 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
               }}
             >
               {[
-                { label: "Strongest Area", value: strongestType || "–" },
+                { label: t('cycleReflection.strongestAreaLabel'), value: strongestType || "–" },
                 {
-                  label: "Consistency Score",
+                  label: t('cycleReflection.consistencyScoreLabel'),
                   value:
                     avgCompletionRate != null ? `${avgCompletionRate}%` : "–",
                 },
@@ -1356,7 +1359,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                 letterSpacing: 0.6,
               }}
             >
-              MITRA REFLECTION
+              {t('cycleReflection.mitraReflectionBadge')}
             </div>
             {!!strongestType && (
               <div
@@ -1372,7 +1375,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                   fontSize: 13,
                 }}
               >
-                Strongest area: {strongestType}
+                {t('cycleReflection.strongestAreaPrefix').replace('{type}', strongestType)}
               </div>
             )}
             {!!summaryBody && (
@@ -1412,7 +1415,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                 >
                   <ButtonLoadingLabel
                     loading={isSubmitting}
-                    label={cp.cta_continue_label || "Continue My Path"}
+                    label={cp.cta_continue_label || t('cycleReflection.ctaContinueMyPath')}
                   />
                 </button>
                 {decisionsAvailable.includes("lighten") && (
@@ -1433,7 +1436,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                   >
                     <ButtonLoadingLabel
                       loading={isSubmitting}
-                      label={cp.cta_lighten_label || "Lighten"}
+                      label={cp.cta_lighten_label || t('cycleReflection.ctaLighten')}
                     />
                   </button>
                 )}
@@ -1451,7 +1454,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                       cursor: isSubmitting ? "default" : "pointer",
                     }}
                   >
-                    {cp.cta_start_fresh_label || "Start Fresh"}
+                    {cp.cta_start_fresh_label || t('cycleReflection.ctaStartFresh')}
                   </button>
                 )}
               </div>
@@ -1491,7 +1494,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                 justifyContent: "center",
               }}
             >
-              {cp.graph_cta || "Continue to Choices"}
+              {cp.graph_cta || t('cycleReflection.continueToChoices')}
             </button>
           )}
         </div>
@@ -1513,7 +1516,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
             marginBottom: 20,
           }}
         >
-          Your Journey
+          {t('cycleReflection.yourJourneyHeading')}
         </p>
 
         <div
@@ -1544,7 +1547,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
               }}
             >
               {completedTotal} {completedTotal === 1 ? "day was" : "days were"}{" "}
-              fully complete.
+              {t('cycleReflection.fullyCompleteText')}
             </p>
           )}
         </div>
@@ -1561,7 +1564,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                 marginBottom: 6,
               }}
             >
-              {sd.checkpoint_classification_label || "Your Arc"}
+              {sd.checkpoint_classification_label || t('cycleReflection.yourArc')}
             </p>
             <p
               style={{
@@ -1615,7 +1618,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
   const framing =
     sd.checkpoint_decision_framing ||
     sd.checkpoint_framing ||
-    (day === 7 ? "Choose your next week:" : "How will you move forward?");
+    (day === 7 ? t('cycleReflection.framingDay7') : t('cycleReflection.framingDay14'));
   const decisionLayout: string =
     dc.decision_layout ||
     cp.decision_layout ||
@@ -1628,33 +1631,33 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
   const classificationBody: string = sd.checkpoint_classification_body || "";
 
   const decisionLabels: Record<string, string> = {
-    continue: cp.cta_continue_label || "Continue My Path",
-    lighten: cp.cta_lighten_label || "Lighten",
-    reset: cp.cta_start_fresh_label || "Start Fresh",
+    continue: cp.cta_continue_label || t('cycleReflection.ctaContinueMyPath'),
+    lighten: cp.cta_lighten_label || t('cycleReflection.ctaLighten'),
+    reset: cp.cta_start_fresh_label || t('cycleReflection.ctaStartFresh'),
     continue_same:
       cp.continue_path_cta ||
       cp.cta_continue_same ||
       dc.continue_same_cta ||
-      "Continue Same Path",
+      t('cycleReflection.ctaContinueSamePath'),
     deepen:
       cp.deepen_practice_cta ||
       cp.cta_deepen ||
       dc.deepen_cta ||
-      "Deepen Practice",
+      t('cycleReflection.ctaDeepenPractice'),
     change_focus:
       cp.change_focus_cta ||
       cp.cta_change_focus ||
       dc.change_focus_cta ||
-      "Change Focus",
+      t('cycleReflection.ctaChangeFocus'),
   };
 
   const decisionDescriptions: Record<string, string> = {
-    continue: "Keep going with your current practice rhythm.",
-    lighten: "Lower the intensity — stay consistent but easier.",
-    reset: "Start a new path with fresh clarity.",
-    continue_same: "Keep going with the same practice as the last 14 days.",
-    deepen: "Commit to 108 repetitions — deeper engagement.",
-    change_focus: "Choose a different focus for your next cycle.",
+    continue: t('cycleReflection.descContinue'),
+    lighten: t('cycleReflection.descLighten'),
+    reset: t('cycleReflection.descReset'),
+    continue_same: t('cycleReflection.descContinueSame'),
+    deepen: t('cycleReflection.descDeepen'),
+    change_focus: t('cycleReflection.descChangeFocus'),
   };
 
   // Day 7 decision buttons use RN color hierarchy; Day 14 uses equal-weight cards (approved web divergence)
@@ -1783,7 +1786,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
               marginBottom: 16,
             }}
           >
-            Something went wrong. Please try again.
+            {t('cycleReflection.submitError')}
           </p>
         )}
 
@@ -1858,7 +1861,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
           <ButtonLoadingLabel
             loading={isSubmitting}
             label={
-              dc.restart_cta || cp.restart_cta || "Start a New 14-Day Rhythm"
+              dc.restart_cta || cp.restart_cta || t('cycleReflection.ctaStartNew14DayRhythm')
             }
           />
         </button>
@@ -2015,7 +2018,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
               marginBottom: 16,
             }}
           >
-            Something went wrong. Please try again.
+            {t('cycleReflection.submitError')}
           </p>
         )}
 
@@ -2211,7 +2214,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
           marginBottom: 16,
         }}
       >
-        {day === 7 ? "Your Next Week" : "Your Next Cycle"}
+        {day === 7 ? t('cycleReflection.yourNextWeek') : t('cycleReflection.yourNextCycle')}
       </p>
       <p
         style={{

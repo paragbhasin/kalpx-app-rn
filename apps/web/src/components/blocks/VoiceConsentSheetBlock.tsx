@@ -3,6 +3,7 @@
  * If voice recording is unavailable, shows text fallback immediately.
  */
 import React from 'react';
+import { useTranslation } from '../../lib/i18n';
 
 const canRecord =
   typeof navigator !== 'undefined' &&
@@ -17,18 +18,19 @@ interface Props {
 }
 
 export function VoiceConsentSheetBlock({ onAction }: Props) {
+  const { t } = useTranslation();
   if (!canRecord) {
     return (
       <div style={{ padding: '32px 24px', textAlign: 'center' }} data-testid="voice-consent-sheet">
         <p style={{ color: '#6B6356', marginBottom: 24, lineHeight: 1.6 }}>
-          Voice notes are not available in this browser.<br />
-          You can continue with text instead.
+          {t('voiceConsent.voiceNotAvailableBrowser')}<br />
+          {t('voiceConsent.continueWithText')}
         </p>
         <button
           onClick={() => onAction?.({ type: 'support_exit' })}
           style={{ padding: '12px 24px', borderRadius: 8, border: 'none', background: '#C9A84C', color: '#fff', cursor: 'pointer' }}
         >
-          Continue
+          {t('voiceConsent.continue')}
         </button>
       </div>
     );
@@ -37,10 +39,10 @@ export function VoiceConsentSheetBlock({ onAction }: Props) {
   return (
     <div style={{ padding: '32px 24px', textAlign: 'center' }} data-testid="voice-consent-sheet">
       <p style={{ fontSize: 16, color: '#2C2A26', marginBottom: 8, fontWeight: 500 }}>
-        Voice notes
+        {t('voiceConsent.voiceNotes')}
       </p>
       <p style={{ color: '#6B6356', lineHeight: 1.6, marginBottom: 24 }}>
-        Mitra can listen and reflect back. Your voice note stays private.
+        {t('voiceConsent.mitraListenPrivate')}
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 280, margin: '0 auto' }}>
         <button
@@ -48,14 +50,14 @@ export function VoiceConsentSheetBlock({ onAction }: Props) {
           data-testid="voice-consent-accept"
           style={{ padding: '12px 24px', borderRadius: 8, border: 'none', background: '#C9A84C', color: '#fff', cursor: 'pointer' }}
         >
-          Allow voice note
+          {t('voiceConsent.allowVoiceNote')}
         </button>
         <button
           onClick={() => onAction?.({ type: 'decline_voice_consent' })}
           data-testid="voice-consent-decline"
           style={{ padding: '12px 24px', borderRadius: 8, border: '1px solid #E8DCC8', background: 'transparent', color: '#6B6356', cursor: 'pointer' }}
         >
-          Not right now
+          {t('voiceConsent.notRightNow')}
         </button>
       </div>
     </div>

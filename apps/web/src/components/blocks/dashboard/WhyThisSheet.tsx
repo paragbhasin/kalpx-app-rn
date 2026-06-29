@@ -1,6 +1,7 @@
 import React from 'react';
 import { normalizeDashboardWhyThisState } from '@kalpx/contracts';
 import type { DashboardWhyThis } from '@kalpx/types';
+import { useTranslation } from '../../../lib/i18n';
 
 interface Props {
   sd: Record<string, any>;
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function WhyThisSheet({ sd, onClose, onAction, onBackFromL3 }: Props) {
+  const { t } = useTranslation();
   const whyThisState = normalizeDashboardWhyThisState(
     sd.why_this as DashboardWhyThis | undefined,
   );
@@ -24,7 +26,7 @@ export function WhyThisSheet({ sd, onClose, onAction, onBackFromL3 }: Props) {
   const source = sd.why_this_source || null;
   const principleId = whyThis.principle_id ?? null;
   const isSubmitting = !!sd._isSubmitting;
-  const eyebrowLabel = whyThisState.label?.toUpperCase() ?? 'WHY THIS';
+  const eyebrowLabel = whyThisState.label?.toUpperCase() ?? t('whyThisSheet.whyThisLabel');
 
   const hasContent = whyThis.level1 || whyThis.level2 || items.length > 0;
 
@@ -93,7 +95,7 @@ export function WhyThisSheet({ sd, onClose, onAction, onBackFromL3 }: Props) {
               onClick={handleBack}
               style={{ background: 'none', border: 'none', fontSize: 13, color: 'var(--kalpx-gold)', cursor: 'pointer', padding: '0 4px', fontWeight: 600 }}
             >
-              ← Back
+              {t('whyThisSheet.back')}
             </button>
           ) : (
             <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-gold)', textTransform: 'uppercase', margin: 0 }}>
@@ -113,7 +115,7 @@ export function WhyThisSheet({ sd, onClose, onAction, onBackFromL3 }: Props) {
         {overlayLevel === 'l3' && source && (
           <div>
             <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-text-muted)', textTransform: 'uppercase', marginBottom: 16 }}>
-              The Source
+              {t('whyThisSheet.theSource')}
             </p>
             {source.sanskrit && (
               <p style={{ fontFamily: '"Noto Sans Devanagari", sans-serif', fontSize: 22, color: 'var(--kalpx-text)', lineHeight: 1.5, textAlign: 'center', marginBottom: 10 }}>
@@ -157,7 +159,7 @@ export function WhyThisSheet({ sd, onClose, onAction, onBackFromL3 }: Props) {
         {overlayLevel === 'l2' && principle && (
           <div>
             <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-text-muted)', textTransform: 'uppercase', marginBottom: 12 }}>
-              The Principle
+              {t('whyThisSheet.thePrinciple')}
             </p>
             {principle.title && (
               <p style={{ fontSize: 20, fontWeight: 700, fontFamily: 'var(--kalpx-font-serif)', color: 'var(--kalpx-text)', marginBottom: 10, lineHeight: 1.3 }}>
@@ -190,7 +192,7 @@ export function WhyThisSheet({ sd, onClose, onAction, onBackFromL3 }: Props) {
                   opacity: isSubmitting ? 0.5 : 1,
                 }}
               >
-                See the source →
+                {t('whyThisSheet.seeTheSource')}
               </button>
             )}
           </div>
@@ -200,13 +202,13 @@ export function WhyThisSheet({ sd, onClose, onAction, onBackFromL3 }: Props) {
         {(!overlayLevel || overlayLevel === 'l1') && (
           <>
             {!hasContent && (
-              <p style={{ color: '#aaa', fontSize: 14, textAlign: 'center' }}>No explanation available yet.</p>
+              <p style={{ color: '#aaa', fontSize: 14, textAlign: 'center' }}>{t('whyThisSheet.noExplanationAvailable')}</p>
             )}
 
             {(whyThis.level1 || whyThis.level2) && (
               <div style={{ marginBottom: 20 }}>
                 <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>
-                  The Principle
+                  {t('whyThisSheet.thePrinciple')}
                 </p>
                 {whyThis.level1 && (
                   <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--kalpx-text)', marginBottom: 8 }}>
@@ -234,7 +236,7 @@ export function WhyThisSheet({ sd, onClose, onAction, onBackFromL3 }: Props) {
                       opacity: isSubmitting ? 0.5 : 1,
                     }}
                   >
-                    Go deeper →
+                    {t('whyThisSheet.goDeeper')}
                   </button>
                 )}
               </div>
@@ -259,7 +261,7 @@ export function WhyThisSheet({ sd, onClose, onAction, onBackFromL3 }: Props) {
             {items.length > 0 && (
               <div>
                 <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-text-muted)', textTransform: 'uppercase', marginBottom: 10 }}>
-                  Your Path Items
+                  {t('whyThisSheet.yourPathItems')}
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {items.map((item) => (

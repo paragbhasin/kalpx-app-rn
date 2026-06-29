@@ -14,6 +14,7 @@ import {
 } from '../../store/preferencesSlice';
 import { getUserProfile, updateUserProfile } from '../../lib/userApi';
 import { useWebPush } from '../../hooks/useWebPush';
+import { useTranslation } from '../../lib/i18n';
 
 const PAGE_BG = '#fffaf5';
 const SECTION_BG = '#fff8f0';
@@ -28,108 +29,6 @@ type CategoryConfig = {
   description: string;
   defaultOn: boolean;
 };
-
-const COMPANION_CATEGORIES: CategoryConfig[] = [
-  {
-    key: 'morning_presence',
-    label: 'Morning Companion',
-    description: 'A gentle start before your day opens.',
-    defaultOn: true,
-  },
-  {
-    key: 'prep_heads_up',
-    label: 'Practice Reminders',
-    description: 'A nudge to return to your Sankalp or Mantra.',
-    defaultOn: true,
-  },
-  {
-    key: 'evening_reflection',
-    label: 'Evening Reflection',
-    description: 'A quiet close for the day.',
-    defaultOn: true,
-  },
-  {
-    key: 'milestone_reflections',
-    label: 'Journey Milestones',
-    description: 'Day 7 and Day 14 checkpoints, and weekly reflections.',
-    defaultOn: true,
-  },
-  {
-    key: 'morning_briefing',
-    label: 'Morning Briefing',
-    description: 'A daily reflection and practice to begin your day with Mitra.',
-    defaultOn: true,
-  },
-];
-
-const COMPANION_GUIDANCE_CATEGORIES: CategoryConfig[] = [
-  {
-    key: 'predictive_suggestions',
-    label: 'Mitra Suggestions',
-    description: 'Gentle suggestions when Mitra finds a practice that may help today.',
-    defaultOn: true,
-  },
-  {
-    key: 'festival_ritucharya',
-    label: 'Festival & Season Rhythms',
-    description: 'Cultural and seasonal reflections woven into your practice.',
-    defaultOn: true,
-  },
-  {
-    key: 'gentle_reengagement',
-    label: 'Gentle Return',
-    description: 'A quiet reminder when you\'ve been away for a few days.',
-    defaultOn: true,
-  },
-  {
-    key: 'post_conflict_follow',
-    label: 'Quiet Reset',
-    description: 'A soft reminder to pause and return to your practice.',
-    defaultOn: true,
-  },
-  {
-    key: 'community_updates',
-    label: 'Community Updates',
-    description: 'Updates from KalpX spaces and reflections.',
-    defaultOn: true,
-  },
-  {
-    key: 'post_room_continuity',
-    label: 'After Room Sessions',
-    description: 'A gentle follow-up to help you carry practice forward.',
-    defaultOn: true,
-  },
-];
-
-const SENSITIVE_CATEGORIES: CategoryConfig[] = [
-  {
-    key: 'grief_follow',
-    label: 'Grief Companionship',
-    description: 'Very gentle support during tender times.',
-    defaultOn: true,
-  },
-];
-
-const RHYTHM_CATEGORIES: CategoryConfig[] = [
-  {
-    key: 'rhythm_reminders',
-    label: 'Daily Rhythm reminders',
-    description: 'A soft call to your rhythm at the time you set.',
-    defaultOn: true,
-  },
-  {
-    key: 'checkin_companion_nudge',
-    label: 'Check-in companion',
-    description: 'A quiet follow-up when Mitra can offer a gentle anchor.',
-    defaultOn: true,
-  },
-  {
-    key: 'quick_chant_reminders',
-    label: 'Mantra reminders',
-    description: 'An occasional return to your chosen sound.',
-    defaultOn: true,
-  },
-];
 
 const TIMEZONE_OPTIONS = [
   { label: 'India Standard Time (IST)', value: 'Asia/Kolkata' },
@@ -148,12 +47,6 @@ const TIMEZONE_OPTIONS = [
   { label: 'South Africa Standard Time (SAST)', value: 'Africa/Johannesburg' },
 ];
 
-const FREQUENCY_OPTIONS = [
-  { label: 'Normal', value: 'normal', description: 'Full companion rhythm' },
-  { label: 'Reduced', value: 'reduced', description: 'Fewer, more spaced' },
-  { label: 'Off', value: 'off', description: 'Pause all notifications' },
-] as const;
-
 function isValidHHMM(val: string): boolean {
   return /^([01]\d|2[0-3]):[0-5]\d$/.test(val);
 }
@@ -166,6 +59,115 @@ export function NotificationPreferencesPage() {
   const frequency = useSelector((s: RootState) => s.preferences.recommended_frequency);
   const globalConsent = useSelector((s: RootState) => s.preferences.global_consent);
   const loaded = useSelector((s: RootState) => s.preferences.loaded);
+  const { t } = useTranslation();
+
+  const COMPANION_CATEGORIES: CategoryConfig[] = [
+    {
+      key: 'morning_presence',
+      label: t('notifPrefs.catMorningLabel'),
+      description: t('notifPrefs.catMorningDesc'),
+      defaultOn: true,
+    },
+    {
+      key: 'prep_heads_up',
+      label: t('notifPrefs.catPracticeLabel'),
+      description: t('notifPrefs.catPracticeDesc'),
+      defaultOn: true,
+    },
+    {
+      key: 'evening_reflection',
+      label: t('notifPrefs.catEveningLabel'),
+      description: t('notifPrefs.catEveningDesc'),
+      defaultOn: true,
+    },
+    {
+      key: 'milestone_reflections',
+      label: t('notifPrefs.catMilestoneLabel'),
+      description: t('notifPrefs.catMilestoneDesc'),
+      defaultOn: true,
+    },
+    {
+      key: 'morning_briefing',
+      label: t('notifPrefs.catBriefingLabel'),
+      description: t('notifPrefs.catBriefingDesc'),
+      defaultOn: true,
+    },
+  ];
+
+  const COMPANION_GUIDANCE_CATEGORIES: CategoryConfig[] = [
+    {
+      key: 'predictive_suggestions',
+      label: t('notifPrefs.catPredictiveLabel'),
+      description: t('notifPrefs.catPredictiveDesc'),
+      defaultOn: true,
+    },
+    {
+      key: 'festival_ritucharya',
+      label: t('notifPrefs.catFestivalLabel'),
+      description: t('notifPrefs.catFestivalDesc'),
+      defaultOn: true,
+    },
+    {
+      key: 'gentle_reengagement',
+      label: t('notifPrefs.catReturnLabel'),
+      description: t('notifPrefs.catReturnDesc'),
+      defaultOn: true,
+    },
+    {
+      key: 'post_conflict_follow',
+      label: t('notifPrefs.catResetLabel'),
+      description: t('notifPrefs.catResetDesc'),
+      defaultOn: true,
+    },
+    {
+      key: 'community_updates',
+      label: t('notifPrefs.catCommunityLabel'),
+      description: t('notifPrefs.catCommunityDesc'),
+      defaultOn: true,
+    },
+    {
+      key: 'post_room_continuity',
+      label: t('notifPrefs.catPostRoomLabel'),
+      description: t('notifPrefs.catPostRoomDesc'),
+      defaultOn: true,
+    },
+  ];
+
+  const SENSITIVE_CATEGORIES: CategoryConfig[] = [
+    {
+      key: 'grief_follow',
+      label: t('notifPrefs.catGriefLabel'),
+      description: t('notifPrefs.catGriefDesc'),
+      defaultOn: true,
+    },
+  ];
+
+  const RHYTHM_CATEGORIES: CategoryConfig[] = [
+    {
+      key: 'rhythm_reminders',
+      label: t('notifPrefs.catRhythmLabel'),
+      description: t('notifPrefs.catRhythmDesc'),
+      defaultOn: true,
+    },
+    {
+      key: 'checkin_companion_nudge',
+      label: t('notifPrefs.catCheckinLabel'),
+      description: t('notifPrefs.catCheckinDesc'),
+      defaultOn: true,
+    },
+    {
+      key: 'quick_chant_reminders',
+      label: t('notifPrefs.catMantraLabel'),
+      description: t('notifPrefs.catMantraDesc'),
+      defaultOn: true,
+    },
+  ];
+
+  const FREQUENCY_OPTIONS = [
+    { label: t('notifPrefs.frequencyNormal'), value: 'normal', description: t('notifPrefs.frequencyNormalDesc') },
+    { label: t('notifPrefs.frequencyReduced'), value: 'reduced', description: t('notifPrefs.frequencyReducedDesc') },
+    { label: t('notifPrefs.frequencyOff'), value: 'off', description: t('notifPrefs.frequencyOffDesc') },
+  ] as const;
 
   const webPush = useWebPush();
 
@@ -232,11 +234,11 @@ export function NotificationPreferencesPage() {
 
   const handleSaveQuietHours = async () => {
     if (!isValidHHMM(quietStart)) {
-      setQuietError('Start must be HH:MM (e.g. 23:00)');
+      setQuietError(t('notifPrefs.quietStartError'));
       return;
     }
     if (!isValidHHMM(quietEnd)) {
-      setQuietError('End must be HH:MM (e.g. 05:00)');
+      setQuietError(t('notifPrefs.quietEndError'));
       return;
     }
     setQuietError('');
@@ -269,7 +271,7 @@ export function NotificationPreferencesPage() {
             <path d="M19 12H5M12 5l-7 7 7 7" />
           </svg>
         </button>
-        <h2 style={{ margin: 0, fontSize: 17, fontWeight: 600, color: TEXT }}>Notification Preferences</h2>
+        <h2 style={{ margin: 0, fontSize: 17, fontWeight: 600, color: TEXT }}>{t('notifPrefs.title')}</h2>
       </div>
 
       {!loaded ? (
@@ -280,12 +282,12 @@ export function NotificationPreferencesPage() {
         <div style={{ maxWidth: 520, margin: '0 auto', padding: '16px 16px 48px' }}>
 
           {/* Timezone */}
-          <Section title="Your Timezone" subtitle="Mitra uses your timezone to send reminders at the right time.">
+          <Section title={t('notifPrefs.timezoneSection')} subtitle={t('notifPrefs.timezoneSubtitle')}>
             {!currentTimezone || currentTimezone === 'Asia/Kolkata' ? (
               <div style={{ padding: '8px 0', borderTop: `1px solid ${BORDER}` }}>
                 <p style={{ margin: '0 0 10px', fontSize: 13, color: TEXT_SECONDARY }}>
-                  To remind you at the right time, Mitra needs your timezone.
-                  {detectedTimezone ? ` We detected your timezone as ${detectedTimezone}.` : ''}
+                  {t('notifPrefs.timezonePrompt')}
+                  {detectedTimezone ? ` ${t('notifPrefs.detectedTimezone').replace('{tz}', detectedTimezone)}` : ''}
                 </p>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   {detectedTimezone && (
@@ -298,7 +300,7 @@ export function NotificationPreferencesPage() {
                         cursor: savingTimezone ? 'not-allowed' : 'pointer', opacity: savingTimezone ? 0.7 : 1,
                       }}
                     >
-                      Use this timezone
+                      {t('notifPrefs.useThisTimezone')}
                     </button>
                   )}
                   <button
@@ -308,7 +310,7 @@ export function NotificationPreferencesPage() {
                       padding: '8px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
                     }}
                   >
-                    Choose manually
+                    {t('notifPrefs.chooseManually')}
                   </button>
                 </div>
               </div>
@@ -316,7 +318,7 @@ export function NotificationPreferencesPage() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderTop: `1px solid ${BORDER}` }}>
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 500, color: TEXT }}>{currentTimezone}</div>
-                  {timezoneSaved && <div style={{ fontSize: 12, color: GOLD, marginTop: 2 }}>Saved</div>}
+                  {timezoneSaved && <div style={{ fontSize: 12, color: GOLD, marginTop: 2 }}>{t('notifPrefs.saved')}</div>}
                 </div>
                 <button
                   onClick={() => setShowTimezoneSelector((v) => !v)}
@@ -325,7 +327,7 @@ export function NotificationPreferencesPage() {
                     padding: '6px 12px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
                   }}
                 >
-                  Change
+                  {t('notifPrefs.change')}
                 </button>
               </div>
             )}
@@ -340,7 +342,7 @@ export function NotificationPreferencesPage() {
                     backgroundColor: '#fff',
                   }}
                 >
-                  <option value="">Select timezone</option>
+                  <option value="">{t('notifPrefs.selectTimezone')}</option>
                   {TIMEZONE_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
@@ -356,7 +358,7 @@ export function NotificationPreferencesPage() {
                       opacity: (savingTimezone || !selectedTimezone) ? 0.7 : 1,
                     }}
                   >
-                    {savingTimezone ? 'Saving...' : 'Save'}
+                    {savingTimezone ? t('notifPrefs.saving') : t('notifPrefs.save')}
                   </button>
                   <button
                     onClick={() => { setShowTimezoneSelector(false); setSelectedTimezone(currentTimezone); }}
@@ -365,7 +367,7 @@ export function NotificationPreferencesPage() {
                       borderRadius: 8, padding: '8px 16px', fontSize: 13, cursor: 'pointer',
                     }}
                   >
-                    Cancel
+                    {t('notifPrefs.cancel')}
                   </button>
                 </div>
               </div>
@@ -373,16 +375,16 @@ export function NotificationPreferencesPage() {
           </Section>
 
           {/* Global consent */}
-          <Section title="Notification Consent" subtitle="Master switches for all Mitra notifications.">
+          <Section title={t('notifPrefs.consentSection')} subtitle={t('notifPrefs.consentSubtitle')}>
             <CategoryRow
-              label="Push Notifications"
-              description="Receive notifications on this device."
+              label={t('notifPrefs.pushLabel')}
+              description={t('notifPrefs.pushDesc')}
               value={globalConsent.receive_push_notifications}
               onToggle={(v) => handleGlobalConsentToggle('receive_push_notifications', v)}
             />
             <CategoryRow
-              label="Email Notifications"
-              description="Receive companion emails."
+              label={t('notifPrefs.emailLabel')}
+              description={t('notifPrefs.emailDesc')}
               value={globalConsent.receive_emails}
               onToggle={(v) => handleGlobalConsentToggle('receive_emails', v)}
             />
@@ -390,14 +392,14 @@ export function NotificationPreferencesPage() {
 
           {/* Browser notifications (web push) */}
           <Section
-            title="Browser Notifications"
-            subtitle="Receive reminders directly in this browser, even when the tab is in the background."
+            title={t('notifPrefs.browserSection')}
+            subtitle={t('notifPrefs.browserSubtitle')}
           >
-            <BrowserPushRow webPush={webPush} />
+            <BrowserPushRow webPush={webPush} t={t} />
           </Section>
 
           {/* Core companion rhythm */}
-          <Section title="Companion Rhythm" subtitle="Core companion notifications.">
+          <Section title={t('notifPrefs.companionSection')} subtitle={t('notifPrefs.companionSubtitle')}>
             {COMPANION_CATEGORIES.map((cat) => (
               <CategoryRow
                 key={cat.key}
@@ -411,8 +413,8 @@ export function NotificationPreferencesPage() {
 
           {/* Companion guidance */}
           <Section
-            title="Companion Guidance"
-            subtitle="Helpful touchpoints from Mitra to support your practice, rhythm, and connection."
+            title={t('notifPrefs.guidanceSection')}
+            subtitle={t('notifPrefs.guidanceSubtitle')}
           >
             {COMPANION_GUIDANCE_CATEGORIES.map((cat) => (
               <CategoryRow
@@ -427,8 +429,8 @@ export function NotificationPreferencesPage() {
 
           {/* Deeply personal */}
           <Section
-            title="Deeply Personal Support"
-            subtitle="These are deeply personal. Turn them on only if you want Mitra to support you in these moments."
+            title={t('notifPrefs.personalSection')}
+            subtitle={t('notifPrefs.personalSubtitle')}
           >
             {SENSITIVE_CATEGORIES.map((cat) => (
               <CategoryRow
@@ -443,8 +445,8 @@ export function NotificationPreferencesPage() {
 
           {/* Rhythm & Practice */}
           <Section
-            title="Rhythm & Practice"
-            subtitle="Reminders tied to your daily rhythm and chosen practices."
+            title={t('notifPrefs.rhythmSection')}
+            subtitle={t('notifPrefs.rhythmSubtitle')}
           >
             {RHYTHM_CATEGORIES.map((cat) => (
               <CategoryRow
@@ -458,10 +460,10 @@ export function NotificationPreferencesPage() {
           </Section>
 
           {/* Quiet hours */}
-          <Section title="Quiet Hours" subtitle="No notifications during this window. Default: 11 PM to 5 AM.">
+          <Section title={t('notifPrefs.quietSection')} subtitle={t('notifPrefs.quietSubtitle')}>
             <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', flexWrap: 'wrap', marginTop: 4 }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <label style={{ fontSize: 12, color: TEXT_SECONDARY }}>From</label>
+                <label style={{ fontSize: 12, color: TEXT_SECONDARY }}>{t('notifPrefs.from')}</label>
                 <input
                   value={quietStart}
                   onChange={(e) => setQuietStart(e.target.value)}
@@ -471,7 +473,7 @@ export function NotificationPreferencesPage() {
                 />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <label style={{ fontSize: 12, color: TEXT_SECONDARY }}>Until</label>
+                <label style={{ fontSize: 12, color: TEXT_SECONDARY }}>{t('notifPrefs.until')}</label>
                 <input
                   value={quietEnd}
                   onChange={(e) => setQuietEnd(e.target.value)}
@@ -489,14 +491,14 @@ export function NotificationPreferencesPage() {
                   opacity: savingQuiet ? 0.7 : 1,
                 }}
               >
-                {savingQuiet ? 'Saving...' : quietSaved ? 'Saved' : 'Save'}
+                {savingQuiet ? t('notifPrefs.saving') : quietSaved ? t('notifPrefs.saved') : t('notifPrefs.save')}
               </button>
             </div>
             {quietError && <p style={{ color: '#c0392b', fontSize: 12, marginTop: 6 }}>{quietError}</p>}
           </Section>
 
           {/* Frequency */}
-          <Section title="Frequency" subtitle="How often Mitra reaches out across all categories.">
+          <Section title={t('notifPrefs.frequencySection')} subtitle={t('notifPrefs.frequencySubtitle')}>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
               {FREQUENCY_OPTIONS.map((opt) => (
                 <button
@@ -518,7 +520,7 @@ export function NotificationPreferencesPage() {
           </Section>
 
           <p style={{ textAlign: 'center', fontSize: 12, color: TEXT_SECONDARY, marginTop: 24 }}>
-            Push consent above overrides all category settings. Browser-level permission can be managed in browser settings.
+            {t('notifPrefs.footerNote')}
           </p>
         </div>
       )}
@@ -528,14 +530,14 @@ export function NotificationPreferencesPage() {
   );
 }
 
-function BrowserPushRow({ webPush }: { webPush: ReturnType<typeof useWebPush> }) {
+function BrowserPushRow({ webPush, t }: { webPush: ReturnType<typeof useWebPush>; t: (key: string) => string }) {
   const { state, error, subscribe, unsubscribe } = webPush;
 
   if (state === 'unsupported') {
     return (
       <div style={{ padding: '10px 0', borderTop: `1px solid ${BORDER}` }}>
         <p style={{ margin: 0, fontSize: 13, color: TEXT_SECONDARY }}>
-          Browser notifications are not supported in this browser. Use Chrome or Firefox for the best experience.
+          {t('notifPrefs.browserUnsupported')}
         </p>
       </div>
     );
@@ -545,7 +547,7 @@ function BrowserPushRow({ webPush }: { webPush: ReturnType<typeof useWebPush> })
     return (
       <div style={{ padding: '10px 0', borderTop: `1px solid ${BORDER}` }}>
         <p style={{ margin: 0, fontSize: 13, color: TEXT_SECONDARY }}>
-          Notifications are blocked. To enable, open your browser's site settings for this page and allow notifications.
+          {t('notifPrefs.browserDenied')}
         </p>
       </div>
     );
@@ -559,12 +561,12 @@ function BrowserPushRow({ webPush }: { webPush: ReturnType<typeof useWebPush> })
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ flex: 1, paddingRight: 16 }}>
           <div style={{ fontSize: 14, fontWeight: 500, color: TEXT }}>
-            {isSubscribed ? 'Browser notifications on' : 'Browser notifications off'}
+            {isSubscribed ? t('notifPrefs.browserOn') : t('notifPrefs.browserOff')}
           </div>
           <div style={{ fontSize: 12, color: TEXT_SECONDARY, marginTop: 2 }}>
             {isSubscribed
-              ? 'This browser will receive reminders from Mitra.'
-              : 'Turn on to receive reminders in this browser.'}
+              ? t('notifPrefs.browserOnDesc')
+              : t('notifPrefs.browserOffDesc')}
           </div>
         </div>
         <label style={{ position: 'relative', display: 'inline-block', width: 44, height: 24, flexShrink: 0 }}>
@@ -589,7 +591,7 @@ function BrowserPushRow({ webPush }: { webPush: ReturnType<typeof useWebPush> })
         </label>
       </div>
       {state === 'subscribing' && (
-        <p style={{ margin: '6px 0 0', fontSize: 12, color: GOLD }}>Enabling browser notifications…</p>
+        <p style={{ margin: '6px 0 0', fontSize: 12, color: GOLD }}>{t('notifPrefs.enabling')}</p>
       )}
       {error && (
         <p style={{ margin: '6px 0 0', fontSize: 12, color: '#c0392b' }}>{error}</p>

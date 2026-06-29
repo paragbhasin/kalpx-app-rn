@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from '../../../lib/i18n';
 
 interface WhyThisItem {
   id: string;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function WhyThisL1Strip({ sd, onOpen }: Props) {
+  const { t } = useTranslation();
   const items: WhyThisItem[] = Array.isArray(sd.why_this_l1_items) ? sd.why_this_l1_items : [];
   const whyThis = sd.why_this;
 
@@ -24,7 +26,7 @@ export function WhyThisL1Strip({ sd, onOpen }: Props) {
         style={{ marginBottom: 20 }}
       >
         <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#C9A84C', textTransform: 'uppercase', margin: '0 0 8px' }}>
-          WHY THIS
+          {t('whyThisStrip.whyThisHeading')}
         </p>
         <div
           style={{
@@ -79,7 +81,7 @@ export function WhyThisL1Strip({ sd, onOpen }: Props) {
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#C9A84C', textTransform: 'uppercase', margin: 0 }}>
-          WHY THIS
+          {t('whyThisStrip.whyThisHeading')}
         </p>
         <span style={{ fontSize: 14, color: '#C9A84C' }}>›</span>
       </div>

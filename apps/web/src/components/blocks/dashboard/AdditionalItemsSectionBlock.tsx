@@ -1,5 +1,6 @@
 import { Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from '../../../lib/i18n';
 import {
   fetchAdditionalItems,
   removeAdditionalItem,
@@ -52,6 +53,7 @@ function actionLabel(itemType?: string): string {
 }
 
 export function AdditionalItemsSectionBlock({ sd, onAction }: Props) {
+  const { t } = useTranslation();
   const [items, setItems] = useState<AdditionalItem[]>(
     Array.isArray(sd.additional_items) ? sd.additional_items : [],
   );
@@ -212,7 +214,7 @@ export function AdditionalItemsSectionBlock({ sd, onAction }: Props) {
               margin: 0,
             }}
           >
-            {sd.additional_items_label || "Additional Practices"}
+            {sd.additional_items_label || t('additionalItems.additionalPractices')}
           </p>
           <button
             data-testid="additional-items-add-library"
@@ -228,7 +230,7 @@ export function AdditionalItemsSectionBlock({ sd, onAction }: Props) {
               padding: "0 2px",
             }}
           >
-            + Add from library
+            {t('additionalItems.addFromLibrary')}
           </button>
         </div>
 
@@ -299,7 +301,7 @@ export function AdditionalItemsSectionBlock({ sd, onAction }: Props) {
                             display: "inline-block",
                           }}
                         >
-                          Done
+                          {t('additionalItems.doneLabel')}
                         </span>
                       )}
                     </div>
@@ -313,7 +315,7 @@ export function AdditionalItemsSectionBlock({ sd, onAction }: Props) {
                         lineHeight: 1.3,
                       }}
                       >
-                      {item.title || resolveItemId(item) || "Practice item"}
+                      {item.title || resolveItemId(item) || t('additionalItems.practiceItemFallback')}
                     </p>
                     {item.subtitle && (
                       <p
@@ -337,7 +339,7 @@ export function AdditionalItemsSectionBlock({ sd, onAction }: Props) {
                         }}
                       >
                         {item.sessionsCount}{" "}
-                        {item.sessionsCount === 1 ? "session" : "sessions"}
+                        {item.sessionsCount === 1 ? t('additionalItems.sessionSingular') : t('additionalItems.sessionPlural')}
                       </p>
                     )}
                   </div>
@@ -371,7 +373,7 @@ export function AdditionalItemsSectionBlock({ sd, onAction }: Props) {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        {actionLabel(resolveItemType(item))}
+                        {(() => { const type = resolveItemType(item); if (type === 'mantra') return t('additionalItems.chantButton'); if (type === 'sankalp' || type === 'sankalpa') return t('additionalItems.embodyButton'); return t('additionalItems.practiceButton'); })()}
                       </button>
                     )}
                     <button
@@ -415,7 +417,7 @@ export function AdditionalItemsSectionBlock({ sd, onAction }: Props) {
               textAlign: "center",
             }}
           >
-            {collapsed ? `See all (${items.length})` : "Show less"}
+            {collapsed ? t('additionalItems.seeAll').replace('{count}', String(items.length)) : t('additionalItems.showLess')}
           </button>
         )}
       </div>

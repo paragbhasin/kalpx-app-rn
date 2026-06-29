@@ -177,11 +177,11 @@ export function LoginPage() {
     e.preventDefault();
     const digits = phoneNum.replace(/\D/g, "");
     if (digits.length < 7) {
-      setPhoneLoginError("Please enter a valid phone number.");
+      setPhoneLoginError(t('phoneLogin.invalidPhoneNumber'));
       return;
     }
     if (!phonePassword) {
-      setPhoneLoginError("Please enter your password.");
+      setPhoneLoginError(t('phoneLogin.passwordRequired'));
       return;
     }
     setPhoneLoginLoading(true);
@@ -192,11 +192,11 @@ export function LoginPage() {
       const NO_ACCOUNT_CODES = new Set(["phone_not_registered", "account_not_found", "user_not_found", "no_account"]);
       const code = (result as any).code as string | undefined;
       if (NO_ACCOUNT_CODES.has(code ?? "")) {
-        dispatch(showSnackBar("No account found for this number. Please sign up first."));
+        dispatch(showSnackBar(t('phoneLogin.noAccountFound')));
       } else if (code === "Invalid credentials" || result.error?.toLowerCase().includes("invalid")) {
-        setPhoneLoginError("Incorrect phone number or password. Please try again.");
+        setPhoneLoginError(t('phoneLogin.incorrectCredentials'));
       } else {
-        setPhoneLoginError(result.error || "Login failed. Please try again.");
+        setPhoneLoginError(result.error || t('phoneLogin.loginFailedRetry'));
       }
       return;
     }
@@ -271,7 +271,7 @@ export function LoginPage() {
                   const result = await socialLoginGoogle(accessToken, returnTo);
                   setGoogleLoading(false);
                   if (!result.success) {
-                    setError(result.error || "Google sign-in failed");
+                    setError(result.error || t('phoneLogin.googleSignInFailed'));
                   }
                 }}
               />
@@ -283,14 +283,14 @@ export function LoginPage() {
                     className={`auth-tab-btn${authMethod === "email" ? " auth-tab-btn--active" : ""}`}
                     onClick={() => { setAuthMethod("email"); setError(""); }}
                   >
-                    Email
+                    {t('phoneLogin.tabEmail')}
                   </button>
                   <button
                     type="button"
                     className={`auth-tab-btn${authMethod === "phone" ? " auth-tab-btn--active" : ""}`}
                     onClick={() => { setAuthMethod("phone"); setError(""); }}
                   >
-                    Phone
+                    {t('phoneLogin.tabPhone')}
                   </button>
                 </div>
               )}
@@ -306,14 +306,14 @@ export function LoginPage() {
                         onClick={() => { setPhoneLoginMode("password"); setPhoneLoginError(""); }}
                         style={{ color: "var(--kalpx-gold, #b8864b)", fontSize: "0.9rem" }}
                       >
-                        Back to phone + password
+                        {t('phoneLogin.backToPhonePassword')}
                       </button>
                     </div>
                   </div>
                 ) : (
                   <form onSubmit={handlePhonePasswordSubmit} className="auth-form" style={{ marginTop: "16px" }}>
                     <div className="form-group">
-                      <label>Phone number</label>
+                      <label>{t('phoneLogin.phoneNumberLabel')}</label>
                       <div className="phone-input-row">
                         <CountryDialSelector
                           value={phoneCountry}
@@ -325,7 +325,7 @@ export function LoginPage() {
                           inputMode="numeric"
                           value={phoneNum}
                           onChange={(e) => setPhoneNum(e.target.value)}
-                          placeholder="Phone number"
+                          placeholder={t('phoneLogin.phoneNumberPlaceholder')}
                           disabled={phoneLoginLoading}
                           aria-label="Phone number"
                           style={{
@@ -342,7 +342,7 @@ export function LoginPage() {
                     </div>
                     <div className="form-group">
                       <div className="label-row">
-                        <label htmlFor="phone-password">Password</label>
+                        <label htmlFor="phone-password">{t('phoneLogin.phonePasswordLabel')}</label>
                         <Link
                           to="/forgot-password-phone"
                           style={{
@@ -351,7 +351,7 @@ export function LoginPage() {
                             fontWeight: 600,
                           }}
                         >
-                          Forgot password?
+                          {t('phoneLogin.forgotPasswordPhone')}
                         </Link>
                       </div>
                       <div className="input-wrapper">
@@ -361,7 +361,7 @@ export function LoginPage() {
                           type={showPhonePassword ? "text" : "password"}
                           value={phonePassword}
                           onChange={(e) => setPhonePassword(e.target.value)}
-                          placeholder="Your password"
+                          placeholder={t('phoneLogin.phonePasswordPlaceholder')}
                           disabled={phoneLoginLoading}
                           autoComplete="current-password"
                           style={{ paddingRight: "3rem" }}
@@ -386,7 +386,7 @@ export function LoginPage() {
                       className="submit-btn"
                       disabled={phoneLoginLoading}
                     >
-                      {phoneLoginLoading ? <Loader2 className="spinner" size={20} /> : "Sign in"}
+                      {phoneLoginLoading ? <Loader2 className="spinner" size={20} /> : t('phoneLogin.phoneSignInBtn')}
                     </button>
                     <div className="auth-footer">
                       <Link to="/signup">{t("auth.newToKalpX")}</Link>

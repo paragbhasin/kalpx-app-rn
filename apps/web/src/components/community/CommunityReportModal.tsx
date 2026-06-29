@@ -1,12 +1,6 @@
 import { X } from "lucide-react";
 import React, { useEffect, useState } from "react";
-
-const REPORT_REASONS = [
-  { label: "Spam", value: "spam" },
-  { label: "Inappropriate Content", value: "inappropriate" },
-  { label: "Harassment", value: "harassment" },
-  { label: "Other", value: "other" },
-] as const;
+import { useTranslation } from "../../lib/i18n";
 
 interface CommunityReportModalProps {
   open: boolean;
@@ -17,10 +11,20 @@ interface CommunityReportModalProps {
 
 export function CommunityReportModal({
   open,
-  title = "Report Post",
+  title,
   onClose,
   onSubmit,
 }: CommunityReportModalProps) {
+  const { t } = useTranslation();
+  const reportTitle = title ?? t('communityReportModal.reportPost');
+
+  const REPORT_REASONS = [
+    { label: t('communityReportModal.reasonSpam'), value: "spam" },
+    { label: t('communityReportModal.reasonInappropriate'), value: "inappropriate" },
+    { label: t('communityReportModal.reasonHarassment'), value: "harassment" },
+    { label: t('communityReportModal.reasonOther'), value: "other" },
+  ];
+
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
   const [details, setDetails] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -103,7 +107,7 @@ export function CommunityReportModal({
                 color: "#333",
               }}
             >
-              {title}
+              {reportTitle}
             </div>
             <button
               onClick={onClose}
@@ -128,8 +132,7 @@ export function CommunityReportModal({
               margin: "0 0 20px",
             }}
           >
-            Please help us identify the issue by selecting a reason for
-            reporting this content.
+            {t('communityReportModal.reasonHelperText')}
           </p>
 
           <div style={{ display: "grid", gap: 10 }}>
@@ -192,12 +195,12 @@ export function CommunityReportModal({
                 marginBottom: 10,
               }}
             >
-              Additional Details (Optional)
+              {t('communityReportModal.additionalDetails')}
             </div>
             <textarea
               value={details}
               onChange={(e) => setDetails(e.target.value)}
-              placeholder="Provide more context if needed..."
+              placeholder={t('communityReportModal.detailsPlaceholder')}
               rows={4}
               style={{
                 width: "100%",
@@ -235,7 +238,7 @@ export function CommunityReportModal({
                 cursor: "pointer",
               }}
             >
-              Cancel
+              {t('communityReportModal.cancel')}
             </button>
             <button
               onClick={() => void handleSubmit()}
@@ -252,7 +255,7 @@ export function CommunityReportModal({
                 cursor: !selectedReason || submitting ? "not-allowed" : "pointer",
               }}
             >
-              {submitting ? "Submitting..." : "Submit Report"}
+              {submitting ? t('communityReportModal.submitting') : t('communityReportModal.submitReport')}
             </button>
           </div>
         </div>

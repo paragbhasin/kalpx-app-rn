@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, X } from 'lucide-react';
 import { searchLibraryItems, addAdditionalItem } from '../../../engine/mitraApi';
+import { useTranslation } from '../../../lib/i18n';
 
 interface Props {
   onClose: () => void;
@@ -15,11 +16,11 @@ interface Props {
   headerTitle?: string;
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  mantra: 'MANTRA',
-  sankalp: 'INTENTION',
-  sankalpa: 'INTENTION',
-  practice: 'PRACTICE',
+const TYPE_KEYS: Record<string, string> = {
+  mantra: 'librarySearchModal.typeMantra',
+  sankalp: 'librarySearchModal.typeIntention',
+  sankalpa: 'librarySearchModal.typeIntention',
+  practice: 'librarySearchModal.typePractice',
 };
 
 const LEVEL_STYLES: Record<string, React.CSSProperties> = {
@@ -44,9 +45,12 @@ export function LibrarySearchModal({
   mode = 'add',
   onItemSelected,
   lockedItemType,
-  selectLabel = 'Use this mantra',
+  selectLabel,
   headerTitle,
 }: Props) {
+  const { t } = useTranslation();
+  const resolvedSelectLabel = selectLabel ?? t('librarySearchModal.useThisMantra');
+
   if (isVisible === false) return null;
 
   const [query, setQuery] = useState('');
@@ -154,23 +158,31 @@ export function LibrarySearchModal({
     if (e.key === 'Escape') onClose();
   };
 
-  const typeLabel = (item: any) =>
-    TYPE_LABELS[(item._type || item.itemType || item.item_type || item.type || '').toLowerCase()] ||
-    (item._type || item.itemType || item.item_type || item.type || '').toUpperCase();
+  const typeLabel = (item: any) => {
+    const key = TYPE_KEYS[(item._type || item.itemType || item.item_type || item.type || '').toLowerCase()];
+    return key ? t(key) : (item._type || item.itemType || item.item_type || item.type || '').toUpperCase();
+  };
+
+  const LEVEL_KEYS: Record<string, string> = {
+    BEGINNER: 'librarySearchModal.levelBeginner',
+    INTERMEDIATE: 'librarySearchModal.levelIntermediate',
+    ADVANCED: 'librarySearchModal.levelAdvanced',
+  };
+  const levelT = (l: string) => t(LEVEL_KEYS[l] || l);
 
   const resultsList = (
     <div style={{ overflowY: 'auto', flex: 1 }}>
       {searching && (
-        <p style={{ fontSize: 13, color: '#C99317', textAlign: 'center', marginTop: 24 }}>Loading…</p>
+        <p style={{ fontSize: 13, color: '#C99317', textAlign: 'center', marginTop: 24 }}>{t('librarySearchModal.loading')}</p>
       )}
       {!searching && query.trim().length < 2 && !lockedItemType && (
         <p style={{ fontSize: 13, color: 'var(--kalpx-text-muted)', textAlign: 'center', marginTop: 24 }}>
-          Type at least 2 characters to search
+          {t('librarySearchModal.typeToSearch')}
         </p>
       )}
       {!searching && results.length === 0 && (query.trim().length >= 2 || lockedItemType) && (
         <p style={{ fontSize: 13, color: 'var(--kalpx-text-muted)', textAlign: 'center', marginTop: 24 }}>
-          No results found
+          {t('librarySearchModal.noResultsFound')}
         </p>
       )}
       {results.map((item) => {
@@ -203,7 +215,7 @@ export function LibrarySearchModal({
               )}
               {levelLabel && (
                 <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase', borderRadius: 6, padding: '2px 7px', ...levelStyle }}>
-                  {levelLabel}
+                  {levelT(levelLabel)}
                 </span>
               )}
             </div>
@@ -239,11 +251,11 @@ export function LibrarySearchModal({
                 onClick={() => setDetailItem({ ...item, _type: item._type || item.item_type || item.itemType || lockedItemType })}
                 style={{ padding: '6px 14px', borderRadius: 20, border: '1px solid rgba(199,160,72,0.4)', background: 'none', color: '#8a7a5a', fontSize: 13, cursor: 'pointer' }}
               >
-                View details
+                {t('librarySearchModal.viewDetails')}
               </button>
               {mode !== 'select' && (isInCore || isAdded) ? (
                 <span style={{ fontSize: 13, color: 'var(--kalpx-text-muted)', fontWeight: 600, alignSelf: 'center' }}>
-                  {isInCore ? 'In core' : 'Added'}
+                  {isInCore ? t('librarySearchModal.inCore') : t('librarySearchModal.added')}
                 </span>
               ) : (
                 <button
@@ -251,7 +263,7 @@ export function LibrarySearchModal({
                   onClick={() => handleAction(item)}
                   style={{ padding: '6px 16px', borderRadius: 20, border: '1px solid rgba(199,160,72,0.6)', background: 'none', color: '#C99317', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
                 >
-                  {mode === 'select' ? selectLabel : (isAdding ? '…' : 'Add')}
+                  {mode === 'select' ? resolvedSelectLabel : (isAdding ? '…' : t('librarySearchModal.add'))}
                 </button>
               )}
             </div>
@@ -298,25 +310,25 @@ export function LibrarySearchModal({
     if (itType === 'mantra') {
       sections = <>
         {it.devanagari && <div style={{ fontFamily: 'var(--kalpx-font-serif)', fontSize: 18, color: '#6b3d12', lineHeight: 1.6, marginBottom: 4 }}>{it.devanagari}</div>}
-        {renderSection('Pronunciation', it.iast)}
-        {renderSection('Meaning', it.meaning || it.summary)}
-        {(it.essence || it.insight) && renderSection('Essence', it.essence || it.insight)}
+        {renderSection(t('librarySearchModal.detailPronunciation'), it.iast)}
+        {renderSection(t('librarySearchModal.detailMeaning'), it.meaning || it.summary)}
+        {(it.essence || it.insight) && renderSection(t('librarySearchModal.detailEssence'), it.essence || it.insight)}
         {(it.deity || it.tradition) && <div style={{ display: 'flex', gap: 24, marginTop: 16 }}>
-          {it.deity && renderSection('Deity', it.deity)}
-          {it.tradition && renderSection('Tradition', it.tradition)}
+          {it.deity && renderSection(t('librarySearchModal.detailDeity'), it.deity)}
+          {it.tradition && renderSection(t('librarySearchModal.detailTradition'), it.tradition)}
         </div>}
       </>;
     } else if (itType === 'sankalp') {
       sections = <>
-        {(it.insight || it.essence) && <div style={{ marginTop: 16 }}><div style={labelSt}>Essence</div><div style={{ ...bodySt, fontStyle: 'italic' }}>{it.insight || it.essence}</div></div>}
-        {it.benefits?.length > 0 && <div style={{ marginTop: 16 }}><div style={labelSt}>Benefits</div><BenefitPills items={it.benefits} /></div>}
-        {it.how_to_live?.length > 0 && <div style={{ marginTop: 16 }}><div style={labelSt}>How to Live This</div><BulletList items={it.how_to_live} /></div>}
+        {(it.insight || it.essence) && <div style={{ marginTop: 16 }}><div style={labelSt}>{t('librarySearchModal.detailEssence')}</div><div style={{ ...bodySt, fontStyle: 'italic' }}>{it.insight || it.essence}</div></div>}
+        {it.benefits?.length > 0 && <div style={{ marginTop: 16 }}><div style={labelSt}>{t('librarySearchModal.detailBenefits')}</div><BenefitPills items={it.benefits} /></div>}
+        {it.how_to_live?.length > 0 && <div style={{ marginTop: 16 }}><div style={labelSt}>{t('librarySearchModal.detailHowToLiveThis')}</div><BulletList items={it.how_to_live} /></div>}
       </>;
     } else {
       sections = <>
-        {(it.essence || it.insight) && renderSection('Essence', it.essence || it.insight)}
-        {it.benefits?.length > 0 && <div style={{ marginTop: 16 }}><div style={labelSt}>Benefits</div><BenefitPills items={it.benefits} /></div>}
-        {it.steps?.length > 0 && <div style={{ marginTop: 16 }}><div style={labelSt}>Steps</div>{it.steps.map((s: string, i: number) => (
+        {(it.essence || it.insight) && renderSection(t('librarySearchModal.detailEssence'), it.essence || it.insight)}
+        {it.benefits?.length > 0 && <div style={{ marginTop: 16 }}><div style={labelSt}>{t('librarySearchModal.detailBenefits')}</div><BenefitPills items={it.benefits} /></div>}
+        {it.steps?.length > 0 && <div style={{ marginTop: 16 }}><div style={labelSt}>{t('librarySearchModal.detailSteps')}</div>{it.steps.map((s: string, i: number) => (
           <div key={i} style={{ display: 'flex', gap: 10, marginTop: 8 }}>
             <span style={{ color: '#C99317', fontSize: 13, fontWeight: 600, minWidth: 20 }}>{i + 1}.</span>
             <div style={{ ...bodySt, fontSize: 14 }}>{s}</div>
@@ -331,13 +343,13 @@ export function LibrarySearchModal({
         <div style={{ paddingBottom: 14, borderBottom: '1px solid rgba(201,168,76,0.18)', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
             <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, color: '#8a7a5a', textTransform: 'uppercase', background: '#F5F0E0', borderRadius: 6, padding: '2px 7px' }}>{typeLabel(it)}</span>
-            {levelLabel && <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase', borderRadius: 6, padding: '2px 7px', ...levelStyle }}>{levelLabel}</span>}
+            {levelLabel && <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase', borderRadius: 6, padding: '2px 7px', ...levelStyle }}>{levelT(levelLabel)}</span>}
             {!isInCore && !isAdded && (
               <button onClick={() => { handleAction(it); setDetailItem(null); }} style={{ marginLeft: 'auto', padding: '5px 16px', borderRadius: 20, border: 'none', background: 'linear-gradient(90deg,#C99317,#E0AE21)', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-                {mode === 'select' ? selectLabel : 'Add'}
+                {mode === 'select' ? resolvedSelectLabel : t('librarySearchModal.add')}
               </button>
             )}
-            {(isInCore || isAdded) && <span style={{ marginLeft: 'auto', fontSize: 13, color: 'var(--kalpx-text-muted)', fontWeight: 600 }}>{isInCore ? 'In core' : 'Added'}</span>}
+            {(isInCore || isAdded) && <span style={{ marginLeft: 'auto', fontSize: 13, color: 'var(--kalpx-text-muted)', fontWeight: 600 }}>{isInCore ? t('librarySearchModal.inCore') : t('librarySearchModal.added')}</span>}
           </div>
           <div style={{ fontFamily: 'var(--kalpx-font-serif)', fontWeight: 700, fontSize: 18, color: '#4b260a', lineHeight: 1.3 }}>{it.title}</div>
         </div>
@@ -358,7 +370,7 @@ export function LibrarySearchModal({
             <button onClick={() => setDetailItem(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7D5408', fontSize: 24, lineHeight: 1, fontWeight: 700, padding: 0, marginRight: 4 }}>‹</button>
           )}
           <p style={{ fontFamily: 'var(--kalpx-font-serif)', fontWeight: 700, fontSize: 20, color: '#4a2508', margin: 0 }}>
-            {headerTitle ?? 'Browse Library'}
+            {headerTitle ?? t('librarySearchModal.browseLibrary')}
           </p>
         </div>
         <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8a7a5a', padding: '0 4px' }}>
@@ -372,7 +384,7 @@ export function LibrarySearchModal({
           <input
             ref={inputRef}
             type="text"
-            placeholder={lockedItemType === 'mantra' ? 'Search mantras…' : 'Search…'}
+            placeholder={lockedItemType === 'mantra' ? t('librarySearchModal.searchMantrasPlaceholder') : t('librarySearchModal.searchPlaceholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             style={{ width: '100%', padding: '9px 12px 9px 34px', borderRadius: 10, border: '1px solid rgba(218,194,142,0.65)', background: '#FFFDF9', color: '#432104', fontSize: 15, outline: 'none', boxSizing: 'border-box' }}

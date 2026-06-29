@@ -12,27 +12,14 @@ import { webStorage } from '../lib/webStorage';
 import { requestPhoneOtp, verifyPhoneOtp, resendPhoneOtp } from '../lib/phoneApi';
 import { WEB_ENV } from '../lib/env';
 import { CountryDialSelector } from './CountryDialSelector';
+import { useTranslation } from '../lib/i18n';
 
 const OTP_LENGTH = 6;
 const MAX_RESENDS = 3;
 
-const ERROR_COPY: Record<string, string> = {
-  invalid_phone: 'Please enter a valid phone number.',
-  rate_limit_exceeded: 'Too many attempts. Please try again later.',
-  cooldown_active: 'Please wait before requesting another code.',
-  otp_expired: 'This code has expired. Please request a new one.',
-  invalid_otp: 'Incorrect code.',
-  too_many_attempts: 'Too many incorrect attempts. Please try again later.',
-  phone_auth_unavailable: 'Phone sign up is not available right now.',
-  sms_send_failed: 'We couldn\'t send the code. Please try again.',
-  sms_unavailable: 'We couldn\'t send the code. Please try again.',
-  phone_already_in_use: 'This phone number is already linked to another KalpX account.',
-  phone_auth_disabled: 'Phone login is not available yet. Please sign in with email.',
-};
-
-function errorCopy(code: string | undefined, fallback: string, extra?: string): string {
+function errorCopy(errorMap: Record<string, string>, code: string | undefined, fallback: string, extra?: string): string {
   if (!code) return fallback;
-  const base = ERROR_COPY[code] || fallback;
+  const base = errorMap[code] || fallback;
   return extra ? `${base} ${extra}` : base;
 }
 
@@ -45,6 +32,22 @@ interface Props {
 
 export function PhoneOtpFlow({ purpose, onSuccess }: Props) {
   if (WEB_ENV.phoneAuthEnabled !== '1') return null;
+
+  const { t } = useTranslation();
+
+  const ERROR_MAP: Record<string, string> = {
+    invalid_phone: t('phoneOtp.invalidPhone'),
+    rate_limit_exceeded: t('phoneOtp.rateLimitExceeded'),
+    cooldown_active: t('phoneOtp.cooldownActive'),
+    otp_expired: t('phoneOtp.otpExpired'),
+    invalid_otp: t('phoneOtp.invalidOtp'),
+    too_many_attempts: t('phoneOtp.tooManyAttempts'),
+    phone_auth_unavailable: t('phoneOtp.phoneAuthUnavailable'),
+    sms_send_failed: t('phoneOtp.smsSendFailed'),
+    sms_unavailable: t('phoneOtp.smsSendFailed'),
+    phone_already_in_use: t('phoneOtp.phoneAlreadyInUse'),
+    phone_auth_disabled: t('phoneOtp.phoneAuthDisabled'),
+  };
 
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [country, setCountry] = useState<PhoneCountryCode>(DEFAULT_PHONE_COUNTRY);
@@ -80,7 +83,7 @@ export function PhoneOtpFlow({ purpose, onSuccess }: Props) {
   const handleRequestOtp = async () => {
     const digits = phone.replace(/\D/g, '');
     if (digits.length < 7) {
-      setError('Please enter a valid phone number.');
+      setError(t('phoneOtp.invalidPhone'));
       return;
     }
     setLoading(true);
@@ -88,7 +91,7 @@ export function PhoneOtpFlow({ purpose, onSuccess }: Props) {
     const result = await requestPhoneOtp({ phone: digits, country, purpose });
     setLoading(false);
     if (!result.success) {
-      setError(errorCopy(undefined, result.error));
+      setError(errorCopy(ERROR_MAP, undefined, result.error));
       return;
     }
     setSessionToken(result.data.session_token);
@@ -116,16 +119,16 @@ export function PhoneOtpFlow({ purpose, onSuccess }: Props) {
   const handleVerifyOtp = async () => {
     const code = otp.join('');
     if (code.length < OTP_LENGTH) {
-      setError('Please enter the 6-digit code.');
+      setError(t('phoneOtp.enterOtpValidation'));
       return;
     }
     if (NEEDS_PASSWORD.has(purpose)) {
       if (password.length < 8) {
-        setError('Password must be at least 8 characters.');
+        setError(t('phoneOtp.passwordTooShort'));
         return;
       }
       if (password !== confirmPassword) {
-        setError('Passwords do not match.');
+        setError(t('phoneOtp.passwordMismatch'));
         return;
       }
     }
@@ -138,7 +141,7 @@ export function PhoneOtpFlow({ purpose, onSuccess }: Props) {
     setLoading(false);
     if (!result.success) {
       const attemptsRemaining = (result as any).data?.attempts_remaining;
-      let msg = errorCopy(result.code, result.error);
+      let msg = errorCopy(ERROR_MAP, result.code, result.error);
       if (result.code === 'invalid_otp' && attemptsRemaining != null) {
         msg = `${msg} ${attemptsRemaining} attempt${attemptsRemaining !== 1 ? 's' : ''} remaining.`;
       }
@@ -167,7 +170,7 @@ export function PhoneOtpFlow({ purpose, onSuccess }: Props) {
     const result = await resendPhoneOtp({ session_token: sessionToken });
     setLoading(false);
     if (!result.success) {
-      setError(errorCopy(result.code, result.error));
+      setError(errorCopy(ERROR_MAP, result.code, result.error));
       return;
     }
     setResendCount(result.data.resends_remaining < MAX_RESENDS ? MAX_RESENDS - result.data.resends_remaining : resendCount + 1);
@@ -182,7 +185,7 @@ export function PhoneOtpFlow({ purpose, onSuccess }: Props) {
   if (step === 'phone') {
     return (
       <div className="phone-otp-flow">
-        <p className="phone-otp-hint">We'll send a one-time code to this number.</p>
+        <p className="phone-otp-hint">{t('phoneOtp.sendOtpHint')}</p>
         <div className="phone-input-row">
           <CountryDialSelector value={country} onChange={(c) => setCountry(c as PhoneCountryCode)} disabled={loading} />
           <input
@@ -211,19 +214,19 @@ export function PhoneOtpFlow({ purpose, onSuccess }: Props) {
           onClick={handleRequestOtp}
           disabled={loading || phone.replace(/\D/g, '').length < 7}
         >
-          {loading ? 'Sending…' : 'Send OTP'}
+          {loading ? t('phoneOtp.sending') : t('phoneOtp.sendOtp')}
         </button>
       </div>
     );
   }
 
   const otpComplete = otp.every(Boolean);
-  const passwordLabel = purpose === 'password_reset_phone' ? 'New password' : 'Create a password';
-  const confirmLabel = purpose === 'password_reset_phone' ? 'Confirm new password' : 'Confirm password';
+  const passwordLabel = purpose === 'password_reset_phone' ? t('phoneOtp.newPassword') : t('phoneOtp.createPassword');
+  const confirmLabel = purpose === 'password_reset_phone' ? t('phoneOtp.confirmNewPassword') : t('phoneOtp.confirmPassword');
 
   return (
     <div className="phone-otp-flow">
-      <p className="phone-otp-hint">Enter the 6-digit code sent to <strong>{maskedPhone}</strong>.</p>
+      <p className="phone-otp-hint">{t('phoneOtp.enterOtpHint').replace('{maskedPhone}', maskedPhone)}</p>
       <div className="otp-cells-row">
         {otp.map((val, idx) => (
           <input
@@ -291,21 +294,21 @@ export function PhoneOtpFlow({ purpose, onSuccess }: Props) {
         onClick={handleVerifyOtp}
         disabled={loading || !otpComplete || (NEEDS_PASSWORD.has(purpose) && (password.length < 8 || password !== confirmPassword))}
       >
-        {loading ? 'Verifying…' : 'Verify'}
+        {loading ? t('phoneOtp.verifying') : t('phoneOtp.verify')}
       </button>
       <div className="phone-otp-resend-row">
         {cooldown > 0 ? (
-          <span>Resend code in {cooldown}s</span>
+          <span>{t('phoneOtp.resendCodeIn').replace('{cooldown}', String(cooldown))}</span>
         ) : resendCount >= MAX_RESENDS ? (
-          <span>Try again later</span>
+          <span>{t('phoneOtp.tryAgainLater')}</span>
         ) : (
           <button type="button" className="link-btn" onClick={handleResend} disabled={loading}>
-            Resend code
+            {t('phoneOtp.resendCode')}
           </button>
         )}
         <span className="phone-otp-sep">·</span>
         <button type="button" className="link-btn" onClick={() => { setStep('phone'); setError(''); setOtp(Array(OTP_LENGTH).fill('')); }}>
-          Change number
+          {t('phoneOtp.changeNumber')}
         </button>
       </div>
     </div>

@@ -149,6 +149,12 @@ function DayReviewCard({ day }: { day: TemplateDay }) {
             customBody={day.custom_mantra_body}
             renderCard={(c) => <MantraCard card={c as LibraryMantra} />}
           />
+          {(day.mantra_card || day.custom_mantra_body) && (day.mantra_count || day.mantra_reminder_time) && (
+            <div style={slotMetaRow}>
+              {day.mantra_count && <span style={slotMetaChip}>Chant count: <b>{day.mantra_count}×</b></span>}
+              {day.mantra_reminder_time && <span style={slotMetaChip}>Reminder: <b>{fmt12h(day.mantra_reminder_time)}</b></span>}
+            </div>
+          )}
 
           {/* Sankalp */}
           <SlotReview
@@ -158,6 +164,11 @@ function DayReviewCard({ day }: { day: TemplateDay }) {
             customBody={day.custom_sankalp_body}
             renderCard={(c) => <SankalpCard card={c as LibrarySankalp} />}
           />
+          {(day.sankalp_card || day.custom_sankalp_body) && day.sankalp_reminder_time && (
+            <div style={slotMetaRow}>
+              <span style={slotMetaChip}>Reminder: <b>{fmt12h(day.sankalp_reminder_time)}</b></span>
+            </div>
+          )}
 
           {/* Practice */}
           <SlotReview
@@ -167,6 +178,12 @@ function DayReviewCard({ day }: { day: TemplateDay }) {
             customBody={day.custom_practice_body}
             renderCard={(c) => <PracticeCard card={c as LibraryPractice} />}
           />
+          {(day.practice_card || day.custom_practice_body) && (day.practice_duration_minutes || day.practice_reminder_time) && (
+            <div style={slotMetaRow}>
+              {day.practice_duration_minutes && <span style={slotMetaChip}>Duration: <b>{day.practice_duration_minutes} min</b></span>}
+              {day.practice_reminder_time && <span style={slotMetaChip}>Reminder: <b>{fmt12h(day.practice_reminder_time)}</b></span>}
+            </div>
+          )}
 
           {/* Wisdom */}
           <SlotReview
@@ -506,3 +523,12 @@ const customBodyStyle: React.CSSProperties = {
   fontSize: 13, color: "#5C4033", margin: 0, lineHeight: 1.6,
 };
 const hint: React.CSSProperties = { textAlign: "center" as const, color: "#B5A08A", padding: "60px 0" };
+const slotMetaRow: React.CSSProperties = { display: "flex", gap: 8, flexWrap: "wrap" as const, marginBottom: 12, marginTop: -4 };
+const slotMetaChip: React.CSSProperties = { fontSize: 12, color: "#7B6545", background: "#FFF8EC", border: "1px solid #E8D9B5", borderRadius: 20, padding: "3px 10px" };
+
+function fmt12h(hhmm: string): string {
+  const [h, m] = hhmm.split(":").map(Number);
+  const period = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, "0")} ${period}`;
+}

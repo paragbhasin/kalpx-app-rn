@@ -561,7 +561,7 @@ function DayRow({
           })
         }
       />
-      {!locked && !!(day.mantra_ref || day.custom_mantra_body) && (
+      {!!(day.mantra_ref || day.custom_mantra_body) && (
         <div style={slotSettingsRow}>
           <div>
             <div style={settingsLabel}>CHANT COUNT FOR PARTICIPANTS</div>
@@ -569,6 +569,7 @@ function DayRow({
               {[1, 9, 27, 54, 108].map((n) => (
                 <button
                   key={n}
+                  disabled={locked}
                   onClick={() =>
                     onBlurSave({
                       mantra_count: day.mantra_count === n ? null : n,
@@ -595,6 +596,7 @@ function DayRow({
             <div style={settingsLabel}>SUGGESTED REMINDER TIME</div>
             <input
               type="time"
+              disabled={locked}
               value={day.mantra_reminder_time ?? "06:00"}
               onChange={(e) =>
                 onLocalChange({ mantra_reminder_time: e.target.value || null })
@@ -633,12 +635,13 @@ function DayRow({
           })
         }
       />
-      {!locked && !!(day.sankalp_ref || day.custom_sankalp_body) && (
+      {!!(day.sankalp_ref || day.custom_sankalp_body) && (
         <div style={slotSettingsRow}>
           <div>
             <div style={settingsLabel}>SUGGESTED REMINDER TIME</div>
             <input
               type="time"
+              disabled={locked}
               value={day.sankalp_reminder_time ?? "08:00"}
               onChange={(e) =>
                 onLocalChange({ sankalp_reminder_time: e.target.value || null })
@@ -677,7 +680,7 @@ function DayRow({
           })
         }
       />
-      {!locked && !!(day.practice_ref || day.custom_practice_body) && (
+      {!!(day.practice_ref || day.custom_practice_body) && (
         <div style={slotSettingsRow}>
           <div>
             <div style={settingsLabel}>DURATION FOR PARTICIPANTS</div>
@@ -693,6 +696,7 @@ function DayRow({
                 type="number"
                 min={1}
                 max={60}
+                disabled={locked}
                 value={day.practice_duration_minutes ?? ""}
                 placeholder="—"
                 onChange={(e) =>
@@ -725,6 +729,7 @@ function DayRow({
             <div style={settingsLabel}>SUGGESTED REMINDER TIME</div>
             <input
               type="time"
+              disabled={locked}
               value={day.practice_reminder_time ?? "18:00"}
               onChange={(e) =>
                 onLocalChange({

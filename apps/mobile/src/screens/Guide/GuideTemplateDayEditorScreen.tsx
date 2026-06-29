@@ -228,12 +228,16 @@ export default function GuideTemplateDayEditorScreen() {
     setPickerTarget(null);
   }
 
-  function applyToAllDays(slot: LibrarySlot, item_id: string) {
+  function applyToAllDays(slot: LibrarySlot, item_id: string, sourceDayNumber?: number) {
+    const src = sourceDayNumber ? days.find((d) => d.day_number === sourceDayNumber) : days[0];
     const patch =
-      slot === "mantra" ? { mantra_ref: item_id, custom_mantra_title: "", custom_mantra_body: "" }
-      : slot === "sankalp" ? { sankalp_ref: item_id, custom_sankalp_title: "", custom_sankalp_body: "" }
-      : slot === "wisdom" ? { wisdom_ref: item_id, custom_wisdom_title: "", custom_wisdom_body: "" }
-      : { practice_ref: item_id, custom_practice_title: "", custom_practice_body: "" };
+      slot === "mantra"
+        ? { mantra_ref: item_id, custom_mantra_title: "", custom_mantra_body: "", mantra_count: src?.mantra_count ?? null, mantra_reminder_time: src?.mantra_reminder_time ?? null }
+        : slot === "sankalp"
+          ? { sankalp_ref: item_id, custom_sankalp_title: "", custom_sankalp_body: "", sankalp_reminder_time: src?.sankalp_reminder_time ?? null }
+          : slot === "wisdom"
+            ? { wisdom_ref: item_id, custom_wisdom_title: "", custom_wisdom_body: "" }
+            : { practice_ref: item_id, custom_practice_title: "", custom_practice_body: "", practice_duration_minutes: src?.practice_duration_minutes ?? null, practice_reminder_time: src?.practice_reminder_time ?? null };
     days.forEach((d) => saveDay(d.day_number, patch));
     setSlotSelections((prev) => {
       const next = { ...prev };
@@ -252,6 +256,9 @@ export default function GuideTemplateDayEditorScreen() {
       practice_ref: day1.practice_ref, custom_practice_title: day1.custom_practice_title, custom_practice_body: day1.custom_practice_body,
       wisdom_ref: day1.wisdom_ref, custom_wisdom_title: day1.custom_wisdom_title, custom_wisdom_body: day1.custom_wisdom_body,
       day_join_url: day1.day_join_url, day_session_time: day1.day_session_time, day_session_timezone: day1.day_session_timezone,
+      mantra_count: day1.mantra_count, practice_duration_minutes: day1.practice_duration_minutes,
+      mantra_reminder_time: day1.mantra_reminder_time, sankalp_reminder_time: day1.sankalp_reminder_time,
+      practice_reminder_time: day1.practice_reminder_time, reflection_prompt: day1.reflection_prompt,
     };
     days.slice(1).forEach((d) => saveDay(d.day_number, patch));
     setSlotSelections((prev) => {
@@ -404,7 +411,7 @@ export default function GuideTemplateDayEditorScreen() {
                 locked={locked}
                 slotSelections={slotSelections}
                 onOpenPicker={(slot) => setPickerTarget({ dayNumber: day.day_number, slot })}
-                onApplyToAll={(slot, item_id) => applyToAllDays(slot, item_id)}
+                onApplyToAll={(slot, item_id) => applyToAllDays(slot, item_id, day.day_number)}
                 onBlurSave={(patch) => saveDay(day.day_number, patch)}
                 onLocalChange={(patch) => updateDayLocal(day.day_number, patch)}
                 onOpenReminderPicker={(slot) => setReminderPickerTarget({ slot, dayNumber: day.day_number })}

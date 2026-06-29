@@ -119,19 +119,23 @@ export function GuideTemplateDayEditorPage() {
     setPickerItems((prev) => ({ ...prev, [`${dayNumber}-${slot}`]: sel }));
   }
 
-  function applyToAllDays(slot: LibrarySlot, item_id: string, title: string) {
+  function applyToAllDays(slot: LibrarySlot, item_id: string, title: string, sourceDayNumber?: number) {
+    const src = sourceDayNumber ? days.find((d) => d.day_number === sourceDayNumber) : days[0];
     const patch =
       slot === "mantra"
         ? {
             mantra_ref: item_id,
             custom_mantra_title: "",
             custom_mantra_body: "",
+            mantra_count: src?.mantra_count ?? null,
+            mantra_reminder_time: src?.mantra_reminder_time ?? null,
           }
         : slot === "sankalp"
           ? {
               sankalp_ref: item_id,
               custom_sankalp_title: "",
               custom_sankalp_body: "",
+              sankalp_reminder_time: src?.sankalp_reminder_time ?? null,
             }
           : slot === "wisdom"
             ? {
@@ -143,6 +147,8 @@ export function GuideTemplateDayEditorPage() {
                 practice_ref: item_id,
                 custom_practice_title: "",
                 custom_practice_body: "",
+                practice_duration_minutes: src?.practice_duration_minutes ?? null,
+                practice_reminder_time: src?.practice_reminder_time ?? null,
               };
 
     days.forEach((d) => {
@@ -401,6 +407,12 @@ export function GuideTemplateDayEditorPage() {
                   day_join_url: day1.day_join_url,
                   day_session_time: day1.day_session_time,
                   day_session_timezone: day1.day_session_timezone,
+                  mantra_count: day1.mantra_count,
+                  practice_duration_minutes: day1.practice_duration_minutes,
+                  mantra_reminder_time: day1.mantra_reminder_time,
+                  sankalp_reminder_time: day1.sankalp_reminder_time,
+                  practice_reminder_time: day1.practice_reminder_time,
+                  reflection_prompt: day1.reflection_prompt,
                 };
                 days.slice(1).forEach((d) => saveDay(d.day_number, patch));
                 // Copy slot selection labels/details from Day 1 to all other days
@@ -446,7 +458,7 @@ export function GuideTemplateDayEditorPage() {
                   setPickerTarget({ dayNumber: day.day_number, slot })
                 }
                 onApplyToAll={(slot, item_id, title) =>
-                  applyToAllDays(slot, item_id, title)
+                  applyToAllDays(slot, item_id, title, day.day_number)
                 }
                 onBlurSave={(patch) => saveDay(day.day_number, patch)}
                 onLocalChange={(patch) => updateDayLocal(day.day_number, patch)}

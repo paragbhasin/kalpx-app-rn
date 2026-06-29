@@ -117,7 +117,9 @@ export default function ProgramCard({ program }: ProgramCardProps) {
       {expanded && (
         <View style={styles.dayList}>
           {days.length > 0
-            ? days.map((day, idx) => {
+            ? (() => {
+                const firstLockedIdx = days.findIndex((d) => d.status === "locked");
+                return days.map((day, idx) => {
                 const tappable = day.status !== "locked";
                 const isLast = idx === days.length - 1;
                 return (
@@ -147,14 +149,15 @@ export default function ProgramCard({ program }: ProgramCardProps) {
                       {day.status === "completed_later" && (
                         <Text style={styles.dayHintLate}>Done on a later day</Text>
                       )}
-                      {day.status === "locked" && !!lockedHint(day.unlock_date) && (
+                      {day.status === "locked" && idx === firstLockedIdx && !!lockedHint(day.unlock_date) && (
                         <Text style={styles.dayHint}>{lockedHint(day.unlock_date)}</Text>
                       )}
                     </View>
                     {tappable && <Text style={styles.dayArrow}>→</Text>}
                   </TouchableOpacity>
                 );
-              })
+              });
+              })()
             : // Legacy fallback rendering (no day_statuses)
               Array.from({ length: totalDays }, (_, i) => i + 1).map((dayNum) => {
                 const done = isCompleted || dayNum <= program.current_day;

@@ -82,6 +82,7 @@ export interface MantraRunnerViewProps {
   item: MantraItem;
   isViewOnly?: boolean;
   initialReps?: number;
+  lockCount?: boolean;
   runnerStartTimeKey?: number | string | null;
   onComplete: (repsCompleted: number, durationSec: number) => void;
   onBack: () => void;
@@ -213,6 +214,7 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
   item,
   isViewOnly,
   initialReps,
+  lockCount,
   runnerStartTimeKey,
   onComplete,
   onBack,
@@ -609,7 +611,7 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
           )}
         </View>
 
-        {!isViewOnly && (
+        {!isViewOnly && !lockCount && (
           <View style={styles.repPillsContainer}>
             {[1, 9, 27, 54, 108].map((option) => {
               const isSelected = option === selectedTarget;
@@ -634,6 +636,13 @@ const MantraRunnerView: React.FC<MantraRunnerViewProps> = ({
                 </TouchableOpacity>
               );
             })}
+          </View>
+        )}
+        {!isViewOnly && lockCount && (
+          <View style={styles.lockedCountRow}>
+            <View style={styles.repPillSelected}>
+              <Text style={styles.repPillTextSelected}>{selectedTarget} ✓</Text>
+            </View>
           </View>
         )}
 
@@ -873,6 +882,12 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 0,
     gap: 12,
+  },
+  lockedCountRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 20,
+    marginBottom: 25,
   },
   repPillsContainer: {
     flexDirection: "row",

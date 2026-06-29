@@ -40,6 +40,7 @@ export default function ProgramMantraRunner() {
         mantraRef={item.item_id ?? null}
         sourceSurface="program"
         initialReps={mantraCount ?? undefined}
+        lockCount={!!mantraCount}
         onEngineReady={(api) => { engineApiRef.current = api; api.refreshStats(); }}
         onComplete={() => {
           trackRitualCompletion("mantra");

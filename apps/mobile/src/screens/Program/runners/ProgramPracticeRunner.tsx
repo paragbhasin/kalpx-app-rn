@@ -28,6 +28,7 @@ export default function ProgramPracticeRunner() {
     <SafeAreaView style={styles.safeArea}>
       <PracticeRunnerView
         item={practiceDurationMinutes ? { ...item, duration_min: practiceDurationMinutes } : item}
+        lockDuration={!!practiceDurationMinutes}
         onComplete={() => {
           trackRitualCompletion("practice");
           const updated = [...new Set([...completedItems, item.item_id])];

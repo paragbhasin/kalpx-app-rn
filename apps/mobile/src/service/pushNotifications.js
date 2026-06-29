@@ -2,7 +2,7 @@ import messaging from '@react-native-firebase/messaging';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import api from '../Networks/axios';
-import { handleMitraDeepLink } from '../utils/deeplink';
+import { handleWhenReady } from '../utils/deeplink';
 import { markNotificationsRead } from '../screens/Notifications/actions';
 import { mitraTrackEvent } from '../engine/mitraApi';
 import store from '../store';
@@ -134,7 +134,7 @@ function _handleTappedNotification(remoteMessage, source) {
   const threadId = data.thread_id || null;
 
   if (deepLink) {
-    handleMitraDeepLink(deepLink);
+    handleWhenReady(deepLink);
   }
 
   if (notificationId) {

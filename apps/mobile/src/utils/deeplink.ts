@@ -494,7 +494,9 @@ export function handleProgramDeepLink(url: string): boolean {
 // For join deep links, setSkipMitraStart() is called immediately (before the
 // navigator is ready) so that Home.tsx's journey check never redirects to
 // MitraStart while the claim screen is being prepared.
-function handleWhenReady(url: string, attemptsLeft = 15): void {
+//
+// Exported so notification handlers can use the same retry + full-chain logic.
+export function handleWhenReady(url: string, attemptsLeft = 15): void {
   if (navigationRef.isReady()) {
     if (!handleGuideInviteDeepLink(url) && !handleProgramJoinDeepLink(url) && !handleProgramDeepLink(url) && !handleTLPDeepLink(url)) {
       handleMitraDeepLink(url);

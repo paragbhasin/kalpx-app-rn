@@ -429,9 +429,9 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
             <div style={settingsLabel}>SUGGESTED REMINDER TIME</div>
             <input
               type="time"
-              value={day.mantra_reminder_time ?? ''}
+              value={day.mantra_reminder_time ?? '07:00'}
               onChange={(e) => onLocalChange({ mantra_reminder_time: e.target.value || null })}
-              onBlur={(e) => onBlurSave({ mantra_reminder_time: e.target.value || null })}
+              onBlur={(e) => onBlurSave({ mantra_reminder_time: e.target.value || '07:00' })}
               style={timeInput}
             />
           </div>
@@ -462,9 +462,9 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
             <div style={settingsLabel}>SUGGESTED REMINDER TIME</div>
             <input
               type="time"
-              value={day.sankalp_reminder_time ?? ''}
+              value={day.sankalp_reminder_time ?? '08:00'}
               onChange={(e) => onLocalChange({ sankalp_reminder_time: e.target.value || null })}
-              onBlur={(e) => onBlurSave({ sankalp_reminder_time: e.target.value || null })}
+              onBlur={(e) => onBlurSave({ sankalp_reminder_time: e.target.value || '08:00' })}
               style={timeInput}
             />
           </div>
@@ -511,9 +511,9 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
             <div style={settingsLabel}>SUGGESTED REMINDER TIME</div>
             <input
               type="time"
-              value={day.practice_reminder_time ?? ''}
+              value={day.practice_reminder_time ?? '18:00'}
               onChange={(e) => onLocalChange({ practice_reminder_time: e.target.value || null })}
-              onBlur={(e) => onBlurSave({ practice_reminder_time: e.target.value || null })}
+              onBlur={(e) => onBlurSave({ practice_reminder_time: e.target.value || '18:00' })}
               style={timeInput}
             />
           </div>

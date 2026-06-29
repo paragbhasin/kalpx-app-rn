@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { TimePickerModal } from "../../components/TimePickerModal";
 import {
   ActivityIndicator,
   FlatList,
@@ -442,8 +443,22 @@ interface DayRowProps {
   onLocalChange: (patch: Partial<TemplateDay>) => void;
 }
 
+const REMINDER_DEFAULTS: Record<'mantra' | 'sankalp' | 'practice', string> = {
+  mantra: '07:00',
+  sankalp: '08:00',
+  practice: '18:00',
+};
+
+function fmtGuide12h(hhmm: string): string {
+  const [h, m] = hhmm.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+}
+
 function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlurSave, onLocalChange }: DayRowProps) {
   const sel = (slot: LibrarySlot) => slotSelections[`${day.day_number}-${slot}`] ?? null;
+  const [reminderPickerSlot, setReminderPickerSlot] = useState<'mantra' | 'sankalp' | 'practice' | null>(null);
 
   return (
     <View style={s.dayCard}>
@@ -499,16 +514,9 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
           </View>
           <View style={{ marginTop: 10 }}>
             <Text style={s.extraDetailsLabel}>SUGGESTED REMINDER TIME</Text>
-            <TextInput
-              style={s.durationInput}
-              value={day.mantra_reminder_time ?? ''}
-              onChangeText={(v) => onLocalChange({ mantra_reminder_time: v || null })}
-              onEndEditing={() => onBlurSave({ mantra_reminder_time: day.mantra_reminder_time || null })}
-              placeholder="HH:MM"
-              placeholderTextColor="#B5A08A"
-              keyboardType="numbers-and-punctuation"
-              maxLength={5}
-            />
+            <TouchableOpacity style={s.timePill} onPress={() => setReminderPickerSlot('mantra')}>
+              <Text style={s.timePillText}>{fmtGuide12h(day.mantra_reminder_time ?? REMINDER_DEFAULTS.mantra)}</Text>
+            </TouchableOpacity>
           </View>
         </View>
       )}
@@ -533,16 +541,9 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         <View style={s.slotSettings}>
           <View>
             <Text style={s.extraDetailsLabel}>SUGGESTED REMINDER TIME</Text>
-            <TextInput
-              style={s.durationInput}
-              value={day.sankalp_reminder_time ?? ''}
-              onChangeText={(v) => onLocalChange({ sankalp_reminder_time: v || null })}
-              onEndEditing={() => onBlurSave({ sankalp_reminder_time: day.sankalp_reminder_time || null })}
-              placeholder="HH:MM"
-              placeholderTextColor="#B5A08A"
-              keyboardType="numbers-and-punctuation"
-              maxLength={5}
-            />
+            <TouchableOpacity style={s.timePill} onPress={() => setReminderPickerSlot('sankalp')}>
+              <Text style={s.timePillText}>{fmtGuide12h(day.sankalp_reminder_time ?? REMINDER_DEFAULTS.sankalp)}</Text>
+            </TouchableOpacity>
           </View>
         </View>
       )}
@@ -583,16 +584,9 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
           </View>
           <View>
             <Text style={s.extraDetailsLabel}>SUGGESTED REMINDER TIME</Text>
-            <TextInput
-              style={s.durationInput}
-              value={day.practice_reminder_time ?? ''}
-              onChangeText={(v) => onLocalChange({ practice_reminder_time: v || null })}
-              onEndEditing={() => onBlurSave({ practice_reminder_time: day.practice_reminder_time || null })}
-              placeholder="HH:MM"
-              placeholderTextColor="#B5A08A"
-              keyboardType="numbers-and-punctuation"
-              maxLength={5}
-            />
+            <TouchableOpacity style={s.timePill} onPress={() => setReminderPickerSlot('practice')}>
+              <Text style={s.timePillText}>{fmtGuide12h(day.practice_reminder_time ?? REMINDER_DEFAULTS.practice)}</Text>
+            </TouchableOpacity>
           </View>
         </View>
       )}
@@ -662,6 +656,24 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
           placeholderTextColor="#B5A08A"
         />
       </FieldRow>
+
+      {/* Reminder time picker */}
+      <TimePickerModal
+        visible={reminderPickerSlot !== null}
+        initialTime={
+          reminderPickerSlot
+            ? (day[`${reminderPickerSlot}_reminder_time` as keyof typeof day] as string | null ?? REMINDER_DEFAULTS[reminderPickerSlot]) + ':00'
+            : null
+        }
+        onConfirm={(timeStr) => {
+          if (!reminderPickerSlot) return;
+          const hhmm = timeStr.slice(0, 5);
+          onLocalChange({ [`${reminderPickerSlot}_reminder_time`]: hhmm } as any);
+          onBlurSave({ [`${reminderPickerSlot}_reminder_time`]: hhmm } as any);
+          setReminderPickerSlot(null);
+        }}
+        onCancel={() => setReminderPickerSlot(null)}
+      />
     </View>
   );
 }
@@ -1022,6 +1034,8 @@ const s = StyleSheet.create({
   pillText: { fontSize: 13, color: "#7B6545", fontFamily: Fonts.sans.regular },
   pillTextActive: { color: "#fff", fontWeight: "700" },
   durationInput: { borderWidth: 1, borderColor: "#DDD3C0", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, fontSize: 14, color: "#432104", fontFamily: Fonts.sans.regular, width: 100 },
+  timePill: { backgroundColor: "#C99317", borderRadius: 8, paddingHorizontal: 14, paddingVertical: 8, alignSelf: "flex-start" as const },
+  timePillText: { fontFamily: Fonts.sans.medium, fontSize: 14, color: "#fff", fontWeight: "700" },
   pickBtn: { backgroundColor: "#FEF3D0", borderWidth: 1, borderColor: "#C99317", borderRadius: 8, paddingHorizontal: 14, paddingVertical: 8, alignSelf: "flex-start" },
   pickBtnText: { fontSize: 12, fontWeight: "700", color: "#7A4E00", fontFamily: Fonts.sans.bold },
   reviewNote: { fontSize: 11, color: "#B5A08A", marginTop: 4, fontFamily: Fonts.sans.regular },

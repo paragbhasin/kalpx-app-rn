@@ -160,6 +160,7 @@ export default function GuideTemplateDayEditorScreen() {
   const [submitted, setSubmitted] = useState(false);
   const [pickerTarget, setPickerTarget] = useState<PickerTarget>(null);
   const [slotSelections, setSlotSelections] = useState<Record<string, SlotSelection>>({});
+  const [reminderPickerTarget, setReminderPickerTarget] = useState<{ slot: 'mantra' | 'sankalp' | 'practice'; dayNumber: number } | null>(null);
   const [activeDay, setActiveDay] = useState(1);
   const scrollRef = useRef<ScrollView>(null);
   const dayOffsets = useRef<Record<number, number>>({});
@@ -406,6 +407,7 @@ export default function GuideTemplateDayEditorScreen() {
                 onApplyToAll={(slot, item_id) => applyToAllDays(slot, item_id)}
                 onBlurSave={(patch) => saveDay(day.day_number, patch)}
                 onLocalChange={(patch) => updateDayLocal(day.day_number, patch)}
+                onOpenReminderPicker={(slot) => setReminderPickerTarget({ slot, dayNumber: day.day_number })}
               />
             </View>
           ))}
@@ -427,6 +429,28 @@ export default function GuideTemplateDayEditorScreen() {
           onClose={() => setPickerTarget(null)}
         />
       )}
+
+      {/* Reminder time picker — screen-level so Modal is never nested */}
+      <TimePickerModal
+        visible={reminderPickerTarget !== null}
+        initialTime={
+          reminderPickerTarget
+            ? (() => {
+                const day = days.find(d => d.day_number === reminderPickerTarget.dayNumber);
+                const saved = day ? (day[`${reminderPickerTarget.slot}_reminder_time` as keyof DayState] as string | null) : null;
+                return (saved ?? REMINDER_DEFAULTS[reminderPickerTarget.slot]) + ':00';
+              })()
+            : null
+        }
+        onConfirm={(timeStr) => {
+          if (!reminderPickerTarget) return;
+          const hhmm = timeStr.slice(0, 5);
+          updateDayLocal(reminderPickerTarget.dayNumber, { [`${reminderPickerTarget.slot}_reminder_time`]: hhmm } as any);
+          saveDay(reminderPickerTarget.dayNumber, { [`${reminderPickerTarget.slot}_reminder_time`]: hhmm } as any);
+          setReminderPickerTarget(null);
+        }}
+        onCancel={() => setReminderPickerTarget(null)}
+      />
     </SafeAreaView>
   );
 }
@@ -436,6 +460,7 @@ export default function GuideTemplateDayEditorScreen() {
 interface DayRowProps {
   day: DayState;
   locked: boolean;
+  onOpenReminderPicker: (slot: 'mantra' | 'sankalp' | 'practice') => void;
   slotSelections: Record<string, SlotSelection>;
   onOpenPicker: (slot: LibrarySlot) => void;
   onApplyToAll: (slot: LibrarySlot, item_id: string) => void;
@@ -456,9 +481,8 @@ function fmtGuide12h(hhmm: string): string {
   return `${h12}:${String(m).padStart(2, '0')} ${period}`;
 }
 
-function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlurSave, onLocalChange }: DayRowProps) {
+function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlurSave, onLocalChange, onOpenReminderPicker }: DayRowProps) {
   const sel = (slot: LibrarySlot) => slotSelections[`${day.day_number}-${slot}`] ?? null;
-  const [reminderPickerSlot, setReminderPickerSlot] = useState<'mantra' | 'sankalp' | 'practice' | null>(null);
 
   return (
     <View style={s.dayCard}>
@@ -514,7 +538,7 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
           </View>
           <View style={{ marginTop: 10 }}>
             <Text style={s.extraDetailsLabel}>SUGGESTED REMINDER TIME</Text>
-            <TouchableOpacity style={s.timePill} onPress={() => setReminderPickerSlot('mantra')}>
+            <TouchableOpacity style={s.timePill} onPress={() => onOpenReminderPicker('mantra')}>
               <Text style={s.timePillText}>{fmtGuide12h(day.mantra_reminder_time ?? REMINDER_DEFAULTS.mantra)}</Text>
             </TouchableOpacity>
           </View>
@@ -541,7 +565,7 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         <View style={s.slotSettings}>
           <View>
             <Text style={s.extraDetailsLabel}>SUGGESTED REMINDER TIME</Text>
-            <TouchableOpacity style={s.timePill} onPress={() => setReminderPickerSlot('sankalp')}>
+            <TouchableOpacity style={s.timePill} onPress={() => onOpenReminderPicker('sankalp')}>
               <Text style={s.timePillText}>{fmtGuide12h(day.sankalp_reminder_time ?? REMINDER_DEFAULTS.sankalp)}</Text>
             </TouchableOpacity>
           </View>
@@ -584,7 +608,7 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
           </View>
           <View>
             <Text style={s.extraDetailsLabel}>SUGGESTED REMINDER TIME</Text>
-            <TouchableOpacity style={s.timePill} onPress={() => setReminderPickerSlot('practice')}>
+            <TouchableOpacity style={s.timePill} onPress={() => onOpenReminderPicker('practice')}>
               <Text style={s.timePillText}>{fmtGuide12h(day.practice_reminder_time ?? REMINDER_DEFAULTS.practice)}</Text>
             </TouchableOpacity>
           </View>
@@ -657,23 +681,6 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         />
       </FieldRow>
 
-      {/* Reminder time picker */}
-      <TimePickerModal
-        visible={reminderPickerSlot !== null}
-        initialTime={
-          reminderPickerSlot
-            ? (day[`${reminderPickerSlot}_reminder_time` as keyof typeof day] as string | null ?? REMINDER_DEFAULTS[reminderPickerSlot]) + ':00'
-            : null
-        }
-        onConfirm={(timeStr) => {
-          if (!reminderPickerSlot) return;
-          const hhmm = timeStr.slice(0, 5);
-          onLocalChange({ [`${reminderPickerSlot}_reminder_time`]: hhmm } as any);
-          onBlurSave({ [`${reminderPickerSlot}_reminder_time`]: hhmm } as any);
-          setReminderPickerSlot(null);
-        }}
-        onCancel={() => setReminderPickerSlot(null)}
-      />
     </View>
   );
 }

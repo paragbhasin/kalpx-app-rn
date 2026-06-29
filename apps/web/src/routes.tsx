@@ -88,7 +88,10 @@ import { GuideTemplateBrowserPage } from "./pages/programs/GuideTemplateBrowserP
 import { GuideTemplateDayEditorPage } from "./pages/programs/GuideTemplateDayEditorPage";
 import { GuideTemplateReviewPage } from "./pages/programs/GuideTemplateReviewPage";
 import { RequiresStaff } from "./components/RequiresStaff";
+import { RequiresFounder } from "./components/RequiresFounder";
 import { ProgramAdminDashboard } from "./pages/programs/ProgramAdminDashboard";
+import { ProgramAdminCampaignList } from "./pages/programs/ProgramAdminCampaignList";
+import { ProgramAdminOverview } from "./pages/programs/ProgramAdminOverview";
 import { ProgramAdminCreateCampaign } from "./pages/programs/ProgramAdminCreateCampaign";
 import { ProgramAdminCampaignDetail } from "./pages/programs/ProgramAdminCampaignDetail";
 import { OpsLoginPage } from "./pages/auth/OpsLoginPage";
@@ -412,6 +415,14 @@ export function AppRoutes() {
       <Route
         path="/programs/admin/"
         element={<RequiresStaff><ProgramAdminDashboard /></RequiresStaff>}
+      />
+      <Route
+        path="/programs/admin/overview/"
+        element={<RequiresFounder><ProgramAdminOverview /></RequiresFounder>}
+      />
+      <Route
+        path="/programs/admin/campaigns/"
+        element={<RequiresStaff><ProgramAdminCampaignList /></RequiresStaff>}
       />
       <Route
         path="/programs/admin/new/"

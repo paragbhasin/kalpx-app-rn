@@ -8,13 +8,14 @@ import {
   mitraInnerPathComplete,
   mitraTrackCompletion,
 } from "../../../engine/mitraApi";
+import { liveActivity } from "../../../native/liveActivity";
 
 const BEIGE_BG = require("../../../../assets/beige_bg.webp");
 
 export default function InnerPathPracticeCompletion() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const { item_id, item_title, journeyId, dayNumber } = route.params;
+  const { item_id, item_title, item_subtitle, journeyId, dayNumber } = route.params;
   const completedRef = useRef(false);
   const COPY = useCompletionCopy("innerPath_practice");
   const [badge, setBadge] = useState<string>(COPY.pending);
@@ -43,7 +44,11 @@ export default function InnerPathPracticeCompletion() {
           badgeLabel={badge}
           ctaLabel={COPY.cta}
           onCtaPress={handleReturn}
-          liveActivity={item_title ? { type: COPY.variant, name: item_title } : undefined}
+          liveActivity={item_title ? {
+            type: COPY.variant,
+            name: item_title,
+            onActivate: () => liveActivity.startSankalp(item_title, item_subtitle ?? '', 'kalpx://mitra/inner_path/home?source=la').catch(() => {}),
+          } : undefined}
           nameCard={item_title ? { label: COPY.nameCardLabel, text: item_title, guideLine: COPY.nameCardGuide } : undefined}
           reflection={{ prompt: COPY.reflectionPrompt, onSubmit: onReflect }}
           testID={__DEV__ ? "test_ip_practice_completion_return" : undefined}

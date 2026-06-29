@@ -61,7 +61,8 @@ interface RunnerCompletionViewProps {
   testID?: string;
   // When set, shows the "Make it your Live Activity?" banner — auto-hidden if
   // this experience is already the user's preferred Live Activity.
-  liveActivity?: { type: "mantra" | "sankalp" | "practice"; name: string };
+  // onActivate: called after preference is confirmed — caller starts the actual LA.
+  liveActivity?: { type: "mantra" | "sankalp" | "practice"; name: string; onActivate?: () => void };
   // The "Today's …" card showing the mantra/sankalp/practice name.
   nameCard?: { label: string; text: string; guideLine?: string };
   // The "Anything to carry from this?" reflection input.
@@ -210,6 +211,7 @@ const RunnerCompletionView: React.FC<RunnerCompletionViewProps> = ({
                 variant="completion"
                 experienceType={liveActivity.type}
                 experienceName={liveActivity.name}
+                onActivate={liveActivity.onActivate}
               />
             )}
 

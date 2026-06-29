@@ -21,7 +21,7 @@ export function OpsLoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      setError("Email and password are required.");
+      setError("Email or username and password are required.");
       return;
     }
 
@@ -48,8 +48,15 @@ export function OpsLoginPage() {
       }
 
       await storeTokens(webStorage, { accessToken, refreshToken });
-      localStorage.setItem("kalpx:ops_session", "1");
-      navigate("/programs/admin/", { replace: true });
+
+      if (data.is_superuser) {
+        localStorage.setItem("kalpx:founder_session", "1");
+        localStorage.setItem("kalpx:ops_session", "1");
+        navigate("/programs/admin/overview/", { replace: true });
+      } else {
+        localStorage.setItem("kalpx:ops_session", "1");
+        navigate("/programs/admin/", { replace: true });
+      }
     } catch (err: any) {
       const msg =
         err?.response?.data?.detail ||
@@ -83,17 +90,17 @@ export function OpsLoginPage() {
 
               <form onSubmit={handleSubmit} className="auth-form" style={{ marginTop: 16 }}>
                 <div className="form-group">
-                  <label htmlFor="ops-email">Email address</label>
+                  <label htmlFor="ops-email">Email or username</label>
                   <div className="input-wrapper">
                     <Mail className="input-icon" size={18} />
                     <input
                       id="ops-email"
-                      type="email"
+                      type="text"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="ops@kalpx.com"
+                      placeholder="ops@kalpx.com or username"
                       required
-                      autoComplete="email"
+                      autoComplete="username"
                       autoFocus
                     />
                   </div>

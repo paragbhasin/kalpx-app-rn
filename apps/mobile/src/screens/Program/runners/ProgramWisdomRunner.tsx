@@ -138,6 +138,7 @@ export default function ProgramWisdomRunner() {
       <LiveActivityPreferenceBanner
         experienceType="practice"
         experienceName={wisdom.text ?? "Wisdom of the Day"}
+        experienceLine={wisdom.text ?? ""}
         onActivate={() => {
           liveActivity.startSankalp(
             `Day ${dayNumber} · Wisdom`,

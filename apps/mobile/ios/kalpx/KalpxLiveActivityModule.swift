@@ -4,6 +4,8 @@ import Foundation
 private let kAppGroupID      = "group.com.kalpx.app"
 private let kPendingKey      = "kalpx_pending_chant_increments"
 private let kActivityIDKey   = "kalpx_la_activity_id"
+private let kSankalpIDKey    = "kalpx_la_sankalp_id"
+private let kResetIDKey      = "kalpx_la_reset_id"
 private let kRhythmIDKey     = "kalpx_la_rhythm_id"
 private let kInnerPathIDKey  = "kalpx_la_inner_path_id"
 
@@ -21,7 +23,9 @@ class KalpxLiveActivityModule: NSObject {
     // (memory pressure, OTA JS reload, extended background).
     override init() {
         let d = UserDefaults(suiteName: kAppGroupID)
-        activityID      = d?.string(forKey: kActivityIDKey)
+        activityID          = d?.string(forKey: kActivityIDKey)
+        sankalpActivityID   = d?.string(forKey: kSankalpIDKey)
+        resetActivityID     = d?.string(forKey: kResetIDKey)
         rhythmActivityID    = d?.string(forKey: kRhythmIDKey)
         innerPathActivityID = d?.string(forKey: kInnerPathIDKey)
         super.init()
@@ -218,6 +222,7 @@ class KalpxLiveActivityModule: NSObject {
                     pushType: nil
                 )
                 self.resetActivityID = activity.id
+                self.saveID(activity.id, forKey: kResetIDKey)
                 resolve(activity.id)
             } catch {
                 reject("START_FAILED", error.localizedDescription, error)
@@ -239,6 +244,13 @@ class KalpxLiveActivityModule: NSObject {
     }
 
     // MARK: - Start Sankalp
+    //
+    // Sankalp is an anchor Live Activity — it is intentionally designed to remain
+    // on the lock screen after the OM session completes. The stale window is set
+    // to 8 hours so it serves as "today's practice" throughout the day.
+    // endCurrentSankalpActivity is intentionally NOT in endAllActivities (TS) for
+    // the same reason: Quick Chant takes Dynamic Island priority (it calls this
+    // method itself), but JS-layer endAllActivities must not kill the Sankalp anchor.
 
     @objc func startSankalpActivity(
         _ title: String,
@@ -269,10 +281,11 @@ class KalpxLiveActivityModule: NSObject {
             do {
                 let activity = try Activity<KalpxSankalpAttributes>.request(
                     attributes: attrs,
-                    content: ActivityContent(state: state, staleDate: Date().addingTimeInterval(30 * 60)),
+                    content: ActivityContent(state: state, staleDate: Date().addingTimeInterval(8 * 60 * 60)),
                     pushType: nil
                 )
                 self.sankalpActivityID = activity.id
+                self.saveID(activity.id, forKey: kSankalpIDKey)
                 resolve(activity.id)
             } catch {
                 reject("START_FAILED", error.localizedDescription, error)
@@ -297,6 +310,7 @@ class KalpxLiveActivityModule: NSObject {
             await activity.end(dismissalPolicy: .immediate)
         }
         sankalpActivityID = nil
+        saveID(nil, forKey: kSankalpIDKey)
     }
 
     @available(iOS 16.2, *)
@@ -305,6 +319,7 @@ class KalpxLiveActivityModule: NSObject {
             await activity.end(dismissalPolicy: .immediate)
         }
         resetActivityID = nil
+        saveID(nil, forKey: kResetIDKey)
     }
 
     // MARK: - Start Rhythm
@@ -334,7 +349,7 @@ class KalpxLiveActivityModule: NSObject {
             await self.endCurrentRhythmActivity()
             await self.endCurrentInnerPathActivity()
 
-            let attrs = KalpxRhythmAttributes(deepLinkURL: "kalpx://mitra/rhythm_home/morning?source=la")
+            let attrs = KalpxRhythmAttributes(deepLinkURL: "kalpx://mitra/rhythm_home/\(band)?source=la")
             let state = KalpxRhythmAttributes.ContentState(
                 band: band,
                 bandLabel: bandLabel,

@@ -248,6 +248,8 @@ export default function RhythmHomeScreen({
   const [resolvingItemId, setResolvingItemId] = useState<string | null>(null);
   const [homeBand, setHomeBand] = useState<RhythmTimeBand | null>(null);
   const lastLABandRef = useRef<RhythmTimeBand | null>(null);
+  // Captures the just-completed band so the Sankalp transition deep link uses the correct band.
+  const completedRhythmBandRef = useRef<string | null>(null);
 
   // Holds the user's chosen LA preference. When set, it has priority — the
   // Daily Rhythm LA must never override it, even on explicit actions.
@@ -289,6 +291,7 @@ export default function RhythmHomeScreen({
               const bandItems: RhythmItem[] = (fresh as any).companion_rhythm?.[b]?.items ?? [];
               const done = bandItems.length > 0 && bandItems.every((i: RhythmItem) => i.completed_today === true);
               if (done) {
+                completedRhythmBandRef.current = b;
                 lastLABandRef.current = null;
                 liveActivity.updateRhythm(true);
                 setTimeout(() => liveActivity.endRhythm(), 3_000);
@@ -305,9 +308,17 @@ export default function RhythmHomeScreen({
       ]).then(([state, preferredRaw]) => {
         if (AppState.currentState !== 'active') return;
         const pref = preferredRaw ? JSON.parse(preferredRaw) : null;
+        const band = completedRhythmBandRef.current;
+        completedRhythmBandRef.current = null;
+        const deepLink = band ? `kalpx://mitra/rhythm_home/${band}?source=la` : 'kalpx://mitra/rhythm_home?source=la';
+        if (pref?.type === 'practice') {
+          // Practice anchor: show the practice on lock screen; server state type is irrelevant
+          liveActivity.startSankalp(pref.name, pref.line ?? '', deepLink);
+          return;
+        }
         if (state.type !== 'sankalp') return;
         if (!pref || (pref.type === 'sankalp' && pref.name === state.title)) {
-          liveActivity.startSankalp(state.title, state.line, 'kalpx://mitra/rhythm_home/morning?source=la');
+          liveActivity.startSankalp(state.title, state.line, deepLink);
         }
       }).catch(() => {});
     }, [dispatch, i18n.language]),

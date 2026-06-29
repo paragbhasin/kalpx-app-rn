@@ -158,6 +158,14 @@ function isValidHHMM(val: string): boolean {
   return /^([01]\d|2[0-3]):[0-5]\d$/.test(val);
 }
 
+/** Normalize legacy IANA aliases so comparisons are reliable. */
+function normalizeTz(tz: string | undefined | null): string {
+  if (!tz) return '';
+  // Asia/Calcutta is a deprecated alias for Asia/Kolkata
+  if (tz === 'Asia/Calcutta') return 'Asia/Kolkata';
+  return tz;
+}
+
 export function NotificationPreferencesPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
@@ -281,7 +289,7 @@ export function NotificationPreferencesPage() {
 
           {/* Timezone */}
           <Section title="Your Timezone" subtitle="Mitra uses your timezone to send reminders at the right time.">
-            {!currentTimezone || currentTimezone === 'Asia/Kolkata' ? (
+            {!currentTimezone || normalizeTz(detectedTimezone) !== normalizeTz(currentTimezone) ? (
               <div style={{ padding: '8px 0', borderTop: `1px solid ${BORDER}` }}>
                 <p style={{ margin: '0 0 10px', fontSize: 13, color: TEXT_SECONDARY }}>
                   To remind you at the right time, Mitra needs your timezone.

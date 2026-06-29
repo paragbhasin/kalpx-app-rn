@@ -190,6 +190,14 @@ function isValidHHMM(val: string): boolean {
   return /^([01]\d|2[0-3]):[0-5]\d$/.test(val);
 }
 
+/** Normalize legacy IANA aliases so comparisons are reliable. */
+function normalizeTz(tz: string | undefined | null): string {
+  if (!tz) return '';
+  // Asia/Calcutta is a deprecated alias for Asia/Kolkata
+  if (tz === 'Asia/Calcutta') return 'Asia/Kolkata';
+  return tz;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function NotificationPreferences() {
@@ -211,6 +219,7 @@ export default function NotificationPreferences() {
   const [tzSaved, setTzSaved] = useState(false);
   const [tzPrompt, setTzPrompt] = useState<'device' | 'readiness' | null>(null);
   const [detectedTz, setDetectedTz] = useState<string | null>(null);
+  const [storedTz, setStoredTz] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(fetchPreferences());
@@ -230,12 +239,33 @@ export default function NotificationPreferences() {
         if (dismissed) {
           if (Date.now() - Number(dismissed) < 24 * 60 * 60 * 1000) return;
         }
-        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        if (tz && tz !== 'UTC') {
-          setDetectedTz(tz);
-          setTzPrompt('device');
+        // Fetch stored timezone from backend profile
+        let stored: string | null = null;
+        try {
+          const res = await api.get('users/profile/profile_details/');
+          const raw = res?.data;
+          const profileData = raw?.profile ?? raw;
+          const tz = profileData?.timezone as string | undefined;
+          if (tz) {
+            stored = normalizeTz(tz);
+            setStoredTz(stored);
+            setSelectedTimezone(stored);
+          }
+        } catch {
+          // best-effort — proceed without stored tz
+        }
+        const detected = normalizeTz(Intl.DateTimeFormat().resolvedOptions().timeZone);
+        if (detected && detected !== 'UTC') {
+          setDetectedTz(detected);
+          // Only prompt if stored tz is missing or differs from detected tz
+          if (!stored || stored !== detected) {
+            setTzPrompt('device');
+          }
+          // else: stored === detected — no prompt needed
         } else {
-          setTzPrompt('readiness');
+          if (!stored) {
+            setTzPrompt('readiness');
+          }
         }
       } catch {
         // best-effort
@@ -598,6 +628,10 @@ export default function NotificationPreferences() {
                 </TouchableOpacity>
               </View>
             </View>
+          ) : storedTz ? (
+            <Text style={styles.tzConfirmedText}>
+              {storedTz} ✓
+            </Text>
           ) : null}
           <View style={styles.tzPickerRow}>
             <Dropdown
@@ -1032,6 +1066,12 @@ const styles = StyleSheet.create({
     color: Colors.brownMuted,
     paddingHorizontal: 4,
     paddingVertical: 9,
+  },
+  tzConfirmedText: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    color: Colors.brownDeep,
+    marginBottom: 10,
   },
   tzPickerRow: {
     flexDirection: 'row',

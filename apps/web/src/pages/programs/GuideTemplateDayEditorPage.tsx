@@ -561,7 +561,7 @@ function DayRow({
           })
         }
       />
-      {!locked && (
+      {!locked && !!(day.mantra_ref || day.custom_mantra_body) && (
         <div style={slotSettingsRow}>
           <div>
             <div style={settingsLabel}>CHANT COUNT FOR PARTICIPANTS</div>
@@ -633,7 +633,7 @@ function DayRow({
           })
         }
       />
-      {!locked && (
+      {!locked && !!(day.sankalp_ref || day.custom_sankalp_body) && (
         <div style={slotSettingsRow}>
           <div>
             <div style={settingsLabel}>SUGGESTED REMINDER TIME</div>
@@ -677,7 +677,7 @@ function DayRow({
           })
         }
       />
-      {!locked && (
+      {!locked && !!(day.practice_ref || day.custom_practice_body) && (
         <div style={slotSettingsRow}>
           <div>
             <div style={settingsLabel}>DURATION FOR PARTICIPANTS</div>

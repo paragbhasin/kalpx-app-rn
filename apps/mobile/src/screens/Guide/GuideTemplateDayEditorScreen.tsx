@@ -527,7 +527,7 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         onCustomChange={(title, body) => onLocalChange({ custom_mantra_title: title, custom_mantra_body: body })}
         onCustomBlur={(title, body) => onBlurSave({ custom_mantra_title: title, custom_mantra_body: body, mantra_ref: "" })}
       />
-      {!locked && (
+      {!locked && !!(day.mantra_ref || day.custom_mantra_body) && (
         <View style={s.slotSettings}>
           <View>
             <Text style={s.extraDetailsLabel}>CHANT COUNT FOR PARTICIPANTS</Text>
@@ -568,7 +568,7 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         onCustomChange={(title, body) => onLocalChange({ custom_sankalp_title: title, custom_sankalp_body: body })}
         onCustomBlur={(title, body) => onBlurSave({ custom_sankalp_title: title, custom_sankalp_body: body, sankalp_ref: "" })}
       />
-      {!locked && (
+      {!locked && !!(day.sankalp_ref || day.custom_sankalp_body) && (
         <View style={s.slotSettings}>
           <View>
             <Text style={s.extraDetailsLabel}>SUGGESTED REMINDER TIME</Text>
@@ -595,7 +595,7 @@ function DayRow({ day, locked, slotSelections, onOpenPicker, onApplyToAll, onBlu
         onCustomChange={(title, body) => onLocalChange({ custom_practice_title: title, custom_practice_body: body })}
         onCustomBlur={(title, body) => onBlurSave({ custom_practice_title: title, custom_practice_body: body, practice_ref: "" })}
       />
-      {!locked && (
+      {!locked && !!(day.practice_ref || day.custom_practice_body) && (
         <View style={s.slotSettings}>
           <View>
             <Text style={s.extraDetailsLabel}>DURATION (MINUTES)</Text>

@@ -137,10 +137,10 @@ export default function ProgramCard({ program }: ProgramCardProps) {
                         Day {day.day_number}
                       </Text>
                       {day.status === "missed" && (
-                        <Text style={styles.dayHintMissed}>Tap to complete now</Text>
+                        <Text style={styles.dayHintMissed}>Missed</Text>
                       )}
                       {day.status === "completed_later" && (
-                        <Text style={styles.dayHintLate}>Completed late</Text>
+                        <Text style={styles.dayHintLate}>Completed</Text>
                       )}
                       {day.status === "locked" && (
                         <Text style={styles.dayHint}>{lockedHint(day.unlock_date)}</Text>

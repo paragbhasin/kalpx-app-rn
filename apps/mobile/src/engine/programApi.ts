@@ -17,6 +17,14 @@ export interface ProgramDayItem {
   description?: string;
 }
 
+export type DayStatus = "locked" | "today" | "completed" | "missed" | "completed_later";
+
+export interface ProgramDayStatus {
+  day_number: number;
+  status: DayStatus;
+  unlock_date: string;
+}
+
 export interface ActiveProgramSummary {
   name: string;
   status: "active" | "completed";
@@ -24,6 +32,8 @@ export interface ActiveProgramSummary {
   next_day_available: boolean;
   next_day_locked?: boolean;
   days_remaining: number;
+  total_days?: number;
+  day_statuses?: ProgramDayStatus[];
   show_day8_transition?: boolean;
 }
 

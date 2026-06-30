@@ -1,5 +1,6 @@
 import { useNavigation, useRoute } from "@react-navigation/native";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -19,15 +20,14 @@ import {
 } from "../../utils/postLoginGuard";
 
 const MAX_CHARS = 500;
-const DEFAULT_PROMPT =
-  "Take a moment. What shifted in you today — even slightly? Notice it without judgement.";
 
 export default function ProgramReflectionScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
+  const { t } = useTranslation();
   const { reflectionPrompt, dayNumber } = route.params ?? {};
 
-  const prompt = reflectionPrompt || DEFAULT_PROMPT;
+  const prompt = reflectionPrompt || t("programs.reflection.defaultPrompt");
 
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
@@ -68,13 +68,13 @@ export default function ProgramReflectionScreen() {
           keyboardShouldPersistTaps="handled"
         >
           {/* <Text style={styles.emoji}>🌼</Text> */}
-          <Text style={styles.heading}>Reflection</Text>
+          <Text style={styles.heading}>{t("programs.reflection.heading")}</Text>
           <Text style={styles.subtitle}>
-            Take a quiet moment to reflect on today's journey.
+            {t("programs.reflection.subtitle")}
           </Text>
 
           <View style={styles.questionCard}>
-            <Text style={styles.questionLabel}>QUESTION</Text>
+            <Text style={styles.questionLabel}>{t("programs.reflection.questionLabel")}</Text>
             <Text style={styles.questionText}>{prompt}</Text>
           </View>
 
@@ -92,7 +92,7 @@ export default function ProgramReflectionScreen() {
                     setSaved(false);
                   }
                 }}
-                placeholder="Write your thoughts here..."
+                placeholder={t("programs.reflection.inputPlaceholder")}
                 placeholderTextColor="#B5A08A"
                 multiline
                 textAlignVertical="top"
@@ -110,7 +110,7 @@ export default function ProgramReflectionScreen() {
                   <ActivityIndicator color="#fff" />
                 ) : (
                   <Text style={styles.saveBtnText}>
-                    {saved ? "✓ Reflection Saved" : "Save Reflection"}
+                    {saved ? t("programs.reflection.savedButton") : t("programs.reflection.saveButton")}
                   </Text>
                 )}
               </TouchableOpacity>
@@ -126,7 +126,7 @@ export default function ProgramReflectionScreen() {
                 navigation.reset({ index: 0, routes: [{ name: "Home" }] });
               }}
             >
-              <Text style={styles.primaryBtnText}>Go to Home</Text>
+              <Text style={styles.primaryBtnText}>{t("programs.reflection.goToHome")}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -139,7 +139,7 @@ export default function ProgramReflectionScreen() {
                 }
               }}
             >
-              <Text style={styles.secondaryBtnText}>Back to Day</Text>
+              <Text style={styles.secondaryBtnText}>{t("programs.reflection.backToDay")}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

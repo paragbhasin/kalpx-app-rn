@@ -6,6 +6,9 @@
  */
 
 import api from "../Networks/axios";
+import i18n from "../config/i18n";
+
+const getLocale = (): string => i18n.language || "en";
 
 export interface ProgramDayItem {
   item_id: string;
@@ -75,12 +78,12 @@ export interface ProgramClaimSuccess {
 }
 
 export async function fetchActiveProgram(): Promise<ActiveProgramSummary | null> {
-  const res = await api.get("programs/my-active/");
+  const res = await api.get("programs/my-active/", { params: { locale: getLocale() } });
   return res.data ?? null;
 }
 
 export async function fetchProgramDay(dayNumber: number): Promise<ProgramDayContent> {
-  const res = await api.get(`programs/my-active/day/${dayNumber}/`);
+  const res = await api.get(`programs/my-active/day/${dayNumber}/`, { params: { locale: getLocale() } });
   console.log('[ProgramDay] API response:', JSON.stringify(res.data, null, 2));
   console.log('[ProgramDay] wisdom_card:', JSON.stringify(res.data.wisdom_card));
   console.log('[ProgramDay] day_join_url:', res.data.day_join_url);
@@ -89,7 +92,7 @@ export async function fetchProgramDay(dayNumber: number): Promise<ProgramDayCont
 }
 
 export async function fetchDayReflection(dayNumber: number): Promise<string> {
-  const res = await api.get(`programs/my-active/day/${dayNumber}/reflection/`);
+  const res = await api.get(`programs/my-active/day/${dayNumber}/reflection/`, { params: { locale: getLocale() } });
   return res.data.text ?? '';
 }
 

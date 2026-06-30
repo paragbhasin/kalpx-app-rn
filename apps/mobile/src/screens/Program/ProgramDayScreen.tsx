@@ -14,6 +14,7 @@ import {
   useRoute,
 } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
@@ -154,6 +155,7 @@ export default function ProgramDayScreen() {
 
   const { withPermissionCheck, renderPermissionModal } =
     useNotificationPermissionGate();
+  const { t } = useTranslation();
 
   const firedAnalyticsRef = useRef(false);
   const dayCompletedRef = useRef(false);
@@ -279,12 +281,12 @@ export default function ProgramDayScreen() {
           const status = err?.response?.status;
           const detail = err?.response?.data?.detail;
           if (status === 403 && detail === "next_day_locked")
-            setError(
-              "Today's practice is complete. Come back tomorrow for the next day.",
-            );
-          else if (status === 403) setError("Complete the previous day first.");
-          else if (status === 404) setError("Day not found in your program.");
-          else setError("Couldn't load today's practice. Please try again.");
+            setError(t("programs.day.errorNextDayLocked"));
+          else if (status === 403)
+            setError(t("programs.day.errorPrevDayIncomplete"));
+          else if (status === 404)
+            setError(t("programs.day.errorDayNotFound"));
+          else setError(t("programs.day.errorLoadFailed"));
         } finally {
           if (!cancelled) setLoading(false);
         }
@@ -367,7 +369,7 @@ export default function ProgramDayScreen() {
   if (error || !dayContent) {
     return (
       <SafeAreaView style={styles.center}>
-        <Text style={styles.errorText}>{error ?? "Something went wrong."}</Text>
+        <Text style={styles.errorText}>{error ?? t("programs.day.errorGeneric")}</Text>
         <TouchableOpacity
           onPress={() => {
             setSkipMitraStart();
@@ -376,16 +378,16 @@ export default function ProgramDayScreen() {
           }}
           style={styles.backBtn}
         >
-          <Text style={styles.backBtnText}>← Back</Text>
+          <Text style={styles.backBtnText}>{t("programs.day.back")}</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
   }
 
   const ITEM_LABELS: Record<string, string> = {
-    mantra: "Mantra",
-    sankalp: "Sankalp",
-    practice: "Practice",
+    mantra: t("programs.day.label_mantra"),
+    sankalp: t("programs.day.label_sankalp"),
+    practice: t("programs.day.label_practice"),
   };
 
   return (
@@ -407,7 +409,7 @@ export default function ProgramDayScreen() {
             {/* <Text style={styles.backIconText}>‹</Text> */}
           </TouchableOpacity>
           <View style={styles.headerCenter}>
-            <Text style={styles.dayLabel}>DAY {dayContent.day_number}</Text>
+            <Text style={styles.dayLabel}>{t("programs.day.dayLabel", { n: dayContent.day_number })}</Text>
             <Text style={styles.themeText}>{dayContent.theme}</Text>
             {dayContent.wisdom_card ? (
               <TouchableOpacity
@@ -415,7 +417,7 @@ export default function ProgramDayScreen() {
                 activeOpacity={0.82}
                 style={styles.wisdomInline}
               >
-                <Text style={styles.wisdomInlineLabel}>WISDOM OF THE DAY</Text>
+                <Text style={styles.wisdomInlineLabel}>{t("programs.day.wisdomLabel")}</Text>
                 <View style={styles.wisdomInlineRow}>
                   <Text
                     style={styles.wisdomInlineTitle}
@@ -465,7 +467,7 @@ export default function ProgramDayScreen() {
             accessibilityLabel="Join live session"
           >
             <View style={styles.liveSessionLeft}>
-              <Text style={styles.liveSessionLabel}>LIVE SESSION</Text>
+              <Text style={styles.liveSessionLabel}>{t("programs.day.liveSessionLabel")}</Text>
               {dayContent.day_session_time ? (
                 <Text style={styles.liveSessionTime}>
                   {formatSessionTime(dayContent.day_session_time)}
@@ -474,7 +476,7 @@ export default function ProgramDayScreen() {
                     : ""}
                 </Text>
               ) : null}
-              <Text style={styles.liveSessionLink}>Tap to join →</Text>
+              <Text style={styles.liveSessionLink}>{t("programs.day.liveSessionTapToJoin")}</Text>
               <View style={styles.liveSessionUrlRow}>
                 <Text
                   style={styles.liveSessionUrl}
@@ -494,7 +496,7 @@ export default function ProgramDayScreen() {
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
                   <Text style={styles.copyBtnText}>
-                    {copiedLink ? "Copied!" : "Copy"}
+                    {copiedLink ? t("programs.day.copied") : t("programs.day.copy")}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -514,12 +516,12 @@ export default function ProgramDayScreen() {
               })
             }
           >
-            <Text style={styles.reflectionLabel}> REFLECTION</Text>
+            <Text style={styles.reflectionLabel}>{t("programs.day.reflectionLabel")}</Text>
             <Text style={styles.reflectionText}>
               {dayContent.reflection_prompt}
             </Text>
             <Text style={styles.reflectionHint}>
-              Tap to write your reflection →
+              {t("programs.day.reflectionHint")}
             </Text>
           </TouchableOpacity>
         ) : null}
@@ -533,13 +535,13 @@ export default function ProgramDayScreen() {
               style={styles.remindersHeader}
             >
               <View style={{ flex: 1 }}>
-                <Text style={styles.remindersTitle}>Reminders</Text>
+                <Text style={styles.remindersTitle}>{t("programs.day.remindersTitle")}</Text>
                 {!remindersOpen && (
                   <Text style={styles.remindersSub}>
                     {(["mantra", "sankalp", "practice"] as const)
                       .filter((k) => reminders[`${k}_reminder_enabled`])
-                      .map((k) => k.charAt(0).toUpperCase() + k.slice(1))
-                      .join(", ") || "None set"}
+                      .map((k) => t(`programs.day.label_${k}`))
+                      .join(", ") || t("programs.day.remindersNoneSet")}
                   </Text>
                 )}
               </View>
@@ -577,7 +579,7 @@ export default function ProgramDayScreen() {
                       ]}
                     >
                       <Text style={styles.reminderRowLabel}>
-                        {key.charAt(0).toUpperCase() + key.slice(1)} reminder
+                        {t(`programs.day.reminder_${key}`)}
                       </Text>
                       <View style={styles.reminderRowRight}>
                         {enabled && displayTime && (
@@ -627,7 +629,7 @@ export default function ProgramDayScreen() {
                 />
 
                 {reminderSaving && (
-                  <Text style={styles.reminderSavingText}>Saving…</Text>
+                  <Text style={styles.reminderSavingText}>{t("programs.day.reminderSaving")}</Text>
                 )}
               </View>
             )}
@@ -638,16 +640,15 @@ export default function ProgramDayScreen() {
         {allDone ? (
           <View style={styles.completionBanner}>
             <Text style={styles.completionTitle}>
-              Day {dayContent.day_number} Complete ✓
+              {t("programs.day.dayComplete", { n: dayContent.day_number })}
             </Text>
             <Text style={styles.completionSub}>
-              Tap any practice to do it again
+              {t("programs.day.completionSub")}
             </Text>
           </View>
         ) : (
           <Text style={styles.progressHint}>
-            {allItems.filter(isItemDone).length}/{allItems.length} done —
-            complete all to finish the day
+            {t("programs.day.progressHint", { done: allItems.filter(isItemDone).length, total: allItems.length })}
           </Text>
         )}
 
@@ -656,14 +657,14 @@ export default function ProgramDayScreen() {
           style={styles.supportLink}
           onPress={() =>
             Alert.alert(
-              "Need help?",
-              "Visit kalpx.com/programs/support for help with your program.",
-              [{ text: "OK" }],
+              t("programs.day.alertTitle"),
+              t("programs.day.alertBody"),
+              [{ text: t("programs.day.alertOk") }],
             )
           }
           accessibilityLabel="Program support"
         >
-          <Text style={styles.supportLinkText}>Need help? Get support →</Text>
+          <Text style={styles.supportLinkText}>{t("programs.day.supportLink")}</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

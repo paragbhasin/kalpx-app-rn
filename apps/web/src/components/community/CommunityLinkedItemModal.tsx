@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import type { ReactNode } from "react";
+import { useTranslation } from "../../lib/i18n";
 
 export interface CommunityLinkedItemView {
   type: "mantra" | "sankalp" | "practice";
@@ -69,6 +70,7 @@ export function CommunityLinkedItemModal({
   onAdd,
   onComplete,
 }: CommunityLinkedItemModalProps) {
+  const { t } = useTranslation();
   if (!open) return null;
 
   return (
@@ -200,7 +202,7 @@ export function CommunityLinkedItemModal({
                   </div>
                 )}
                 {item.devanagari && (
-                  <Section title="Devanagari">
+                  <Section title={t("librarySearchModal.detailDevanagari")}>
                     <div
                       style={{
                         fontSize: 28,
@@ -220,28 +222,28 @@ export function CommunityLinkedItemModal({
                   </Section>
                 )}
                 {item.meaning && (
-                  <Section title="Meaning">
+                  <Section title={t("librarySearchModal.detailMeaning")}>
                     <div style={{ fontSize: 14, color: "#43352b", lineHeight: 1.6 }}>
                       {item.meaning}
                     </div>
                   </Section>
                 )}
                 {item.essence && (
-                  <Section title="Essence">
+                  <Section title={t("librarySearchModal.detailEssence")}>
                     <div style={{ fontSize: 14, color: "#43352b", lineHeight: 1.6 }}>
                       {item.essence}
                     </div>
                   </Section>
                 )}
                 {item.insight && (
-                  <Section title="Insight">
+                  <Section title={t("librarySearchModal.detailInsight")}>
                     <div style={{ fontSize: 14, color: "#43352b", lineHeight: 1.6 }}>
                       {item.insight}
                     </div>
                   </Section>
                 )}
                 {item.source && (
-                  <Section title="Source">
+                  <Section title={t("librarySearchModal.detailSource")}>
                     <div style={{ fontSize: 14, color: "#43352b", lineHeight: 1.6 }}>
                       {item.source}
                     </div>
@@ -255,14 +257,14 @@ export function CommunityLinkedItemModal({
                   </Section>
                 )}
                 {item.duration && (
-                  <Section title="Duration">
+                  <Section title={t("librarySearchModal.detailDuration")}>
                     <div style={{ fontSize: 14, color: "#43352b" }}>
                       {item.duration}
                     </div>
                   </Section>
                 )}
                 {item.benefits && item.benefits.length > 0 && (
-                  <Section title="Benefits">
+                  <Section title={t("librarySearchModal.detailBenefits")}>
                     <ul
                       style={{
                         margin: 0,
@@ -279,7 +281,7 @@ export function CommunityLinkedItemModal({
                   </Section>
                 )}
                 {item.steps && item.steps.length > 0 && (
-                  <Section title="Steps">
+                  <Section title={t("librarySearchModal.detailSteps")}>
                     <ol
                       style={{
                         margin: 0,
@@ -366,7 +368,7 @@ export function CommunityLinkedItemModal({
                     opacity: addLoading || completeLoading ? 0.65 : 1,
                   }}
                 >
-                  {completeLoading ? "Saving..." : "Do it today"}
+                  {completeLoading ? t("librarySearchModal.saving") : t("librarySearchModal.doItToday")}
                 </button>
               </div>
             </>

@@ -501,7 +501,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
 
         let hydratedItem: any = null;
         try {
-          const resp = await mitraLibrarySearch(String(linkedItemId), linkedItemType);
+          const resp = await mitraLibrarySearch(String(linkedItemId), linkedItemType, i18n.language || "en");
           hydratedItem = (resp?.results || []).find((result: any) => {
             const resultId = result?.itemId ?? result?.item_id ?? result?.id;
             return String(resultId || "") === String(linkedItemId);

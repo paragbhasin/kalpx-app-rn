@@ -2206,6 +2206,8 @@ export async function mitraJourneyHomeV3(opts?: {
   return req;
 }
 
+export function invalidateHomeV3Cache() { _homeV3Cache = null; }
+
 // ---------------------------------------------------------------------------
 // postTellMitraV3 — POST /api/mitra/v3/tell-mitra/ (S04 Tell Mitra door)
 // ---------------------------------------------------------------------------

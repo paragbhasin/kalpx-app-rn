@@ -5,6 +5,7 @@ import { AppShell } from '../../components/ui/AppShell';
 import { fetchProgramByCode, fetchProgramBySlug, type ProgramCampaignPublic } from '../../engine/programApi';
 import { captureProgramAttribution } from '../../utils/programAttribution';
 import { WEB_ENV } from '../../lib/env';
+import { useTranslation } from '../../lib/i18n';
 
 const APPLE_APP_STORE_ID = '6755144623';
 
@@ -101,6 +102,7 @@ export function ProgramLandingPage() {
 // ── Loading ──────────────────────────────────────────────────────────────────
 
 function LoadingState() {
+  const { t } = useTranslation();
   return (
     <div style={{ textAlign: 'center', paddingTop: 80 }} aria-busy="true" aria-label="Loading program">
       <div style={{
@@ -110,7 +112,7 @@ function LoadingState() {
         animation: 'spin 0.8s linear infinite',
         margin: '0 auto 16px',
       }} />
-      <p style={{ color: 'var(--kalpx-text-muted)', fontSize: 14 }}>Loading program…</p>
+      <p style={{ color: 'var(--kalpx-text-muted)', fontSize: 14 }}>{t('programLanding.loading')}</p>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
@@ -119,32 +121,35 @@ function LoadingState() {
 // ── Error states ─────────────────────────────────────────────────────────────
 
 function NotFoundState() {
+  const { t } = useTranslation();
   return (
     <div style={{ textAlign: 'center', paddingTop: 80 }}>
-      <p style={{ fontSize: 22, fontWeight: 600, marginBottom: 12 }}>Link not valid</p>
+      <p style={{ fontSize: 22, fontWeight: 600, marginBottom: 12 }}>{t('programLanding.linkNotValid')}</p>
       <p style={{ color: 'var(--kalpx-text-soft)', lineHeight: 1.6 }}>
-        This invite link isn&apos;t valid. Please check with the person who shared it.
+        {t('programLanding.linkNotValidBody')}
       </p>
     </div>
   );
 }
 
 function EndedState() {
+  const { t } = useTranslation();
   return (
     <div style={{ textAlign: 'center', paddingTop: 80 }}>
-      <p style={{ fontSize: 22, fontWeight: 600, marginBottom: 12 }}>Program has ended</p>
-      <p style={{ color: 'var(--kalpx-text-soft)' }}>This program has ended.</p>
+      <p style={{ fontSize: 22, fontWeight: 600, marginBottom: 12 }}>{t('programLanding.programEnded')}</p>
+      <p style={{ color: 'var(--kalpx-text-soft)' }}>{t('programLanding.programEndedBody')}</p>
     </div>
   );
 }
 
 function ErrorState() {
+  const { t } = useTranslation();
   return (
     <div style={{ textAlign: 'center', paddingTop: 80 }}>
-      <p style={{ fontSize: 22, fontWeight: 600, marginBottom: 12 }}>Something went wrong</p>
+      <p style={{ fontSize: 22, fontWeight: 600, marginBottom: 12 }}>{t('programLanding.somethingWrong')}</p>
       <p style={{ color: 'var(--kalpx-text-soft)' }}>
-        Please try again or{' '}
-        <a href="https://kalpx.com/support" style={{ color: 'var(--kalpx-gold)' }}>contact support</a>.
+        {t('programLanding.errorRetry')}{' '}
+        <a href="https://kalpx.com/support" style={{ color: 'var(--kalpx-gold)' }}>{t('programLanding.contactSupport')}</a>.
       </p>
     </div>
   );
@@ -153,6 +158,7 @@ function ErrorState() {
 // ── Paused banner (inline, not a route change) ────────────────────────────────
 
 function PausedBanner() {
+  const { t } = useTranslation();
   return (
     <div
       role="alert"
@@ -166,7 +172,7 @@ function PausedBanner() {
         color: 'var(--kalpx-text-soft)',
       }}
     >
-      This program is currently paused. Check back soon.
+      {t('programLanding.paused')}
     </div>
   );
 }
@@ -185,6 +191,7 @@ function fireTrackBeacon(event: string, campaignCode: string) {
 }
 
 function CampaignBody({ campaign }: { campaign: ProgramCampaignPublic }) {
+  const { t } = useTranslation();
   const joinUrl = `${window.location.hostname === 'localhost' ? WEB_ENV.imageBaseUrl.replace('/api', '').replace(/\/$/, '') : window.location.origin}/join/${campaign.code}`;
   const deepLinkUrl = `kalpx://join/${campaign.code}`;
 
@@ -222,7 +229,7 @@ function CampaignBody({ campaign }: { campaign: ProgramCampaignPublic }) {
       {/* Header — Decision 3: Program is the hero, not "Download KalpX" */}
       <header style={{ marginBottom: 28 }}>
         <p style={{ fontSize: 12, color: 'var(--kalpx-text-muted)', marginBottom: 10, letterSpacing: '0.04em' }}>
-          PRACTICE PROGRAM
+          {t('programLanding.practiceProgram')}
         </p>
         <h1
           style={{
@@ -257,7 +264,7 @@ function CampaignBody({ campaign }: { campaign: ProgramCampaignPublic }) {
           id="invite-code-label"
           style={{ fontSize: 12, color: 'var(--kalpx-text-muted)', marginBottom: 8, letterSpacing: '0.06em' }}
         >
-          YOUR INVITE CODE
+          {t('programLanding.yourInviteCode')}
         </p>
         <code
           aria-labelledby="invite-code-label"
@@ -274,14 +281,14 @@ function CampaignBody({ campaign }: { campaign: ProgramCampaignPublic }) {
           {campaign.code}
         </code>
         <p style={{ fontSize: 13, color: 'var(--kalpx-text-soft)', lineHeight: 1.5 }}>
-          Enter this in the KalpX app under &quot;Have an invite code?&quot;
+          {t('programLanding.inviteCodeHint')}
         </p>
       </section>
 
       {/* Download section */}
       <section style={{ marginBottom: 28 }}>
         <p style={{ fontSize: 13, color: 'var(--kalpx-text-muted)', marginBottom: 14 }}>
-          Download KalpX to join:
+          {t('programLanding.downloadToJoin')}
         </p>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
           <a
@@ -292,7 +299,7 @@ function CampaignBody({ campaign }: { campaign: ProgramCampaignPublic }) {
             style={storeButtonStyle}
             onClick={() => fireTrackBeacon('app_store_clicked', campaign.code)}
           >
-            App Store
+            {t('programLanding.appStore')}
           </a>
           <a
             href={playStoreUrl}
@@ -302,12 +309,12 @@ function CampaignBody({ campaign }: { campaign: ProgramCampaignPublic }) {
             style={storeButtonStyle}
             onClick={() => fireTrackBeacon('play_store_clicked', campaign.code)}
           >
-            Google Play
+            {t('programLanding.googlePlay')}
           </a>
         </div>
         {/* Open KalpX — custom scheme, secondary (Decision 5) */}
         <p style={{ fontSize: 13, color: 'var(--kalpx-text-muted)', marginBottom: 8 }}>
-          Already have KalpX?
+          {t('programLanding.alreadyHaveApp')}
         </p>
         <a
           href={deepLinkUrl}
@@ -333,7 +340,7 @@ function CampaignBody({ campaign }: { campaign: ProgramCampaignPublic }) {
             textDecoration: 'none',
           }}
         >
-          Open KalpX
+          {t('programLanding.openApp')}
         </a>
       </section>
 
@@ -366,7 +373,7 @@ function CampaignBody({ campaign }: { campaign: ProgramCampaignPublic }) {
           </span>
         </div>
         <p style={{ fontSize: 13, color: 'var(--kalpx-text-muted)', textAlign: 'center' }}>
-          Scan to join on mobile
+          {t('programLanding.scanToJoin')}
         </p>
       </section>
 
@@ -427,7 +434,7 @@ function CampaignBody({ campaign }: { campaign: ProgramCampaignPublic }) {
         }}
       >
         <p style={{ fontSize: 15, fontWeight: 500, marginBottom: 8, color: 'var(--kalpx-text)' }}>
-          Need help joining?
+          {t('programLanding.needHelp')}
         </p>
         <Link
           to={supportUrl}
@@ -440,19 +447,19 @@ function CampaignBody({ campaign }: { campaign: ProgramCampaignPublic }) {
           aria-label="Get support joining this program"
           onClick={() => fireTrackBeacon('program_support_clicked', campaign.code)}
         >
-          Get support →
+          {t('programLanding.getSupport')}
         </Link>
       </section>
 
       {/* Footer */}
       <footer style={{ fontSize: 12, color: 'var(--kalpx-text-faint)', lineHeight: 1.6 }}>
         {campaign.status === 'active' && (
-          <span>Program is active · </span>
+          <span>{t('programLanding.programActive')} · </span>
         )}
         {campaign.start_date && (
           <span>Starts {campaign.start_date} · </span>
         )}
-        <span>Powered by KalpX</span>
+        <span>{t('programLanding.poweredBy')}</span>
       </footer>
     </div>
   );

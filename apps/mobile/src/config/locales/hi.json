@@ -277,6 +277,51 @@
     "intentPlaceholder": "अपना उद्देश्य साझा करें…",
     "nextStep": "अगला चरण लें"
   },
+  "programs": {
+    "day": {
+      "errorNextDayLocked": "आज का अभ्यास पूर्ण हुआ। अगले दिन के लिए कल वापस आएँ।",
+      "errorPrevDayIncomplete": "पहले पिछला दिन पूरा करें।",
+      "errorDayNotFound": "आपके कार्यक्रम में यह दिन नहीं मिला।",
+      "errorLoadFailed": "आज का अभ्यास लोड नहीं हो सका। कृपया पुनः प्रयास करें।",
+      "errorGeneric": "कुछ गड़बड़ हो गई।",
+      "back": "← वापस",
+      "dayLabel": "दिन {{n}}",
+      "wisdomLabel": "आज का ज्ञान",
+      "label_mantra": "मंत्र",
+      "label_sankalp": "संकल्प",
+      "label_practice": "अभ्यास",
+      "liveSessionLabel": "सीधा सत्र",
+      "liveSessionTapToJoin": "जुड़ने के लिए स्पर्श करें →",
+      "copied": "कॉपी हो गया!",
+      "copy": "कॉपी करें",
+      "reflectionLabel": "चिंतन",
+      "reflectionHint": "अपना चिंतन लिखने के लिए स्पर्श करें →",
+      "remindersTitle": "स्मरण",
+      "remindersNoneSet": "कोई नहीं",
+      "reminder_mantra": "मंत्र स्मरण",
+      "reminder_sankalp": "संकल्प स्मरण",
+      "reminder_practice": "अभ्यास स्मरण",
+      "reminderSaving": "सहेजा जा रहा है…",
+      "dayComplete": "दिन {{n}} पूर्ण ✓",
+      "completionSub": "पुनः करने के लिए किसी भी अभ्यास को स्पर्श करें",
+      "progressHint": "{{done}}/{{total}} हुआ — दिन पूर्ण करने के लिए सभी करें",
+      "alertTitle": "सहायता चाहिए?",
+      "alertBody": "अपने कार्यक्रम में सहायता के लिए kalpx.com/programs/support पर जाएँ।",
+      "alertOk": "ठीक है",
+      "supportLink": "सहायता चाहिए? यहाँ पाएँ →"
+    },
+    "reflection": {
+      "defaultPrompt": "एक पल रुकें। आज आपके भीतर क्या बदला — चाहे थोड़ा भी? इसे बिना किसी निर्णय के महसूस करें।",
+      "heading": "चिंतन",
+      "subtitle": "आज की यात्रा पर एक शांत पल में विचार करें।",
+      "questionLabel": "प्रश्न",
+      "inputPlaceholder": "अपने विचार यहाँ लिखें...",
+      "savedButton": "✓ चिंतन सहेजा",
+      "saveButton": "चिंतन सहेजें",
+      "goToHome": "होम पर जाएं",
+      "backToDay": "दिन पर वापस जाएं"
+    }
+  },
   "room": {
     "actions": {
       "addAnother": "एक और जोड़ें",

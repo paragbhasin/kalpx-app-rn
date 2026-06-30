@@ -731,13 +731,13 @@
     "categories": "श्रेणियां",
     "languages": "सूचना भाषा",
     "updateProfile": "प्रोफ़ाइल अपडेट करें",
-    "chooseTZ": "अपना timezone चुनें",
-    "languageInstruction": "सभी notifications चुनी हुई भाषा में आएंगे",
+    "chooseTZ": "अपना समय क्षेत्र चुनें",
+    "languageInstruction": "सभी सूचनाएं चुनी हुई भाषा में आएंगी",
     "Reminders": "रिमाइंडर",
-    "emailNotifications": "Email notifications",
-    "pushNotifications": "Push notifications",
+    "emailNotifications": "ईमेल सूचनाएं",
+    "pushNotifications": "पुश सूचनाएं",
     "continue": "आगे बढ़ें",
-    "chooseHeader": "भाषा और timezone चुनें"
+    "chooseHeader": "भाषा और समय क्षेत्र चुनें"
   },
   "mySadhana": {
     "findPeace": "दैनिक साधना से शांति और स्पष्टता प्राप्त करें",
@@ -2862,15 +2862,63 @@
   "notificationPermission": {
     "undetermined": {
       "title": "अपनी लय से जुड़े रहें",
-      "body": "अपने मंत्र, संकल्प और रोज़ की साधना के लिए gentle reminders पाएं।",
-      "primaryCta": "Reminder की अनुमति दें",
+      "body": "अपने मंत्र, संकल्प और रोज़ की साधना के लिए सौम्य स्मरण पाएं।",
+      "primaryCta": "सौम्य स्मरण की अनुमति दें",
       "secondaryCta": "बाद में"
     },
     "denied": {
-      "title": "अभी notifications बंद हैं",
-      "body": "Gentle reminders पाने के लिए अपनी device settings में KalpX को notifications की अनुमति दें।",
-      "primaryCta": "Settings खोलें",
+      "title": "अभी सूचनाएं बंद हैं",
+      "body": "सौम्य स्मरण पाने के लिए अपनी डिवाइस सेटिंग में KalpX को सूचनाएं देने की अनुमति दें।",
+      "primaryCta": "सेटिंग खोलें",
       "secondaryCta": "अभी नहीं"
     }
+  },
+  "programs": {
+    "day": {
+      "dayLabel": "दिन {{n}}",
+      "wisdomLabel": "प्रज्ञा",
+      "label_mantra": "मन्त्र",
+      "label_sankalp": "संकल्प",
+      "label_practice": "अभ्यास",
+      "reminder_mantra": "मन्त्र",
+      "reminder_sankalp": "संकल्प",
+      "reminder_practice": "अभ्यास",
+      "reflectionLabel": "चिंतन",
+      "reflectionHint": "अपना चिंतन लिखने के लिए दबाएं",
+      "remindersTitle": "स्मरण",
+      "remindersNoneSet": "कोई नहीं",
+      "reminderSaving": "सहेजा जा रहा है…",
+      "back": "वापस",
+      "supportLink": "सहायता लें",
+      "liveSessionLabel": "सत्संग",
+      "liveSessionTapToJoin": "जुड़ने के लिए दबाएं",
+      "copy": "लिंक कॉपी करें",
+      "copied": "कॉपी हो गया!",
+      "dayComplete": "दिन {{n}} पूर्ण!",
+      "completionSub": "पुनः करने के लिए किसी अभ्यास पर दबाएं",
+      "progressHint": "{{total}} में से {{done}} पूर्ण",
+      "alertTitle": "सहायता",
+      "alertBody": "अपने कार्यक्रम के बारे में सहायता के लिए हमारे सहायता पृष्ठ पर जाएं।",
+      "alertOk": "ठीक है",
+      "errorNextDayLocked": "अगला दिन कल उपलब्ध होगा।",
+      "errorPrevDayIncomplete": "पहले पिछला दिन पूरा करें।",
+      "errorDayNotFound": "यह दिन नहीं मिला।",
+      "errorLoadFailed": "लोड नहीं हो सका। फिर से प्रयास करें।",
+      "errorGeneric": "कुछ समस्या आई।"
+    }
+  },
+  "programCard": {
+    "label": "साधना कार्यक्रम",
+    "day": "दिन {{n}}",
+    "dayContinue": "दिन {{n}} · साधना जारी रखें",
+    "dayMissed": "दिन {{n}} छूटा · अभी पूरा करें",
+    "dayCompletedLocked": "दिन {{n}} पूर्ण ✓ · दिन {{next}} कल उपलब्ध होगा",
+    "complete": "पूर्ण · अगला पथ चुनें",
+    "chooseNextStep": "अगला पथ चुनें →",
+    "unlocksTomorrow": "कल उपलब्ध होगा",
+    "statusCompleted": "पूर्ण",
+    "statusToday": "आज",
+    "statusMissed": "छूटा",
+    "statusLater": "बाद में किया"
   }
 }

@@ -7,6 +7,7 @@
  */
 import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   LayoutAnimation,
   Platform,
@@ -27,13 +28,12 @@ interface ProgramCardProps {
   program: ActiveProgramSummary;
 }
 
-function lockedHint(unlockDate: string): string {
+function isUnlocksTomorrow(unlockDate: string): boolean {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const target = new Date(unlockDate + "T00:00:00");
   const diffDays = Math.round((target.getTime() - today.getTime()) / 86400000);
-  if (diffDays === 1) return "Unlocks tomorrow";
-  return "";
+  return diffDays === 1;
 }
 
 function getDayIcon(s: DayStatus) {
@@ -54,6 +54,7 @@ function getDayLabelStyle(s: DayStatus) {
 
 export default function ProgramCard({ program }: ProgramCardProps) {
   const navigation = useNavigation<any>();
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
   const isCompleted = program.status === "completed" && program.show_day8_transition;
@@ -74,23 +75,23 @@ export default function ProgramCard({ program }: ProgramCardProps) {
   // Build subtitle
   let subtitle: string;
   if (isCompleted) {
-    subtitle = "Complete · Choose your next step";
+    subtitle = t("programCard.complete");
   } else if (days.length > 0) {
     const firstMissed = days.find((d) => d.status === "missed");
     const todayDay = days.find((d) => d.status === "today");
     if (firstMissed) {
-      subtitle = `Day ${firstMissed.day_number} missed · Complete it now`;
+      subtitle = t("programCard.dayMissed", { n: firstMissed.day_number });
     } else if (todayDay) {
-      subtitle = `Day ${todayDay.day_number} · Continue your practice`;
+      subtitle = t("programCard.dayContinue", { n: todayDay.day_number });
     } else {
-      subtitle = `Day ${program.current_day + 1} · Continue your practice`;
+      subtitle = t("programCard.dayContinue", { n: program.current_day + 1 });
     }
   } else {
     // Legacy fallback (no day_statuses from API yet)
     const isNextDayLocked = !isCompleted && !!program.next_day_locked;
     subtitle = isNextDayLocked
-      ? `Day ${program.current_day} Complete ✓ · Day ${program.current_day + 1} unlocks tomorrow`
-      : `Day ${program.current_day + 1} · Continue your practice`;
+      ? t("programCard.dayCompletedLocked", { n: program.current_day, next: program.current_day + 1 })
+      : t("programCard.dayContinue", { n: program.current_day + 1 });
   }
 
   return (
@@ -104,7 +105,7 @@ export default function ProgramCard({ program }: ProgramCardProps) {
         testID="program_card"
       >
         <View style={styles.headerLeft}>
-          <Text style={styles.label}>PRACTICE PROGRAM</Text>
+          <Text style={styles.label}>{t("programCard.label")}</Text>
           <Text style={styles.name} numberOfLines={1}>
             {program.name}
           </Text>
@@ -135,22 +136,22 @@ export default function ProgramCard({ program }: ProgramCardProps) {
                     </View>
                     <View style={styles.dayMid}>
                       <Text style={[styles.dayLabel, getDayLabelStyle(day.status)]}>
-                        Day {day.day_number}
+                        {t("programCard.day", { n: day.day_number })}
                       </Text>
                       {day.status === "completed" && (
-                        <Text style={styles.dayHintDone}>Completed</Text>
+                        <Text style={styles.dayHintDone}>{t("programCard.statusCompleted")}</Text>
                       )}
                       {day.status === "today" && (
-                        <Text style={styles.dayHintToday}>Today</Text>
+                        <Text style={styles.dayHintToday}>{t("programCard.statusToday")}</Text>
                       )}
                       {day.status === "missed" && (
-                        <Text style={styles.dayHintMissed}>Missed</Text>
+                        <Text style={styles.dayHintMissed}>{t("programCard.statusMissed")}</Text>
                       )}
                       {day.status === "completed_later" && (
-                        <Text style={styles.dayHintLate}>Done on a later day</Text>
+                        <Text style={styles.dayHintLate}>{t("programCard.statusLater")}</Text>
                       )}
-                      {day.status === "locked" && idx === firstLockedIdx && !!lockedHint(day.unlock_date) && (
-                        <Text style={styles.dayHint}>{lockedHint(day.unlock_date)}</Text>
+                      {day.status === "locked" && idx === firstLockedIdx && isUnlocksTomorrow(day.unlock_date) && (
+                        <Text style={styles.dayHint}>{t("programCard.unlocksTomorrow")}</Text>
                       )}
                     </View>
                     {tappable && <Text style={styles.dayArrow}>→</Text>}
@@ -189,10 +190,10 @@ export default function ProgramCard({ program }: ProgramCardProps) {
                           !done && !active && styles.dayLabelLocked,
                         ]}
                       >
-                        Day {dayNum}
+                        {t("programCard.day", { n: dayNum })}
                       </Text>
                       {!done && !active && dayNum === program.current_day + 1 && program.next_day_locked && (
-                        <Text style={styles.dayHint}>Unlocks tomorrow</Text>
+                        <Text style={styles.dayHint}>{t("programCard.unlocksTomorrow")}</Text>
                       )}
                     </View>
                     {tappable && <Text style={styles.dayArrow}>→</Text>}
@@ -206,7 +207,7 @@ export default function ProgramCard({ program }: ProgramCardProps) {
               activeOpacity={0.85}
               style={styles.nextStepRow}
             >
-              <Text style={styles.nextStepText}>Choose your next step →</Text>
+              <Text style={styles.nextStepText}>{t("programCard.chooseNextStep")}</Text>
             </TouchableOpacity>
           )}
         </View>

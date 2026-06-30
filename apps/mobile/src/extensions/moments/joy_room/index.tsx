@@ -59,6 +59,7 @@ import store from "../../../store";
 import { screenActions } from "../../../store/screenSlice";
 import { Fonts } from "../../../theme/fonts";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 /**
  * Read a slot from screenData.joy_room with null-safe "" fallback.
@@ -92,6 +93,7 @@ interface Props {
 }
 
 const JoyRoomContainer: React.FC<Props> = () => {
+  const { i18n } = useTranslation();
   const { screenData, loadScreen, goBack } = useScreenStore();
   const updateBackground = useScreenStore(
     (state: any) => state.updateBackground,
@@ -377,7 +379,7 @@ You’re exactly where you need to be right now.`;
       return;
     }
     try {
-      const resp = await mitraLibrarySearch(itemId, "mantra");
+      const resp = await mitraLibrarySearch(itemId, "mantra", i18n.language || "en");
       const mantra = (resp?.results || []).find(
         (r: any) => (r?.itemId ?? r?.item_id) === itemId,
       );

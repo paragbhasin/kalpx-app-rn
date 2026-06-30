@@ -23,6 +23,7 @@ import {
 import { invalidateJourneyStatusCache } from "../../hooks/useJourneyStatus";
 import { invalidateJourneyEntryViewCache } from "../../hooks/useJourneyEntryView";
 import "./Auth.css";
+import { useTranslation } from '../../lib/i18n';
 
 /**
  * SignupPage — Enhanced Registration Page
@@ -36,6 +37,7 @@ import "./Auth.css";
 
 export function SignupPage() {
   useRecaptcha();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [searchParams] = useSearchParams();
@@ -168,7 +170,7 @@ export function SignupPage() {
 
   const handleRequestOTP = async () => {
     if (!email) {
-      setError("Email is required");
+      setError(t('auth.emailRequired'));
       return;
     }
     setOtpLoading(true);
@@ -177,16 +179,16 @@ export function SignupPage() {
     setOtpLoading(false);
     if (result.success) {
       setOtpSent(true);
-      setOtpSuccessMsg("OTP sent to your email");
+      setOtpSuccessMsg(t('auth.otpSent'));
       setCooldown(60);
     } else {
-      setError(result.error || "Failed to send OTP");
+      setError(result.error || t('auth.otpFailed'));
     }
   };
 
   const handleVerifyOTP = async () => {
     if (!otp) {
-      setError("Please enter OTP");
+      setError(t('auth.otpRequired'));
       return;
     }
     setOtpLoading(true);
@@ -195,21 +197,21 @@ export function SignupPage() {
     setOtpLoading(false);
     if (result.success) {
       setOtpVerified(true);
-      setOtpSuccessMsg("OTP Verified");
+      setOtpSuccessMsg(t('auth.otpVerified'));
       setOtpValidFor(120);
     } else {
-      setError(result.error || "Invalid OTP");
+      setError(result.error || t('auth.otpInvalid'));
     }
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!otpVerified) {
-      setError("Please verify your email first");
+      setError(t('auth.verifyEmailFirst'));
       return;
     }
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t('auth.passwordsNoMatch'));
       return;
     }
 
@@ -225,10 +227,10 @@ export function SignupPage() {
 
     if (result.success) {
       try { navigator.sendBeacon('/api/programs/track/', JSON.stringify({ event: 'signup_completed', method: 'email' })); } catch { /* non-fatal */ }
-      dispatch(showSnackBar("Account created successfully! Welcome to KalpX."));
+      dispatch(showSnackBar(t('auth.accountCreated')));
       navigate(returnTo);
     } else {
-      setError(result.error || "Registration failed");
+      setError(result.error || t('auth.registrationFailed'));
     }
   };
 
@@ -244,7 +246,7 @@ export function SignupPage() {
         <div className="auth-grid">
           <section className="auth-panel form-panel">
             <div className="auth-header">
-              <h2 className="auth-title">Create Your Account</h2>
+              <h2 className="auth-title">{t('auth.createAccount')}</h2>
             </div>
 
             {WEB_ENV.phoneAuthEnabled === "1" && (
@@ -272,7 +274,7 @@ export function SignupPage() {
             <form onSubmit={handleRegister} className="auth-form">
               {/* Email */}
               <div className="form-group">
-                <label htmlFor="email">Email</label>
+                <label htmlFor="email">{t('auth.email')}</label>
                 <div className="input-wrapper">
                   <Mail className="input-icon" size={18} />
                   <input
@@ -280,7 +282,7 @@ export function SignupPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
+                    placeholder={t('auth.emailPlaceholder')}
                     required
                     disabled={otpVerified}
                   />
@@ -289,7 +291,7 @@ export function SignupPage() {
 
               {/* Username */}
               <div className="form-group">
-                <label htmlFor="username">Username</label>
+                <label htmlFor="username">{t('auth.username')}</label>
                 <div className="input-wrapper">
                   <User className="input-icon" size={18} />
                   <input
@@ -297,7 +299,7 @@ export function SignupPage() {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Choose a username"
+                    placeholder={t('auth.usernamePlaceholder')}
                     required
                   />
                   {usernameLoading && (
@@ -305,14 +307,14 @@ export function SignupPage() {
                   )}
                 </div>
                 {usernameAvailable === true && (
-                  <p className="success-text">Username is available</p>
+                  <p className="success-text">{t('auth.usernameAvailable')}</p>
                 )}
                 {usernameError && <p className="error-text">{usernameError}</p>}
               </div>
 
               {/* Password */}
               <div className="form-group">
-                <label htmlFor="password">Password</label>
+                <label htmlFor="password">{t('auth.password')}</label>
                 <div className="input-wrapper">
                   <Lock className="input-icon" size={18} />
                   <input
@@ -320,7 +322,7 @@ export function SignupPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
+                    placeholder={t('auth.passwordPlaceholder')}
                     required
                   />
                 </div>
@@ -328,19 +330,19 @@ export function SignupPage() {
                 <ul className="password-rules">
                   <RuleItem
                     valid={validations.minLength}
-                    text="At least 8 characters"
+                    text={t('auth.passwordMin')}
                   />
                   <RuleItem
                     valid={validations.hasNumber}
-                    text="At least a number"
+                    text={t('auth.passwordNumber')}
                   />
                   <RuleItem
                     valid={validations.hasLetter}
-                    text="At least a letter"
+                    text={t('auth.passwordLetter')}
                   />
                   <RuleItem
                     valid={validations.noUserOrEmail}
-                    text="Not Your username/email"
+                    text={t('auth.passwordNotUsername')}
                   />
                 </ul>
 
@@ -354,7 +356,7 @@ export function SignupPage() {
 
               {/* Confirm Password */}
               <div className="form-group">
-                <label htmlFor="confirmPassword">Confirm Password</label>
+                <label htmlFor="confirmPassword">{t('auth.confirmPassword')}</label>
                 <div className="input-wrapper">
                   <ShieldCheck className="input-icon" size={18} />
                   <input
@@ -362,20 +364,20 @@ export function SignupPage() {
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Re-enter your password"
+                    placeholder={t('auth.confirmPasswordPlaceholder')}
                     required
                   />
                 </div>
                 {password &&
                   confirmPassword &&
                   password !== confirmPassword && (
-                    <p className="error-text">Passwords do not match</p>
+                    <p className="error-text">{t('auth.passwordsNoMatch')}</p>
                   )}
               </div>
 
               {/* OTP Section */}
               <div className="form-group otp-section">
-                <label htmlFor="otp">Verification Code</label>
+                <label htmlFor="otp">{t('auth.verificationCode')}</label>
                 <div className="otp-controls">
                   <div className="input-wrapper">
                     <input
@@ -383,7 +385,7 @@ export function SignupPage() {
                       type="text"
                       value={otp}
                       onChange={(e) => setOtp(e.target.value)}
-                      placeholder="Enter OTP"
+                      placeholder={t('auth.otpPlaceholder')}
                       disabled={otpVerified}
                       className={otpVerified ? "verified" : ""}
                     />
@@ -405,16 +407,16 @@ export function SignupPage() {
                     {otpLoading ? (
                       <Loader2 className="spinner" size={16} />
                     ) : otpVerified ? (
-                      "Verified"
+                      t('auth.otpVerified')
                     ) : otpSent ? (
-                      "Verify Code"
+                      t('auth.verifyCode')
                     ) : (
-                      "Get Code"
+                      t('auth.getCode')
                     )}
                   </button>
                 </div>
                 {cooldown > 0 && !otpVerified && (
-                  <p className="cooldown-text">Resend in {cooldown}s</p>
+                  <p className="cooldown-text">{t('auth.resendIn').replace('{s}', String(cooldown))}</p>
                 )}
                 {otpSuccessMsg && (
                   <p className="success-text">{otpSuccessMsg}</p>
@@ -423,7 +425,7 @@ export function SignupPage() {
                   <p
                     className={`otp-expiry ${otpValidFor < 30 ? "urgent" : ""}`}
                   >
-                    Expires in {otpValidFor}s
+                    {t('auth.expiresIn').replace('{s}', String(otpValidFor))}
                   </p>
                 )}
               </div>
@@ -438,7 +440,7 @@ export function SignupPage() {
                 {loading ? (
                   <Loader2 className="spinner mr-2" size={18} />
                 ) : (
-                  "Register"
+                  t('auth.register')
                 )}
               </button>
 
@@ -463,7 +465,7 @@ export function SignupPage() {
               </p>
 
               <div className="auth-footer">
-                Already have an account? <Link to="/login">Login</Link>
+                <Link to="/login">{t('auth.alreadyHaveAccount')}</Link>
               </div>
             </form>
             )}

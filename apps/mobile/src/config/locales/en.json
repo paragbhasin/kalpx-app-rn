@@ -277,6 +277,51 @@
     "intentPlaceholder": "Share your intent…",
     "nextStep": "Take the Next Step"
   },
+  "programs": {
+    "day": {
+      "errorNextDayLocked": "Today's practice is complete. Come back tomorrow for the next day.",
+      "errorPrevDayIncomplete": "Complete the previous day first.",
+      "errorDayNotFound": "Day not found in your program.",
+      "errorLoadFailed": "Couldn't load today's practice. Please try again.",
+      "errorGeneric": "Something went wrong.",
+      "back": "← Back",
+      "dayLabel": "DAY {{n}}",
+      "wisdomLabel": "WISDOM OF THE DAY",
+      "label_mantra": "Mantra",
+      "label_sankalp": "Sankalp",
+      "label_practice": "Practice",
+      "liveSessionLabel": "LIVE SESSION",
+      "liveSessionTapToJoin": "Tap to join →",
+      "copied": "Copied!",
+      "copy": "Copy",
+      "reflectionLabel": "REFLECTION",
+      "reflectionHint": "Tap to write your reflection →",
+      "remindersTitle": "Reminders",
+      "remindersNoneSet": "None set",
+      "reminder_mantra": "Mantra reminder",
+      "reminder_sankalp": "Sankalp reminder",
+      "reminder_practice": "Practice reminder",
+      "reminderSaving": "Saving…",
+      "dayComplete": "Day {{n}} Complete ✓",
+      "completionSub": "Tap any practice to do it again",
+      "progressHint": "{{done}}/{{total}} done — complete all to finish the day",
+      "alertTitle": "Need help?",
+      "alertBody": "Visit kalpx.com/programs/support for help with your program.",
+      "alertOk": "OK",
+      "supportLink": "Need help? Get support →"
+    },
+    "reflection": {
+      "defaultPrompt": "Take a moment. What shifted in you today — even slightly? Notice it without judgement.",
+      "heading": "Reflection",
+      "subtitle": "Take a quiet moment to reflect on today's journey.",
+      "questionLabel": "QUESTION",
+      "inputPlaceholder": "Write your thoughts here...",
+      "savedButton": "✓ Reflection Saved",
+      "saveButton": "Save Reflection",
+      "goToHome": "Go to Home",
+      "backToDay": "Back to Day"
+    }
+  },
   "room": {
     "actions": {
       "addAnother": "Add another",

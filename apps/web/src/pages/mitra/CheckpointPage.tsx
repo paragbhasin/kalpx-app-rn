@@ -25,7 +25,7 @@ type CheckpointLoadResult = {
   notReady: boolean;
 };
 
-const checkpointLoadCache = new Map<number, Promise<CheckpointLoadResult>>();
+const checkpointLoadCache = new Map<string, Promise<CheckpointLoadResult>>();
 
 export function CheckpointPage() {
   const { day } = useParams<{ day: string }>();
@@ -33,8 +33,17 @@ export function CheckpointPage() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const screenState = useScreenState();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [loadState, setLoadState] = useState<LoadState>('loading');
+
+  useEffect(() => {
+    function handleLocaleChange() {
+      checkpointLoadCache.clear();
+      setLoadState('loading');
+    }
+    window.addEventListener('kalpx:locale-changed', handleLocaleChange);
+    return () => window.removeEventListener('kalpx:locale-changed', handleLocaleChange);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -42,7 +51,8 @@ export function CheckpointPage() {
     async function load() {
       setLoadState('loading');
       try {
-        const existing = checkpointLoadCache.get(dayNum);
+        const cacheKey = `${dayNum}:${locale}`;
+        const existing = checkpointLoadCache.get(cacheKey);
         const request = existing ?? (async (): Promise<CheckpointLoadResult> => {
           if (dayNum === 7) {
             const env = await mitraJourneyDay7View();
@@ -68,9 +78,9 @@ export function CheckpointPage() {
         })();
 
         if (!existing) {
-          checkpointLoadCache.set(dayNum, request);
+          checkpointLoadCache.set(cacheKey, request);
           request.finally(() => {
-            checkpointLoadCache.delete(dayNum);
+            checkpointLoadCache.delete(cacheKey);
           });
         }
 
@@ -100,7 +110,7 @@ export function CheckpointPage() {
 
     load();
     return () => { cancelled = true; };
-  }, [dayNum, dispatch]);
+  }, [dayNum, locale, dispatch]);
 
   const actionContext = {
     dispatch,

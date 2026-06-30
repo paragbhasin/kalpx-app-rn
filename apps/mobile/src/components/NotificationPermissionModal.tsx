@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useTranslation } from 'react-i18next';
 import { Colors } from '../theme/colors';
 import { Fonts } from '../theme/fonts';
 import { mitraTrackEvent } from '../engine/mitraApi';
@@ -21,30 +22,15 @@ interface Props {
   onDismiss: () => void;
 }
 
-const COPY = {
-  undetermined: {
-    title: 'Turn on notifications',
-    body: 'Get gentle reminders for your mantra and daily rhythm.',
-    primaryCta: 'Turn On',
-    secondaryCta: 'Not Now',
-  },
-  denied: {
-    title: 'Notifications are off',
-    body: 'Allow notifications in Settings to receive gentle reminders.',
-    primaryCta: 'Open Settings',
-    secondaryCta: 'Not Now',
-  },
-} as const;
-
 export default function NotificationPermissionModal({
   visible,
   permissionStatus,
   onAllow,
   onDismiss,
 }: Props) {
+  const { t } = useTranslation();
   const slideAnim = useRef(new Animated.Value(80)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const copy = COPY[permissionStatus] ?? COPY.undetermined;
 
   useEffect(() => {
     if (visible) {
@@ -90,11 +76,11 @@ export default function NotificationPermissionModal({
             <View style={styles.iconWrap}>
               <Ionicons name="notifications-outline" size={18} color={Colors.goldBright} />
             </View>
-            <Text style={styles.title}>{copy.title}</Text>
+            <Text style={styles.title}>{t(`notificationPermission.${permissionStatus}.title`)}</Text>
           </View>
 
           {/* Body */}
-          <Text style={styles.body}>{copy.body}</Text>
+          <Text style={styles.body}>{t(`notificationPermission.${permissionStatus}.body`)}</Text>
 
           {/* Buttons */}
           <View style={styles.btnRow}>
@@ -103,7 +89,7 @@ export default function NotificationPermissionModal({
               activeOpacity={0.7}
               style={styles.secondaryBtn}
             >
-              <Text style={styles.secondaryBtnText}>{copy.secondaryCta}</Text>
+              <Text style={styles.secondaryBtnText}>{t(`notificationPermission.${permissionStatus}.secondaryCta`)}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -111,7 +97,7 @@ export default function NotificationPermissionModal({
               activeOpacity={0.82}
               style={styles.primaryBtn}
             >
-              <Text style={styles.primaryBtnText}>{copy.primaryCta}</Text>
+              <Text style={styles.primaryBtnText}>{t(`notificationPermission.${permissionStatus}.primaryCta`)}</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>

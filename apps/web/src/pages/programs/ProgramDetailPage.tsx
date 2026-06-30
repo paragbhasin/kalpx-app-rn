@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useParams, Link } from 'react-router-dom';
 import { WEB_ENV } from '../../lib/env';
+import { useTranslation } from '../../lib/i18n';
 import { AppShell } from '../../components/ui/AppShell';
 import { GuideChip } from '../../components/GuideChip';
 import {
@@ -31,6 +32,7 @@ function safeHref(url: string | null | undefined): string | null {
 
 export function ProgramDetailPage() {
   const { slug } = useParams<{ slug: string }>();
+  const { t } = useTranslation();
   const [state, setState] = useState<LoadState>({ kind: 'loading' });
 
   useEffect(() => {
@@ -97,7 +99,7 @@ export function ProgramDetailPage() {
             textDecoration: 'none',
           }}
         >
-          ← All Programs
+          {t('programDetail.allPrograms')}
         </Link>
 
         {state.kind === 'loading' && <LoadingState />}
@@ -114,8 +116,9 @@ export function ProgramDetailPage() {
 // ── Load states ───────────────────────────────────────────────────────────────
 
 function LoadingState() {
+  const { t } = useTranslation();
   return (
-    <div style={{ textAlign: 'center', paddingTop: 80 }} aria-busy="true" aria-live="polite" aria-label="Loading program">
+    <div style={{ textAlign: 'center', paddingTop: 80 }} aria-busy="true" aria-live="polite" aria-label={t('programDetail.loading')}>
       <div
         style={{
           width: 40,
@@ -127,29 +130,31 @@ function LoadingState() {
           margin: '0 auto 16px',
         }}
       />
-      <p style={{ color: 'var(--kalpx-text-muted)', fontSize: 14 }}>Loading program…</p>
+      <p style={{ color: 'var(--kalpx-text-muted)', fontSize: 14 }}>{t('programDetail.loading')}</p>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
 
 function NotFoundState() {
+  const { t } = useTranslation();
   return (
     <div style={{ textAlign: 'center', paddingTop: 80 }}>
-      <p style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>Program not found</p>
+      <p style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>{t('programDetail.notFoundTitle')}</p>
       <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14 }}>
-        This program link is no longer valid.
+        {t('programDetail.notFoundBody')}
       </p>
     </div>
   );
 }
 
 function ErrorState() {
+  const { t } = useTranslation();
   return (
     <div style={{ textAlign: 'center', paddingTop: 80 }}>
-      <p style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>Something went wrong</p>
+      <p style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>{t('programDetail.errorTitle')}</p>
       <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14 }}>
-        Please refresh or{' '}
+        {t('programDetail.errorBodyPrefix')}{' '}
         <a
           href="https://kalpx.com/support"
           target="_blank"
@@ -157,7 +162,7 @@ function ErrorState() {
           aria-label="Contact KalpX support (opens in new tab)"
           style={{ color: 'var(--kalpx-gold)' }}
         >
-          contact support
+          {t('programDetail.errorContactLink')}
         </a>
         .
       </p>
@@ -174,6 +179,7 @@ function ProgramBody({
   program: TLPProgramDetail;
   testimonials: ProgramTestimonial[];
 }) {
+  const { t } = useTranslation();
   const [guideBioExpanded, setGuideBioExpanded] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
 
@@ -240,7 +246,7 @@ function ProgramBody({
             letterSpacing: '0.04em',
           }}
         >
-          {program.program_type ? program.program_type.toUpperCase() : 'PRACTICE PROGRAM'}
+          {program.program_type ? program.program_type.toUpperCase() : t('programDetail.defaultProgramType')}
         </p>
 
         <h1
@@ -256,7 +262,7 @@ function ProgramBody({
         </h1>
 
         <p style={{ fontSize: 14, color: 'var(--kalpx-text-soft)', lineHeight: 1.6 }}>
-          A {program.duration_days}-day practice offered by {guideName} · Powered by KalpX
+          {t('programDetail.heroDays').replace('{days}', String(program.duration_days)).replace('{guide}', guideName)}
         </p>
       </header>
 
@@ -271,7 +277,7 @@ function ProgramBody({
               marginBottom: 10,
             }}
           >
-            What to expect
+            {t('programDetail.whatToExpect')}
           </h2>
           <p
             style={{
@@ -297,7 +303,7 @@ function ProgramBody({
               marginBottom: 12,
             }}
           >
-            {program.duration_days}-Day Overview
+            {t('programDetail.dayOverview').replace('{days}', String(program.duration_days))}
           </h2>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {program.day_themes.map((theme, i) => (
@@ -320,7 +326,7 @@ function ProgramBody({
                     fontSize: 11,
                   }}
                 >
-                  Day {i + 1}
+                  {t('programDetail.dayLabel').replace('{n}', String(i + 1))}
                 </span>
                 {theme}
               </span>
@@ -347,7 +353,7 @@ function ProgramBody({
               marginBottom: 14,
             }}
           >
-            About the Guide
+            {t('programDetail.aboutGuide')}
           </h2>
 
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 12 }}>
@@ -383,7 +389,7 @@ function ProgramBody({
                     fontWeight: 500,
                   }}
                 >
-                  {guideBioExpanded ? 'Show less' : 'Read more'}
+                  {guideBioExpanded ? t('programDetail.showLess') : t('programDetail.readMore')}
                 </button>
               )}
             </div>
@@ -430,7 +436,7 @@ function ProgramBody({
             marginBottom: 8,
           }}
         >
-          YOUR INVITE CODE
+          {t('programDetail.yourInviteCode')}
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
           <code
@@ -458,7 +464,7 @@ function ProgramBody({
               fontWeight: 500,
             }}
           >
-            {codeCopied ? 'Copied!' : 'Copy'}
+            {codeCopied ? t('programDetail.copied') : t('programDetail.copy')}
           </button>
         </div>
 
@@ -479,7 +485,7 @@ function ProgramBody({
           />
         </div>
         <p style={{ fontSize: 12, color: 'var(--kalpx-text-muted)', textAlign: 'center', marginBottom: 16 }}>
-          Scan to join on mobile
+          {t('programDetail.scanToJoin')}
         </p>
 
         {/* CTA buttons */}
@@ -499,7 +505,7 @@ function ProgramBody({
               textDecoration: 'none',
             }}
           >
-            Join Program →
+            {t('programDetail.joinProgram')}
           </Link>
           <a
             href={deepLinkUrl}
@@ -516,7 +522,7 @@ function ProgramBody({
               textDecoration: 'none',
             }}
           >
-            Open KalpX
+            {t('programDetail.openKalpX')}
           </a>
         </div>
 
@@ -529,7 +535,7 @@ function ProgramBody({
             aria-label="Download KalpX on the App Store"
             style={storeButtonStyle}
           >
-            App Store
+            {t('programDetail.appStore')}
           </a>
           <a
             href={playStoreUrl}
@@ -538,7 +544,7 @@ function ProgramBody({
             aria-label="Get KalpX on Google Play"
             style={storeButtonStyle}
           >
-            Google Play
+            {t('programDetail.googlePlay')}
           </a>
         </div>
       </section>
@@ -560,7 +566,7 @@ function ProgramBody({
               marginBottom: 8,
             }}
           >
-            Need help?
+            {t('programDetail.needHelp')}
           </p>
           <a
             href={supportHref}
@@ -569,7 +575,7 @@ function ProgramBody({
             aria-label={`Get help with ${program.name}`}
             style={{ color: 'var(--kalpx-gold)', fontSize: 14, textDecoration: 'underline' }}
           >
-            Contact support →
+            {t('programDetail.contactSupport')}
           </a>
         </section>
       )}
@@ -585,10 +591,10 @@ function ProgramBody({
               marginBottom: 16,
             }}
           >
-            What participants say
+            {t('programDetail.participantsSay')}
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {visibleTestimonials.map((t, i) => (
+            {visibleTestimonials.map((testimonial, i) => (
               <blockquote
                 key={i}
                 style={{
@@ -608,24 +614,24 @@ function ProgramBody({
                     fontStyle: 'italic',
                   }}
                 >
-                  &ldquo;{t.testimonial_text}&rdquo;
+                  &ldquo;{testimonial.testimonial_text}&rdquo;
                 </p>
                 <footer style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <span
                     style={{ fontSize: 12, fontWeight: 600, color: 'var(--kalpx-text)' }}
                   >
-                    {t.display_name}
+                    {testimonial.display_name}
                   </span>
-                  {t.source_day !== null && (
+                  {testimonial.source_day !== null && (
                     <span style={{ fontSize: 11, color: 'var(--kalpx-text-muted)' }}>
-                      · Day {t.source_day}
+                      {t('programDetail.testimonialDay').replace('{n}', String(testimonial.source_day))}
                     </span>
                   )}
                   <span
                     style={{ fontSize: 11, color: 'var(--kalpx-gold)', marginLeft: 'auto' }}
-                    aria-label={`${Math.min(5, Math.max(1, t.rating))} out of 5 stars`}
+                    aria-label={`${Math.min(5, Math.max(1, testimonial.rating))} out of 5 stars`}
                   >
-                    {'★'.repeat(Math.min(5, Math.max(1, t.rating)))}
+                    {'★'.repeat(Math.min(5, Math.max(1, testimonial.rating)))}
                   </span>
                 </footer>
               </blockquote>

@@ -6,7 +6,7 @@ import { Dropdown } from "react-native-element-dropdown";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../store";
 import { ENABLED_LOCALES } from "../config/i18n";
-import { mitraJourneyDailyView } from "../engine/mitraApi";
+import { mitraJourneyDailyView, mitraJourneyHomeV3, invalidateHomeV3Cache } from "../engine/mitraApi";
 import { ingestDailyView } from "../engine/v3Ingest";
 import { screenActions } from "../store/screenSlice";
 import Colors from "./Colors";
@@ -41,6 +41,8 @@ const Header: React.FC<HeaderProps> = ({ isTransparent, backgroundColor }) => {
   const changeLanguage = (code: string) => {
     setSelectedLang(code);
     i18n.changeLanguage(code);
+    invalidateHomeV3Cache();
+    mitraJourneyHomeV3({ forceFresh: true, locale: code }).catch(() => {});
     // Re-fetch daily-view content with new locale so runner_active_item
     // and triad data reflect the selected language immediately.
     mitraJourneyDailyView(null, code).then((result) => {
@@ -103,10 +105,21 @@ const Header: React.FC<HeaderProps> = ({ isTransparent, backgroundColor }) => {
         />
       </TouchableOpacity>
 
-      {/* Language Dropdown — commented out */}
-      {/* <View style={styles.dropdownContainer}>
-        <Dropdown ... />
-      </View> */}
+      {/* Language Dropdown */}
+      <View style={styles.dropdownContainer}>
+        <Dropdown
+          data={languages}
+          labelField="label"
+          valueField="value"
+          value={selectedLang}
+          onChange={(item) => changeLanguage(item.value)}
+          style={styles.dropdown}
+          selectedTextStyle={styles.selectedText}
+          placeholderStyle={styles.placeholder}
+          itemTextStyle={styles.dropdownItemText}
+          containerStyle={styles.dropdownListContainer}
+        />
+      </View>
     </View>
   );
 };
@@ -125,36 +138,40 @@ const styles = StyleSheet.create({
     height: 38,
   },
   dropdownContainer: {
-    width: 120,
+    width: 110,
     justifyContent: "center",
   },
   dropdownListContainer: {
-    width: 140,
+    width: 130,
     borderRadius: 8,
+    borderColor: "#CA8A04",
+    borderWidth: 0.8,
+    backgroundColor: "#FDF8EE",
   },
   dropdown: {
-    height: 30, // reduced from 32 ➜ smaller height
-    borderColor: "#BDC4CD",
-    borderWidth: 0.6,
+    height: 28,
+    borderColor: "#CA8A04",
+    borderWidth: 0.8,
     borderRadius: 6,
-    paddingHorizontal: 6,
-    backgroundColor: "rgba(255, 255, 255, 0.5)",
+    paddingHorizontal: 8,
+    backgroundColor: "transparent",
   },
   selectedText: {
-    color: "#000000",
-    fontSize: 14, // smaller text for compact fit
+    color: "#7A5C1E",
+    fontSize: 13,
+    fontWeight: "500",
   },
   placeholder: {
-    color: "#96A0AD",
-    fontSize: 14,
+    color: "#CA8A04",
+    fontSize: 13,
   },
   itemText: {
     fontSize: 14,
-    color: "#000",
+    color: "#7A5C1E",
   },
   dropdownItemText: {
-    color: "#000000", // color of list items
-    fontSize: 16,
+    color: "#7A5C1E",
+    fontSize: 14,
   },
 });
 

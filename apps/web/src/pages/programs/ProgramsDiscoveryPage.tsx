@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AppShell } from '../../components/ui/AppShell';
 import { fetchPrograms, type TLPProgram } from '../../engine/liveSessionApi';
 import { ProgramCard } from '../../components/ProgramCard';
+import { useTranslation } from '../../lib/i18n';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -34,6 +35,7 @@ const LANGUAGES: { key: Language; label: string }[] = [
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export function ProgramsDiscoveryPage() {
+  const { t } = useTranslation();
   const [state, setState] = useState<LoadState>({ kind: 'loading' });
   const [selectedCategory, setSelectedCategory] = useState<Category>('all');
   const [selectedLanguage, setSelectedLanguage] = useState<Language>('all');
@@ -124,7 +126,7 @@ export function ProgramsDiscoveryPage() {
             marginBottom: 12,
           }}
         >
-          {CATEGORIES.map(({ key, label }) => (
+          {CATEGORIES.map(({ key }) => (
             <button
               key={key}
               aria-pressed={selectedCategory === key}
@@ -144,7 +146,7 @@ export function ProgramsDiscoveryPage() {
                 cursor: 'pointer',
               }}
             >
-              {label}
+              {t(`programsDiscovery.categories.${key}`)}
             </button>
           ))}
         </div>
@@ -159,7 +161,7 @@ export function ProgramsDiscoveryPage() {
             marginBottom: 28,
           }}
         >
-          {LANGUAGES.map(({ key, label }) => (
+          {LANGUAGES.map(({ key }) => (
             <button
               key={key}
               aria-pressed={selectedLanguage === key}
@@ -179,7 +181,7 @@ export function ProgramsDiscoveryPage() {
                 cursor: 'pointer',
               }}
             >
-              {label}
+              {t(`programsDiscovery.languages.${key}`)}
             </button>
           ))}
         </div>
@@ -199,6 +201,7 @@ export function ProgramsDiscoveryPage() {
 // ── States ────────────────────────────────────────────────────────────────────
 
 function LoadingState() {
+  const { t } = useTranslation();
   return (
     <div style={{ textAlign: 'center', paddingTop: 80 }} aria-busy="true" aria-live="polite" aria-label="Loading programs">
       <div
@@ -212,18 +215,19 @@ function LoadingState() {
           margin: '0 auto 16px',
         }}
       />
-      <p style={{ color: 'var(--kalpx-text-muted)', fontSize: 14 }}>Loading programs…</p>
+      <p style={{ color: 'var(--kalpx-text-muted)', fontSize: 14 }}>{t('programsDiscovery.loading')}</p>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
 
 function ErrorState() {
+  const { t } = useTranslation();
   return (
     <div style={{ textAlign: 'center', paddingTop: 80 }}>
-      <p style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>Something went wrong</p>
+      <p style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>{t('programsDiscovery.errorTitle')}</p>
       <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14 }}>
-        Please refresh the page or{' '}
+        {t('programsDiscovery.errorBodyPrefix')}
         <a
           href="https://kalpx.com/support"
           target="_blank"
@@ -231,7 +235,7 @@ function ErrorState() {
           aria-label="Contact KalpX support (opens in new tab)"
           style={{ color: 'var(--kalpx-gold)' }}
         >
-          contact support
+          {t('programsDiscovery.errorBodyLink')}
         </a>
         .
       </p>
@@ -240,14 +244,15 @@ function ErrorState() {
 }
 
 function EmptyState({ filtered }: { filtered: boolean }) {
+  const { t } = useTranslation();
   return (
     <div style={{ textAlign: 'center', paddingTop: 80 }}>
       <p style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>
-        {filtered ? 'No programs found in this category.' : 'No programs available right now'}
+        {filtered ? t('programsDiscovery.emptyFiltered') : t('programsDiscovery.emptyTitle')}
       </p>
       {!filtered && (
         <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14, lineHeight: 1.6 }}>
-          Check back soon — new programs are added regularly.
+          {t('programsDiscovery.emptyBody')}
         </p>
       )}
     </div>

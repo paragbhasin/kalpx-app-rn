@@ -2861,5 +2861,53 @@
     "howToLive": "HOW TO LIVE THIS",
     "benefits": "BENEFITS",
     "steps": "STEPS"
+  },
+  "programs": {
+    "day": {
+      "dayLabel": "DAY {{n}}",
+      "wisdomLabel": "WISDOM",
+      "label_mantra": "MANTRA",
+      "label_sankalp": "SANKALP",
+      "label_practice": "PRACTICE",
+      "reminder_mantra": "Mantra",
+      "reminder_sankalp": "Sankalp",
+      "reminder_practice": "Practice",
+      "reflectionLabel": "REFLECTION",
+      "reflectionHint": "Tap to write your reflection",
+      "remindersTitle": "REMINDERS",
+      "remindersNoneSet": "None set",
+      "reminderSaving": "Saving…",
+      "back": "Back",
+      "supportLink": "Get support",
+      "liveSessionLabel": "LIVE SESSION",
+      "liveSessionTapToJoin": "Tap to join",
+      "copy": "Copy link",
+      "copied": "Copied!",
+      "dayComplete": "Day {{n}} Complete!",
+      "completionSub": "Tap any practice to do it again",
+      "progressHint": "{{done}} of {{total}} done",
+      "alertTitle": "Program Support",
+      "alertBody": "Visit our support page for help with your program.",
+      "alertOk": "OK",
+      "errorNextDayLocked": "Come back tomorrow to continue.",
+      "errorPrevDayIncomplete": "Complete the previous day first.",
+      "errorDayNotFound": "Day not found.",
+      "errorLoadFailed": "Failed to load. Please try again.",
+      "errorGeneric": "Something went wrong."
+    }
+  },
+  "programCard": {
+    "label": "PRACTICE PROGRAM",
+    "day": "Day {{n}}",
+    "dayContinue": "Day {{n}} · Continue your practice",
+    "dayMissed": "Day {{n}} missed · Complete it now",
+    "dayCompletedLocked": "Day {{n}} Complete ✓ · Day {{next}} unlocks tomorrow",
+    "complete": "Complete · Choose your next step",
+    "chooseNextStep": "Choose your next step →",
+    "unlocksTomorrow": "Unlocks tomorrow",
+    "statusCompleted": "Completed",
+    "statusToday": "Today",
+    "statusMissed": "Missed",
+    "statusLater": "Done on a later day"
   }
 }

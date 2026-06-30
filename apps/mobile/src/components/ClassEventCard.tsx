@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Card } from "react-native-paper";
 import Colors from "./Colors";
@@ -33,6 +34,7 @@ const ClassEventCard: React.FC<ClassEventCardProps> = ({
   trailAmt,
   trialDuration
 }) => {
+  const { t } = useTranslation();
   const isRemote = typeof imageUrl === "string" && imageUrl.startsWith("http");
   return (
     <Card style={styles.card}>
@@ -83,7 +85,7 @@ const ClassEventCard: React.FC<ClassEventCardProps> = ({
           {/* Buttons row */}
           <View style={styles.buttonRow}>
             <TouchableOpacity onPress={onViewDetails}>
-              <TextComponent type="semiBoldText">View Details</TextComponent>
+              <TextComponent type="semiBoldText">{t('classEventCard.viewDetails')}</TextComponent>
             </TouchableOpacity>
               <TouchableOpacity onPress={onBookNow} style={{backgroundColor:Colors.Colors.App_theme,padding:8,borderRadius:6,marginLeft:10}}>
               <TextComponent type="semiBoldText" style={{color:Colors.Colors.white}}>Book Now</TextComponent>

@@ -407,5 +407,22 @@
         "inRoomCarry": "Carry with you"
       }
     }
+  },
+  "classPayment": {
+    "className": "Class Name",
+    "scheduled": "Scheduled",
+    "price": "Price",
+    "total": "Total"
+  },
+  "classReschedule": {
+    "availableSlots": "Available slots",
+    "noteToTutor": "Note to Tutor (Optional)",
+    "rescheduleButton": "Reschedule"
+  },
+  "mantraCard": {
+    "noMantras": "No mantras found for today."
+  },
+  "classEventCard": {
+    "viewDetails": "View Details"
   }
 }

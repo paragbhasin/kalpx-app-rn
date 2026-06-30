@@ -1254,4 +1254,12 @@ export const hi = {
     emptyTitle: 'अभी कोई प्रोग्राम उपलब्ध नहीं है',
     emptyBody: 'जल्द देखें — नए प्रोग्राम नियमित रूप से जोड़े जाते हैं।',
   },
+  communityWebLayout: {
+    searchPlaceholder: 'खोजें ...',
+    createButton: 'बनाओ',
+  },
+  communityDetail: {
+    publicLabel: 'सार्वजनिक',
+    createPost: 'पोस्ट बनाओ',
+  },
 } as const;

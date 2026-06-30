@@ -1254,4 +1254,12 @@ export const en = {
     emptyTitle: 'No programs available right now',
     emptyBody: 'Check back soon — new programs are added regularly.',
   },
+  communityWebLayout: {
+    searchPlaceholder: 'Search ...',
+    createButton: 'Create',
+  },
+  communityDetail: {
+    publicLabel: 'Public',
+    createPost: 'Create post',
+  },
 } as const;

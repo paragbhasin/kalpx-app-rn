@@ -165,7 +165,7 @@ const MantraCard = ({
   if (!filteredMantras || filteredMantras.length === 0) {
     return (
       <View style={{ padding: 20 }}>
-        <TextComponent>No mantras found for today.</TextComponent>
+        <TextComponent>{t('mantraCard.noMantras')}</TextComponent>
       </View>
     );
   }

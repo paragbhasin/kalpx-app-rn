@@ -1254,4 +1254,12 @@ export const te = {
     emptyTitle: 'ప్రస్తుతం ఏ ప్రోగ్రామ్‌లు అందుబాటులో లేవు',
     emptyBody: 'త్వరలో తిరిగి చూడండి — కొత్త ప్రోగ్రామ్‌లు క్రమం తప్పకుండా జోడించబడతాయి.',
   },
+  communityWebLayout: {
+    searchPlaceholder: 'వెతకండి ...',
+    createButton: 'సృష్టించు',
+  },
+  communityDetail: {
+    publicLabel: 'పబ్లిక్',
+    createPost: 'పోస్ట్ సృష్టించు',
+  },
 } as const;

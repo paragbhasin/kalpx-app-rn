@@ -477,7 +477,7 @@ const callPaymentStripeGateway = async () => {
           marginTop: 8,
         }}
       >
-        <TextComponent type="mediumText">Class Name</TextComponent>
+        <TextComponent type="mediumText">{t('classPayment.className')}</TextComponent>
         <TextComponent type="mediumText" style={{flexShrink: 1, textAlign: "right",marginLeft:35}}> {route?.params?.data?.title}</TextComponent>
       </View>
       <View
@@ -487,7 +487,7 @@ const callPaymentStripeGateway = async () => {
           marginTop: 8,
         }}
       >
-        <TextComponent type="mediumText">Scheduled</TextComponent>
+        <TextComponent type="mediumText">{t('classPayment.scheduled')}</TextComponent>
         <TextComponent type="mediumText" style={{flexShrink: 1, textAlign: "right",marginLeft:35}}>
              {`${moment(route?.params?.bookingData?.data?.start_utc).format("MMM DD, YYYY h:mm a")} - ${moment(route?.params?.bookingData?.data?.start_utc).format("MMM DD, YYYY h:mm a")}`}
         </TextComponent>
@@ -499,7 +499,7 @@ const callPaymentStripeGateway = async () => {
           marginTop: 8,
         }}
       >
-        <TextComponent type="mediumText">Price</TextComponent>
+        <TextComponent type="mediumText">{t('classPayment.price')}</TextComponent>
         <TextComponent type="mediumText">
   {route?.params?.data?.pricing?.currency === "INR" ? "₹" : "$"}{" "}
   {
@@ -518,7 +518,7 @@ const callPaymentStripeGateway = async () => {
           marginVertical: 8,
         }}
       >
-        <TextComponent type="mediumText">Total</TextComponent>
+        <TextComponent type="mediumText">{t('classPayment.total')}</TextComponent>
         <TextComponent
   type="mediumText"
   style={{ color: Colors.Colors.App_theme }}

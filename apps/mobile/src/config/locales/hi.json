@@ -407,5 +407,22 @@
         "inRoomCarry": "साथ ले जाएं"
       }
     }
+  },
+  "classPayment": {
+    "className": "क्लास का नाम",
+    "scheduled": "समय निर्धारित",
+    "price": "कीमत",
+    "total": "कुल"
+  },
+  "classReschedule": {
+    "availableSlots": "उपलब्ध स्लॉट",
+    "noteToTutor": "शिक्षक को नोट (वैकल्पिक)",
+    "rescheduleButton": "फिर से बुक करो"
+  },
+  "mantraCard": {
+    "noMantras": "आज के लिए कोई मंत्र नहीं मिला।"
+  },
+  "classEventCard": {
+    "viewDetails": "विवरण देखो"
   }
 }

@@ -407,5 +407,22 @@
         "inRoomCarry": "మీతో తీసుకెళ్ళండి"
       }
     }
+  },
+  "classPayment": {
+    "className": "క్లాస్ పేరు",
+    "scheduled": "షెడ్యూల్ చేయబడింది",
+    "price": "ధర",
+    "total": "మొత్తం"
+  },
+  "classReschedule": {
+    "availableSlots": "అందుబాటులో ఉన్న స్లాట్లు",
+    "noteToTutor": "ట్యూటర్‌కు గమనిక (ఐచ్ఛికం)",
+    "rescheduleButton": "మళ్లీ షెడ్యూల్ చేయి"
+  },
+  "mantraCard": {
+    "noMantras": "ఈ రోజు మంత్రాలు కనుగొనబడలేదు."
+  },
+  "classEventCard": {
+    "viewDetails": "వివరాలు చూడు"
   }
 }

@@ -1,6 +1,7 @@
 import { Plus, Search, XCircle } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "../../lib/i18n";
 import {
   getCommunityGlobalSearch,
   getTopCommunities,
@@ -68,6 +69,7 @@ export function CommunityWebLayout({
   hideDesktopTopBar = false,
   showCreateButton = true,
 }: CommunityWebLayoutProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [isDesktop, setIsDesktop] = useState(false);
@@ -440,7 +442,7 @@ export function CommunityWebLayout({
                     style={searchButtonStyle}
                   >
                     <Search size={18} color="#25211b" />
-                    <span>Search ...</span>
+                    <span>{t('communityWebLayout.searchPlaceholder')}</span>
                   </button>
                 )}
                 {showCreateButton ? (
@@ -452,7 +454,7 @@ export function CommunityWebLayout({
                     <div style={createIconBoxStyle}>
                       <Plus size={18} />
                     </div>
-                    <span>Create</span>
+                    <span>{t('communityWebLayout.createButton')}</span>
                   </button>
                 ) : null}
                 {topBarRightSlot}

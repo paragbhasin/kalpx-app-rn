@@ -191,6 +191,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     "mantra" | "sankalp" | "practice" | null
   >(null);
   const [showAllCompleteMessage, setShowAllCompleteMessage] = useState(false);
+  const [resolvingSlot, setResolvingSlot] = useState<string | null>(null);
   const { withPermissionCheck, renderPermissionModal } = useNotificationPermissionGate();
 
   // After daily-view data is loaded, watch for runner container transitions.
@@ -706,13 +707,45 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     [sd, triadArr, t],
   );
 
-  const handleTriadPress = (
+  const handleTriadPress = async (
     slot: "mantra" | "sankalp" | "practice",
     item: any,
   ) => {
-    if (!item) return;
+    if (!item || resolvingSlot) return;
+    setResolvingSlot(slot);
+
     const journeyId = String((sd as any)?.journey_id ?? "");
     const dayNumber = Number((sd as any)?.day_number) || 0;
+
+    // Call entry-view with the current locale before launching the runner,
+    // mirroring how RhythmHomeScreen calls resolve-item with locale.
+    // This ensures the runner always receives fresh, locale-aware content
+    // regardless of what is cached in Redux from a prior language.
+    let resolvedItem = item;
+    try {
+      const entryResult = await mitraJourneyEntryView(null, undefined, i18n.language || "en");
+      const payload = entryResult.envelope?.target?.payload;
+      if (payload?.today?.triad) {
+        const flat = ingestDailyView(payload);
+        const masterKey =
+          slot === "mantra" ? "master_mantra"
+          : slot === "sankalp" ? "master_sankalp"
+          : "master_practice";
+        if (flat[masterKey]) {
+          resolvedItem = flat[masterKey];
+          // Push fresh locale data into Redux so the screen also updates.
+          for (const [k, v] of Object.entries(flat)) {
+            if (v !== undefined) {
+              dispatch(screenActions.setScreenValue({ key: k, value: v }));
+            }
+          }
+        }
+      }
+    } catch {
+      // fall through with the snapshot item from Redux
+    } finally {
+      setResolvingSlot(null);
+    }
 
     // Start Inner Path LA on explicit user action (not on screen mount).
     // If the user has chosen a preferred LA, it has priority — never override it.
@@ -734,7 +767,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
       slot === "mantra" ? "InnerPathMantraRunner"
       : slot === "sankalp" ? "InnerPathSankalpRunner"
       : "InnerPathPracticeRunner";
-    const runnerParams = { item, journeyId, dayNumber };
+    const runnerParams = { item: resolvedItem, journeyId, dayNumber };
     // Remember this runner so tapping the Inner Path Live Activity returns here.
     rememberRunnerRoute("inner_path", runnerName, runnerParams);
     navigation.navigate(runnerName as any, runnerParams);
@@ -957,7 +990,8 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
           {triadItems.map((item) => (
             <TouchableOpacity
               key={item.slot}
-              activeOpacity={0.9}
+              activeOpacity={resolvingSlot ? 1 : 0.9}
+              disabled={!!resolvingSlot}
               onPress={() => handleTriadPress(item.slot as any, item.master)}
               style={[
                 styles.triadCard,

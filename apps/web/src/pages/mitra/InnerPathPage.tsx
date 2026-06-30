@@ -151,14 +151,21 @@ export function InnerPathPage() {
       .catch(() => {});
   }, []);
 
-  // Re-fetch inner path content when locale changes so titles update in the new language.
-  // getDashboardView's locale-keyed cache misses on locale change → fresh API call.
+  // Re-fetch inner path content when locale changes so titles/essence/meaning update.
+  // Calls entry-view (with locale) first; if its payload has the daily view embedded,
+  // use that directly — otherwise fall back to daily-view.
   useEffect(() => {
     function onLocaleChange() {
       invalidateDashboardViewCache();
       invalidateEntryViewApiCache();
-      getDashboardView()
-        .then((envelope) => {
+      mitraJourneyEntryView()
+        .then(async (result) => {
+          const entryPayload = result.envelope?.target?.payload;
+          const isDailyViewPayload =
+            result.envelope?.target?.view_key === 'daily_view' &&
+            entryPayload?.identity != null &&
+            entryPayload?.today != null;
+          const envelope = isDailyViewPayload ? entryPayload : await getDashboardView();
           if (!envelope || envelope._isLegacyFallback) return;
           const flat = ingestDailyView(envelope);
           dispatch(updateScreenData(flat));

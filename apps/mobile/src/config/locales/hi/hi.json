@@ -2850,7 +2850,9 @@
     "about": "परिचय",
     "deity": "देवता",
     "tradition": "परंपरा",
-    "howToLive": "इसे कैसे जिएं"
+    "howToLive": "इसे कैसे जिएं",
+    "benefits": "लाभ",
+    "steps": "विधि"
   },
   "progressSection": {
     "daysEngaged": "जुड़े दिन",

@@ -140,7 +140,7 @@ export async function getDashboardView(): Promise<any> {
 
   const request = _dashboardViewInflight ?? (async () => {
     try {
-      const res = await api.get('mitra/v3/journey/daily-view/');
+      const res = await api.get('mitra/v3/journey/daily-view/', { params: { locale } });
       return res.data;
     } catch (err: any) {
       if (err?.response?.status === 404) {
@@ -599,7 +599,7 @@ export async function mitraJourneyEntryView(etag?: string | null): Promise<{
     try {
       const headers: Record<string, string> = {};
       if (etag) headers['If-None-Match'] = etag;
-      const res = await api.get('mitra/v3/journey/entry-view/', { headers, params: { tz: getTz() } });
+      const res = await api.get('mitra/v3/journey/entry-view/', { headers, params: { tz: getTz(), locale: getActiveLocale() } });
       return {
         envelope: res.data,
         etag: (res.headers as any)['etag'] ?? null,
@@ -923,7 +923,9 @@ export async function postQuickCheckin(energy_state: QuickCheckinEnergyState): P
 /** GET mitra/v3/quick_reset/ — 3-state opening (E-D-10). null = flag off or error. */
 export async function getQuickResetOpening(): Promise<QuickResetOpeningState | null> {
   try {
-    const resp = await api.get<QuickResetOpeningState>('mitra/v3/quick_reset/');
+    const resp = await api.get<QuickResetOpeningState>('mitra/v3/quick_reset/', {
+      params: { locale: getActiveLocale() },
+    });
     return resp.data;
   } catch (err: any) {
     if (err?.response?.status === 404) return null;

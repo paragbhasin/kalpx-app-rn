@@ -282,6 +282,7 @@
     "menu": {
       "login": "లాగిన్",
       "myProfile": "నా ప్రొఫైల్",
+      "myPrograms": "నా కార్యక్రమాలు",
       "savedReflections": "సేవ్ చేసిన ప్రతిఫలనాలు",
       "setReminders": "గుర్తుచేప్పులు సెట్ చేయండి",
       "myPractices": "నా సాధనలు",
@@ -2999,6 +3000,16 @@
     "statusCompleted": "పూర్తయింది",
     "statusToday": "నేడు",
     "statusMissed": "తప్పింది",
-    "statusLater": "తర్వాత పూర్తి చేశారు"
+    "statusLater": "తర్వాత పూర్తి చేశారు",
+    "journeyComplete": "యాత్ర పూర్తయింది!",
+    "congratulations": "అభినందనలు! మీరు {{n}} రోజుల యాత్రను పూర్తి చేశారు.",
+    "viewSummary": "సారాంశం చూడండి",
+    "exploreAnother": "మరో కార్యక్రమం అన్వేషించండి",
+    "myPrograms": "నా కార్యక్రమాలు",
+    "active": "క్రియాశీల",
+    "completed": "పూర్తయింది",
+    "completedOn": "{{date}}న పూర్తయింది",
+    "noActivePrograms": "క్రియాశీల కార్యక్రమాలు లేవు",
+    "noCompletedPrograms": "ఇంకా పూర్తయిన కార్యక్రమాలు లేవు"
   }
 }

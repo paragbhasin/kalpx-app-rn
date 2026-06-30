@@ -171,6 +171,22 @@ export async function apiPatchProgramReminders(patch: ProgramRemindersPatch): Pr
   return res.data;
 }
 
+export interface MyProgramEntry {
+  participant_id: string;
+  campaign_code: string;
+  name: string;
+  status: "active" | "completed";
+  current_day: number;
+  total_days: number;
+  joined_at: string | null;
+  completed_at: string | null;
+}
+
+export async function fetchMyPrograms(): Promise<MyProgramEntry[]> {
+  const res = await api.get("programs/my-programs/", { params: { locale: getLocale() } });
+  return res.data ?? [];
+}
+
 export async function postProgramActivity(
   eventName: string,
   props?: { day_number?: number; notification_type?: string; platform?: string; source?: string },

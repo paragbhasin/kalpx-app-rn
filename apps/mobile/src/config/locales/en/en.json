@@ -257,6 +257,7 @@
     "menu": {
       "login": "Login",
       "myProfile": "My Profile",
+      "myPrograms": "My Programs",
       "savedReflections": "Saved reflections",
       "setReminders": "Set Reminders",
       "myPractices": "My Practices",
@@ -2908,6 +2909,16 @@
     "statusCompleted": "Completed",
     "statusToday": "Today",
     "statusMissed": "Missed",
-    "statusLater": "Done on a later day"
+    "statusLater": "Done on a later day",
+    "journeyComplete": "Journey Complete!",
+    "congratulations": "Congratulations on completing your {{n}}-day journey.",
+    "viewSummary": "View Summary",
+    "exploreAnother": "Explore Another Program",
+    "myPrograms": "My Programs",
+    "active": "Active",
+    "completed": "Completed",
+    "completedOn": "Completed on {{date}}",
+    "noActivePrograms": "No active programs",
+    "noCompletedPrograms": "No completed programs yet"
   }
 }

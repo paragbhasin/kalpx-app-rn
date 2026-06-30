@@ -256,6 +256,7 @@
     "menu": {
       "login": "Login करें",
       "myProfile": "मेरी प्रोफ़ाइल",
+      "myPrograms": "मेरे कार्यक्रम",
       "setReminders": "रिमाइंडर सेट करें",
       "myPractices": "मेरे अभ्यास",
       "notifications": "सूचनाएँ",
@@ -2919,6 +2920,16 @@
     "statusCompleted": "पूर्ण",
     "statusToday": "आज",
     "statusMissed": "छूटा",
-    "statusLater": "बाद में किया"
+    "statusLater": "बाद में किया",
+    "journeyComplete": "यात्रा पूर्ण!",
+    "congratulations": "बधाई हो! आपने {{n}} दिनों की यात्रा पूरी की।",
+    "viewSummary": "सारांश देखें",
+    "exploreAnother": "दूसरा कार्यक्रम खोजें",
+    "myPrograms": "मेरे कार्यक्रम",
+    "active": "सक्रिय",
+    "completed": "पूर्ण",
+    "completedOn": "{{date}} को पूर्ण",
+    "noActivePrograms": "कोई सक्रिय कार्यक्रम नहीं",
+    "noCompletedPrograms": "अभी तक कोई पूर्ण कार्यक्रम नहीं"
   }
 }

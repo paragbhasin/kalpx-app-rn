@@ -52,12 +52,52 @@ function getDayLabelStyle(s: DayStatus) {
   return styles.dayLabelLocked;
 }
 
+function CompletedProgramCard({ program }: ProgramCardProps) {
+  const navigation = useNavigation<any>();
+  const { t } = useTranslation();
+  const totalDays = program.total_days ?? program.current_day;
+  return (
+    <View style={styles.completedCard}>
+      <View style={styles.completedTop}>
+        <View style={styles.emojiWrap}>
+          <Text style={styles.emoji}>🎉</Text>
+        </View>
+        <View style={styles.completedInfo}>
+          <Text style={styles.completedTitle}>{t("programCard.journeyComplete")}</Text>
+          <Text style={styles.completedName} numberOfLines={2}>{program.name}</Text>
+          <Text style={styles.completedSub}>
+            {t("programCard.congratulations", { n: totalDays })}
+          </Text>
+        </View>
+      </View>
+      <TouchableOpacity
+        style={styles.btnPrimary}
+        activeOpacity={0.85}
+        onPress={() => navigation.navigate("MyProgramsScreen" as any, { initialTab: "completed" })}
+      >
+        <Text style={styles.btnPrimaryText}>{t("programCard.viewSummary")}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.btnOutline}
+        activeOpacity={0.85}
+        onPress={() => navigation.navigate("ProgramsDiscovery" as any)}
+      >
+        <Text style={styles.btnOutlineText}>{t("programCard.exploreAnother")}</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
 export default function ProgramCard({ program }: ProgramCardProps) {
   const navigation = useNavigation<any>();
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
-  const isCompleted = program.status === "completed" && program.show_day8_transition;
+  if (program.status === "completed") {
+    return <CompletedProgramCard program={program} />;
+  }
+
+  const isCompleted = false;
   const days = program.day_statuses ?? [];
   const totalDays = days.length > 0
     ? days.length
@@ -217,6 +257,72 @@ export default function ProgramCard({ program }: ProgramCardProps) {
 }
 
 const styles = StyleSheet.create({
+  // Completed celebration card
+  completedCard: {
+    backgroundColor: "#F0F7EE",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#A5C9A1",
+    padding: 16,
+    gap: 10,
+  },
+  completedTop: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+    marginBottom: 4,
+  },
+  emojiWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#DCF0D8",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emoji: { fontSize: 22 },
+  completedInfo: { flex: 1 },
+  completedTitle: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 13,
+    color: "#2E7D32",
+    marginBottom: 2,
+  },
+  completedName: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 16,
+    color: "#1B3A1F",
+    marginBottom: 4,
+  },
+  completedSub: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 12,
+    color: "#4A6741",
+  },
+  btnPrimary: {
+    backgroundColor: "#2E5723",
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  btnPrimaryText: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 14,
+    color: "#FFFFFF",
+  },
+  btnOutline: {
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: "#2E5723",
+    paddingVertical: 11,
+    alignItems: "center",
+  },
+  btnOutlineText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 14,
+    color: "#2E5723",
+  },
+
   card: {
     backgroundColor: "#FFF8EE",
     borderRadius: 14,

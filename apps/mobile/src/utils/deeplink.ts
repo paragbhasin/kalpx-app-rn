@@ -186,8 +186,21 @@ export function handleMitraDeepLink(url: string | null | undefined): boolean {
       }
       return true;
     }
-    // stateId may be "day7_checkpoint" or "day14_checkpoint"; extract the key.
     const stateId = parsed.stateId;
+
+    // Notification item-type stateIds → open InnerPath with item_type so it
+    // auto-navigates to the mantra/sankalp/practice runner after data loads.
+    if (stateId === "mantra" || stateId === "sankalp" || stateId === "practice") {
+      try {
+        navigate("InnerPath", { item_type: stateId });
+      } catch (err) {
+        console.warn("[deeplink] navigate InnerPath failed:", err);
+      }
+      console.log(`[deeplink] → InnerPath (item_type=${stateId})`);
+      return true;
+    }
+
+    // stateId may be "day7_checkpoint" or "day14_checkpoint"; extract the key.
     const checkpoint = stateId === "day7_checkpoint"
       ? "day7"
       : stateId === "day14_checkpoint"

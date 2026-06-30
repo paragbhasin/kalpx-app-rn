@@ -31,7 +31,7 @@ import type {
 } from "@kalpx/types";
 import { useNotificationPermissionGate } from "../../hooks/useNotificationPermissionGate";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import React, {
   useCallback,
   useEffect,
@@ -125,6 +125,7 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
   const { t, i18n } = useTranslation();
   const isHindi = i18n.language !== "en";
   const navigation = useNavigation<any>();
+  const route = useRoute<any>();
   const dispatch = useDispatch<any>();
   const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
@@ -738,6 +739,20 @@ export function InnerPathScreen({ embedded = false }: { embedded?: boolean }) {
     rememberRunnerRoute("inner_path", runnerName, runnerParams);
     navigation.navigate(runnerName as any, runnerParams);
   };
+
+  // When launched from a notification with item_type param, auto-open the
+  // corresponding runner once the triad data has loaded from the API.
+  const autoItemFiredRef = useRef(false);
+  const autoItemType = route.params?.item_type as "mantra" | "sankalp" | "practice" | undefined;
+  useEffect(() => {
+    if (loading || !autoItemType || autoItemFiredRef.current) return;
+    const target = triadItems.find((ti) => ti.slot === autoItemType);
+    if (!target?.master) return;
+    autoItemFiredRef.current = true;
+    const timer = setTimeout(() => handleTriadPress(autoItemType, target.master), 350);
+    return () => clearTimeout(timer);
+  }, [loading, autoItemType, triadItems]);
+
   const handleBack = () => {
     if (embedded) {
       store.dispatch(

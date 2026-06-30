@@ -165,8 +165,12 @@ export function handleMitraDeepLink(url: string | null | undefined): boolean {
         navigateInHomeStack(runner.name, runner.params);
         console.log(`[deeplink] → ${runner.name} (rhythm LA → exact runner)`);
       } else {
-        navigate("RhythmHome", VALID_RHYTHM_SLOTS.has(slot) ? { slot } : undefined);
-        console.log(`[deeplink] → RhythmHome (slot=${slot})`);
+        const itemType = parsed.data.item_type || undefined;
+        const rhythmParams: Record<string, string> = {};
+        if (VALID_RHYTHM_SLOTS.has(slot)) rhythmParams.slot = slot;
+        if (itemType) rhythmParams.item_type = itemType;
+        navigate("RhythmHome", Object.keys(rhythmParams).length ? rhythmParams : undefined);
+        console.log(`[deeplink] → RhythmHome (slot=${slot} item_type=${itemType ?? "none"})`);
       }
     } catch (err) {
       console.warn("[deeplink] navigate RhythmHome failed:", err);

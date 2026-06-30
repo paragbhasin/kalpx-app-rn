@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 import { RHYTHM_BAND_LABELS } from "@kalpx/contracts";
 import type { RhythmItem, RhythmTimeBand } from "@kalpx/types";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   AppState,
@@ -236,6 +236,7 @@ export default function RhythmHomeScreen({
   const { t, i18n } = useTranslation();
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
+  const route = useRoute<any>();
   const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -435,6 +436,21 @@ export default function RhythmHomeScreen({
     rememberRunnerRoute("rhythm_home", runnerName, runnerParams);
     navigation.navigate(runnerName as any, runnerParams);
   }
+
+  // When launched from a notification with slot + item_type params, auto-open
+  // the correct runner once homeData has loaded from the API.
+  const autoItemFiredRef = useRef(false);
+  const autoSlot = route.params?.slot as RhythmTimeBand | undefined;
+  const autoItemType = route.params?.item_type as string | undefined;
+  useEffect(() => {
+    if (!homeData || !autoSlot || !autoItemType || autoItemFiredRef.current) return;
+    const slotItems: RhythmItem[] = homeData?.companion_rhythm?.[autoSlot]?.items ?? [];
+    const target = slotItems.find((i: RhythmItem) => i.item_type === autoItemType && !i.completed_today);
+    if (!target) return;
+    autoItemFiredRef.current = true;
+    const timer = setTimeout(() => handleItemAction(target, autoSlot), 400);
+    return () => clearTimeout(timer);
+  }, [homeData, autoSlot, autoItemType]);
 
   return (
     <SafeAreaView style={styles.safeArea}>

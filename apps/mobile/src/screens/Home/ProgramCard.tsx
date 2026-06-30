@@ -61,9 +61,14 @@ function getDayLabelStyle(s: DayStatus) {
 function CompletedProgramCard({ program }: ProgramCardProps) {
   const navigation = useNavigation<any>();
   const { t } = useTranslation();
+  const [dismissed, setDismissed] = useState(false);
   const totalDays = program.total_days ?? program.current_day;
+  if (dismissed) return null;
   return (
     <View style={styles.completedCard}>
+      <TouchableOpacity style={styles.closeBtn} onPress={() => setDismissed(true)} hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}>
+        <Text style={styles.closeBtnText}>✕</Text>
+      </TouchableOpacity>
       <View style={styles.completedTop}>
         {/* <View style={styles.emojiWrap}>
           <Text style={styles.emoji}>🎉</Text>
@@ -323,6 +328,17 @@ const styles = StyleSheet.create({
     borderColor: "#A5C9A1",
     padding: 16,
     gap: 10,
+  },
+  closeBtn: {
+    position: "absolute",
+    top: 10,
+    right: 12,
+    zIndex: 1,
+  },
+  closeBtnText: {
+    fontSize: 14,
+    color: "#7A9E78",
+    fontWeight: "600",
   },
   completedTop: {
     flexDirection: "row",

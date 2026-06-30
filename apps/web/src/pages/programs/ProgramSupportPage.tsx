@@ -81,15 +81,6 @@ function buildFaqs(code: string | null): { question: string; answer: React.React
         </>
       ),
     },
-    {
-      question: 'Can I restart the program?',
-      answer: (
-        <>
-          Contact support and we&apos;ll help.{' '}
-          <a href="#contact-support" style={{ color: 'var(--kalpx-gold)' }}>Contact support</a>
-        </>
-      ),
-    },
   ];
 }
 

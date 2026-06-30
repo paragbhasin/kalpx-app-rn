@@ -42,7 +42,7 @@ function buildFaqs(code: string | null): { question: string; answer: React.React
       answer: (
         <>
           Wait 30 seconds and request a new OTP. If the problem continues,{' '}
-          <a href="#contact-support" style={{ color: 'var(--kalpx-gold)' }}>contact support</a> using the button below.
+          <a href="mailto:support@kalpx.com" style={{ color: 'var(--kalpx-gold)' }}>contact support</a>.
         </>
       ),
     },
@@ -69,7 +69,7 @@ function buildFaqs(code: string | null): { question: string; answer: React.React
       answer: (
         <>
           Close and reopen the app. If Day 1 still doesn&apos;t appear,{' '}
-          <a href="#contact-support" style={{ color: 'var(--kalpx-gold)' }}>contact support</a>.
+          <a href="mailto:support@kalpx.com" style={{ color: 'var(--kalpx-gold)' }}>contact support</a>.
         </>
       ),
     },

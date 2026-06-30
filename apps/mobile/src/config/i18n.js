@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import i18n from "i18next";
 import merge from "lodash/merge";
 import { initReactI18next } from "react-i18next";
@@ -246,11 +247,20 @@ i18n.use(initReactI18next).init({
     escapeValue: false,
   },
   saveMissing: true,
-}).then(() => {
-  // Reset any persisted locale that is no longer enabled (e.g. 'hi' stored when
-  // prod is English-only). Forces English silently on next app start.
-  if (!ENABLED_LOCALES.includes(i18n.language)) {
-    i18n.changeLanguage("en");
+}).then(async () => {
+  // Restore the user's saved language preference. If the saved locale is no
+  // longer in ENABLED_LOCALES (e.g. prod build that only ships English), silently
+  // fall back to English so the app never gets stuck on an invisible language.
+  try {
+    const saved = await AsyncStorage.getItem("kalpx_locale");
+    const target = saved && ENABLED_LOCALES.includes(saved) ? saved : "en";
+    if (target !== i18n.language) {
+      i18n.changeLanguage(target);
+    }
+  } catch {
+    if (!ENABLED_LOCALES.includes(i18n.language)) {
+      i18n.changeLanguage("en");
+    }
   }
 });
 

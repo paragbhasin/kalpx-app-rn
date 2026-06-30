@@ -207,23 +207,26 @@ const MantraTextCard: React.FC<{
 const CommunityActionBar: React.FC<{
   addLoading?: boolean;
   onAdd?: () => void;
-}> = ({ addLoading, onAdd }) => (
-  <View style={styles.communityActionBar}>
-    <TouchableOpacity
-      onPress={onAdd}
-      disabled={addLoading}
-      activeOpacity={0.85}
-      style={[
-        styles.communityAddButton,
-        addLoading && styles.communityAddButtonDisabled,
-      ]}
-    >
-      <Text style={styles.communityAddButtonText}>
-        {addLoading ? "Adding..." : "Add to My Practice"}
-      </Text>
-    </TouchableOpacity>
-  </View>
-);
+}> = ({ addLoading, onAdd }) => {
+  const { t } = useTranslation();
+  return (
+    <View style={styles.communityActionBar}>
+      <TouchableOpacity
+        onPress={onAdd}
+        disabled={addLoading}
+        activeOpacity={0.85}
+        style={[
+          styles.communityAddButton,
+          addLoading && styles.communityAddButtonDisabled,
+        ]}
+      >
+        <Text style={styles.communityAddButtonText}>
+          {addLoading ? t("practiceRunner.adding") : t("practiceRunner.addToMyPractice")}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
 
 // --- Main Component ---
 

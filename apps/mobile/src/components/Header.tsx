@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -41,6 +42,7 @@ const Header: React.FC<HeaderProps> = ({ isTransparent, backgroundColor }) => {
   const changeLanguage = (code: string) => {
     setSelectedLang(code);
     i18n.changeLanguage(code);
+    AsyncStorage.setItem("kalpx_locale", code).catch(() => {});
     invalidateHomeV3Cache();
     mitraJourneyHomeV3({ forceFresh: true, locale: code }).catch(() => {});
     // Re-fetch daily-view content with new locale so runner_active_item

@@ -1,16 +1,26 @@
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { SafeAreaView, StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 import MantraRunnerView from "../../../blocks/runners/MantraRunnerView";
 import { useScreenStore } from "../../../engine/useScreenBridge";
+import { mitraRhythmResolveItem } from "../../../engine/mitraApi";
 
 const BEIGE_BG = require("../../../../assets/beige_bg.webp");
 
 export default function RhythmMantraRunner() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const { item, slot, journeyId, dayNumber } = route.params;
+  const { item: initialItem, slot, journeyId, dayNumber } = route.params;
+  const { i18n } = useTranslation();
+  const [item, setItem] = useState(initialItem);
   const updateBackground = useScreenStore((state) => state.updateBackground);
+
+  useEffect(() => {
+    mitraRhythmResolveItem(slot, initialItem.item_id, initialItem.item_type, i18n.language || 'en')
+      .then((resolved) => { if (resolved?.resolved) setItem((prev: any) => ({ ...prev, ...resolved })); })
+      .catch(() => {});
+  }, [i18n.language]);
 
   const engineApiRef = useRef<{ syncNow: () => Promise<void>; refreshStats: () => Promise<void> } | null>(null);
 

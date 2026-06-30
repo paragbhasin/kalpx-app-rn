@@ -17,10 +17,16 @@ import {
   UIManager,
   View,
 } from "react-native";
+import {
+  type ActiveProgramSummary,
+  type DayStatus,
+} from "../../engine/programApi";
 import { Fonts } from "../../theme/fonts";
-import { type ActiveProgramSummary, type DayStatus } from "../../engine/programApi";
 
-if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
@@ -59,12 +65,16 @@ function CompletedProgramCard({ program }: ProgramCardProps) {
   return (
     <View style={styles.completedCard}>
       <View style={styles.completedTop}>
-        <View style={styles.emojiWrap}>
+        {/* <View style={styles.emojiWrap}>
           <Text style={styles.emoji}>🎉</Text>
-        </View>
+        </View> */}
         <View style={styles.completedInfo}>
-          <Text style={styles.completedTitle}>{t("programCard.journeyComplete")}</Text>
-          <Text style={styles.completedName} numberOfLines={2}>{program.name}</Text>
+          <Text style={styles.completedTitle}>
+            {t("programCard.journeyComplete")}
+          </Text>
+          <Text style={styles.completedName} numberOfLines={2}>
+            {program.name}
+          </Text>
           <Text style={styles.completedSub}>
             {t("programCard.congratulations", { n: totalDays })}
           </Text>
@@ -73,16 +83,24 @@ function CompletedProgramCard({ program }: ProgramCardProps) {
       <TouchableOpacity
         style={styles.btnPrimary}
         activeOpacity={0.85}
-        onPress={() => navigation.navigate("MyProgramsScreen" as any, { initialTab: "completed" })}
+        onPress={() =>
+          navigation.navigate("MyProgramsScreen" as any, {
+            initialTab: "completed",
+          })
+        }
       >
-        <Text style={styles.btnPrimaryText}>{t("programCard.viewSummary")}</Text>
+        <Text style={styles.btnPrimaryText}>
+          {t("programCard.viewSummary")}
+        </Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.btnOutline}
         activeOpacity={0.85}
         onPress={() => navigation.navigate("ProgramsDiscovery" as any)}
       >
-        <Text style={styles.btnOutlineText}>{t("programCard.exploreAnother")}</Text>
+        <Text style={styles.btnOutlineText}>
+          {t("programCard.exploreAnother")}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -99,9 +117,10 @@ export default function ProgramCard({ program }: ProgramCardProps) {
 
   const isCompleted = false;
   const days = program.day_statuses ?? [];
-  const totalDays = days.length > 0
-    ? days.length
-    : program.current_day + (program.days_remaining ?? 0);
+  const totalDays =
+    days.length > 0
+      ? days.length
+      : program.current_day + (program.days_remaining ?? 0);
 
   const toggleExpand = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -130,7 +149,10 @@ export default function ProgramCard({ program }: ProgramCardProps) {
     // Legacy fallback (no day_statuses from API yet)
     const isNextDayLocked = !isCompleted && !!program.next_day_locked;
     subtitle = isNextDayLocked
-      ? t("programCard.dayCompletedLocked", { n: program.current_day, next: program.current_day + 1 })
+      ? t("programCard.dayCompletedLocked", {
+          n: program.current_day,
+          next: program.current_day + 1,
+        })
       : t("programCard.dayContinue", { n: program.current_day + 1 });
   }
 
@@ -159,95 +181,131 @@ export default function ProgramCard({ program }: ProgramCardProps) {
         <View style={styles.dayList}>
           {days.length > 0
             ? (() => {
-                const firstLockedIdx = days.findIndex((d) => d.status === "locked");
-                return days.map((day, idx) => {
-                const tappable = day.status !== "locked";
-                const isLast = idx === days.length - 1;
-                return (
-                  <TouchableOpacity
-                    key={day.day_number}
-                    onPress={() => tappable && handleDayPress(day.day_number)}
-                    activeOpacity={tappable ? 0.7 : 1}
-                    disabled={!tappable}
-                    style={[styles.dayRow, !isLast && styles.dayRowBorder]}
-                  >
-                    <View style={styles.dayIconWrap}>
-                      {getDayIcon(day.status)}
-                    </View>
-                    <View style={styles.dayMid}>
-                      <Text style={[styles.dayLabel, getDayLabelStyle(day.status)]}>
-                        {t("programCard.day", { n: day.day_number })}
-                      </Text>
-                      {day.status === "completed" && (
-                        <Text style={styles.dayHintDone}>{t("programCard.statusCompleted")}</Text>
-                      )}
-                      {day.status === "today" && (
-                        <Text style={styles.dayHintToday}>{t("programCard.statusToday")}</Text>
-                      )}
-                      {day.status === "missed" && (
-                        <Text style={styles.dayHintMissed}>{t("programCard.statusMissed")}</Text>
-                      )}
-                      {day.status === "completed_later" && (
-                        <Text style={styles.dayHintLate}>{t("programCard.statusLater")}</Text>
-                      )}
-                      {day.status === "locked" && idx === firstLockedIdx && isUnlocksTomorrow(day.unlock_date) && (
-                        <Text style={styles.dayHint}>{t("programCard.unlocksTomorrow")}</Text>
-                      )}
-                    </View>
-                    {tappable && <Text style={styles.dayArrow}>→</Text>}
-                  </TouchableOpacity>
+                const firstLockedIdx = days.findIndex(
+                  (d) => d.status === "locked",
                 );
-              });
+                return days.map((day, idx) => {
+                  const tappable = day.status !== "locked";
+                  const isLast = idx === days.length - 1;
+                  return (
+                    <TouchableOpacity
+                      key={day.day_number}
+                      onPress={() => tappable && handleDayPress(day.day_number)}
+                      activeOpacity={tappable ? 0.7 : 1}
+                      disabled={!tappable}
+                      style={[styles.dayRow, !isLast && styles.dayRowBorder]}
+                    >
+                      <View style={styles.dayIconWrap}>
+                        {getDayIcon(day.status)}
+                      </View>
+                      <View style={styles.dayMid}>
+                        <Text
+                          style={[
+                            styles.dayLabel,
+                            getDayLabelStyle(day.status),
+                          ]}
+                        >
+                          {t("programCard.day", { n: day.day_number })}
+                        </Text>
+                        {day.status === "completed" && (
+                          <Text style={styles.dayHintDone}>
+                            {t("programCard.statusCompleted")}
+                          </Text>
+                        )}
+                        {day.status === "today" && (
+                          <Text style={styles.dayHintToday}>
+                            {t("programCard.statusToday")}
+                          </Text>
+                        )}
+                        {day.status === "missed" && (
+                          <Text style={styles.dayHintMissed}>
+                            {t("programCard.statusMissed")}
+                          </Text>
+                        )}
+                        {day.status === "completed_later" && (
+                          <Text style={styles.dayHintLate}>
+                            {t("programCard.statusLater")}
+                          </Text>
+                        )}
+                        {day.status === "locked" &&
+                          idx === firstLockedIdx &&
+                          isUnlocksTomorrow(day.unlock_date) && (
+                            <Text style={styles.dayHint}>
+                              {t("programCard.unlocksTomorrow")}
+                            </Text>
+                          )}
+                      </View>
+                      {tappable && <Text style={styles.dayArrow}>→</Text>}
+                    </TouchableOpacity>
+                  );
+                });
               })()
             : // Legacy fallback rendering (no day_statuses)
-              Array.from({ length: totalDays }, (_, i) => i + 1).map((dayNum) => {
-                const done = isCompleted || dayNum <= program.current_day;
-                const active = !isCompleted && dayNum === program.current_day + 1 && !program.next_day_locked;
-                const tappable = done || active;
-                return (
-                  <TouchableOpacity
-                    key={dayNum}
-                    onPress={() => tappable && handleDayPress(dayNum)}
-                    activeOpacity={tappable ? 0.7 : 1}
-                    disabled={!tappable}
-                    style={[styles.dayRow, dayNum < totalDays && styles.dayRowBorder]}
-                  >
-                    <View style={styles.dayIconWrap}>
-                      {done ? (
-                        <Text style={styles.iconDone}>✓</Text>
-                      ) : active ? (
-                        <View style={styles.iconActiveDot} />
-                      ) : (
-                        <Text style={styles.iconLock}>🔒</Text>
-                      )}
-                    </View>
-                    <View style={styles.dayMid}>
-                      <Text
-                        style={[
-                          styles.dayLabel,
-                          done && styles.dayLabelDone,
-                          active && styles.dayLabelActive,
-                          !done && !active && styles.dayLabelLocked,
-                        ]}
-                      >
-                        {t("programCard.day", { n: dayNum })}
-                      </Text>
-                      {!done && !active && dayNum === program.current_day + 1 && program.next_day_locked && (
-                        <Text style={styles.dayHint}>{t("programCard.unlocksTomorrow")}</Text>
-                      )}
-                    </View>
-                    {tappable && <Text style={styles.dayArrow}>→</Text>}
-                  </TouchableOpacity>
-                );
-              })}
+              Array.from({ length: totalDays }, (_, i) => i + 1).map(
+                (dayNum) => {
+                  const done = isCompleted || dayNum <= program.current_day;
+                  const active =
+                    !isCompleted &&
+                    dayNum === program.current_day + 1 &&
+                    !program.next_day_locked;
+                  const tappable = done || active;
+                  return (
+                    <TouchableOpacity
+                      key={dayNum}
+                      onPress={() => tappable && handleDayPress(dayNum)}
+                      activeOpacity={tappable ? 0.7 : 1}
+                      disabled={!tappable}
+                      style={[
+                        styles.dayRow,
+                        dayNum < totalDays && styles.dayRowBorder,
+                      ]}
+                    >
+                      <View style={styles.dayIconWrap}>
+                        {done ? (
+                          <Text style={styles.iconDone}>✓</Text>
+                        ) : active ? (
+                          <View style={styles.iconActiveDot} />
+                        ) : (
+                          <Text style={styles.iconLock}>🔒</Text>
+                        )}
+                      </View>
+                      <View style={styles.dayMid}>
+                        <Text
+                          style={[
+                            styles.dayLabel,
+                            done && styles.dayLabelDone,
+                            active && styles.dayLabelActive,
+                            !done && !active && styles.dayLabelLocked,
+                          ]}
+                        >
+                          {t("programCard.day", { n: dayNum })}
+                        </Text>
+                        {!done &&
+                          !active &&
+                          dayNum === program.current_day + 1 &&
+                          program.next_day_locked && (
+                            <Text style={styles.dayHint}>
+                              {t("programCard.unlocksTomorrow")}
+                            </Text>
+                          )}
+                      </View>
+                      {tappable && <Text style={styles.dayArrow}>→</Text>}
+                    </TouchableOpacity>
+                  );
+                },
+              )}
 
           {isCompleted && (
             <TouchableOpacity
-              onPress={() => navigation.navigate("ProgramDay8TransitionScreen" as any)}
+              onPress={() =>
+                navigation.navigate("ProgramDay8TransitionScreen" as any)
+              }
               activeOpacity={0.85}
               style={styles.nextStepRow}
             >
-              <Text style={styles.nextStepText}>{t("programCard.chooseNextStep")}</Text>
+              <Text style={styles.nextStepText}>
+                {t("programCard.chooseNextStep")}
+              </Text>
             </TouchableOpacity>
           )}
         </View>

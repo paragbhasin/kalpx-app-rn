@@ -691,8 +691,8 @@ export function InnerPathPage() {
                     >
                       {sentence(
                         activeWhyItem.slot === "sankalp"
-                          ? `This is ${activeWhyItem.context.mitra_frame_through}`
-                          : `${activeWhyItem.title || "This"} is ${activeWhyItem.context.mitra_frame_through}`,
+                          ? t("turn8.frameSankalp").replace("{frame}", activeWhyItem.context.mitra_frame_through)
+                          : t("turn8.frameItem").replace("{title}", activeWhyItem.title || "").replace("{frame}", activeWhyItem.context.mitra_frame_through),
                       )}
                     </p>
                   </div>
@@ -730,7 +730,7 @@ export function InnerPathPage() {
                       }}
                     >
                       {sentence(
-                        `Mitra chose this to guide you from ${activeWhyItem.shift}`,
+                        t("turn8.shiftLabel").replace("{shift}", activeWhyItem.shift),
                       )}
                     </p>
                   </div>
@@ -1689,7 +1689,7 @@ export function InnerPathPage() {
                                       }}
                                     >
                                       {sentence(
-                                        `This is ${activeWhyItem.context.mitra_frame_through}`,
+                                        t("turn8.frameSankalp").replace("{frame}", activeWhyItem.context.mitra_frame_through),
                                       )}
                                     </p>
                                   </div>
@@ -1766,7 +1766,7 @@ export function InnerPathPage() {
                                   }}
                                 >
                                   {sentence(
-                                    `Mitra chose this to guide you from ${activeWhyItem.shift}`,
+                                    t("turn8.shiftLabel").replace("{shift}", activeWhyItem.shift),
                                   )}
                                 </p>
                               </div>

@@ -456,7 +456,7 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
                         )}
                         {detailItem.how_to_live?.length > 0 && (
                           <View style={styles.detailSection}>
-                            <Text style={styles.detailLabel}>HOW TO LIVE THIS</Text>
+                            <Text style={styles.detailLabel}>{t("libraryModal.howToLive")}</Text>
                             <BulletList items={detailItem.how_to_live} />
                           </View>
                         )}

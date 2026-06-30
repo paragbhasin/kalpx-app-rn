@@ -94,7 +94,7 @@ export function CycleProgressBlock({ sd, expanded: expandedProp, onToggle, hideH
 
   const summaryLine =
     metrics.summary_label || `Day ${dayNumber} of ${totalDays}`;
-  const rhythmHeader = metrics.rhythm_header_label || t('progressSection.dailyRhythm');
+  const rhythmHeader = t('progressSection.dailyRhythm');
 
   const visibleRhythm = useMemo(() => {
     if (rhythm.length > 0) return rhythm;
@@ -183,11 +183,11 @@ export function CycleProgressBlock({ sd, expanded: expandedProp, onToggle, hideH
           >
             <Metric
               value={daysEngaged}
-              label={metrics.days_engaged_label || t('progressSection.daysEngaged')}
+              label={t('progressSection.daysEngaged')}
             />
             <Metric
               value={daysComplete}
-              label={metrics.days_complete_label || t('progressSection.fullyCompleted')}
+              label={t('progressSection.fullyCompleted')}
             />
           </div>
 

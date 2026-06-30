@@ -1,6 +1,5 @@
 import { useNavigation, useRoute } from "@react-navigation/native";
 import React, { useEffect, useRef, useState } from "react";
-import { setSkipMitraStart, setForceFourDoorHome } from "../../utils/postLoginGuard";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -14,6 +13,10 @@ import {
   View,
 } from "react-native";
 import { saveDayReflection } from "../../engine/programApi";
+import {
+  setForceFourDoorHome,
+  setSkipMitraStart,
+} from "../../utils/postLoginGuard";
 
 const MAX_CHARS = 500;
 const DEFAULT_PROMPT =
@@ -64,7 +67,7 @@ export default function ProgramReflectionScreen() {
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.emoji}>🌼</Text>
+          {/* <Text style={styles.emoji}>🌼</Text> */}
           <Text style={styles.heading}>Reflection</Text>
           <Text style={styles.subtitle}>
             Take a quiet moment to reflect on today's journey.
@@ -84,14 +87,19 @@ export default function ProgramReflectionScreen() {
                 style={styles.input}
                 value={text}
                 onChangeText={(v) => {
-                  if (v.length <= MAX_CHARS) { setText(v); setSaved(false); }
+                  if (v.length <= MAX_CHARS) {
+                    setText(v);
+                    setSaved(false);
+                  }
                 }}
                 placeholder="Write your thoughts here..."
                 placeholderTextColor="#B5A08A"
                 multiline
                 textAlignVertical="top"
               />
-              <Text style={styles.charCount}>{text.length}/{MAX_CHARS}</Text>
+              <Text style={styles.charCount}>
+                {text.length}/{MAX_CHARS}
+              </Text>
 
               <TouchableOpacity
                 style={[styles.saveBtn, saving && { opacity: 0.6 }]}

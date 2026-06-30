@@ -309,7 +309,7 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
                     )}
                     {detailItem.how_to_live && detailItem.how_to_live.length > 0 && (
                       <div style={{ marginTop: 16 }}>
-                        <div style={labelStyle}>HOW TO LIVE THIS</div>
+                        <div style={labelStyle}>{t("mitra.rhythmSetup.libraryModal.howToLive")}</div>
                         <BulletList items={detailItem.how_to_live} />
                       </div>
                     )}

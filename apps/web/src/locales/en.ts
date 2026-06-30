@@ -537,6 +537,7 @@ export const en = {
         about: 'About',
         deity: 'Deity',
         tradition: 'Tradition',
+        howToLive: 'HOW TO LIVE THIS',
         select: 'Add',
       },
     },

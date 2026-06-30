@@ -1,4 +1,5 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useParams } from "react-router-dom";
+import { useTranslation } from "./lib/i18n";
 
 import { RequiresAuth } from "./components/RequiresAuth";
 import { RequiresGuideAuth } from "./components/RequiresGuideAuth";
@@ -100,14 +101,21 @@ import { GuideLoginPage } from "./pages/auth/GuideLoginPage";
 import { GuideForgotPasswordPage } from "./pages/auth/GuideForgotPasswordPage";
 import { GuideInviteAcceptPage } from "./pages/auth/GuideInviteAcceptPage";
 
-const ONBOARDING_TURN_1_PATH =
-  "/en/mitra/onboarding?containerId=welcome_onboarding&stateId=turn_1";
+function LocaleRedirect() {
+  const { locale } = useTranslation();
+  return <Navigate to={`/${locale}`} replace />;
+}
+
+function MitraStartRedirect() {
+  const { locale = 'en' } = useParams<{ locale: string }>();
+  return <Navigate to={`/${locale}/mitra/onboarding?containerId=welcome_onboarding&stateId=turn_1`} replace />;
+}
 
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/en" replace />} />
-      <Route path="/en" element={<MitraHomePage />} />
+      <Route path="/" element={<LocaleRedirect />} />
+      <Route path="/:locale" element={<MitraHomePage />} />
 
       {/* Auth */}
       <Route path="/login" element={<LoginPage />} />
@@ -124,32 +132,32 @@ export function AppRoutes() {
       <Route path="/guide/invite/:token" element={<GuideInviteAcceptPage />} />
 
       {/* Mitra — home is an open routing hub */}
-      <Route path="/en/mitra" element={<MitraHomePage />} />
+      <Route path="/:locale/mitra" element={<MitraHomePage />} />
       <Route
-        path="/en/mitra/start"
-        element={<Navigate to={ONBOARDING_TURN_1_PATH} replace />}
+        path="/:locale/mitra/start"
+        element={<MitraStartRedirect />}
       />
-      <Route path="/en/mitra/intention" element={<MitraIntentionPage />} />
-      <Route path="/en/mitra/onboarding" element={<OnboardingPage />} />
+      <Route path="/:locale/mitra/intention" element={<MitraIntentionPage />} />
+      <Route path="/:locale/mitra/onboarding" element={<OnboardingPage />} />
       <Route
-        path="/en/mitra/inner-path"
+        path="/:locale/mitra/inner-path"
         element={
           <RequiresAuth>
             <InnerPathPage />
           </RequiresAuth>
         }
       />
-      <Route path="/en/mitra/rhythm" element={<RhythmHomePage />} />
-      <Route path="/en/mitra/rhythm/setup" element={<RhythmWizardPage />} />
-      <Route path="/en/mitra/rhythm/edit" element={<RhythmSetupPage />} />
-      <Route path="/en/mitra/quick-reset" element={<MitraEnginePage />} />
-      <Route path="/en/mitra/tell-mitra" element={<TellMitraPage />} />
-      <Route path="/en/mitra/checkin-quick" element={<QuickCheckinPage />} />
-      <Route path="/en/mitra/rooms" element={<BrowseRoomsPage />} />
+      <Route path="/:locale/mitra/rhythm" element={<RhythmHomePage />} />
+      <Route path="/:locale/mitra/rhythm/setup" element={<RhythmWizardPage />} />
+      <Route path="/:locale/mitra/rhythm/edit" element={<RhythmSetupPage />} />
+      <Route path="/:locale/mitra/quick-reset" element={<MitraEnginePage />} />
+      <Route path="/:locale/mitra/tell-mitra" element={<TellMitraPage />} />
+      <Route path="/:locale/mitra/checkin-quick" element={<QuickCheckinPage />} />
+      <Route path="/:locale/mitra/rooms" element={<BrowseRoomsPage />} />
 
       {/* Journey-gated Mitra routes */}
       <Route
-        path="/en/mitra/engine"
+        path="/:locale/mitra/engine"
         element={
           <RequiresAuth>
             <MitraEnginePage />
@@ -157,7 +165,7 @@ export function AppRoutes() {
         }
       />
       <Route
-        path="/en/mitra/dashboard"
+        path="/:locale/mitra/dashboard"
         element={
           <RequiresJourney>
             <DashboardPage />
@@ -165,7 +173,7 @@ export function AppRoutes() {
         }
       />
       <Route
-        path="/en/mitra/room/:roomId"
+        path="/:locale/mitra/room/:roomId"
         element={
           <RequiresAuth>
             <RoomPage />
@@ -173,7 +181,7 @@ export function AppRoutes() {
         }
       />
       <Route
-        path="/en/mitra/checkpoint/:day"
+        path="/:locale/mitra/checkpoint/:day"
         element={
           <RequiresJourney>
             <CheckpointPage />
@@ -181,7 +189,7 @@ export function AppRoutes() {
         }
       />
       <Route
-        path="/en/mitra/trigger"
+        path="/:locale/mitra/trigger"
         element={
           <RequiresJourney>
             <TriggerPage />
@@ -189,7 +197,7 @@ export function AppRoutes() {
         }
       />
       <Route
-        path="/en/mitra/checkin"
+        path="/:locale/mitra/checkin"
         element={
           <RequiresJourney>
             <CheckinPage />
@@ -197,7 +205,7 @@ export function AppRoutes() {
         }
       />
       <Route
-        path="/en/mitra/welcome-back"
+        path="/:locale/mitra/welcome-back"
         element={
           <RequiresAuth>
             <WelcomeBackPage />
@@ -206,79 +214,79 @@ export function AppRoutes() {
       />
 
       {/* Haat vertical */}
-      <Route path="/en/haat" element={<KalpxHaatPage />} />
-      <Route path="/en/haat/browse" element={<KalpxHaatBrowsePage />} />
-      <Route path="/en/haat/cart" element={<KalpxHaatCartPage />} />
-      <Route path="/en/haat/payment" element={<KalpxHaatPaymentPage />} />
-      <Route path="/en/haat/addresses" element={<KalpxHaatAddressListPage />} />
-      <Route path="/en/haat/addresses/new" element={<KalpxHaatAddressFormPage />} />
+      <Route path="/:locale/haat" element={<KalpxHaatPage />} />
+      <Route path="/:locale/haat/browse" element={<KalpxHaatBrowsePage />} />
+      <Route path="/:locale/haat/cart" element={<KalpxHaatCartPage />} />
+      <Route path="/:locale/haat/payment" element={<KalpxHaatPaymentPage />} />
+      <Route path="/:locale/haat/addresses" element={<KalpxHaatAddressListPage />} />
+      <Route path="/:locale/haat/addresses/new" element={<KalpxHaatAddressFormPage />} />
       <Route
-        path="/en/haat/addresses/:id/edit"
+        path="/:locale/haat/addresses/:id/edit"
         element={<KalpxHaatAddressFormPage />}
       />
-      <Route path="/en/haat/store/:id" element={<KalpxHaatStoreDetailPage />} />
+      <Route path="/:locale/haat/store/:id" element={<KalpxHaatStoreDetailPage />} />
       <Route
-        path="/en/haat/product/:id"
+        path="/:locale/haat/product/:id"
         element={<KalpxHaatProductDetailPage />}
       />
-      <Route path="/en/haat/service/:id" element={<KalpxHaatServiceDetailPage />} />
+      <Route path="/:locale/haat/service/:id" element={<KalpxHaatServiceDetailPage />} />
       <Route
-        path="/en/haat/service/:id/package/:packageId"
+        path="/:locale/haat/service/:id/package/:packageId"
         element={<KalpxHaatPackageDetailPage />}
       />
       <Route
-        path="/en/haat/service/:id/checkout"
+        path="/:locale/haat/service/:id/checkout"
         element={<KalpxHaatServiceCheckoutPage />}
       />
 
       {/* Retreats vertical */}
       {/* Classes vertical */}
-      <Route path="/en/classes" element={<ClassListingPage />} />
-      <Route path="/en/classes/success" element={<ClassBookingSuccessPage />} />
-      <Route path="/en/classes/:slug" element={<ClassDetailPage />} />
-      <Route path="/en/classes/:slug/book" element={<ClassBookingPage />} />
-      <Route path="/en/classes/:slug/pay" element={<ClassPaymentPage />} />
+      <Route path="/:locale/classes" element={<ClassListingPage />} />
+      <Route path="/:locale/classes/success" element={<ClassBookingSuccessPage />} />
+      <Route path="/:locale/classes/:slug" element={<ClassDetailPage />} />
+      <Route path="/:locale/classes/:slug/book" element={<ClassBookingPage />} />
+      <Route path="/:locale/classes/:slug/pay" element={<ClassPaymentPage />} />
 
       {/* Communities vertical */}
-      <Route path="/en/community" element={<CommunityFeedPage />} />
+      <Route path="/:locale/community" element={<CommunityFeedPage />} />
       <Route
-        path="/en/community/communities"
+        path="/:locale/community/communities"
         element={<CommunityTopCommunitiesPage />}
       />
       <Route
-        path="/en/community/communities/:slug"
+        path="/:locale/community/communities/:slug"
         element={<CommunityDetailPage />}
       />
-      <Route path="/en/community/explore" element={<CommunityExplorePage />} />
+      <Route path="/:locale/community/explore" element={<CommunityExplorePage />} />
       <Route
-        path="/en/community/about-kalpx"
+        path="/:locale/community/about-kalpx"
         element={<CommunityAboutKalpxPage />}
       />
       <Route
-        path="/en/community/kalpx-rules"
+        path="/:locale/community/kalpx-rules"
         element={<CommunityKalpxRulesPage />}
       />
-      <Route path="/en/community/popular" element={<CommunityPopularPage />} />
+      <Route path="/:locale/community/popular" element={<CommunityPopularPage />} />
       <Route
-        path="/en/community/privacy-policy"
+        path="/:locale/community/privacy-policy"
         element={<CommunityPrivacyPolicyPage />}
       />
-      <Route path="/en/community/top" element={<CommunityTopPage />} />
+      <Route path="/:locale/community/top" element={<CommunityTopPage />} />
       <Route
-        path="/en/community/activity"
+        path="/:locale/community/activity"
         element={<CommunityUserActivityPage />}
       />
       <Route
-        path="/en/community/user-agreements"
+        path="/:locale/community/user-agreements"
         element={<CommunityUserAgreementsPage />}
       />
-      <Route path="/en/community/new" element={<CreateCommunityPostPage />} />
+      <Route path="/:locale/community/new" element={<CreateCommunityPostPage />} />
       <Route
-        path="/en/community/:postId"
+        path="/:locale/community/:postId"
         element={<CommunityPostDetailPage />}
       />
       <Route
-        path="/en/creator/posts"
+        path="/:locale/creator/posts"
         element={
           <RequiresAuth>
             <CreatorPostsPage />
@@ -286,7 +294,7 @@ export function AppRoutes() {
         }
       />
       <Route
-        path="/en/creator/posts/new"
+        path="/:locale/creator/posts/new"
         element={
           <RequiresAuth>
             <CreatorPostEditorPage />
@@ -294,7 +302,7 @@ export function AppRoutes() {
         }
       />
       <Route
-        path="/en/creator/posts/new-simple"
+        path="/:locale/creator/posts/new-simple"
         element={
           <RequiresAuth>
             <CreatorSimplePostEditorPage />
@@ -302,7 +310,7 @@ export function AppRoutes() {
         }
       />
       <Route
-        path="/en/creator/posts/select-practice"
+        path="/:locale/creator/posts/select-practice"
         element={
           <RequiresAuth>
             <CreatorPracticeLibraryPage />
@@ -310,7 +318,7 @@ export function AppRoutes() {
         }
       />
       <Route
-        path="/en/creator/posts/:id/edit"
+        path="/:locale/creator/posts/:id/edit"
         element={
           <RequiresAuth>
             <CreatorPostEditorPage />
@@ -318,7 +326,7 @@ export function AppRoutes() {
         }
       />
       <Route
-        path="/en/creator/posts/:id/edit-simple"
+        path="/:locale/creator/posts/:id/edit-simple"
         element={
           <RequiresAuth>
             <CreatorSimplePostEditorPage />
@@ -326,38 +334,38 @@ export function AppRoutes() {
         }
       />
       <Route
-        path="/en/profile"
+        path="/:locale/profile"
         element={
           <RequiresAuth>
             <ProfilePage />
           </RequiresAuth>
         }
       />
-      <Route path="/en/privacy" element={<PrivacyPage />} />
-      <Route path="/en/privacy/india" element={<IndiaPrivacyPage />} />
-      <Route path="/en/terms" element={<TermsPage />} />
-      <Route path="/en/data-deletion" element={<DataDeletionPage />} />
+      <Route path="/:locale/privacy" element={<PrivacyPage />} />
+      <Route path="/:locale/privacy/india" element={<IndiaPrivacyPage />} />
+      <Route path="/:locale/terms" element={<TermsPage />} />
+      <Route path="/:locale/data-deletion" element={<DataDeletionPage />} />
 
       {/* Retreats vertical */}
-      <Route path="/en/retreats" element={<RetreatsInterestPage />} />
-      <Route path="/en/retreats/:slug" element={<RetreatDetailsPage />} />
+      <Route path="/:locale/retreats" element={<RetreatsInterestPage />} />
+      <Route path="/:locale/retreats/:slug" element={<RetreatDetailsPage />} />
       <Route
-        path="/en/retreats/:slug/package/:packageId"
+        path="/:locale/retreats/:slug/package/:packageId"
         element={<RetreatPackageDetailsPage />}
       />
-      <Route path="/en/retreats/:slug/book" element={<RetreatBookingPage />} />
+      <Route path="/:locale/retreats/:slug/book" element={<RetreatBookingPage />} />
       <Route
-        path="/en/retreats/bookings/:bookingId"
+        path="/:locale/retreats/bookings/:bookingId"
         element={<RetreatBookingDetailsPage />}
       />
       <Route
-        path="/en/retreats/cancellation/:bookingId"
+        path="/:locale/retreats/cancellation/:bookingId"
         element={<RetreatCancellationPage />}
       />
 
       {/* Notifications inbox */}
       <Route
-        path="/en/notifications"
+        path="/:locale/notifications"
         element={
           <RequiresAuth>
             <NotificationsPage />
@@ -367,7 +375,7 @@ export function AppRoutes() {
 
       {/* Notification preferences */}
       <Route
-        path="/en/settings/notifications"
+        path="/:locale/settings/notifications"
         element={
           <RequiresAuth>
             <NotificationPreferencesPage />
@@ -377,7 +385,7 @@ export function AppRoutes() {
 
       {/* Reminders */}
       <Route
-        path="/en/settings/reminders"
+        path="/:locale/settings/reminders"
         element={
           <RequiresAuth>
             <RemindersPage />
@@ -433,7 +441,7 @@ export function AppRoutes() {
         element={<RequiresStaff><ProgramAdminCampaignDetail /></RequiresStaff>}
       />
 
-      <Route path="*" element={<Navigate to="/en" replace />} />
+      <Route path="*" element={<LocaleRedirect />} />
     </Routes>
   );
 }

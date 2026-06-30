@@ -5,49 +5,6 @@ import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { useTranslation } from "../../lib/i18n";
 import { MitraMenuDrawer } from "./MitraMenuDrawer";
 
-const TABS = [
-  {
-    to: "/en",
-    labelKey: "nav.home" as const,
-    icon: "/new-home.svg",
-    activeIcon: "/sel-home.svg",
-    exact: true,
-  },
-  {
-    to: "/en/profile",
-    labelKey: "nav.profile" as const,
-    exact: false,
-  },
-  // {
-  //   to: "/en/mitra",
-  //   label: "Mitra",
-  //   icon: "/new-routine.svg",
-  //   activeIcon: "/sel-routine.svg",
-  //   exact: false,
-  // },
-  // {
-  //   to: "/en/classes",
-  //   label: "Classes",
-  //   icon: "/new-classes.svg",
-  //   activeIcon: "/sel-classes.svg",
-  //   exact: false,
-  // },
-  // {
-  //   to: "/en/community",
-  //   label: "Community",
-  //   icon: "/new-kalpxhaat.svg",
-  //   activeIcon: "/sel-com.svg",
-  //   exact: false,
-  // },
-  // {
-  //   to: "/en/retreats",
-  //   label: "Retreats",
-  //   icon: "/new-retreat.svg",
-  //   activeIcon: "/sel-retreats.svg",
-  //   exact: false,
-  // },
-];
-
 export function MobileBottomNav({
   transparent = false,
   hidden = false,
@@ -56,7 +13,11 @@ export function MobileBottomNav({
   hidden?: boolean;
 }) {
   const { authed, userInitial } = useCurrentUser();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const TABS = [
+    { to: `/${locale}`, labelKey: "nav.home" as const, icon: "/new-home.svg", activeIcon: "/sel-home.svg", exact: true },
+    { to: `/${locale}/profile`, labelKey: "nav.profile" as const, exact: false },
+  ];
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (

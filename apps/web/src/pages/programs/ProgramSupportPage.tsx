@@ -90,17 +90,6 @@ function buildFaqs(code: string | null): { question: string; answer: React.React
         </>
       ),
     },
-    {
-      question: 'How do I enter my invite code?',
-      answer: (
-        <ol style={{ margin: '8px 0 0', paddingLeft: 20, lineHeight: 1.8 }}>
-          <li>Open KalpX.</li>
-          <li>On the home screen, tap <strong>&quot;Have an invite code?&quot;</strong></li>
-          <li>Enter {codeEl}</li>
-          <li>Tap Join.</li>
-        </ol>
-      ),
-    },
   ];
 }
 
@@ -201,40 +190,6 @@ export function ProgramSupportPage() {
           ))}
         </section>
 
-        {/* Contact support */}
-        <div
-          id="contact-support"
-          style={{
-            marginTop: 40,
-            padding: 24,
-            background: 'var(--kalpx-card-bg)',
-            border: '1px solid var(--kalpx-border)',
-            borderRadius: 'var(--kalpx-r-lg)',
-            textAlign: 'center',
-          }}
-        >
-          <p style={{ marginBottom: 16, color: 'var(--kalpx-text-soft)', fontSize: 14 }}>
-            Still need help? Our support team will assist you.
-          </p>
-          <a
-            href={safeContactUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Contact KalpX support"
-            style={{
-              display: 'inline-block',
-              padding: '12px 28px',
-              background: 'var(--kalpx-cta)',
-              color: 'var(--kalpx-cta-text)',
-              borderRadius: 'var(--kalpx-r-md)',
-              fontWeight: 600,
-              fontSize: 15,
-              textDecoration: 'none',
-            }}
-          >
-            {supportLabel || 'Contact KalpX support'}
-          </a>
-        </div>
       </main>
     </AppShell>
   );

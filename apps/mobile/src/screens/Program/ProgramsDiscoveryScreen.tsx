@@ -108,22 +108,17 @@ export default function ProgramsDiscoveryScreen() {
   const [programs, setPrograms] = useState<TLPProgram[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedLanguage, setSelectedLanguage] = useState("all");
   const [refreshing, setRefreshing] = useState(false);
 
   const loadPrograms = React.useCallback(async () => {
     try {
       setError(null);
-      const data = await fetchPrograms({
-        category: selectedCategory !== "all" ? selectedCategory : undefined,
-        language: selectedLanguage !== "all" ? selectedLanguage : undefined,
-      });
+      const data = await fetchPrograms({});
       setPrograms(data.programs);
     } catch {
       setError("Couldn't load programs. Please try again.");
     }
-  }, [selectedCategory, selectedLanguage]);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -132,10 +127,7 @@ export default function ProgramsDiscoveryScreen() {
         try {
           setLoading(true);
           setError(null);
-          const data = await fetchPrograms({
-            category: selectedCategory !== "all" ? selectedCategory : undefined,
-            language: selectedLanguage !== "all" ? selectedLanguage : undefined,
-          });
+          const data = await fetchPrograms({});
           if (!cancelled) setPrograms(data.programs);
         } catch {
           if (!cancelled) setError("Couldn't load programs. Please try again.");
@@ -144,7 +136,7 @@ export default function ProgramsDiscoveryScreen() {
         }
       })();
       return () => { cancelled = true; };
-    }, [selectedCategory, selectedLanguage]),
+    }, []),
   );
 
   const handleRefresh = async () => {
@@ -172,8 +164,6 @@ export default function ProgramsDiscoveryScreen() {
     );
   }
 
-  const isFiltered = selectedCategory !== "all" || selectedLanguage !== "all";
-
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* Header */}
@@ -187,62 +177,6 @@ export default function ProgramsDiscoveryScreen() {
         <View style={{ width: 40 }} />
       </View>
 
-      {/* Category filter chips */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filterRow}
-      >
-        {CATEGORIES.map((cat) => (
-          <TouchableOpacity
-            key={cat.value}
-            onPress={() => setSelectedCategory(cat.value)}
-            style={[
-              styles.filterChip,
-              selectedCategory === cat.value && styles.filterChipActive,
-            ]}
-            accessibilityLabel={`Filter by ${cat.label}`}
-          >
-            <Text
-              style={[
-                styles.filterChipText,
-                selectedCategory === cat.value && styles.filterChipTextActive,
-              ]}
-            >
-              {cat.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      {/* Language filter chips */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.langRow}
-      >
-        {LANGUAGES.map((lang) => (
-          <TouchableOpacity
-            key={lang.value}
-            onPress={() => setSelectedLanguage(lang.value)}
-            style={[
-              styles.filterChip,
-              selectedLanguage === lang.value && styles.filterChipActive,
-            ]}
-            accessibilityLabel={`Filter by ${lang.label}`}
-          >
-            <Text
-              style={[
-                styles.filterChipText,
-                selectedLanguage === lang.value && styles.filterChipTextActive,
-              ]}
-            >
-              {lang.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
@@ -252,17 +186,8 @@ export default function ProgramsDiscoveryScreen() {
       >
         {programs.length === 0 ? (
           <View style={styles.emptyState}>
-            {isFiltered ? (
-              <>
-                <Text style={styles.emptyText}>No programs in this category yet.</Text>
-                <Text style={styles.emptySubText}>Try a different filter or check back soon.</Text>
-              </>
-            ) : (
-              <>
-                <Text style={styles.emptyText}>No programs available</Text>
-                <Text style={styles.emptySubText}>Check back soon for new programs.</Text>
-              </>
-            )}
+            <Text style={styles.emptyText}>No programs available</Text>
+            <Text style={styles.emptySubText}>Check back soon for new programs.</Text>
           </View>
         ) : (
           <View style={styles.list}>

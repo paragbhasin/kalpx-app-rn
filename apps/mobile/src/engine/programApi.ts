@@ -30,7 +30,7 @@ export interface ProgramDayStatus {
 
 export interface ActiveProgramSummary {
   name: string;
-  status: "active" | "completed";
+  status: "active" | "completed" | "upcoming" | "joined";
   current_day: number;
   next_day_available: boolean;
   next_day_locked?: boolean;
@@ -39,6 +39,10 @@ export interface ActiveProgramSummary {
   day_statuses?: ProgramDayStatus[];
   show_day8_transition?: boolean;
   campaign_code?: string;
+  // upcoming program fields
+  start_date?: string;
+  days_until_start?: number;
+  join_url?: string;
 }
 
 export interface JourneySummaryData {

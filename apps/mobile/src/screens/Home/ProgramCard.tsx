@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import {
   LayoutAnimation,
   Platform,
+  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -56,6 +57,39 @@ function getDayLabelStyle(s: DayStatus) {
   if (s === "today") return styles.dayLabelActive;
   if (s === "missed") return styles.dayLabelMissed;
   return styles.dayLabelLocked;
+}
+
+function UpcomingProgramCard({ program }: ProgramCardProps) {
+  const handleShare = async () => {
+    const daysText = (program.days_until_start ?? 0) > 1
+      ? `Starts in ${program.days_until_start} days`
+      : "Starts tomorrow";
+    try {
+      await Share.share({
+        message: `Join me on "${program.name}" — a ${program.total_days ?? 7}-day spiritual journey on KalpX.\n\n${daysText}\n\n${program.join_url ?? ""}`,
+        url: program.join_url,
+      });
+    } catch {}
+  };
+
+  const daysLabel = (program.days_until_start ?? 0) === 1
+    ? "Starts Tomorrow"
+    : `Starts in ${program.days_until_start ?? "a few"} Days`;
+
+  return (
+    <View style={styles.upcomingCard}>
+      <Text style={styles.upcomingTag}>UPCOMING</Text>
+      <Text style={styles.upcomingName}>{program.name}</Text>
+      <Text style={styles.upcomingDays}>{daysLabel}</Text>
+      <View style={styles.upcomingDivider} />
+      <Text style={styles.upcomingMessage}>
+        Practice is more meaningful together.{"\n"}Invite someone you'd like to walk this journey with.
+      </Text>
+      <TouchableOpacity style={styles.upcomingShareBtn} activeOpacity={0.85} onPress={handleShare}>
+        <Text style={styles.upcomingShareBtnText}>Share This Journey</Text>
+      </TouchableOpacity>
+    </View>
+  );
 }
 
 function CompletedProgramCard({ program }: ProgramCardProps) {
@@ -122,6 +156,10 @@ export default function ProgramCard({ program }: ProgramCardProps) {
 
   if (program.status === "completed") {
     return <CompletedProgramCard program={program} />;
+  }
+
+  if (program.status === "upcoming") {
+    return <UpcomingProgramCard program={program} />;
   }
 
   const isCompleted = false;
@@ -544,5 +582,57 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#C99317",
     fontWeight: "600",
+  },
+
+  // Upcoming card
+  upcomingCard: {
+    backgroundColor: "#FFF8EE",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#C99317",
+    padding: 20,
+    gap: 6,
+  },
+  upcomingTag: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 10,
+    color: "#C99317",
+    letterSpacing: 0.08,
+    marginBottom: 2,
+  },
+  upcomingName: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
+    color: "#432104",
+    marginBottom: 2,
+  },
+  upcomingDays: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 14,
+    color: "#9A7548",
+    marginBottom: 4,
+  },
+  upcomingDivider: {
+    height: 1,
+    backgroundColor: "#EEE3CC",
+    marginVertical: 12,
+  },
+  upcomingMessage: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    color: "#7B6545",
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  upcomingShareBtn: {
+    backgroundColor: "#2E5723",
+    borderRadius: 10,
+    paddingVertical: 13,
+    alignItems: "center",
+  },
+  upcomingShareBtnText: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 14,
+    color: "#FFFFFF",
   },
 });

@@ -38,6 +38,18 @@ export interface ActiveProgramSummary {
   total_days?: number;
   day_statuses?: ProgramDayStatus[];
   show_day8_transition?: boolean;
+  campaign_code?: string;
+}
+
+export interface JourneySummaryData {
+  program_name: string;
+  campaign_code: string;
+  total_days: number;
+  days_completed: number;
+  reflections_written: number;
+  testimonial_submitted: boolean;
+  joined_at: string | null;
+  completed_at: string | null;
 }
 
 export interface WisdomCard {
@@ -132,6 +144,27 @@ export async function submitProgramTestimonial(
     consent_to_share: false,
   });
   return res.data;
+}
+
+export async function fetchJourneySummary(campaignCode: string): Promise<JourneySummaryData> {
+  const res = await api.get(`programs/my-programs/${campaignCode}/summary/`, {
+    params: { locale: getLocale() },
+  });
+  return res.data;
+}
+
+export async function submitTestimonialFull(payload: {
+  text: string;
+  rating: number;
+  visibility: "named" | "anonymous" | "private";
+  display_name?: string;
+}): Promise<void> {
+  await api.post("programs/my-active/testimonial/", {
+    text: payload.text,
+    rating: payload.rating,
+    visibility: payload.visibility,
+    display_name: payload.display_name ?? "",
+  });
 }
 
 export async function submitProgramMicroFeedback(

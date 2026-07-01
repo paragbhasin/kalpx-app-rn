@@ -93,8 +93,8 @@ function CompletedProgramCard({ program }: ProgramCardProps) {
         style={styles.btnPrimary}
         activeOpacity={0.85}
         onPress={() =>
-          navigation.navigate("MyProgramsScreen" as any, {
-            initialTab: "completed",
+          navigation.navigate("JourneySummaryScreen" as any, {
+            campaignCode: program.campaign_code,
           })
         }
       >

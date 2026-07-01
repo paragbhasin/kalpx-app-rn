@@ -383,14 +383,24 @@ function TemplateRow({
             <span style={{ fontSize: 11, color: "var(--kalpx-text-muted)" }}>
               · {tmpl.duration_days} days
             </span>
-            <span style={{ fontSize: 11, color: 'var(--kalpx-text-muted)' }}>
+            <button
+              onClick={() => onView(tmpl.id)}
+              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: 11,
+                color: tmpl.desired_start_date ? 'var(--kalpx-text-muted)' : 'var(--kalpx-gold)',
+                fontWeight: tmpl.desired_start_date ? 400 : 600, textDecoration: tmpl.desired_start_date ? 'none' : 'underline' }}
+            >
               · Starts: {tmpl.desired_start_date
                 ? new Date(tmpl.desired_start_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-                : 'Not set'}
-            </span>
-            <span style={{ fontSize: 11, color: 'var(--kalpx-text-muted)' }}>
-              · Max: {tmpl.max_participants ? `${tmpl.max_participants} people` : 'Unlimited'}
-            </span>
+                : 'Set date →'}
+            </button>
+            <button
+              onClick={() => onView(tmpl.id)}
+              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: 11,
+                color: tmpl.max_participants ? 'var(--kalpx-text-muted)' : 'var(--kalpx-gold)',
+                fontWeight: tmpl.max_participants ? 400 : 600, textDecoration: tmpl.max_participants ? 'none' : 'underline' }}
+            >
+              · Max: {tmpl.max_participants ? `${tmpl.max_participants} people` : 'Set limit →'}
+            </button>
           </div>
         </div>
         <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>

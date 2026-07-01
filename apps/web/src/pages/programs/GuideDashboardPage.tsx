@@ -97,11 +97,21 @@ function ProgramRow({ program }: { program: GuideProgram }) {
           >
             {program.title}
           </p>
-          <p
-            style={{ fontSize: 12, color: "var(--kalpx-text-muted)", margin: 0 }}
-          >
-            {program.status}
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' as const }}>
+            <p style={{ fontSize: 12, color: "var(--kalpx-text-muted)", margin: 0 }}>
+              {program.status}
+            </p>
+            {program.start_date && (
+              <span style={{ fontSize: 11, color: 'var(--kalpx-text-muted)' }}>
+                · Starts {new Date(program.start_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </span>
+            )}
+            {program.max_participants && (
+              <span style={{ fontSize: 11, color: 'var(--kalpx-text-muted)' }}>
+                · Max {program.max_participants} people
+              </span>
+            )}
+          </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 20, flexShrink: 0 }}>
           <div style={{ textAlign: "right" }}>
@@ -360,7 +370,7 @@ function TemplateRow({
           >
             {tmpl.title || "Untitled Program"}
           </p>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: 'wrap' as const }}>
             <span
               style={{
                 fontSize: 11,
@@ -375,6 +385,16 @@ function TemplateRow({
             <span style={{ fontSize: 11, color: "var(--kalpx-text-muted)" }}>
               · {tmpl.duration_days} days
             </span>
+            {tmpl.desired_start_date && (
+              <span style={{ fontSize: 11, color: 'var(--kalpx-text-muted)' }}>
+                · Starts {new Date(tmpl.desired_start_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </span>
+            )}
+            {tmpl.max_participants && (
+              <span style={{ fontSize: 11, color: 'var(--kalpx-text-muted)' }}>
+                · Max {tmpl.max_participants} people
+              </span>
+            )}
           </div>
         </div>
         <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>

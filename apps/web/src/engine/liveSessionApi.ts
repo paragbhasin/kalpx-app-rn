@@ -239,6 +239,8 @@ export interface GuideProgram {
   joined_count: number;
   testimonials_count: number;
   created_at: string;
+  start_date: string | null;
+  max_participants: number | null;
 }
 
 export interface GuideSession {
@@ -262,6 +264,8 @@ export interface GuideDashboardTemplate {
   is_editable_by_guide: boolean;
   locked_at: string | null;
   submitted_at: string | null;
+  desired_start_date: string | null;
+  max_participants: number | null;
 }
 
 export interface GuideDashboard {

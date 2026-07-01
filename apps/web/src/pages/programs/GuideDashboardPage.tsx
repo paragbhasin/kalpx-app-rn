@@ -351,36 +351,38 @@ function ProgramRow({
                 Completed
               </span>
             </div>
-            {program.testimonials_count > 0 && (
-              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                <svg
-                  width="13"
-                  height="13"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#d97706"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                </svg>
-                <span
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 700,
-                    color: "var(--kalpx-text)",
-                  }}
-                >
-                  {program.testimonials_count}
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#d97706"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+              <span style={{ fontSize: 13, fontWeight: 700, color: "var(--kalpx-text)" }}>
+                {program.testimonials_count}
+              </span>
+              <span style={{ fontSize: 11, color: "var(--kalpx-text-muted)" }}>
+                Testimonials
+              </span>
+              {program.testimonials_count > 0 && (program.approved_testimonials_count ?? 0) < program.testimonials_count && (
+                <span style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  background: "#FFF3CC",
+                  color: "#9A7548",
+                  borderRadius: 8,
+                  padding: "1px 6px",
+                }}>
+                  {program.testimonials_count - (program.approved_testimonials_count ?? 0)} pending
                 </span>
-                <span
-                  style={{ fontSize: 11, color: "var(--kalpx-text-muted)" }}
-                >
-                  Testimonials
-                </span>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -812,6 +814,11 @@ function GuideTestimonialsSection({ programs }: { programs: GuideProgram[] }) {
         ) : (
           filtered.map((t) => (
             <div key={t.id} style={{ background: "#FAF7F2", borderRadius: 10, border: "1px solid #E8D9B5", padding: 14 }}>
+              {t.program_name && (
+                <div style={{ fontSize: 11, fontWeight: 600, color: "var(--kalpx-text-muted)", marginBottom: 6 }}>
+                  {t.program_name}
+                </div>
+              )}
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
                 <span style={{ fontSize: 12, fontWeight: 600, color: "var(--kalpx-text)" }}>{t.display_name}</span>
                 <span style={{ fontSize: 13, color: "#C99317" }}>{starStr(t.rating)}</span>

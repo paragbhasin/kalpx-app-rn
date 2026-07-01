@@ -240,6 +240,7 @@ export interface GuideProgram {
   active_count: number;
   completed_count: number;
   testimonials_count: number;
+  approved_testimonials_count: number;
   created_at: string;
   start_date: string | null;
   max_participants: number | null;
@@ -317,6 +318,8 @@ export interface GuideTestimonialFull {
   consent_to_share: boolean;
   moderation_status: "pending" | "approved" | "rejected";
   created_at: string;
+  program_name: string;
+  campaign_code: string;
 }
 
 export interface OpsTestimonial {

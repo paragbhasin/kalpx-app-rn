@@ -457,7 +457,7 @@ export default function JourneySummaryScreen() {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "#FBF5EE" },
   bg: { flex: 1 },
-  scroll: { padding: 24, paddingTop: 64, paddingBottom: 80 },
+  scroll: { padding: 24, paddingTop: 24, paddingBottom: 80 },
   center: {
     flex: 1,
     alignItems: "center",
@@ -476,7 +476,7 @@ const styles = StyleSheet.create({
   backBtnText: { fontSize: 22, color: "#432104" },
 
   // Badge
-  badgeWrap: { alignItems: "center", marginBottom: 20 },
+  badgeWrap: { alignItems: "center", marginBottom: 12 },
   badgeEmoji: { fontSize: 48, marginBottom: 10 },
   badgeText: {
     fontFamily: Fonts.sans.bold,
@@ -496,7 +496,7 @@ const styles = StyleSheet.create({
     fontSize: 26,
     color: "#432104",
     textAlign: "center",
-    marginBottom: 8,
+    marginBottom: 16,
   },
   headingMedium: {
     fontFamily: Fonts.serif.bold,
@@ -511,8 +511,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#7B6545",
     textAlign: "center",
-    marginBottom: 6,
-    marginTop: 4,
+    marginBottom: 10,
+    lineHeight: 24,
   },
   programNameInline: {
     fontFamily: Fonts.sans.bold,
@@ -523,14 +523,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#9A7548",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 28,
   },
   sectionLabel: {
     fontFamily: Fonts.sans.regular,
     fontSize: 13,
     color: "#9A7548",
     textAlign: "center",
-    marginBottom: 16,
+    marginBottom: 14,
   },
 
   // Stats

@@ -237,6 +237,8 @@ export interface GuideProgram {
   join_url: string;
   template_id: number | null;
   joined_count: number;
+  active_count: number;
+  completed_count: number;
   testimonials_count: number;
   created_at: string;
   start_date: string | null;
@@ -275,6 +277,9 @@ export interface GuideDashboard {
     sessions_count: number;
     total_registered: number;
     testimonials_count: number;
+    active_count_total: number;
+    completed_count_total: number;
+    completion_rate: number;
   };
   programs: GuideProgram[];
   my_templates: GuideDashboardTemplate[];

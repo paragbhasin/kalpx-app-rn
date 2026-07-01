@@ -222,24 +222,42 @@ export function GuideTemplateDayEditorPage() {
   }
 
   async function handleSubmit() {
-    // Validate: every day must have at least one slot filled
+    // Validate: every day must have at least one of mantra/sankalp/practice
     const emptyDays = days.filter((d) => {
-      const hasRef =
-        d.mantra_ref || d.sankalp_ref || d.practice_ref || d.wisdom_ref;
-      const hasCustom =
-        d.custom_mantra_body ||
-        d.custom_sankalp_body ||
-        d.custom_practice_body ||
-        d.custom_wisdom_body;
-      return !hasRef && !hasCustom;
+      const hasMantra = d.mantra_ref || d.custom_mantra_body;
+      const hasSankalp = d.sankalp_ref || d.custom_sankalp_body;
+      const hasPractice = d.practice_ref || d.custom_practice_body;
+      return !hasMantra && !hasSankalp && !hasPractice;
     });
     if (emptyDays.length > 0) {
       const nums = emptyDays.map((d) => `Day ${d.day_number}`).join(", ");
-      setError(
-        `Each day needs at least one content slot (Mantra, Sankalp, Practice, or Wisdom). Missing: ${nums}`,
-      );
+      setError(`Each day needs at least one Mantra, Sankalp, or Practice. Missing: ${nums}`);
+      setActiveDay(emptyDays[0].day_number);
       return;
     }
+
+    // Validate: mantra without count
+    const missingCount = days.filter(
+      (d) => (d.mantra_ref || d.custom_mantra_body) && !d.mantra_count
+    );
+    if (missingCount.length > 0) {
+      const nums = missingCount.map((d) => `Day ${d.day_number}`).join(", ");
+      setError(`Select a chant count for the Mantra in: ${nums}`);
+      setActiveDay(missingCount[0].day_number);
+      return;
+    }
+
+    // Validate: practice without duration
+    const missingDuration = days.filter(
+      (d) => (d.practice_ref || d.custom_practice_body) && !d.practice_duration_minutes
+    );
+    if (missingDuration.length > 0) {
+      const nums = missingDuration.map((d) => `Day ${d.day_number}`).join(", ");
+      setError(`Enter a practice duration (minutes) for: ${nums}`);
+      setActiveDay(missingDuration[0].day_number);
+      return;
+    }
+
     setError("");
     // If settings already filled on page, submit directly — no modal needed
     const hasSettings = launchStartDate || launchMaxParticipants;
@@ -838,6 +856,11 @@ function DayRow({
                 </button>
               ))}
             </div>
+            {!day.mantra_count && (
+              <p style={{ fontSize: 11, color: "#C05B3A", margin: "4px 0 0" }}>
+                Select a chant count to continue
+              </p>
+            )}
           </div>
           <div>
             <div style={settingsLabel}>SUGGESTED REMINDER TIME</div>
@@ -971,6 +994,11 @@ function DayRow({
               />
               <span style={{ fontSize: 12, color: "#7B6545" }}>min</span>
             </div>
+            {!day.practice_duration_minutes && (
+              <p style={{ fontSize: 11, color: "#C05B3A", margin: "4px 0 0" }}>
+                Enter practice duration to continue
+              </p>
+            )}
           </div>
           <div>
             <div style={settingsLabel}>SUGGESTED REMINDER TIME</div>

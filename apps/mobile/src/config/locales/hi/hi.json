@@ -2906,6 +2906,17 @@
       "errorDayNotFound": "यह दिन नहीं मिला।",
       "errorLoadFailed": "लोड नहीं हो सका। फिर से प्रयास करें।",
       "errorGeneric": "कुछ समस्या आई।"
+    },
+    "reflection": {
+      "defaultPrompt": "एक पल रुकें। आज आपके भीतर क्या बदला — चाहे थोड़ा भी? इसे बिना किसी निर्णय के महसूस करें।",
+      "heading": "चिंतन",
+      "subtitle": "आज की यात्रा पर एक शांत पल में विचार करें।",
+      "questionLabel": "प्रश्न",
+      "inputPlaceholder": "अपने विचार यहाँ लिखें...",
+      "savedButton": "✓ चिंतन सहेजा",
+      "saveButton": "चिंतन सहेजें",
+      "goToHome": "होम पर जाएं",
+      "backToDay": "दिन पर वापस जाएं"
     }
   },
   "programCard": {

@@ -76,8 +76,6 @@ function ImpactCard({
         background: "var(--kalpx-surface)",
         border: "1px solid var(--kalpx-border)",
         borderRadius: 12,
-        flex: "1 1 100px",
-        minWidth: 100,
         display: "flex",
         flexDirection: "column",
         gap: 10,
@@ -595,14 +593,7 @@ function TemplateRow({
         gap: 12,
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-        }}
-      >
+      <div className="gd-tmpl-header">
         <div style={{ flex: 1, minWidth: 0 }}>
           <p
             style={{
@@ -684,7 +675,7 @@ function TemplateRow({
             </button>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+        <div className="gd-tmpl-btns">
           {canEdit && (
             <button
               onClick={() => onEdit(tmpl.id)}
@@ -875,6 +866,72 @@ function GuideTestimonialsSection({ programs }: { programs: GuideProgram[] }) {
   );
 }
 
+const GUIDE_DASH_STYLES = `
+  .gd-main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 24px 16px 80px;
+  }
+  .gd-impact-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .gd-impact-grid > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+  .gd-cta-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .gd-cta-btn {
+    display: block;
+    text-align: center;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .gd-tmpl-header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .gd-tmpl-btns {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .gd-tmpl-btns button, .gd-tmpl-btns a {
+    flex: 1;
+    text-align: center;
+  }
+  .gd-metrics-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  @media (min-width: 600px) {
+    .gd-main { padding: 32px 24px 80px; }
+    .gd-impact-grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+    .gd-impact-grid > :last-child:nth-child(odd) {
+      grid-column: auto;
+    }
+    .gd-cta-row { flex-direction: row; }
+    .gd-cta-btn { display: inline-block; text-align: left; }
+    .gd-tmpl-header { flex-direction: row; align-items: flex-start; }
+    .gd-tmpl-btns { flex-wrap: nowrap; }
+    .gd-tmpl-btns button, .gd-tmpl-btns a { flex: none; }
+  }
+`;
+
 export function GuideDashboardPage() {
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -901,6 +958,7 @@ export function GuideDashboardPage() {
 
   return (
     <AppShell>
+      <style>{GUIDE_DASH_STYLES}</style>
       {/* Portal top bar */}
       <div
         style={{
@@ -909,7 +967,7 @@ export function GuideDashboardPage() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 20px",
+          padding: "0 16px",
           background: "var(--kalpx-bg)",
           position: "sticky",
           top: 0,
@@ -936,13 +994,7 @@ export function GuideDashboardPage() {
           Sign out
         </button>
       </div>
-      <main
-        style={{
-          maxWidth: 1500,
-          margin: "5px 250px",
-          padding: "32px 20px 80px",
-        }}
-      >
+      <main className="gd-main">
         <header style={{ marginBottom: 28 }}>
           <p
             style={{
@@ -1021,14 +1073,7 @@ export function GuideDashboardPage() {
             return (
               <>
                 {/* Summary impact cards */}
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 10,
-                    flexWrap: "wrap",
-                    marginBottom: 32,
-                  }}
-                >
+                <div className="gd-impact-grid">
                   <ImpactCard
                     iconBg="#FEF3C7"
                     icon={
@@ -1358,38 +1403,23 @@ export function GuideDashboardPage() {
                   })()} */}
 
                 {/* CTA row */}
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 10,
-                    marginBottom: 32,
-                    flexWrap: "wrap",
-                  }}
-                >
+                <div className="gd-cta-row">
                   <Link
                     to="/guide/templates"
+                    className="gd-cta-btn"
                     style={{
-                      padding: "10px 18px",
                       background: "var(--kalpx-gold)",
                       color: "#fff",
-                      borderRadius: 8,
-                      fontSize: 13,
-                      fontWeight: 600,
-                      textDecoration: "none",
                     }}
                   >
                     + Build a Program
                   </Link>
                   <Link
                     to="/guide/sessions/draft"
+                    className="gd-cta-btn"
                     style={{
-                      padding: "10px 18px",
                       border: "1px solid var(--kalpx-gold)",
                       color: "var(--kalpx-gold)",
-                      borderRadius: 8,
-                      fontSize: 13,
-                      fontWeight: 600,
-                      textDecoration: "none",
                     }}
                   >
                     + Schedule Session

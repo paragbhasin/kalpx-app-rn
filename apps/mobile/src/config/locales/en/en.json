@@ -2895,6 +2895,17 @@
       "errorDayNotFound": "Day not found.",
       "errorLoadFailed": "Failed to load. Please try again.",
       "errorGeneric": "Something went wrong."
+    },
+    "reflection": {
+      "defaultPrompt": "Pause for a moment. What shifted in you today — even a little? Notice it without judgment.",
+      "heading": "Reflection",
+      "subtitle": "Take a quiet moment to reflect on today's journey.",
+      "questionLabel": "QUESTION",
+      "inputPlaceholder": "Write your thoughts here...",
+      "savedButton": "✓ Reflection Saved",
+      "saveButton": "Save Reflection",
+      "goToHome": "Go to Home",
+      "backToDay": "Back to Today"
     }
   },
   "programCard": {

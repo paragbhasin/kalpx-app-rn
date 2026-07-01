@@ -39,16 +39,42 @@ export function GuideTemplateReviewPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Launch settings — editable by leader anytime
+  const [startDate, setStartDate] = useState("");
+  const [maxParticipants, setMaxParticipants] = useState("");
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [settingsSaved, setSettingsSaved] = useState(false);
+
   useEffect(() => {
     if (!templateId) return;
     const fetch = isOpsView
       ? api.get(`ops/pending-templates/${templateId}/`).then((r) => r.data)
       : fetchMyTemplate(templateId);
     fetch
-      .then(setTemplate)
+      .then((t) => {
+        setTemplate(t);
+        setStartDate((t as any).desired_start_date ?? "");
+        setMaxParticipants((t as any).max_participants != null ? String((t as any).max_participants) : "");
+      })
       .catch(() => setError("Could not load program."))
       .finally(() => setLoading(false));
   }, [templateId, isOpsView]);
+
+  async function handleSaveSettings() {
+    if (!templateId || isOpsView) return;
+    setSettingsSaving(true);
+    setSettingsSaved(false);
+    try {
+      await api.patch(`guide/my-templates/${templateId}/`, {
+        desired_start_date: startDate || null,
+        max_participants: maxParticipants ? parseInt(maxParticipants, 10) : null,
+      });
+      setSettingsSaved(true);
+      setTimeout(() => setSettingsSaved(false), 3000);
+    } finally {
+      setSettingsSaving(false);
+    }
+  }
 
   if (loading) return <p style={hint}>Loading…</p>;
   if (error) return <p style={{ color: "#C0392B", padding: 24 }}>{error}</p>;
@@ -106,6 +132,46 @@ export function GuideTemplateReviewPage() {
           {template.program_promise && <FieldRow label="Program Promise" value={template.program_promise} />}
           {template.description && <FieldRow label="Description" value={template.description} multiline />}
         </div>
+
+        {/* Launch settings — leader only */}
+        {!isOpsView && (
+          <div style={{ ...metaCard, marginTop: 16 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: "#B5A08A", textTransform: "uppercase" as const, letterSpacing: "0.08em", margin: "0 0 14px" }}>
+              Program Settings
+            </p>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" as const, marginBottom: 12 }}>
+              <div style={{ flex: 1, minWidth: 160 }}>
+                <p style={{ fontSize: 11, fontWeight: 600, color: "#B5A08A", margin: "0 0 4px" }}>Start Date</p>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={e => setStartDate(e.target.value)}
+                  style={{ width: "100%", padding: "9px 12px", border: "1px solid #E8DECE", borderRadius: 8, fontSize: 13, color: "#432104", background: "#fff", boxSizing: "border-box" as const }}
+                />
+                <p style={{ fontSize: 11, color: "#C5B69A", margin: "3px 0 0" }}>Leave blank for rolling start</p>
+              </div>
+              <div style={{ flex: 1, minWidth: 160 }}>
+                <p style={{ fontSize: 11, fontWeight: 600, color: "#B5A08A", margin: "0 0 4px" }}>Max People Allowed</p>
+                <input
+                  type="number"
+                  value={maxParticipants}
+                  onChange={e => setMaxParticipants(e.target.value)}
+                  placeholder="e.g. 50"
+                  min={1}
+                  style={{ width: "100%", padding: "9px 12px", border: "1px solid #E8DECE", borderRadius: 8, fontSize: 13, color: "#432104", background: "#fff", boxSizing: "border-box" as const }}
+                />
+                <p style={{ fontSize: 11, color: "#C5B69A", margin: "3px 0 0" }}>Leave blank for unlimited</p>
+              </div>
+            </div>
+            <button
+              onClick={handleSaveSettings}
+              disabled={settingsSaving}
+              style={{ padding: "8px 20px", background: "#432104", color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: settingsSaving ? "default" : "pointer", opacity: settingsSaving ? 0.7 : 1 }}
+            >
+              {settingsSaving ? "Saving…" : settingsSaved ? "Saved ✓" : "Save Settings"}
+            </button>
+          </div>
+        )}
 
         {/* Days */}
         <div style={{ display: "flex", flexDirection: "column" as const, gap: 16, marginTop: 20 }}>

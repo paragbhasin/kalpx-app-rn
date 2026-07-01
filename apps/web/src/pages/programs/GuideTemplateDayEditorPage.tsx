@@ -38,6 +38,11 @@ export function GuideTemplateDayEditorPage() {
     {},
   );
   const [activeDay, setActiveDay] = useState(1);
+
+  // Launch modal state
+  const [showLaunchModal, setShowLaunchModal] = useState(false);
+  const [launchStartDate, setLaunchStartDate] = useState('');
+  const [launchMaxParticipants, setLaunchMaxParticipants] = useState('');
   const dayRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
   useEffect(() => {
@@ -199,7 +204,7 @@ export function GuideTemplateDayEditorPage() {
     setPickerTarget(null);
   }
 
-  async function handleSubmit() {
+  function handleSubmit() {
     // Validate: every day must have at least one slot filled
     const emptyDays = days.filter((d) => {
       const hasRef =
@@ -219,14 +224,23 @@ export function GuideTemplateDayEditorPage() {
       return;
     }
     setError("");
+    setShowLaunchModal(true);
+  }
+
+  async function handleLaunchConfirm() {
     setSubmitting(true);
     try {
-      await submitTemplateForReview(templateId);
+      await submitTemplateForReview(templateId, {
+        desired_start_date: launchStartDate || undefined,
+        max_participants: launchMaxParticipants ? parseInt(launchMaxParticipants, 10) : undefined,
+      });
+      setShowLaunchModal(false);
       setSubmitted(true);
     } catch (e: any) {
       setError(
         e?.response?.data?.detail ?? "Could not submit. Please try again.",
       );
+      setShowLaunchModal(false);
     } finally {
       setSubmitting(false);
     }
@@ -374,6 +388,93 @@ export function GuideTemplateDayEditorPage() {
             onSelect={handleLibrarySelect}
             onClose={() => setPickerTarget(null)}
           />
+        )}
+
+        {/* Launch modal — start date + max participants */}
+        {showLaunchModal && (
+          <div style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 1000, padding: 20,
+          }}>
+            <div style={{
+              background: '#FAF7F2', borderRadius: 16, padding: '32px 28px',
+              maxWidth: 420, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+            }}>
+              <h2 style={{ fontSize: 18, fontWeight: 800, color: '#432104', margin: '0 0 6px' }}>
+                Program Settings
+              </h2>
+              <p style={{ fontSize: 13, color: '#7A6652', margin: '0 0 24px', lineHeight: 1.6 }}>
+                Set when you want the program to start and how many people you want to allow.
+              </p>
+
+              <div style={{ marginBottom: 18 }}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#7A6652', marginBottom: 6, textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>
+                  Start Date
+                </label>
+                <input
+                  type="date"
+                  value={launchStartDate}
+                  onChange={e => setLaunchStartDate(e.target.value)}
+                  style={{
+                    width: '100%', padding: '10px 12px', fontSize: 14,
+                    border: '1px solid #E8DECE', borderRadius: 8,
+                    background: '#fff', color: '#432104', boxSizing: 'border-box' as const,
+                  }}
+                />
+                <p style={{ fontSize: 11, color: '#B5A08A', margin: '4px 0 0' }}>
+                  Leave blank if the program is rolling (no fixed start).
+                </p>
+              </div>
+
+              <div style={{ marginBottom: 28 }}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#7A6652', marginBottom: 6, textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>
+                  Max People Allowed
+                </label>
+                <input
+                  type="number"
+                  value={launchMaxParticipants}
+                  onChange={e => setLaunchMaxParticipants(e.target.value)}
+                  placeholder="e.g. 50"
+                  min={1}
+                  style={{
+                    width: '100%', padding: '10px 12px', fontSize: 14,
+                    border: '1px solid #E8DECE', borderRadius: 8,
+                    background: '#fff', color: '#432104', boxSizing: 'border-box' as const,
+                  }}
+                />
+                <p style={{ fontSize: 11, color: '#B5A08A', margin: '4px 0 0' }}>
+                  Leave blank for unlimited.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button
+                  onClick={() => setShowLaunchModal(false)}
+                  style={{
+                    flex: 1, padding: '11px', background: 'transparent',
+                    border: '1px solid #E8DECE', borderRadius: 8,
+                    color: '#7A6652', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleLaunchConfirm}
+                  disabled={submitting}
+                  style={{
+                    flex: 2, padding: '11px', background: '#432104',
+                    border: 'none', borderRadius: 8,
+                    color: '#fff', fontSize: 14, fontWeight: 700,
+                    cursor: submitting ? 'not-allowed' : 'pointer',
+                    opacity: submitting ? 0.7 : 1,
+                  }}
+                >
+                  {submitting ? 'Submitting…' : 'Submit for Review'}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         {locked && (

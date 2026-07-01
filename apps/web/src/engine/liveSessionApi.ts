@@ -566,9 +566,11 @@ export async function updateTemplateDay(
 
 export async function submitTemplateForReview(
   id: number,
+  opts?: { desired_start_date?: string; max_participants?: number },
 ): Promise<{ ok: boolean; review_status: string; message: string }> {
   const res = await api.post<{ ok: boolean; review_status: string; message: string }>(
     `/guide/my-templates/${id}/submit/`,
+    opts ?? {},
   );
   return res.data;
 }

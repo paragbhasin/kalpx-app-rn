@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppShell } from "../../components/ui/AppShell";
-import { useAuth } from "../../hooks/useAuth";
-import { api } from "../../lib/api";
 import {
+  deleteTestimonial,
   fetchOpsTestimonials,
   moderateTestimonial,
-  deleteTestimonial,
   type OpsTestimonial,
 } from "../../engine/liveSessionApi";
+import { useAuth } from "../../hooks/useAuth";
+import { api } from "../../lib/api";
 
 // ── Invite a Leader ────────────────────────────────────────────────────────────
 
@@ -119,7 +119,9 @@ function InviteLeaderSection() {
 // ── Testimonials Moderation ─────────────────────────────────────────────────────
 
 function TestimonialsSection() {
-  const [tab, setTab] = useState<"pending" | "approved" | "rejected">("pending");
+  const [tab, setTab] = useState<"pending" | "approved" | "rejected">(
+    "approved",
+  );
   const [items, setItems] = useState<OpsTestimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState<number | null>(null);
@@ -134,7 +136,9 @@ function TestimonialsSection() {
     }
   }, []);
 
-  useEffect(() => { load(tab); }, [tab, load]);
+  useEffect(() => {
+    load(tab);
+  }, [tab, load]);
 
   const moderate = async (id: number, newStatus: "approved" | "rejected") => {
     setActing(id);
@@ -157,11 +161,19 @@ function TestimonialsSection() {
     }
   };
 
-  const starStr = (r: number | null) => r ? "★".repeat(r) + "☆".repeat(5 - r) : "—";
+  const starStr = (r: number | null) =>
+    r ? "★".repeat(r) + "☆".repeat(5 - r) : "—";
 
   return (
     <div style={sectionCard}>
-      <h2 style={{ fontSize: 15, fontWeight: 700, marginBottom: 16, color: "var(--kalpx-text)" }}>
+      <h2
+        style={{
+          fontSize: 15,
+          fontWeight: 700,
+          marginBottom: 16,
+          color: "var(--kalpx-text)",
+        }}
+      >
         Testimonials
       </h2>
 
@@ -189,9 +201,13 @@ function TestimonialsSection() {
       </div>
 
       {loading ? (
-        <p style={{ color: "var(--kalpx-text-muted)", fontSize: 13 }}>Loading…</p>
+        <p style={{ color: "var(--kalpx-text-muted)", fontSize: 13 }}>
+          Loading…
+        </p>
       ) : items.length === 0 ? (
-        <p style={{ color: "var(--kalpx-text-muted)", fontSize: 13 }}>No {tab} testimonials.</p>
+        <p style={{ color: "var(--kalpx-text-muted)", fontSize: 13 }}>
+          No {tab} testimonials.
+        </p>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {items.map((t) => (
@@ -204,17 +220,44 @@ function TestimonialsSection() {
                 padding: 14,
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--kalpx-text-muted)" }}>
-                  {t.program_name} · {t.campaign_code}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: 6,
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "var(--kalpx-text-muted)",
+                  }}
+                >
+                  {t.program_name}
                 </span>
-                <span style={{ fontSize: 13, color: "#C99317" }}>{starStr(t.rating)}</span>
+                <span style={{ fontSize: 13, color: "#C99317" }}>
+                  {starStr(t.rating)}
+                </span>
               </div>
-              <p style={{ fontSize: 14, color: "var(--kalpx-text)", margin: "0 0 6px" }}>
+              <p
+                style={{
+                  fontSize: 14,
+                  color: "var(--kalpx-text)",
+                  margin: "0 0 6px",
+                }}
+              >
                 "{t.testimonial_text}"
               </p>
-              <div style={{ fontSize: 12, color: "var(--kalpx-text-muted)", marginBottom: 10 }}>
-                — {t.display_name} · {t.created_at} · {t.consent_to_share ? "Consented" : "No consent"}
+              <div
+                style={{
+                  fontSize: 12,
+                  color: "var(--kalpx-text-muted)",
+                  marginBottom: 10,
+                }}
+              >
+                — {t.display_name} · {t.created_at} ·{" "}
+                {t.consent_to_share ? "Consented" : "No consent"}
               </div>
               <div style={{ display: "flex", gap: 8 }}>
                 {tab === "pending" && (
@@ -222,14 +265,32 @@ function TestimonialsSection() {
                     <button
                       disabled={acting === t.id}
                       onClick={() => moderate(t.id, "approved")}
-                      style={{ padding: "5px 14px", borderRadius: 8, border: "none", background: "#2E5723", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}
+                      style={{
+                        padding: "5px 14px",
+                        borderRadius: 8,
+                        border: "none",
+                        background: "#2E5723",
+                        color: "#fff",
+                        fontSize: 12,
+                        fontWeight: 600,
+                        cursor: "pointer",
+                      }}
                     >
                       Approve
                     </button>
                     <button
                       disabled={acting === t.id}
                       onClick={() => moderate(t.id, "rejected")}
-                      style={{ padding: "5px 14px", borderRadius: 8, border: "1px solid #C05B3A", background: "transparent", color: "#C05B3A", fontSize: 12, fontWeight: 600, cursor: "pointer" }}
+                      style={{
+                        padding: "5px 14px",
+                        borderRadius: 8,
+                        border: "1px solid #C05B3A",
+                        background: "transparent",
+                        color: "#C05B3A",
+                        fontSize: 12,
+                        fontWeight: 600,
+                        cursor: "pointer",
+                      }}
                     >
                       Reject
                     </button>
@@ -238,7 +299,16 @@ function TestimonialsSection() {
                 <button
                   disabled={acting === t.id}
                   onClick={() => remove(t.id)}
-                  style={{ padding: "5px 14px", borderRadius: 8, border: "1px solid #999", background: "transparent", color: "#666", fontSize: 12, fontWeight: 600, cursor: "pointer" }}
+                  style={{
+                    padding: "5px 14px",
+                    borderRadius: 8,
+                    border: "1px solid #999",
+                    background: "transparent",
+                    color: "#666",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
                 >
                   Delete
                 </button>
@@ -297,7 +367,7 @@ function ProgramReviewQueue() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<
     "pending" | "approved" | "rejected"
-  >("pending");
+  >("approved");
   const [allTemplates, setAllTemplates] = useState<ReviewTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

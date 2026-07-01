@@ -161,9 +161,10 @@ export async function submitTestimonialFull(payload: {
   text: string;
   rating: number;
   visibility: "named" | "anonymous" | "private";
+  campaignCode: string;
   display_name?: string;
 }): Promise<void> {
-  await api.post("programs/my-active/testimonial/", {
+  await api.post(`programs/my-programs/${payload.campaignCode}/testimonial/`, {
     text: payload.text,
     rating: payload.rating,
     visibility: payload.visibility,

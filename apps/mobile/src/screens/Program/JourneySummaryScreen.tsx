@@ -121,7 +121,7 @@ export default function JourneySummaryScreen() {
 
   const handleSubmitTestimonial = async () => {
     if (!testimonialText.trim()) {
-      setStep(5);
+      setStep(6);
       return;
     }
     setSubmitting(true);
@@ -130,15 +130,17 @@ export default function JourneySummaryScreen() {
         text: testimonialText.trim(),
         rating,
         visibility,
+        campaignCode,
       });
-    } catch {
+      setStep(6);
+    } catch (e: any) {
+      console.log("[Testimonial] error:", e?.response?.status, e?.response?.data);
       Alert.alert(
         "Couldn't save",
         "Your reflection could not be saved. Please try again.",
       );
     } finally {
       setSubmitting(false);
-      setStep(6);
     }
   };
 

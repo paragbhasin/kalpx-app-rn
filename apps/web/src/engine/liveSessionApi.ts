@@ -446,6 +446,20 @@ export async function moderateTestimonial(
   });
 }
 
+export async function deleteTestimonial(id: number): Promise<void> {
+  await api.delete(`/programs/admin/testimonials/${id}/`);
+}
+
+export async function guideModerateTestimonial(
+  code: string,
+  id: number,
+  moderationStatus: "approved" | "rejected",
+): Promise<void> {
+  await api.patch(`/guide/programs/${code}/testimonials/${id}/`, {
+    moderation_status: moderationStatus,
+  });
+}
+
 export async function submitRerunRequest(
   code: string,
   data?: { requested_start_date?: string; change_notes?: string },

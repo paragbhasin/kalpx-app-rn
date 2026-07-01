@@ -4,6 +4,7 @@ import { AppShell } from "../../components/ui/AppShell";
 import {
   fetchGuideDashboard,
   fetchGuideAllTestimonials,
+  guideModerateTestimonial,
   type GuideDashboard,
   type GuideDashboardTemplate,
   type GuideProgram,
@@ -750,23 +751,33 @@ function GuideTestimonialsSection({ programs }: { programs: GuideProgram[] }) {
   const [testimonials, setTestimonials] = useState<GuideTestimonialFull[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"all" | "pending" | "approved">("all");
+  const [acting, setActing] = useState<number | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      setLoading(true);
-      try {
-        const all = await Promise.all(
-          programs.map((p) => fetchGuideAllTestimonials(p.code).then((r) => r.testimonials))
-        );
-        if (!cancelled) setTestimonials(all.flat());
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+  const loadAll = useCallback(async () => {
+    setLoading(true);
+    try {
+      const all = await Promise.all(
+        programs.map((p) => fetchGuideAllTestimonials(p.code).then((r) => r.testimonials))
+      );
+      setTestimonials(all.flat());
+    } finally {
+      setLoading(false);
     }
-    load();
-    return () => { cancelled = true; };
   }, [programs]);
+
+  useEffect(() => { loadAll(); }, [loadAll]);
+
+  const moderate = async (t: GuideTestimonialFull, newStatus: "approved" | "rejected") => {
+    setActing(t.id);
+    try {
+      await guideModerateTestimonial(t.campaign_code, t.id, newStatus);
+      setTestimonials((prev) =>
+        prev.map((x) => x.id === t.id ? { ...x, moderation_status: newStatus } : x)
+      );
+    } finally {
+      setActing(null);
+    }
+  };
 
   const filtered = testimonials.filter((t) =>
     tab === "all" ? true : t.moderation_status === tab
@@ -824,7 +835,7 @@ function GuideTestimonialsSection({ programs }: { programs: GuideProgram[] }) {
                 <span style={{ fontSize: 13, color: "#C99317" }}>{starStr(t.rating)}</span>
               </div>
               <p style={{ fontSize: 14, color: "var(--kalpx-text)", margin: "4px 0" }}>"{t.testimonial_text}"</p>
-              <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 6 }}>
+              <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 6, flexWrap: "wrap" }}>
                 <span style={{ fontSize: 11, color: "var(--kalpx-text-muted)" }}>{t.created_at}</span>
                 <span style={{
                   fontSize: 10,
@@ -837,6 +848,24 @@ function GuideTestimonialsSection({ programs }: { programs: GuideProgram[] }) {
                 }}>
                   {t.moderation_status}
                 </span>
+                {t.moderation_status === "pending" && (
+                  <>
+                    <button
+                      disabled={acting === t.id}
+                      onClick={() => moderate(t, "approved")}
+                      style={{ padding: "3px 12px", borderRadius: 8, border: "none", background: "#2E5723", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer" }}
+                    >
+                      Approve
+                    </button>
+                    <button
+                      disabled={acting === t.id}
+                      onClick={() => moderate(t, "rejected")}
+                      style={{ padding: "3px 12px", borderRadius: 8, border: "1px solid #C05B3A", background: "transparent", color: "#C05B3A", fontSize: 11, fontWeight: 600, cursor: "pointer" }}
+                    >
+                      Reject
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           ))

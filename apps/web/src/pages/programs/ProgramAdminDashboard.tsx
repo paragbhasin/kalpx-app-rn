@@ -6,6 +6,7 @@ import { api } from "../../lib/api";
 import {
   fetchOpsTestimonials,
   moderateTestimonial,
+  deleteTestimonial,
   type OpsTestimonial,
 } from "../../engine/liveSessionApi";
 
@@ -145,6 +146,17 @@ function TestimonialsSection() {
     }
   };
 
+  const remove = async (id: number) => {
+    if (!window.confirm("Delete this testimonial permanently?")) return;
+    setActing(id);
+    try {
+      await deleteTestimonial(id);
+      setItems((prev) => prev.filter((t) => t.id !== id));
+    } finally {
+      setActing(null);
+    }
+  };
+
   const starStr = (r: number | null) => r ? "★".repeat(r) + "☆".repeat(5 - r) : "—";
 
   return (
@@ -204,42 +216,33 @@ function TestimonialsSection() {
               <div style={{ fontSize: 12, color: "var(--kalpx-text-muted)", marginBottom: 10 }}>
                 — {t.display_name} · {t.created_at} · {t.consent_to_share ? "Consented" : "No consent"}
               </div>
-              {tab === "pending" && (
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button
-                    disabled={acting === t.id}
-                    onClick={() => moderate(t.id, "approved")}
-                    style={{
-                      padding: "5px 14px",
-                      borderRadius: 8,
-                      border: "none",
-                      background: "#2E5723",
-                      color: "#fff",
-                      fontSize: 12,
-                      fontWeight: 600,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Approve
-                  </button>
-                  <button
-                    disabled={acting === t.id}
-                    onClick={() => moderate(t.id, "rejected")}
-                    style={{
-                      padding: "5px 14px",
-                      borderRadius: 8,
-                      border: "1px solid #C05B3A",
-                      background: "transparent",
-                      color: "#C05B3A",
-                      fontSize: 12,
-                      fontWeight: 600,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Reject
-                  </button>
-                </div>
-              )}
+              <div style={{ display: "flex", gap: 8 }}>
+                {tab === "pending" && (
+                  <>
+                    <button
+                      disabled={acting === t.id}
+                      onClick={() => moderate(t.id, "approved")}
+                      style={{ padding: "5px 14px", borderRadius: 8, border: "none", background: "#2E5723", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}
+                    >
+                      Approve
+                    </button>
+                    <button
+                      disabled={acting === t.id}
+                      onClick={() => moderate(t.id, "rejected")}
+                      style={{ padding: "5px 14px", borderRadius: 8, border: "1px solid #C05B3A", background: "transparent", color: "#C05B3A", fontSize: 12, fontWeight: 600, cursor: "pointer" }}
+                    >
+                      Reject
+                    </button>
+                  </>
+                )}
+                <button
+                  disabled={acting === t.id}
+                  onClick={() => remove(t.id)}
+                  style={{ padding: "5px 14px", borderRadius: 8, border: "1px solid #999", background: "transparent", color: "#666", fontSize: 12, fontWeight: 600, cursor: "pointer" }}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>

@@ -264,6 +264,9 @@ export default function ProgramDayScreen() {
           const data = await fetchProgramDay(dayNumber);
           if (!cancelled) {
             setDayContent(data);
+            // Re-fetch reminders: fetchProgramDay auto-enables defaults on the backend,
+            // so the initial parallel fetch may have returned all-off.
+            apiGetProgramReminders().then(setReminders).catch(() => {});
             if (!firedAnalyticsRef.current) {
               firedAnalyticsRef.current = true;
               postProgramActivity("program_day_started", {

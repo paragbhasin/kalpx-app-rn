@@ -40,25 +40,31 @@ const INSPIRATIONAL_QUOTES = [
 
 type Visibility = "named" | "anonymous" | "private";
 
-function StatRow({ icon, value, label }: { icon: string; value: number; label: string }) {
+function StatRow({ value, label, accent }: { value: number; label: string; accent: string }) {
   return (
     <View style={styles.statRow}>
-      <View style={styles.statIconWrap}>
-        <Text style={styles.statIcon}>{icon}</Text>
-      </View>
-      <View style={styles.statMid}>
-        <Text style={styles.statValue}>{value}</Text>
-        <Text style={styles.statLabel}>{label}</Text>
-      </View>
+      <View style={[styles.statAccent, { backgroundColor: accent }]} />
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
     </View>
   );
 }
 
-function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+function StarRating({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+}) {
   return (
     <View style={styles.starRow}>
       {[1, 2, 3, 4, 5].map((n) => (
-        <TouchableOpacity key={n} onPress={() => onChange(n)} activeOpacity={0.7}>
+        <TouchableOpacity
+          key={n}
+          onPress={() => onChange(n)}
+          activeOpacity={0.7}
+        >
           <Text style={[styles.star, n <= value && styles.starFilled]}>★</Text>
         </TouchableOpacity>
       ))}
@@ -83,18 +89,33 @@ export default function JourneySummaryScreen() {
   const [submitting, setSubmitting] = useState(false);
 
   const quoteRef = useRef(
-    INSPIRATIONAL_QUOTES[Math.floor(Math.random() * INSPIRATIONAL_QUOTES.length)],
+    INSPIRATIONAL_QUOTES[
+      Math.floor(Math.random() * INSPIRATIONAL_QUOTES.length)
+    ],
   );
 
   useEffect(() => {
-    if (!campaignCode) { setError(true); setLoading(false); return; }
+    if (!campaignCode) {
+      setError(true);
+      setLoading(false);
+      return;
+    }
     fetchJourneySummary(campaignCode)
-      .then((data) => { setSummary(data); setLoading(false); })
-      .catch(() => { setError(true); setLoading(false); });
+      .then((data) => {
+        setSummary(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError(true);
+        setLoading(false);
+      });
   }, [campaignCode]);
 
   const handleSubmitTestimonial = async () => {
-    if (!testimonialText.trim()) { setStep(5); return; }
+    if (!testimonialText.trim()) {
+      setStep(5);
+      return;
+    }
     setSubmitting(true);
     try {
       await submitTestimonialFull({
@@ -103,7 +124,10 @@ export default function JourneySummaryScreen() {
         visibility,
       });
     } catch {
-      Alert.alert("Couldn't save", "Your reflection could not be saved. Please try again.");
+      Alert.alert(
+        "Couldn't save",
+        "Your reflection could not be saved. Please try again.",
+      );
     } finally {
       setSubmitting(false);
       setStep(6);
@@ -126,8 +150,13 @@ export default function JourneySummaryScreen() {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.center}>
-          <Text style={styles.errorText}>Couldn't load summary. Please try again.</Text>
-          <TouchableOpacity style={styles.btnPrimary} onPress={() => navigation.goBack()}>
+          <Text style={styles.errorText}>
+            Couldn't load summary. Please try again.
+          </Text>
+          <TouchableOpacity
+            style={styles.btnPrimary}
+            onPress={() => navigation.goBack()}
+          >
             <Text style={styles.btnPrimaryText}>Go Back</Text>
           </TouchableOpacity>
         </View>
@@ -137,7 +166,9 @@ export default function JourneySummaryScreen() {
 
   const completedDate = summary.completed_at
     ? new Date(summary.completed_at + "T00:00:00").toLocaleDateString("en-IN", {
-        day: "numeric", month: "long", year: "numeric",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
       })
     : null;
 
@@ -145,45 +176,61 @@ export default function JourneySummaryScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ImageBackground source={BEIGE_BG} style={styles.bg}>
         {/* Back button */}
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+        {/* <TouchableOpacity
+          style={styles.backBtn}
+          onPress={() => navigation.goBack()}
+        >
           <Text style={styles.backBtnText}>←</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
+        >
           {/* ── Step 1: Journey Summary ── */}
           {step === 1 && (
             <>
               <View style={styles.badgeWrap}>
-                <Text style={styles.badgeEmoji}>✅</Text>
-                <Text style={styles.badgeText}>JOURNEY COMPLETE</Text>
+                <Text style={styles.badgeText}>JOURNEY COMPLETED</Text>
               </View>
 
-              <Text style={styles.headingLarge}>You did it! 🎉</Text>
+              <Text style={styles.headingLarge}>You did it!</Text>
               <Text style={styles.subHeading}>
                 You have completed{"\n"}
-                <Text style={styles.programNameInline}>{summary.program_name}</Text>
+                <Text style={styles.programNameInline}>
+                  {summary.program_name}
+                </Text>
               </Text>
               <Text style={styles.metaLine}>
-                {completedDate ? `Completed on ${completedDate}` : "Journey complete"}
+                {completedDate
+                  ? `Completed on ${completedDate}`
+                  : "Journey complete"}
               </Text>
 
-              <Text style={styles.sectionLabel}>Here's a glimpse of your journey.</Text>
+              <Text style={styles.sectionLabel}>
+                Here's a glimpse of your journey.
+              </Text>
 
               <View style={styles.statsCard}>
-                <StatRow icon="📅" value={summary.days_completed} label="Days Completed" />
+                <StatRow accent="#2E7D32" value={summary.days_completed} label="Days Completed" />
                 <View style={styles.statDivider} />
-                <StatRow icon="✅" value={summary.days_completed} label="Practices Done" />
+                <StatRow accent="#C99317" value={summary.days_completed} label="Practices Done" />
                 <View style={styles.statDivider} />
-                <StatRow icon="📝" value={summary.reflections_written} label="Reflections Written" />
+                <StatRow accent="#7B6545" value={summary.reflections_written} label="Reflections Written" />
               </View>
 
               <Text style={styles.quote}>"{quoteRef.current}"</Text>
 
-              <TouchableOpacity style={styles.btnPrimary} onPress={() => setStep(2)}>
+              <TouchableOpacity
+                style={styles.btnPrimary}
+                onPress={() => setStep(2)}
+              >
                 <Text style={styles.btnPrimaryText}>Continue</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.btnLink} onPress={() => navigation.navigate("Home")}>
+              <TouchableOpacity
+                style={styles.btnLink}
+                onPress={() => navigation.navigate("Home")}
+              >
                 <Text style={styles.btnLinkText}>Explore Another Program</Text>
               </TouchableOpacity>
             </>
@@ -194,9 +241,12 @@ export default function JourneySummaryScreen() {
             <>
               <View style={styles.centeredSection}>
                 <Text style={styles.inviteEmoji}>🌱</Text>
-                <Text style={styles.headingLarge}>Your journey can{"\n"}inspire others</Text>
+                <Text style={styles.headingLarge}>
+                  Your journey can{"\n"}inspire others
+                </Text>
                 <Text style={styles.inviteBody}>
-                  Your experience can help someone who is going through the same phase in life.
+                  Your experience can help someone who is going through the same
+                  phase in life.
                 </Text>
               </View>
 
@@ -213,10 +263,16 @@ export default function JourneySummaryScreen() {
                 ))}
               </View>
 
-              <TouchableOpacity style={styles.btnPrimary} onPress={() => setStep(3)}>
+              <TouchableOpacity
+                style={styles.btnPrimary}
+                onPress={() => setStep(3)}
+              >
                 <Text style={styles.btnPrimaryText}>Share My Experience</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.btnLink} onPress={handleSkipTestimonial}>
+              <TouchableOpacity
+                style={styles.btnLink}
+                onPress={handleSkipTestimonial}
+              >
                 <Text style={styles.btnLinkText}>Maybe Later</Text>
               </TouchableOpacity>
             </>
@@ -226,9 +282,12 @@ export default function JourneySummaryScreen() {
           {step === 3 && (
             <>
               <View style={styles.centeredSection}>
-                <Text style={styles.headingMedium}>How was your overall{"\n"}experience?</Text>
+                <Text style={styles.headingMedium}>
+                  How was your overall{"\n"}experience?
+                </Text>
                 <Text style={styles.inviteBody}>
-                  Your rating helps us improve and helps others trust the program.
+                  Your rating helps us improve and helps others trust the
+                  program.
                 </Text>
                 <StarRating value={rating} onChange={setRating} />
               </View>
@@ -240,7 +299,10 @@ export default function JourneySummaryScreen() {
               >
                 <Text style={styles.btnPrimaryText}>Continue</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.btnLink} onPress={handleSkipTestimonial}>
+              <TouchableOpacity
+                style={styles.btnLink}
+                onPress={handleSkipTestimonial}
+              >
                 <Text style={styles.btnLinkText}>Skip</Text>
               </TouchableOpacity>
             </>
@@ -268,7 +330,9 @@ export default function JourneySummaryScreen() {
                 textAlignVertical="top"
               />
               <Text style={styles.charCount}>{testimonialText.length}/500</Text>
-              <Text style={styles.consentNote}>🔒 Your name will be shown as you choose.</Text>
+              <Text style={styles.consentNote}>
+                🔒 Your name will be shown as you choose.
+              </Text>
 
               <TouchableOpacity
                 style={[styles.btnPrimary, submitting && { opacity: 0.6 }]}
@@ -277,7 +341,10 @@ export default function JourneySummaryScreen() {
               >
                 <Text style={styles.btnPrimaryText}>Continue</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.btnLink} onPress={handleSkipTestimonial}>
+              <TouchableOpacity
+                style={styles.btnLink}
+                onPress={handleSkipTestimonial}
+              >
                 <Text style={styles.btnLinkText}>Skip</Text>
               </TouchableOpacity>
             </>
@@ -287,8 +354,12 @@ export default function JourneySummaryScreen() {
           {step === 5 && (
             <>
               <View style={styles.centeredSection}>
-                <Text style={styles.headingMedium}>Where can we share this?</Text>
-                <Text style={styles.inviteBody}>You are always in control.</Text>
+                <Text style={styles.headingMedium}>
+                  Where can we share this?
+                </Text>
+                <Text style={styles.inviteBody}>
+                  You are always in control.
+                </Text>
               </View>
 
               {(
@@ -315,7 +386,10 @@ export default function JourneySummaryScreen() {
               ).map((opt) => (
                 <TouchableOpacity
                   key={opt.value}
-                  style={[styles.visibilityRow, visibility === opt.value && styles.visibilityRowSelected]}
+                  style={[
+                    styles.visibilityRow,
+                    visibility === opt.value && styles.visibilityRowSelected,
+                  ]}
                   onPress={() => setVisibility(opt.value)}
                   activeOpacity={0.8}
                 >
@@ -324,7 +398,12 @@ export default function JourneySummaryScreen() {
                     <Text style={styles.visibilityLabel}>{opt.label}</Text>
                     <Text style={styles.visibilityDesc}>{opt.desc}</Text>
                   </View>
-                  <View style={[styles.radio, visibility === opt.value && styles.radioSelected]} />
+                  <View
+                    style={[
+                      styles.radio,
+                      visibility === opt.value && styles.radioSelected,
+                    ]}
+                  />
                 </TouchableOpacity>
               ))}
 
@@ -357,7 +436,9 @@ export default function JourneySummaryScreen() {
                 style={styles.btnPrimary}
                 onPress={() => navigation.navigate("Home")}
               >
-                <Text style={styles.btnPrimaryText}>Explore Another Program</Text>
+                <Text style={styles.btnPrimaryText}>
+                  Explore Another Program
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.btnLink}
@@ -367,7 +448,6 @@ export default function JourneySummaryScreen() {
               </TouchableOpacity>
             </>
           )}
-
         </ScrollView>
       </ImageBackground>
     </SafeAreaView>
@@ -378,7 +458,12 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "#FBF5EE" },
   bg: { flex: 1 },
   scroll: { padding: 24, paddingTop: 64, paddingBottom: 80 },
-  center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
+  center: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+  },
 
   backBtn: {
     position: "absolute",
@@ -395,12 +480,12 @@ const styles = StyleSheet.create({
   badgeEmoji: { fontSize: 48, marginBottom: 10 },
   badgeText: {
     fontFamily: Fonts.sans.bold,
-    fontSize: 11,
+    fontSize: 18,
     color: "#2E7D32",
     letterSpacing: 0.08,
-    backgroundColor: "#DCF0D8",
+    // backgroundColor: "#DCF0D8",
     paddingHorizontal: 14,
-    paddingVertical: 5,
+    // paddingVertical: 5,
     borderRadius: 20,
     overflow: "hidden",
   },
@@ -427,6 +512,7 @@ const styles = StyleSheet.create({
     color: "#7B6545",
     textAlign: "center",
     marginBottom: 6,
+    marginTop: 4,
   },
   programNameInline: {
     fontFamily: Fonts.sans.bold,
@@ -459,30 +545,27 @@ const styles = StyleSheet.create({
   statRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 14,
+    paddingVertical: 16,
     paddingHorizontal: 20,
     gap: 14,
   },
-  statDivider: { height: 1, backgroundColor: "#F0E8D0", marginHorizontal: 20 },
-  statIconWrap: {
-    width: 36,
+  statAccent: {
+    width: 4,
     height: 36,
-    borderRadius: 18,
-    backgroundColor: "#FFF8EE",
-    alignItems: "center",
-    justifyContent: "center",
+    borderRadius: 2,
   },
-  statIcon: { fontSize: 18 },
-  statMid: { flex: 1, flexDirection: "row", alignItems: "baseline", gap: 8 },
+  statDivider: { height: 1, backgroundColor: "#F0E8D0", marginHorizontal: 20 },
   statValue: {
     fontFamily: Fonts.sans.bold,
-    fontSize: 20,
+    fontSize: 22,
     color: "#432104",
+    marginRight: 6,
   },
   statLabel: {
     fontFamily: Fonts.sans.regular,
-    fontSize: 13,
+    fontSize: 14,
     color: "#7B6545",
+    flex: 1,
   },
 
   // Quote

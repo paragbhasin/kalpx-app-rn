@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Clipboard,
   RefreshControl,
   SafeAreaView,
@@ -14,10 +15,13 @@ import {
 } from "react-native";
 import {
   fetchGuideDashboard,
+  fetchGuideAllTestimonials,
+  guideModerateTestimonial,
   type GuideDashboard,
   type GuideDashboardTemplate,
   type GuideProgram,
   type GuideSession,
+  type GuideTestimonialFull,
 } from "../../engine/liveSessionApi";
 import { performLogout } from "../../utils/logout";
 import api from "../../Networks/axios";
@@ -47,16 +51,33 @@ const STATUS_COLOR: Record<string, string> = {
   active: "#22863a",
 };
 
-function StatCard({ label, value }: { label: string; value: number }) {
+// ─── Impact stat card ──────────────────────────────────────────────
+function ImpactCard({
+  label,
+  sublabel,
+  value,
+}: {
+  label: string;
+  sublabel: string;
+  value: number | string;
+}) {
   return (
-    <View style={styles.statCard}>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+    <View style={styles.impactCard}>
+      <Text style={styles.impactValue}>{value}</Text>
+      <Text style={styles.impactLabel}>{label}</Text>
+      <Text style={styles.impactSub}>{sublabel}</Text>
     </View>
   );
 }
 
-function ProgramRow({ program, onView }: { program: GuideProgram; onView?: () => void }) {
+// ─── Live program row ───────────────────────────────────────────────
+function ProgramRow({
+  program,
+  onView,
+}: {
+  program: GuideProgram;
+  onView?: () => void;
+}) {
   const [copied, setCopied] = useState(false);
   const joinUrl = program.join_url || "";
 
@@ -67,37 +88,74 @@ function ProgramRow({ program, onView }: { program: GuideProgram; onView?: () =>
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const pendingCount =
+    program.testimonials_count - (program.approved_testimonials_count ?? 0);
+
   return (
     <View style={styles.row}>
-      <View style={styles.rowHeader}>
-        <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={styles.rowTitle} numberOfLines={1}>{program.title}</Text>
-          <Text style={styles.rowMeta}>{program.status}</Text>
+      {/* Title + View */}
+      <View style={styles.rowTop}>
+        <Text style={styles.rowTitle} numberOfLines={1}>
+          {program.title}
+        </Text>
+        {!!program.template_id && !!onView && (
+          <TouchableOpacity style={styles.ghostBtn} onPress={onView}>
+            <Text style={styles.ghostBtnText}>View</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {/* Status + start date */}
+      <Text style={styles.rowMeta}>
+        <Text style={{ color: "#22863a", fontWeight: "700" }}>
+          • {program.status.charAt(0).toUpperCase() + program.status.slice(1)}
+        </Text>
+        {program.start_date
+          ? `  ·  Starts ${new Date(program.start_date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`
+          : "  ·  No start date"}
+        {program.max_participants
+          ? `  ·  Max ${program.max_participants}`
+          : "  ·  Unlimited"}
+      </Text>
+
+      {/* Metrics row */}
+      <View style={styles.metricsRow}>
+        <View style={styles.metricItem}>
+          <Text style={styles.metricNum}>{program.joined_count}</Text>
+          <Text style={styles.metricLabel}>Joined</Text>
         </View>
-        <View style={styles.rowStats}>
-          <View style={styles.statPill}>
-            <Text style={styles.statPillNum}>{program.joined_count}</Text>
-            <Text style={styles.statPillLabel}>joined</Text>
-          </View>
-          <View style={styles.statPill}>
-            <Text style={styles.statPillNum}>{program.testimonials_count}</Text>
-            <Text style={styles.statPillLabel}>testimonials</Text>
-          </View>
-          {!!program.template_id && !!onView && (
-            <TouchableOpacity style={styles.ghostRowBtn} onPress={onView}>
-              <Text style={styles.ghostRowBtnText}>View</Text>
-            </TouchableOpacity>
+        <View style={styles.metricItem}>
+          <Text style={styles.metricNum}>{program.active_count ?? 0}</Text>
+          <Text style={styles.metricLabel}>Active</Text>
+        </View>
+        <View style={styles.metricItem}>
+          <Text style={styles.metricNum}>{program.completed_count ?? 0}</Text>
+          <Text style={styles.metricLabel}>Completed</Text>
+        </View>
+        <View style={styles.metricItem}>
+          <Text style={styles.metricNum}>{program.testimonials_count}</Text>
+          <Text style={styles.metricLabel}>Testimonials</Text>
+          {pendingCount > 0 && (
+            <View style={styles.pendingBadge}>
+              <Text style={styles.pendingBadgeText}>{pendingCount} pending</Text>
+            </View>
           )}
         </View>
       </View>
+
+      {/* Join URL */}
       {!!joinUrl && (
         <View style={styles.joinUrlRow}>
-          <Text style={styles.joinUrlText} numberOfLines={1}>{joinUrl}</Text>
+          <Text style={styles.joinUrlText} numberOfLines={1}>
+            {joinUrl}
+          </Text>
           <TouchableOpacity
             style={[styles.copyBtn, copied && styles.copyBtnDone]}
             onPress={handleCopy}
           >
-            <Text style={styles.copyBtnText}>{copied ? "Copied!" : "Copy link"}</Text>
+            <Text style={styles.copyBtnText}>
+              {copied ? "Copied!" : "Copy link"}
+            </Text>
           </TouchableOpacity>
         </View>
       )}
@@ -105,6 +163,7 @@ function ProgramRow({ program, onView }: { program: GuideProgram; onView?: () =>
   );
 }
 
+// ─── Session row ────────────────────────────────────────────────────
 function SessionRow({ session }: { session: GuideSession }) {
   const date = (() => {
     try {
@@ -121,21 +180,25 @@ function SessionRow({ session }: { session: GuideSession }) {
 
   return (
     <View style={styles.row}>
-      <View style={styles.rowHeader}>
+      <View style={styles.rowTop}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.rowTitle} numberOfLines={1}>{session.title}</Text>
-          <Text style={styles.rowMeta}>{date} · {session.status}</Text>
+          <Text style={styles.rowTitle} numberOfLines={1}>
+            {session.title}
+          </Text>
+          <Text style={styles.rowMeta}>
+            {date} · {session.status}
+          </Text>
         </View>
-        <View style={styles.rowStats}>
-          <View style={styles.statPill}>
-            <Text style={styles.statPillNum}>
+        <View style={styles.metricsRow}>
+          <View style={styles.metricItem}>
+            <Text style={styles.metricNum}>
               {session.registered_count > 0 ? session.registered_count : "—"}
             </Text>
-            <Text style={styles.statPillLabel}>registered</Text>
+            <Text style={styles.metricLabel}>registered</Text>
           </View>
-          <View style={styles.statPill}>
-            <Text style={styles.statPillNum}>{session.reflection_count}</Text>
-            <Text style={styles.statPillLabel}>reflected</Text>
+          <View style={styles.metricItem}>
+            <Text style={styles.metricNum}>{session.reflection_count}</Text>
+            <Text style={styles.metricLabel}>reflected</Text>
           </View>
         </View>
       </View>
@@ -143,6 +206,7 @@ function SessionRow({ session }: { session: GuideSession }) {
   );
 }
 
+// ─── Template (in-review) row ───────────────────────────────────────
 function TemplateRow({
   tmpl,
   onEdit,
@@ -159,19 +223,22 @@ function TemplateRow({
   const [launching, setLaunching] = useState(false);
   const [launchError, setLaunchError] = useState("");
 
-  const withinGrace = (() => {
-    if (!tmpl.submitted_at) return false;
-    return Date.now() - new Date(tmpl.submitted_at).getTime() < 60 * 60 * 1000;
-  })();
+  const canEdit = ["submitted", "under_review", "changes_requested"].includes(
+    tmpl.review_status,
+  );
 
   const handleLaunch = async () => {
     setLaunching(true);
     setLaunchError("");
     try {
-      const res = await api.post<{ code: string; join_url: string }>(`guide/my-templates/${tmpl.id}/launch/`);
+      const res = await api.post<{ code: string; join_url: string }>(
+        `guide/my-templates/${tmpl.id}/launch/`,
+      );
       onLaunched(res.data.join_url);
     } catch (e: any) {
-      setLaunchError(e?.response?.data?.detail || "Launch failed. Please try again.");
+      setLaunchError(
+        e?.response?.data?.detail || "Launch failed. Please try again.",
+      );
     } finally {
       setLaunching(false);
     }
@@ -179,39 +246,202 @@ function TemplateRow({
 
   return (
     <View style={styles.row}>
-      <View style={styles.rowHeader}>
+      <View style={styles.rowTop}>
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={styles.rowTitle} numberOfLines={1}>{tmpl.title || "Untitled Program"}</Text>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 3 }}>
+          <Text style={styles.rowTitle} numberOfLines={1}>
+            {tmpl.title || "Untitled Program"}
+          </Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 3 }}>
             <Text style={[styles.statusBadge, { color }]}>{label}</Text>
             <Text style={styles.rowMeta}>· {tmpl.duration_days} days</Text>
+            {tmpl.desired_start_date && (
+              <Text style={styles.rowMeta}>
+                · Starts{" "}
+                {new Date(tmpl.desired_start_date).toLocaleDateString("en-IN", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </Text>
+            )}
           </View>
         </View>
-        <View style={styles.rowBtns}>
-          {withinGrace && (
-            <TouchableOpacity style={styles.goldRowBtn} onPress={() => onEdit(tmpl.id)}>
-              <Text style={styles.goldRowBtnText}>Edit</Text>
-            </TouchableOpacity>
-          )}
-          {tmpl.review_status === "approved" && (
-            <TouchableOpacity
-              style={[styles.launchBtn, launching && { opacity: 0.6 }]}
-              onPress={handleLaunch}
-              disabled={launching}
-            >
-              <Text style={styles.launchBtnText}>{launching ? "Launching…" : "🚀 Launch"}</Text>
-            </TouchableOpacity>
-          )}
-          <TouchableOpacity style={styles.ghostRowBtn} onPress={() => onView(tmpl.id)}>
-            <Text style={styles.ghostRowBtnText}>View Details</Text>
-          </TouchableOpacity>
-        </View>
       </View>
-      {!!launchError && <Text style={styles.launchError}>{launchError}</Text>}
+      <View style={[styles.rowTop, { marginTop: 10, gap: 8 }]}>
+        {canEdit && (
+          <TouchableOpacity
+            style={styles.goldBtn}
+            onPress={() => onEdit(tmpl.id)}
+          >
+            <Text style={styles.goldBtnText}>Edit</Text>
+          </TouchableOpacity>
+        )}
+        {tmpl.review_status === "approved" && (
+          <TouchableOpacity
+            style={[styles.launchBtn, launching && { opacity: 0.6 }]}
+            onPress={handleLaunch}
+            disabled={launching}
+          >
+            <Text style={styles.launchBtnText}>
+              {launching ? "Launching…" : "🚀 Launch"}
+            </Text>
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity
+          style={styles.ghostBtn}
+          onPress={() => onView(tmpl.id)}
+        >
+          <Text style={styles.ghostBtnText}>View Details</Text>
+        </TouchableOpacity>
+      </View>
+      {!!launchError && (
+        <Text style={styles.launchError}>{launchError}</Text>
+      )}
     </View>
   );
 }
 
+// ─── Testimonials section ───────────────────────────────────────────
+function TestimonialsSection({ programs }: { programs: GuideProgram[] }) {
+  const [testimonials, setTestimonials] = useState<GuideTestimonialFull[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<"all" | "pending" | "approved">("all");
+  const [acting, setActing] = useState<number | null>(null);
+
+  const loadAll = useCallback(async () => {
+    setLoading(true);
+    try {
+      const all = await Promise.all(
+        programs.map((p) =>
+          fetchGuideAllTestimonials(p.code).then((r) => r.testimonials),
+        ),
+      );
+      setTestimonials(all.flat());
+    } finally {
+      setLoading(false);
+    }
+  }, [programs]);
+
+  useEffect(() => {
+    loadAll();
+  }, [loadAll]);
+
+  const moderate = async (
+    t: GuideTestimonialFull,
+    newStatus: "approved" | "rejected",
+  ) => {
+    setActing(t.id);
+    try {
+      await guideModerateTestimonial(t.campaign_code, t.id, newStatus);
+      setTestimonials((prev) =>
+        prev.map((x) =>
+          x.id === t.id ? { ...x, moderation_status: newStatus } : x,
+        ),
+      );
+    } catch {
+      Alert.alert("Error", "Could not update testimonial. Please try again.");
+    } finally {
+      setActing(null);
+    }
+  };
+
+  if (loading || testimonials.length === 0) return null;
+
+  const tabs: ("all" | "pending" | "approved")[] = ["all", "pending", "approved"];
+  const filtered = testimonials.filter((t) =>
+    tab === "all" ? true : (t.moderation_status ?? "") === tab,
+  );
+  const starStr = (r: number | null) =>
+    r ? "★".repeat(r) + "☆".repeat(5 - r) : "";
+
+  return (
+    <View style={styles.section}>
+      <Text style={styles.sectionLabel}>TESTIMONIALS</Text>
+
+      {/* Tabs */}
+      <View style={styles.tabRow}>
+        {tabs.map((t) => {
+          const count = testimonials.filter((x) =>
+            t === "all" ? true : (x.moderation_status ?? "") === t,
+          ).length;
+          return (
+            <TouchableOpacity
+              key={t}
+              onPress={() => setTab(t)}
+              style={[styles.tabBtn, tab === t && styles.tabBtnActive]}
+            >
+              <Text
+                style={[
+                  styles.tabBtnText,
+                  tab === t && styles.tabBtnTextActive,
+                ]}
+              >
+                {t.charAt(0).toUpperCase() + t.slice(1)} ({count})
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      {filtered.length === 0 ? (
+        <Text style={styles.rowMeta}>No {tab} testimonials.</Text>
+      ) : (
+        filtered.map((t) => (
+          <View key={t.id} style={styles.testimonialCard}>
+            {!!t.program_name && (
+              <Text style={styles.testimonialProgram}>{t.program_name}</Text>
+            )}
+            <View style={styles.rowTop}>
+              <Text style={styles.testimonialName}>{t.display_name}</Text>
+              <Text style={styles.testimonialStars}>{starStr(t.rating)}</Text>
+            </View>
+            <Text style={styles.testimonialText}>"{t.testimonial_text}"</Text>
+            <View style={[styles.rowTop, { marginTop: 8, flexWrap: "wrap", gap: 8 }]}>
+              <Text style={styles.rowMeta}>{t.created_at}</Text>
+              <View
+                style={[
+                  styles.statusChip,
+                  t.moderation_status === "approved" && styles.statusChipGreen,
+                  t.moderation_status === "rejected" && styles.statusChipRed,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.statusChipText,
+                    t.moderation_status === "approved" && { color: "#2E7D32" },
+                    t.moderation_status === "rejected" && { color: "#C05B3A" },
+                  ]}
+                >
+                  {(t.moderation_status ?? "").toUpperCase()}
+                </Text>
+              </View>
+            </View>
+            {t.moderation_status === "pending" && (
+              <View style={[styles.rowTop, { marginTop: 10, gap: 8 }]}>
+                <TouchableOpacity
+                  style={styles.approveBtn}
+                  disabled={acting === t.id}
+                  onPress={() => moderate(t, "approved")}
+                >
+                  <Text style={styles.approveBtnText}>Approve</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.rejectBtn}
+                  disabled={acting === t.id}
+                  onPress={() => moderate(t, "rejected")}
+                >
+                  <Text style={styles.rejectBtnText}>Reject</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        ))
+      )}
+    </View>
+  );
+}
+
+// ─── Main screen ────────────────────────────────────────────────────
 export default function GuideHomeScreen() {
   const navigation = useNavigation<any>();
   const [state, setState] = useState<LoadState>({ kind: "loading" });
@@ -227,7 +457,9 @@ export default function GuideHomeScreen() {
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -254,10 +486,19 @@ export default function GuideHomeScreen() {
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={styles.scroll}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#c9a84c" />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#c9a84c"
+          />
+        }
       >
-        <Text style={styles.sectionEyebrow}>GUIDE DASHBOARD</Text>
-        <Text style={styles.pageTitle}>Your Impact</Text>
+        <Text style={styles.eyebrow}>GUIDE DASHBOARD</Text>
+        <Text style={styles.pageTitle}>Your Impact at a Glance</Text>
+        <Text style={styles.pageSub}>
+          Here's how your programs are transforming lives.
+        </Text>
 
         {state.kind === "loading" && (
           <View style={styles.centered}>
@@ -267,106 +508,186 @@ export default function GuideHomeScreen() {
 
         {state.kind === "error" && (
           <View style={styles.centered}>
-            <Text style={styles.errorText}>Could not load dashboard. Pull down to retry.</Text>
+            <Text style={styles.errorText}>
+              Could not load dashboard. Pull down to retry.
+            </Text>
           </View>
         )}
 
-        {state.kind === "loaded" && (() => {
-          const { data } = state;
-          const { summary } = data;
-          const pipeline = (data.my_templates ?? []).filter((t) =>
-            ["submitted", "under_review", "approved", "changes_requested"].includes(t.review_status)
-          );
+        {state.kind === "loaded" &&
+          (() => {
+            const { data } = state;
+            const { summary } = data;
+            const pipeline = (data.my_templates ?? []).filter((t) =>
+              [
+                "submitted",
+                "under_review",
+                "approved",
+                "changes_requested",
+              ].includes(t.review_status),
+            );
 
-          return (
-            <>
-              {/* Stats */}
-              <View style={styles.statsRow}>
-                <StatCard label="PROGRAMS" value={summary.programs_count} />
-                <StatCard label="TOTAL JOINED" value={summary.total_joined} />
-                <StatCard label="SESSIONS" value={summary.sessions_count} />
-                <StatCard label="TESTIMONIALS" value={summary.testimonials_count} />
-              </View>
-
-              {/* CTAs */}
-              <View style={styles.ctaRow}>
-                <TouchableOpacity
-                  style={styles.ctaPrimary}
-                  onPress={() => navigation.navigate("GuideTemplateBrowser")}
-                >
-                  <Text style={styles.ctaPrimaryText}>+ Build a Program</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.ctaSecondary}
-                  onPress={() => navigation.navigate("GuideSessionDraft")}
-                >
-                  <Text style={styles.ctaSecondaryText}>+ Schedule Session</Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* My Programs (pipeline) */}
-              {pipeline.length > 0 && (
-                <View style={styles.section}>
-                  <Text style={styles.sectionLabel}>MY PROGRAMS</Text>
-                  {launchResult && (
-                    <View style={styles.launchSuccess}>
-                      <Text style={styles.launchSuccessTitle}>Program launched! Share this link:</Text>
-                      <View style={styles.joinUrlRow}>
-                        <Text style={styles.joinUrlText} numberOfLines={1}>{launchResult}</Text>
-                        <TouchableOpacity
-                          style={styles.copyBtn}
-                          onPress={() => { Clipboard.setString(launchResult); }}
-                        >
-                          <Text style={styles.copyBtnText}>Copy link</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  )}
-                  {pipeline.map((t) => (
-                    <TemplateRow
-                      key={t.id}
-                      tmpl={t}
-                      onEdit={(id) => navigation.navigate("GuideTemplateDayEditor", { templateId: id })}
-                      onView={(id) => navigation.navigate("GuideTemplateDayEditor", { templateId: id, viewOnly: true })}
-                      onLaunched={(joinUrl) => { setLaunchResult(joinUrl); load(); }}
-                    />
-                  ))}
+            return (
+              <>
+                {/* Impact grid: 2×3 on mobile */}
+                <View style={styles.impactGrid}>
+                  <ImpactCard
+                    label="Programs"
+                    sublabel="Live programs"
+                    value={summary.programs_count}
+                  />
+                  <ImpactCard
+                    label="Total Participants"
+                    sublabel="Across all programs"
+                    value={summary.total_joined}
+                  />
+                  <ImpactCard
+                    label="Active"
+                    sublabel="Started the program"
+                    value={summary.active_count_total ?? 0}
+                  />
+                  <ImpactCard
+                    label="Completion Rate"
+                    sublabel="Overall"
+                    value={`${summary.completion_rate ?? 0}%`}
+                  />
+                  <ImpactCard
+                    label="Testimonials"
+                    sublabel="Received"
+                    value={summary.testimonials_count}
+                  />
+                  <ImpactCard
+                    label="Sessions"
+                    sublabel="Scheduled"
+                    value={summary.sessions_count}
+                  />
                 </View>
-              )}
 
-              {/* Live Programs */}
-              {data.programs.length > 0 && (
-                <View style={styles.section}>
-                  <Text style={styles.sectionLabel}>LIVE PROGRAMS</Text>
-                  {data.programs.map((p) => (
-                    <ProgramRow
-                      key={p.code}
-                      program={p}
-                      onView={p.template_id ? () => navigation.navigate("GuideTemplateDayEditor", { templateId: p.template_id, viewOnly: true }) : undefined}
-                    />
-                  ))}
-                </View>
-              )}
-
-              {/* Upcoming Sessions */}
-              {data.upcoming_sessions.length > 0 && (
-                <View style={styles.section}>
-                  <Text style={styles.sectionLabel}>UPCOMING SESSIONS</Text>
-                  {data.upcoming_sessions.map((s) => <SessionRow key={s.code} session={s} />)}
-                </View>
-              )}
-
-              {data.programs.length === 0 && data.upcoming_sessions.length === 0 && pipeline.length === 0 && (
-                <View style={styles.emptyBox}>
-                  <Text style={styles.emptyText}>No programs or sessions yet.</Text>
-                  <TouchableOpacity onPress={() => navigation.navigate("GuideTemplateBrowser")}>
-                    <Text style={styles.emptyLink}>Submit your first program →</Text>
+                {/* CTAs */}
+                <View style={styles.ctaRow}>
+                  <TouchableOpacity
+                    style={styles.ctaPrimary}
+                    onPress={() => navigation.navigate("GuideTemplateBrowser")}
+                  >
+                    <Text style={styles.ctaPrimaryText}>+ Build a Program</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.ctaSecondary}
+                    onPress={() => navigation.navigate("GuideSessionDraft")}
+                  >
+                    <Text style={styles.ctaSecondaryText}>
+                      + Schedule Session
+                    </Text>
                   </TouchableOpacity>
                 </View>
-              )}
-            </>
-          );
-        })()}
+
+                {/* My Programs (review pipeline) */}
+                {pipeline.length > 0 && (
+                  <View style={styles.section}>
+                    <Text style={styles.sectionLabel}>MY PROGRAMS</Text>
+                    {launchResult && (
+                      <View style={styles.launchSuccess}>
+                        <Text style={styles.launchSuccessTitle}>
+                          Program launched! Share this link:
+                        </Text>
+                        <View style={styles.joinUrlRow}>
+                          <Text
+                            style={styles.joinUrlText}
+                            numberOfLines={1}
+                          >
+                            {launchResult}
+                          </Text>
+                          <TouchableOpacity
+                            style={styles.copyBtn}
+                            onPress={() => Clipboard.setString(launchResult)}
+                          >
+                            <Text style={styles.copyBtnText}>Copy</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    )}
+                    {pipeline.map((t) => (
+                      <TemplateRow
+                        key={t.id}
+                        tmpl={t}
+                        onEdit={(id) =>
+                          navigation.navigate("GuideTemplateDayEditor", {
+                            templateId: id,
+                          })
+                        }
+                        onView={(id) =>
+                          navigation.navigate("GuideTemplateDayEditor", {
+                            templateId: id,
+                            viewOnly: true,
+                          })
+                        }
+                        onLaunched={(joinUrl) => {
+                          setLaunchResult(joinUrl);
+                          load();
+                        }}
+                      />
+                    ))}
+                  </View>
+                )}
+
+                {/* Live Programs */}
+                {data.programs.length > 0 && (
+                  <View style={styles.section}>
+                    <Text style={styles.sectionLabel}>LIVE PROGRAMS</Text>
+                    {data.programs.map((p) => (
+                      <ProgramRow
+                        key={p.code}
+                        program={p}
+                        onView={
+                          p.template_id
+                            ? () =>
+                                navigation.navigate("GuideTemplateDayEditor", {
+                                  templateId: p.template_id,
+                                  viewOnly: true,
+                                })
+                            : undefined
+                        }
+                      />
+                    ))}
+                  </View>
+                )}
+
+                {/* Testimonials */}
+                {data.programs.length > 0 && (
+                  <TestimonialsSection programs={data.programs} />
+                )}
+
+                {/* Upcoming Sessions */}
+                {data.upcoming_sessions.length > 0 && (
+                  <View style={styles.section}>
+                    <Text style={styles.sectionLabel}>UPCOMING SESSIONS</Text>
+                    {data.upcoming_sessions.map((s) => (
+                      <SessionRow key={s.code} session={s} />
+                    ))}
+                  </View>
+                )}
+
+                {data.programs.length === 0 &&
+                  data.upcoming_sessions.length === 0 &&
+                  pipeline.length === 0 && (
+                    <View style={styles.emptyBox}>
+                      <Text style={styles.emptyText}>
+                        No programs or sessions yet.
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() =>
+                          navigation.navigate("GuideTemplateBrowser")
+                        }
+                      >
+                        <Text style={styles.emptyLink}>
+                          Submit your first program →
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+              </>
+            );
+          })()}
       </ScrollView>
     </SafeAreaView>
   );
@@ -394,47 +715,56 @@ const styles = StyleSheet.create({
   },
   signOutText: { fontSize: 13, color: "#8B6F4E" },
   scroll: { padding: 20, paddingBottom: 60 },
-  sectionEyebrow: {
+  eyebrow: {
     fontSize: 11,
     fontWeight: "700",
     color: "#9e9b97",
     letterSpacing: 0.8,
     marginBottom: 4,
   },
-  pageTitle: { fontSize: 22, fontWeight: "700", color: "#432104", marginBottom: 24 },
+  pageTitle: { fontSize: 22, fontWeight: "700", color: "#432104", marginBottom: 4 },
+  pageSub: { fontSize: 13, color: "#9e9b97", marginBottom: 24 },
   centered: { paddingTop: 60, alignItems: "center" },
   errorText: { fontSize: 14, color: "#8B6F4E", textAlign: "center" },
 
-  statsRow: { flexDirection: "row", gap: 8, marginBottom: 20, flexWrap: "wrap" },
-  statCard: {
-    flex: 1,
-    minWidth: 70,
+  // Impact grid — 2 columns
+  impactGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginBottom: 24,
+  },
+  impactCard: {
+    width: "47%",
     backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: "#e8dfc8",
-    borderRadius: 10,
-    padding: 12,
+    borderRadius: 12,
+    padding: 14,
   },
-  statValue: { fontSize: 20, fontWeight: "700", color: "#432104", marginBottom: 2 },
-  statLabel: { fontSize: 10, fontWeight: "600", color: "#9e9b97", letterSpacing: 0.4 },
+  impactValue: { fontSize: 22, fontWeight: "700", color: "#432104", marginBottom: 2 },
+  impactLabel: { fontSize: 13, fontWeight: "600", color: "#432104", marginBottom: 2 },
+  impactSub: { fontSize: 11, color: "#9e9b97" },
 
-  ctaRow: { flexDirection: "row", gap: 10, marginBottom: 28, flexWrap: "wrap" },
+  // CTAs
+  ctaRow: { gap: 10, marginBottom: 28 },
   ctaPrimary: {
     backgroundColor: "#c9a84c",
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: "center",
   },
-  ctaPrimaryText: { color: "#fff", fontWeight: "700", fontSize: 13 },
+  ctaPrimaryText: { color: "#fff", fontWeight: "700", fontSize: 15 },
   ctaSecondary: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: "#c9a84c",
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: "center",
   },
-  ctaSecondaryText: { color: "#c9a84c", fontWeight: "700", fontSize: 13 },
+  ctaSecondaryText: { color: "#c9a84c", fontWeight: "700", fontSize: 15 },
 
+  // Section
   section: { marginBottom: 28 },
   sectionLabel: {
     fontSize: 11,
@@ -443,33 +773,69 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
     marginBottom: 10,
   },
+
+  // Card row
   row: {
     backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: "#e8dfc8",
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 14,
-    marginBottom: 8,
+    marginBottom: 10,
   },
-  rowHeader: { flexDirection: "row", alignItems: "center", gap: 12 },
-  rowTitle: { fontSize: 14, fontWeight: "600", color: "#432104", marginBottom: 2 },
-  rowMeta: { fontSize: 12, color: "#9e9b97" },
-  rowStats: { flexDirection: "row", gap: 14, alignItems: "center" },
-  statPill: { alignItems: "flex-end" },
-  statPillNum: { fontSize: 15, fontWeight: "700", color: "#432104" },
-  statPillLabel: { fontSize: 10, color: "#9e9b97" },
+  rowTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  rowTitle: { fontSize: 14, fontWeight: "600", color: "#432104", flex: 1, marginBottom: 3 },
+  rowMeta: { fontSize: 12, color: "#9e9b97", marginBottom: 2 },
   statusBadge: { fontSize: 11, fontWeight: "700", letterSpacing: 0.4, textTransform: "uppercase" },
-  rowBtns: { flexDirection: "row", gap: 6, flexShrink: 0, flexWrap: "wrap", alignItems: "center" },
-  goldRowBtn: { borderWidth: 1, borderColor: "#c9a84c", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 5 },
-  goldRowBtnText: { fontSize: 12, fontWeight: "600", color: "#c9a84c" },
-  ghostRowBtn: { borderWidth: 1, borderColor: "#e8dfc8", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 5 },
-  ghostRowBtnText: { fontSize: 12, fontWeight: "600", color: "#9e9b97" },
-  launchBtn: { backgroundColor: "#c9a84c", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 5 },
+
+  // Metrics
+  metricsRow: { flexDirection: "row", gap: 16, marginTop: 10, flexWrap: "wrap" },
+  metricItem: { alignItems: "center", minWidth: 56 },
+  metricNum: { fontSize: 16, fontWeight: "700", color: "#432104" },
+  metricLabel: { fontSize: 10, color: "#9e9b97", marginTop: 1 },
+
+  // Pending badge
+  pendingBadge: {
+    backgroundColor: "#FFF3CC",
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginTop: 3,
+  },
+  pendingBadgeText: { fontSize: 9, fontWeight: "700", color: "#9A7548" },
+
+  // Buttons
+  ghostBtn: {
+    borderWidth: 1,
+    borderColor: "#e8dfc8",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  ghostBtnText: { fontSize: 12, fontWeight: "600", color: "#9e9b97" },
+  goldBtn: {
+    borderWidth: 1,
+    borderColor: "#c9a84c",
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+  },
+  goldBtnText: { fontSize: 12, fontWeight: "600", color: "#c9a84c" },
+  launchBtn: {
+    backgroundColor: "#c9a84c",
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+  },
   launchBtnText: { fontSize: 12, fontWeight: "700", color: "#fff" },
   launchError: { fontSize: 12, color: "#c0392b", marginTop: 6 },
-  launchSuccess: { backgroundColor: "#f0fdf4", borderWidth: 1, borderColor: "#86efac", borderRadius: 10, padding: 14, marginBottom: 10 },
-  launchSuccessTitle: { fontSize: 13, fontWeight: "700", color: "#166534", marginBottom: 8 },
 
+  // Join URL
   joinUrlRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -486,11 +852,88 @@ const styles = StyleSheet.create({
     backgroundColor: "#c9a84c",
     borderRadius: 6,
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 5,
   },
   copyBtnDone: { backgroundColor: "#22863a" },
   copyBtnText: { color: "#fff", fontSize: 12, fontWeight: "600" },
 
+  // Launch success
+  launchSuccess: {
+    backgroundColor: "#f0fdf4",
+    borderWidth: 1,
+    borderColor: "#86efac",
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 10,
+  },
+  launchSuccessTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#166534",
+    marginBottom: 8,
+  },
+
+  // Testimonials
+  tabRow: { flexDirection: "row", gap: 8, marginBottom: 12 },
+  tabBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: "#e0d5c5",
+  },
+  tabBtnActive: { borderColor: "#c9a84c", backgroundColor: "#c9a84c" },
+  tabBtnText: { fontSize: 12, fontWeight: "600", color: "#9e9b97" },
+  tabBtnTextActive: { color: "#fff" },
+  testimonialCard: {
+    backgroundColor: "#faf7f2",
+    borderWidth: 1,
+    borderColor: "#e8d9b5",
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 10,
+  },
+  testimonialProgram: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#9e9b97",
+    marginBottom: 6,
+  },
+  testimonialName: { fontSize: 13, fontWeight: "600", color: "#432104", flex: 1 },
+  testimonialStars: { fontSize: 14, color: "#c9a84c" },
+  testimonialText: {
+    fontSize: 14,
+    color: "#432104",
+    lineHeight: 20,
+    marginTop: 4,
+    fontStyle: "italic",
+  },
+  statusChip: {
+    backgroundColor: "#FFF3CC",
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  statusChipGreen: { backgroundColor: "#DCF0D8" },
+  statusChipRed: { backgroundColor: "#FCE8E4" },
+  statusChipText: { fontSize: 10, fontWeight: "700", color: "#9A7548", textTransform: "uppercase" },
+  approveBtn: {
+    backgroundColor: "#2E5723",
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 7,
+  },
+  approveBtnText: { fontSize: 12, fontWeight: "600", color: "#fff" },
+  rejectBtn: {
+    borderWidth: 1,
+    borderColor: "#C05B3A",
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 7,
+  },
+  rejectBtnText: { fontSize: 12, fontWeight: "600", color: "#C05B3A" },
+
+  // Empty
   emptyBox: {
     borderWidth: 1,
     borderStyle: "dashed",

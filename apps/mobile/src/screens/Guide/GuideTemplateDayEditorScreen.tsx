@@ -162,6 +162,8 @@ export default function GuideTemplateDayEditorScreen() {
   const [slotSelections, setSlotSelections] = useState<Record<string, SlotSelection>>({});
   const [reminderPickerTarget, setReminderPickerTarget] = useState<{ slot: 'mantra' | 'sankalp' | 'practice'; dayNumber: number } | null>(null);
   const [activeDay, setActiveDay] = useState(1);
+  const [launchStartDate, setLaunchStartDate] = useState("");
+  const [launchMaxParticipants, setLaunchMaxParticipants] = useState("");
   const scrollRef = useRef<ScrollView>(null);
   const dayOffsets = useRef<Record<number, number>>({});
 
@@ -172,6 +174,8 @@ export default function GuideTemplateDayEditorScreen() {
         setTemplate(tmpl);
         const loadedDays = (tmpl.days ?? []).map((d) => ({ ...d, saving: false }));
         setDays(loadedDays);
+        if ((tmpl as any).desired_start_date) setLaunchStartDate((tmpl as any).desired_start_date);
+        if ((tmpl as any).max_participants) setLaunchMaxParticipants(String((tmpl as any).max_participants));
 
         // Seed slotSelections from _card fields already resolved by backend — no extra API calls
         const seeded: Record<string, SlotSelection> = {};
@@ -289,7 +293,10 @@ export default function GuideTemplateDayEditorScreen() {
     setError("");
     setSubmitting(true);
     try {
-      await submitTemplateForReview(templateId);
+      await submitTemplateForReview(templateId, {
+        desired_start_date: launchStartDate || undefined,
+        max_participants: launchMaxParticipants ? parseInt(launchMaxParticipants, 10) : undefined,
+      });
       setSubmitted(true);
     } catch (e: any) {
       setError(e?.response?.data?.detail ?? "Could not submit. Please try again.");
@@ -323,7 +330,12 @@ export default function GuideTemplateDayEditorScreen() {
   }
 
   const locked = viewOnly || !!template?.locked_at;
-  const canSubmit = !viewOnly && (template?.review_status === "draft" || template?.review_status === "changes_requested");
+  const editableStatuses = ["draft", "submitted", "under_review", "changes_requested"];
+  const canSubmit = !viewOnly && editableStatuses.includes(template?.review_status ?? "");
+  const submitLabel =
+    template?.review_status === "draft" || template?.review_status === "changes_requested"
+      ? "Submit for Review"
+      : "Update Submission";
   const statusColor = STATUS_COLOR[template?.review_status ?? ""] ?? "#8B6F4E";
 
   return (
@@ -387,6 +399,58 @@ export default function GuideTemplateDayEditorScreen() {
             </View>
           )}
 
+          {/* Program Settings — always visible, read-only when locked/viewOnly */}
+          <View style={s.settingsCard}>
+            <Text style={s.settingsCardLabel}>PROGRAM SETTINGS</Text>
+            <View style={s.settingsRow}>
+              <View style={s.settingsField}>
+                <Text style={s.settingsFieldLabel}>Start Date</Text>
+                {locked ? (
+                  <View style={[s.settingsInput, s.settingsInputReadonly]}>
+                    <Text style={launchStartDate ? s.settingsReadonlyText : s.settingsReadonlyPlaceholder}>
+                      {launchStartDate || "Not set (rolling start)"}
+                    </Text>
+                  </View>
+                ) : (
+                  <>
+                    <TextInput
+                      style={s.settingsInput}
+                      placeholder="YYYY-MM-DD"
+                      placeholderTextColor="#C5B69A"
+                      value={launchStartDate}
+                      onChangeText={setLaunchStartDate}
+                      keyboardType="default"
+                      autoCorrect={false}
+                    />
+                    <Text style={s.settingsHint}>Leave blank for rolling start</Text>
+                  </>
+                )}
+              </View>
+              <View style={s.settingsField}>
+                <Text style={s.settingsFieldLabel}>Max People Allowed</Text>
+                {locked ? (
+                  <View style={[s.settingsInput, s.settingsInputReadonly]}>
+                    <Text style={launchMaxParticipants ? s.settingsReadonlyText : s.settingsReadonlyPlaceholder}>
+                      {launchMaxParticipants || "Unlimited"}
+                    </Text>
+                  </View>
+                ) : (
+                  <>
+                    <TextInput
+                      style={s.settingsInput}
+                      placeholder="e.g. 50"
+                      placeholderTextColor="#C5B69A"
+                      value={launchMaxParticipants}
+                      onChangeText={setLaunchMaxParticipants}
+                      keyboardType="number-pad"
+                    />
+                    <Text style={s.settingsHint}>Leave blank for unlimited</Text>
+                  </>
+                )}
+              </View>
+            </View>
+          </View>
+
           {/* Repeat Day 1 banner */}
           {!locked && days.length > 1 && (
             <View style={s.repeatBanner}>
@@ -397,10 +461,10 @@ export default function GuideTemplateDayEditorScreen() {
             </View>
           )}
 
-          {/* Submit btn at top for multi-day */}
-          {!locked && canSubmit && days.length > 3 && (
+          {/* Submit btn — always at top when editable */}
+          {!locked && canSubmit && (
             <TouchableOpacity style={[s.submitBtn, { marginBottom: 20 }]} onPress={handleSubmit} disabled={submitting}>
-              <Text style={s.submitBtnText}>{submitting ? "Submitting…" : "Submit for Review"}</Text>
+              <Text style={s.submitBtnText}>{submitting ? "Submitting…" : submitLabel}</Text>
             </TouchableOpacity>
           )}
 
@@ -426,7 +490,7 @@ export default function GuideTemplateDayEditorScreen() {
           {/* Submit btn at bottom */}
           {!locked && canSubmit && (
             <TouchableOpacity style={s.submitBtn} onPress={handleSubmit} disabled={submitting}>
-              <Text style={s.submitBtnText}>{submitting ? "Submitting…" : "Submit for Review"}</Text>
+              <Text style={s.submitBtnText}>{submitting ? "Submitting…" : submitLabel}</Text>
             </TouchableOpacity>
           )}
         </ScrollView>
@@ -988,6 +1052,18 @@ const s = StyleSheet.create({
 
   lockBanner: { backgroundColor: "#FEF3D0", borderWidth: 1, borderColor: "#C99317", borderRadius: 8, padding: 12, marginBottom: 16 },
   lockBannerText: { fontSize: 13, color: "#7A4E00", fontFamily: Fonts.sans.regular },
+
+  // Program settings card
+  settingsCard: { backgroundColor: "#FDFAF6", borderWidth: 1, borderColor: "#E8DECE", borderRadius: 12, padding: 16, marginBottom: 16 },
+  settingsCardLabel: { fontSize: 11, fontWeight: "700", color: "#B5A08A", letterSpacing: 0.8, marginBottom: 12 },
+  settingsRow: { flexDirection: "row", gap: 12 },
+  settingsField: { flex: 1 },
+  settingsFieldLabel: { fontSize: 11, fontWeight: "600", color: "#8B6F4E", marginBottom: 4 },
+  settingsInput: { backgroundColor: "#fff", borderWidth: 1, borderColor: "#E8DECE", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 9, fontSize: 13, color: "#432104" },
+  settingsInputReadonly: { backgroundColor: "#F5F0E8", justifyContent: "center" as const },
+  settingsReadonlyText: { fontSize: 13, color: "#432104" },
+  settingsReadonlyPlaceholder: { fontSize: 13, color: "#C5B69A", fontStyle: "italic" as const },
+  settingsHint: { fontSize: 10, color: "#C5B69A", marginTop: 3 },
 
   repeatBanner: { backgroundColor: "#FEF9ED", borderWidth: 1, borderColor: "#E8D9A0", borderRadius: 10, padding: 12, marginBottom: 16, gap: 8 },
   repeatBannerText: { fontSize: 12, color: "#7A6652", fontFamily: Fonts.sans.regular },

@@ -163,7 +163,12 @@ export interface GuideProgram {
   join_url: string;
   template_id: number | null;
   joined_count: number;
+  active_count: number;
+  completed_count: number;
   testimonials_count: number;
+  approved_testimonials_count: number;
+  start_date: string | null;
+  max_participants: number | null;
 }
 
 export interface GuideSession {
@@ -182,12 +187,16 @@ export interface GuideDashboardTemplate {
   duration_days: number;
   review_status: string;
   submitted_at: string | null;
+  desired_start_date: string | null;
+  max_participants: number | null;
 }
 
 export interface GuideDashboard {
   summary: {
     programs_count: number;
     total_joined: number;
+    active_count_total: number;
+    completion_rate: number;
     sessions_count: number;
     testimonials_count: number;
   };
@@ -196,9 +205,37 @@ export interface GuideDashboard {
   upcoming_sessions: GuideSession[];
 }
 
+export interface GuideTestimonialFull {
+  id: number;
+  display_name: string;
+  testimonial_text: string;
+  rating: number | null;
+  moderation_status: string;
+  created_at: string;
+  program_name: string;
+  campaign_code: string;
+}
+
 export async function fetchGuideDashboard(): Promise<GuideDashboard> {
   const res = await api.get("guide/dashboard/");
   return res.data;
+}
+
+export async function fetchGuideAllTestimonials(
+  code: string,
+): Promise<{ testimonials: GuideTestimonialFull[] }> {
+  const res = await api.get(`guide/programs/${code}/testimonials/`);
+  return res.data;
+}
+
+export async function guideModerateTestimonial(
+  code: string,
+  id: number,
+  moderationStatus: "approved" | "rejected",
+): Promise<void> {
+  await api.patch(`guide/programs/${code}/testimonials/${id}/`, {
+    moderation_status: moderationStatus,
+  });
 }
 
 export async function fetchGuideMyProfile(): Promise<{ is_guide: boolean }> {
@@ -393,8 +430,11 @@ export async function updateTemplateDay(templateId: number, dayNumber: number, d
   return res.data;
 }
 
-export async function submitTemplateForReview(templateId: number): Promise<void> {
-  await api.post(`guide/my-templates/${templateId}/submit/`);
+export async function submitTemplateForReview(
+  templateId: number,
+  settings?: { desired_start_date?: string; max_participants?: number },
+): Promise<void> {
+  await api.post(`guide/my-templates/${templateId}/submit/`, settings ?? {});
 }
 
 function hasVal(v: string | string[]): boolean {

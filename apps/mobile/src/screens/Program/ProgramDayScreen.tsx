@@ -83,15 +83,15 @@ function getCardSubtitle(
   if (item.item_type === "mantra") {
     if (dayContent.mantra_count) parts.push(`${dayContent.mantra_count}×`);
     if (dayContent.mantra_reminder_time)
-      parts.push(`⏰ ${fmt12h(dayContent.mantra_reminder_time)}`);
+      parts.push(`🔔 ${fmt12h(dayContent.mantra_reminder_time)}`);
   } else if (item.item_type === "practice") {
     if (dayContent.practice_duration_minutes)
       parts.push(`${dayContent.practice_duration_minutes} min`);
     if (dayContent.practice_reminder_time)
-      parts.push(`⏰ ${fmt12h(dayContent.practice_reminder_time)}`);
+      parts.push(`🔔 ${fmt12h(dayContent.practice_reminder_time)}`);
   } else if (item.item_type === "sankalp") {
     if (dayContent.sankalp_reminder_time)
-      parts.push(`⏰ ${fmt12h(dayContent.sankalp_reminder_time)}`);
+      parts.push(`🔔 ${fmt12h(dayContent.sankalp_reminder_time)}`);
   }
   return parts.length > 0 ? parts.join("  ·  ") : null;
 }
@@ -658,13 +658,7 @@ export default function ProgramDayScreen() {
         {/* Support footer */}
         <TouchableOpacity
           style={styles.supportLink}
-          onPress={() =>
-            Alert.alert(
-              t("programs.day.alertTitle"),
-              t("programs.day.alertBody"),
-              [{ text: t("programs.day.alertOk") }],
-            )
-          }
+          onPress={() => Linking.openURL(SUPPORT_URL)}
           accessibilityLabel="Program support"
         >
           <Text style={styles.supportLinkText}>{t("programs.day.supportLink")}</Text>

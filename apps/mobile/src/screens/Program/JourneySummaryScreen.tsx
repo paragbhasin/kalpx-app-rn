@@ -40,7 +40,15 @@ const INSPIRATIONAL_QUOTES = [
 
 type Visibility = "named" | "anonymous" | "private";
 
-function StatRow({ value, label, accent }: { value: number; label: string; accent: string }) {
+function StatRow({
+  value,
+  label,
+  accent,
+}: {
+  value: number;
+  label: string;
+  accent: string;
+}) {
   return (
     <View style={styles.statRow}>
       <View style={[styles.statAccent, { backgroundColor: accent }]} />
@@ -212,11 +220,23 @@ export default function JourneySummaryScreen() {
               </Text>
 
               <View style={styles.statsCard}>
-                <StatRow accent="#2E7D32" value={summary.days_completed} label="Days Completed" />
+                <StatRow
+                  accent="#2E7D32"
+                  value={summary.days_completed}
+                  label="Days Completed"
+                />
                 <View style={styles.statDivider} />
-                <StatRow accent="#C99317" value={summary.days_completed} label="Practices Done" />
+                <StatRow
+                  accent="#C99317"
+                  value={summary.days_completed}
+                  label="Practices Done"
+                />
                 <View style={styles.statDivider} />
-                <StatRow accent="#7B6545" value={summary.reflections_written} label="Reflections Written" />
+                <StatRow
+                  accent="#7B6545"
+                  value={summary.reflections_written}
+                  label="Reflections Written"
+                />
               </View>
 
               <Text style={styles.quote}>"{quoteRef.current}"</Text>
@@ -231,7 +251,7 @@ export default function JourneySummaryScreen() {
                 style={styles.btnLink}
                 onPress={() => navigation.navigate("Home")}
               >
-                <Text style={styles.btnLinkText}>Explore Another Program</Text>
+                {/* <Text style={styles.btnLinkText}>Explore Another Program</Text> */}
               </TouchableOpacity>
             </>
           )}
@@ -240,7 +260,7 @@ export default function JourneySummaryScreen() {
           {step === 2 && (
             <>
               <View style={styles.centeredSection}>
-                <Text style={styles.inviteEmoji}>🌱</Text>
+                {/* <Text style={styles.inviteEmoji}>🌱</Text> */}
                 <Text style={styles.headingLarge}>
                   Your journey can{"\n"}inspire others
                 </Text>
@@ -252,14 +272,17 @@ export default function JourneySummaryScreen() {
 
               <View style={styles.reasonsCard}>
                 {[
-                  { icon: "✨", label: "Inspire Others" },
-                  { icon: "🤝", label: "Build a Supportive Community" },
-                  { icon: "🙏", label: "Spread Healing" },
-                ].map((r) => (
-                  <View key={r.label} style={styles.reasonRow}>
-                    <Text style={styles.reasonIcon}>{r.icon}</Text>
-                    <Text style={styles.reasonLabel}>{r.label}</Text>
-                  </View>
+                  { label: "Inspire Others", color: "#2E7D32" },
+                  { label: "Build a Supportive Community", color: "#C99317" },
+                  { label: "Spread Healing", color: "#7B6545" },
+                ].map((r, idx) => (
+                  <React.Fragment key={r.label}>
+                    {idx > 0 && <View style={styles.reasonDivider} />}
+                    <View style={styles.reasonRow}>
+                      <View style={[styles.reasonDot, { backgroundColor: r.color }]} />
+                      <Text style={styles.reasonLabel}>{r.label}</Text>
+                    </View>
+                  </React.Fragment>
                 ))}
               </View>
 
@@ -594,19 +617,29 @@ const styles = StyleSheet.create({
   },
 
   reasonsCard: {
-    backgroundColor: "#FFF8EE",
-    borderRadius: 14,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: "#E8D9B5",
-    padding: 16,
-    gap: 14,
-    marginBottom: 28,
+    marginBottom: 32,
+    overflow: "hidden",
   },
-  reasonRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  reasonIcon: { fontSize: 20, width: 28 },
+  reasonDivider: { height: 1, backgroundColor: "#F0E8D0" },
+  reasonDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  reasonRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+  },
   reasonLabel: {
     fontFamily: Fonts.sans.medium,
-    fontSize: 14,
+    fontSize: 15,
     color: "#432104",
   },
 

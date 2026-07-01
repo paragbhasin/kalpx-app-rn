@@ -251,7 +251,7 @@ function ProgramRow({
                 : "Not set"}
             </span>
             <span style={{ fontSize: 11, color: "var(--kalpx-text-muted)" }}>
-              · Max:{" "}
+              · Maximum Participants:{" "}
               {program.max_participants
                 ? `${program.max_participants} people`
                 : "Unlimited"}
@@ -676,7 +676,7 @@ function TemplateRow({
                 textDecoration: tmpl.max_participants ? "none" : "underline",
               }}
             >
-              · Max:{" "}
+              · Maximum Participants:{" "}
               {tmpl.max_participants
                 ? `${tmpl.max_participants} people`
                 : "Set limit →"}
@@ -821,7 +821,11 @@ export function GuideDashboardPage() {
         </button>
       </div>
       <main
-        style={{ maxWidth: 680, margin: "0 auto", padding: "32px 20px 80px" }}
+        style={{
+          maxWidth: 1500,
+          margin: "5px 250px",
+          padding: "32px 20px 80px",
+        }}
       >
         <header style={{ marginBottom: 28 }}>
           <p
@@ -1015,197 +1019,7 @@ export function GuideDashboardPage() {
                     sublabel="Received"
                   />
                 </div>
-
-                {/* CTA row */}
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 10,
-                    marginBottom: 32,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <Link
-                    to="/guide/templates"
-                    style={{
-                      padding: "10px 18px",
-                      background: "var(--kalpx-gold)",
-                      color: "#fff",
-                      borderRadius: 8,
-                      fontSize: 13,
-                      fontWeight: 600,
-                      textDecoration: "none",
-                    }}
-                  >
-                    + Build a Program
-                  </Link>
-                  <Link
-                    to="/guide/sessions/draft"
-                    style={{
-                      padding: "10px 18px",
-                      border: "1px solid var(--kalpx-gold)",
-                      color: "var(--kalpx-gold)",
-                      borderRadius: 8,
-                      fontSize: 13,
-                      fontWeight: 600,
-                      textDecoration: "none",
-                    }}
-                  >
-                    + Schedule Session
-                  </Link>
-                  {/* <Link to="/guide/programs/draft"
-                  style={{ padding: '10px 18px', border: '1px solid #DDD3C0',
-                    color: '#8B6F4E', borderRadius: 8, fontSize: 13, fontWeight: 600,
-                    textDecoration: 'none' }}>
-                  Submit Free-form Draft
-                </Link> */}
-                </div>
-
-                {/* My Programs in review pipeline (submitted / under_review / approved / changes_requested) */}
-                {(() => {
-                  const pipeline = (data.my_templates ?? []).filter((t) =>
-                    [
-                      "submitted",
-                      "under_review",
-                      "approved",
-                      "changes_requested",
-                    ].includes(t.review_status),
-                  );
-                  if (!pipeline.length) return null;
-                  return (
-                    <section style={{ marginBottom: 32 }}>
-                      <p
-                        style={{
-                          fontSize: 11,
-                          letterSpacing: "0.05em",
-                          color: "var(--kalpx-text-muted)",
-                          marginBottom: 12,
-                          fontWeight: 600,
-                        }}
-                      >
-                        MY PROGRAMS
-                      </p>
-                      {launchResult && (
-                        <div
-                          style={{
-                            marginBottom: 12,
-                            padding: "14px 16px",
-                            background: "#f0fdf4",
-                            border: "1px solid #86efac",
-                            borderRadius: 10,
-                          }}
-                        >
-                          <p
-                            style={{
-                              fontSize: 13,
-                              fontWeight: 700,
-                              color: "#166534",
-                              margin: "0 0 6px",
-                            }}
-                          >
-                            Program launched! Share this link with your
-                            community:
-                          </p>
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 8,
-                              flexWrap: "wrap",
-                            }}
-                          >
-                            <a
-                              href={launchResult.joinUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              style={{
-                                fontSize: 13,
-                                color: "#1d4ed8",
-                                wordBreak: "break-all",
-                              }}
-                            >
-                              {launchResult.joinUrl}
-                            </a>
-                            <button
-                              onClick={() =>
-                                navigator.clipboard.writeText(
-                                  launchResult.joinUrl,
-                                )
-                              }
-                              style={{
-                                padding: "4px 12px",
-                                background: "var(--kalpx-gold)",
-                                border: "none",
-                                color: "#fff",
-                                borderRadius: 6,
-                                fontSize: 12,
-                                fontWeight: 600,
-                                cursor: "pointer",
-                                flexShrink: 0,
-                              }}
-                            >
-                              Copy link
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 8,
-                        }}
-                      >
-                        {pipeline.map((t) => (
-                          <TemplateRow
-                            key={t.id}
-                            tmpl={t}
-                            onEdit={(id) =>
-                              navigate(`/guide/templates/${id}/edit`)
-                            }
-                            onView={(id) =>
-                              navigate(`/guide/templates/${id}/review`)
-                            }
-                            onLaunched={(joinUrl, code) =>
-                              setLaunchResult({ joinUrl, code })
-                            }
-                          />
-                        ))}
-                      </div>
-                    </section>
-                  );
-                })()}
-
-                {/* Live Programs (campaigns) */}
-                {data.programs.length > 0 && (
-                  <section style={{ marginBottom: 32 }}>
-                    <p
-                      style={{
-                        fontSize: 11,
-                        letterSpacing: "0.05em",
-                        color: "var(--kalpx-text-muted)",
-                        marginBottom: 12,
-                        fontWeight: 600,
-                      }}
-                    >
-                      LIVE PROGRAMS
-                    </p>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 8,
-                      }}
-                    >
-                      {data.programs.map((p, i) => (
-                        <ProgramRow key={p.code} program={p} index={i} />
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {/* Today at a Glance */}
-                {data.programs.length > 0 &&
+                {/* {data.programs.length > 0 &&
                   (() => {
                     const totalJoined = summary.total_joined;
                     const totalActive = summary.active_count_total ?? 0;
@@ -1425,7 +1239,197 @@ export function GuideDashboardPage() {
                         </div>
                       </section>
                     );
-                  })()}
+                  })()} */}
+
+                {/* CTA row */}
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 10,
+                    marginBottom: 32,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <Link
+                    to="/guide/templates"
+                    style={{
+                      padding: "10px 18px",
+                      background: "var(--kalpx-gold)",
+                      color: "#fff",
+                      borderRadius: 8,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      textDecoration: "none",
+                    }}
+                  >
+                    + Build a Program
+                  </Link>
+                  <Link
+                    to="/guide/sessions/draft"
+                    style={{
+                      padding: "10px 18px",
+                      border: "1px solid var(--kalpx-gold)",
+                      color: "var(--kalpx-gold)",
+                      borderRadius: 8,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      textDecoration: "none",
+                    }}
+                  >
+                    + Schedule Session
+                  </Link>
+                  {/* <Link to="/guide/programs/draft"
+                  style={{ padding: '10px 18px', border: '1px solid #DDD3C0',
+                    color: '#8B6F4E', borderRadius: 8, fontSize: 13, fontWeight: 600,
+                    textDecoration: 'none' }}>
+                  Submit Free-form Draft
+                </Link> */}
+                </div>
+
+                {/* My Programs in review pipeline (submitted / under_review / approved / changes_requested) */}
+                {(() => {
+                  const pipeline = (data.my_templates ?? []).filter((t) =>
+                    [
+                      "submitted",
+                      "under_review",
+                      "approved",
+                      "changes_requested",
+                    ].includes(t.review_status),
+                  );
+                  if (!pipeline.length) return null;
+                  return (
+                    <section style={{ marginBottom: 32 }}>
+                      <p
+                        style={{
+                          fontSize: 11,
+                          letterSpacing: "0.05em",
+                          color: "var(--kalpx-text-muted)",
+                          marginBottom: 12,
+                          fontWeight: 600,
+                        }}
+                      >
+                        MY PROGRAMS
+                      </p>
+                      {launchResult && (
+                        <div
+                          style={{
+                            marginBottom: 12,
+                            padding: "14px 16px",
+                            background: "#f0fdf4",
+                            border: "1px solid #86efac",
+                            borderRadius: 10,
+                          }}
+                        >
+                          <p
+                            style={{
+                              fontSize: 13,
+                              fontWeight: 700,
+                              color: "#166534",
+                              margin: "0 0 6px",
+                            }}
+                          >
+                            Program launched! Share this link with your
+                            community:
+                          </p>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 8,
+                              flexWrap: "wrap",
+                            }}
+                          >
+                            <a
+                              href={launchResult.joinUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{
+                                fontSize: 13,
+                                color: "#1d4ed8",
+                                wordBreak: "break-all",
+                              }}
+                            >
+                              {launchResult.joinUrl}
+                            </a>
+                            <button
+                              onClick={() =>
+                                navigator.clipboard.writeText(
+                                  launchResult.joinUrl,
+                                )
+                              }
+                              style={{
+                                padding: "4px 12px",
+                                background: "var(--kalpx-gold)",
+                                border: "none",
+                                color: "#fff",
+                                borderRadius: 6,
+                                fontSize: 12,
+                                fontWeight: 600,
+                                cursor: "pointer",
+                                flexShrink: 0,
+                              }}
+                            >
+                              Copy link
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 8,
+                        }}
+                      >
+                        {pipeline.map((t) => (
+                          <TemplateRow
+                            key={t.id}
+                            tmpl={t}
+                            onEdit={(id) =>
+                              navigate(`/guide/templates/${id}/edit`)
+                            }
+                            onView={(id) =>
+                              navigate(`/guide/templates/${id}/review`)
+                            }
+                            onLaunched={(joinUrl, code) =>
+                              setLaunchResult({ joinUrl, code })
+                            }
+                          />
+                        ))}
+                      </div>
+                    </section>
+                  );
+                })()}
+
+                {/* Live Programs (campaigns) */}
+                {data.programs.length > 0 && (
+                  <section style={{ marginBottom: 32 }}>
+                    <p
+                      style={{
+                        fontSize: 11,
+                        letterSpacing: "0.05em",
+                        color: "var(--kalpx-text-muted)",
+                        marginBottom: 12,
+                        fontWeight: 600,
+                      }}
+                    >
+                      LIVE PROGRAMS
+                    </p>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 8,
+                      }}
+                    >
+                      {data.programs.map((p, i) => (
+                        <ProgramRow key={p.code} program={p} index={i} />
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* Today at a Glance */}
 
                 {/* Upcoming sessions */}
                 {data.upcoming_sessions.length > 0 && (

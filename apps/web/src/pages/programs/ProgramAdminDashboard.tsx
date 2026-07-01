@@ -121,6 +121,8 @@ interface ReviewTemplate {
   submitted_at: string | null;
   guide_name: string;
   guide_email: string;
+  desired_start_date: string | null;
+  max_participants: number | null;
 }
 
 const TAB_STATUSES: Record<string, string[]> = {
@@ -390,8 +392,20 @@ function ProgramReviewQueue() {
                         margin: 0,
                       }}
                     >
-                      {t.duration_days} days · {t.language.toUpperCase()} ·
-                      Submitted {submittedAt}
+                      {/* {t.duration_days} days · {t.language.toUpperCase()} · Submitted {submittedAt} */}
+                      {t.desired_start_date && (
+                        <>
+                          {" "}
+                          Start Date:{" "}
+                          {new Date(t.desired_start_date).toLocaleDateString(
+                            "en-IN",
+                            { day: "numeric", month: "short", year: "numeric" },
+                          )}
+                        </>
+                      )}
+                      {t.max_participants && (
+                        <> ·Maximum Participants: {t.max_participants} people</>
+                      )}
                     </p>
                   </div>
                   <span

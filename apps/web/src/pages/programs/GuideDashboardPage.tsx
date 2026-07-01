@@ -561,11 +561,7 @@ function TemplateRow({
   const [launching, setLaunching] = React.useState(false);
   const [launchError, setLaunchError] = React.useState("");
 
-  const withinGrace = (() => {
-    if (!tmpl.submitted_at) return false;
-    const diffMs = Date.now() - new Date(tmpl.submitted_at).getTime();
-    return diffMs < 60 * 60 * 1000;
-  })();
+  const canEdit = ["submitted", "under_review", "changes_requested"].includes(tmpl.review_status);
 
   const handleLaunch = async () => {
     setLaunching(true);
@@ -684,7 +680,7 @@ function TemplateRow({
           </div>
         </div>
         <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-          {withinGrace && (
+          {canEdit && (
             <button
               onClick={() => onEdit(tmpl.id)}
               style={{
@@ -755,32 +751,19 @@ export function GuideDashboardPage() {
     code: string;
   } | null>(null);
 
+  async function loadDashboard() {
+    try {
+      const data = await fetchGuideDashboard();
+      if (!data?.summary) { setState({ kind: "error" }); return; }
+      setState({ kind: "loaded", data });
+    } catch (e: any) {
+      setState(e?.response?.status === 403 ? { kind: "auth_required" } : { kind: "error" });
+    }
+  }
+
   useEffect(() => {
     document.title = "Guide Dashboard — KalpX";
-    let cancelled = false;
-    async function load() {
-      try {
-        const data = await fetchGuideDashboard();
-        if (cancelled) return;
-        if (!data?.summary) {
-          setState({ kind: "error" });
-          return;
-        }
-        setState({ kind: "loaded", data });
-      } catch (e: any) {
-        if (!cancelled) {
-          setState(
-            e?.response?.status === 403
-              ? { kind: "auth_required" }
-              : { kind: "error" },
-          );
-        }
-      }
-    }
-    load();
-    return () => {
-      cancelled = true;
-    };
+    loadDashboard();
   }, []);
 
   return (
@@ -1391,9 +1374,10 @@ export function GuideDashboardPage() {
                             onView={(id) =>
                               navigate(`/guide/templates/${id}/review`)
                             }
-                            onLaunched={(joinUrl, code) =>
-                              setLaunchResult({ joinUrl, code })
-                            }
+                            onLaunched={(joinUrl, code) => {
+                              setLaunchResult({ joinUrl, code });
+                              loadDashboard();
+                            }}
                           />
                         ))}
                       </div>

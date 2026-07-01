@@ -66,7 +66,11 @@ function CompletedProgramCard({ program }: ProgramCardProps) {
   if (dismissed) return null;
   return (
     <View style={styles.completedCard}>
-      <TouchableOpacity style={styles.closeBtn} onPress={() => setDismissed(true)} hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}>
+      <TouchableOpacity
+        style={styles.closeBtn}
+        onPress={() => setDismissed(true)}
+        hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
+      >
         <Text style={styles.closeBtnText}>✕</Text>
       </TouchableOpacity>
       <View style={styles.completedTop}>
@@ -98,7 +102,7 @@ function CompletedProgramCard({ program }: ProgramCardProps) {
           {t("programCard.viewSummary")}
         </Text>
       </TouchableOpacity>
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={styles.btnOutline}
         activeOpacity={0.85}
         onPress={() => navigation.navigate("MyProgramsScreen" as any)}
@@ -106,7 +110,7 @@ function CompletedProgramCard({ program }: ProgramCardProps) {
         <Text style={styles.btnOutlineText}>
           {t("programCard.exploreAnother")}
         </Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 }

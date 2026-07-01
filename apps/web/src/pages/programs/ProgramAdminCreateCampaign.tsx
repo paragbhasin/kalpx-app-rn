@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { AppShell } from '../../components/ui/AppShell';
-import { api } from '../../lib/api';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AppShell } from "../../components/ui/AppShell";
+import { api } from "../../lib/api";
 
 interface Template {
   id: number;
@@ -25,41 +25,44 @@ interface FormState {
   max_participants: string;
 }
 
-type FieldErrors = Partial<Record<keyof FormState | 'non_field_errors', string[]>>;
+type FieldErrors = Partial<
+  Record<keyof FormState | "non_field_errors", string[]>
+>;
 
 const LEADER_TYPE_OPTIONS = [
-  { value: 'temple', label: 'Temple/Spiritual' },
-  { value: 'yoga', label: 'Yoga/Ayurveda' },
-  { value: 'parent', label: 'Parent/NRI Group' },
-  { value: 'creator', label: 'Micro-Creator' },
-  { value: 'manager', label: 'Workplace/Manager' },
-  { value: 'other', label: 'Other' },
+  { value: "temple", label: "Temple/Spiritual" },
+  { value: "yoga", label: "Yoga/Ayurveda" },
+  { value: "parent", label: "Parent/NRI Group" },
+  { value: "creator", label: "Micro-Creator" },
+  { value: "manager", label: "Workplace/Manager" },
+  { value: "other", label: "Other" },
 ];
 
 const CODE_RE = /^[A-Z0-9]{4,10}$/;
 
 function codeValidationMessage(code: string): string | null {
   if (!code) return null;
-  if (!/^[A-Z0-9]*$/.test(code)) return 'Code must be uppercase letters and digits only.';
-  if (code.length < 4) return 'Code must be at least 4 characters.';
-  if (code.length > 10) return 'Code must be at most 10 characters.';
+  if (!/^[A-Z0-9]*$/.test(code))
+    return "Code must be uppercase letters and digits only.";
+  if (code.length < 4) return "Code must be at least 4 characters.";
+  if (code.length > 10) return "Code must be at most 10 characters.";
   return null;
 }
 
 const EMPTY_FORM: FormState = {
-  template_id: '',
-  code: '',
-  leader_name: '',
-  leader_type: '',
-  community_name: '',
-  support_contact_url: '',
-  internal_ops_owner: '',
-  estimated_invites: '',
-  leader_email: '',
-  leader_phone: '',
-  notes: '',
-  start_date: '',
-  max_participants: '',
+  template_id: "",
+  code: "",
+  leader_name: "",
+  leader_type: "",
+  community_name: "",
+  support_contact_url: "",
+  internal_ops_owner: "",
+  estimated_invites: "",
+  leader_email: "",
+  leader_phone: "",
+  notes: "",
+  start_date: "",
+  max_participants: "",
 };
 
 function InputRow({
@@ -75,27 +78,37 @@ function InputRow({
 }) {
   return (
     <div style={{ marginBottom: 18 }}>
-      <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--kalpx-text)', marginBottom: 6 }}>
+      <label
+        style={{
+          display: "block",
+          fontSize: 13,
+          fontWeight: 600,
+          color: "var(--kalpx-text)",
+          marginBottom: 6,
+        }}
+      >
         {label}
-        {required && <span style={{ color: '#dc2626', marginLeft: 3 }}>*</span>}
+        {required && <span style={{ color: "#dc2626", marginLeft: 3 }}>*</span>}
       </label>
       {children}
       {errors && errors.length > 0 && (
-        <p style={{ margin: '4px 0 0', fontSize: 12, color: '#dc2626' }}>{errors.join(' ')}</p>
+        <p style={{ margin: "4px 0 0", fontSize: 12, color: "#dc2626" }}>
+          {errors.join(" ")}
+        </p>
       )}
     </div>
   );
 }
 
 const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '8px 12px',
-  border: '1px solid var(--kalpx-border)',
+  width: "100%",
+  padding: "8px 12px",
+  border: "1px solid var(--kalpx-border)",
   borderRadius: 6,
   fontSize: 14,
-  color: 'var(--kalpx-text)',
-  background: 'var(--kalpx-card-bg)',
-  boxSizing: 'border-box',
+  color: "var(--kalpx-text)",
+  background: "var(--kalpx-card-bg)",
+  boxSizing: "border-box",
 };
 
 export function ProgramAdminCreateCampaign() {
@@ -110,7 +123,8 @@ export function ProgramAdminCreateCampaign() {
   const [publishing, setPublishing] = useState(false);
 
   useEffect(() => {
-    api.get('programs/admin/templates/')
+    api
+      .get("programs/admin/templates/")
       .then((res) => {
         setTemplates(res.data?.results ?? res.data ?? []);
       })
@@ -121,8 +135,8 @@ export function ProgramAdminCreateCampaign() {
   }, []);
 
   function handleChange(field: keyof FormState, value: string) {
-    if (field === 'code') {
-      value = value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (field === "code") {
+      value = value.toUpperCase().replace(/[^A-Z0-9]/g, "");
     }
     setForm((prev) => ({ ...prev, [field]: value }));
     if (fieldErrors[field]) {
@@ -143,22 +157,26 @@ export function ProgramAdminCreateCampaign() {
     setFieldErrors({});
 
     try {
-      const res = await api.post('programs/admin/campaigns/', {
+      const res = await api.post("programs/admin/campaigns/", {
         ...form,
         estimated_invites: parseInt(form.estimated_invites, 10),
         template_id: parseInt(form.template_id, 10),
         start_date: form.start_date || undefined,
-        max_participants: form.max_participants ? parseInt(form.max_participants, 10) : undefined,
+        max_participants: form.max_participants
+          ? parseInt(form.max_participants, 10)
+          : undefined,
       });
       const campaign = res.data;
       setCreatedCode(campaign.code);
       setShowSuccessOptions(true);
     } catch (err: any) {
       const data = err?.response?.data;
-      if (data && typeof data === 'object') {
+      if (data && typeof data === "object") {
         setFieldErrors(data as FieldErrors);
       } else {
-        setFieldErrors({ non_field_errors: ['An unexpected error occurred. Please try again.'] });
+        setFieldErrors({
+          non_field_errors: ["An unexpected error occurred. Please try again."],
+        });
       }
     } finally {
       setSubmitting(false);
@@ -169,7 +187,9 @@ export function ProgramAdminCreateCampaign() {
     if (!createdCode) return;
     setPublishing(true);
     try {
-      await api.patch(`programs/admin/campaigns/${createdCode}/`, { status: 'active' });
+      await api.patch(`programs/admin/campaigns/${createdCode}/`, {
+        status: "active",
+      });
       navigate(`/programs/admin/${createdCode}/`);
     } catch {
       navigate(`/programs/admin/${createdCode}/`);
@@ -185,50 +205,74 @@ export function ProgramAdminCreateCampaign() {
   if (showSuccessOptions && createdCode) {
     return (
       <AppShell>
-        <main style={{ maxWidth: 600, margin: '0 auto', padding: '64px 20px' }}>
-          <div style={{
-            background: 'var(--kalpx-card-bg)',
-            border: '1px solid var(--kalpx-border)',
-            borderRadius: 'var(--kalpx-r-lg)',
-            padding: 32,
-            textAlign: 'center',
-          }}>
+        <main style={{ maxWidth: 600, margin: "0 auto", padding: "64px 20px" }}>
+          <div
+            style={{
+              background: "var(--kalpx-card-bg)",
+              border: "1px solid var(--kalpx-border)",
+              borderRadius: "var(--kalpx-r-lg)",
+              padding: 32,
+              textAlign: "center",
+            }}
+          >
             <div style={{ fontSize: 32, marginBottom: 12 }}>✓</div>
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--kalpx-text)', marginBottom: 8 }}>
-              Campaign <code style={{ fontFamily: 'monospace' }}>{createdCode}</code> created
+            <h2
+              style={{
+                fontSize: 20,
+                fontWeight: 700,
+                color: "var(--kalpx-text)",
+                marginBottom: 8,
+              }}
+            >
+              Campaign{" "}
+              <code style={{ fontFamily: "monospace" }}>{createdCode}</code>{" "}
+              created
             </h2>
-            <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14, marginBottom: 24 }}>
+            <p
+              style={{
+                color: "var(--kalpx-text-soft)",
+                fontSize: 14,
+                marginBottom: 24,
+              }}
+            >
               What would you like to do next?
             </p>
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 12,
+                justifyContent: "center",
+                flexWrap: "wrap",
+              }}
+            >
               <button
                 onClick={handlePublishNow}
                 disabled={publishing}
                 style={{
-                  padding: '10px 24px',
-                  background: '#166534',
-                  color: '#fff',
-                  border: 'none',
+                  padding: "10px 24px",
+                  background: "#166534",
+                  color: "#fff",
+                  border: "none",
                   borderRadius: 6,
                   fontWeight: 700,
                   fontSize: 15,
-                  cursor: publishing ? 'default' : 'pointer',
+                  cursor: publishing ? "default" : "pointer",
                   opacity: publishing ? 0.7 : 1,
                 }}
               >
-                {publishing ? 'Publishing...' : 'Publish now'}
+                {publishing ? "Publishing..." : "Publish now"}
               </button>
               <button
                 onClick={handleSaveAsDraft}
                 style={{
-                  padding: '10px 24px',
-                  background: 'transparent',
-                  color: 'var(--kalpx-gold)',
-                  border: '1px solid var(--kalpx-gold)',
+                  padding: "10px 24px",
+                  background: "transparent",
+                  color: "var(--kalpx-gold)",
+                  border: "1px solid var(--kalpx-gold)",
                   borderRadius: 6,
                   fontWeight: 600,
                   fontSize: 15,
-                  cursor: 'pointer',
+                  cursor: "pointer",
                 }}
               >
                 Save as draft
@@ -242,39 +286,90 @@ export function ProgramAdminCreateCampaign() {
 
   return (
     <AppShell>
-      <main style={{ maxWidth: 700, margin: '0 auto', padding: '32px 20px 80px' }}>
+      <main
+        style={{ maxWidth: 700, margin: "0 auto", padding: "32px 20px 80px" }}
+      >
         {/* Header */}
         <div style={{ marginBottom: 28 }}>
           <button
-            onClick={() => navigate('/programs/admin/')}
-            style={{ background: 'none', border: 'none', color: 'var(--kalpx-text-soft)', cursor: 'pointer', fontSize: 13, padding: 0, marginBottom: 12 }}
+            onClick={() => navigate("/programs/admin/")}
+            style={{
+              background: "none",
+              border: "none",
+              color: "var(--kalpx-text-soft)",
+              cursor: "pointer",
+              fontSize: 13,
+              padding: 0,
+              marginBottom: 12,
+            }}
           >
             ← Back to campaigns
           </button>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--kalpx-text)', margin: 0 }}>
+          <h1
+            style={{
+              fontSize: 22,
+              fontWeight: 700,
+              color: "var(--kalpx-text)",
+              margin: 0,
+            }}
+          >
             New Campaign
           </h1>
         </div>
 
         {fieldErrors.non_field_errors && (
-          <div style={{ background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 8, padding: '12px 16px', marginBottom: 20, color: '#991b1b', fontSize: 14 }}>
-            {fieldErrors.non_field_errors.join(' ')}
+          <div
+            style={{
+              background: "#fee2e2",
+              border: "1px solid #fca5a5",
+              borderRadius: 8,
+              padding: "12px 16px",
+              marginBottom: 20,
+              color: "#991b1b",
+              fontSize: 14,
+            }}
+          >
+            {fieldErrors.non_field_errors.join(" ")}
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
-          <div style={{ background: 'var(--kalpx-card-bg)', border: '1px solid var(--kalpx-border)', borderRadius: 'var(--kalpx-r-lg)', padding: 24, marginBottom: 24 }}>
-            <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--kalpx-text-soft)', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 0, marginBottom: 20 }}>
+          <div
+            style={{
+              background: "var(--kalpx-card-bg)",
+              border: "1px solid var(--kalpx-border)",
+              borderRadius: "var(--kalpx-r-lg)",
+              padding: 24,
+              marginBottom: 24,
+            }}
+          >
+            <h2
+              style={{
+                fontSize: 14,
+                fontWeight: 600,
+                color: "var(--kalpx-text-soft)",
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+                marginTop: 0,
+                marginBottom: 20,
+              }}
+            >
               Program
             </h2>
 
-            <InputRow label="Template" required errors={fieldErrors.template_id}>
+            <InputRow
+              label="Template"
+              required
+              errors={fieldErrors.template_id}
+            >
               {templatesLoading ? (
-                <p style={{ fontSize: 13, color: 'var(--kalpx-text-muted)' }}>Loading templates...</p>
+                <p style={{ fontSize: 13, color: "var(--kalpx-text-muted)" }}>
+                  Loading templates...
+                </p>
               ) : (
                 <select
                   value={form.template_id}
-                  onChange={(e) => handleChange('template_id', e.target.value)}
+                  onChange={(e) => handleChange("template_id", e.target.value)}
                   required
                   style={{ ...inputStyle }}
                 >
@@ -292,49 +387,85 @@ export function ProgramAdminCreateCampaign() {
               <input
                 type="text"
                 value={form.code}
-                onChange={(e) => handleChange('code', e.target.value)}
+                onChange={(e) => handleChange("code", e.target.value)}
                 placeholder="e.g. YOGA21"
                 maxLength={10}
                 required
                 style={inputStyle}
               />
               {form.code && !CODE_RE.test(form.code) && !fieldErrors.code && (
-                <p style={{ margin: '4px 0 0', fontSize: 12, color: '#d97706' }}>
+                <p
+                  style={{ margin: "4px 0 0", fontSize: 12, color: "#d97706" }}
+                >
                   {codeValidationMessage(form.code)}
                 </p>
               )}
-              <p style={{ margin: '4px 0 0', fontSize: 11, color: 'var(--kalpx-text-muted)' }}>
+              <p
+                style={{
+                  margin: "4px 0 0",
+                  fontSize: 11,
+                  color: "var(--kalpx-text-muted)",
+                }}
+              >
                 4–10 uppercase letters and digits. Uniqueness validated on save.
               </p>
             </InputRow>
           </div>
 
-          <div style={{ background: 'var(--kalpx-card-bg)', border: '1px solid var(--kalpx-border)', borderRadius: 'var(--kalpx-r-lg)', padding: 24, marginBottom: 24 }}>
-            <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--kalpx-text-soft)', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 0, marginBottom: 20 }}>
+          <div
+            style={{
+              background: "var(--kalpx-card-bg)",
+              border: "1px solid var(--kalpx-border)",
+              borderRadius: "var(--kalpx-r-lg)",
+              padding: 24,
+              marginBottom: 24,
+            }}
+          >
+            <h2
+              style={{
+                fontSize: 14,
+                fontWeight: 600,
+                color: "var(--kalpx-text-soft)",
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+                marginTop: 0,
+                marginBottom: 20,
+              }}
+            >
               Leader
             </h2>
 
-            <InputRow label="Leader Name" required errors={fieldErrors.leader_name}>
+            <InputRow
+              label="Leader Name"
+              required
+              errors={fieldErrors.leader_name}
+            >
               <input
                 type="text"
                 value={form.leader_name}
-                onChange={(e) => handleChange('leader_name', e.target.value)}
+                onChange={(e) => handleChange("leader_name", e.target.value)}
                 placeholder="Full name"
                 required
                 style={inputStyle}
               />
             </InputRow>
 
-            <InputRow label="Leader Type" required errors={fieldErrors.leader_type}>
+            <InputRow
+              label="Leader Type"
+              required
+              errors={fieldErrors.leader_type}
+            >
               <select
                 value={form.leader_type}
-                onChange={(e) => handleChange('leader_type', e.target.value)}
+                onChange={(e) => handleChange("leader_type", e.target.value)}
                 required
                 style={inputStyle}
               >
                 <option value="">Select type</option>
                 {LEADER_TYPE_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
                 ))}
               </select>
             </InputRow>
@@ -343,7 +474,7 @@ export function ProgramAdminCreateCampaign() {
               <input
                 type="email"
                 value={form.leader_email}
-                onChange={(e) => handleChange('leader_email', e.target.value)}
+                onChange={(e) => handleChange("leader_email", e.target.value)}
                 placeholder="email@example.com"
                 style={inputStyle}
               />
@@ -353,34 +484,62 @@ export function ProgramAdminCreateCampaign() {
               <input
                 type="tel"
                 value={form.leader_phone}
-                onChange={(e) => handleChange('leader_phone', e.target.value)}
+                onChange={(e) => handleChange("leader_phone", e.target.value)}
                 placeholder="+91..."
                 style={inputStyle}
               />
             </InputRow>
           </div>
 
-          <div style={{ background: 'var(--kalpx-card-bg)', border: '1px solid var(--kalpx-border)', borderRadius: 'var(--kalpx-r-lg)', padding: 24, marginBottom: 24 }}>
-            <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--kalpx-text-soft)', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 0, marginBottom: 20 }}>
+          <div
+            style={{
+              background: "var(--kalpx-card-bg)",
+              border: "1px solid var(--kalpx-border)",
+              borderRadius: "var(--kalpx-r-lg)",
+              padding: 24,
+              marginBottom: 24,
+            }}
+          >
+            <h2
+              style={{
+                fontSize: 14,
+                fontWeight: 600,
+                color: "var(--kalpx-text-soft)",
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+                marginTop: 0,
+                marginBottom: 20,
+              }}
+            >
               Community
             </h2>
 
-            <InputRow label="Community Name" required errors={fieldErrors.community_name}>
+            <InputRow
+              label="Community Name"
+              required
+              errors={fieldErrors.community_name}
+            >
               <input
                 type="text"
                 value={form.community_name}
-                onChange={(e) => handleChange('community_name', e.target.value)}
+                onChange={(e) => handleChange("community_name", e.target.value)}
                 placeholder="e.g. Sunrise Yoga Studio"
                 required
                 style={inputStyle}
               />
             </InputRow>
 
-            <InputRow label="Estimated Invites" required errors={fieldErrors.estimated_invites}>
+            <InputRow
+              label="Estimated Invites"
+              required
+              errors={fieldErrors.estimated_invites}
+            >
               <input
                 type="number"
                 value={form.estimated_invites}
-                onChange={(e) => handleChange('estimated_invites', e.target.value)}
+                onChange={(e) =>
+                  handleChange("estimated_invites", e.target.value)
+                }
                 placeholder="e.g. 100"
                 min={1}
                 required
@@ -388,16 +547,27 @@ export function ProgramAdminCreateCampaign() {
               />
             </InputRow>
 
-            <InputRow label="Max Participants" errors={fieldErrors.max_participants}>
+            <InputRow
+              label="Maximum Participants"
+              errors={fieldErrors.max_participants}
+            >
               <input
                 type="number"
                 value={form.max_participants}
-                onChange={(e) => handleChange('max_participants', e.target.value)}
+                onChange={(e) =>
+                  handleChange("max_participants", e.target.value)
+                }
                 placeholder="Leave blank for unlimited"
                 min={1}
                 style={inputStyle}
               />
-              <p style={{ margin: '4px 0 0', fontSize: 11, color: 'var(--kalpx-text-muted)' }}>
+              <p
+                style={{
+                  margin: "4px 0 0",
+                  fontSize: 11,
+                  color: "var(--kalpx-text-muted)",
+                }}
+              >
                 Caps join requests once reached.
               </p>
             </InputRow>
@@ -406,36 +576,72 @@ export function ProgramAdminCreateCampaign() {
               <input
                 type="date"
                 value={form.start_date}
-                onChange={(e) => handleChange('start_date', e.target.value)}
+                onChange={(e) => handleChange("start_date", e.target.value)}
                 style={inputStyle}
               />
-              <p style={{ margin: '4px 0 0', fontSize: 11, color: 'var(--kalpx-text-muted)' }}>
+              <p
+                style={{
+                  margin: "4px 0 0",
+                  fontSize: 11,
+                  color: "var(--kalpx-text-muted)",
+                }}
+              >
                 When the program cohort begins. Leave blank for rolling.
               </p>
             </InputRow>
           </div>
 
-          <div style={{ background: 'var(--kalpx-card-bg)', border: '1px solid var(--kalpx-border)', borderRadius: 'var(--kalpx-r-lg)', padding: 24, marginBottom: 24 }}>
-            <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--kalpx-text-soft)', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 0, marginBottom: 20 }}>
+          <div
+            style={{
+              background: "var(--kalpx-card-bg)",
+              border: "1px solid var(--kalpx-border)",
+              borderRadius: "var(--kalpx-r-lg)",
+              padding: 24,
+              marginBottom: 24,
+            }}
+          >
+            <h2
+              style={{
+                fontSize: 14,
+                fontWeight: 600,
+                color: "var(--kalpx-text-soft)",
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+                marginTop: 0,
+                marginBottom: 20,
+              }}
+            >
               Operations
             </h2>
 
-            <InputRow label="Support Contact URL" required errors={fieldErrors.support_contact_url}>
+            <InputRow
+              label="Support Contact URL"
+              required
+              errors={fieldErrors.support_contact_url}
+            >
               <input
                 type="url"
                 value={form.support_contact_url}
-                onChange={(e) => handleChange('support_contact_url', e.target.value)}
+                onChange={(e) =>
+                  handleChange("support_contact_url", e.target.value)
+                }
                 placeholder="https://wa.me/..."
                 required
                 style={inputStyle}
               />
             </InputRow>
 
-            <InputRow label="Internal Ops Owner" required errors={fieldErrors.internal_ops_owner}>
+            <InputRow
+              label="Internal Ops Owner"
+              required
+              errors={fieldErrors.internal_ops_owner}
+            >
               <input
                 type="text"
                 value={form.internal_ops_owner}
-                onChange={(e) => handleChange('internal_ops_owner', e.target.value)}
+                onChange={(e) =>
+                  handleChange("internal_ops_owner", e.target.value)
+                }
                 placeholder="e.g. Pavani"
                 required
                 style={inputStyle}
@@ -445,27 +651,27 @@ export function ProgramAdminCreateCampaign() {
             <InputRow label="Notes" errors={fieldErrors.notes}>
               <textarea
                 value={form.notes}
-                onChange={(e) => handleChange('notes', e.target.value)}
+                onChange={(e) => handleChange("notes", e.target.value)}
                 placeholder="Internal notes..."
                 rows={3}
-                style={{ ...inputStyle, resize: 'vertical' as const }}
+                style={{ ...inputStyle, resize: "vertical" as const }}
               />
             </InputRow>
           </div>
 
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+          <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
             <button
               type="button"
-              onClick={() => navigate('/programs/admin/')}
+              onClick={() => navigate("/programs/admin/")}
               style={{
-                padding: '10px 20px',
-                background: 'transparent',
-                color: 'var(--kalpx-text-soft)',
-                border: '1px solid var(--kalpx-border)',
+                padding: "10px 20px",
+                background: "transparent",
+                color: "var(--kalpx-text-soft)",
+                border: "1px solid var(--kalpx-border)",
                 borderRadius: 6,
                 fontWeight: 600,
                 fontSize: 14,
-                cursor: 'pointer',
+                cursor: "pointer",
               }}
             >
               Cancel
@@ -474,18 +680,18 @@ export function ProgramAdminCreateCampaign() {
               type="submit"
               disabled={submitting}
               style={{
-                padding: '10px 24px',
-                background: 'var(--kalpx-cta)',
-                color: 'var(--kalpx-cta-text)',
-                border: 'none',
+                padding: "10px 24px",
+                background: "var(--kalpx-cta)",
+                color: "var(--kalpx-cta-text)",
+                border: "none",
                 borderRadius: 6,
                 fontWeight: 700,
                 fontSize: 14,
-                cursor: submitting ? 'default' : 'pointer',
+                cursor: submitting ? "default" : "pointer",
                 opacity: submitting ? 0.7 : 1,
               }}
             >
-              {submitting ? 'Creating...' : 'Create Campaign'}
+              {submitting ? "Creating..." : "Create Campaign"}
             </button>
           </div>
         </form>

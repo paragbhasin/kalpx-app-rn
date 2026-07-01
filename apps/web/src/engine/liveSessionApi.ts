@@ -309,6 +309,29 @@ export interface GuideTestimonial {
   date: string;
 }
 
+export interface GuideTestimonialFull {
+  id: number;
+  display_name: string;
+  testimonial_text: string;
+  rating: number | null;
+  consent_to_share: boolean;
+  moderation_status: "pending" | "approved" | "rejected";
+  created_at: string;
+}
+
+export interface OpsTestimonial {
+  id: number;
+  campaign_code: string;
+  program_name: string;
+  testimonial_text: string;
+  rating: number | null;
+  display_name: string;
+  anonymous_allowed: boolean;
+  consent_to_share: boolean;
+  moderation_status: "pending" | "approved" | "rejected";
+  created_at: string;
+}
+
 export async function fetchGuidePublicProfile(slug: string): Promise<GuidePublicProfile> {
   const res = await api.get<GuidePublicProfile>(`/guides/${slug}/`);
   return res.data;
@@ -388,6 +411,36 @@ export async function fetchGuideTestimonials(
     `/guide/programs/${code}/testimonials/`,
   );
   return res.data;
+}
+
+export async function fetchGuideAllTestimonials(code: string): Promise<{
+  testimonials: GuideTestimonialFull[];
+  count: number;
+  pending_count: number;
+  approved_count: number;
+}> {
+  const res = await api.get(`/guide/programs/${code}/all-testimonials/`);
+  return res.data;
+}
+
+export async function fetchOpsTestimonials(
+  status?: string,
+  campaignCode?: string,
+): Promise<{ testimonials: OpsTestimonial[]; count: number }> {
+  const params: Record<string, string> = {};
+  if (status) params.status = status;
+  if (campaignCode) params.campaign_code = campaignCode;
+  const res = await api.get("/programs/admin/testimonials/", { params });
+  return res.data;
+}
+
+export async function moderateTestimonial(
+  id: number,
+  moderationStatus: "approved" | "rejected" | "pending",
+): Promise<void> {
+  await api.patch(`/programs/admin/testimonials/${id}/`, {
+    moderation_status: moderationStatus,
+  });
 }
 
 export async function submitRerunRequest(

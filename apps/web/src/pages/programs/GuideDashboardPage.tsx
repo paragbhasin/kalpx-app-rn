@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AppShell } from "../../components/ui/AppShell";
 import {
   fetchGuideDashboard,
+  fetchGuideAllTestimonials,
   type GuideDashboard,
   type GuideDashboardTemplate,
   type GuideProgram,
   type GuideSession,
+  type GuideTestimonialFull,
 } from "../../engine/liveSessionApi";
 import { useAuth } from "../../hooks/useAuth";
 import { api } from "../../lib/api";
@@ -742,6 +744,101 @@ function TemplateRow({
   );
 }
 
+function GuideTestimonialsSection({ programs }: { programs: GuideProgram[] }) {
+  const [testimonials, setTestimonials] = useState<GuideTestimonialFull[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<"all" | "pending" | "approved">("all");
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      try {
+        const all = await Promise.all(
+          programs.map((p) => fetchGuideAllTestimonials(p.code).then((r) => r.testimonials))
+        );
+        if (!cancelled) setTestimonials(all.flat());
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [programs]);
+
+  const filtered = testimonials.filter((t) =>
+    tab === "all" ? true : t.moderation_status === tab
+  );
+
+  const starStr = (r: number | null) => r ? "★".repeat(r) + "☆".repeat(5 - r) : "";
+
+  if (loading || testimonials.length === 0) return null;
+
+  return (
+    <section style={{ marginBottom: 32 }}>
+      <p style={{ fontSize: 11, letterSpacing: "0.05em", color: "var(--kalpx-text-muted)", marginBottom: 12, fontWeight: 600 }}>
+        TESTIMONIALS
+      </p>
+
+      <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+        {(["all", "pending", "approved"] as const).map((t) => {
+          const count = testimonials.filter((x) => t === "all" ? true : x.moderation_status === t).length;
+          return (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              style={{
+                padding: "4px 12px",
+                borderRadius: 16,
+                border: "1.5px solid",
+                borderColor: tab === t ? "var(--kalpx-gold)" : "#E0D5C5",
+                background: tab === t ? "var(--kalpx-gold)" : "transparent",
+                color: tab === t ? "#fff" : "var(--kalpx-text-muted)",
+                fontSize: 11,
+                fontWeight: 600,
+                cursor: "pointer",
+                textTransform: "capitalize",
+              }}
+            >
+              {t} ({count})
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {filtered.length === 0 ? (
+          <p style={{ fontSize: 13, color: "var(--kalpx-text-muted)" }}>No {tab} testimonials.</p>
+        ) : (
+          filtered.map((t) => (
+            <div key={t.id} style={{ background: "#FAF7F2", borderRadius: 10, border: "1px solid #E8D9B5", padding: 14 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--kalpx-text)" }}>{t.display_name}</span>
+                <span style={{ fontSize: 13, color: "#C99317" }}>{starStr(t.rating)}</span>
+              </div>
+              <p style={{ fontSize: 14, color: "var(--kalpx-text)", margin: "4px 0" }}>"{t.testimonial_text}"</p>
+              <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 6 }}>
+                <span style={{ fontSize: 11, color: "var(--kalpx-text-muted)" }}>{t.created_at}</span>
+                <span style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  padding: "2px 8px",
+                  borderRadius: 10,
+                  background: t.moderation_status === "approved" ? "#DCF0D8" : t.moderation_status === "rejected" ? "#FCE8E4" : "#FFF3CC",
+                  color: t.moderation_status === "approved" ? "#2E7D32" : t.moderation_status === "rejected" ? "#C05B3A" : "#9A7548",
+                  textTransform: "uppercase",
+                }}>
+                  {t.moderation_status}
+                </span>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </section>
+  );
+}
+
 export function GuideDashboardPage() {
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -1411,6 +1508,11 @@ export function GuideDashboardPage() {
                       ))}
                     </div>
                   </section>
+                )}
+
+                {/* Testimonials from live programs */}
+                {data.programs.length > 0 && (
+                  <GuideTestimonialsSection programs={data.programs} />
                 )}
 
                 {/* Today at a Glance */}

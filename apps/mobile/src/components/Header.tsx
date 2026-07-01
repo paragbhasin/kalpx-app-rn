@@ -107,21 +107,7 @@ const Header: React.FC<HeaderProps> = ({ isTransparent, backgroundColor }) => {
         />
       </TouchableOpacity>
 
-      {/* Language Dropdown */}
-      <View style={styles.dropdownContainer}>
-        <Dropdown
-          data={languages}
-          labelField="label"
-          valueField="value"
-          value={selectedLang}
-          onChange={(item) => changeLanguage(item.value)}
-          style={styles.dropdown}
-          selectedTextStyle={styles.selectedText}
-          placeholderStyle={styles.placeholder}
-          itemTextStyle={styles.dropdownItemText}
-          containerStyle={styles.dropdownListContainer}
-        />
-      </View>
+      {/* Language Dropdown — hidden for now */}
     </View>
   );
 };

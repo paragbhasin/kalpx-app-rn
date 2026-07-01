@@ -21,6 +21,8 @@ interface FormState {
   leader_email: string;
   leader_phone: string;
   notes: string;
+  start_date: string;
+  max_participants: string;
 }
 
 type FieldErrors = Partial<Record<keyof FormState | 'non_field_errors', string[]>>;
@@ -56,6 +58,8 @@ const EMPTY_FORM: FormState = {
   leader_email: '',
   leader_phone: '',
   notes: '',
+  start_date: '',
+  max_participants: '',
 };
 
 function InputRow({
@@ -143,6 +147,8 @@ export function ProgramAdminCreateCampaign() {
         ...form,
         estimated_invites: parseInt(form.estimated_invites, 10),
         template_id: parseInt(form.template_id, 10),
+        start_date: form.start_date || undefined,
+        max_participants: form.max_participants ? parseInt(form.max_participants, 10) : undefined,
       });
       const campaign = res.data;
       setCreatedCode(campaign.code);
@@ -380,6 +386,32 @@ export function ProgramAdminCreateCampaign() {
                 required
                 style={inputStyle}
               />
+            </InputRow>
+
+            <InputRow label="Max Participants" errors={fieldErrors.max_participants}>
+              <input
+                type="number"
+                value={form.max_participants}
+                onChange={(e) => handleChange('max_participants', e.target.value)}
+                placeholder="Leave blank for unlimited"
+                min={1}
+                style={inputStyle}
+              />
+              <p style={{ margin: '4px 0 0', fontSize: 11, color: 'var(--kalpx-text-muted)' }}>
+                Caps join requests once reached.
+              </p>
+            </InputRow>
+
+            <InputRow label="Start Date" errors={fieldErrors.start_date}>
+              <input
+                type="date"
+                value={form.start_date}
+                onChange={(e) => handleChange('start_date', e.target.value)}
+                style={inputStyle}
+              />
+              <p style={{ margin: '4px 0 0', fontSize: 11, color: 'var(--kalpx-text-muted)' }}>
+                When the program cohort begins. Leave blank for rolling.
+              </p>
             </InputRow>
           </div>
 

@@ -101,7 +101,7 @@ function CompletedProgramCard({ program }: ProgramCardProps) {
       <TouchableOpacity
         style={styles.btnOutline}
         activeOpacity={0.85}
-        onPress={() => navigation.navigate("ProgramsDiscovery" as any)}
+        onPress={() => navigation.navigate("MyProgramsScreen" as any)}
       >
         <Text style={styles.btnOutlineText}>
           {t("programCard.exploreAnother")}

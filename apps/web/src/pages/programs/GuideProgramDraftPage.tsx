@@ -76,6 +76,7 @@ export function GuideProgramDraftPage() {
   const [dailyStructure, setDailyStructure] = useState('');
   const [startType, setStartType] = useState('rolling');
   const [desiredStartDate, setDesiredStartDate] = useState('');
+  const [maxParticipants, setMaxParticipants] = useState('');
   const [supportNeeds, setSupportNeeds] = useState('');
   const [notesToKalpx, setNotesToKalpx] = useState('');
 
@@ -93,6 +94,7 @@ export function GuideProgramDraftPage() {
         daily_structure: dailyStructure,
         start_type: startType,
         desired_start_date: desiredStartDate,
+        max_participants: maxParticipants ? parseInt(maxParticipants, 10) : undefined,
         support_needs: supportNeeds,
         notes_to_kalpx: notesToKalpx,
       });
@@ -231,11 +233,19 @@ export function GuideProgramDraftPage() {
           </Field>
 
           {startType !== 'rolling' && (
-            <Field label="Desired start date">
+            <Field label="Desired start date"
+              hint="When do you want participants to begin the program?">
               <input type="date" style={inputStyle} value={desiredStartDate}
                 onChange={e => setDesiredStartDate(e.target.value)} />
             </Field>
           )}
+
+          <Field label="Maximum participants"
+            hint="How many people do you want to allow in this program? Leave blank for unlimited.">
+            <input type="number" style={inputStyle} value={maxParticipants}
+              onChange={e => setMaxParticipants(e.target.value)}
+              placeholder="e.g. 50" min={1} />
+          </Field>
 
           <Field label="Support needs"
             hint="What help do you need from KalpX? (e.g. WhatsApp copy, Hindi translations)">

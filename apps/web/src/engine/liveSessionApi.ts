@@ -342,6 +342,7 @@ export async function submitProgramDraft(data: {
   daily_structure?: string;
   start_type?: string;
   desired_start_date?: string;
+  max_participants?: number;
   support_needs?: string;
   notes_to_kalpx?: string;
 }): Promise<GuideSubmissionResult> {

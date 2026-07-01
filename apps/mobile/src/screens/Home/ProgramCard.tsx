@@ -60,6 +60,8 @@ function getDayLabelStyle(s: DayStatus) {
 }
 
 function UpcomingProgramCard({ program }: ProgramCardProps) {
+  const [dismissed, setDismissed] = useState(false);
+
   const handleShare = async () => {
     const daysText = (program.days_until_start ?? 0) > 1
       ? `Starts in ${program.days_until_start} days`
@@ -76,8 +78,18 @@ function UpcomingProgramCard({ program }: ProgramCardProps) {
     ? "Starts Tomorrow"
     : `Starts in ${program.days_until_start ?? "a few"} Days`;
 
+  if (dismissed) return null;
+
   return (
     <View style={styles.upcomingCard}>
+      <TouchableOpacity
+        onPress={() => setDismissed(true)}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        style={styles.upcomingCloseBtn}
+        accessibilityLabel="Dismiss"
+      >
+        <Text style={styles.upcomingCloseBtnText}>✕</Text>
+      </TouchableOpacity>
       <Text style={styles.upcomingTag}>UPCOMING</Text>
       <Text style={styles.upcomingName}>{program.name}</Text>
       <Text style={styles.upcomingDays}>{daysLabel}</Text>
@@ -592,6 +604,17 @@ const styles = StyleSheet.create({
     borderColor: "#C99317",
     padding: 20,
     gap: 6,
+    position: "relative",
+  },
+  upcomingCloseBtn: {
+    position: "absolute",
+    top: 10,
+    right: 12,
+    zIndex: 1,
+  },
+  upcomingCloseBtnText: {
+    fontSize: 14,
+    color: "#B8966A",
   },
   upcomingTag: {
     fontFamily: Fonts.sans.bold,

@@ -142,7 +142,7 @@ export default function JourneySummaryScreen() {
     }
   };
 
-  const handleSkipTestimonial = () => setStep(6);
+  const handleSkipTestimonial = () => navigation.navigate("Home");
 
   if (loading) {
     return (
@@ -279,7 +279,9 @@ export default function JourneySummaryScreen() {
                   <React.Fragment key={r.label}>
                     {idx > 0 && <View style={styles.reasonDivider} />}
                     <View style={styles.reasonRow}>
-                      <View style={[styles.reasonDot, { backgroundColor: r.color }]} />
+                      <View
+                        style={[styles.reasonDot, { backgroundColor: r.color }]}
+                      />
                       <Text style={styles.reasonLabel}>{r.label}</Text>
                     </View>
                   </React.Fragment>
@@ -399,12 +401,6 @@ export default function JourneySummaryScreen() {
                     label: "Show anonymously",
                     desc: "Your words, no name",
                   },
-                  {
-                    value: "private" as Visibility,
-                    icon: "🔒",
-                    label: "Not now",
-                    desc: "I'll decide later",
-                  },
                 ] as const
               ).map((opt) => (
                 <TouchableOpacity
@@ -455,14 +451,14 @@ export default function JourneySummaryScreen() {
                 </Text>
               </View>
 
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={styles.btnPrimary}
                 onPress={() => navigation.navigate("Home")}
               >
                 <Text style={styles.btnPrimaryText}>
                   Explore Another Program
                 </Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
               <TouchableOpacity
                 style={styles.btnLink}
                 onPress={() => navigation.navigate("Home")}

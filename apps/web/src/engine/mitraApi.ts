@@ -140,7 +140,7 @@ export async function getDashboardView(): Promise<any> {
 
   const request = _dashboardViewInflight ?? (async () => {
     try {
-      const res = await api.get('mitra/v3/journey/daily-view/');
+      const res = await api.get('mitra/v3/journey/daily-view/', { params: { locale } });
       return res.data;
     } catch (err: any) {
       if (err?.response?.status === 404) {
@@ -489,7 +489,7 @@ export async function postPranaAcknowledgeDismiss(): Promise<{ dismissed: boolea
  */
 export async function getPrinciple(id: string | number): Promise<any> {
   try {
-    const res = await api.get(`mitra/principles/${encodeURIComponent(String(id))}/`);
+    const res = await api.get(`mitra/principles/${encodeURIComponent(String(id))}/`, { params: { locale: getActiveLocale() } });
     if (import.meta.env.DEV) {
       console.log(`[mitraApi] principles/${id}/ shape:`, JSON.stringify(res.data)?.slice(0, 200));
     }
@@ -507,7 +507,7 @@ export async function getPrinciple(id: string | number): Promise<any> {
  */
 export async function getPrincipleSource(id: string | number): Promise<any> {
   try {
-    const res = await api.get(`mitra/principles/${encodeURIComponent(String(id))}/sources/`);
+    const res = await api.get(`mitra/principles/${encodeURIComponent(String(id))}/sources/`, { params: { locale: getActiveLocale() } });
     if (import.meta.env.DEV) {
       console.log(`[mitraApi] principles/${id}/sources/ shape:`, JSON.stringify(res.data)?.slice(0, 200));
     }
@@ -527,7 +527,7 @@ export async function getPrincipleSource(id: string | number): Promise<any> {
  */
 export async function mitraJourneyDay7View(): Promise<any> {
   try {
-    const res = await api.get('mitra/v3/journey/day-7-view/');
+    const res = await api.get('mitra/v3/journey/day-7-view/', { params: { locale: getActiveLocale() } });
     return res.data;
   } catch (err: any) {
     if (err?.response?.status === 404) return null;
@@ -541,7 +541,7 @@ export async function mitraJourneyDay7View(): Promise<any> {
  */
 export async function mitraJourneyDay14View(): Promise<any> {
   try {
-    const res = await api.get('mitra/v3/journey/day-14-view/');
+    const res = await api.get('mitra/v3/journey/day-14-view/', { params: { locale: getActiveLocale() } });
     return res.data;
   } catch (err: any) {
     if (err?.response?.status === 404) return null;
@@ -599,7 +599,7 @@ export async function mitraJourneyEntryView(etag?: string | null): Promise<{
     try {
       const headers: Record<string, string> = {};
       if (etag) headers['If-None-Match'] = etag;
-      const res = await api.get('mitra/v3/journey/entry-view/', { headers, params: { tz: getTz() } });
+      const res = await api.get('mitra/v3/journey/entry-view/', { headers, params: { tz: getTz(), locale: getActiveLocale() } });
       return {
         envelope: res.data,
         etag: (res.headers as any)['etag'] ?? null,
@@ -648,7 +648,7 @@ export async function fetchAdditionalItems(): Promise<{ items: any[]; uiHints: {
 
   const request = _additionalItemsInflight ?? (async () => {
     try {
-      const res = await api.get('mitra/journey/additional/list/', { params: { tz: getTz() } });
+      const res = await api.get('mitra/journey/additional/list/', { params: { tz: getTz(), locale: getActiveLocale() } });
       return res.data;
     } catch {
       return { items: [], uiHints: {} };
@@ -674,7 +674,7 @@ export async function fetchLibraryItem(
 ): Promise<any | null> {
   try {
     const res = await api.get('mitra/library/item/', {
-      params: { type: itemType, id: itemId },
+      params: { type: itemType, id: itemId, locale: getActiveLocale() },
     });
     return res.data?.item ?? res.data ?? null;
   } catch (err: any) {
@@ -714,7 +714,7 @@ export async function searchLibraryItems(
 ): Promise<{ results: any[] }> {
   try {
     const res = await api.get('mitra/library/search/', {
-      params: { q: query, itemType, limit: 5 },
+      params: { q: query, itemType, limit: 5, locale: getActiveLocale() },
     });
     const data = res.data;
     if (Array.isArray(data)) return { results: data };
@@ -894,6 +894,7 @@ export async function postRhythmResolveItem(
       slot,
       item_id: itemId,
       item_type: itemType,
+      locale: getActiveLocale(),
     });
     return resp.data;
   } catch (err: any) {
@@ -923,7 +924,9 @@ export async function postQuickCheckin(energy_state: QuickCheckinEnergyState): P
 /** GET mitra/v3/quick_reset/ — 3-state opening (E-D-10). null = flag off or error. */
 export async function getQuickResetOpening(): Promise<QuickResetOpeningState | null> {
   try {
-    const resp = await api.get<QuickResetOpeningState>('mitra/v3/quick_reset/');
+    const resp = await api.get<QuickResetOpeningState>('mitra/v3/quick_reset/', {
+      params: { locale: getActiveLocale() },
+    });
     return resp.data;
   } catch (err: any) {
     if (err?.response?.status === 404) return null;
@@ -970,7 +973,7 @@ export async function postBrowseMantras(
 ): Promise<unknown[]> {
   try {
     const resp = await api.post<{ mantras: unknown[]; count: number }>(
-      'mitra/browse-mantras/', { focus },
+      'mitra/browse-mantras/', { focus, locale: getActiveLocale() },
     );
     return Array.isArray(resp.data?.mantras) ? resp.data.mantras : [];
   } catch (err: any) {

@@ -223,7 +223,7 @@ export default function ClassRescheduleScreen({ navigation }) {
                     marginVertical: 12,
                     color: Colors.Colors.BLACK
                 }}
-            >Available slots</TextComponent>
+            >{t('classReschedule.availableSlots')}</TextComponent>
             <FlatList
                 data={times}
                 renderItem={renderItem}
@@ -291,7 +291,7 @@ export default function ClassRescheduleScreen({ navigation }) {
                 color: Colors.Colors.BLACK,
                 fontSize: FontSize.CONSTS.FS_14,
                 marginTop: 12
-            }}>Note to Tutor (Optional)</TextComponent>
+            }}>{t('classReschedule.noteToTutor')}</TextComponent>
             <TextInput
             allowFontScaling={false}
                 style={styles.input}
@@ -304,7 +304,7 @@ export default function ClassRescheduleScreen({ navigation }) {
                 <TextComponent style={{
                     color: Colors.Colors.white,
                     fontSize: FontSize.CONSTS.FS_12,
-                }}>Reschedule</TextComponent>
+                }}>{t('classReschedule.rescheduleButton')}</TextComponent>
             </TouchableOpacity>
             <ClassSuccessModal
             visible={rescheduleSuccess}

@@ -8,12 +8,14 @@ import { storeTokens } from '@kalpx/auth';
 import { invalidateJourneyStatusCache } from '../../hooks/useJourneyStatus';
 import { invalidateJourneyEntryViewCache } from '../../hooks/useJourneyEntryView';
 import { claimGuestJourney } from '../../engine/mitraApi';
+import { useTranslation } from '../../lib/i18n';
 
 type VerifyState = 'verifying' | 'success' | 'expired' | 'invalid';
 
 export function VerifyPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const token = searchParams.get('token');
   const [state, setState] = useState<VerifyState>(token ? 'verifying' : 'invalid');
 
@@ -47,9 +49,9 @@ export function VerifyPage() {
 
   if (state === 'verifying') {
     return (
-      <AuthLayout title="Verifying your email">
+      <AuthLayout title={t('auth.verifyingEmail')}>
         <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14, textAlign: 'center', lineHeight: 1.6 }}>
-          Please wait…
+          {t('auth.pleaseWait')}
         </p>
       </AuthLayout>
     );
@@ -57,10 +59,10 @@ export function VerifyPage() {
 
   if (state === 'success') {
     return (
-      <AuthLayout title="Email verified">
+      <AuthLayout title={t('auth.emailVerified')}>
         <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 16 }}>
           <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14, lineHeight: 1.6, margin: 0 }}>
-            Your email has been verified. You're now signed in.
+            {t('auth.emailVerifiedMessage')}
           </p>
           <KalpXButton
             onClick={() =>
@@ -70,7 +72,7 @@ export function VerifyPage() {
             }
             fullWidth
           >
-            Continue
+            {t('auth.continue')}
           </KalpXButton>
         </div>
       </AuthLayout>
@@ -79,13 +81,13 @@ export function VerifyPage() {
 
   if (state === 'expired') {
     return (
-      <AuthLayout title="Link expired">
+      <AuthLayout title={t('auth.linkExpired')}>
         <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 16 }}>
           <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14, lineHeight: 1.6, margin: 0 }}>
-            Your verification link has expired. We've sent a fresh one — check your inbox.
+            {t('auth.linkExpiredMessage')}
           </p>
           <KalpXButton onClick={() => navigate('/login')} fullWidth>
-            Back to sign in
+            {t('auth.backToSignIn')}
           </KalpXButton>
         </div>
       </AuthLayout>
@@ -93,13 +95,13 @@ export function VerifyPage() {
   }
 
   return (
-    <AuthLayout title="Invalid link">
+    <AuthLayout title={t('auth.invalidLink')}>
       <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 16 }}>
         <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14, lineHeight: 1.6, margin: 0 }}>
-          This verification link is invalid or has already been used.
+          {t('auth.invalidLinkMessage')}
         </p>
         <KalpXButton onClick={() => navigate('/login')} fullWidth>
-          Back to sign in
+          {t('auth.backToSignIn')}
         </KalpXButton>
       </div>
     </AuthLayout>

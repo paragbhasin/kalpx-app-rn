@@ -17,8 +17,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Fonts } from "../../theme/fonts";
 import { fetchPrograms, type TLPProgram } from "../../engine/liveSessionApi";
+import { Fonts } from "../../theme/fonts";
 
 const CATEGORIES: { value: string; label: string }[] = [
   { value: "all", label: "All" },
@@ -46,11 +46,17 @@ function ProgramCard({
   onDetail: () => void;
 }) {
   return (
-    <TouchableOpacity activeOpacity={0.95} onPress={onDetail} style={styles.card}>
+    <TouchableOpacity
+      activeOpacity={0.95}
+      onPress={onDetail}
+      style={styles.card}
+    >
       {/* Duration badge */}
       {program.duration_days ? (
         <View style={styles.durationBadge}>
-          <Text style={styles.durationText}>{program.duration_days}-day program</Text>
+          <Text style={styles.durationText}>
+            {program.duration_days}-day program
+          </Text>
         </View>
       ) : null}
 
@@ -58,7 +64,9 @@ function ProgramCard({
 
       <View style={styles.leaderRow}>
         <Text style={styles.leaderLabel}>Led by </Text>
-        <Text style={styles.leaderName}>{program.guide?.display_name || program.leader_name || ""}</Text>
+        <Text style={styles.leaderName}>
+          {program.guide?.display_name || program.leader_name || ""}
+        </Text>
       </View>
 
       {program.community_name ? (
@@ -73,7 +81,7 @@ function ProgramCard({
 
       {program.start_date ? (
         <Text style={styles.startDate}>
-          Starts {formatDate(program.start_date)}
+          Start Date: {formatDate(program.start_date)}
         </Text>
       ) : null}
 
@@ -97,7 +105,11 @@ function ProgramCard({
 function formatDate(iso: string): string {
   try {
     const d = new Date(iso);
-    return d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+    return d.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
   } catch {
     return iso;
   }
@@ -108,22 +120,17 @@ export default function ProgramsDiscoveryScreen() {
   const [programs, setPrograms] = useState<TLPProgram[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedLanguage, setSelectedLanguage] = useState("all");
   const [refreshing, setRefreshing] = useState(false);
 
   const loadPrograms = React.useCallback(async () => {
     try {
       setError(null);
-      const data = await fetchPrograms({
-        category: selectedCategory !== "all" ? selectedCategory : undefined,
-        language: selectedLanguage !== "all" ? selectedLanguage : undefined,
-      });
+      const data = await fetchPrograms({});
       setPrograms(data.programs);
     } catch {
       setError("Couldn't load programs. Please try again.");
     }
-  }, [selectedCategory, selectedLanguage]);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -132,10 +139,7 @@ export default function ProgramsDiscoveryScreen() {
         try {
           setLoading(true);
           setError(null);
-          const data = await fetchPrograms({
-            category: selectedCategory !== "all" ? selectedCategory : undefined,
-            language: selectedLanguage !== "all" ? selectedLanguage : undefined,
-          });
+          const data = await fetchPrograms({});
           if (!cancelled) setPrograms(data.programs);
         } catch {
           if (!cancelled) setError("Couldn't load programs. Please try again.");
@@ -143,8 +147,10 @@ export default function ProgramsDiscoveryScreen() {
           if (!cancelled) setLoading(false);
         }
       })();
-      return () => { cancelled = true; };
-    }, [selectedCategory, selectedLanguage]),
+      return () => {
+        cancelled = true;
+      };
+    }, []),
   );
 
   const handleRefresh = async () => {
@@ -165,20 +171,25 @@ export default function ProgramsDiscoveryScreen() {
     return (
       <SafeAreaView style={styles.center}>
         <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backBtn}
+        >
           <Text style={styles.backBtnText}>← Back</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
   }
 
-  const isFiltered = selectedCategory !== "all" || selectedLanguage !== "all";
-
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon} accessibilityLabel="Go back">
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backIcon}
+          accessibilityLabel="Go back"
+        >
           <Text style={styles.backIconText}>‹</Text>
         </TouchableOpacity>
         <View style={styles.headerCenter}>
@@ -187,82 +198,23 @@ export default function ProgramsDiscoveryScreen() {
         <View style={{ width: 40 }} />
       </View>
 
-      {/* Category filter chips */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filterRow}
-      >
-        {CATEGORIES.map((cat) => (
-          <TouchableOpacity
-            key={cat.value}
-            onPress={() => setSelectedCategory(cat.value)}
-            style={[
-              styles.filterChip,
-              selectedCategory === cat.value && styles.filterChipActive,
-            ]}
-            accessibilityLabel={`Filter by ${cat.label}`}
-          >
-            <Text
-              style={[
-                styles.filterChipText,
-                selectedCategory === cat.value && styles.filterChipTextActive,
-              ]}
-            >
-              {cat.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      {/* Language filter chips */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.langRow}
-      >
-        {LANGUAGES.map((lang) => (
-          <TouchableOpacity
-            key={lang.value}
-            onPress={() => setSelectedLanguage(lang.value)}
-            style={[
-              styles.filterChip,
-              selectedLanguage === lang.value && styles.filterChipActive,
-            ]}
-            accessibilityLabel={`Filter by ${lang.label}`}
-          >
-            <Text
-              style={[
-                styles.filterChipText,
-                selectedLanguage === lang.value && styles.filterChipTextActive,
-              ]}
-            >
-              {lang.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#C99317" />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor="#C99317"
+          />
         }
       >
         {programs.length === 0 ? (
           <View style={styles.emptyState}>
-            {isFiltered ? (
-              <>
-                <Text style={styles.emptyText}>No programs in this category yet.</Text>
-                <Text style={styles.emptySubText}>Try a different filter or check back soon.</Text>
-              </>
-            ) : (
-              <>
-                <Text style={styles.emptyText}>No programs available</Text>
-                <Text style={styles.emptySubText}>Check back soon for new programs.</Text>
-              </>
-            )}
+            <Text style={styles.emptyText}>No programs available</Text>
+            <Text style={styles.emptySubText}>
+              Check back soon for new programs.
+            </Text>
           </View>
         ) : (
           <View style={styles.list}>
@@ -274,7 +226,9 @@ export default function ProgramsDiscoveryScreen() {
                   navigation.navigate("ProgramDetailPreview", { code: p.code })
                 }
                 onJoin={() =>
-                  navigation.navigate("ProgramInviteClaimScreen", { code: p.code })
+                  navigation.navigate("ProgramInviteClaimScreen", {
+                    code: p.code,
+                  })
                 }
               />
             ))}
@@ -287,7 +241,13 @@ export default function ProgramsDiscoveryScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "#FAF7F2" },
-  center: { flex: 1, backgroundColor: "#FAF7F2", justifyContent: "center", alignItems: "center", padding: 24 },
+  center: {
+    flex: 1,
+    backgroundColor: "#FAF7F2",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
   scroll: { paddingBottom: 60, paddingHorizontal: 20 },
 
   header: {

@@ -37,7 +37,7 @@ export function MitraTopBar({ transparent = false }: Props) {
       }}
     >
       <Link
-        to="/en/mitra"
+        to={`/${locale}/mitra`}
         style={{ display: "flex", alignItems: "center" }}
       >
         <img src="/kalpx-logo.png" alt="KalpX" style={{ height: 28 }} />

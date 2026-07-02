@@ -94,6 +94,7 @@ import ProgramInviteClaimScreen from "../screens/Program/ProgramInviteClaimScree
 import ProgramDayScreen from "../screens/Program/ProgramDayScreen";
 import ProgramCompletionScreen from "../screens/Program/ProgramCompletionScreen";
 import ProgramDay8TransitionScreen from "../screens/Program/ProgramDay8TransitionScreen";
+import JourneySummaryScreen from "../screens/Program/JourneySummaryScreen";
 import ProgramReflectionScreen from "../screens/Program/ProgramReflectionScreen";
 import ProgramMantraRunner from "../screens/Program/runners/ProgramMantraRunner";
 import ProgramSankalpRunner from "../screens/Program/runners/ProgramSankalpRunner";
@@ -109,6 +110,7 @@ import LiveSessionReflectScreen from "../screens/LiveSession/LiveSessionReflectS
 import MySessionsScreen from "../screens/LiveSession/MySessionsScreen";
 // TLP Phase 2 — Guide self-service
 import { GuideProgramDraftScreen } from "../screens/Program/GuideProgramDraftScreen";
+import MyProgramsScreen from "../screens/Program/MyProgramsScreen";
 import { GuideSessionDraftScreen } from "../screens/LiveSession/GuideSessionDraftScreen";
 
 const Stack: any = createNativeStackNavigator();
@@ -426,6 +428,7 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen name="ProgramDayScreen" component={ProgramDayScreen} options={{ headerShown: false }} />
     <Stack.Screen name="ProgramCompletionScreen" component={ProgramCompletionScreen} options={{ headerShown: false }} />
     <Stack.Screen name="ProgramDay8TransitionScreen" component={ProgramDay8TransitionScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="JourneySummaryScreen" component={JourneySummaryScreen} options={{ headerShown: false }} />
     <Stack.Screen name="ProgramReflectionScreen" component={ProgramReflectionScreen} options={{ headerShown: false }} />
     <Stack.Screen name="ProgramMantraRunner" component={ProgramMantraRunner} options={{ headerShown: false }} />
     <Stack.Screen name="ProgramSankalpRunner" component={ProgramSankalpRunner} options={{ headerShown: false }} />
@@ -441,6 +444,7 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen name="MySessions" component={MySessionsScreen} options={{ headerShown: false }} />
     {/* TLP Phase 2 — Guide self-service */}
     <Stack.Screen name="GuideProgramDraft" component={GuideProgramDraftScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="MyProgramsScreen" component={MyProgramsScreen} options={{ headerShown: false }} />
     <Stack.Screen name="GuideSessionDraft" component={GuideSessionDraftScreen} options={{ headerShown: false }} />
   </Stack.Navigator>
 );

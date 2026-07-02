@@ -11,7 +11,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { ScreenRenderer } from '../../engine/ScreenRenderer';
 import { useScreenState, updateScreenData, loadScreenWithData } from '../../store/screenSlice';
-import { getDashboardView } from '../../engine/mitraApi';
+import { getDashboardView, invalidateDashboardViewCache } from '../../engine/mitraApi';
 import { ingestDailyView } from '../../engine/v3Ingest';
 import { executeAction } from '../../engine/actionExecutor';
 import { useGuestIdentity } from '../../hooks/useGuestIdentity';
@@ -72,6 +72,12 @@ export function DashboardPage() {
 
   useEffect(() => {
     void load();
+  }, [load]);
+
+  useEffect(() => {
+    function onLocale() { invalidateDashboardViewCache(); void load(); }
+    window.addEventListener('kalpx:locale-changed', onLocale);
+    return () => window.removeEventListener('kalpx:locale-changed', onLocale);
   }, [load]);
 
   const actionContext = {

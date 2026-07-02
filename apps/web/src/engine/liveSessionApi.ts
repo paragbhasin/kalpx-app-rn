@@ -237,8 +237,13 @@ export interface GuideProgram {
   join_url: string;
   template_id: number | null;
   joined_count: number;
+  active_count: number;
+  completed_count: number;
   testimonials_count: number;
+  approved_testimonials_count: number;
   created_at: string;
+  start_date: string | null;
+  max_participants: number | null;
 }
 
 export interface GuideSession {
@@ -262,6 +267,8 @@ export interface GuideDashboardTemplate {
   is_editable_by_guide: boolean;
   locked_at: string | null;
   submitted_at: string | null;
+  desired_start_date: string | null;
+  max_participants: number | null;
 }
 
 export interface GuideDashboard {
@@ -271,6 +278,9 @@ export interface GuideDashboard {
     sessions_count: number;
     total_registered: number;
     testimonials_count: number;
+    active_count_total: number;
+    completed_count_total: number;
+    completion_rate: number;
   };
   programs: GuideProgram[];
   my_templates: GuideDashboardTemplate[];
@@ -298,6 +308,31 @@ export interface GuideTestimonial {
   source_day: number;
   rating: number | null;
   date: string;
+}
+
+export interface GuideTestimonialFull {
+  id: number;
+  display_name: string;
+  testimonial_text: string;
+  rating: number | null;
+  consent_to_share: boolean;
+  moderation_status: "pending" | "approved" | "rejected";
+  created_at: string;
+  program_name: string;
+  campaign_code: string;
+}
+
+export interface OpsTestimonial {
+  id: number;
+  campaign_code: string;
+  program_name: string;
+  testimonial_text: string;
+  rating: number | null;
+  display_name: string;
+  anonymous_allowed: boolean;
+  consent_to_share: boolean;
+  moderation_status: "pending" | "approved" | "rejected";
+  created_at: string;
 }
 
 export async function fetchGuidePublicProfile(slug: string): Promise<GuidePublicProfile> {
@@ -342,6 +377,7 @@ export async function submitProgramDraft(data: {
   daily_structure?: string;
   start_type?: string;
   desired_start_date?: string;
+  max_participants?: number;
   support_needs?: string;
   notes_to_kalpx?: string;
 }): Promise<GuideSubmissionResult> {
@@ -378,6 +414,50 @@ export async function fetchGuideTestimonials(
     `/guide/programs/${code}/testimonials/`,
   );
   return res.data;
+}
+
+export async function fetchGuideAllTestimonials(code: string): Promise<{
+  testimonials: GuideTestimonialFull[];
+  count: number;
+  pending_count: number;
+  approved_count: number;
+}> {
+  const res = await api.get(`/guide/programs/${code}/all-testimonials/`);
+  return res.data;
+}
+
+export async function fetchOpsTestimonials(
+  status?: string,
+  campaignCode?: string,
+): Promise<{ testimonials: OpsTestimonial[]; count: number }> {
+  const params: Record<string, string> = {};
+  if (status) params.status = status;
+  if (campaignCode) params.campaign_code = campaignCode;
+  const res = await api.get("/programs/admin/testimonials/", { params });
+  return res.data;
+}
+
+export async function moderateTestimonial(
+  id: number,
+  moderationStatus: "approved" | "rejected" | "pending",
+): Promise<void> {
+  await api.patch(`/programs/admin/testimonials/${id}/`, {
+    moderation_status: moderationStatus,
+  });
+}
+
+export async function deleteTestimonial(id: number): Promise<void> {
+  await api.delete(`/programs/admin/testimonials/${id}/`);
+}
+
+export async function guideModerateTestimonial(
+  code: string,
+  id: number,
+  moderationStatus: "approved" | "rejected",
+): Promise<void> {
+  await api.patch(`/guide/programs/${code}/testimonials/${id}/`, {
+    moderation_status: moderationStatus,
+  });
 }
 
 export async function submitRerunRequest(
@@ -565,9 +645,11 @@ export async function updateTemplateDay(
 
 export async function submitTemplateForReview(
   id: number,
+  opts?: { desired_start_date?: string; max_participants?: number },
 ): Promise<{ ok: boolean; review_status: string; message: string }> {
   const res = await api.post<{ ok: boolean; review_status: string; message: string }>(
     `/guide/my-templates/${id}/submit/`,
+    opts ?? {},
   );
   return res.data;
 }

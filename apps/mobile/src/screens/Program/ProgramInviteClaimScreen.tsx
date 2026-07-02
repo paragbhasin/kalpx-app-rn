@@ -21,7 +21,7 @@ import {
   View,
 } from "react-native";
 import { Fonts } from "../../theme/fonts";
-import { claimProgram, type ProgramClaimConflict } from "../../engine/programApi";
+import { claimProgram, fetchActiveProgram, type ProgramClaimConflict } from "../../engine/programApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setSkipMitraStart, setForceFourDoorHome } from "../../utils/postLoginGuard";
 
@@ -34,6 +34,8 @@ export default function ProgramInviteClaimScreen() {
   const [claiming, setClaiming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successName, setSuccessName] = useState<string | null>(null);
+  const [isUpcoming, setIsUpcoming] = useState(false);
+  const [daysUntilStart, setDaysUntilStart] = useState<number | null>(null);
 
   const autoClaimedRef = useRef(false);
 
@@ -86,10 +88,17 @@ export default function ProgramInviteClaimScreen() {
         return;
       }
 
-      // Success
+      // Success — check if program is upcoming (future start date)
       await AsyncStorage.removeItem("pending_program_code");
       await AsyncStorage.removeItem("pending_program_source");
       const programName = (result as any).program_name ?? "your program";
+      try {
+        const active = await fetchActiveProgram();
+        if (active?.status === "upcoming") {
+          setIsUpcoming(true);
+          setDaysUntilStart(active.days_until_start ?? null);
+        }
+      } catch (_) {}
       setSuccessName(programName);
       setClaiming(false);
     } catch (err: any) {
@@ -121,24 +130,30 @@ export default function ProgramInviteClaimScreen() {
           <Text style={styles.successEmoji}>🙏</Text>
           <Text style={styles.successTitle}>You've joined!</Text>
           <Text style={styles.successSubtext}>
-            Welcome to {successName}. Your Day 1 is ready.
+            {isUpcoming
+              ? `${successName} starts in ${daysUntilStart ?? "a few"} day${daysUntilStart === 1 ? "" : "s"}. We'll notify you when it begins.`
+              : `Welcome to ${successName}. Your Day 1 is ready.`}
           </Text>
           <TouchableOpacity
             activeOpacity={0.85}
             onPress={() => {
               setSkipMitraStart();
-              navigation.reset({
-                index: 1,
-                routes: [
-                  { name: "Home" },
-                  { name: "ProgramDayScreen", params: { dayNumber: 1, completedItems: [] } },
-                ],
-              });
+              if (isUpcoming) {
+                navigation.reset({ index: 0, routes: [{ name: "Home" }] });
+              } else {
+                navigation.reset({
+                  index: 1,
+                  routes: [
+                    { name: "Home" },
+                    { name: "ProgramDayScreen", params: { dayNumber: 1, completedItems: [] } },
+                  ],
+                });
+              }
             }}
             style={styles.successBtn}
-            accessibilityLabel="Start Day 1"
+            accessibilityLabel={isUpcoming ? "Go to Home" : "Start Day 1"}
           >
-            <Text style={styles.successBtnText}>Start Day 1 →</Text>
+            <Text style={styles.successBtnText}>{isUpcoming ? "Go to Home →" : "Start Day 1 →"}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>

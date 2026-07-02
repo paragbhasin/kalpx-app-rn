@@ -15,7 +15,14 @@ import { SankalpHoldBlock } from "../../components/blocks/SankalpHoldBlock";
 import { TriggerPracticeRunnerBlock } from "../../components/blocks/TriggerPracticeRunnerBlock";
 import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
 import { executeAction } from "../../engine/actionExecutor";
-import { addAdditionalItem } from "../../engine/mitraApi";
+import {
+  addAdditionalItem,
+  getDashboardView,
+  invalidateDashboardViewCache,
+  invalidateEntryViewApiCache,
+  mitraJourneyEntryView,
+} from "../../engine/mitraApi";
+import { ingestDailyView } from "../../engine/v3Ingest";
 import { ScreenRenderer } from "../../engine/ScreenRenderer";
 import { createCalmAudio } from "../../lib/audio/calmMusic";
 import type { AudioHandle } from "../../lib/audio/howlerAudio";
@@ -831,11 +838,14 @@ export function MitraEnginePage() {
   const dispatch = useDispatch<AppDispatch>();
   const [searchParams] = useSearchParams();
   const location = useLocation();
-  const isQuickResetRoute = location.pathname === "/en/mitra/quick-reset";
+  const isQuickResetRoute = location.pathname.endsWith('/mitra/quick-reset');
   const screenState = useScreenState();
   const [resolving, setResolving] = useState(false);
   const [communityAddLoading, setCommunityAddLoading] = useState(false);
   const calmAudioRef = useRef<AudioHandle | null>(null);
+  // Keep a live ref to screenData so the locale-change handler doesn't close over stale values.
+  const screenDataRef = useRef(screenState.screenData);
+  useEffect(() => { screenDataRef.current = screenState.screenData; });
 
   const containerId: string =
     (location.state as any)?.containerId ||
@@ -919,6 +929,60 @@ export function MitraEnginePage() {
     dispatch(loadScreenWithData({ containerId, stateId })).finally(() =>
       setResolving(false),
     );
+  }, [containerId, stateId, dispatch]);
+
+  // When locale changes: re-fetch entry-view (with new locale) to get localized
+  // mantra/practice/sankalp content (essence, meaning, title) from the backend.
+  useEffect(() => {
+    async function onLocaleChange() {
+      if (!containerId || !stateId) return;
+      invalidateDashboardViewCache();
+      invalidateEntryViewApiCache();
+      try {
+        // Call entry-view first — it now sends ?locale=<new> so backend returns
+        // locale-specific triad content. If its payload embeds daily-view, use it;
+        // otherwise fall back to daily-view directly.
+        const result = await mitraJourneyEntryView();
+        const entryPayload = result.envelope?.target?.payload;
+        const isDailyViewPayload =
+          result.envelope?.target?.view_key === 'daily_view' &&
+          entryPayload?.identity != null &&
+          entryPayload?.today != null;
+        const envelope = isDailyViewPayload ? entryPayload : await getDashboardView();
+        if (!envelope || envelope._isLegacyFallback) return;
+
+        const ingested = ingestDailyView(envelope);
+
+        // Update master items and runner_active_item with new-locale content.
+        const sd = screenDataRef.current;
+        const activeItem = (sd?.runner_active_item ?? null) as Record<string, any> | null;
+        const itemType = (activeItem?.item_type || activeItem?.itemType) as string | undefined;
+        if (activeItem && (itemType === 'mantra' || itemType === 'sankalp' || itemType === 'practice')) {
+          const masterKey =
+            itemType === 'sankalp' ? 'master_sankalp' :
+            itemType === 'practice' ? 'master_practice' : 'master_mantra';
+          const newMaster = (ingested[masterKey] ?? null) as Record<string, any> | null;
+          if (newMaster && newMaster.item_id === activeItem.item_id) {
+            dispatch(updateScreenData({
+              [masterKey]: newMaster,
+              runner_active_item: { ...activeItem, ...newMaster },
+              ...(itemType === 'mantra' ? { mantra_text: newMaster.title || activeItem.mantra_text || '' } : {}),
+            }));
+          }
+        } else {
+          // Not in a runner — update all master items so InnerPath/dashboard refresh too.
+          dispatch(updateScreenData({
+            master_mantra: ingested.master_mantra ?? sd?.master_mantra,
+            master_sankalp: ingested.master_sankalp ?? sd?.master_sankalp,
+            master_practice: ingested.master_practice ?? sd?.master_practice,
+          }));
+        }
+      } catch {
+        // best-effort — locale refresh must never break the runner
+      }
+    }
+    window.addEventListener('kalpx:locale-changed', onLocaleChange);
+    return () => window.removeEventListener('kalpx:locale-changed', onLocaleChange);
   }, [containerId, stateId, dispatch]);
 
   const actionContext = {

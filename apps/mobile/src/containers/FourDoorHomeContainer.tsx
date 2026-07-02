@@ -360,6 +360,11 @@ export default function FourDoorHomeContainer({
     }, []),
   );
 
+  // Re-fetch active program when language changes so program name comes in new locale
+  useEffect(() => {
+    fetchActiveProgram().then(setActiveProgram).catch(() => {});
+  }, [i18n.language]);
+
   const handleFeelingSelect = useCallback(
     async (feeling: FeelingOption) => {
       const pranaType = mapFeelingToPranaType(feeling);

@@ -122,6 +122,10 @@ export function useJapaEngine({
   const cachedLifetimeBase = useRef(0);
   const sessionInitialCount = useRef(0);
   const currentMantraRef   = useRef<string | null>(mantraRef);
+  // Stable callback refs — updated after every render so the init effect never
+  // needs ensureSessionStarted/syncNow as deps (avoids spurious re-inits).
+  const ensureSessionStartedRef = useRef<() => Promise<void>>(async () => {});
+  const syncNowRef              = useRef<() => Promise<void>>(async () => {});
 
   useEffect(() => { currentMantraRef.current = mantraRef; }, [mantraRef]);
   useEffect(() => { sessionCountRef.current = sessionCount; }, [sessionCount]);
@@ -282,6 +286,12 @@ export function useJapaEngine({
     }
   }, [enqueuePendingBatch, ensureSessionStarted, persistStats, sourceSurface, tz]);
 
+  // Keep stable refs current so the init effect always calls the latest version.
+  useEffect(() => {
+    ensureSessionStartedRef.current = ensureSessionStarted;
+    syncNowRef.current = syncNow;
+  });
+
   // ── Refresh stats ─────────────────────────────────────────────────────────
 
   const refreshStats = useCallback(async () => {
@@ -392,7 +402,7 @@ export function useJapaEngine({
     if (resumeCount === todayBase) lastSyncedCount.current = todayBase;
     setSessionCount(resumeCount);
 
-    ensureSessionStarted();
+    void ensureSessionStartedRef.current();
 
     if (syncTimerRef.current)    clearInterval(syncTimerRef.current);
     if (elapsedTimerRef.current) clearInterval(elapsedTimerRef.current);
@@ -400,7 +410,7 @@ export function useJapaEngine({
     syncTimerRef.current = setInterval(() => {
       if (Date.now() - lastSyncTimestamp.current >= SYNC_INTERVAL_MS &&
           sessionCountRef.current > lastSyncedCount.current) {
-        syncNow();
+        void syncNowRef.current();
       }
     }, 10_000);
 
@@ -412,7 +422,9 @@ export function useJapaEngine({
       if (syncTimerRef.current)    { clearInterval(syncTimerRef.current);    syncTimerRef.current    = null; }
       if (elapsedTimerRef.current) { clearInterval(elapsedTimerRef.current); elapsedTimerRef.current = null; }
     };
-  }, [mantraRef, ensureSessionStarted, syncNow, tz]);
+    // Only mantraRef and tz should trigger re-initialization — NOT callback refs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mantraRef, tz]);
 
   // ── Time goal ─────────────────────────────────────────────────────────────
 

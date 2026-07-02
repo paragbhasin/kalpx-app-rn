@@ -9,7 +9,8 @@ import { en } from '../locales/en';
 import { hi } from '../locales/hi';
 import { te } from '../locales/te';
 import { invalidateMitraHomeV3Cache } from '../engine/mitraApi';
-import { normalizeLocale } from './locale';
+import { ENABLED_LOCALES, normalizeLocale } from './locale';
+import { webNavigate } from './webRouter';
 
 export type Locale = 'en' | 'hi' | 'te';
 
@@ -35,6 +36,12 @@ const I18nContext = createContext<I18nContextValue>({
 
 function detectInitialLocale(): Locale {
   try {
+    // URL locale segment takes priority so bookmarked/shared /hi/ or /te/ URLs load correctly
+    const urlSegment = window.location.pathname.split('/')[1];
+    if ((ENABLED_LOCALES as string[]).includes(urlSegment)) {
+      try { localStorage.setItem(LOCALE_STORAGE_KEY, urlSegment); } catch {}
+      return urlSegment as Locale;
+    }
     const stored = localStorage.getItem(LOCALE_STORAGE_KEY);
     const candidate = stored ?? (typeof navigator !== 'undefined' ? navigator.language?.split('-')[0] : undefined);
     const normalized = normalizeLocale(candidate);
@@ -57,6 +64,13 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     invalidateMitraHomeV3Cache();
     setLocaleState(next);
     window.dispatchEvent(new CustomEvent('kalpx:locale-changed', { detail: next }));
+    // Swap the locale segment in the current URL (e.g. /en/mitra → /hi/mitra)
+    const segments = window.location.pathname.split('/');
+    if (segments.length >= 2 && (ENABLED_LOCALES as string[]).includes(segments[1]) && segments[1] !== next) {
+      segments[1] = next;
+      const newPath = segments.join('/') + window.location.search + window.location.hash;
+      webNavigate(newPath, { replace: true });
+    }
   }, []);
 
   const t = useCallback(

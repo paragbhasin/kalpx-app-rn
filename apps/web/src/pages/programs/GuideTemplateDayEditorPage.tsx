@@ -5,7 +5,7 @@ import {
   GuideTemplate,
   submitTemplateForReview,
   TemplateDay,
-  updateTemplateDay
+  updateTemplateDay,
 } from "../../engine/liveSessionApi";
 import {
   GuideLibraryPickerModal,
@@ -38,6 +38,11 @@ export function GuideTemplateDayEditorPage() {
     {},
   );
   const [activeDay, setActiveDay] = useState(1);
+
+  // Launch modal state
+  const [showLaunchModal, setShowLaunchModal] = useState(false);
+  const [launchStartDate, setLaunchStartDate] = useState("");
+  const [launchMaxParticipants, setLaunchMaxParticipants] = useState("");
   const dayRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
   useEffect(() => {
@@ -46,6 +51,9 @@ export function GuideTemplateDayEditorPage() {
       .then((tmpl) => {
         setTemplate(tmpl);
         setDays((tmpl.days ?? []).map((d) => ({ ...d, saving: false })));
+        // Pre-fill modal with existing values
+        if ((tmpl as any).desired_start_date) setLaunchStartDate((tmpl as any).desired_start_date);
+        if ((tmpl as any).max_participants) setLaunchMaxParticipants(String((tmpl as any).max_participants));
         // Seed slotSelections from resolved _card fields returned by the backend
         const seeded: Record<string, PickerItem> = {};
         (tmpl.days ?? []).forEach((d) => {
@@ -119,8 +127,15 @@ export function GuideTemplateDayEditorPage() {
     setPickerItems((prev) => ({ ...prev, [`${dayNumber}-${slot}`]: sel }));
   }
 
-  function applyToAllDays(slot: LibrarySlot, item_id: string, title: string, sourceDayNumber?: number) {
-    const src = sourceDayNumber ? days.find((d) => d.day_number === sourceDayNumber) : days[0];
+  function applyToAllDays(
+    slot: LibrarySlot,
+    item_id: string,
+    title: string,
+    sourceDayNumber?: number,
+  ) {
+    const src = sourceDayNumber
+      ? days.find((d) => d.day_number === sourceDayNumber)
+      : days[0];
     const patch =
       slot === "mantra"
         ? {
@@ -147,7 +162,8 @@ export function GuideTemplateDayEditorPage() {
                 practice_ref: item_id,
                 custom_practice_title: "",
                 custom_practice_body: "",
-                practice_duration_minutes: src?.practice_duration_minutes ?? null,
+                practice_duration_minutes:
+                  src?.practice_duration_minutes ?? null,
                 practice_reminder_time: src?.practice_reminder_time ?? null,
               };
 
@@ -173,14 +189,18 @@ export function GuideTemplateDayEditorPage() {
             custom_mantra_title: "",
             custom_mantra_body: "",
             // Seed default reminder time if none saved yet
-            ...(!srcDay?.mantra_reminder_time ? { mantra_reminder_time: "06:00" } : {}),
+            ...(!srcDay?.mantra_reminder_time
+              ? { mantra_reminder_time: "06:00" }
+              : {}),
           }
         : slot === "sankalp"
           ? {
               sankalp_ref: item.item_id,
               custom_sankalp_title: "",
               custom_sankalp_body: "",
-              ...(!srcDay?.sankalp_reminder_time ? { sankalp_reminder_time: "08:00" } : {}),
+              ...(!srcDay?.sankalp_reminder_time
+                ? { sankalp_reminder_time: "08:00" }
+                : {}),
             }
           : slot === "wisdom"
             ? {
@@ -192,7 +212,9 @@ export function GuideTemplateDayEditorPage() {
                 practice_ref: item.item_id,
                 custom_practice_title: "",
                 custom_practice_body: "",
-                ...(!srcDay?.practice_reminder_time ? { practice_reminder_time: "18:00" } : {}),
+                ...(!srcDay?.practice_reminder_time
+                  ? { practice_reminder_time: "18:00" }
+                  : {}),
               };
     saveDay(dayNumber, patch);
     storePickerItem(dayNumber, slot, item);
@@ -200,33 +222,79 @@ export function GuideTemplateDayEditorPage() {
   }
 
   async function handleSubmit() {
-    // Validate: every day must have at least one slot filled
+    // Validate: every day must have at least one of mantra/sankalp/practice
     const emptyDays = days.filter((d) => {
-      const hasRef =
-        d.mantra_ref || d.sankalp_ref || d.practice_ref || d.wisdom_ref;
-      const hasCustom =
-        d.custom_mantra_body ||
-        d.custom_sankalp_body ||
-        d.custom_practice_body ||
-        d.custom_wisdom_body;
-      return !hasRef && !hasCustom;
+      const hasMantra = d.mantra_ref || d.custom_mantra_body;
+      const hasSankalp = d.sankalp_ref || d.custom_sankalp_body;
+      const hasPractice = d.practice_ref || d.custom_practice_body;
+      return !hasMantra && !hasSankalp && !hasPractice;
     });
     if (emptyDays.length > 0) {
       const nums = emptyDays.map((d) => `Day ${d.day_number}`).join(", ");
-      setError(
-        `Each day needs at least one content slot (Mantra, Sankalp, Practice, or Wisdom). Missing: ${nums}`,
-      );
+      setError(`Each day needs at least one Mantra, Sankalp, or Practice. Missing: ${nums}`);
+      setActiveDay(emptyDays[0].day_number);
       return;
     }
+
+    // Validate: mantra without count
+    const missingCount = days.filter(
+      (d) => (d.mantra_ref || d.custom_mantra_body) && !d.mantra_count
+    );
+    if (missingCount.length > 0) {
+      const nums = missingCount.map((d) => `Day ${d.day_number}`).join(", ");
+      setError(`Select a chant count for the Mantra in: ${nums}`);
+      setActiveDay(missingCount[0].day_number);
+      return;
+    }
+
+    // Validate: practice without duration
+    const missingDuration = days.filter(
+      (d) => (d.practice_ref || d.custom_practice_body) && !d.practice_duration_minutes
+    );
+    if (missingDuration.length > 0) {
+      const nums = missingDuration.map((d) => `Day ${d.day_number}`).join(", ");
+      setError(`Enter a practice duration (minutes) for: ${nums}`);
+      setActiveDay(missingDuration[0].day_number);
+      return;
+    }
+
     setError("");
+    // If settings already filled on page, submit directly — no modal needed
+    const hasSettings = launchStartDate || launchMaxParticipants;
+    if (hasSettings) {
+      setSubmitting(true);
+      try {
+        await submitTemplateForReview(templateId, {
+          desired_start_date: launchStartDate || undefined,
+          max_participants: launchMaxParticipants ? parseInt(launchMaxParticipants, 10) : undefined,
+        });
+        setSubmitted(true);
+      } catch (e: any) {
+        setError(e?.response?.data?.detail ?? "Could not submit. Please try again.");
+      } finally {
+        setSubmitting(false);
+      }
+    } else {
+      setShowLaunchModal(true);
+    }
+  }
+
+  async function handleLaunchConfirm() {
     setSubmitting(true);
     try {
-      await submitTemplateForReview(templateId);
+      await submitTemplateForReview(templateId, {
+        desired_start_date: launchStartDate || undefined,
+        max_participants: launchMaxParticipants
+          ? parseInt(launchMaxParticipants, 10)
+          : undefined,
+      });
+      setShowLaunchModal(false);
       setSubmitted(true);
     } catch (e: any) {
       setError(
         e?.response?.data?.detail ?? "Could not submit. Please try again.",
       );
+      setShowLaunchModal(false);
     } finally {
       setSubmitting(false);
     }
@@ -258,10 +326,14 @@ export function GuideTemplateDayEditorPage() {
     );
   }
 
-  const locked = !!template?.locked_at;
+  const _inReview = ["submitted", "under_review", "changes_requested"].includes(template?.review_status ?? "");
+  // locked = campaign is actively running, NOT just "submitted for review"
+  const locked = !!template?.locked_at && !_inReview;
   const canSubmit =
     template?.review_status === "draft" ||
-    template?.review_status === "changes_requested";
+    template?.review_status === "changes_requested" ||
+    template?.review_status === "submitted" ||
+    template?.review_status === "under_review";
 
   const navBarHeight = days.length > 1 ? 56 : 0;
 
@@ -376,10 +448,209 @@ export function GuideTemplateDayEditorPage() {
           />
         )}
 
+        {/* Launch modal — start date + max participants */}
+        {showLaunchModal && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.5)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 1000,
+              padding: 20,
+            }}
+          >
+            <div
+              style={{
+                background: "#FAF7F2",
+                borderRadius: 16,
+                padding: "32px 28px",
+                maxWidth: 420,
+                width: "100%",
+                boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+              }}
+            >
+              <h2
+                style={{
+                  fontSize: 18,
+                  fontWeight: 800,
+                  color: "#432104",
+                  margin: "0 0 6px",
+                }}
+              >
+                Program Settings
+              </h2>
+              <p
+                style={{
+                  fontSize: 13,
+                  color: "#7A6652",
+                  margin: "0 0 24px",
+                  lineHeight: 1.6,
+                }}
+              >
+                Set when you want the program to start and how many people you
+                want to allow.
+              </p>
+
+              <div style={{ marginBottom: 18 }}>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: "#7A6652",
+                    marginBottom: 6,
+                    textTransform: "uppercase" as const,
+                    letterSpacing: "0.06em",
+                  }}
+                >
+                  Start Date
+                </label>
+                <input
+                  type="date"
+                  value={launchStartDate}
+                  onChange={(e) => setLaunchStartDate(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    fontSize: 14,
+                    border: "1px solid #E8DECE",
+                    borderRadius: 8,
+                    background: "#fff",
+                    color: "#432104",
+                    boxSizing: "border-box" as const,
+                  }}
+                />
+                <p
+                  style={{ fontSize: 11, color: "#B5A08A", margin: "4px 0 0" }}
+                >
+                  Leave blank if the program is rolling (no fixed start).
+                </p>
+              </div>
+
+              <div style={{ marginBottom: 28 }}>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: "#7A6652",
+                    marginBottom: 6,
+                    textTransform: "uppercase" as const,
+                    letterSpacing: "0.06em",
+                  }}
+                >
+                  Maximum People Allowed
+                </label>
+                <input
+                  type="number"
+                  value={launchMaxParticipants}
+                  onChange={(e) => setLaunchMaxParticipants(e.target.value)}
+                  placeholder="e.g. 50"
+                  min={1}
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    fontSize: 14,
+                    border: "1px solid #E8DECE",
+                    borderRadius: 8,
+                    background: "#fff",
+                    color: "#432104",
+                    boxSizing: "border-box" as const,
+                  }}
+                />
+                <p
+                  style={{ fontSize: 11, color: "#B5A08A", margin: "4px 0 0" }}
+                >
+                  Leave blank for unlimited.
+                </p>
+              </div>
+
+              <div style={{ display: "flex", gap: 10 }}>
+                <button
+                  onClick={() => setShowLaunchModal(false)}
+                  style={{
+                    flex: 1,
+                    padding: "11px",
+                    background: "transparent",
+                    border: "1px solid #E8DECE",
+                    borderRadius: 8,
+                    color: "#7A6652",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleLaunchConfirm}
+                  disabled={submitting}
+                  style={{
+                    flex: 2,
+                    padding: "11px",
+                    background: "#432104",
+                    border: "none",
+                    borderRadius: 8,
+                    color: "#fff",
+                    fontSize: 14,
+                    fontWeight: 700,
+                    cursor: submitting ? "not-allowed" : "pointer",
+                    opacity: submitting ? 0.7 : 1,
+                  }}
+                >
+                  {submitting ? "Submitting…" : "Submit for Review"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {locked && (
           <div style={lockBanner}>
             This template is locked — a campaign is already running from it.
             Create a new version to make changes.
+          </div>
+        )}
+
+        {/* Program Settings — visible in editor, not just in modal */}
+        {!locked && (
+          <div style={{
+            background: "#FDFAF6",
+            border: "1px solid #E8DECE",
+            borderRadius: 12,
+            padding: "16px 20px",
+            marginBottom: 20,
+          }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: "#B5A08A", textTransform: "uppercase" as const, letterSpacing: "0.08em", margin: "0 0 12px" }}>
+              Program Settings
+            </p>
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap" as const }}>
+              <div style={{ flex: 1, minWidth: 160 }}>
+                <p style={{ fontSize: 11, fontWeight: 600, color: "#B5A08A", margin: "0 0 4px" }}>Start Date</p>
+                <input
+                  type="date"
+                  value={launchStartDate}
+                  onChange={e => setLaunchStartDate(e.target.value)}
+                  style={{ width: "100%", padding: "9px 12px", border: "1px solid #E8DECE", borderRadius: 8, fontSize: 13, color: "#432104", background: "#fff", boxSizing: "border-box" as const }}
+                />
+                <p style={{ fontSize: 11, color: "#C5B69A", margin: "3px 0 0" }}>Leave blank for rolling start</p>
+              </div>
+              <div style={{ flex: 1, minWidth: 160 }}>
+                <p style={{ fontSize: 11, fontWeight: 600, color: "#B5A08A", margin: "0 0 4px" }}>Max People Allowed</p>
+                <input
+                  type="number"
+                  value={launchMaxParticipants}
+                  onChange={e => setLaunchMaxParticipants(e.target.value)}
+                  placeholder="e.g. 50"
+                  min={1}
+                  style={{ width: "100%", padding: "9px 12px", border: "1px solid #E8DECE", borderRadius: 8, fontSize: 13, color: "#432104", background: "#fff", boxSizing: "border-box" as const }}
+                />
+                <p style={{ fontSize: 11, color: "#C5B69A", margin: "3px 0 0" }}>Leave blank for unlimited</p>
+              </div>
+            </div>
           </div>
         )}
 
@@ -472,17 +743,6 @@ export function GuideTemplateDayEditorPage() {
           ))}
         </div>
 
-        {!locked && canSubmit && (
-          <div style={{ textAlign: "center" as const, marginTop: 32 }}>
-            <button
-              style={submitBtn}
-              onClick={handleSubmit}
-              disabled={submitting}
-            >
-              {submitting ? "Submitting…" : "Submit for Review"}
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -596,6 +856,11 @@ function DayRow({
                 </button>
               ))}
             </div>
+            {!day.mantra_count && (
+              <p style={{ fontSize: 11, color: "#C05B3A", margin: "4px 0 0" }}>
+                Select a chant count to continue
+              </p>
+            )}
           </div>
           <div>
             <div style={settingsLabel}>SUGGESTED REMINDER TIME</div>
@@ -729,6 +994,11 @@ function DayRow({
               />
               <span style={{ fontSize: 12, color: "#7B6545" }}>min</span>
             </div>
+            {!day.practice_duration_minutes && (
+              <p style={{ fontSize: 11, color: "#C05B3A", margin: "4px 0 0" }}>
+                Enter practice duration to continue
+              </p>
+            )}
           </div>
           <div>
             <div style={settingsLabel}>SUGGESTED REMINDER TIME</div>

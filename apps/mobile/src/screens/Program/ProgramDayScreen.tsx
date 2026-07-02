@@ -14,6 +14,7 @@ import {
   useRoute,
 } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
@@ -38,11 +39,14 @@ import {
   type ProgramDayContent,
   type ProgramDayItem,
   type ProgramReminders,
-  type ProgramRemindersPatch
+  type ProgramRemindersPatch,
 } from "../../engine/programApi";
 import { useNotificationPermissionGate } from "../../hooks/useNotificationPermissionGate";
 import { Fonts } from "../../theme/fonts";
-import { setForceFourDoorHome, setSkipMitraStart } from "../../utils/postLoginGuard";
+import {
+  setForceFourDoorHome,
+  setSkipMitraStart,
+} from "../../utils/postLoginGuard";
 
 const SUPPORT_URL = "https://kalpx.com/programs/support";
 
@@ -70,17 +74,24 @@ function fmt12h(hhmm: string): string {
   return `${h12}:${String(m).padStart(2, "0")} ${period}`;
 }
 
-function getCardSubtitle(item: ProgramDayItem, dayContent: ProgramDayContent | null): string | null {
+function getCardSubtitle(
+  item: ProgramDayItem,
+  dayContent: ProgramDayContent | null,
+): string | null {
   if (!dayContent) return null;
   const parts: string[] = [];
   if (item.item_type === "mantra") {
     if (dayContent.mantra_count) parts.push(`${dayContent.mantra_count}×`);
-    if (dayContent.mantra_reminder_time) parts.push(`⏰ ${fmt12h(dayContent.mantra_reminder_time)}`);
+    if (dayContent.mantra_reminder_time)
+      parts.push(`🔔 ${fmt12h(dayContent.mantra_reminder_time)}`);
   } else if (item.item_type === "practice") {
-    if (dayContent.practice_duration_minutes) parts.push(`${dayContent.practice_duration_minutes} min`);
-    if (dayContent.practice_reminder_time) parts.push(`⏰ ${fmt12h(dayContent.practice_reminder_time)}`);
+    if (dayContent.practice_duration_minutes)
+      parts.push(`${dayContent.practice_duration_minutes} min`);
+    if (dayContent.practice_reminder_time)
+      parts.push(`🔔 ${fmt12h(dayContent.practice_reminder_time)}`);
   } else if (item.item_type === "sankalp") {
-    if (dayContent.sankalp_reminder_time) parts.push(`⏰ ${fmt12h(dayContent.sankalp_reminder_time)}`);
+    if (dayContent.sankalp_reminder_time)
+      parts.push(`🔔 ${fmt12h(dayContent.sankalp_reminder_time)}`);
   }
   return parts.length > 0 ? parts.join("  ·  ") : null;
 }
@@ -138,16 +149,22 @@ export default function ProgramDayScreen() {
   const [reminders, setReminders] = useState<ProgramReminders | null>(null);
   const [remindersOpen, setRemindersOpen] = useState(false);
   const [reminderSaving, setReminderSaving] = useState(false);
-  const [reminderPickerKey, setReminderPickerKey] = useState<"mantra" | "sankalp" | "practice" | null>(null);
+  const [reminderPickerKey, setReminderPickerKey] = useState<
+    "mantra" | "sankalp" | "practice" | null
+  >(null);
 
-  const { withPermissionCheck, renderPermissionModal } = useNotificationPermissionGate();
+  const { withPermissionCheck, renderPermissionModal } =
+    useNotificationPermissionGate();
+  const { t } = useTranslation();
 
   const firedAnalyticsRef = useRef(false);
   const dayCompletedRef = useRef(false);
 
   // Load program reminders on mount
   useEffect(() => {
-    apiGetProgramReminders().then(setReminders).catch(() => {});
+    apiGetProgramReminders()
+      .then(setReminders)
+      .catch(() => {});
   }, []);
 
   const REMINDER_DEFAULTS: Record<"mantra" | "sankalp" | "practice", string> = {
@@ -165,9 +182,16 @@ export default function ProgramDayScreen() {
 
   async function doReminderToggle(key: "mantra" | "sankalp" | "practice") {
     if (!reminders || reminderSaving) return;
-    const currentEnabled = reminders[`${key}_reminder_enabled` as keyof ProgramReminders] as boolean;
-    const patch: ProgramRemindersPatch = { [`${key}_reminder_enabled`]: !currentEnabled };
-    if (!currentEnabled && !reminders[`${key}_reminder_time` as keyof ProgramReminders]) {
+    const currentEnabled = reminders[
+      `${key}_reminder_enabled` as keyof ProgramReminders
+    ] as boolean;
+    const patch: ProgramRemindersPatch = {
+      [`${key}_reminder_enabled`]: !currentEnabled,
+    };
+    if (
+      !currentEnabled &&
+      !reminders[`${key}_reminder_time` as keyof ProgramReminders]
+    ) {
       (patch as any)[`${key}_reminder_time`] = REMINDER_DEFAULTS[key];
     }
     setReminderSaving(true);
@@ -183,7 +207,9 @@ export default function ProgramDayScreen() {
 
   async function handleReminderToggle(key: "mantra" | "sankalp" | "practice") {
     if (!reminders || reminderSaving) return;
-    const isCurrentlyEnabled = reminders[`${key}_reminder_enabled` as keyof ProgramReminders] as boolean;
+    const isCurrentlyEnabled = reminders[
+      `${key}_reminder_enabled` as keyof ProgramReminders
+    ] as boolean;
     if (!isCurrentlyEnabled) {
       await withPermissionCheck(() => doReminderToggle(key));
     } else {
@@ -191,13 +217,22 @@ export default function ProgramDayScreen() {
     }
   }
 
-  async function handleReminderTime(key: "mantra" | "sankalp" | "practice", timeStr: string) {
+  async function handleReminderTime(
+    key: "mantra" | "sankalp" | "practice",
+    timeStr: string,
+  ) {
     setReminderPickerKey(null);
     setReminderSaving(true);
     try {
-      const updated = await apiPatchProgramReminders({ [`${key}_reminder_time`]: timeStr } as ProgramRemindersPatch);
+      const updated = await apiPatchProgramReminders({
+        [`${key}_reminder_time`]: timeStr,
+      } as ProgramRemindersPatch);
       setReminders(updated);
-      setDayContent((prev) => prev ? { ...prev, [`${key}_reminder_time`]: timeStr.slice(0, 5) } : prev);
+      setDayContent((prev) =>
+        prev
+          ? { ...prev, [`${key}_reminder_time`]: timeStr.slice(0, 5) }
+          : prev,
+      );
     } catch {
       // non-fatal
     } finally {
@@ -229,6 +264,9 @@ export default function ProgramDayScreen() {
           const data = await fetchProgramDay(dayNumber);
           if (!cancelled) {
             setDayContent(data);
+            // Re-fetch reminders: fetchProgramDay auto-enables defaults on the backend,
+            // so the initial parallel fetch may have returned all-off.
+            apiGetProgramReminders().then(setReminders).catch(() => {});
             if (!firedAnalyticsRef.current) {
               firedAnalyticsRef.current = true;
               postProgramActivity("program_day_started", {
@@ -245,10 +283,13 @@ export default function ProgramDayScreen() {
           if (cancelled) return;
           const status = err?.response?.status;
           const detail = err?.response?.data?.detail;
-          if (status === 403 && detail === 'next_day_locked') setError("Today's practice is complete. Come back tomorrow for the next day.");
-          else if (status === 403) setError("Complete the previous day first.");
-          else if (status === 404) setError("Day not found in your program.");
-          else setError("Couldn't load today's practice. Please try again.");
+          if (status === 403 && detail === "next_day_locked")
+            setError(t("programs.day.errorNextDayLocked"));
+          else if (status === 403)
+            setError(t("programs.day.errorPrevDayIncomplete"));
+          else if (status === 404)
+            setError(t("programs.day.errorDayNotFound"));
+          else setError(t("programs.day.errorLoadFailed"));
         } finally {
           if (!cancelled) setLoading(false);
         }
@@ -271,8 +312,12 @@ export default function ProgramDayScreen() {
     if (item.item_type === "mantra" && dayContent?.mantra_count) {
       extraParams.mantraCount = dayContent.mantra_count;
     }
-    if (item.item_type === "practice" && dayContent?.practice_duration_minutes) {
-      extraParams.practiceDurationMinutes = dayContent.practice_duration_minutes;
+    if (
+      item.item_type === "practice" &&
+      dayContent?.practice_duration_minutes
+    ) {
+      extraParams.practiceDurationMinutes =
+        dayContent.practice_duration_minutes;
     }
     navigation.navigate(screen, {
       item,
@@ -327,21 +372,25 @@ export default function ProgramDayScreen() {
   if (error || !dayContent) {
     return (
       <SafeAreaView style={styles.center}>
-        <Text style={styles.errorText}>{error ?? "Something went wrong."}</Text>
+        <Text style={styles.errorText}>{error ?? t("programs.day.errorGeneric")}</Text>
         <TouchableOpacity
-          onPress={() => { setSkipMitraStart(); setForceFourDoorHome(); navigation.goBack(); }}
+          onPress={() => {
+            setSkipMitraStart();
+            setForceFourDoorHome();
+            navigation.goBack();
+          }}
           style={styles.backBtn}
         >
-          <Text style={styles.backBtnText}>← Back</Text>
+          <Text style={styles.backBtnText}>{t("programs.day.back")}</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
   }
 
   const ITEM_LABELS: Record<string, string> = {
-    mantra: "Mantra",
-    sankalp: "Sankalp",
-    practice: "Practice",
+    mantra: t("programs.day.label_mantra"),
+    sankalp: t("programs.day.label_sankalp"),
+    practice: t("programs.day.label_practice"),
   };
 
   return (
@@ -353,23 +402,30 @@ export default function ProgramDayScreen() {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
-            onPress={() => { setSkipMitraStart(); setForceFourDoorHome(); navigation.goBack(); }}
+            onPress={() => {
+              setSkipMitraStart();
+              setForceFourDoorHome();
+              navigation.goBack();
+            }}
             style={styles.backIcon}
           >
             {/* <Text style={styles.backIconText}>‹</Text> */}
           </TouchableOpacity>
           <View style={styles.headerCenter}>
-            <Text style={styles.dayLabel}>DAY {dayContent.day_number}</Text>
+            <Text style={styles.dayLabel}>{t("programs.day.dayLabel", { n: dayContent.day_number })}</Text>
             <Text style={styles.themeText}>{dayContent.theme}</Text>
             {dayContent.wisdom_card ? (
               <TouchableOpacity
-                onPress={() => setWisdomOpen(v => !v)}
+                onPress={() => setWisdomOpen((v) => !v)}
                 activeOpacity={0.82}
                 style={styles.wisdomInline}
               >
-                <Text style={styles.wisdomInlineLabel}>WISDOM OF THE DAY</Text>
+                <Text style={styles.wisdomInlineLabel}>{t("programs.day.wisdomLabel")}</Text>
                 <View style={styles.wisdomInlineRow}>
-                  <Text style={styles.wisdomInlineTitle} numberOfLines={wisdomOpen ? undefined : 2}>
+                  <Text
+                    style={styles.wisdomInlineTitle}
+                    numberOfLines={wisdomOpen ? undefined : 2}
+                  >
                     {dayContent.wisdom_card.text}
                   </Text>
                   <Ionicons
@@ -379,7 +435,8 @@ export default function ProgramDayScreen() {
                     style={{ marginLeft: 6 }}
                   />
                 </View>
-                {wisdomOpen && (dayContent.wisdom_card.explanation?.[0] ?? null) ? (
+                {wisdomOpen &&
+                (dayContent.wisdom_card.explanation?.[0] ?? null) ? (
                   <Text style={styles.wisdomInlineBody}>
                     {dayContent.wisdom_card.explanation![0]}
                   </Text>
@@ -413,16 +470,22 @@ export default function ProgramDayScreen() {
             accessibilityLabel="Join live session"
           >
             <View style={styles.liveSessionLeft}>
-              <Text style={styles.liveSessionLabel}>LIVE SESSION</Text>
+              <Text style={styles.liveSessionLabel}>{t("programs.day.liveSessionLabel")}</Text>
               {dayContent.day_session_time ? (
                 <Text style={styles.liveSessionTime}>
                   {formatSessionTime(dayContent.day_session_time)}
-                  {dayContent.day_session_timezone ? ` ${dayContent.day_session_timezone}` : ''}
+                  {dayContent.day_session_timezone
+                    ? ` ${dayContent.day_session_timezone}`
+                    : ""}
                 </Text>
               ) : null}
-              <Text style={styles.liveSessionLink}>Tap to join →</Text>
+              <Text style={styles.liveSessionLink}>{t("programs.day.liveSessionTapToJoin")}</Text>
               <View style={styles.liveSessionUrlRow}>
-                <Text style={styles.liveSessionUrl} numberOfLines={1} ellipsizeMode="middle">
+                <Text
+                  style={styles.liveSessionUrl}
+                  numberOfLines={1}
+                  ellipsizeMode="middle"
+                >
                   {dayContent.day_join_url}
                 </Text>
                 <TouchableOpacity
@@ -435,7 +498,9 @@ export default function ProgramDayScreen() {
                   activeOpacity={0.7}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <Text style={styles.copyBtnText}>{copiedLink ? "Copied!" : "Copy"}</Text>
+                  <Text style={styles.copyBtnText}>
+                    {copiedLink ? t("programs.day.copied") : t("programs.day.copy")}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -454,11 +519,13 @@ export default function ProgramDayScreen() {
               })
             }
           >
-            <Text style={styles.reflectionLabel}>🌼 REFLECTION</Text>
+            <Text style={styles.reflectionLabel}>{t("programs.day.reflectionLabel")}</Text>
             <Text style={styles.reflectionText}>
               {dayContent.reflection_prompt}
             </Text>
-            <Text style={styles.reflectionHint}>Tap to write your reflection →</Text>
+            <Text style={styles.reflectionHint}>
+              {t("programs.day.reflectionHint")}
+            </Text>
           </TouchableOpacity>
         ) : null}
 
@@ -471,13 +538,13 @@ export default function ProgramDayScreen() {
               style={styles.remindersHeader}
             >
               <View style={{ flex: 1 }}>
-                <Text style={styles.remindersTitle}>Reminders</Text>
+                <Text style={styles.remindersTitle}>{t("programs.day.remindersTitle")}</Text>
                 {!remindersOpen && (
                   <Text style={styles.remindersSub}>
                     {(["mantra", "sankalp", "practice"] as const)
                       .filter((k) => reminders[`${k}_reminder_enabled`])
-                      .map((k) => k.charAt(0).toUpperCase() + k.slice(1))
-                      .join(", ") || "None set"}
+                      .map((k) => t(`programs.day.label_${k}`))
+                      .join(", ") || t("programs.day.remindersNoneSet")}
                   </Text>
                 )}
               </View>
@@ -491,8 +558,12 @@ export default function ProgramDayScreen() {
             {remindersOpen && (
               <View style={styles.remindersBody}>
                 {(["mantra", "sankalp", "practice"] as const).map((key) => {
-                  const enabled = reminders[`${key}_reminder_enabled`] as boolean;
-                  const time = reminders[`${key}_reminder_time`] as string | null;
+                  const enabled = reminders[
+                    `${key}_reminder_enabled`
+                  ] as boolean;
+                  const time = reminders[`${key}_reminder_time`] as
+                    | string
+                    | null;
                   const displayTime = time
                     ? (() => {
                         const [h, m] = time.slice(0, 5).split(":").map(Number);
@@ -505,10 +576,13 @@ export default function ProgramDayScreen() {
                   return (
                     <View
                       key={key}
-                      style={[styles.reminderRow, enabled && styles.reminderRowEnabled]}
+                      style={[
+                        styles.reminderRow,
+                        enabled && styles.reminderRowEnabled,
+                      ]}
                     >
                       <Text style={styles.reminderRowLabel}>
-                        {key.charAt(0).toUpperCase() + key.slice(1)} reminder
+                        {t(`programs.day.reminder_${key}`)}
                       </Text>
                       <View style={styles.reminderRowRight}>
                         {enabled && displayTime && (
@@ -517,14 +591,19 @@ export default function ProgramDayScreen() {
                             style={styles.reminderTimePill}
                             activeOpacity={0.7}
                           >
-                            <Text style={styles.reminderTimePillText}>{displayTime}</Text>
+                            <Text style={styles.reminderTimePillText}>
+                              {displayTime}
+                            </Text>
                           </TouchableOpacity>
                         )}
                         <Switch
                           value={enabled}
                           onValueChange={() => void handleReminderToggle(key)}
                           disabled={reminderSaving}
-                          trackColor={{ false: "rgba(0,0,0,0.12)", true: "#C99317" }}
+                          trackColor={{
+                            false: "rgba(0,0,0,0.12)",
+                            true: "#C99317",
+                          }}
                           thumbColor="#fff"
                         />
                       </View>
@@ -536,19 +615,24 @@ export default function ProgramDayScreen() {
                   visible={!!reminderPickerKey}
                   initialTime={
                     reminderPickerKey
-                      ? ((reminders?.[`${reminderPickerKey}_reminder_time` as keyof ProgramReminders] as string | null)
-                          ? (reminders![`${reminderPickerKey}_reminder_time` as keyof ProgramReminders] as string) + ":00"
-                          : REMINDER_DEFAULTS[reminderPickerKey] + ":00")
+                      ? (reminders?.[
+                          `${reminderPickerKey}_reminder_time` as keyof ProgramReminders
+                        ] as string | null)
+                        ? (reminders![
+                            `${reminderPickerKey}_reminder_time` as keyof ProgramReminders
+                          ] as string) + ":00"
+                        : REMINDER_DEFAULTS[reminderPickerKey] + ":00"
                       : null
                   }
                   onConfirm={(timeStr) => {
-                    if (reminderPickerKey) void handleReminderTime(reminderPickerKey, timeStr);
+                    if (reminderPickerKey)
+                      void handleReminderTime(reminderPickerKey, timeStr);
                   }}
                   onCancel={() => setReminderPickerKey(null)}
                 />
 
                 {reminderSaving && (
-                  <Text style={styles.reminderSavingText}>Saving…</Text>
+                  <Text style={styles.reminderSavingText}>{t("programs.day.reminderSaving")}</Text>
                 )}
               </View>
             )}
@@ -559,32 +643,25 @@ export default function ProgramDayScreen() {
         {allDone ? (
           <View style={styles.completionBanner}>
             <Text style={styles.completionTitle}>
-              Day {dayContent.day_number} Complete ✓
+              {t("programs.day.dayComplete", { n: dayContent.day_number })}
             </Text>
             <Text style={styles.completionSub}>
-              Tap any practice to do it again
+              {t("programs.day.completionSub")}
             </Text>
           </View>
         ) : (
           <Text style={styles.progressHint}>
-            {allItems.filter(isItemDone).length}/{allItems.length} done —
-            complete all to finish the day
+            {t("programs.day.progressHint", { done: allItems.filter(isItemDone).length, total: allItems.length })}
           </Text>
         )}
 
         {/* Support footer */}
         <TouchableOpacity
           style={styles.supportLink}
-          onPress={() =>
-            Alert.alert(
-              "Need help?",
-              "Visit kalpx.com/programs/support for help with your program.",
-              [{ text: "OK" }],
-            )
-          }
+          onPress={() => Linking.openURL(SUPPORT_URL)}
           accessibilityLabel="Program support"
         >
-          <Text style={styles.supportLinkText}>Need help? Get support →</Text>
+          <Text style={styles.supportLinkText}>{t("programs.day.supportLink")}</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -673,47 +750,47 @@ const styles = StyleSheet.create({
 
   wisdomInline: {
     marginTop: 12,
-    alignSelf: 'stretch',
-    backgroundColor: '#FFF8EE',
+    alignSelf: "stretch",
+    backgroundColor: "#FFF8EE",
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#E8D9B5',
+    borderColor: "#E8D9B5",
     padding: 14,
-    alignItems: 'center',
+    alignItems: "center",
   },
   wisdomInlineLabel: {
     fontFamily: Fonts.sans.medium,
     fontSize: 10,
-    color: '#9A7548',
+    color: "#9A7548",
     letterSpacing: 0.08,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 5,
   },
   wisdomInlineRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   wisdomInlineTitle: {
     fontFamily: Fonts.serif.bold,
     fontSize: 15,
-    color: '#432104',
-    textAlign: 'center',
+    color: "#432104",
+    textAlign: "center",
     flexShrink: 1,
   },
   wisdomInlineBody: {
     marginTop: 10,
     fontFamily: Fonts.sans.regular,
     fontSize: 13,
-    color: '#7B6545',
+    color: "#7B6545",
     lineHeight: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   liveSessionCard: {
-    backgroundColor: '#FFF3DC',
+    backgroundColor: "#FFF3DC",
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#C99317',
+    borderColor: "#C99317",
     padding: 16,
     marginBottom: 12,
   },
@@ -721,37 +798,37 @@ const styles = StyleSheet.create({
   liveSessionLabel: {
     fontFamily: Fonts.sans.medium,
     fontSize: 10,
-    color: '#9A7548',
+    color: "#9A7548",
     letterSpacing: 0.06,
     marginBottom: 6,
   },
   liveSessionTime: {
     fontFamily: Fonts.serif.bold,
     fontSize: 16,
-    color: '#432104',
+    color: "#432104",
     marginBottom: 4,
   },
   liveSessionLink: {
     fontFamily: Fonts.sans.medium,
     fontSize: 13,
-    color: '#C99317',
+    color: "#C99317",
   },
   liveSessionUrlRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 4,
     gap: 8,
   },
   liveSessionUrl: {
     fontFamily: Fonts.sans.regular,
     fontSize: 11,
-    color: '#9A7548',
+    color: "#9A7548",
     flex: 1,
   },
   copyBtn: {
-    backgroundColor: '#FFF3DC',
+    backgroundColor: "#FFF3DC",
     borderWidth: 1,
-    borderColor: '#C99317',
+    borderColor: "#C99317",
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 3,
@@ -759,7 +836,7 @@ const styles = StyleSheet.create({
   copyBtnText: {
     fontFamily: Fonts.sans.medium,
     fontSize: 11,
-    color: '#C99317',
+    color: "#C99317",
   },
   reflectionCard: {
     backgroundColor: "#FFF8EE",

@@ -90,6 +90,11 @@ const Profile = () => {
               route: "ProfileDetails",
             },
             {
+              key: "myPrograms",
+              icon: "ribbon-outline",
+              route: "MyProgramsScreen",
+            },
+            {
               key: "savedReflections",
               icon: "bookmark-outline",
               route: "RoomMemoryScreen",

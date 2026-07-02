@@ -8,9 +8,11 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthLayout } from '../../components/AuthLayout';
 import { useAuth } from '../../hooks/useAuth';
 import { KalpXButton } from '../../components/ui';
+import { useTranslation } from '../../lib/i18n';
 
 export function ResetPasswordPage() {
   const { resetPassword } = useAuth();
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -26,10 +28,10 @@ export function ResetPasswordPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
-    if (!email) { setError('Email is required.'); return; }
+    if (!email) { setError(t('auth.emailRequired')); return; }
     if (!otp) { setError('Please enter the reset code.'); return; }
     if (newPassword.length < 8) { setError('Password must be at least 8 characters.'); return; }
-    if (newPassword !== confirmPassword) { setError('Passwords do not match.'); return; }
+    if (newPassword !== confirmPassword) { setError(t('auth.passwordsNoMatch')); return; }
 
     setLoading(true);
     const result = await resetPassword(email, otp, newPassword);
@@ -44,13 +46,13 @@ export function ResetPasswordPage() {
 
   if (done) {
     return (
-      <AuthLayout title="Password reset">
+      <AuthLayout title={t('auth.resetPasswordTitle')}>
         <div style={{ textAlign: 'center' }}>
           <p style={{ color: 'var(--kalpx-text-soft)', marginBottom: 24, lineHeight: 1.6 }}>
-            Your password has been reset successfully.
+            {t('auth.resetPasswordSuccess')}
           </p>
           <KalpXButton onClick={() => navigate('/login')}>
-            Sign in
+            {t('auth.signIn')}
           </KalpXButton>
         </div>
       </AuthLayout>
@@ -58,11 +60,11 @@ export function ResetPasswordPage() {
   }
 
   return (
-    <AuthLayout title="Enter reset code">
+    <AuthLayout title={t('auth.enterResetCode')}>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <Link to="/forgot-password" style={{ color: 'var(--kalpx-cta)', fontSize: 14 }}>← Back</Link>
         <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14, margin: 0, lineHeight: 1.6 }}>
-          Enter the code we sent to your email and choose a new password.
+          {t('auth.resetCodeSubtitle')}
         </p>
 
         {!emailFromState && (
@@ -79,7 +81,7 @@ export function ResetPasswordPage() {
         <input
           type="text"
           inputMode="numeric"
-          placeholder="Reset code"
+          placeholder={t('auth.resetCode')}
           value={otp}
           onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
           maxLength={6}
@@ -90,7 +92,7 @@ export function ResetPasswordPage() {
 
         <input
           type="password"
-          placeholder="New password"
+          placeholder={t('auth.newPassword')}
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           autoComplete="new-password"
@@ -117,13 +119,13 @@ export function ResetPasswordPage() {
           fullWidth
           data-testid="reset-submit-btn"
         >
-          Reset password
+          {t('auth.resetPasswordBtn')}
         </KalpXButton>
 
         <div style={{ textAlign: 'center', fontSize: 14, display: 'flex', justifyContent: 'center', gap: 12 }}>
-          <Link to="/forgot-password" style={{ color: 'var(--kalpx-cta)' }}>Resend code</Link>
+          <Link to="/forgot-password" style={{ color: 'var(--kalpx-cta)' }}>{t('auth.resendCode')}</Link>
           <span style={{ color: 'var(--kalpx-text-muted)' }}>·</span>
-          <Link to="/login" style={{ color: 'var(--kalpx-cta)' }}>Sign in</Link>
+          <Link to="/login" style={{ color: 'var(--kalpx-cta)' }}>{t('auth.signIn')}</Link>
         </div>
       </form>
     </AuthLayout>

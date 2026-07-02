@@ -1,6 +1,6 @@
 import { useNavigation, useRoute } from "@react-navigation/native";
 import React, { useEffect, useRef, useState } from "react";
-import { setSkipMitraStart, setForceFourDoorHome } from "../../utils/postLoginGuard";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -14,17 +14,20 @@ import {
   View,
 } from "react-native";
 import { saveDayReflection } from "../../engine/programApi";
+import {
+  setForceFourDoorHome,
+  setSkipMitraStart,
+} from "../../utils/postLoginGuard";
 
 const MAX_CHARS = 500;
-const DEFAULT_PROMPT =
-  "Take a moment. What shifted in you today — even slightly? Notice it without judgement.";
 
 export default function ProgramReflectionScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
+  const { t } = useTranslation();
   const { reflectionPrompt, dayNumber } = route.params ?? {};
 
-  const prompt = reflectionPrompt || DEFAULT_PROMPT;
+  const prompt = reflectionPrompt || t("programs.reflection.defaultPrompt");
 
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
@@ -64,14 +67,14 @@ export default function ProgramReflectionScreen() {
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.emoji}>🌼</Text>
-          <Text style={styles.heading}>Reflection</Text>
+          {/* <Text style={styles.emoji}>🌼</Text> */}
+          <Text style={styles.heading}>{t("programs.reflection.heading")}</Text>
           <Text style={styles.subtitle}>
-            Take a quiet moment to reflect on today's journey.
+            {t("programs.reflection.subtitle")}
           </Text>
 
           <View style={styles.questionCard}>
-            <Text style={styles.questionLabel}>QUESTION</Text>
+            <Text style={styles.questionLabel}>{t("programs.reflection.questionLabel")}</Text>
             <Text style={styles.questionText}>{prompt}</Text>
           </View>
 
@@ -84,14 +87,19 @@ export default function ProgramReflectionScreen() {
                 style={styles.input}
                 value={text}
                 onChangeText={(v) => {
-                  if (v.length <= MAX_CHARS) { setText(v); setSaved(false); }
+                  if (v.length <= MAX_CHARS) {
+                    setText(v);
+                    setSaved(false);
+                  }
                 }}
-                placeholder="Write your thoughts here..."
+                placeholder={t("programs.reflection.inputPlaceholder")}
                 placeholderTextColor="#B5A08A"
                 multiline
                 textAlignVertical="top"
               />
-              <Text style={styles.charCount}>{text.length}/{MAX_CHARS}</Text>
+              <Text style={styles.charCount}>
+                {text.length}/{MAX_CHARS}
+              </Text>
 
               <TouchableOpacity
                 style={[styles.saveBtn, saving && { opacity: 0.6 }]}
@@ -102,7 +110,7 @@ export default function ProgramReflectionScreen() {
                   <ActivityIndicator color="#fff" />
                 ) : (
                   <Text style={styles.saveBtnText}>
-                    {saved ? "✓ Reflection Saved" : "Save Reflection"}
+                    {saved ? t("programs.reflection.savedButton") : t("programs.reflection.saveButton")}
                   </Text>
                 )}
               </TouchableOpacity>
@@ -118,7 +126,7 @@ export default function ProgramReflectionScreen() {
                 navigation.reset({ index: 0, routes: [{ name: "Home" }] });
               }}
             >
-              <Text style={styles.primaryBtnText}>Go to Home</Text>
+              <Text style={styles.primaryBtnText}>{t("programs.reflection.goToHome")}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -131,7 +139,7 @@ export default function ProgramReflectionScreen() {
                 }
               }}
             >
-              <Text style={styles.secondaryBtnText}>Back to Day</Text>
+              <Text style={styles.secondaryBtnText}>{t("programs.reflection.backToDay")}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -142,42 +150,42 @@ export default function ProgramReflectionScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: "#FAF7F2" },
-  scroll: { flexGrow: 1, padding: 24, paddingBottom: 48 },
-  emoji: { fontSize: 32, textAlign: "center", marginBottom: 6 },
+  scroll: { flexGrow: 1, padding: 20, paddingBottom: 32 },
+  emoji: { fontSize: 28, textAlign: "center", marginBottom: 4 },
   heading: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "800",
     color: "#432104",
     textAlign: "center",
-    marginBottom: 8,
+    marginBottom: 4,
     fontFamily: "serif",
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#7A6248",
     textAlign: "center",
-    lineHeight: 20,
-    marginBottom: 28,
+    lineHeight: 18,
+    marginBottom: 14,
   },
   questionCard: {
     backgroundColor: "#FFF8EC",
     borderWidth: 1,
     borderColor: "#E8DECE",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 12,
   },
   questionLabel: {
     fontSize: 10,
     fontWeight: "700",
     color: "#C99317",
     letterSpacing: 1.2,
-    marginBottom: 10,
+    marginBottom: 6,
   },
   questionText: {
-    fontSize: 16,
+    fontSize: 15,
     color: "#432104",
-    lineHeight: 24,
+    lineHeight: 22,
     fontStyle: "italic",
   },
   input: {
@@ -185,39 +193,39 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "#DDD0BC",
     borderRadius: 12,
-    padding: 16,
+    padding: 14,
     fontSize: 15,
     color: "#432104",
-    minHeight: 120,
+    minHeight: 100,
     lineHeight: 22,
   },
   charCount: {
     fontSize: 12,
     color: "#A08060",
     textAlign: "right",
-    marginTop: 6,
-    marginBottom: 20,
+    marginTop: 4,
+    marginBottom: 12,
   },
   saveBtn: {
     backgroundColor: "#C99317",
     borderRadius: 12,
-    paddingVertical: 16,
+    paddingVertical: 13,
     alignItems: "center",
-    marginBottom: 28,
+    marginBottom: 8,
   },
   saveBtnText: { color: "#fff", fontSize: 15, fontWeight: "700" },
-  actions: { gap: 12 },
+  actions: { gap: 6 },
   primaryBtn: {
     backgroundColor: "transparent",
     borderWidth: 1.5,
     borderColor: "#C99317",
     borderRadius: 12,
-    paddingVertical: 14,
+    paddingVertical: 11,
     alignItems: "center",
   },
   primaryBtnText: { color: "#C99317", fontSize: 15, fontWeight: "700" },
   secondaryBtn: {
-    paddingVertical: 12,
+    paddingVertical: 6,
     alignItems: "center",
   },
   secondaryBtnText: { color: "#9A7548", fontSize: 14 },

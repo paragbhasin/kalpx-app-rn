@@ -165,8 +165,12 @@ export function handleMitraDeepLink(url: string | null | undefined): boolean {
         navigateInHomeStack(runner.name, runner.params);
         console.log(`[deeplink] → ${runner.name} (rhythm LA → exact runner)`);
       } else {
-        navigate("RhythmHome", VALID_RHYTHM_SLOTS.has(slot) ? { slot } : undefined);
-        console.log(`[deeplink] → RhythmHome (slot=${slot})`);
+        const itemType = parsed.data.item_type || undefined;
+        const rhythmParams: Record<string, string> = {};
+        if (VALID_RHYTHM_SLOTS.has(slot)) rhythmParams.slot = slot;
+        if (itemType) rhythmParams.item_type = itemType;
+        navigate("RhythmHome", Object.keys(rhythmParams).length ? rhythmParams : undefined);
+        console.log(`[deeplink] → RhythmHome (slot=${slot} item_type=${itemType ?? "none"})`);
       }
     } catch (err) {
       console.warn("[deeplink] navigate RhythmHome failed:", err);
@@ -186,8 +190,21 @@ export function handleMitraDeepLink(url: string | null | undefined): boolean {
       }
       return true;
     }
-    // stateId may be "day7_checkpoint" or "day14_checkpoint"; extract the key.
     const stateId = parsed.stateId;
+
+    // Notification item-type stateIds → open InnerPath with item_type so it
+    // auto-navigates to the mantra/sankalp/practice runner after data loads.
+    if (stateId === "mantra" || stateId === "sankalp" || stateId === "practice") {
+      try {
+        navigate("InnerPath", { item_type: stateId });
+      } catch (err) {
+        console.warn("[deeplink] navigate InnerPath failed:", err);
+      }
+      console.log(`[deeplink] → InnerPath (item_type=${stateId})`);
+      return true;
+    }
+
+    // stateId may be "day7_checkpoint" or "day14_checkpoint"; extract the key.
     const checkpoint = stateId === "day7_checkpoint"
       ? "day7"
       : stateId === "day14_checkpoint"

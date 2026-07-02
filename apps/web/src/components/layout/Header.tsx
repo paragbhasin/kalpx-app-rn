@@ -11,7 +11,7 @@ export function Header({
   transparent = false,
   hidden = false,
   showBack = false,
-  backTo = "/en/mitra",
+  backTo,
   onBack,
 }: {
   transparent?: boolean;
@@ -24,6 +24,7 @@ export function Header({
   const location = useLocation();
   const { authed, userInitial, refresh } = useCurrentUser();
   const { t, locale, setLocale } = useTranslation();
+  const resolvedBackTo = backTo ?? `/${locale}/mitra`;
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
@@ -36,9 +37,9 @@ export function Header({
   const useTransparentChrome = transparent && !isScrolled;
 
   const NAV_LINKS = [
-    { to: "/en", label: t("nav.home"), match: "/en", mobileOnly: true },
-    { to: "/en/classes", label: t("nav.classes"), match: "/en/classes" },
-    { to: "/en/community", label: t("nav.community"), match: "/en/community" },
+    { to: `/${locale}`, label: t("nav.home"), match: `/${locale}`, mobileOnly: true },
+    { to: `/${locale}/classes`, label: t("nav.classes"), match: `/${locale}/classes` },
+    { to: `/${locale}/community`, label: t("nav.community"), match: `/${locale}/community` },
   ];
 
   useEffect(() => {
@@ -82,7 +83,7 @@ export function Header({
       navigate(-1);
       return;
     }
-    navigate(backTo);
+    navigate(resolvedBackTo);
   }
 
   function handleLangSelect(lang: Locale) {

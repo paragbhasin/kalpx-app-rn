@@ -256,6 +256,7 @@
     "menu": {
       "login": "Login करें",
       "myProfile": "मेरी प्रोफ़ाइल",
+      "myPrograms": "मेरे कार्यक्रम",
       "setReminders": "रिमाइंडर सेट करें",
       "myPractices": "मेरे अभ्यास",
       "notifications": "सूचनाएँ",
@@ -731,13 +732,13 @@
     "categories": "श्रेणियां",
     "languages": "सूचना भाषा",
     "updateProfile": "प्रोफ़ाइल अपडेट करें",
-    "chooseTZ": "अपना timezone चुनें",
-    "languageInstruction": "सभी notifications चुनी हुई भाषा में आएंगे",
+    "chooseTZ": "अपना समय क्षेत्र चुनें",
+    "languageInstruction": "सभी सूचनाएं चुनी हुई भाषा में आएंगी",
     "Reminders": "रिमाइंडर",
-    "emailNotifications": "Email notifications",
-    "pushNotifications": "Push notifications",
+    "emailNotifications": "ईमेल सूचनाएं",
+    "pushNotifications": "पुश सूचनाएं",
     "continue": "आगे बढ़ें",
-    "chooseHeader": "भाषा और timezone चुनें"
+    "chooseHeader": "भाषा और समय क्षेत्र चुनें"
   },
   "mySadhana": {
     "findPeace": "दैनिक साधना से शांति और स्पष्टता प्राप्त करें",
@@ -1888,7 +1889,7 @@
       "whySupports": "यह आज क्यों सहायक है",
       "essence": "सार",
       "shift": "बदलाव",
-      "shiftLabel": "मित्र ने यह इसलिए चुना: {{shift}}",
+      "shiftLabel": "मित्र ने {{shift}} से आपका मार्गदर्शन करने के लिए यह चुना",
       "usefulFor": "उपयोगी है",
       "rootedIn": "आधारित है",
       "frameSankalp": "यह {{frame}} है",
@@ -2141,7 +2142,7 @@
       "heading": "यह आज क्यों सहायक है",
       "essence": "सार",
       "shift": "परिवर्तन",
-      "shiftFrom": "मित्र ने यह इसलिए चुना: {{shift}}",
+      "shiftFrom": "मित्र ने {{shift}} से आपका मार्गदर्शन करने के लिए यह चुना",
       "usefulFor": "किसके लिए उपयोगी",
       "rootedIn": "निहित"
     },
@@ -2849,7 +2850,10 @@
     "essence": "सार",
     "about": "परिचय",
     "deity": "देवता",
-    "tradition": "परंपरा"
+    "tradition": "परंपरा",
+    "howToLive": "इसे कैसे जिएं",
+    "benefits": "लाभ",
+    "steps": "विधि"
   },
   "progressSection": {
     "daysEngaged": "जुड़े दिन",
@@ -2859,15 +2863,84 @@
   "notificationPermission": {
     "undetermined": {
       "title": "अपनी लय से जुड़े रहें",
-      "body": "अपने मंत्र, संकल्प और रोज़ की साधना के लिए gentle reminders पाएं।",
-      "primaryCta": "Reminder की अनुमति दें",
+      "body": "अपने मंत्र, संकल्प और रोज़ की साधना के लिए सौम्य स्मरण पाएं।",
+      "primaryCta": "सौम्य स्मरण की अनुमति दें",
       "secondaryCta": "बाद में"
     },
     "denied": {
-      "title": "अभी notifications बंद हैं",
-      "body": "Gentle reminders पाने के लिए अपनी device settings में KalpX को notifications की अनुमति दें।",
-      "primaryCta": "Settings खोलें",
+      "title": "अभी सूचनाएं बंद हैं",
+      "body": "सौम्य स्मरण पाने के लिए अपनी डिवाइस सेटिंग में KalpX को सूचनाएं देने की अनुमति दें।",
+      "primaryCta": "सेटिंग खोलें",
       "secondaryCta": "अभी नहीं"
     }
+  },
+  "programs": {
+    "day": {
+      "dayLabel": "दिन {{n}}",
+      "wisdomLabel": "प्रज्ञा",
+      "label_mantra": "मन्त्र",
+      "label_sankalp": "संकल्प",
+      "label_practice": "अभ्यास",
+      "reminder_mantra": "मन्त्र",
+      "reminder_sankalp": "संकल्प",
+      "reminder_practice": "अभ्यास",
+      "reflectionLabel": "चिंतन",
+      "reflectionHint": "अपना चिंतन लिखने के लिए दबाएं",
+      "remindersTitle": "स्मरण",
+      "remindersNoneSet": "कोई नहीं",
+      "reminderSaving": "सहेजा जा रहा है…",
+      "back": "वापस",
+      "supportLink": "सहायता लें",
+      "liveSessionLabel": "सत्संग",
+      "liveSessionTapToJoin": "जुड़ने के लिए दबाएं",
+      "copy": "लिंक कॉपी करें",
+      "copied": "कॉपी हो गया!",
+      "dayComplete": "दिन {{n}} पूर्ण!",
+      "completionSub": "पुनः करने के लिए किसी अभ्यास पर दबाएं",
+      "progressHint": "{{total}} में से {{done}} पूर्ण",
+      "alertTitle": "सहायता",
+      "alertBody": "अपने कार्यक्रम के बारे में सहायता के लिए हमारे सहायता पृष्ठ पर जाएं।",
+      "alertOk": "ठीक है",
+      "errorNextDayLocked": "अगला दिन कल उपलब्ध होगा।",
+      "errorPrevDayIncomplete": "पहले पिछला दिन पूरा करें।",
+      "errorDayNotFound": "यह दिन नहीं मिला।",
+      "errorLoadFailed": "लोड नहीं हो सका। फिर से प्रयास करें।",
+      "errorGeneric": "कुछ समस्या आई।"
+    },
+    "reflection": {
+      "defaultPrompt": "एक पल रुकें। आज आपके भीतर क्या बदला — चाहे थोड़ा भी? इसे बिना किसी निर्णय के महसूस करें।",
+      "heading": "चिंतन",
+      "subtitle": "आज की यात्रा पर एक शांत पल में विचार करें।",
+      "questionLabel": "प्रश्न",
+      "inputPlaceholder": "अपने विचार यहाँ लिखें...",
+      "savedButton": "✓ चिंतन सहेजा",
+      "saveButton": "चिंतन सहेजें",
+      "goToHome": "होम पर जाएं",
+      "backToDay": "दिन पर वापस जाएं"
+    }
+  },
+  "programCard": {
+    "label": "साधना कार्यक्रम",
+    "day": "दिन {{n}}",
+    "dayContinue": "दिन {{n}} · साधना जारी रखें",
+    "dayMissed": "दिन {{n}} छूटा · अभी पूरा करें",
+    "dayCompletedLocked": "दिन {{n}} पूर्ण ✓ · दिन {{next}} कल उपलब्ध होगा",
+    "complete": "पूर्ण · अगला पथ चुनें",
+    "chooseNextStep": "अगला पथ चुनें →",
+    "unlocksTomorrow": "कल उपलब्ध होगा",
+    "statusCompleted": "पूर्ण",
+    "statusToday": "आज",
+    "statusMissed": "छूटा",
+    "statusLater": "बाद में किया",
+    "journeyComplete": "यात्रा पूर्ण!",
+    "congratulations": "बधाई हो! आपने {{n}} दिनों की यात्रा पूरी की।",
+    "viewSummary": "सारांश देखें",
+    "exploreAnother": "दूसरा कार्यक्रम खोजें",
+    "myPrograms": "मेरे कार्यक्रम",
+    "active": "सक्रिय",
+    "completed": "पूर्ण",
+    "completedOn": "{{date}} को पूर्ण",
+    "noActivePrograms": "कोई सक्रिय कार्यक्रम नहीं",
+    "noCompletedPrograms": "अभी तक कोई पूर्ण कार्यक्रम नहीं"
   }
 }

@@ -1,12 +1,15 @@
+import { useTranslation } from "../../../lib/i18n";
+
 interface Props {
   sd: Record<string, any>;
 }
 
 export function SankalpCarryBlock({ sd }: Props) {
+  const { t } = useTranslation();
   const items: string[] = Array.isArray(sd.sankalp_how_to_live)
     ? sd.sankalp_how_to_live
     : [];
-  const label: string = sd.sankalp_how_to_live_label || "How To Live This";
+  const label: string = sd.sankalp_how_to_live_label || t("mitra.engine.howToLive");
 
   if (!items.length) return null;
 

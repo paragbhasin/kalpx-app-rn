@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppShell } from "../../components/ui/AppShell";
+import {
+  deleteTestimonial,
+  fetchOpsTestimonials,
+  moderateTestimonial,
+  type OpsTestimonial,
+} from "../../engine/liveSessionApi";
 import { useAuth } from "../../hooks/useAuth";
 import { api } from "../../lib/api";
 
@@ -110,6 +116,211 @@ function InviteLeaderSection() {
   );
 }
 
+// ── Testimonials Moderation ─────────────────────────────────────────────────────
+
+function TestimonialsSection() {
+  const [tab, setTab] = useState<"pending" | "approved" | "rejected">(
+    "approved",
+  );
+  const [items, setItems] = useState<OpsTestimonial[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [acting, setActing] = useState<number | null>(null);
+
+  const load = useCallback(async (t: typeof tab) => {
+    setLoading(true);
+    try {
+      const data = await fetchOpsTestimonials(t);
+      setItems(data.testimonials);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load(tab);
+  }, [tab, load]);
+
+  const moderate = async (id: number, newStatus: "approved" | "rejected") => {
+    setActing(id);
+    try {
+      await moderateTestimonial(id, newStatus);
+      setItems((prev) => prev.filter((t) => t.id !== id));
+    } finally {
+      setActing(null);
+    }
+  };
+
+  const remove = async (id: number) => {
+    if (!window.confirm("Delete this testimonial permanently?")) return;
+    setActing(id);
+    try {
+      await deleteTestimonial(id);
+      setItems((prev) => prev.filter((t) => t.id !== id));
+    } finally {
+      setActing(null);
+    }
+  };
+
+  const starStr = (r: number | null) =>
+    r ? "★".repeat(r) + "☆".repeat(5 - r) : "—";
+
+  return (
+    <div style={sectionCard}>
+      <h2
+        style={{
+          fontSize: 15,
+          fontWeight: 700,
+          marginBottom: 16,
+          color: "var(--kalpx-text)",
+        }}
+      >
+        Testimonials
+      </h2>
+
+      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        {(["pending", "approved", "rejected"] as const).map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            style={{
+              padding: "6px 14px",
+              borderRadius: 20,
+              border: "1.5px solid",
+              borderColor: tab === t ? "var(--kalpx-gold)" : "#E0D5C5",
+              background: tab === t ? "var(--kalpx-gold)" : "transparent",
+              color: tab === t ? "#fff" : "var(--kalpx-text-muted)",
+              fontWeight: 600,
+              fontSize: 12,
+              cursor: "pointer",
+              textTransform: "capitalize",
+            }}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <p style={{ color: "var(--kalpx-text-muted)", fontSize: 13 }}>
+          Loading…
+        </p>
+      ) : items.length === 0 ? (
+        <p style={{ color: "var(--kalpx-text-muted)", fontSize: 13 }}>
+          No {tab} testimonials.
+        </p>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {items.map((t) => (
+            <div
+              key={t.id}
+              style={{
+                background: "#FAF7F2",
+                borderRadius: 10,
+                border: "1px solid #E8D9B5",
+                padding: 14,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: 6,
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "var(--kalpx-text-muted)",
+                  }}
+                >
+                  {t.program_name}
+                </span>
+                <span style={{ fontSize: 13, color: "#C99317" }}>
+                  {starStr(t.rating)}
+                </span>
+              </div>
+              <p
+                style={{
+                  fontSize: 14,
+                  color: "var(--kalpx-text)",
+                  margin: "0 0 6px",
+                }}
+              >
+                "{t.testimonial_text}"
+              </p>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: "var(--kalpx-text-muted)",
+                  marginBottom: 10,
+                }}
+              >
+                — {t.display_name} · {t.created_at} ·{" "}
+                {t.consent_to_share ? "Consented" : "No consent"}
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                {tab === "pending" && (
+                  <>
+                    <button
+                      disabled={acting === t.id}
+                      onClick={() => moderate(t.id, "approved")}
+                      style={{
+                        padding: "5px 14px",
+                        borderRadius: 8,
+                        border: "none",
+                        background: "#2E5723",
+                        color: "#fff",
+                        fontSize: 12,
+                        fontWeight: 600,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Approve
+                    </button>
+                    <button
+                      disabled={acting === t.id}
+                      onClick={() => moderate(t.id, "rejected")}
+                      style={{
+                        padding: "5px 14px",
+                        borderRadius: 8,
+                        border: "1px solid #C05B3A",
+                        background: "transparent",
+                        color: "#C05B3A",
+                        fontSize: 12,
+                        fontWeight: 600,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Reject
+                    </button>
+                  </>
+                )}
+                <button
+                  disabled={acting === t.id}
+                  onClick={() => remove(t.id)}
+                  style={{
+                    padding: "5px 14px",
+                    borderRadius: 8,
+                    border: "1px solid #999",
+                    background: "transparent",
+                    color: "#666",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Program Review Queue with tabs ─────────────────────────────────────────────
 
 interface ReviewTemplate {
@@ -121,6 +332,8 @@ interface ReviewTemplate {
   submitted_at: string | null;
   guide_name: string;
   guide_email: string;
+  desired_start_date: string | null;
+  max_participants: number | null;
 }
 
 const TAB_STATUSES: Record<string, string[]> = {
@@ -154,7 +367,7 @@ function ProgramReviewQueue() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<
     "pending" | "approved" | "rejected"
-  >("pending");
+  >("approved");
   const [allTemplates, setAllTemplates] = useState<ReviewTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -390,8 +603,20 @@ function ProgramReviewQueue() {
                         margin: 0,
                       }}
                     >
-                      {t.duration_days} days · {t.language.toUpperCase()} ·
-                      Submitted {submittedAt}
+                      {/* {t.duration_days} days · {t.language.toUpperCase()} · Submitted {submittedAt} */}
+                      {t.desired_start_date && (
+                        <>
+                          {" "}
+                          Start Date:{" "}
+                          {new Date(t.desired_start_date).toLocaleDateString(
+                            "en-IN",
+                            { day: "numeric", month: "short", year: "numeric" },
+                          )}
+                        </>
+                      )}
+                      {t.max_participants && (
+                        <> ·Maximum Participants: {t.max_participants} people</>
+                      )}
                     </p>
                   </div>
                   <span
@@ -611,6 +836,8 @@ export function ProgramAdminDashboard() {
         </header>
 
         <InviteLeaderSection />
+
+        <TestimonialsSection />
 
         <ProgramReviewQueue />
       </main>

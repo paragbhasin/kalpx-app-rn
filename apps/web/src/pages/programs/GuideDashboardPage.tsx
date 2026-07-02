@@ -1,12 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AppShell } from "../../components/ui/AppShell";
 import {
   fetchGuideDashboard,
+  fetchGuideAllTestimonials,
+  guideModerateTestimonial,
   type GuideDashboard,
   type GuideDashboardTemplate,
   type GuideProgram,
   type GuideSession,
+  type GuideTestimonialFull,
 } from "../../engine/liveSessionApi";
 import { useAuth } from "../../hooks/useAuth";
 import { api } from "../../lib/api";
@@ -53,11 +56,98 @@ function StatCard({ label, value }: { label: string; value: number | string }) {
   );
 }
 
-function ProgramRow({ program }: { program: GuideProgram }) {
+function ImpactCard({
+  icon,
+  iconBg,
+  value,
+  label,
+  sublabel,
+}: {
+  icon: React.ReactNode;
+  iconBg: string;
+  value: number | string;
+  label: string;
+  sublabel: string;
+}) {
+  return (
+    <div
+      style={{
+        padding: "16px",
+        background: "var(--kalpx-surface)",
+        border: "1px solid var(--kalpx-border)",
+        borderRadius: 12,
+        display: "flex",
+        flexDirection: "column",
+        gap: 10,
+      }}
+    >
+      <div
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: 10,
+          background: iconBg,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}
+      >
+        {icon}
+      </div>
+      <div>
+        <p
+          style={{
+            fontSize: 22,
+            fontWeight: 700,
+            color: "var(--kalpx-text)",
+            margin: "0 0 2px",
+          }}
+        >
+          {value}
+        </p>
+        <p
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: "var(--kalpx-text)",
+            margin: "0 0 2px",
+          }}
+        >
+          {label}
+        </p>
+        <p
+          style={{ fontSize: 11, color: "var(--kalpx-text-muted)", margin: 0 }}
+        >
+          {sublabel}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+const CARD_GRADIENTS = [
+  "linear-gradient(135deg, #F7C97E 0%, #E8956A 100%)",
+  "linear-gradient(135deg, #4A7B9D 0%, #1A3E5A 100%)",
+  "linear-gradient(135deg, #7B9D7B 0%, #3A5A3A 100%)",
+  "linear-gradient(135deg, #9D7B4A 0%, #5A3A1A 100%)",
+  "linear-gradient(135deg, #7B6A9D 0%, #3A2A5A 100%)",
+];
+
+function ProgramRow({
+  program,
+  index,
+}: {
+  program: GuideProgram;
+  index: number;
+}) {
   const navigate = useNavigate();
   const [copied, setCopied] = React.useState(false);
 
-  const _origin = window.location.hostname === 'localhost' ? 'https://dev.kalpx.com' : window.location.origin;
+  const _origin =
+    window.location.hostname === "localhost"
+      ? "https://dev.kalpx.com"
+      : window.location.origin;
   const joinUrl = program.join_url
     ? program.join_url.replace("https://kalpx.com", _origin)
     : null;
@@ -73,69 +163,230 @@ function ProgramRow({ program }: { program: GuideProgram }) {
   return (
     <div
       style={{
-        padding: "14px 16px",
         background: "var(--kalpx-surface)",
         border: "1px solid var(--kalpx-border)",
-        borderRadius: 10,
-        display: "flex",
-        flexDirection: "column",
-        gap: 10,
+        borderRadius: 12,
+        overflow: "hidden",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p
+      {/* Top row: title/meta + metrics + view */}
+      <div style={{ display: "flex", alignItems: "stretch", gap: 0 }}>
+        {/* Content */}
+        <div
+          style={{
+            flex: 1,
+            minWidth: 0,
+            padding: "12px 14px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 6,
+          }}
+        >
+          {/* Title + View button */}
+          <div
             style={{
-              fontSize: 14,
-              fontWeight: 600,
-              color: "var(--kalpx-text)",
-              margin: "0 0 2px",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+              gap: 10,
             }}
           >
-            {program.title}
-          </p>
-          <p
-            style={{ fontSize: 12, color: "var(--kalpx-text-muted)", margin: 0 }}
-          >
-            {program.status}
-          </p>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 20, flexShrink: 0 }}>
-          <div style={{ textAlign: "right" }}>
-            <p style={{ fontSize: 16, fontWeight: 700, color: "var(--kalpx-text)", margin: 0 }}>
-              {program.joined_count}
-            </p>
-            <p style={{ fontSize: 10, color: "var(--kalpx-text-muted)", margin: 0 }}>joined</p>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <p style={{ fontSize: 16, fontWeight: 700, color: "var(--kalpx-text)", margin: 0 }}>
-              {program.testimonials_count}
-            </p>
-            <p style={{ fontSize: 10, color: "var(--kalpx-text-muted)", margin: 0 }}>testimonials</p>
-          </div>
-          {program.template_id && (
-            <button
-              onClick={() => navigate(`/guide/templates/${program.template_id}/review`)}
+            <p
               style={{
-                padding: "6px 14px",
-                border: "1px solid var(--kalpx-border)",
-                background: "none",
-                color: "var(--kalpx-text-muted)",
-                borderRadius: 8,
-                fontSize: 12,
+                fontSize: 14,
                 fontWeight: 600,
-                cursor: "pointer",
+                color: "var(--kalpx-text)",
+                margin: 0,
+                flex: 1,
+                minWidth: 0,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
               }}
             >
-              View
-            </button>
-          )}
+              {program.title}
+            </p>
+            {program.template_id && (
+              <button
+                onClick={() =>
+                  navigate(`/guide/templates/${program.template_id}/review`)
+                }
+                style={{
+                  padding: "4px 12px",
+                  border: "1px solid var(--kalpx-border)",
+                  background: "none",
+                  color: "var(--kalpx-text-muted)",
+                  borderRadius: 8,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  flexShrink: 0,
+                }}
+              >
+                View
+              </button>
+            )}
+          </div>
+
+          {/* Status + start date + max */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              flexWrap: "wrap" as const,
+            }}
+          >
+            <span style={{ fontSize: 11, fontWeight: 600, color: "#22863a" }}>
+              •{" "}
+              {program.status.charAt(0).toUpperCase() + program.status.slice(1)}
+            </span>
+            <span style={{ fontSize: 11, color: "var(--kalpx-text-muted)" }}>
+              · Start Date:{" "}
+              {program.start_date
+                ? new Date(program.start_date).toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })
+                : "Not set"}
+            </span>
+            <span style={{ fontSize: 11, color: "var(--kalpx-text-muted)" }}>
+              · Maximum Participants:{" "}
+              {program.max_participants
+                ? `${program.max_participants} people`
+                : "Unlimited"}
+            </span>
+          </div>
+
+          {/* Joined / Active / Completed metrics */}
+          <div
+            style={{
+              display: "flex",
+              gap: 20,
+              flexWrap: "wrap" as const,
+              marginTop: 2,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#8B6F4E"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: "var(--kalpx-text)",
+                }}
+              >
+                {program.joined_count}
+              </span>
+              <span style={{ fontSize: 11, color: "var(--kalpx-text-muted)" }}>
+                Joined
+              </span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#0969da"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg>
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: "var(--kalpx-text)",
+                }}
+              >
+                {program.active_count ?? 0}
+              </span>
+              <span style={{ fontSize: 11, color: "var(--kalpx-text-muted)" }}>
+                Active
+              </span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#22863a"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="9 12 11 14 15 10" />
+              </svg>
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: "var(--kalpx-text)",
+                }}
+              >
+                {program.completed_count ?? 0}
+              </span>
+              <span style={{ fontSize: 11, color: "var(--kalpx-text-muted)" }}>
+                Completed
+              </span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#d97706"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+              <span style={{ fontSize: 13, fontWeight: 700, color: "var(--kalpx-text)" }}>
+                {program.testimonials_count}
+              </span>
+              <span style={{ fontSize: 11, color: "var(--kalpx-text-muted)" }}>
+                Testimonials
+              </span>
+              {program.testimonials_count > 0 && (program.approved_testimonials_count ?? 0) < program.testimonials_count && (
+                <span style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  background: "#FFF3CC",
+                  color: "#9A7548",
+                  borderRadius: 8,
+                  padding: "1px 6px",
+                }}>
+                  {program.testimonials_count - (program.approved_testimonials_count ?? 0)} pending
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
+      {/* Join URL row */}
       {joinUrl && (
         <div
           style={{
@@ -143,12 +394,20 @@ function ProgramRow({ program }: { program: GuideProgram }) {
             alignItems: "center",
             gap: 8,
             background: "#F7F3ED",
-            border: "1px solid var(--kalpx-border)",
-            borderRadius: 8,
-            padding: "8px 12px",
+            borderTop: "1px solid var(--kalpx-border)",
+            padding: "8px 14px",
           }}
         >
-          <p style={{ flex: 1, fontSize: 12, color: "#1d4ed8", margin: 0, wordBreak: "break-all", lineHeight: 1.4 }}>
+          <p
+            style={{
+              flex: 1,
+              fontSize: 12,
+              color: "#1d4ed8",
+              margin: 0,
+              wordBreak: "break-all",
+              lineHeight: 1.4,
+            }}
+          >
             {joinUrl}
           </p>
           <button
@@ -305,11 +564,7 @@ function TemplateRow({
   const [launching, setLaunching] = React.useState(false);
   const [launchError, setLaunchError] = React.useState("");
 
-  const withinGrace = (() => {
-    if (!tmpl.submitted_at) return false;
-    const diffMs = Date.now() - new Date(tmpl.submitted_at).getTime();
-    return diffMs < 60 * 60 * 1000;
-  })();
+  const canEdit = ["submitted", "under_review", "changes_requested"].includes(tmpl.review_status);
 
   const handleLaunch = async () => {
     setLaunching(true);
@@ -338,14 +593,7 @@ function TemplateRow({
         gap: 12,
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-        }}
-      >
+      <div className="gd-tmpl-header">
         <div style={{ flex: 1, minWidth: 0 }}>
           <p
             style={{
@@ -360,7 +608,14 @@ function TemplateRow({
           >
             {tmpl.title || "Untitled Program"}
           </p>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              flexWrap: "wrap" as const,
+            }}
+          >
             <span
               style={{
                 fontSize: 11,
@@ -375,10 +630,53 @@ function TemplateRow({
             <span style={{ fontSize: 11, color: "var(--kalpx-text-muted)" }}>
               · {tmpl.duration_days} days
             </span>
+            <button
+              onClick={() => onView(tmpl.id)}
+              style={{
+                background: "none",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+                fontSize: 11,
+                color: tmpl.desired_start_date
+                  ? "var(--kalpx-text-muted)"
+                  : "var(--kalpx-gold)",
+                fontWeight: tmpl.desired_start_date ? 400 : 600,
+                textDecoration: tmpl.desired_start_date ? "none" : "underline",
+              }}
+            >
+              · Start Date:{" "}
+              {tmpl.desired_start_date
+                ? new Date(tmpl.desired_start_date).toLocaleDateString(
+                    "en-IN",
+                    { day: "numeric", month: "short", year: "numeric" },
+                  )
+                : "Set date →"}
+            </button>
+            <button
+              onClick={() => onView(tmpl.id)}
+              style={{
+                background: "none",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+                fontSize: 11,
+                color: tmpl.max_participants
+                  ? "var(--kalpx-text-muted)"
+                  : "var(--kalpx-gold)",
+                fontWeight: tmpl.max_participants ? 400 : 600,
+                textDecoration: tmpl.max_participants ? "none" : "underline",
+              }}
+            >
+              · Maximum Participants:{" "}
+              {tmpl.max_participants
+                ? `${tmpl.max_participants} people`
+                : "Set limit →"}
+            </button>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-          {withinGrace && (
+        <div className="gd-tmpl-btns">
+          {canEdit && (
             <button
               onClick={() => onEdit(tmpl.id)}
               style={{
@@ -440,6 +738,200 @@ function TemplateRow({
   );
 }
 
+function GuideTestimonialsSection({ programs }: { programs: GuideProgram[] }) {
+  const [testimonials, setTestimonials] = useState<GuideTestimonialFull[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<"all" | "pending" | "approved">("all");
+  const [acting, setActing] = useState<number | null>(null);
+
+  const loadAll = useCallback(async () => {
+    setLoading(true);
+    try {
+      const all = await Promise.all(
+        programs.map((p) => fetchGuideAllTestimonials(p.code).then((r) => r.testimonials))
+      );
+      setTestimonials(all.flat());
+    } finally {
+      setLoading(false);
+    }
+  }, [programs]);
+
+  useEffect(() => { loadAll(); }, [loadAll]);
+
+  const moderate = async (t: GuideTestimonialFull, newStatus: "approved" | "rejected") => {
+    setActing(t.id);
+    try {
+      await guideModerateTestimonial(t.campaign_code, t.id, newStatus);
+      setTestimonials((prev) =>
+        prev.map((x) => x.id === t.id ? { ...x, moderation_status: newStatus } : x)
+      );
+    } finally {
+      setActing(null);
+    }
+  };
+
+  const filtered = testimonials.filter((t) =>
+    tab === "all" ? true : t.moderation_status === tab
+  );
+
+  const starStr = (r: number | null) => r ? "★".repeat(r) + "☆".repeat(5 - r) : "";
+
+  if (loading || testimonials.length === 0) return null;
+
+  return (
+    <section style={{ marginBottom: 32 }}>
+      <p style={{ fontSize: 11, letterSpacing: "0.05em", color: "var(--kalpx-text-muted)", marginBottom: 12, fontWeight: 600 }}>
+        TESTIMONIALS
+      </p>
+
+      <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+        {(["all", "pending", "approved"] as const).map((t) => {
+          const count = testimonials.filter((x) => t === "all" ? true : x.moderation_status === t).length;
+          return (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              style={{
+                padding: "4px 12px",
+                borderRadius: 16,
+                border: "1.5px solid",
+                borderColor: tab === t ? "var(--kalpx-gold)" : "#E0D5C5",
+                background: tab === t ? "var(--kalpx-gold)" : "transparent",
+                color: tab === t ? "#fff" : "var(--kalpx-text-muted)",
+                fontSize: 11,
+                fontWeight: 600,
+                cursor: "pointer",
+                textTransform: "capitalize",
+              }}
+            >
+              {t} ({count})
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {filtered.length === 0 ? (
+          <p style={{ fontSize: 13, color: "var(--kalpx-text-muted)" }}>No {tab} testimonials.</p>
+        ) : (
+          filtered.map((t) => (
+            <div key={t.id} style={{ background: "#FAF7F2", borderRadius: 10, border: "1px solid #E8D9B5", padding: 14 }}>
+              {t.program_name && (
+                <div style={{ fontSize: 11, fontWeight: 600, color: "var(--kalpx-text-muted)", marginBottom: 6 }}>
+                  {t.program_name}
+                </div>
+              )}
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--kalpx-text)" }}>{t.display_name}</span>
+                <span style={{ fontSize: 13, color: "#C99317" }}>{starStr(t.rating)}</span>
+              </div>
+              <p style={{ fontSize: 14, color: "var(--kalpx-text)", margin: "4px 0" }}>"{t.testimonial_text}"</p>
+              <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 6, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 11, color: "var(--kalpx-text-muted)" }}>{t.created_at}</span>
+                <span style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  padding: "2px 8px",
+                  borderRadius: 10,
+                  background: t.moderation_status === "approved" ? "#DCF0D8" : t.moderation_status === "rejected" ? "#FCE8E4" : "#FFF3CC",
+                  color: t.moderation_status === "approved" ? "#2E7D32" : t.moderation_status === "rejected" ? "#C05B3A" : "#9A7548",
+                  textTransform: "uppercase",
+                }}>
+                  {t.moderation_status}
+                </span>
+                {t.moderation_status === "pending" && (
+                  <>
+                    <button
+                      disabled={acting === t.id}
+                      onClick={() => moderate(t, "approved")}
+                      style={{ padding: "3px 12px", borderRadius: 8, border: "none", background: "#2E5723", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer" }}
+                    >
+                      Approve
+                    </button>
+                    <button
+                      disabled={acting === t.id}
+                      onClick={() => moderate(t, "rejected")}
+                      style={{ padding: "3px 12px", borderRadius: 8, border: "1px solid #C05B3A", background: "transparent", color: "#C05B3A", fontSize: 11, fontWeight: 600, cursor: "pointer" }}
+                    >
+                      Reject
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </section>
+  );
+}
+
+const GUIDE_DASH_STYLES = `
+  .gd-main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 24px 16px 80px;
+  }
+  .gd-impact-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .gd-impact-grid > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+  .gd-cta-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .gd-cta-btn {
+    display: block;
+    text-align: center;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .gd-tmpl-header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .gd-tmpl-btns {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .gd-tmpl-btns button, .gd-tmpl-btns a {
+    flex: 1;
+    text-align: center;
+  }
+  .gd-metrics-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  @media (min-width: 600px) {
+    .gd-main { padding: 32px 24px 80px; }
+    .gd-impact-grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+    .gd-impact-grid > :last-child:nth-child(odd) {
+      grid-column: auto;
+    }
+    .gd-cta-row { flex-direction: row; }
+    .gd-cta-btn { display: inline-block; text-align: left; }
+    .gd-tmpl-header { flex-direction: row; align-items: flex-start; }
+    .gd-tmpl-btns { flex-wrap: nowrap; }
+    .gd-tmpl-btns button, .gd-tmpl-btns a { flex: none; }
+  }
+`;
+
 export function GuideDashboardPage() {
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -449,36 +941,24 @@ export function GuideDashboardPage() {
     code: string;
   } | null>(null);
 
+  async function loadDashboard() {
+    try {
+      const data = await fetchGuideDashboard();
+      if (!data?.summary) { setState({ kind: "error" }); return; }
+      setState({ kind: "loaded", data });
+    } catch (e: any) {
+      setState(e?.response?.status === 403 ? { kind: "auth_required" } : { kind: "error" });
+    }
+  }
+
   useEffect(() => {
     document.title = "Guide Dashboard — KalpX";
-    let cancelled = false;
-    async function load() {
-      try {
-        const data = await fetchGuideDashboard();
-        if (cancelled) return;
-        if (!data?.summary) {
-          setState({ kind: "error" });
-          return;
-        }
-        setState({ kind: "loaded", data });
-      } catch (e: any) {
-        if (!cancelled) {
-          setState(
-            e?.response?.status === 403
-              ? { kind: "auth_required" }
-              : { kind: "error" },
-          );
-        }
-      }
-    }
-    load();
-    return () => {
-      cancelled = true;
-    };
+    loadDashboard();
   }, []);
 
   return (
     <AppShell>
+      <style>{GUIDE_DASH_STYLES}</style>
       {/* Portal top bar */}
       <div
         style={{
@@ -487,7 +967,7 @@ export function GuideDashboardPage() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 20px",
+          padding: "0 16px",
           background: "var(--kalpx-bg)",
           position: "sticky",
           top: 0,
@@ -514,9 +994,7 @@ export function GuideDashboardPage() {
           Sign out
         </button>
       </div>
-      <main
-        style={{ maxWidth: 680, margin: "0 auto", padding: "32px 20px 80px" }}
-      >
+      <main className="gd-main">
         <header style={{ marginBottom: 28 }}>
           <p
             style={{
@@ -534,11 +1012,20 @@ export function GuideDashboardPage() {
               fontSize: 22,
               fontWeight: 700,
               color: "var(--kalpx-text)",
+              margin: "0 0 4px",
+            }}
+          >
+            Your Impact at a Glance
+          </h1>
+          <p
+            style={{
+              fontSize: 13,
+              color: "var(--kalpx-text-muted)",
               margin: 0,
             }}
           >
-            Your Impact
-          </h1>
+            Here's how your programs are transforming lives.
+          </p>
         </header>
 
         {state.kind === "loading" && (
@@ -585,60 +1072,354 @@ export function GuideDashboardPage() {
             const { summary } = data;
             return (
               <>
-                {/* Summary stats */}
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 10,
-                    flexWrap: "wrap",
-                    marginBottom: 32,
-                  }}
-                >
-                  <StatCard label="PROGRAMS" value={summary.programs_count} />
-                  <StatCard
-                    label="TOTAL JOINED"
-                    value={summary.total_joined}
+                {/* Summary impact cards */}
+                <div className="gd-impact-grid">
+                  <ImpactCard
+                    iconBg="#FEF3C7"
+                    icon={
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#D97706"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                      </svg>
+                    }
+                    value={summary.programs_count}
+                    label="Programs"
+                    sublabel="Live programs"
                   />
-                  <StatCard label="SESSIONS" value={summary.sessions_count} />
-                  <StatCard
-                    label="TESTIMONIALS"
+                  <ImpactCard
+                    iconBg="#D1FAE5"
+                    icon={
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#059669"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                      </svg>
+                    }
+                    value={summary.total_joined}
+                    label="Total Participants"
+                    sublabel="Across all programs"
+                  />
+                  <ImpactCard
+                    iconBg="#DBEAFE"
+                    icon={
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#2563EB"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                      </svg>
+                    }
+                    value={summary.active_count_total ?? 0}
+                    label="Active"
+                    sublabel="Started the program"
+                  />
+                  <ImpactCard
+                    iconBg="#EDE9FE"
+                    icon={
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#7C3AED"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="9 12 11 14 15 10" />
+                      </svg>
+                    }
+                    value={`${summary.completion_rate ?? 0}%`}
+                    label="Completion Rate"
+                    sublabel="Overall"
+                  />
+                  <ImpactCard
+                    iconBg="#FFE4E6"
+                    icon={
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#E11D48"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                      </svg>
+                    }
                     value={summary.testimonials_count}
+                    label="Testimonials"
+                    sublabel="Received"
                   />
                 </div>
+                {/* {data.programs.length > 0 &&
+                  (() => {
+                    const totalJoined = summary.total_joined;
+                    const totalActive = summary.active_count_total ?? 0;
+                    const totalCompleted = summary.completed_count_total ?? 0;
+                    const inProgress = Math.max(
+                      0,
+                      totalActive - totalCompleted,
+                    );
+                    const notStarted = Math.max(0, totalJoined - totalActive);
+                    return (
+                      <section style={{ marginBottom: 32 }}>
+                        <div
+                          style={{
+                            padding: "16px 20px",
+                            background: "var(--kalpx-surface)",
+                            border: "1px solid var(--kalpx-border)",
+                            borderRadius: 12,
+                            display: "flex",
+                            flexWrap: "wrap" as const,
+                            gap: 20,
+                            alignItems: "center",
+                          }}
+                        >
+                          <div style={{ flex: 1, minWidth: 160 }}>
+                            <p
+                              style={{
+                                fontSize: 13,
+                                fontWeight: 700,
+                                color: "var(--kalpx-text)",
+                                margin: "0 0 2px",
+                              }}
+                            >
+                              Participation Overview
+                            </p>
+                            <p
+                              style={{
+                                fontSize: 11,
+                                color: "var(--kalpx-text-muted)",
+                                margin: 0,
+                              }}
+                            >
+                              Activity across all your programs
+                            </p>
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: 28,
+                              flexWrap: "wrap" as const,
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 8,
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: 32,
+                                  height: 32,
+                                  borderRadius: "50%",
+                                  background: "#D1FAE5",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  flexShrink: 0,
+                                }}
+                              >
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="#059669"
+                                  strokeWidth="2.5"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <circle cx="12" cy="12" r="10" />
+                                  <polyline points="9 12 11 14 15 10" />
+                                </svg>
+                              </div>
+                              <div>
+                                <p
+                                  style={{
+                                    fontSize: 18,
+                                    fontWeight: 700,
+                                    color: "var(--kalpx-text)",
+                                    margin: 0,
+                                  }}
+                                >
+                                  {totalCompleted}
+                                </p>
+                                <p
+                                  style={{
+                                    fontSize: 10,
+                                    color: "var(--kalpx-text-muted)",
+                                    margin: 0,
+                                  }}
+                                >
+                                  Completed
+                                </p>
+                              </div>
+                            </div>
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 8,
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: 32,
+                                  height: 32,
+                                  borderRadius: "50%",
+                                  background: "#FEF3C7",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  flexShrink: 0,
+                                }}
+                              >
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="#D97706"
+                                  strokeWidth="2.5"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                                </svg>
+                              </div>
+                              <div>
+                                <p
+                                  style={{
+                                    fontSize: 18,
+                                    fontWeight: 700,
+                                    color: "var(--kalpx-text)",
+                                    margin: 0,
+                                  }}
+                                >
+                                  {inProgress}
+                                </p>
+                                <p
+                                  style={{
+                                    fontSize: 10,
+                                    color: "var(--kalpx-text-muted)",
+                                    margin: 0,
+                                  }}
+                                >
+                                  In Progress
+                                </p>
+                              </div>
+                            </div>
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 8,
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: 32,
+                                  height: 32,
+                                  borderRadius: "50%",
+                                  background: "#F3F4F6",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  flexShrink: 0,
+                                }}
+                              >
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="#9CA3AF"
+                                  strokeWidth="2.5"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                  <circle cx="9" cy="7" r="4" />
+                                </svg>
+                              </div>
+                              <div>
+                                <p
+                                  style={{
+                                    fontSize: 18,
+                                    fontWeight: 700,
+                                    color: "var(--kalpx-text)",
+                                    margin: 0,
+                                  }}
+                                >
+                                  {notStarted}
+                                </p>
+                                <p
+                                  style={{
+                                    fontSize: 10,
+                                    color: "var(--kalpx-text-muted)",
+                                    margin: 0,
+                                  }}
+                                >
+                                  Not Started
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                    );
+                  })()} */}
 
                 {/* CTA row */}
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 10,
-                    marginBottom: 32,
-                    flexWrap: "wrap",
-                  }}
-                >
+                <div className="gd-cta-row">
                   <Link
                     to="/guide/templates"
+                    className="gd-cta-btn"
                     style={{
-                      padding: "10px 18px",
                       background: "var(--kalpx-gold)",
                       color: "#fff",
-                      borderRadius: 8,
-                      fontSize: 13,
-                      fontWeight: 600,
-                      textDecoration: "none",
                     }}
                   >
                     + Build a Program
                   </Link>
                   <Link
                     to="/guide/sessions/draft"
+                    className="gd-cta-btn"
                     style={{
-                      padding: "10px 18px",
                       border: "1px solid var(--kalpx-gold)",
                       color: "var(--kalpx-gold)",
-                      borderRadius: 8,
-                      fontSize: 13,
-                      fontWeight: 600,
-                      textDecoration: "none",
                     }}
                   >
                     + Schedule Session
@@ -756,9 +1537,10 @@ export function GuideDashboardPage() {
                             onView={(id) =>
                               navigate(`/guide/templates/${id}/review`)
                             }
-                            onLaunched={(joinUrl, code) =>
-                              setLaunchResult({ joinUrl, code })
-                            }
+                            onLaunched={(joinUrl, code) => {
+                              setLaunchResult({ joinUrl, code });
+                              loadDashboard();
+                            }}
                           />
                         ))}
                       </div>
@@ -787,12 +1569,19 @@ export function GuideDashboardPage() {
                         gap: 8,
                       }}
                     >
-                      {data.programs.map((p) => (
-                        <ProgramRow key={p.code} program={p} />
+                      {data.programs.map((p, i) => (
+                        <ProgramRow key={p.code} program={p} index={i} />
                       ))}
                     </div>
                   </section>
                 )}
+
+                {/* Testimonials from live programs */}
+                {data.programs.length > 0 && (
+                  <GuideTestimonialsSection programs={data.programs} />
+                )}
+
+                {/* Today at a Glance */}
 
                 {/* Upcoming sessions */}
                 {data.upcoming_sessions.length > 0 && (
@@ -861,7 +1650,6 @@ export function GuideDashboardPage() {
                       </Link>
                     </div>
                   )}
-
               </>
             );
           })()}

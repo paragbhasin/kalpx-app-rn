@@ -5,25 +5,35 @@ import { Footer } from './Footer';
 import { MobileBottomNav } from './MobileBottomNav';
 import { useScrollDirection } from '../../hooks/useScrollDirection';
 import { stopRoomAmbient } from '../../lib/audio/calmMusic';
+import { ENABLED_LOCALES } from '../../lib/locale';
 
-// Routes that are full-screen immersive — no header/footer/bottom-nav
+// Strips the leading locale segment (e.g. /hi/mitra → /mitra, /en → /)
+function stripLocale(path: string): string {
+  for (const loc of ENABLED_LOCALES) {
+    if (path === `/${loc}`) return '/';
+    if (path.startsWith(`/${loc}/`)) return path.slice(loc.length + 1);
+  }
+  return path;
+}
+
+// Routes that are full-screen immersive — no header/footer/bottom-nav (locale-agnostic)
 const IMMERSIVE_PREFIXES = [
-  '/en/mitra/dashboard',
-  '/en/mitra/engine',
-  '/en/mitra/inner-path',
-  '/en/mitra/quick-reset',
-  '/en/mitra/rhythm',
-  '/en/mitra/rhythm/setup',
-  '/en/mitra/rhythm/edit',
-  '/en/mitra/tell-mitra',
-  '/en/mitra/checkin-quick',
-  '/en/mitra/checkpoint/',
-  '/en/mitra/trigger',
-  '/en/mitra/checkin',
-  '/en/mitra/start',
-  '/en/mitra/intention',
-  '/en/mitra/onboarding',
-  '/en/mitra/welcome-back',
+  '/mitra/dashboard',
+  '/mitra/engine',
+  '/mitra/inner-path',
+  '/mitra/quick-reset',
+  '/mitra/rhythm',
+  '/mitra/rhythm/setup',
+  '/mitra/rhythm/edit',
+  '/mitra/tell-mitra',
+  '/mitra/checkin-quick',
+  '/mitra/checkpoint/',
+  '/mitra/trigger',
+  '/mitra/checkin',
+  '/mitra/start',
+  '/mitra/intention',
+  '/mitra/onboarding',
+  '/mitra/welcome-back',
 ];
 
 // Routes that use AuthLayout — also no shell
@@ -34,15 +44,16 @@ const PORTAL_PREFIXES = ['/guide/', '/guide', '/ops-login', '/ops/', '/ops', '/p
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation();
+  const localePath = stripLocale(pathname);
 
   const isImmersive = IMMERSIVE_PREFIXES.some((p) => {
     const prefix = p.endsWith('/') ? p : p + '/';
-    return pathname === p || pathname.startsWith(prefix);
+    return localePath === p || localePath.startsWith(prefix);
   });
   const isAuth = AUTH_ROUTES.some((p) => pathname === p || pathname.startsWith(p + '?'));
   const isPortal = PORTAL_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/') || pathname.startsWith(p + '?'));
-  const isMitraHome = pathname === '/en' || pathname === '/en/mitra';
-  const isRoomRoute = pathname.startsWith('/en/mitra/room/');
+  const isMitraHome = localePath === '/' || localePath === '/mitra';
+  const isRoomRoute = localePath.startsWith('/mitra/room/');
   const { shouldHideChrome } = useScrollDirection();
 
   useEffect(() => {

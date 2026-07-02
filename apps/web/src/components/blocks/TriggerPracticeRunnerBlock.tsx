@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "../../lib/i18n";
 
 const BROWN = "#432104";
 const GOLD = "#D4A017";
@@ -81,6 +82,7 @@ export function TriggerPracticeRunnerBlock({
   screenData = {},
   onAction,
 }: Props) {
+  const { t } = useTranslation();
   const activeItem: any = screenData.runner_active_item || {};
   const title =
     activeItem.title ||
@@ -110,7 +112,7 @@ export function TriggerPracticeRunnerBlock({
   const insight: string = activeItem.insight || "";
   const summary: string = activeItem.summary || "";
   const negativeLabel: string =
-    (screenData._trigger_negative_label as string) || "Try another way";
+    (screenData._trigger_negative_label as string) || t('mitra.engine.tryAnotherWay');
 
   const [meaningExpanded, setMeaningExpanded] = useState(false);
   const [benefitsExpanded, setBenefitsExpanded] = useState(false);
@@ -273,7 +275,7 @@ export function TriggerPracticeRunnerBlock({
       {hasContent(summary) && (
         <div style={{ width: "100%", marginBottom: 12 }}>
           <CollapsibleCard
-            label="Meaning"
+            label={t('mitra.engine.meaning')}
             expanded={meaningExpanded}
             onToggle={() => setMeaningExpanded((v) => !v)}
           >
@@ -285,7 +287,7 @@ export function TriggerPracticeRunnerBlock({
       {benefits.length > 0 && (
         <div style={{ width: "100%", marginBottom: 12 }}>
           <CollapsibleCard
-            label="Benefits"
+            label={t('mitra.engine.benefits')}
             expanded={benefitsExpanded}
             onToggle={() => setBenefitsExpanded((v) => !v)}
           >
@@ -306,7 +308,7 @@ export function TriggerPracticeRunnerBlock({
       {hasContent(insight) && (
         <div style={{ width: "100%", marginBottom: 24 }}>
           <CollapsibleCard
-            label="Why this works"
+            label={t('mitra.engine.whyThisWorks')}
             expanded={insightExpanded}
             onToggle={() => setInsightExpanded((v) => !v)}
           >

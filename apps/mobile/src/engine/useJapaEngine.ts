@@ -164,6 +164,11 @@ export function useJapaEngine({
     currentMantraRef.current = mantraRef;
   }, [mantraRef]);
 
+  // Stable callback refs — updated after every render so the init effect never
+  // needs ensureSessionStarted/syncNow as deps (avoids spurious re-inits).
+  const ensureSessionStartedRef = useRef<() => Promise<void>>(async () => {});
+  const syncNowRef              = useRef<() => Promise<void>>(async () => {});
+
   // Keep sessionCountRef in sync with state
   useEffect(() => {
     sessionCountRef.current = sessionCount;
@@ -391,6 +396,12 @@ export function useJapaEngine({
     }
   }, [enqueuePendingBatch, ensureSessionStarted, persistStats, sourceSurface, tz]);
 
+  // Keep stable refs current so the init effect always calls the latest version.
+  useEffect(() => {
+    ensureSessionStartedRef.current = ensureSessionStarted;
+    syncNowRef.current = syncNow;
+  });
+
   // ── Refresh stats from server (call on screen focus) ──────────────────────
 
   const refreshStats = useCallback(async () => {
@@ -544,14 +555,14 @@ export function useJapaEngine({
       setSessionCount(resumeCount);
     }).catch(() => {});
 
-    ensureSessionStarted();
+    void ensureSessionStartedRef.current();
 
     // Sync interval — checks every 10s, fires if 30s elapsed since last sync
     if (syncTimerRef.current) clearInterval(syncTimerRef.current);
     syncTimerRef.current = setInterval(() => {
       const elapsed = Date.now() - lastSyncTimestamp.current;
       if (elapsed >= SYNC_INTERVAL_MS && sessionCountRef.current > lastSyncedCount.current) {
-        syncNow();
+        void syncNowRef.current();
       }
     }, 10_000);
 
@@ -565,7 +576,9 @@ export function useJapaEngine({
       if (syncTimerRef.current) { clearInterval(syncTimerRef.current); syncTimerRef.current = null; }
       if (elapsedTimerRef.current) { clearInterval(elapsedTimerRef.current); elapsedTimerRef.current = null; }
     };
-  }, [mantraRef, ensureSessionStarted, syncNow]);
+    // Only mantraRef and tz should trigger re-initialization — NOT callback refs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mantraRef, tz]);
 
   // ── Time goal countdown & auto-completion ─────────────────────────────────
 

@@ -11,6 +11,9 @@ import api from "../Networks/axios";
 import type { MitraHomeV3Response, TellMitraV3Response, MitraHomeV3CompanionRhythm, QuickCheckinEnergyState, QuickCheckinResponse, RhythmSuggestRequest, RhythmSuggestResponse, TellMitraFollowupMeta, QuickResetOpeningState, QuickChantCompleteRequest, QuickChantCompleteResponse, QuickResetSetDefaultResponse, RhythmCompleteResponse, RhythmResolvedItem, RhythmItemMutationResponse, RhythmSettingsResponse, RhythmTimeBand, RhythmItemType, RhythmItemSource, RhythmReminderPreference, JourneyTriadReminders, JourneyTriadRemindersPatch } from '@kalpx/types';
 import type { RhythmSetupPayload } from '@kalpx/contracts';
 import { normalizeTellMitraResult, normalizeRhythmSuggestResponse } from '@kalpx/contracts';
+import i18n from '../config/i18n';
+
+const getActiveLocale = (): string => i18n.language || 'en';
 
 // ---------------------------------------------------------------------------
 // Offline fallbacks — used when backend is unreachable (dev 502, airplane
@@ -1291,7 +1294,7 @@ export function mitraJourneyEntryView(
   if (signals?.crisis) params.crisis = "1";
   if (signals?.grief) params.grief = "1";
   if (signals?.loneliness) params.loneliness = "1";
-  if (locale) params.locale = locale;
+  params.locale = locale ?? getActiveLocale();
   return v3Get<V3EntryViewEnvelope>("mitra/v3/journey/entry-view/", etag, params);
 }
 
@@ -1317,7 +1320,7 @@ export function mitraJourneyDailyView(
   locale?: string,
 ): Promise<V3GetResult<V3DailyViewEnvelope>> {
   const params: Record<string, string> = { tz: getTz() };
-  if (locale) params.locale = locale;
+  params.locale = locale ?? getActiveLocale();
   return v3Get<V3DailyViewEnvelope>("mitra/v3/journey/daily-view/", etag, params);
 }
 
@@ -2189,7 +2192,7 @@ export async function mitraJourneyHomeV3(opts?: {
   const req = (async () => {
     try {
       const params: Record<string, string | number> = { tz: getTz() };
-      if (opts?.locale) params.locale = opts.locale;
+      params.locale = opts?.locale ?? getActiveLocale();
       const resp = await api.get<MitraHomeV3Response>("mitra/v3/journey/home/", { params });
       _homeV3Cache = { data: resp.data, at: Date.now() };
       return resp.data;
@@ -2202,6 +2205,8 @@ export async function mitraJourneyHomeV3(opts?: {
   _homeV3Inflight = req;
   return req;
 }
+
+export function invalidateHomeV3Cache() { _homeV3Cache = null; }
 
 // ---------------------------------------------------------------------------
 // postTellMitraV3 — POST /api/mitra/v3/tell-mitra/ (S04 Tell Mitra door)

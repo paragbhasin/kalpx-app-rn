@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "../../lib/i18n";
 import { CommunityEmptyState } from "../../components/community/CommunityEmptyState";
 import { CommunityErrorState } from "../../components/community/CommunityErrorState";
 import { CommunityFeedSkeleton } from "../../components/community/CommunityFeedSkeleton";
@@ -111,6 +112,7 @@ export function CommunityDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const lang = getLangFromPath();
+  const { t } = useTranslation();
 
   const [community, setCommunity] = useState<CommunityListItem | null>(null);
   const [posts, setPosts] = useState<CommunityPost[]>([]);
@@ -427,7 +429,7 @@ export function CommunityDetailPage() {
           </div>
           <div style={desktopSideMetaRowStyle}>
             <Globe size={20} />
-            <span>Public</span>
+            <span>{t('communityDetail.publicLabel')}</span>
           </div>
         </div>
 
@@ -570,7 +572,7 @@ export function CommunityDetailPage() {
               style={desktopCreatePostButtonStyle}
             >
               <Plus size={18} />
-              <span>Create post</span>
+              <span>{t('communityDetail.createPost')}</span>
             </button>
           ) : (
             <>
@@ -579,7 +581,7 @@ export function CommunityDetailPage() {
                 onClick={() => void handleCreatePost()}
                 style={createPostButtonStyle}
               >
-                + Create post
+                + {t('communityDetail.createPost')}
               </button>
 
               <div

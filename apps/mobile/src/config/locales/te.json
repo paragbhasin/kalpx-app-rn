@@ -277,6 +277,51 @@
     "intentPlaceholder": "మీ ఉద్దేశాన్ని పంచుకోండి…",
     "nextStep": "తదుపరి దశకు వెళ్ళండి"
   },
+  "programs": {
+    "day": {
+      "errorNextDayLocked": "నేటి సాధన పూర్తయింది. తదుపరి రోజు కోసం రేపు తిరిగి రండి.",
+      "errorPrevDayIncomplete": "ముందు మునుపటి రోజు పూర్తి చేయండి.",
+      "errorDayNotFound": "మీ కార్యక్రమంలో ఈ రోజు కనుగొనబడలేదు.",
+      "errorLoadFailed": "నేటి సాధన లోడ్ కాలేదు. దయచేసి మళ్ళీ ప్రయత్నించండి.",
+      "errorGeneric": "ఏదో తప్పు జరిగింది.",
+      "back": "← వెనుకకు",
+      "dayLabel": "రోజు {{n}}",
+      "wisdomLabel": "నేటి జ్ఞానం",
+      "label_mantra": "మంత్రం",
+      "label_sankalp": "సంకల్పం",
+      "label_practice": "సాధన",
+      "liveSessionLabel": "లైవ్ సెషన్",
+      "liveSessionTapToJoin": "చేరడానికి నొక్కండి →",
+      "copied": "కాపీ అయింది!",
+      "copy": "కాపీ",
+      "reflectionLabel": "ప్రతిఫలనం",
+      "reflectionHint": "మీ ప్రతిఫలనం రాయడానికి నొక్కండి →",
+      "remindersTitle": "రిమైండర్లు",
+      "remindersNoneSet": "ఏదీ సెట్ కాలేదు",
+      "reminder_mantra": "మంత్రం రిమైండర్",
+      "reminder_sankalp": "సంకల్పం రిమైండర్",
+      "reminder_practice": "సాధన రిమైండర్",
+      "reminderSaving": "సేవ్ అవుతోంది…",
+      "dayComplete": "రోజు {{n}} పూర్తయింది ✓",
+      "completionSub": "మళ్ళీ చేయడానికి ఏదైనా సాధనను నొక్కండి",
+      "progressHint": "{{done}}/{{total}} పూర్తయింది — రోజు ముగించడానికి అన్నీ పూర్తి చేయండి",
+      "alertTitle": "సహాయం కావాలా?",
+      "alertBody": "మీ కార్యక్రమంలో సహాయం కోసం kalpx.com/programs/support సందర్శించండి.",
+      "alertOk": "సరే",
+      "supportLink": "సహాయం కావాలా? మద్దతు పొందండి →"
+    },
+    "reflection": {
+      "defaultPrompt": "ఒక్క క్షణం ఆగండి. నేడు మీలో ఏమి మారింది — కొద్దిగా అయినా? దాన్ని నిర్ణయం లేకుండా గమనించండి.",
+      "heading": "చింతన",
+      "subtitle": "ఈ రోజు ప్రయాణంపై ప్రశాంతంగా ఆలోచించండి.",
+      "questionLabel": "ప్రశ్న",
+      "inputPlaceholder": "మీ ఆలోచనలు ఇక్కడ రాయండి...",
+      "savedButton": "✓ చింతన సేవ్ అయింది",
+      "saveButton": "చింతన సేవ్ చేయండి",
+      "goToHome": "హోమ్‌కి వెళ్ళండి",
+      "backToDay": "రోజుకు తిరిగి వెళ్ళండి"
+    }
+  },
   "room": {
     "actions": {
       "addAnother": "మరొకటి జోడించండి",
@@ -362,5 +407,22 @@
         "inRoomCarry": "మీతో తీసుకెళ్ళండి"
       }
     }
+  },
+  "classPayment": {
+    "className": "క్లాస్ పేరు",
+    "scheduled": "షెడ్యూల్ చేయబడింది",
+    "price": "ధర",
+    "total": "మొత్తం"
+  },
+  "classReschedule": {
+    "availableSlots": "అందుబాటులో ఉన్న స్లాట్లు",
+    "noteToTutor": "ట్యూటర్‌కు గమనిక (ఐచ్ఛికం)",
+    "rescheduleButton": "మళ్లీ షెడ్యూల్ చేయి"
+  },
+  "mantraCard": {
+    "noMantras": "ఈ రోజు మంత్రాలు కనుగొనబడలేదు."
+  },
+  "classEventCard": {
+    "viewDetails": "వివరాలు చూడు"
   }
 }

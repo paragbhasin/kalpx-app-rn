@@ -8,8 +8,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AuthLayout } from '../../components/AuthLayout';
 import { useAuth } from '../../hooks/useAuth';
 import { KalpXButton } from '../../components/ui';
+import { useTranslation } from '../../lib/i18n';
 
 export function ForgotPasswordPage() {
+  const { t } = useTranslation();
   const { forgotPassword } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -19,7 +21,7 @@ export function ForgotPasswordPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
-    if (!email) { setError('Email is required.'); return; }
+    if (!email) { setError(t('auth.emailRequired')); return; }
 
     setLoading(true);
     // Call succeeds or fails — always navigate to step 2 to avoid account enumeration
@@ -29,10 +31,10 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <AuthLayout title="Reset password">
+    <AuthLayout title={t('auth.resetPasswordTitle')}>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14, margin: 0, lineHeight: 1.6 }}>
-          Enter your email and we'll send you a reset code.
+          {t('auth.forgotPasswordSubtitle')}
         </p>
         <input
           type="email"
@@ -44,10 +46,10 @@ export function ForgotPasswordPage() {
         />
         {error && <p style={{ color: '#c0392b', fontSize: 12 }}>{error}</p>}
         <KalpXButton type="submit" disabled={loading} loading={loading} loadingText="Sending…" fullWidth>
-          Send reset code
+          {t('auth.sendResetCode')}
         </KalpXButton>
         <div style={{ textAlign: 'center', fontSize: 14 }}>
-          <Link to="/login" style={{ color: 'var(--kalpx-cta)' }}>← Back to sign in</Link>
+          <Link to="/login" style={{ color: 'var(--kalpx-cta)' }}>{t('auth.backToSignIn')}</Link>
         </div>
       </form>
     </AuthLayout>

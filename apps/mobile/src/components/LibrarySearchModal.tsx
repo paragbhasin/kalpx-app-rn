@@ -450,13 +450,13 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
                         )}
                         {detailItem.benefits?.length > 0 && (
                           <View style={styles.detailSection}>
-                            <Text style={styles.detailLabel}>BENEFITS</Text>
+                            <Text style={styles.detailLabel}>{t("libraryModal.benefits")}</Text>
                             <BenefitPills items={detailItem.benefits} />
                           </View>
                         )}
                         {detailItem.how_to_live?.length > 0 && (
                           <View style={styles.detailSection}>
-                            <Text style={styles.detailLabel}>HOW TO LIVE THIS</Text>
+                            <Text style={styles.detailLabel}>{t("libraryModal.howToLive")}</Text>
                             <BulletList items={detailItem.how_to_live} />
                           </View>
                         )}
@@ -474,13 +474,13 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
                       )}
                       {detailItem.benefits?.length > 0 && (
                         <View style={styles.detailSection}>
-                          <Text style={styles.detailLabel}>BENEFITS</Text>
+                          <Text style={styles.detailLabel}>{t("libraryModal.benefits")}</Text>
                           <BenefitPills items={detailItem.benefits} />
                         </View>
                       )}
                       {detailItem.steps?.length > 0 && (
                         <View style={styles.detailSection}>
-                          <Text style={styles.detailLabel}>STEPS</Text>
+                          <Text style={styles.detailLabel}>{t("libraryModal.steps")}</Text>
                           {detailItem.steps.map((step: string, i: number) => (
                             <View key={i} style={{ flexDirection: 'row', marginTop: 8, gap: 10 }}>
                               <Text style={{ color: '#C99317', fontSize: 13, fontFamily: Fonts.sans.semiBold, minWidth: 20 }}>{i + 1}.</Text>

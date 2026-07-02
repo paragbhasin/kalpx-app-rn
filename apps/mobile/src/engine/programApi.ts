@@ -6,6 +6,9 @@
  */
 
 import api from "../Networks/axios";
+import i18n from "../config/i18n";
+
+const getLocale = (): string => i18n.language || "en";
 
 export interface ProgramDayItem {
   item_id: string;
@@ -27,7 +30,7 @@ export interface ProgramDayStatus {
 
 export interface ActiveProgramSummary {
   name: string;
-  status: "active" | "completed";
+  status: "active" | "completed" | "upcoming" | "joined";
   current_day: number;
   next_day_available: boolean;
   next_day_locked?: boolean;
@@ -35,6 +38,22 @@ export interface ActiveProgramSummary {
   total_days?: number;
   day_statuses?: ProgramDayStatus[];
   show_day8_transition?: boolean;
+  campaign_code?: string;
+  // upcoming program fields
+  start_date?: string;
+  days_until_start?: number;
+  join_url?: string;
+}
+
+export interface JourneySummaryData {
+  program_name: string;
+  campaign_code: string;
+  total_days: number;
+  days_completed: number;
+  reflections_written: number;
+  testimonial_submitted: boolean;
+  joined_at: string | null;
+  completed_at: string | null;
 }
 
 export interface WisdomCard {
@@ -75,12 +94,12 @@ export interface ProgramClaimSuccess {
 }
 
 export async function fetchActiveProgram(): Promise<ActiveProgramSummary | null> {
-  const res = await api.get("programs/my-active/");
+  const res = await api.get("programs/my-active/", { params: { locale: getLocale() } });
   return res.data ?? null;
 }
 
 export async function fetchProgramDay(dayNumber: number): Promise<ProgramDayContent> {
-  const res = await api.get(`programs/my-active/day/${dayNumber}/`);
+  const res = await api.get(`programs/my-active/day/${dayNumber}/`, { params: { locale: getLocale() } });
   console.log('[ProgramDay] API response:', JSON.stringify(res.data, null, 2));
   console.log('[ProgramDay] wisdom_card:', JSON.stringify(res.data.wisdom_card));
   console.log('[ProgramDay] day_join_url:', res.data.day_join_url);
@@ -89,7 +108,7 @@ export async function fetchProgramDay(dayNumber: number): Promise<ProgramDayCont
 }
 
 export async function fetchDayReflection(dayNumber: number): Promise<string> {
-  const res = await api.get(`programs/my-active/day/${dayNumber}/reflection/`);
+  const res = await api.get(`programs/my-active/day/${dayNumber}/reflection/`, { params: { locale: getLocale() } });
   return res.data.text ?? '';
 }
 
@@ -131,6 +150,28 @@ export async function submitProgramTestimonial(
   return res.data;
 }
 
+export async function fetchJourneySummary(campaignCode: string): Promise<JourneySummaryData> {
+  const res = await api.get(`programs/my-programs/${campaignCode}/summary/`, {
+    params: { locale: getLocale() },
+  });
+  return res.data;
+}
+
+export async function submitTestimonialFull(payload: {
+  text: string;
+  rating: number;
+  visibility: "named" | "anonymous" | "private";
+  campaignCode: string;
+  display_name?: string;
+}): Promise<void> {
+  await api.post(`programs/my-programs/${payload.campaignCode}/testimonial/`, {
+    text: payload.text,
+    rating: payload.rating,
+    visibility: payload.visibility,
+    display_name: payload.display_name ?? "",
+  });
+}
+
 export async function submitProgramMicroFeedback(
   campaignCode: string,
   response: string,
@@ -166,6 +207,22 @@ export async function apiGetProgramReminders(): Promise<ProgramReminders> {
 export async function apiPatchProgramReminders(patch: ProgramRemindersPatch): Promise<ProgramReminders> {
   const res = await api.patch('programs/my-active/reminders/', patch);
   return res.data;
+}
+
+export interface MyProgramEntry {
+  participant_id: string;
+  campaign_code: string;
+  name: string;
+  status: "active" | "completed";
+  current_day: number;
+  total_days: number;
+  joined_at: string | null;
+  completed_at: string | null;
+}
+
+export async function fetchMyPrograms(): Promise<MyProgramEntry[]> {
+  const res = await api.get("programs/my-programs/", { params: { locale: getLocale() } });
+  return res.data ?? [];
 }
 
 export async function postProgramActivity(

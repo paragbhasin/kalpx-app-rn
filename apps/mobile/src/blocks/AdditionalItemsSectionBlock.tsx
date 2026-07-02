@@ -22,6 +22,7 @@ import {
 } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { Fonts } from "../theme/fonts";
+import { useTranslation } from "react-i18next";
 
 if (
   Platform.OS === "android" &&
@@ -63,6 +64,7 @@ const humanizeId = (id: string): string => {
 };
 
 const AdditionalItemsSectionBlock: React.FC<Props> = ({ block }) => {
+  const { i18n } = useTranslation();
   const blockSafe = block ?? {};
   const { screenData, updateScreenData, loadScreen, currentScreen, goBack } =
     useScreenStore();
@@ -178,6 +180,7 @@ const AdditionalItemsSectionBlock: React.FC<Props> = ({ block }) => {
         const searchRes = await mitraLibrarySearch(
           item.itemId || item.title,
           item.itemType,
+          i18n.language || "en",
         );
 
         // Use String() for type-agnostic matching (int vs string IDs)

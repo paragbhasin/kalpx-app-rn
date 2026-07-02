@@ -454,6 +454,12 @@ export function QuickResetPage() {
     loadOpening();
   }, [loadOpening]);
 
+  // Re-fetch with new locale when language changes so mantra meaning/essence updates.
+  useEffect(() => {
+    window.addEventListener('kalpx:locale-changed', loadOpening);
+    return () => window.removeEventListener('kalpx:locale-changed', loadOpening);
+  }, [loadOpening]);
+
   // ── Secondary action: "Show another calming mantra" ────────────────────────
   const handleShowAnother = useCallback(async () => {
     if (!activeMantra) return;
